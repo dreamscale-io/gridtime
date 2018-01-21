@@ -16,4 +16,11 @@ public interface ContextClient {
     @RequestLine("GET " + ResourcePaths.PROJECT_PATH)
     List<ProjectDto> getProjects();
 
+    /*
+    @RequestLine("POST /somepath")
+    void createThingie(Thingie thingie);
+
+    @RequestLine("GET /otherpath/{pathParam}?queryarg={someArg}")
+    Thingie getThingieWithQueyrArg(@Param("pathParam") String pathParam, @Param("someArg") String queryArg);
+    */
 }
