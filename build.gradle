@@ -19,6 +19,7 @@ plugins {
 }
 
 apply plugin: "spring-boot"
+apply from: "gradle/postgres.gradle"
 
 allprojects {
     ext {
@@ -31,6 +32,9 @@ allprojects {
 
     repositories {
         mavenLocal()
+        maven {
+            url "https://dl.bintray.com/dreamscale/maven-public"
+        }
         jcenter()
     }
 
@@ -43,6 +47,7 @@ allprojects {
 }
 
 dependencies {
+    compile project(path: "rest-client")
     compile "com.google.guava:guava:23.6-jre"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-actuator"

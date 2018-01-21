@@ -1,0 +1,4 @@
+databaseChangeLog:
+
+  - include:
+        file: db/context/create_project.sql
