@@ -1,0 +1,13 @@
+ext {
+    artifactId = "${artifactId}-rest-feign"
+    feignVersion = "9.5.1"
+}
+
+dependencies {
+    compile "io.github.openfeign:feign-core:${feignVersion}"
+    compile "io.github.openfeign:feign-jackson:${feignVersion}"
+}
+
+publishing_ext {
+    publication('mainTest')
+}
