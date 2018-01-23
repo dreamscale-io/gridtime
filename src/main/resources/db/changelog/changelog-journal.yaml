@@ -1,0 +1,4 @@
+databaseChangeLog:
+
+  - include:
+        file: db/journal/create_project.sql
