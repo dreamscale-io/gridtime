@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @RestController
-@RequestMapping(produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class JournalResource {
 
     @Autowired

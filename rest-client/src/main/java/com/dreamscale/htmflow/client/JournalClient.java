@@ -13,7 +13,7 @@ import java.util.List;
 })
 public interface JournalClient {
 
-    @RequestLine("GET " + ResourcePaths.PROJECT_PATH)
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     List<ProjectDto> getProjects();
 
     /*

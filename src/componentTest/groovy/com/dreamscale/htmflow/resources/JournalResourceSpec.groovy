@@ -14,7 +14,7 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 class JournalResourceSpec extends Specification {
 
     @Autowired
-    JournalClient contextClient
+    JournalClient journalClient
     @Autowired
     ProjectRepository projectRepository
 
@@ -24,7 +24,7 @@ class JournalResourceSpec extends Specification {
         projectRepository.save(entity)
 
         when:
-        List<ProjectDto> projects = contextClient.getProjects()
+        List<ProjectDto> projects = journalClient.getProjects()
 
         then:
         assert projects.size() == 1
