@@ -1,4 +1,4 @@
-package org.dreamscale.htmflow;
+package com.dreamscale.htmflow;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
