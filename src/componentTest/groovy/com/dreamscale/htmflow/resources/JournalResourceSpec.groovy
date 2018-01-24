@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.resources
 
+import com.dreamscale.htmflow.api.journal.ChunkEventInputDto
+import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto
 import com.dreamscale.htmflow.api.journal.TaskDto
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.core.context.domain.ProjectRepository
@@ -23,7 +25,7 @@ class JournalResourceSpec extends Specification {
     ProjectRepository projectRepository
     @Autowired
     TaskRepository taskRepository
-    
+
     def setup() {
         projectRepository.deleteAll()
         taskRepository.deleteAll()
@@ -58,6 +60,17 @@ class JournalResourceSpec extends Specification {
         assert tasks[0].name == entity.name
         assert tasks[0].summary == entity.summary
         assert tasks[0].externalId == entity.externalId
+    }
+
+    def "should save new chunk"() {
+        given:
+        ChunkEventInputDto chunkEvent = new ChunkEventInputDto();
+
+        when:
+        ChunkEventOutputDto output = journalClient.createChunkEvent(chunkEvent)
+
+        then:
+        assert output != null
     }
 
 

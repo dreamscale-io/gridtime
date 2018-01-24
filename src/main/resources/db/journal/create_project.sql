@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset project:0
+--changeset dreamscale:0
 create table project (
   id uuid primary key not null,
   name text,

@@ -5,3 +5,6 @@ databaseChangeLog:
 
   - include:
         file: db/journal/create_task.sql
+
+  - include:
+        file: db/journal/create_event.sql

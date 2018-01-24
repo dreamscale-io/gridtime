@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.resources;
 
+import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
+import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
 import com.dreamscale.htmflow.api.journal.ProjectDto;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.TaskDto;
@@ -46,6 +48,24 @@ public class JournalResource {
     List<TaskDto> getOpenTasksForProject(@PathVariable("id") String projectId) {
         Iterable<TaskEntity> taskEntities = taskRepository.findAll();
         return taskMapper.toApiList(taskEntities);
+    }
+
+    @GetMapping(ResourcePaths.PROJECT_PATH + ResourcePaths.RECENT_PATH)
+    List<ProjectDto> getRecentProjects() {
+        Iterable<ProjectEntity> projectEntities = projectRepository.findAll();
+        return projectMapper.toApiList(projectEntities);
+    }
+
+    @GetMapping(ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
+    List<TaskDto> getRecentTasksForProject(@PathVariable("id") String projectId) {
+        Iterable<TaskEntity> taskEntities = taskRepository.findAll();
+        return taskMapper.toApiList(taskEntities);
+    }
+
+    @PostMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
+    ChunkEventOutputDto createChunkEvent(@RequestBody ChunkEventInputDto chunkEventInput) {
+        //need to save to DB, and also update the recent list of things...
+        return new ChunkEventOutputDto();
     }
 
 }
