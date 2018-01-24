@@ -1,10 +1,14 @@
 package com.dreamscale.htmflow.resources
 
+import com.dreamscale.htmflow.api.journal.TaskDto
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.core.context.domain.ProjectRepository
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.journal.ProjectDto
 import com.dreamscale.htmflow.core.context.domain.ProjectEntity
+import com.dreamscale.htmflow.core.context.domain.TaskEntity
+import com.dreamscale.htmflow.core.context.domain.TaskRepository
+import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -17,6 +21,13 @@ class JournalResourceSpec extends Specification {
     JournalClient journalClient
     @Autowired
     ProjectRepository projectRepository
+    @Autowired
+    TaskRepository taskRepository
+    
+    def setup() {
+        projectRepository.deleteAll()
+        taskRepository.deleteAll()
+    }
 
     def "should retrieve project list"() {
         given:
@@ -32,5 +43,22 @@ class JournalResourceSpec extends Specification {
         assert projects[0].name == entity.name
         assert projects[0].externalId == entity.externalId
     }
+
+    def "should retrieve task list"() {
+        given:
+        TaskEntity entity = aRandom.taskEntity().build()
+        taskRepository.save(entity)
+
+        when:
+        List<TaskDto> tasks = journalClient.getOpenTasksForProject("3")
+
+        then:
+        assert tasks.size() == 1
+        assert tasks[0].id == entity.id.toString()
+        assert tasks[0].name == entity.name
+        assert tasks[0].summary == entity.summary
+        assert tasks[0].externalId == entity.externalId
+    }
+
 
 }

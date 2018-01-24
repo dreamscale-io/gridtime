@@ -2,7 +2,9 @@ package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.ProjectDto;
+import com.dreamscale.htmflow.api.journal.TaskDto;
 import feign.Headers;
+import feign.Param;
 import feign.RequestLine;
 
 import java.util.List;
@@ -15,6 +17,10 @@ public interface JournalClient {
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     List<ProjectDto> getProjects();
+
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH)
+    List<TaskDto> getOpenTasksForProject(@Param("id") String projectId);
+
 
     /*
     @RequestLine("POST /somepath")
