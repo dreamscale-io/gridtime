@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.dreamscale:gradle-core:1.3"
+        classpath "org.dreamscale:gradle-core:1.3.1"
     }
 }
 
@@ -27,7 +27,7 @@ allprojects {
         spockVersion = "1.1-groovy-2.4"
     }
 
-    apply plugin: "org.dreamscale.core-oss"
+    apply plugin: "org.dreamscale.core"
     apply plugin: "org.dreamscale.maven-publish-ext"
 
     repositories {
@@ -91,8 +91,4 @@ bintray {
         vcsUrl = 'https://github.com/dreamscale/htm_flow.git'
         licenses = ['Apache-2.0']
     }
-}
-
-license {
-    excludes(["**/*.properties", "**/*.xml", "**/*.yml", "db/**", "licenses/**"])
 }
