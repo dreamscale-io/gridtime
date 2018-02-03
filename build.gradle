@@ -1,9 +1,13 @@
 apply plugin: "org.springframework.boot"
 apply plugin: "org.dreamscale.spring"
+apply plugin: "org.dreamscale.templates"
 apply plugin: "org.dreamscale.postgres"
 
 allprojects {
     ext {
+        // used by the various templates tasks to determine the base service package
+        servicePackageName="com.dreamscale.htmflow"
+
         groovyVersion = "2.4.11"
         spockVersion = "1.1-groovy-2.4"
         commonSpringBootVersion = "${springBootVersion}-1.+"
