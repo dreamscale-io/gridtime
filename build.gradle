@@ -46,3 +46,7 @@ dependencies {
 bintray {
     publications = ['htmFlowRestClient']
 }
+
+postgres {
+    dockerImageName = "postgres:9.5.5"
+}

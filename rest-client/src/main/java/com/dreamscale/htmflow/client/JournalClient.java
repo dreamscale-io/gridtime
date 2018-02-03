@@ -17,6 +17,10 @@ import java.util.List;
 })
 public interface JournalClient {
 
+    @Headers("Authorization: Bearer {apiKey}")
+    @RequestLine("GET /jira/story/{storyId}")
+    String getStory(@Param("apiKey") String apiKey, @Param("storyId") String storyId);
+
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     List<ProjectDto> getProjects();
 

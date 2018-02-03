@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core;
 import com.dreamscale.htmflow.core.context.domain.RandomProjectEntityBuilder;
 import com.dreamscale.htmflow.core.context.domain.RandomTaskEntityBuilder;
 
-public class RandomCoreBuilderSupport {
+public class CoreRandomBuilderSupport {
 
     public RandomProjectEntityBuilder projectEntity() {
         return new RandomProjectEntityBuilder();
