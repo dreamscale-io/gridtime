@@ -1,9 +1,9 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
-import com.dreamscale.htmflow.api.project.*;
+import com.dreamscale.htmflow.api.project.ProjectDto;
+import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
+import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -11,11 +11,12 @@ import com.dreamscale.htmflow.core.domain.TaskRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -45,19 +46,14 @@ public class ProjectResource {
         return projectMapper.toApiList(projectEntities);
     }
 
-    @PostMapping()
-    ProjectDto findOrCreateProject(@RequestBody ProjectInputDto projectInputDto) {
-        return new ProjectDto();
-    }
-
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH)
     List<TaskDto> getAllTasksForProject(@PathVariable("id") String projectId) {
         Iterable<TaskEntity> taskEntities = taskRepository.findAll();
         return taskMapper.toApiList(taskEntities);
     }
 
-    @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
-    TaskDto findOrCreateTask(@RequestBody TaskInputDto taskInputDto) {
+    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.NAME_PATH + "/{name}")
+    TaskDto findTaskByName(@PathVariable("id") String projectId, @PathVariable("name") String taskName) {
         return new TaskDto();
     }
 
