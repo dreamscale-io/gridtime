@@ -50,3 +50,7 @@ bintray {
 postgres {
     dockerImageName = "postgres:9.5.5"
 }
+
+task stage {
+        dependsOn clean, bootRepackage
+}
