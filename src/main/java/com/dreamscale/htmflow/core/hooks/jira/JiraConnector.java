@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.hooks.jira;
 
+import feign.auth.BasicAuthRequestInterceptor;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,12 +32,13 @@ public class JiraConnector {
     }
 
     public List<JiraProjectDto> getProjects() {
-
-        return jiraClient.getProjects(user, apiKey);
+        return jiraClient.getProjects();
     }
 
     JiraClient createJiraClient() {
-        return jacksonFeignBuilder.target(JiraClient.class, siteUrl);
+        return jacksonFeignBuilder
+                .requestInterceptor(new BasicAuthRequestInterceptor(user, apiKey))
+                .target(JiraClient.class, siteUrl);
     }
 
 }

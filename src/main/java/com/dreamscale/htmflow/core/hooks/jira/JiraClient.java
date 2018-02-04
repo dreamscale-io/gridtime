@@ -14,10 +14,7 @@ import java.util.List;
 })
 public interface JiraClient {
 
-    @Headers({
-            "Authorization: {user}:{apiKey}"
-    })
     @RequestLine("GET " + JiraPaths.API_PATH + ResourcePaths.PROJECT_PATH)
-    List<JiraProjectDto> getProjects(@Param("user") String user, @Param("apiKey") String apiKey);
+    List<JiraProjectDto> getProjects();
 
 }
