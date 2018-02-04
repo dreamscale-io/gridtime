@@ -51,6 +51,7 @@ postgres {
     dockerImageName = "postgres:9.5.5"
 }
 
+bootRepackage.mustRunAfter clean
 task stage {
         dependsOn clean, bootRepackage
 }
