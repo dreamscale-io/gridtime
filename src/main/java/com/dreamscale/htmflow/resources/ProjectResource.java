@@ -64,18 +64,13 @@ public class ProjectResource {
         return taskMapper.toApiList(taskEntities);
     }
 
-    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.NAME_PATH + "/{name}")
-    TaskDto getTaskByName(@PathVariable("id") String projectId, @PathVariable("name") String taskName) {
-        return new TaskDto();
-    }
-
     @PostMapping()
-    ProjectDto createProject(@RequestBody ProjectInputDto projectInputDto) {
+    ProjectDto findOrCreateProject(@RequestBody ProjectInputDto projectInputDto) {
         return new ProjectDto();
     }
 
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
-    TaskDto createTask(@RequestBody TaskInputDto taskInputDto) {
+    TaskDto findOrCreateTask(@RequestBody TaskInputDto taskInputDto) {
         return new TaskDto();
     }
 
