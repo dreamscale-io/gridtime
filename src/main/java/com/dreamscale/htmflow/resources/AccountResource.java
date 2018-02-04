@@ -5,9 +5,9 @@ import com.dreamscale.htmflow.api.account.AccountKeyDto;
 import com.dreamscale.htmflow.api.account.AccountStatusDto;
 import com.dreamscale.htmflow.api.account.HeartbeatDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
+import com.dreamscale.htmflow.api.account.UserProfileDto;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -60,5 +61,16 @@ public class AccountResource {
     SimpleStatusDto logout() {
         return new SimpleStatusDto();
     }
+
+    @GetMapping(ResourcePaths.USER_PROFILE_PATH)
+    List<UserProfileDto> getAllUserProfiles() {
+        return Collections.emptyList();
+    }
+
+    @PutMapping(ResourcePaths.USER_PROFILE_PATH + ResourcePaths.ME_PATH)
+    UserProfileDto configureMe(@RequestBody UserProfileDto myProfile) {
+        return new UserProfileDto();
+    }
+
 
 }

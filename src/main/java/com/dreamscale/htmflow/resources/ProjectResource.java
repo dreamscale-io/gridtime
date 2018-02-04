@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
+import com.dreamscale.htmflow.api.project.TaskInputDto;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -11,10 +12,7 @@ import com.dreamscale.htmflow.core.domain.TaskRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -62,5 +60,9 @@ public class ProjectResource {
         return new RecentTasksByProjectDto();
     }
 
+    @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
+    TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {
+        return new TaskDto();
+    }
 
 }
