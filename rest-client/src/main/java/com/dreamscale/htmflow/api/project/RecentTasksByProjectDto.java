@@ -5,19 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskDto {
+public class RecentTasksByProjectDto {
 
-    private UUID id;
-    private String name;
-    private String summary;
-    private String externalId;
-
-    private UUID projectId;
+    private List<ProjectDto> recentProjects;
+    private Map<UUID, List<TaskDto>> recentTasksByProjectId;
 
 }

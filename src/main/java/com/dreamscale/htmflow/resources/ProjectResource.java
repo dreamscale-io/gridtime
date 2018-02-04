@@ -3,10 +3,7 @@ package com.dreamscale.htmflow.resources;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
 import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
-import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.api.project.ProjectInputDto;
-import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.project.TaskInputDto;
+import com.dreamscale.htmflow.api.project.*;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -17,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -41,27 +40,9 @@ public class ProjectResource {
     }
 
     @GetMapping()
-    List<ProjectDto> getProjects() {
+    List<ProjectDto> getAllProjects() {
         Iterable<ProjectEntity> projectEntities = projectRepository.findAll();
         return projectMapper.toApiList(projectEntities);
-    }
-
-    @GetMapping("/{id}" + ResourcePaths.TASK_PATH)
-    List<TaskDto> getOpenTasksForProject(@PathVariable("id") String projectId) {
-        Iterable<TaskEntity> taskEntities = taskRepository.findAll();
-        return taskMapper.toApiList(taskEntities);
-    }
-
-    @GetMapping(ResourcePaths.RECENT_PATH)
-    List<ProjectDto> getRecentProjects() {
-        Iterable<ProjectEntity> projectEntities = projectRepository.findAll();
-        return projectMapper.toApiList(projectEntities);
-    }
-
-    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
-    List<TaskDto> getRecentTasksForProject(@PathVariable("id") String projectId) {
-        Iterable<TaskEntity> taskEntities = taskRepository.findAll();
-        return taskMapper.toApiList(taskEntities);
     }
 
     @PostMapping()
@@ -69,9 +50,21 @@ public class ProjectResource {
         return new ProjectDto();
     }
 
+    @GetMapping("/{id}" + ResourcePaths.TASK_PATH)
+    List<TaskDto> getAllTasksForProject(@PathVariable("id") String projectId) {
+        Iterable<TaskEntity> taskEntities = taskRepository.findAll();
+        return taskMapper.toApiList(taskEntities);
+    }
+
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto findOrCreateTask(@RequestBody TaskInputDto taskInputDto) {
         return new TaskDto();
     }
+
+    @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
+    RecentTasksByProjectDto getRecentTasksByProjectForUser() {
+        return new RecentTasksByProjectDto();
+    }
+
 
 }

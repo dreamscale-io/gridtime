@@ -41,7 +41,7 @@ class ProjectResourceSpec extends Specification {
 
         then:
         assert projects.size() == 1
-        assert projects[0].id == entity.id.toString()
+        assert projects[0].id == entity.id
         assert projects[0].name == entity.name
         assert projects[0].externalId == entity.externalId
     }
@@ -56,7 +56,7 @@ class ProjectResourceSpec extends Specification {
 
         then:
         assert tasks.size() == 1
-        assert tasks[0].id == entity.id.toString()
+        assert tasks[0].id == entity.id
         assert tasks[0].name == entity.name
         assert tasks[0].summary == entity.summary
         assert tasks[0].externalId == entity.externalId
