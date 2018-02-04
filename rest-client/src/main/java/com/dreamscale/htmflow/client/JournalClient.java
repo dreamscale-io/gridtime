@@ -18,14 +18,14 @@ import java.util.List;
 })
 public interface JournalClient {
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH)
     ChunkEventOutputDto createChunkEvent(ChunkEventInputDto chunkEvent);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH
             + "?from_date={fromDate}&to_date={toDate}")
     List<ChunkEventOutputDto> getChunks(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
     List<ChunkEventOutputDto> getRecentChunks();
 
     /*

@@ -39,18 +39,18 @@ public class JournalResource {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-    @PostMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
+    @PostMapping(ResourcePaths.CHUNK_PATH)
     ChunkEventOutputDto createChunkEvent(@RequestBody ChunkEventInputDto chunkEventInput) {
         //need to save to DB, and also update the recent list of things...
         return new ChunkEventOutputDto();
     }
 
-    @GetMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
+    @GetMapping(ResourcePaths.CHUNK_PATH)
     List<ChunkEventOutputDto> getChunks(@RequestParam("from_date") String fromDate, @RequestParam("to_date") String toDate) {
         return new ArrayList<ChunkEventOutputDto>();
     }
 
-    @GetMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
+    @GetMapping(ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
     List<ChunkEventOutputDto> getRecentChunks() {
         return new ArrayList<ChunkEventOutputDto>();
     }
