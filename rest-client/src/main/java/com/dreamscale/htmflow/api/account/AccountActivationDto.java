@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountStatusDto {
+public class AccountActivationDto {
 
     Status status;
     String message;
     String email;
-
+    String apiKey;
 }

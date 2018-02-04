@@ -1,13 +1,9 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.account.AccountKeyDto;
-import com.dreamscale.htmflow.api.account.AccountStatusDto;
-import com.dreamscale.htmflow.api.account.HeartbeatDto;
-import com.dreamscale.htmflow.api.account.SimpleStatusDto;
+import com.dreamscale.htmflow.api.account.*;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.account.UserProfileDto;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -43,8 +39,14 @@ public class AccountResource {
     }
 
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
-    AccountStatusDto activate(@RequestBody AccountKeyDto accountKey) {
-        return new AccountStatusDto();
+    AccountActivationDto activate(@RequestBody ActivationToken activationToken) {
+        AccountActivationDto activation = new AccountActivationDto();
+        activation.setStatus(Status.VALID);
+        activation.setEmail("kara@dreamscale.io");
+        activation.setMessage("Your account has been successfully activated.");
+        activation.setApiKey("FASFD423fsfd32d2322d");
+
+        return activation;
     }
 
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
