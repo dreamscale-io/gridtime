@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.account.ActivationToken
+import com.dreamscale.htmflow.api.account.ActivationTokenDto
 import com.dreamscale.htmflow.api.account.AccountActivationDto
 import com.dreamscale.htmflow.api.account.HeartbeatDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
@@ -28,7 +28,7 @@ class AccountResourceSpec extends Specification {
 
     def "should activate account"() {
         given:
-        ActivationToken accountKey = new ActivationToken();
+        ActivationTokenDto accountKey = new ActivationTokenDto();
 
         when:
         AccountActivationDto statusDto = accountClient.activate(accountKey)

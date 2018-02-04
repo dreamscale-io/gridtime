@@ -30,8 +30,9 @@ public class JiraConnector {
         jiraClient = createJiraClient();
     }
 
-    List<JiraProjectDto> getProjects() {
-        return jiraClient.getProjects();
+    public List<JiraProjectDto> getProjects() {
+
+        return jiraClient.getProjects(user, apiKey);
     }
 
     JiraClient createJiraClient() {

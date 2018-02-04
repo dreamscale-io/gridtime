@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.account.ActivationToken;
+import com.dreamscale.htmflow.api.account.ActivationTokenDto;
 import com.dreamscale.htmflow.api.account.AccountActivationDto;
 import com.dreamscale.htmflow.api.account.HeartbeatDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
@@ -15,7 +15,7 @@ import feign.RequestLine;
 public interface AccountClient {
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)
-    AccountActivationDto activate(ActivationToken accountKey);
+    AccountActivationDto activate(ActivationTokenDto accountKey);
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(HeartbeatDto accountKey);

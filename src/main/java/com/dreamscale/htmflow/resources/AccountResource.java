@@ -39,7 +39,7 @@ public class AccountResource {
     }
 
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
-    AccountActivationDto activate(@RequestBody ActivationToken activationToken) {
+    AccountActivationDto activate(@RequestBody ActivationTokenDto activationToken) {
         AccountActivationDto activation = new AccountActivationDto();
         activation.setStatus(Status.VALID);
         activation.setEmail("kara@dreamscale.io");
