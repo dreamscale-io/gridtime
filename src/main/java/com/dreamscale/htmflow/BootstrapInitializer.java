@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow;
 
-import com.dreamscale.htmflow.core.context.domain.ProjectEntity;
-import com.dreamscale.htmflow.core.context.domain.ProjectRepository;
+import com.dreamscale.htmflow.core.domain.ProjectEntity;
+import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

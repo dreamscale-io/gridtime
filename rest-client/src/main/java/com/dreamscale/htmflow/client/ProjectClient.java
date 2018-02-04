@@ -15,16 +15,16 @@ import java.util.List;
         "Content-Type: application/json",
         "Accept: application/json",
 })
-public interface JournalClient {
+public interface ProjectClient {
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
-    ChunkEventOutputDto createChunkEvent(ChunkEventInputDto chunkEvent);
+//    @Headers("Authorization: Bearer {apiKey}")
+//    @RequestLine("GET /jira/story/{storyId}")
+//    String getStory(@Param("apiKey") String apiKey, @Param("storyId") String storyId);
 
-    /*
-    @RequestLine("POST /somepath")
-    void createThingie(Thingie thingie);
+    @RequestLine("GET " + ResourcePaths.PROJECT_PATH)
+    List<ProjectDto> getProjects();
 
-    @RequestLine("GET /otherpath/{pathParam}?queryarg={someArg}")
-    Thingie getThingieWithQueyrArg(@Param("pathParam") String pathParam, @Param("someArg") String queryArg);
-    */
+    @RequestLine("GET " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH)
+    List<TaskDto> getOpenTasksForProject(@Param("id") String projectId);
+
 }

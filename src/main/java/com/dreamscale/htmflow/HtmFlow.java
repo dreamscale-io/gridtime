@@ -21,5 +21,5 @@ public class HtmFlow {
     public static void main(String[] args) {
         SpringApplication.run(HtmFlow.class, args);
     }
-    
+
 }

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.api.journal;
+package com.dreamscale.htmflow.api.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDto {
+public class HeartbeatDto {
 
-    private String id;
-    private String name;
-    private String externalId;
-
+    private int idleTime;
+    private int deltaTime;
 }

@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core;
 
-import com.dreamscale.htmflow.core.context.domain.RandomProjectEntityBuilder;
-import com.dreamscale.htmflow.core.context.domain.RandomTaskEntityBuilder;
+import com.dreamscale.htmflow.core.domain.RandomProjectEntityBuilder;
+import com.dreamscale.htmflow.core.domain.RandomTaskEntityBuilder;
 
 public class CoreRandomBuilderSupport {
 

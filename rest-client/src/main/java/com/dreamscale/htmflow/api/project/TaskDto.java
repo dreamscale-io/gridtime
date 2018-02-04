@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.api.journal;
+package com.dreamscale.htmflow.api.project;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

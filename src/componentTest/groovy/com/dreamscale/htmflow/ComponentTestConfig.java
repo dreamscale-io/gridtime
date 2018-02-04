@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow;
 
+import com.dreamscale.htmflow.client.ProjectClient;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -18,8 +19,12 @@ public class ComponentTestConfig extends BaseTestConfig {
     JacksonFeignBuilder jacksonFeignBuilder;
 
     @Bean
-    JournalClient contextClient() {
+    JournalClient journalClient() {
         return jacksonFeignBuilder.target(JournalClient.class, baseUrl);
     }
 
+    @Bean
+    ProjectClient projectClient() {
+        return jacksonFeignBuilder.target(ProjectClient.class, baseUrl);
+    }
 }
