@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.api.journal;
 
+import com.dreamscale.htmflow.api.project.ProjectDto;
+import com.dreamscale.htmflow.api.project.TaskDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,6 @@ public class ChunkEventOutputDto {
     private LocalDateTime position;
     private String description;
 
-    private UUID projectId;
-    private UUID taskId;
+    private ProjectDto project;
+    private TaskDto task;
 }

@@ -1,8 +1,12 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
+import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
 import com.dreamscale.htmflow.api.project.ProjectDto;
+import com.dreamscale.htmflow.api.project.ProjectInputDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
+import com.dreamscale.htmflow.api.project.TaskInputDto;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -58,6 +62,21 @@ public class ProjectResource {
     List<TaskDto> getRecentTasksForProject(@PathVariable("id") String projectId) {
         Iterable<TaskEntity> taskEntities = taskRepository.findAll();
         return taskMapper.toApiList(taskEntities);
+    }
+
+    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.NAME_PATH + "/{name}")
+    TaskDto getTaskByName(@PathVariable("id") String projectId, @PathVariable("name") String taskName) {
+        return new TaskDto();
+    }
+
+    @PostMapping()
+    ProjectDto createProject(@RequestBody ProjectInputDto projectInputDto) {
+        return new ProjectDto();
+    }
+
+    @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
+    TaskDto createTask(@RequestBody TaskInputDto taskInputDto) {
+        return new TaskDto();
     }
 
 }

@@ -20,6 +20,8 @@ public interface JournalClient {
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
     ChunkEventOutputDto createChunkEvent(ChunkEventInputDto chunkEvent);
 
+
+
     /*
     @RequestLine("POST /somepath")
     void createThingie(Thingie thingie);

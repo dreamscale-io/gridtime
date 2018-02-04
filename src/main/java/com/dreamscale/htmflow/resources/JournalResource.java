@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
@@ -43,4 +45,13 @@ public class JournalResource {
         return new ChunkEventOutputDto();
     }
 
+    @GetMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH)
+    List<ChunkEventOutputDto> getChunks(@RequestParam("from_date") String fromDate, @RequestParam("to_date") String toDate) {
+        return new ArrayList<ChunkEventOutputDto>();
+    }
+
+    @GetMapping(ResourcePaths.EVENT_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
+    List<ChunkEventOutputDto> getRecentChunks() {
+        return new ArrayList<ChunkEventOutputDto>();
+    }
 }
