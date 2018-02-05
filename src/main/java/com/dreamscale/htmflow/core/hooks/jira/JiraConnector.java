@@ -35,6 +35,14 @@ public class JiraConnector {
         return jiraClient.getProjects();
     }
 
+    public JiraSearchResultPage getOpenTasksForProject(String projectId) {
+        System.out.println(projectId);
+        String jql = "project="+projectId+" and status not in (Done) order by updated desc";
+        String fields = "id,key,summary";
+
+        return jiraClient.getTasks(jql, fields);
+    }
+
     JiraClient createJiraClient() {
         return jacksonFeignBuilder
                 .requestInterceptor(new BasicAuthRequestInterceptor(user, apiKey))

@@ -10,6 +10,8 @@ import com.dreamscale.htmflow.core.domain.ProjectRepository
 import com.dreamscale.htmflow.core.domain.TaskRepository
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnector
 import com.dreamscale.htmflow.core.hooks.jira.JiraProjectDto
+import com.dreamscale.htmflow.core.hooks.jira.JiraSearchResultPage
+import com.dreamscale.htmflow.core.hooks.jira.JiraTaskDto
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -31,5 +33,16 @@ class JiraConnectorSpec extends Specification {
         assert projects.size() == 1
     }
 
+    def "should get jira tasks"() {
+        given:
+        List<JiraProjectDto> projects = jiraConnector.getProjects()
+        String projectId = projects.get(0).id;
+
+        when:
+        JiraSearchResultPage tasksPage = jiraConnector.getOpenTasksForProject(projectId);
+
+        then:
+        assert tasksPage.getIssues().size() > 1
+    }
 
 }

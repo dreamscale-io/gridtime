@@ -11,11 +11,11 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JiraProjectDetailsDto {
+public class JiraTaskDto {
 
+    String expand;
     String self;
     String id;
     String key;
-    String name;
-    Map<String, String> avatarUrls;
+    Map<String, String> fields;
 }

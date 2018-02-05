@@ -5,21 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JiraProjectDto {
+public class JiraSearchResultPage {
 
     String expand;
-    String self;
-    String id;
-    String key;
-    String name;
-    Map<String, String> avatarUrls;
-    String projectTypeKey;
-    boolean simplified;
+    Integer startAt;
+    Integer maxResults;
+    Integer total;
 
+    List<JiraTaskDto> issues;
 }

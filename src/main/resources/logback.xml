@@ -2,7 +2,7 @@
 <configuration>
     <include resource="org/dreamscale/logback/common.xml"/>
 
-    <logger name="com.dreamscale" level="DEBUG"/>
+    <logger name="com.dreamscale" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
