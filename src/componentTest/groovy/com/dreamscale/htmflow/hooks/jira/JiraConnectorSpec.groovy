@@ -12,6 +12,7 @@ import com.dreamscale.htmflow.core.hooks.jira.JiraConnector
 import com.dreamscale.htmflow.core.hooks.jira.JiraProjectDto
 import com.dreamscale.htmflow.core.hooks.jira.JiraSearchResultPage
 import com.dreamscale.htmflow.core.hooks.jira.JiraTaskDto
+import com.dreamscale.htmflow.core.hooks.jira.JiraUserDto
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -43,6 +44,17 @@ class JiraConnectorSpec extends Specification {
 
         then:
         assert tasksPage.getIssues().size() > 1
+    }
+
+    def "should get jira users"() {
+        given:
+
+        when:
+        List<JiraUserDto> users = jiraConnector.getUsers();
+
+        then:
+        println users
+        assert users.size() == 3
     }
 
 }

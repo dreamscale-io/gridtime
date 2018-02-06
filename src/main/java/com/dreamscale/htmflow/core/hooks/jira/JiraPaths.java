@@ -6,4 +6,5 @@ public class JiraPaths {
     public static final String PROJECT_PATH = "/project";
 
     public static final String SEARCH_PATH = "/search";
+    public static final String USER_PATH = "/user";
 }

@@ -21,6 +21,13 @@ public interface JiraClient {
     @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.SEARCH_PATH +
             "?jql={query}&fields={fields}")
     JiraSearchResultPage getTasks(@Param("query") String query, @Param("fields") String fields);
+
+    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
+            "?username=%25&includeActive=true&includeInactive=false")
+    List<JiraUserDto> getUsers();
+
+
+
 //
 //    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH
 //            + "?from_date={fromDate}&to_date={toDate}")

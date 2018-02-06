@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -41,6 +42,17 @@ public class JiraConnector {
         String fields = "id,key,summary";
 
         return jiraClient.getTasks(jql, fields);
+    }
+
+    public List<JiraUserDto> getUsers() {
+        List<JiraUserDto> allUsers = jiraClient.getUsers();
+        List<JiraUserDto> filteredUsers = new ArrayList<>();
+        for (JiraUserDto user: allUsers) {
+            if (!user.getKey().startsWith("addon_")) {
+                filteredUsers.add(user);
+            }
+        }
+        return filteredUsers;
     }
 
     JiraClient createJiraClient() {
