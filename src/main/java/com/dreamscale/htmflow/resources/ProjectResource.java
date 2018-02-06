@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = ResourcePaths.PROJECT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
@@ -46,13 +47,14 @@ public class ProjectResource {
 
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH)
     List<TaskDto> getAllTasksForProject(@PathVariable("id") String projectId) {
-        Iterable<TaskEntity> taskEntities = taskRepository.findAll();
+        Iterable<TaskEntity> taskEntities = taskRepository.findByProjectId(UUID.fromString(projectId));
         return taskMapper.toApiList(taskEntities);
     }
 
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.NAME_PATH + "/{name}")
     TaskDto findTaskByName(@PathVariable("id") String projectId, @PathVariable("name") String taskName) {
-        return new TaskDto();
+        TaskEntity taskEntity = taskRepository.findByName(taskName);
+        return taskMapper.toApi(taskEntity);
     }
 
     @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
@@ -62,6 +64,7 @@ public class ProjectResource {
 
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {
+
         return new TaskDto();
     }
 

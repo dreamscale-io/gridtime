@@ -48,18 +48,22 @@ class ProjectResourceSpec extends Specification {
 
     def "should retrieve task list"() {
         given:
-        TaskEntity entity = aRandom.taskEntity().build()
-        taskRepository.save(entity)
+        ProjectEntity project = aRandom.projectEntity().build()
+        projectRepository.save(project)
+
+        TaskEntity task = aRandom.taskEntity().build()
+        task.projectId = project.id;
+        taskRepository.save(task)
 
         when:
-        List<TaskDto> tasks = projectClient.getOpenTasksForProject("3")
+        List<TaskDto> tasks = projectClient.getOpenTasksForProject(project.id.toString())
 
         then:
         assert tasks.size() == 1
-        assert tasks[0].id == entity.id
-        assert tasks[0].name == entity.name
-        assert tasks[0].summary == entity.summary
-        assert tasks[0].externalId == entity.externalId
+        assert tasks[0].id == task.id
+        assert tasks[0].name == task.name
+        assert tasks[0].summary == task.summary
+        assert tasks[0].externalId == task.externalId
     }
 
 
