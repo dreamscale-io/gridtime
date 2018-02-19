@@ -17,3 +17,7 @@ out
 .classpath
 .projectbuild
 bin
+
+# IDE
+*.sublime-project
+*.sublime-workspace
