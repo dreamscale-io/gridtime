@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.api.account;
 
+import com.dreamscale.htmflow.api.status.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

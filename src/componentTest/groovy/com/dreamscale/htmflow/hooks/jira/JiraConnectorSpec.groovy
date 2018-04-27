@@ -1,17 +1,9 @@
 package com.dreamscale.htmflow.hooks.jira
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.account.AccountActivationDto
-import com.dreamscale.htmflow.api.account.ActivationTokenDto
-import com.dreamscale.htmflow.api.account.HeartbeatDto
-import com.dreamscale.htmflow.api.account.SimpleStatusDto
-import com.dreamscale.htmflow.client.AccountClient
-import com.dreamscale.htmflow.core.domain.ProjectRepository
-import com.dreamscale.htmflow.core.domain.TaskRepository
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnector
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory
 import com.dreamscale.htmflow.core.hooks.jira.JiraProjectDto
 import com.dreamscale.htmflow.core.hooks.jira.JiraSearchResultPage
-import com.dreamscale.htmflow.core.hooks.jira.JiraTaskDto
 import com.dreamscale.htmflow.core.hooks.jira.JiraUserDto
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -20,7 +12,7 @@ import spock.lang.Specification
 class JiraConnectorSpec extends Specification {
 
     @Autowired
-    JiraConnector jiraConnector
+    JiraConnectionFactory jiraConnector
 
 
     def "should get jira projects"() {

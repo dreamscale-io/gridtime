@@ -4,10 +4,7 @@ import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
 import com.dreamscale.htmflow.core.domain.TaskRepository;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnector;
-import com.dreamscale.htmflow.core.hooks.jira.JiraProjectDto;
-import com.dreamscale.htmflow.core.hooks.jira.JiraSearchResultPage;
-import com.dreamscale.htmflow.core.hooks.jira.JiraTaskDto;
+import com.dreamscale.htmflow.core.hooks.jira.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +16,7 @@ import java.util.UUID;
 public class JiraSyncJob {
 
     @Autowired
-    JiraConnector jiraConnector;
+    JiraConnectionFactory jiraConnectionFactory;
 
     @Autowired
     ProjectRepository projectRepository;
@@ -27,12 +24,12 @@ public class JiraSyncJob {
     @Autowired
     TaskRepository taskRepository;
 
-    public void synchonizeDBWithJira() {
-        List<ProjectEntity> projects = fetchJiraProjects();
+    public void synchonizeDBWithJira(JiraConnection jiraConnection) {
+        List<ProjectEntity> projects = fetchJiraProjects(jiraConnection);
         saveProjects(projects);
 
         for (ProjectEntity project : projects) {
-            List<TaskEntity> tasks = fetchJiraTasks(project);
+            List<TaskEntity> tasks = fetchJiraTasks(jiraConnection, project);
             saveTasks(tasks);
         }
     }
@@ -57,8 +54,8 @@ public class JiraSyncJob {
         }
     }
 
-    private List<TaskEntity> fetchJiraTasks(ProjectEntity project) {
-        JiraSearchResultPage jiraSearchResults = jiraConnector.getOpenTasksForProject(project.getExternalId());
+    private List<TaskEntity> fetchJiraTasks(JiraConnection jiraConnection, ProjectEntity project) {
+        JiraSearchResultPage jiraSearchResults = jiraConnection.getOpenTasksForProject(project.getExternalId());
 
         List<TaskEntity> taskEntities = new ArrayList<>();
 
@@ -75,8 +72,8 @@ public class JiraSyncJob {
         return taskEntities;
     }
 
-    private List<ProjectEntity> fetchJiraProjects() {
-        List<JiraProjectDto> jiraProjects = jiraConnector.getProjects();
+    private List<ProjectEntity> fetchJiraProjects(JiraConnection jiraConnection ) {
+        List<JiraProjectDto> jiraProjects = jiraConnection.getProjects();
 
         List<ProjectEntity> projectEntities = new ArrayList<>();
 

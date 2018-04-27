@@ -1,6 +1,5 @@
-package com.dreamscale.htmflow.api.account;
+package com.dreamscale.htmflow.api.organization;
 
-import com.dreamscale.htmflow.api.status.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SimpleStatusDto {
-    Status status;
-    String message;
+public class MembershipInputDto {
+
+    private String inviteToken;
+    private String orgEmail;
 }

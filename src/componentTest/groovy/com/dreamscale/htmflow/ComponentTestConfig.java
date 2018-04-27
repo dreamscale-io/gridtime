@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow;
 
 import com.dreamscale.htmflow.client.AccountClient;
+import com.dreamscale.htmflow.client.OrganizationClient;
 import com.dreamscale.htmflow.client.ProjectClient;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
@@ -22,6 +23,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     JournalClient journalClient() {
         return jacksonFeignBuilder.target(JournalClient.class, baseUrl);
+    }
+
+    @Bean
+    OrganizationClient organizationClient() {
+        return jacksonFeignBuilder.target(OrganizationClient.class, baseUrl);
     }
 
     @Bean

@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+  - include:
+        file: db/organization/create_master_account.sql
+
+  - include:
+        file: db/organization/create_organization.sql
+
+  - include:
+        file: db/organization/create_organization_invite_token.sql
+
+  - include:
+        file: db/organization/create_organization_member.sql

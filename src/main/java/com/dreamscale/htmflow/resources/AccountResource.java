@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.account.*;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
+import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.ProjectEntity;
 import com.dreamscale.htmflow.core.domain.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.TaskEntity;
@@ -38,6 +39,16 @@ public class AccountResource {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
+//    POST /account/activate
+//
+//    request:
+//    apiKey:{string}
+//
+//    respone:
+//    status; {VALID, FAILED}
+//    message: {string}
+//    email: {string}
+
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationTokenDto activationToken) {
         AccountActivationDto activation = new AccountActivationDto();
@@ -49,10 +60,36 @@ public class AccountResource {
         return activation;
     }
 
+
+//    GET /account/heartbeat
+//    request:
+//    header.apiKey: {string}
+//    idleTime: {int}
+//    deltaTime: {int}
+
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
         return new SimpleStatusDto();
     }
+
+
+//    POST /account/login
+//
+//    request:
+//    header.apiKey: {string}
+//
+//    reponse:
+//    status; {VALID, FAILED}
+//    message: {string}
+//
+//    POST /account/logout
+//
+//    request:
+//    header.apiKey : {string}
+//
+//    response:
+//    status; {VALID, FAILED}
+//    message: {string}
 
     @PostMapping(ResourcePaths.LOGIN_PATH)
     SimpleStatusDto login() {
@@ -63,16 +100,5 @@ public class AccountResource {
     SimpleStatusDto logout() {
         return new SimpleStatusDto();
     }
-
-    @GetMapping(ResourcePaths.USER_PROFILE_PATH)
-    List<UserProfileDto> getAllUserProfiles() {
-        return Collections.emptyList();
-    }
-
-    @PutMapping(ResourcePaths.USER_PROFILE_PATH + ResourcePaths.ME_PATH)
-    UserProfileDto configureMe(@RequestBody UserProfileDto myProfile) {
-        return new UserProfileDto();
-    }
-
 
 }

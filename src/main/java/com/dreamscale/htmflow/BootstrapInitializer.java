@@ -20,7 +20,7 @@ public class BootstrapInitializer {
 
     @PostConstruct
     private void bootstrap() {
-        jiraSyncJob.synchonizeDBWithJira();
+//        jiraSyncJob.synchonizeDBWithJira();
     }
 
 }

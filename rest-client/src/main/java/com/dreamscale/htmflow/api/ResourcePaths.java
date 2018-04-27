@@ -17,6 +17,12 @@ public class ResourcePaths {
     public static final String LOGIN_PATH = "/login";
     public static final String LOGOUT_PATH = "/logout";
 
+    public static final String ORGANIZATION_PATH = "/organization";
+    public static final String MEMBER_PATH = "/member";
+    public static final String INVITATION_PATH = "/invitation";
+    public static final String UNBOUND_PATH = "/unbound";
+
+
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
 
