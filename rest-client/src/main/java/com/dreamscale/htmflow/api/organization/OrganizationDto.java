@@ -21,4 +21,5 @@ public class OrganizationDto {
     private String connectionFailedMessage;
 
     private String inviteLink;
+    private String inviteToken;
 }

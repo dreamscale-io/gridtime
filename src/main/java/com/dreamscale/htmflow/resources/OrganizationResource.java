@@ -63,15 +63,10 @@ public class OrganizationResource {
      * @return
      */
     @GetMapping(ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH)
-    public OrganizationDto getMemberInvitation(@RequestParam("token") String inviteToken) {
-        OrganizationDto org = new OrganizationDto();
-        org.setId(UUID.randomUUID());
-        org.setName("Org name");
+    public OrganizationDto decodeInvitation(@RequestParam("token") String inviteToken) {
 
-        //String invitationLink = constructInvitationLink(org.getId());
-        //org.setInviteLink(invitationLink);
+        return organizationService.decodeInvitation(inviteToken);
 
-        return org;
     }
 
     /**

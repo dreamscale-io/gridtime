@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface OrganizationInviteTokenRepository extends CrudRepository<OrganizationInviteTokenEntity, UUID> {
 
     OrganizationInviteTokenEntity findById(String id);
+
+    OrganizationInviteTokenEntity findByToken(String token);
 }

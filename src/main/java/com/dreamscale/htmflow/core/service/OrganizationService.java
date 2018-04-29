@@ -6,12 +6,13 @@ import com.dreamscale.htmflow.api.organization.OrganizationInputDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.ErrorEntity;
 import org.dreamscale.exception.WebApplicationException;
+import org.dreamscale.logging.LoggingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,17 +37,17 @@ public class OrganizationService {
 
     @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<OrganizationInputDto, OrganizationEntity> organizationMapper;
-    private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
+    private DtoEntityMapper<OrganizationInputDto, OrganizationEntity> orgInputMapper;
+    private DtoEntityMapper<OrganizationDto, OrganizationEntity> orgOutputMapper;
 
     @PostConstruct
     private void init() {
-        organizationMapper = mapperFactory.createDtoEntityMapper(OrganizationInputDto.class, OrganizationEntity.class);
-        taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
+        orgInputMapper = mapperFactory.createDtoEntityMapper(OrganizationInputDto.class, OrganizationEntity.class);
+        orgOutputMapper = mapperFactory.createDtoEntityMapper(OrganizationDto.class, OrganizationEntity.class);
     }
 
     public OrganizationDto createOrganization(OrganizationInputDto orgInputDto) {
-        OrganizationEntity orgEntity = organizationMapper.toEntity(orgInputDto);
+        OrganizationEntity orgEntity = orgInputMapper.toEntity(orgInputDto);
         orgEntity.setId(UUID.randomUUID());
         orgEntity.setJiraSiteUrl(formatSiteUrl(orgInputDto.getJiraSiteUrl()));
 
@@ -76,6 +77,7 @@ public class OrganizationService {
 
             String inviteLink = constructInvitationLink(inviteToken.getToken());
             orgDto.setInviteLink(inviteLink);
+            orgDto.setInviteToken(inviteToken.getToken());
         }
 
         return orgDto;
@@ -97,4 +99,23 @@ public class OrganizationService {
         return baseInviteLink + "?token="+inviteToken;
     }
 
+    public OrganizationDto decodeInvitation(String inviteToken) {
+
+        OrganizationDto organizationDto = null;
+
+        OrganizationInviteTokenEntity inviteTokenEntity = inviteTokenRepository.findByToken(inviteToken);
+
+        if (inviteTokenEntity != null) {
+            OrganizationEntity orgEntity = organizationRepository.findById(inviteTokenEntity.getOrganizationId());
+            organizationDto = orgOutputMapper.toApi(orgEntity);
+            organizationDto.setInviteToken(inviteToken);
+            organizationDto.setInviteLink(constructInvitationLink(inviteToken));
+            organizationDto.setConnectionStatus(Status.VALID);
+
+        } else {
+            throw new WebApplicationException(404, new ErrorEntity("404", null, "token invalid", null, LoggingLevel.WARN));
+        }
+
+        return organizationDto;
+    }
 }

@@ -24,7 +24,7 @@ public interface OrganizationClient {
 
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH
             + "?token={token}")
-    OrganizationDto getMemberInvitation(@Param("token") String inviteToken);
+    OrganizationDto decodeInvitation(@Param("token") String inviteToken);
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
     MembershipDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);

@@ -6,5 +6,5 @@ import java.util.UUID;
 
 public interface OrganizationRepository extends CrudRepository<OrganizationEntity, UUID> {
 
-    OrganizationEntity findById(String id);
+    OrganizationEntity findById(UUID id);
 }
