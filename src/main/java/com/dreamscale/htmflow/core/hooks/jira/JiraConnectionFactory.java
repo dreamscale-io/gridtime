@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.hooks.jira;
 
+import com.dreamscale.htmflow.core.domain.OrganizationEntity;
 import feign.auth.BasicAuthRequestInterceptor;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.springframework.beans.factory.annotation.Autowired;

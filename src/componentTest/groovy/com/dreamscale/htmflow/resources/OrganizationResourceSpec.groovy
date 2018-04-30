@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.organization.MembershipDto
+import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.status.Status
@@ -73,6 +75,32 @@ class OrganizationResourceSpec extends Specification {
         assert inviteOrg.getConnectionStatus() == Status.VALID
         assert inviteOrg.getInviteLink() != null
     }
+
+    def "should add member to organization if valid user"() {
+        given:
+        OrganizationInputDto organization = createValidOrganization()
+
+        OrganizationDto organizationDto = organizationClient.createOrganization(organization)
+        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken());
+
+        MembershipInputDto membershipInputDto = new MembershipInputDto()
+        membershipInputDto.setInviteToken(organizationDto.getInviteToken())
+        membershipInputDto.setOrgEmail("janelle@dreamscale.io")
+
+        when:
+
+        MembershipDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
+
+        then:
+        assert membershipDto != null
+        assert membershipDto.getId() != null
+        assert membershipDto.getMasterAccountId() != null
+        assert membershipDto.getOrgEmail() == membershipInputDto.getOrgEmail()
+        assert membershipDto.getFullName() == "Janelle Klein" //pulled from Jira
+        assert membershipDto.getActivationCode() != null
+
+    }
+
 
 
 

@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset dreamscale:0
-create table master_acccount (
+create table master_account (
   id uuid primary key not null,
   master_email text,
   full_name text,

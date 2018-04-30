@@ -13,15 +13,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MembershipDto {
-    private UUID memberId;
+    private UUID id;
     private String orgEmail;
+    private String fullName;
 
-    private Status bindingStatus;
-
-    private ExternalMemberDto boundExternalAccount;
-
-    private MasterAccountDto masterAccountDto;
-
-    private OrganizationDto organization;
+    private UUID masterAccountId;
+    private String activationCode;
 
 }
