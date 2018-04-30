@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AccountActivationDto {
 
-    Status status;
-    String message;
     String email;
     String apiKey;
 }

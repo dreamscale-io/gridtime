@@ -6,5 +6,6 @@ create table master_account (
   master_email text,
   full_name text,
   activation_code text,
-  activation_date timestamp
+  activation_date timestamp,
+  api_key text
 );

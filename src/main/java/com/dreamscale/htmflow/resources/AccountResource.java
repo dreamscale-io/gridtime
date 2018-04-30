@@ -5,28 +5,22 @@ import com.dreamscale.htmflow.api.account.*;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.status.Status;
-import com.dreamscale.htmflow.core.domain.ProjectEntity;
-import com.dreamscale.htmflow.core.domain.ProjectRepository;
-import com.dreamscale.htmflow.core.domain.TaskEntity;
-import com.dreamscale.htmflow.core.domain.TaskRepository;
+import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = ResourcePaths.ACCOUNT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class AccountResource {
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private AccountService accountService;
 
-    @Autowired
-    private TaskRepository taskRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -39,66 +33,31 @@ public class AccountResource {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-//    POST /account/activate
-//
-//    request:
-//    apiKey:{string}
-//
-//    respone:
-//    status; {VALID, FAILED}
-//    message: {string}
-//    email: {string}
-
+    /**
+     * Activate your master account to get a permanent API-Key to use for all future requests
+     * that will be tied to your account
+     * @param activationCode Provided by /organization/{id}/member service registration
+     * @return
+     */
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
-    AccountActivationDto activate(@RequestBody ActivationTokenDto activationToken) {
-        AccountActivationDto activation = new AccountActivationDto();
-        activation.setStatus(Status.VALID);
-        activation.setEmail("kara@dreamscale.io");
-        activation.setMessage("Your account has been successfully activated.");
-        activation.setApiKey("FASFD423fsfd32d2322d");
+    AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
 
-        return activation;
+        return accountService.activate(activationCode.getActivationCode());
     }
-
-
-//    GET /account/heartbeat
-//    request:
-//    header.apiKey: {string}
-//    idleTime: {int}
-//    deltaTime: {int}
 
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
-        return new SimpleStatusDto();
+        return new SimpleStatusDto(Status.VALID, "beat.");
     }
-
-
-//    POST /account/login
-//
-//    request:
-//    header.apiKey: {string}
-//
-//    reponse:
-//    status; {VALID, FAILED}
-//    message: {string}
-//
-//    POST /account/logout
-//
-//    request:
-//    header.apiKey : {string}
-//
-//    response:
-//    status; {VALID, FAILED}
-//    message: {string}
 
     @PostMapping(ResourcePaths.LOGIN_PATH)
     SimpleStatusDto login() {
-        return new SimpleStatusDto();
+        return new SimpleStatusDto(Status.VALID, "Logged In");
     }
 
     @PostMapping(ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout() {
-        return new SimpleStatusDto();
+        return new SimpleStatusDto(Status.VALID, "Logged Out");
     }
 
 }

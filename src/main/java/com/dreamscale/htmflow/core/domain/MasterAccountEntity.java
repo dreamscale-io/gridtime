@@ -32,4 +32,7 @@ public class MasterAccountEntity {
     @Column(name = "activation_date")
     private LocalDateTime activationDate;
 
+    @Column(name = "api_key")
+    private String apiKey;
+
 }

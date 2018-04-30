@@ -6,5 +6,7 @@ import java.util.UUID;
 
 public interface MasterAccountRepository extends CrudRepository<MasterAccountEntity, UUID> {
 
-    MasterAccountEntity findById(String id);
+    MasterAccountEntity findById(UUID id);
+
+    MasterAccountEntity findByActivationCode(String activationCode);
 }

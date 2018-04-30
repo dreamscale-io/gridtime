@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActivationTokenDto {
+public class ActivationCodeDto {
 
-    private String activationToken;
+    private String activationCode;
 }

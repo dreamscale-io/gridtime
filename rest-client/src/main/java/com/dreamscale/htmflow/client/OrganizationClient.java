@@ -1,10 +1,6 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.account.AccountActivationDto;
-import com.dreamscale.htmflow.api.account.ActivationTokenDto;
-import com.dreamscale.htmflow.api.account.HeartbeatDto;
-import com.dreamscale.htmflow.api.account.SimpleStatusDto;
 import com.dreamscale.htmflow.api.organization.MembershipDto;
 import com.dreamscale.htmflow.api.organization.MembershipInputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;

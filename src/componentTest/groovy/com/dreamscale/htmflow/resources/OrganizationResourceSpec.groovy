@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.OrganizationClient
+import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -17,12 +18,16 @@ class OrganizationResourceSpec extends Specification {
     @Autowired
     OrganizationClient organizationClient
 
-    @Autowired
-    OrganizationRepository organizationRepository
+	@Autowired
+	OrganizationRepository organizationRepository
 
-    def setup() {
-        organizationRepository.deleteAll()
-    }
+	@Autowired
+	MasterAccountRepository masterAccountRepository
+
+	def setup() {
+		organizationRepository.deleteAll()
+		masterAccountRepository.deleteAll()
+	}
 
     def "should create organization with failed Jira connect"() {
         given:
@@ -89,7 +94,7 @@ class OrganizationResourceSpec extends Specification {
 
         when:
 
-        MembershipDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
+        MembershipDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         then:
         assert membershipDto != null

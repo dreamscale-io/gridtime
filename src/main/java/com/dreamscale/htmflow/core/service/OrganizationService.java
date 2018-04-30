@@ -132,7 +132,7 @@ public class OrganizationService {
         //if invitation is invalid, this will throw a 404
         OrganizationDto organizationDto = decodeInvitation(membershipInputDto.getInviteToken());
 
-        if (organizationDto.getId() != organizationId) {
+        if (!organizationDto.getId().equals(organizationId)) {
             throw new WebApplicationException(404, new ErrorEntity("404", null,
                     "invitation token doesn't match organization", null, LoggingLevel.WARN));
         }
@@ -153,7 +153,7 @@ public class OrganizationService {
         MasterAccountEntity masterAccountEntity = new MasterAccountEntity();
         masterAccountEntity.setId(UUID.randomUUID());
         masterAccountEntity.setFullName(selectedUser.getDisplayName());
-        masterAccountEntity.setActivationDate(LocalDateTime.now());
+        masterAccountEntity.setMasterEmail(memberEntity.getEmail());
         masterAccountEntity.setActivationCode(generateToken());
 
         masterAccountRepository.save(masterAccountEntity);
