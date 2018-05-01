@@ -1,5 +1,8 @@
 package com.dreamscale.htmflow;
 
+import com.dreamscale.htmflow.core.security.AuthorizationFilter;
+import com.dreamscale.htmflow.core.security.RequestContext;
+import com.dreamscale.htmflow.core.security.UserIdResolver;
 import org.dreamscale.feign.DefaultFeignConfig;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.springboot.config.CommonSpringBootConfig;
@@ -20,6 +23,16 @@ public class HtmFlow {
 
     public static void main(String[] args) {
         SpringApplication.run(HtmFlow.class, args);
+    }
+
+    @Bean
+    public AuthorizationFilter authorizationFilter() {
+        return new AuthorizationFilter();
+    }
+
+    @Bean
+    public RequestContext requestContext() {
+        return new RequestContext();
     }
 
 }

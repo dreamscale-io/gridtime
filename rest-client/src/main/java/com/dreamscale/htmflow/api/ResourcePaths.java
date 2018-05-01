@@ -26,6 +26,7 @@ public class ResourcePaths {
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
 
+    public static final String API_KEY_HEADER = "X-API-KEY";
 
 
 }

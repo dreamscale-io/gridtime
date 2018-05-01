@@ -8,5 +8,7 @@ public interface MasterAccountRepository extends CrudRepository<MasterAccountEnt
 
     MasterAccountEntity findById(UUID id);
 
+    MasterAccountEntity findByApiKey(String apiKey);
+
     MasterAccountEntity findByActivationCode(String activationCode);
 }

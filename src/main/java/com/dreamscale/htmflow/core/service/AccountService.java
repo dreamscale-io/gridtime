@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.account.AccountActivationDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository;
+import com.dreamscale.htmflow.core.security.UserIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.ErrorEntity;
 import org.dreamscale.exception.WebApplicationException;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class AccountService {
+public class AccountService implements UserIdResolver {
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -40,6 +41,16 @@ public class AccountService {
         accountActivationDto.setApiKey(apiKey);
 
         return accountActivationDto;
+    }
+
+    public UUID findAccountIdByApiKey(String apiKey) {
+        UUID accountId = null;
+
+        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(apiKey);
+        if (masterAccountEntity != null) {
+            accountId = masterAccountEntity.getId();
+        }
+        return accountId;
     }
 
     private String generateAPIKey() {

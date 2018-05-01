@@ -11,3 +11,10 @@ databaseChangeLog:
 
   - include:
         file: db/organization/create_organization_member.sql
+
+  - include:
+        file: db/organization/create_active_account_status.sql
+
+  - include:
+        file: db/organization/create_active_work_status.sql
+
