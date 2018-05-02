@@ -27,7 +27,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		RequestContext context = null;
 
-		if (notPassThroughApi(request) && notOptionsRequest(request)) {
+		if (requiresApiKey(request) && notOptionsRequest(request)) {
 			logger.debug("Checking API-Key...");
 
 			String apiKey = request.getHeader(ResourcePaths.API_KEY_HEADER);
@@ -58,11 +58,11 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		return HttpMethod.OPTIONS.matches(request.getMethod()) == false;
 	}
 
-	private boolean notPassThroughApi(HttpServletRequest request) {
+	private boolean requiresApiKey(HttpServletRequest request) {
 		String servletPath = request.getServletPath();
 
-		return (servletPath.startsWith(ResourcePaths.ORGANIZATION_PATH)
-				|| servletPath.startsWith("/swagger-ui.html") || servletPath.startsWith("/webjars")
-				|| servletPath.startsWith(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)) == false;
+		return (servletPath != null &&
+				servletPath.startsWith(ResourcePaths.ACCOUNT_PATH) &&
+				!servletPath.equals(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH));
 	}
 }
