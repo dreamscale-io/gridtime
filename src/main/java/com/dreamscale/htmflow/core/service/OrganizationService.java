@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.organization.*;
-import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
@@ -52,56 +51,93 @@ public class OrganizationService {
     }
 
     public OrganizationDto createOrganization(OrganizationInputDto orgInputDto) {
-        OrganizationEntity orgEntity = orgInputMapper.toEntity(orgInputDto);
-        orgEntity.setId(UUID.randomUUID());
-        orgEntity.setJiraSiteUrl(formatSiteUrl(orgInputDto.getJiraSiteUrl()));
 
-        organizationRepository.save(orgEntity);
+        OrganizationEntity inputOrgEntity = orgInputMapper.toEntity(orgInputDto);
+        ConnectionResult connectionResult = validateJiraConnection(inputOrgEntity);
 
-        OrganizationDto orgDto = new OrganizationDto();
-        orgDto.setId(orgEntity.getId());
-        orgDto.setName(orgEntity.getName());
-        orgDto.setJiraSiteUrl(orgEntity.getJiraSiteUrl());
+        OrganizationDto outputDto = null;
 
-        try {
-            jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
-            orgDto.setConnectionStatus(Status.VALID);
-        } catch (Exception ex) {
-            orgDto.setConnectionStatus(Status.FAILED);
-            orgDto.setConnectionFailedMessage(ex.getMessage());
+        if (connectionResult.status == Status.FAILED) {
+            outputDto = orgOutputMapper.toApi(inputOrgEntity);
+            outputDto.setConnectionStatus(connectionResult.status);
+            outputDto.setConnectionFailedMessage(connectionResult.errorMessage);
+        } else {
+            outputDto = findOrCreateOrganization(orgInputDto);
+            outputDto.setConnectionStatus(connectionResult.status);
         }
 
-        if (orgDto.getConnectionStatus() == Status.VALID) {
+        return outputDto;
+    }
+
+    private OrganizationDto findOrCreateOrganization(OrganizationInputDto inputDto) {
+        OrganizationDto outputOrg;
+
+        OrganizationEntity existingOrg = organizationRepository.findByDomainName(inputDto.getDomainName());
+
+        if (existingOrg != null) {
+
+            OrganizationInviteTokenEntity inviteToken = inviteTokenRepository.findByOrganizationId(existingOrg.getId());
+
+            outputOrg = orgOutputMapper.toApi(existingOrg);
+            outputOrg.setConnectionStatus(Status.VALID);
+            outputOrg.setInviteLink(constructInvitationLink(inviteToken.getToken()));
+            outputOrg.setInviteToken(inviteToken.getToken());
+
+        } else {
+
+            OrganizationEntity orgEntity = orgInputMapper.toEntity(inputDto);
+            orgEntity.setId(UUID.randomUUID());
+
+            organizationRepository.save(orgEntity);
+
+            OrganizationInviteTokenEntity inviteToken = createInviteToken(orgEntity.getId());
+            inviteTokenRepository.save(inviteToken);
+
+            outputOrg = orgOutputMapper.toApi(orgEntity);
+            outputOrg.setInviteLink(constructInvitationLink(inviteToken.getToken()));
+            outputOrg.setInviteToken(inviteToken.getToken());
+        }
+        return outputOrg;
+    }
+
+    private OrganizationInviteTokenEntity createInviteToken(UUID organizationId) {
             OrganizationInviteTokenEntity inviteToken = new OrganizationInviteTokenEntity();
-            inviteToken.setOrganizationId(orgDto.getId());
+            inviteToken.setOrganizationId(organizationId);
             inviteToken.setId(UUID.randomUUID());
             inviteToken.setToken(generateToken());
             inviteToken.setExpirationDate(LocalDateTime.now().plusWeeks(2));
 
-            inviteTokenRepository.save(inviteToken);
+        return inviteToken;
+    }
 
-            String inviteLink = constructInvitationLink(inviteToken.getToken());
-            orgDto.setInviteLink(inviteLink);
-            orgDto.setInviteToken(inviteToken.getToken());
+    private ConnectionResult validateJiraConnection(OrganizationEntity orgEntity) {
+        ConnectionResult result = new ConnectionResult();
+
+        if (jiraUserNotInOrgDomain(orgEntity.getDomainName(), orgEntity.getJiraUser())) {
+            result.status = Status.FAILED;
+            result.errorMessage = "Jira user not in organization domain";
+        } else {
+            try {
+                jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
+                result.status = Status.VALID;
+            } catch (Exception ex) {
+                result.status = Status.FAILED;
+                result.errorMessage = ex.getMessage();
+            }
         }
 
-        return orgDto;
+        return result;
+    }
+
+    private boolean jiraUserNotInOrgDomain(String domainName, String jiraUser) {
+        return domainName == null || jiraUser == null || !jiraUser.toLowerCase().endsWith(domainName.toLowerCase());
     }
 
     private String generateToken() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private String formatSiteUrl(String jiraSiteUrl) {
-        String siteUrl;
-        if (jiraSiteUrl.contains("//")) {
-            String afterProtocol = jiraSiteUrl.substring(jiraSiteUrl.indexOf("//") + 1);
-            siteUrl = "https://" + afterProtocol;
-        } else {
-            siteUrl = "https://" + jiraSiteUrl;
-        }
-        return siteUrl;
-    }
+
 
     private String constructInvitationLink(String inviteToken) {
         String baseInviteLink = ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH;
@@ -187,5 +223,10 @@ public class OrganizationService {
         }
 
         return selectedUser;
+    }
+
+    private class ConnectionResult {
+        Status status;
+        String errorMessage;
     }
 }

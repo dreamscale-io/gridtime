@@ -14,7 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class OrganizationDto {
     private UUID id;
-    private String name;
+    private String orgName;
+    private String domainName;
 
     private String jiraSiteUrl;
     private Status connectionStatus;

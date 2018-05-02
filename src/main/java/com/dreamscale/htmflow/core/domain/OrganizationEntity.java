@@ -19,7 +19,11 @@ public class OrganizationEntity {
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
-    private String name;
+    @Column(name = "org_name")
+    private String orgName;
+
+    @Column(name = "domain_name")
+    private String domainName;
 
     @Column(name = "jira_site_url")
     private String jiraSiteUrl;

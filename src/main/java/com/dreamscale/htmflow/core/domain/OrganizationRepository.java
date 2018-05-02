@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface OrganizationRepository extends CrudRepository<OrganizationEntity, UUID> {
 
     OrganizationEntity findById(UUID id);
+
+    OrganizationEntity findByDomainName(String domainName);
 }

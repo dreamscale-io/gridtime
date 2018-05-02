@@ -13,7 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrganizationInputDto {
-    private String name;
+    private String orgName;
+    private String domainName;
 
     private String jiraSiteUrl;
     private String jiraUser;

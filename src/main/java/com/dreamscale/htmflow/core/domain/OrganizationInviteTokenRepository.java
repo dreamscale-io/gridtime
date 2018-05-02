@@ -9,4 +9,6 @@ public interface OrganizationInviteTokenRepository extends CrudRepository<Organi
     OrganizationInviteTokenEntity findById(String id);
 
     OrganizationInviteTokenEntity findByToken(String token);
+
+    OrganizationInviteTokenEntity findByOrganizationId(UUID organizationId);
 }
