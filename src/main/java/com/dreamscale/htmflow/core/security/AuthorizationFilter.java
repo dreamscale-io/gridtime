@@ -61,7 +61,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	private boolean notPassThroughApi(HttpServletRequest request) {
 		String servletPath = request.getServletPath();
 
-		return (servletPath.startsWith(ResourcePaths.ORGANIZATION_PATH)
+		return (servletPath.startsWith(ResourcePaths.ORGANIZATION_PATH) || servletPath.startsWith("/swagger-ui.html")
 				|| servletPath.startsWith(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)) == false;
 	}
 }
