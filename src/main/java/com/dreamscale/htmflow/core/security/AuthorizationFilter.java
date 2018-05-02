@@ -26,7 +26,10 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		RequestContext context = null;
-		if (HttpMethod.OPTIONS.matches(request.getMethod()) == false) {
+
+		if (notPassThroughApi(request) && notOptionsRequest(request)) {
+			logger.debug("Checking API-Key...");
+
 			String apiKey = request.getHeader(ResourcePaths.API_KEY_HEADER);
 			if (apiKey == null) {
 				throw new ForbiddenException(SecurityErrorCodes.MISSING_OR_INVALID_AUTHORIZATION_TOKEN, "Missing API key, header=" + ResourcePaths.API_KEY_HEADER);
@@ -49,5 +52,16 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		} finally {
 			RequestContext.clear();
 		}
+	}
+
+	private boolean notOptionsRequest(HttpServletRequest request) {
+		return HttpMethod.OPTIONS.matches(request.getMethod()) == false;
+	}
+
+	private boolean notPassThroughApi(HttpServletRequest request) {
+		String servletPath = request.getServletPath();
+
+		return (servletPath.startsWith(ResourcePaths.ORGANIZATION_PATH)
+				|| servletPath.startsWith(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)) == false;
 	}
 }
