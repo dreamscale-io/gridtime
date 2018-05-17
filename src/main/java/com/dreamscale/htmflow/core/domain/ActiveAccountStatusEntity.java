@@ -21,10 +21,16 @@ public class ActiveAccountStatusEntity {
     @Column(name = "master_account_id")
     private UUID masterAccountId;
 
+    @Column(name = "connection_id")
+    private UUID connectionId;
+
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 
+    @Column(name = "delta_time")
+    private Integer deltaTime;
+
     @Column(name = "active_status")
-    private ActiveAccountStatus activeStatus;
+    private ActiveStatus activeStatus;
 
 }

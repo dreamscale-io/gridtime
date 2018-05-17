@@ -5,15 +5,11 @@ import com.dreamscale.htmflow.client.OrganizationClient;
 import com.dreamscale.htmflow.client.ProjectClient;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
-import com.dreamscale.htmflow.core.security.UserIdResolver;
-import feign.Feign;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
+import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.client.JournalClient;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.test.BaseTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -65,15 +61,15 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Bean
     @Primary
-    public UserIdResolver userIdResolver() {
-        return new StubUserIdResolver(testUser());
+    public MasterAccountIdResolver userIdResolver() {
+        return new StubMasterAccountIdResolver(testUser());
     }
 
-    private static class StubUserIdResolver implements UserIdResolver {
+    private static class StubMasterAccountIdResolver implements MasterAccountIdResolver {
 
         private MasterAccountEntity user;
 
-        public StubUserIdResolver(MasterAccountEntity user) {
+        public StubMasterAccountIdResolver(MasterAccountEntity user) {
             System.out.println("STUB CREATED!!!");
             this.user = user;
         }
@@ -81,6 +77,11 @@ public class ComponentTestConfig extends BaseTestConfig {
         @Override
         public UUID findAccountIdByApiKey(String apiKey) {
             return user.getApiKey().equals(apiKey) ? user.getId() : null;
+        }
+
+        @Override
+        public UUID findAccountIdByConnectionId(String connectionId) {
+            return user.getId();
         }
 
     }

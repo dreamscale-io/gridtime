@@ -21,7 +21,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	@Autowired
 	private RequestContext invocationContext;
 	@Autowired
-	private UserIdResolver userIdResolver;
+	private MasterAccountIdResolver masterAccountIdResolver;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -31,16 +31,18 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			logger.debug("Checking API-Key...");
 
 			String apiKey = request.getHeader(ResourcePaths.API_KEY_HEADER);
-			if (apiKey == null) {
+			String connectionId = request.getHeader(ResourcePaths.CONNECT_ID_HEADER);
+
+			if (apiKey == null && connectionId == null) {
 				throw new ForbiddenException(SecurityErrorCodes.MISSING_OR_INVALID_AUTHORIZATION_TOKEN, "Missing API key, header=" + ResourcePaths.API_KEY_HEADER);
 			}
 
-			UUID accountId = userIdResolver.findAccountIdByApiKey(apiKey);
-			if (accountId == null) {
+			UUID masterAccountId = lookupAccount(apiKey, connectionId);
+			if (masterAccountId == null) {
 				throw new ForbiddenException(SecurityErrorCodes.NOT_AUTHORIZED, "Failed to resolve user with apiKey=" + apiKey);
 			}
 			context = RequestContext.builder()
-					.userId(accountId)
+					.masterAccountId(masterAccountId)
 					.build();
 		}
 
@@ -52,6 +54,18 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		} finally {
 			RequestContext.clear();
 		}
+	}
+
+	private UUID lookupAccount(String apiKey, String connectionId) {
+		UUID masterAccountId = null;
+
+		if (apiKey != null) {
+			masterAccountId = masterAccountIdResolver.findAccountIdByApiKey(apiKey);
+		} else if (connectionId != null) {
+			masterAccountId = masterAccountIdResolver.findAccountIdByConnectionId(connectionId);
+		}
+
+		return masterAccountId;
 	}
 
 	private boolean notOptionsRequest(HttpServletRequest request) {

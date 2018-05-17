@@ -2,8 +2,10 @@ package com.dreamscale.htmflow.core.security;
 
 import java.util.UUID;
 
-public interface UserIdResolver {
+public interface MasterAccountIdResolver {
 
 	UUID findAccountIdByApiKey(String apiKey);
+
+	UUID findAccountIdByConnectionId(String connectionId);
 
 }

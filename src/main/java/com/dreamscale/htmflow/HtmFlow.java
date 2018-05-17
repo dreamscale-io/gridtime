@@ -2,11 +2,8 @@ package com.dreamscale.htmflow;
 
 import com.dreamscale.htmflow.core.security.AuthorizationFilter;
 import com.dreamscale.htmflow.core.security.RequestContext;
-import com.dreamscale.htmflow.core.security.UserIdResolver;
 import org.dreamscale.feign.DefaultFeignConfig;
-import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.springboot.config.CommonSpringBootConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

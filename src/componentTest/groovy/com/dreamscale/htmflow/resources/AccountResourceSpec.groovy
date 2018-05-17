@@ -3,12 +3,14 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.account.ActivationCodeDto
 import com.dreamscale.htmflow.api.account.AccountActivationDto
+import com.dreamscale.htmflow.api.account.ConnectionStatusDto
 import com.dreamscale.htmflow.api.account.HeartbeatDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
 import com.dreamscale.htmflow.api.organization.MembershipDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
+import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
@@ -64,10 +66,12 @@ class AccountResourceSpec extends Specification {
         given:
 
         when:
-        SimpleStatusDto statusDto = accountClient.login()
+        ConnectionStatusDto connectionStatusDto = accountClient.login()
 
         then:
-        assert statusDto != null
+        assert connectionStatusDto != null
+        assert connectionStatusDto.getConnectionId() != null;
+        assert connectionStatusDto.status == Status.VALID
     }
 
     def "should logout"() {
@@ -78,17 +82,21 @@ class AccountResourceSpec extends Specification {
 
         then:
         assert statusDto != null
+        assert statusDto.status == Status.VALID
     }
 
     def "should update heartbeat"() {
         given:
         HeartbeatDto heartbeatDto = new HeartbeatDto();
+        accountClient.login();
 
         when:
+
         SimpleStatusDto statusDto = accountClient.heartbeat(heartbeatDto)
 
         then:
         assert statusDto != null
+        assert statusDto.status == Status.VALID
     }
 
     private OrganizationInputDto createValidOrganization() {

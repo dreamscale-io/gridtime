@@ -29,6 +29,6 @@ public class RequestContext {
         threadLocal.remove();
     }
 
-    private UUID userId;
+    private UUID masterAccountId;
 
 }

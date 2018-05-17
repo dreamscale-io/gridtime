@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.account.AccountActivationDto;
+import com.dreamscale.htmflow.api.account.ConnectionStatusDto;
+import com.dreamscale.htmflow.api.account.HeartbeatDto;
+import com.dreamscale.htmflow.api.account.SimpleStatusDto;
 import com.dreamscale.htmflow.api.status.Status;
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
-import com.dreamscale.htmflow.core.domain.MasterAccountRepository;
-import com.dreamscale.htmflow.core.security.UserIdResolver;
+import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.ErrorEntity;
 import org.dreamscale.exception.WebApplicationException;
@@ -17,10 +19,13 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class AccountService implements UserIdResolver {
+public class AccountService implements MasterAccountIdResolver {
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
+
+    @Autowired
+    private ActiveAccountStatusRepository accountStatusRepository;
 
     public AccountActivationDto activate(String activationCode) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
@@ -43,14 +48,85 @@ public class AccountService implements UserIdResolver {
         return accountActivationDto;
     }
 
+    public ConnectionStatusDto login(UUID masterAccountId) {
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+
+        accountStatusEntity.setConnectionId(UUID.randomUUID());
+        accountStatusEntity.setActiveStatus(ActiveStatus.Online);
+
+        accountStatusRepository.save(accountStatusEntity);
+
+        return new ConnectionStatusDto(Status.VALID, "Successfully logged in", accountStatusEntity.getConnectionId());
+    }
+
+    public SimpleStatusDto logout(UUID masterAccountId) {
+
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+
+        accountStatusEntity.setActiveStatus(ActiveStatus.Offline);
+        accountStatusEntity.setConnectionId(null);
+
+        accountStatusRepository.save(accountStatusEntity);
+
+        return new SimpleStatusDto(Status.VALID, "Successfully logged out");
+    }
+
+    public SimpleStatusDto heartbeat(UUID masterAccountId, HeartbeatDto heartbeat) {
+        SimpleStatusDto heartBeatStatus;
+
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+
+        if (isNotOnline(accountStatusEntity)) {
+            heartBeatStatus = new SimpleStatusDto(Status.FAILED, "Please login before updating heartbeat");
+        } else {
+            accountStatusEntity.setDeltaTime(heartbeat.getDeltaTime());
+            accountStatusRepository.save(accountStatusEntity);
+
+            heartBeatStatus = new SimpleStatusDto(Status.VALID, "beat.");
+        }
+
+        return heartBeatStatus;
+    }
+
+    private boolean isNotOnline(ActiveAccountStatusEntity accountStatusEntity) {
+        return (accountStatusEntity.getActiveStatus() == null
+                || accountStatusEntity.getActiveStatus() != ActiveStatus.Online);
+    }
+
+    private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID masterAccountId) {
+
+        ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByMasterAccountId(masterAccountId);
+        if (accountStatusEntity == null) {
+            accountStatusEntity = new ActiveAccountStatusEntity();
+            accountStatusEntity.setMasterAccountId(masterAccountId);
+            accountStatusEntity.setLastActivity(LocalDateTime.now());
+
+        } else {
+            accountStatusEntity.setLastActivity(LocalDateTime.now());
+        }
+
+        return accountStatusEntity;
+    }
+
     public UUID findAccountIdByApiKey(String apiKey) {
-        UUID accountId = null;
+        UUID masterAccountId = null;
 
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(apiKey);
         if (masterAccountEntity != null) {
-            accountId = masterAccountEntity.getId();
+            masterAccountId = masterAccountEntity.getId();
         }
-        return accountId;
+        return masterAccountId;
+    }
+
+    @Override
+    public UUID findAccountIdByConnectionId(String connectionId) {
+        UUID masterAccountId = null;
+        UUID connectUuid = UUID.fromString(connectionId);
+        ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByConnectionId(connectUuid);
+        if (accountStatusEntity != null) {
+            masterAccountId = accountStatusEntity.getMasterAccountId();
+        }
+        return masterAccountId;
     }
 
     private String generateAPIKey() {

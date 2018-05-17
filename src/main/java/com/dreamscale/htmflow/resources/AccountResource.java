@@ -4,16 +4,18 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.account.*;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.AccountService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 
+@Slf4j
 @RestController
 @RequestMapping(path = ResourcePaths.ACCOUNT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class AccountResource {
@@ -47,17 +49,23 @@ public class AccountResource {
 
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
-        return new SimpleStatusDto(Status.VALID, "beat.");
+
+        RequestContext context = RequestContext.get();
+        return accountService.heartbeat(context.getMasterAccountId(), heartbeat);
     }
 
     @PostMapping(ResourcePaths.LOGIN_PATH)
-    SimpleStatusDto login() {
-        return new SimpleStatusDto(Status.VALID, "Logged In");
+    ConnectionStatusDto login() {
+
+        RequestContext context = RequestContext.get();
+        return accountService.login(context.getMasterAccountId());
     }
 
     @PostMapping(ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout() {
-        return new SimpleStatusDto(Status.VALID, "Logged Out");
+
+        RequestContext context = RequestContext.get();
+        return accountService.logout(context.getMasterAccountId());
     }
 
 }

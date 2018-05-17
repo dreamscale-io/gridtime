@@ -122,7 +122,8 @@ public class OrganizationService {
                 result.status = Status.VALID;
             } catch (Exception ex) {
                 result.status = Status.FAILED;
-                result.errorMessage = ex.getMessage();
+                result.errorMessage = "Failed to connect to Jira";
+                //result.errorMessage = ex.getMessage();
             }
         }
 
