@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.hooks.jira
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnection
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory
 import com.dreamscale.htmflow.core.hooks.jira.JiraProjectDto
 import com.dreamscale.htmflow.core.hooks.jira.JiraSearchResultPage
@@ -17,9 +18,10 @@ class JiraConnectorSpec extends Specification {
 
     def "should get jira projects"() {
         given:
+        JiraConnection jiraConnection = connect();
 
         when:
-        List<JiraProjectDto> projects = jiraConnector.getProjects()
+        List<JiraProjectDto> projects = jiraConnection.getProjects()
 
         then:
         println projects
@@ -28,11 +30,13 @@ class JiraConnectorSpec extends Specification {
 
     def "should get jira tasks"() {
         given:
-        List<JiraProjectDto> projects = jiraConnector.getProjects()
+        JiraConnection jiraConnection = connect();
+
+        List<JiraProjectDto> projects = jiraConnection.getProjects()
         String projectId = projects.get(0).id;
 
         when:
-        JiraSearchResultPage tasksPage = jiraConnector.getOpenTasksForProject(projectId);
+        JiraSearchResultPage tasksPage = jiraConnection.getOpenTasksForProject(projectId);
 
         then:
         assert tasksPage.getIssues().size() > 1
@@ -40,13 +44,18 @@ class JiraConnectorSpec extends Specification {
 
     def "should get jira users"() {
         given:
+        JiraConnection jiraConnection = connect();
 
         when:
-        List<JiraUserDto> users = jiraConnector.getUsers();
+        List<JiraUserDto> users = jiraConnection.getUsers();
 
         then:
         println users
         assert users.size() == 3
+    }
+
+    JiraConnection connect() {
+       return jiraConnector.connect("dreamscale.atlassian.net", "janelle@dreamscale.io", "9KC0iM24tfXf8iKDVP2q4198");
     }
 
 }

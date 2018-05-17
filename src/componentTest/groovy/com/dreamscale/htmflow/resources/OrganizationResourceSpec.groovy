@@ -1,14 +1,21 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.organization.MembershipDto
+import com.dreamscale.htmflow.StubMasterAccountIdResolver
+import com.dreamscale.htmflow.api.account.AccountActivationDto
+import com.dreamscale.htmflow.api.account.ActivationCodeDto
+import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
+import com.dreamscale.htmflow.api.organization.OrgMemberStatusDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.status.Status
+import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
+import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.security.MasterAccountIdResolver
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -18,11 +25,17 @@ class OrganizationResourceSpec extends Specification {
     @Autowired
     OrganizationClient organizationClient
 
+    @Autowired
+    AccountClient accountClient
+
 	@Autowired
 	OrganizationRepository organizationRepository
 
 	@Autowired
 	MasterAccountRepository masterAccountRepository
+
+    @Autowired
+    MasterAccountEntity testUser;
 
 	def setup() {
 		organizationRepository.deleteAll()
@@ -92,11 +105,11 @@ class OrganizationResourceSpec extends Specification {
 
         when:
 
-        MembershipDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
+        MembershipDetailsDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         then:
         assert membershipDto != null
-        assert membershipDto.getId() != null
+        assert membershipDto.getMemberId() != null
         assert membershipDto.getMasterAccountId() != null
         assert membershipDto.getOrgEmail() == membershipInputDto.getOrgEmail()
         assert membershipDto.getFullName() == "Janelle Klein" //pulled from Jira
@@ -104,6 +117,39 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
+    def "should retrieve all members in organization"() {
+        given:
+        OrganizationInputDto organization = createValidOrganization()
+
+        OrganizationDto organizationDto = organizationClient.createOrganization(organization)
+        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken());
+
+        MembershipInputDto membershipInputDto = new MembershipInputDto()
+        membershipInputDto.setInviteToken(organizationDto.getInviteToken())
+        membershipInputDto.setOrgEmail("janelle@dreamscale.io")
+        MembershipDetailsDto detailsDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
+
+        ActivationCodeDto activationCode = new ActivationCodeDto();
+        activationCode.setActivationCode(detailsDto.getActivationCode());
+
+        AccountActivationDto activationDto = accountClient.activate(activationCode);
+
+        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(activationDto.apiKey);
+
+        //Can only retrieve org members for orgs you are a part of
+        testUser.setApiKey(masterAccountEntity.getApiKey());
+        testUser.setId(masterAccountEntity.getId())
+
+        membershipInputDto.setOrgEmail("kara@dreamscale.io")
+        organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
+
+        when:
+        List<OrgMemberStatusDto> orgMembers = organizationClient.getMembers(inviteOrg.getId().toString())
+
+        then:
+        assert orgMembers != null
+        assert orgMembers.size() == 2
+    }
 
 
 

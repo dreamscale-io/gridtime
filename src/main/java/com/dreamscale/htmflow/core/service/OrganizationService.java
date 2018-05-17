@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +37,12 @@ public class OrganizationService {
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
+
+    @Autowired
+    private ActiveAccountStatusRepository activeAccountStatusRepository;
+
+    @Autowired
+    private MemberStatusRepository memberStatusRepository;
 
     @Autowired
     private JiraConnectionFactory jiraConnectionFactory;
@@ -164,7 +172,7 @@ public class OrganizationService {
         return organizationDto;
     }
 
-    public MembershipDto registerMember(UUID organizationId, MembershipInputDto membershipInputDto) {
+    public MembershipDetailsDto registerMember(UUID organizationId, MembershipInputDto membershipInputDto) {
 
         //if invitation is invalid, this will throw a 404
         OrganizationDto organizationDto = decodeInvitation(membershipInputDto.getInviteToken());
@@ -177,26 +185,34 @@ public class OrganizationService {
         OrganizationEntity orgEntity = organizationRepository.findById(organizationDto.getId());
 
         //if user is invalid, this will throw a 404
-        JiraUserDto selectedUser = lookupMatchingJiraUser(orgEntity, membershipInputDto.getOrgEmail());
-
-        OrganizationMemberEntity memberEntity = new OrganizationMemberEntity();
-        memberEntity.setId(UUID.randomUUID());
-        memberEntity.setOrganizationId(orgEntity.getId());
-        memberEntity.setEmail(selectedUser.getEmailAddress());
-        memberEntity.setExternalId(selectedUser.getAccountId());
-
-        memberRepository.save(memberEntity);
+        JiraUserDto jiraUser = lookupMatchingJiraUser(orgEntity, membershipInputDto.getOrgEmail());
 
         MasterAccountEntity masterAccountEntity = new MasterAccountEntity();
         masterAccountEntity.setId(UUID.randomUUID());
-        masterAccountEntity.setFullName(selectedUser.getDisplayName());
-        masterAccountEntity.setMasterEmail(memberEntity.getEmail());
+        masterAccountEntity.setFullName(jiraUser.getDisplayName());
+        masterAccountEntity.setMasterEmail(jiraUser.getEmailAddress());
         masterAccountEntity.setActivationCode(generateToken());
 
         masterAccountRepository.save(masterAccountEntity);
 
-        MembershipDto membership = new MembershipDto();
-        membership.setId(memberEntity.getId());
+        OrganizationMemberEntity memberEntity = new OrganizationMemberEntity();
+        memberEntity.setId(UUID.randomUUID());
+        memberEntity.setOrganizationId(orgEntity.getId());
+        memberEntity.setEmail(jiraUser.getEmailAddress());
+        memberEntity.setExternalId(jiraUser.getAccountId());
+        memberEntity.setMasterAccountId(masterAccountEntity.getId());
+
+        memberRepository.save(memberEntity);
+
+        ActiveAccountStatusEntity accountStatusEntity = new ActiveAccountStatusEntity();
+        accountStatusEntity.setMasterAccountId(masterAccountEntity.getId());
+        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Offline);
+
+        activeAccountStatusRepository.save(accountStatusEntity);
+
+
+        MembershipDetailsDto membership = new MembershipDetailsDto();
+        membership.setMemberId(memberEntity.getId());
         membership.setOrgEmail(memberEntity.getEmail());
         membership.setMasterAccountId(masterAccountEntity.getId());
         membership.setFullName(masterAccountEntity.getFullName());
@@ -224,6 +240,39 @@ public class OrganizationService {
         }
 
         return selectedUser;
+    }
+
+    public List<OrgMemberStatusDto> getMembersForOrganization(UUID organizationId, UUID masterAccountId) {
+
+        List<OrgMemberStatusDto> orgMemberDtos = new ArrayList<>();
+
+        //first, need to figure out what org the user is part of, later on we can set the active org
+
+        OrganizationMemberEntity orgMembership = memberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
+
+        if (orgMembership != null) {
+
+            List<MemberStatusEntity> peersAndMe = memberStatusRepository.findByOrganizationId(organizationId);
+
+            //"select o.id, o.email, o.full_name, a.last_activity, a.active_status " +
+
+            for (MemberStatusEntity memberStatusEntity : peersAndMe) {
+                OrgMemberStatusDto orgMemberDto = OrgMemberStatusDto.builder()
+                        .memberId(memberStatusEntity.getId())
+                        .email(memberStatusEntity.getEmail())
+                        .fullName(memberStatusEntity.getFullName())
+                        .lastActivity(memberStatusEntity.getLastActivity())
+                        .memberStatus(memberStatusEntity.getActiveStatus().name())
+                        .build();
+
+                orgMemberDtos.add(orgMemberDto);
+            }
+
+        } else {
+            throw new WebApplicationException(404, new ErrorEntity("404", null, "members not found", null, LoggingLevel.WARN));
+        }
+
+        return orgMemberDtos;
     }
 
     private class ConnectionResult {

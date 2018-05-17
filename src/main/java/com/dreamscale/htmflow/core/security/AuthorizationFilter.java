@@ -13,6 +13,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +29,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		RequestContext context = null;
 
-		if (requiresApiKey(request) && notOptionsRequest(request)) {
+		if (requiresAuth(request) && notOptionsRequest(request)) {
 			logger.debug("Checking API-Key...");
 
 			String apiKey = request.getHeader(ResourcePaths.API_KEY_HEADER);
@@ -39,7 +41,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
 			UUID masterAccountId = lookupAccount(apiKey, connectionId);
 			if (masterAccountId == null) {
-				throw new ForbiddenException(SecurityErrorCodes.NOT_AUTHORIZED, "Failed to resolve user with apiKey=" + apiKey);
+				throw new ForbiddenException(SecurityErrorCodes.NOT_AUTHORIZED, "Failed to resolve user with apiKey=" + apiKey + " or connectId="+connectionId);
 			}
 			context = RequestContext.builder()
 					.masterAccountId(masterAccountId)
@@ -72,11 +74,51 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		return HttpMethod.OPTIONS.matches(request.getMethod()) == false;
 	}
 
-	private boolean requiresApiKey(HttpServletRequest request) {
+	private boolean requiresAuth(HttpServletRequest request) {
 		String servletPath = request.getServletPath();
+		String method = request.getMethod();
 
-		return (servletPath != null &&
-				servletPath.startsWith(ResourcePaths.ACCOUNT_PATH) &&
-				!servletPath.equals(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH));
+		List<String> allHtmFlowPaths = new ArrayList<>();
+		allHtmFlowPaths.add(ResourcePaths.ACCOUNT_PATH);
+		allHtmFlowPaths.add(ResourcePaths.ORGANIZATION_PATH);
+		allHtmFlowPaths.add(ResourcePaths.PROJECT_PATH);
+		allHtmFlowPaths.add(ResourcePaths.TASK_PATH);
+
+		List<String> noAuthPostPaths = new ArrayList<>();
+		noAuthPostPaths.add(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH);
+		noAuthPostPaths.add(ResourcePaths.ORGANIZATION_PATH);
+
+		List<String> noAuthGetPaths = new ArrayList<>();
+		noAuthGetPaths.add(ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH);
+
+		boolean needsAuth = false;
+
+		if (startsWithAny(servletPath, allHtmFlowPaths)) {
+			needsAuth = true;
+
+			if (method.equals("POST") && startsWithAny(servletPath, noAuthPostPaths)) {
+				needsAuth = false;
+			}
+			if (method.equals("GET") && startsWithAny(servletPath, noAuthGetPaths)) {
+				needsAuth = false;
+			}
+		}
+
+		return needsAuth;
 	}
+
+	private boolean startsWithAny(String servletPath, List<String> allHtmFlowPaths) {
+		boolean startsWithPath = false;
+
+		for (String htmFlowPath : allHtmFlowPaths) {
+			if (servletPath.startsWith(htmFlowPath)) {
+				startsWithPath = true;
+				break;
+			}
+		}
+
+		return startsWithPath;
+	}
+
+
 }

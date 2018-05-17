@@ -2,21 +2,11 @@ package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.organization.*;
-import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.status.Status;
-import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
-import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
-import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.OrganizationService;
-import org.dreamscale.exception.ErrorEntity;
-import org.dreamscale.exception.WebApplicationException;
-import org.dreamscale.logging.LoggingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,15 +43,22 @@ public class OrganizationResource {
        return organizationService.decodeInvitation(inviteToken);
     }
 
+    @GetMapping("/{id}" + ResourcePaths.MEMBER_PATH)
+    public List<OrgMemberStatusDto> getMembers(@PathVariable("id") String organizationId) {
+        RequestContext context = RequestContext.get();
+        UUID organizationUuid = UUID.fromString(organizationId);
+        return organizationService.getMembersForOrganization(organizationUuid, context.getMasterAccountId());
+    }
+
     /**
      * Creates a new member within an organization associated with the specified Jira email
      * A new master account will be created using the email, along with a product activation code
      */
     @PostMapping("/{id}" + ResourcePaths.MEMBER_PATH)
-    public MembershipDto registerMember(@PathVariable("id") String organizationId, @RequestBody MembershipInputDto membershipInputDto) {
+    public MembershipDetailsDto registerMember(@PathVariable("id") String organizationId, @RequestBody MembershipInputDto membershipInputDto) {
 
         return organizationService.registerMember(UUID.fromString(organizationId), membershipInputDto);
-
     }
+
 
 }

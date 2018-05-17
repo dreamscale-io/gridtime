@@ -1,18 +1,19 @@
 package com.dreamscale.htmflow.core.security;
 
+import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
 public class AuthorizationRequestInterceptor implements RequestInterceptor {
 
-    private String staticHeader;
+    private final MasterAccountEntity activeAccount;
 
-    public AuthorizationRequestInterceptor(String staticHeader) {
-        this.staticHeader = staticHeader;
+    public AuthorizationRequestInterceptor(MasterAccountEntity activeAccount) {
+        this.activeAccount = activeAccount;
     }
 
     @Override
     public void apply(RequestTemplate template) {
-        template.header(AuthHeaders.AUTHORIZATION, staticHeader);
+        template.header(AuthHeaders.AUTHORIZATION, activeAccount.getApiKey());
     }
 }

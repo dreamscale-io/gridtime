@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Entity(name = "active_account_status")
 @Data
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "masterAccountId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,13 +24,13 @@ public class ActiveAccountStatusEntity {
     @Column(name = "connection_id")
     private UUID connectionId;
 
-    @Column(name = "last_activity")
-    private LocalDateTime lastActivity;
-
     @Column(name = "delta_time")
     private Integer deltaTime;
 
+    @Column(name = "last_activity")
+    private LocalDateTime lastActivity;
+
     @Column(name = "active_status")
-    private ActiveStatus activeStatus;
+    private ActiveAccountStatus activeStatus;
 
 }

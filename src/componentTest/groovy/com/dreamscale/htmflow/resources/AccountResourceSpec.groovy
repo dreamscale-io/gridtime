@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.api.account.AccountActivationDto
 import com.dreamscale.htmflow.api.account.ConnectionStatusDto
 import com.dreamscale.htmflow.api.account.HeartbeatDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
-import com.dreamscale.htmflow.api.organization.MembershipDto
+import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
@@ -47,7 +47,7 @@ class AccountResourceSpec extends Specification {
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
 
-        MembershipDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
+        MembershipDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
 
         ActivationCodeDto activationCode = new ActivationCodeDto();
         activationCode.setActivationCode(membershipDto.getActivationCode());

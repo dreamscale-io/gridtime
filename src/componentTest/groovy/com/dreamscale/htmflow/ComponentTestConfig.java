@@ -53,9 +53,7 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     public <T> T createClientWithStaticApiKey(JacksonFeignBuilder builder, Class<T> clazz) {
-        String apiKey = testUser().getApiKey();
-
-        return builder.requestInterceptor(new AuthorizationRequestInterceptor(apiKey))
+        return builder.requestInterceptor(new AuthorizationRequestInterceptor(testUser()))
                 .target(clazz, baseUrl);
     }
 
@@ -65,24 +63,4 @@ public class ComponentTestConfig extends BaseTestConfig {
         return new StubMasterAccountIdResolver(testUser());
     }
 
-    private static class StubMasterAccountIdResolver implements MasterAccountIdResolver {
-
-        private MasterAccountEntity user;
-
-        public StubMasterAccountIdResolver(MasterAccountEntity user) {
-            System.out.println("STUB CREATED!!!");
-            this.user = user;
-        }
-
-        @Override
-        public UUID findAccountIdByApiKey(String apiKey) {
-            return user.getApiKey().equals(apiKey) ? user.getId() : null;
-        }
-
-        @Override
-        public UUID findAccountIdByConnectionId(String connectionId) {
-            return user.getId();
-        }
-
-    }
 }

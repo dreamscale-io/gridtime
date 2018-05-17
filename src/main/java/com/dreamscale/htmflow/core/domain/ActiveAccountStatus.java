@@ -1,5 +1,5 @@
 package com.dreamscale.htmflow.core.domain;
 
-public enum ActiveStatus {
+public enum ActiveAccountStatus {
     Online, Offline
 }

@@ -1,13 +1,12 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.organization.MembershipDto;
-import com.dreamscale.htmflow.api.organization.MembershipInputDto;
-import com.dreamscale.htmflow.api.organization.OrganizationDto;
-import com.dreamscale.htmflow.api.organization.OrganizationInputDto;
+import com.dreamscale.htmflow.api.organization.*;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
+import java.util.List;
 
 @Headers({
         "Content-Type: application/json",
@@ -23,6 +22,8 @@ public interface OrganizationClient {
     OrganizationDto decodeInvitation(@Param("token") String inviteToken);
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
-    MembershipDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
+    MembershipDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
 
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
+    List<OrgMemberStatusDto> getMembers(@Param("id") String organizationId);
 }

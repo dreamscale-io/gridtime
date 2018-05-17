@@ -52,7 +52,7 @@ public class AccountService implements MasterAccountIdResolver {
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
-        accountStatusEntity.setActiveStatus(ActiveStatus.Online);
+        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Online);
 
         accountStatusRepository.save(accountStatusEntity);
 
@@ -63,7 +63,7 @@ public class AccountService implements MasterAccountIdResolver {
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
 
-        accountStatusEntity.setActiveStatus(ActiveStatus.Offline);
+        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Offline);
         accountStatusEntity.setConnectionId(null);
 
         accountStatusRepository.save(accountStatusEntity);
@@ -90,7 +90,7 @@ public class AccountService implements MasterAccountIdResolver {
 
     private boolean isNotOnline(ActiveAccountStatusEntity accountStatusEntity) {
         return (accountStatusEntity.getActiveStatus() == null
-                || accountStatusEntity.getActiveStatus() != ActiveStatus.Online);
+                || accountStatusEntity.getActiveStatus() != ActiveAccountStatus.Online);
     }
 
     private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID masterAccountId) {

@@ -18,3 +18,6 @@ databaseChangeLog:
   - include:
         file: db/organization/create_active_work_status.sql
 
+  - include:
+        file: db/organization/create_member_status_view.sql
+
