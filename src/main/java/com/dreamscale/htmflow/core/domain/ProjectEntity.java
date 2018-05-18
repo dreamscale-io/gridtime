@@ -17,12 +17,17 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectEntity {
+public class ProjectEntity implements External {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private String name;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "organization_id")
+    private UUID organizationId;
+
     @Column(name = "external_id")
     private String externalId;
 

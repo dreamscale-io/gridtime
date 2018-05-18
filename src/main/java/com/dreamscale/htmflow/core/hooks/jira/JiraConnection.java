@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.hooks.jira;
 
 import org.dreamscale.exception.WebApplicationException;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +17,13 @@ public class JiraConnection {
         return jiraClient.getProjects();
     }
 
-    public JiraSearchResultPage getOpenTasksForProject(String projectId) {
+    public List<JiraTaskDto> getOpenTasksForProject(String projectId) {
         System.out.println(projectId);
         String jql = "project="+projectId+" and status not in (Done) order by updated desc";
         String fields = "id,key,summary";
 
-        return jiraClient.getTasks(jql, fields);
+        JiraSearchResultPage searchResultPage = jiraClient.getTasks(jql, fields);
+        return searchResultPage.getIssues();
     }
 
     public List<JiraUserDto> getUsers() {

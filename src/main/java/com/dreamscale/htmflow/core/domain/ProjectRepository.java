@@ -8,4 +8,8 @@ import java.util.UUID;
 public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
 
     ProjectEntity findByExternalId(String externalId);
+
+    List<ProjectEntity> findByOrganizationId(UUID organizationId);
+
+    ProjectEntity findById(UUID id);
 }

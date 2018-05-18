@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +125,8 @@ public class OrganizationService {
             result.errorMessage = "Jira user not in organization domain";
         } else {
             try {
-                jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
+                JiraConnection connection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
+                connection.validate();
                 result.status = Status.VALID;
             } catch (Exception ex) {
                 result.status = Status.FAILED;
@@ -241,6 +241,18 @@ public class OrganizationService {
 
         return selectedUser;
     }
+
+    public OrganizationDto getDefaultOrganization(UUID masterAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+
+        if (orgMemberships == null || orgMemberships.size() == 0) {
+            throw new WebApplicationException(404, new ErrorEntity("404", null, "default organization not found", null, LoggingLevel.ERROR));
+        }
+
+        OrganizationEntity organizationEntity = organizationRepository.findById(orgMemberships.get(0).getOrganizationId());
+        return orgOutputMapper.toApi(organizationEntity);
+    }
+
 
     public List<OrgMemberStatusDto> getMembersForOrganization(UUID organizationId, UUID masterAccountId) {
 

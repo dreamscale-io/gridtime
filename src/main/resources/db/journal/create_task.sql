@@ -6,5 +6,6 @@ create table task (
   name text,
   summary text,
   external_id text,
-  project_id uuid
+  project_id uuid,
+  organization_id uuid
 );

@@ -136,7 +136,7 @@ class OrganizationResourceSpec extends Specification {
 
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(activationDto.apiKey);
 
-        //Can only retrieve org members for orgs you are a part of
+        //Can only retrieve org members for orgs you are a part of,
         testUser.setApiKey(masterAccountEntity.getApiKey());
         testUser.setId(masterAccountEntity.getId())
 

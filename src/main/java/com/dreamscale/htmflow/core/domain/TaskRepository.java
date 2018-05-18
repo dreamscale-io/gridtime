@@ -7,9 +7,7 @@ import java.util.UUID;
 
 public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
 
-    TaskEntity findByExternalId(String externalId);
-
     List<TaskEntity> findByProjectId(UUID projectId);
 
-    TaskEntity findByName(String name);
+    TaskEntity findByProjectIdAndName(UUID projectId, String taskName);
 }

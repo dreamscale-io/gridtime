@@ -13,13 +13,18 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskEntity {
+public class TaskEntity implements External {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private String name;
     private String summary;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "organization_id")
+    private UUID organizationId;
+
     @Column(name = "external_id")
     private String externalId;
 

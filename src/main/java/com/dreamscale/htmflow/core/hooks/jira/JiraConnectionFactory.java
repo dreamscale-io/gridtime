@@ -26,8 +26,6 @@ public class JiraConnectionFactory {
 
         JiraConnection connection = new JiraConnection(jiraClient);
 
-        connection.validate();
-
         return connection;
     }
 
