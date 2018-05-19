@@ -28,6 +28,10 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
     List<ChunkEventOutputDto> getRecentChunks();
 
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH
+      + "?member={memberId}")
+    List<ChunkEventOutputDto> getRecentChunksForMember(@Param("memberId") String memberId);
+
     /*
     @RequestLine("POST /somepath")
     void createThingie(Thingie thingie);

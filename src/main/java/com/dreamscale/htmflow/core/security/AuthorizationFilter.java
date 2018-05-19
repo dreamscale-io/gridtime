@@ -82,7 +82,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		allHtmFlowPaths.add(ResourcePaths.ACCOUNT_PATH);
 		allHtmFlowPaths.add(ResourcePaths.ORGANIZATION_PATH);
 		allHtmFlowPaths.add(ResourcePaths.PROJECT_PATH);
-		allHtmFlowPaths.add(ResourcePaths.TASK_PATH);
+		allHtmFlowPaths.add(ResourcePaths.JOURNAL_PATH);
 
 		List<String> noAuthPostPaths = new ArrayList<>();
 		noAuthPostPaths.add(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH);

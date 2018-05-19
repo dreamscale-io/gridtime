@@ -11,6 +11,7 @@ import com.dreamscale.htmflow.core.domain.TaskEntity;
 import com.dreamscale.htmflow.core.domain.TaskRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.JournalService;
 import com.dreamscale.htmflow.core.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -30,16 +32,26 @@ public class JournalResource {
 
     @PostMapping(ResourcePaths.CHUNK_PATH)
     ChunkEventOutputDto createChunkEvent(@RequestBody ChunkEventInputDto chunkEventInput) {
-        return journalService.createChunkEvent(chunkEventInput);
+        RequestContext context = RequestContext.get();
+        return journalService.createChunkEvent(context.getMasterAccountId(), chunkEventInput);
     }
 
     @GetMapping(ResourcePaths.CHUNK_PATH)
     List<ChunkEventOutputDto> getChunks(@RequestParam("from_date") String fromDate, @RequestParam("to_date") String toDate) {
-        return new ArrayList<ChunkEventOutputDto>();
+        RequestContext context = RequestContext.get();
+
+        return journalService.getChunksWithinRange(context.getMasterAccountId(), null, null);
     }
 
+
     @GetMapping(ResourcePaths.CHUNK_PATH + ResourcePaths.RECENT_PATH)
-    List<ChunkEventOutputDto> getRecentChunks() {
-        return new ArrayList<ChunkEventOutputDto>();
+    List<ChunkEventOutputDto> getRecentChunksForMember(@RequestParam("member") Optional<String> memberId) {
+        RequestContext context = RequestContext.get();
+        if (memberId.isPresent()) {
+            return journalService.getRecentChunksForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()));
+        } else {
+            return journalService.getRecentChunks(context.getMasterAccountId());
+        }
     }
+
 }

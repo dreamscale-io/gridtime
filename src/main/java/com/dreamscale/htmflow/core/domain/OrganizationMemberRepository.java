@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface OrganizationMemberRepository extends CrudRepository<OrganizationMemberEntity, UUID> {
 
-    OrganizationMemberEntity findById(String id);
+    OrganizationMemberEntity findById(UUID id);
 
     List<OrganizationMemberEntity> findByMasterAccountId(UUID masterAccountId);
 

@@ -7,5 +7,6 @@ create table chunk_event (
   description text,
   project_id uuid,
   task_id uuid,
-  organization_id uuid
+  organization_id uuid,
+  member_id uuid
 );

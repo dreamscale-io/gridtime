@@ -11,4 +11,8 @@ class RandomProjectEntityBuilder extends ProjectEntity.ProjectEntityBuilder {
 				.organizationId(aRandom.uuid())
 	}
 
+	RandomProjectEntityBuilder forOrg(OrganizationEntity organization) {
+		organizationId(organization.getId())
+		return this
+	}
 }

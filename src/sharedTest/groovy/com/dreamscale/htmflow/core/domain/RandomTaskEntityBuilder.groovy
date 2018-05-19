@@ -15,6 +15,7 @@ class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
 
     RandomTaskEntityBuilder forProject(ProjectEntity projectEntity) {
         projectId(projectEntity.getId())
+        organizationId(projectEntity.getOrganizationId())
         return this;
     }
 }
