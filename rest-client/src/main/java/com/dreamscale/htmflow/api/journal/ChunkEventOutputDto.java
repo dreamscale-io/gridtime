@@ -19,7 +19,6 @@ public class ChunkEventOutputDto {
     private UUID id;
     private LocalDateTime position;
     private String description;
-
-    private ProjectDto project;
-    private TaskDto task;
+    private UUID projectId;
+    private UUID taskId;
 }

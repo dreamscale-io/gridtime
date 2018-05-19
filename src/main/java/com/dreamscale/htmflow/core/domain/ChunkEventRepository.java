@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface EventRepository extends CrudRepository<EventEntity, UUID> {
+public interface ChunkEventRepository extends CrudRepository<ChunkEventEntity, UUID> {
 
 }

@@ -10,6 +10,11 @@ class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
                 .summary(aRandom.text(30))
                 .externalId(aRandom.numberText(5))
                 .projectId(aRandom.uuid())
+                .organizationId(aRandom.uuid())
     }
 
+    RandomTaskEntityBuilder forProject(ProjectEntity projectEntity) {
+        projectId(projectEntity.getId())
+        return this;
+    }
 }

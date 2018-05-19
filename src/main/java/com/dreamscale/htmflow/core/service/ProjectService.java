@@ -78,4 +78,5 @@ public class ProjectService {
 
         return jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
     }
+
 }

@@ -11,38 +11,26 @@ import com.dreamscale.htmflow.core.domain.TaskEntity;
 import com.dreamscale.htmflow.core.domain.TaskRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.service.JournalService;
+import com.dreamscale.htmflow.core.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class JournalResource {
 
     @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private MapperFactory mapperFactory;
-    private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
-    private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
-
-    @PostConstruct
-    private void init() {
-        projectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, ProjectEntity.class);
-        taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
-    }
+    private JournalService journalService;
 
     @PostMapping(ResourcePaths.CHUNK_PATH)
     ChunkEventOutputDto createChunkEvent(@RequestBody ChunkEventInputDto chunkEventInput) {
-        //need to save to DB, and also update the recent list of things...
-        return new ChunkEventOutputDto();
+        return journalService.createChunkEvent(chunkEventInput);
     }
 
     @GetMapping(ResourcePaths.CHUNK_PATH)
