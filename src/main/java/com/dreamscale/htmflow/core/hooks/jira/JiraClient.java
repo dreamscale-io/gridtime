@@ -1,8 +1,5 @@
 package com.dreamscale.htmflow.core.hooks.jira;
 
-
-import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;

@@ -5,28 +5,34 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "organization_member")
+@Entity(name = "recent_project")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationMemberEntity {
+public class RecentProjectEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
-    private String email;
-
-    @Column(name = "master_account_id")
-    private UUID masterAccountId;
-
-    @Column(name = "external_id")
-    private String externalId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "project_id")
+    private UUID projectId;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "member_id")
+    private UUID memberId;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "organization_id")
     private UUID organizationId;
+
+    @Column(name = "last_accessed")
+    private LocalDateTime lastAccessed;
 
 }

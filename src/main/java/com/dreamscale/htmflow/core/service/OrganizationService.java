@@ -242,6 +242,16 @@ public class OrganizationService {
         return selectedUser;
     }
 
+    public OrganizationMemberEntity getDefaultMembership(UUID masterAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+
+        if (orgMemberships == null || orgMemberships.size() == 0) {
+            throw new WebApplicationException(404, new ErrorEntity("404", null, "default organization not found", null, LoggingLevel.ERROR));
+        }
+
+        return orgMemberships.get(0);
+    }
+
     public OrganizationDto getDefaultOrganization(UUID masterAccountId) {
         List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
 

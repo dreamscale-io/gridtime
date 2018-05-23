@@ -34,7 +34,7 @@ public interface JournalClient {
 
     /*
     @RequestLine("POST /somepath")
-    void createThingie(Thingie thingie);
+    void createThingie(Thingie thingi]e);
 
     @RequestLine("GET /otherpath/{pathParam}?queryarg={someArg}")
     Thingie getThingieWithQueyrArg(@Param("pathParam") String pathParam, @Param("someArg") String queryArg);

@@ -36,6 +36,9 @@ public class JournalService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private RecentActivityService recentActivityService;
+
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -59,6 +62,9 @@ public class JournalService {
         chunkEventEntity.setMemberId(memberId);
 
         chunkEventRepository.save(chunkEventEntity);
+
+        recentActivityService.updateRecentProjects(chunkEventEntity);
+        recentActivityService.updateRecentTasks(chunkEventEntity);
 
         return chunkOutputMapper.toApi(chunkEventEntity);
     }

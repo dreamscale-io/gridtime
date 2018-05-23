@@ -6,7 +6,6 @@ create table organization_member (
   master_account_id uuid,
   email text,
   external_id text,
-  full_name text,
   organization_id uuid
 );
 

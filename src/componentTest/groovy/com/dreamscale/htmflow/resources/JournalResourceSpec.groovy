@@ -3,7 +3,10 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.journal.ChunkEventInputDto
 import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto
+import com.dreamscale.htmflow.api.project.ProjectDto
+import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto
 import com.dreamscale.htmflow.client.JournalClient
+import com.dreamscale.htmflow.client.ProjectClient
 import com.dreamscale.htmflow.core.domain.ChunkEventRepository
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
@@ -12,6 +15,8 @@ import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.ProjectRepository
+import com.dreamscale.htmflow.core.domain.RecentProjectRepository
+import com.dreamscale.htmflow.core.domain.RecentTaskRepository
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +29,9 @@ class JournalResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient
+
+    @Autowired
+    ProjectClient projectClient
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -39,6 +47,12 @@ class JournalResourceSpec extends Specification {
     ChunkEventRepository chunkEventRepository
 
     @Autowired
+    RecentProjectRepository recentProjectRepository
+
+    @Autowired
+    RecentTaskRepository recentTaskRepository
+
+    @Autowired
     MasterAccountEntity testUser
 
     def setup() {
@@ -47,6 +61,8 @@ class JournalResourceSpec extends Specification {
         chunkEventRepository.deleteAll()
         organizationRepository.deleteAll()
         organizationMemberRepository.deleteAll()
+        recentProjectRepository.deleteAll()
+        recentTaskRepository.deleteAll()
     }
 
     def "should save new chunk"() {
@@ -84,6 +100,57 @@ class JournalResourceSpec extends Specification {
         assert chunks != null
         assert chunks.size() == 2
     }
+
+    def "get recent projects and tasks"() {
+        given:
+        OrganizationEntity organization = aRandom.organizationEntity().build()
+        organizationRepository.save(organization)
+
+        createMembership(organization.getId(), testUser.getId());
+
+        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
+        projectRepository.save(project1)
+
+        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).build()
+        projectRepository.save(project2)
+
+        TaskEntity task1 = aRandom.taskEntity().forProject(project1).build()
+        taskRepository.save(task1)
+
+        TaskEntity task2 = aRandom.taskEntity().forProject(project1).build()
+        taskRepository.save(task2)
+
+        TaskEntity task3 = aRandom.taskEntity().forProject(project2).build()
+        taskRepository.save(task3)
+
+        TaskEntity task4 = aRandom.taskEntity().forProject(project2).build()
+        taskRepository.save(task4)
+
+        ChunkEventInputDto chunkEvent1 = aRandom.chunkEventInputDto().forTask(task1).build();
+        ChunkEventInputDto chunkEvent2 = aRandom.chunkEventInputDto().forTask(task2).build();
+        ChunkEventInputDto chunkEvent3 = aRandom.chunkEventInputDto().forTask(task3).build();
+        ChunkEventInputDto chunkEvent4 = aRandom.chunkEventInputDto().forTask(task4).build();
+
+        journalClient.createChunkEvent(chunkEvent1)
+        journalClient.createChunkEvent(chunkEvent2)
+        journalClient.createChunkEvent(chunkEvent3)
+        journalClient.createChunkEvent(chunkEvent4)
+
+        when:
+        RecentTasksByProjectDto recentTasksByProject = projectClient.getRecentTasksByProject();
+
+        then:
+        assert recentTasksByProject != null
+        assert recentTasksByProject.getRecentProjects().size() == 2
+
+        ProjectDto recentProject1 = recentTasksByProject.getRecentProjects().get(0);
+        ProjectDto recentProject2 = recentTasksByProject.getRecentProjects().get(1);
+
+        assert recentTasksByProject.getRecentTasks(recentProject1.getId()).size() == 2;
+        assert recentTasksByProject.getRecentTasks(recentProject2.getId()).size() == 2;
+
+    }
+
 
     def "get recent chunks for other member"() {
         given:

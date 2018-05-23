@@ -1,26 +1,26 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.project.TaskInputDto;
-import com.dreamscale.htmflow.core.domain.ProjectEntity;
-import com.dreamscale.htmflow.core.domain.ProjectRepository;
-import com.dreamscale.htmflow.core.domain.TaskEntity;
-import com.dreamscale.htmflow.core.domain.TaskRepository;
+import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.ProjectService;
+import com.dreamscale.htmflow.core.service.RecentActivityService;
 import com.dreamscale.htmflow.core.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -37,8 +37,7 @@ public class ProjectResource {
     private OrganizationService organizationService;
 
     @Autowired
-    private TaskRepository taskRepository;
-
+    private RecentActivityService recentActivityService;
 
     @GetMapping()
     List<ProjectDto> getAllProjects() {
@@ -59,10 +58,11 @@ public class ProjectResource {
     }
 
     @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
-    RecentTasksByProjectDto getRecentTasksByProjectForUser() {
+    RecentTasksByProjectDto getRecentTasksByProject() {
         RequestContext context = RequestContext.get();
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return taskService.getRecentTasksByProjectForUser(getDefaultOrgId(), context.getMasterAccountId());
+        return recentActivityService.getRecentTasksByProject(memberEntity.getId());
     }
 
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
