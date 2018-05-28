@@ -1,26 +1,17 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.organization.*;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
-import com.dreamscale.htmflow.core.hooks.jira.JiraUserDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamscale.exception.ErrorEntity;
-import org.dreamscale.exception.WebApplicationException;
-import org.dreamscale.logging.LoggingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.hooks.jira;
 
+import com.dreamscale.htmflow.core.hooks.jira.dto.*;
 import org.dreamscale.exception.WebApplicationException;
 
 import java.util.ArrayList;
@@ -37,11 +38,56 @@ public class JiraConnection {
         return filteredUsers;
     }
 
+    public JiraTaskDto saveTask(JiraNewTaskDto newTask) {
+        JiraNewTaskFields fields = new JiraNewTaskFields();
+        fields.addSummary(newTask.getSummary());
+        fields.addDescription(newTask.getDescription());
+        fields.addIssueType(newTask.getIssueType());
+        fields.addProject(newTask.getProjectId());
+
+        return jiraClient.saveTask(fields);
+    }
+
+    public void updateAssignee(String taskName, String jiraUserName) {
+        JiraAssigneeUpdateDto jiraAssigneeUpdateDto = new JiraAssigneeUpdateDto(jiraUserName);
+        jiraClient.updateAssignee(taskName, jiraAssigneeUpdateDto);
+    }
+
+    public void updateTransition(String taskName, String transitionName) {
+        JiraTransitions transitions = jiraClient.getTransitions(taskName);
+
+        JiraTransition selectedTransition = null;
+
+        for (JiraTransition transition : transitions.getTransitions() ) {
+            JiraStatus status = transition.getTo();
+            if (transitionName != null && transitionName.equalsIgnoreCase(status.getName())) {
+                selectedTransition = transition;
+                break;
+            }
+        }
+
+        if (selectedTransition == null) {
+            throw new JiraException("Unable to find transition for status: "+transitionName);
+        }
+
+        JiraStatusPatch statusPatch = new JiraStatusPatch(selectedTransition.getId(), "Transitioned state to "+transitionName);
+        jiraClient.updateStatus(taskName, statusPatch);
+
+    }
+
     public void validate() {
         try {
             List<JiraProjectDto> projects = jiraClient.getProjects();
         } catch (WebApplicationException ex) {
             throw new JiraException("["+ex.getStatusCode() + "]: Unable to retrieve data from Jira, "+ex.getMessage(), ex);
         }
+    }
+
+    public JiraTaskDto getTask(String taskName) {
+        return jiraClient.getTask(taskName);
+    }
+
+    public JiraTransitions getTransitions(String taskName) {
+        return jiraClient.getTransitions(taskName);
     }
 }

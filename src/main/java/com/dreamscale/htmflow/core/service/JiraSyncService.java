@@ -2,8 +2,9 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.hooks.jira.*;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -67,13 +68,13 @@ public class JiraSyncService {
     }
 
     private boolean isTaskUpdated(TaskEntity dbTask, JiraTaskDto jiraTask) {
-        String jiraSummary = jiraTask.getFields().get(JIRA_SUMMARY);
+        Object jiraSummary = jiraTask.getFields().get(JIRA_SUMMARY);
         String dbSummary = dbTask.getSummary();
-        return jiraSummary != null && !jiraSummary.equals(dbSummary);
+        return jiraSummary != null && !jiraSummary.toString().equals(dbSummary);
     }
 
     private TaskEntity updateTaskFields(TaskEntity dbTask, JiraTaskDto jiraTask) {
-        dbTask.setSummary(jiraTask.getFields().get(JIRA_SUMMARY));
+        dbTask.setSummary(jiraTask.getFields().get(JIRA_SUMMARY).toString());
         return dbTask;
     }
 
@@ -82,7 +83,7 @@ public class JiraSyncService {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());
         taskEntity.setName(jiraTask.getKey());
-        taskEntity.setSummary(jiraTask.getFields().get(JIRA_SUMMARY));
+        taskEntity.setSummary(jiraTask.getFields().get(JIRA_SUMMARY).toString());
         taskEntity.setExternalId(jiraTask.getId());
         taskEntity.setProjectId(projectId);
         taskEntity.setOrganizationId(organizationId);

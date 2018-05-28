@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.hooks.jira;
 
+import com.dreamscale.htmflow.core.hooks.jira.dto.*;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -22,6 +23,21 @@ public interface JiraClient {
     @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
             "?username=%25&includeActive=true&includeInactive=false")
     List<JiraUserDto> getUsers();
+
+    @RequestLine("POST "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH)
+    JiraTaskDto saveTask(JiraNewTaskFields fields);
+
+    @RequestLine("PUT "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}" + JiraPaths.ASSIGNEE_PATH)
+    JiraTaskDto updateAssignee(@Param("id") String id, JiraAssigneeUpdateDto fields);
+
+    @RequestLine("GET "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}")
+    JiraTaskDto getTask(@Param("id") String id );
+
+    @RequestLine("GET "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}" + JiraPaths.TRANSITIONS_PATH)
+    JiraTransitions getTransitions(@Param("id") String id);
+
+    @RequestLine("POST "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}" + JiraPaths.TRANSITIONS_PATH)
+    void updateStatus(@Param("id") String id, JiraStatusPatch statusPatch);
 
 
 

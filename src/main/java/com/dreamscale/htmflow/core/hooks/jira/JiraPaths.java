@@ -7,4 +7,7 @@ public class JiraPaths {
 
     public static final String SEARCH_PATH = "/search";
     public static final String USER_PATH = "/user";
+    public static final String ISSUE_PATH = "/issue";
+    public static final String ASSIGNEE_PATH = "/assignee";
+    public static final String TRANSITIONS_PATH = "/transitions";
 }

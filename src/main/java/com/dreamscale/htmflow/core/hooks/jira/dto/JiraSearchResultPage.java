@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.hooks.jira;
+package com.dreamscale.htmflow.core.hooks.jira.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
