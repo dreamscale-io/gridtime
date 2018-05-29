@@ -33,6 +33,6 @@ public interface ProjectClient {
     TaskDto findTaskByName(@Param("id") String projectId, @Param("name") String taskName);
 
     @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH)
-    TaskDto createNewTask(TaskInputDto taskInputDto);
+    TaskDto createNewTask(@Param("id") String projectId, TaskInputDto taskInputDto);
 
 }

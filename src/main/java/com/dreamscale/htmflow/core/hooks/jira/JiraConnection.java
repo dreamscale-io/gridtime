@@ -38,14 +38,14 @@ public class JiraConnection {
         return filteredUsers;
     }
 
-    public JiraTaskDto saveTask(JiraNewTaskDto newTask) {
+    public JiraTaskDto createTask(JiraNewTaskDto newTask) {
         JiraNewTaskFields fields = new JiraNewTaskFields();
         fields.addSummary(newTask.getSummary());
         fields.addDescription(newTask.getDescription());
         fields.addIssueType(newTask.getIssueType());
         fields.addProject(newTask.getProjectId());
 
-        return jiraClient.saveTask(fields);
+        return jiraClient.createTask(fields);
     }
 
     public void updateAssignee(String taskName, String jiraUserName) {
@@ -89,5 +89,9 @@ public class JiraConnection {
 
     public JiraTransitions getTransitions(String taskName) {
         return jiraClient.getTransitions(taskName);
+    }
+
+    public JiraUserDto getUserByKey(String userKey) {
+        return jiraClient.getUser(userKey);
     }
 }

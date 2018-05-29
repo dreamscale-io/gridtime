@@ -1,13 +1,15 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.project.TaskInputDto;
-import com.dreamscale.htmflow.core.domain.ProjectEntity;
-import com.dreamscale.htmflow.core.domain.ProjectRepository;
-import com.dreamscale.htmflow.core.domain.TaskEntity;
-import com.dreamscale.htmflow.core.domain.TaskRepository;
+import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraNewTaskDto;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraNewTaskFields;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -27,6 +28,15 @@ public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private OrganizationMemberRepository organizationMemberRepository;
+
+    @Autowired
+    private JiraConnectionFactory jiraConnectionFactory;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -46,15 +56,37 @@ public class TaskService {
         return taskMapper.toApi(taskEntity);
     }
 
-    public RecentTasksByProjectDto getRecentTasksByProjectForUser(UUID organizationId, UUID masterAccountId) {
-
-        //TODO this depends on chunks that were entered, and tracking recent usage of things
-
-        return new RecentTasksByProjectDto();
-    }
-
     public TaskDto createNewTask(UUID organizationId, UUID projectId, UUID masterAccountId, TaskInputDto taskInputDto) {
-        //TODO need to figure out how to post new tasks in Jira, and shift to in progress state with first chunk
-        return new TaskDto();
+
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
+
+        JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
+
+        ProjectEntity project = projectRepository.findById(projectId);
+
+        JiraUserDto jiraUserDto = jiraConnection.getUserByKey(membership.getExternalId());
+
+        JiraNewTaskDto newTaskDto = new JiraNewTaskDto(taskInputDto.getSummary(),
+                taskInputDto.getDescription(),
+                project.getExternalId(),
+                "Task");
+
+        JiraTaskDto newTask = jiraConnection.createTask(newTaskDto);
+
+        TaskEntity taskEntity = new TaskEntity();
+        taskEntity.setId(UUID.randomUUID());
+        taskEntity.setName(newTask.getKey());
+        taskEntity.setSummary(taskInputDto.getSummary());
+        taskEntity.setExternalId(newTask.getId());
+        taskEntity.setProjectId(projectId);
+        taskEntity.setOrganizationId(organizationId);
+
+        taskRepository.save(taskEntity);
+
+        jiraConnection.updateTransition(newTask.getKey(), "In Progress");
+        jiraConnection.updateAssignee(newTask.getKey(), membership.getExternalId());
+
+        return taskMapper.toApi(taskEntity);
     }
 }

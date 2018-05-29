@@ -24,8 +24,11 @@ public interface JiraClient {
             "?username=%25&includeActive=true&includeInactive=false")
     List<JiraUserDto> getUsers();
 
+    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + "?key={user}")
+    JiraUserDto getUser(@Param("user") String userKey);
+
     @RequestLine("POST "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH)
-    JiraTaskDto saveTask(JiraNewTaskFields fields);
+    JiraTaskDto createTask(JiraNewTaskFields fields);
 
     @RequestLine("PUT "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}" + JiraPaths.ASSIGNEE_PATH)
     JiraTaskDto updateAssignee(@Param("id") String id, JiraAssigneeUpdateDto fields);

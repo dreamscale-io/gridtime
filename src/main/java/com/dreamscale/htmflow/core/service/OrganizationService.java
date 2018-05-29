@@ -199,7 +199,7 @@ public class OrganizationService {
         memberEntity.setId(UUID.randomUUID());
         memberEntity.setOrganizationId(orgEntity.getId());
         memberEntity.setEmail(jiraUser.getEmailAddress());
-        memberEntity.setExternalId(jiraUser.getAccountId());
+        memberEntity.setExternalId(jiraUser.getKey());
         memberEntity.setMasterAccountId(masterAccountEntity.getId());
 
         memberRepository.save(memberEntity);

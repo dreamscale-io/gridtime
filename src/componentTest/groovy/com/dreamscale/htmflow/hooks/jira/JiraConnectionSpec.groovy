@@ -85,7 +85,7 @@ class JiraConnectionSpec extends Specification {
         JiraNewTaskDto taskDto = new JiraNewTaskDto("summary", "description", projectId, "Task");
 
         when:
-        JiraTaskDto task = jiraConnection.saveTask(taskDto)
+        JiraTaskDto task = jiraConnection.createTask(taskDto)
 
         then:
         println task
@@ -102,7 +102,7 @@ class JiraConnectionSpec extends Specification {
         String projectId = projects.get(0).id;
 
         JiraNewTaskDto taskDto = new JiraNewTaskDto("summary", "description", projectId, "Task");
-        JiraTaskDto task = jiraConnection.saveTask(taskDto)
+        JiraTaskDto task = jiraConnection.createTask(taskDto)
 
         when:
         jiraConnection.updateTransition(task.getKey(), "In Progress");
@@ -123,7 +123,7 @@ class JiraConnectionSpec extends Specification {
 
         JiraNewTaskDto taskDto = new JiraNewTaskDto("summary", "description", projectId, "Task");
 
-        JiraTaskDto task = jiraConnection.saveTask(taskDto)
+        JiraTaskDto task = jiraConnection.createTask(taskDto)
 
         JiraUserDto user = jiraConnection.getUsers().get(0);
 
