@@ -1,5 +1,5 @@
 ext {
-    artifactId = "${artifactId}-rest-feign"
+    artifactId = "${artifactId}-rest-client"
 }
 
 dependencies {

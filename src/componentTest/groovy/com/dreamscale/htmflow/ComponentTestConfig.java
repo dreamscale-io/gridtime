@@ -3,6 +3,7 @@ package com.dreamscale.htmflow;
 import com.dreamscale.htmflow.client.AccountClient;
 import com.dreamscale.htmflow.client.OrganizationClient;
 import com.dreamscale.htmflow.client.ProjectClient;
+import com.dreamscale.htmflow.client.PublisherClient;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
@@ -40,6 +41,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     AccountClient accountClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, AccountClient.class);
+    }
+
+    @Bean
+    PublisherClient publisherClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, PublisherClient.class);
     }
 
     @Bean
