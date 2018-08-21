@@ -22,7 +22,7 @@ public class ResourcePaths {
     public static final String INVITATION_PATH = "/invitation";
     public static final String UNBOUND_PATH = "/unbound";
 
-    public static final String PUBLISHER_PATH = "/publisher";
+    public static final String FLOW_PATH = "/flow";
     public static final String BATCH_PATH = "/batch";
 
     public static final String USER_PROFILE_PATH = "/userprofile";

@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.batch.NewBatchEvent
 import com.dreamscale.htmflow.api.batch.NewIFMBatch
 import com.dreamscale.htmflow.api.event.EventType
-import com.dreamscale.htmflow.client.PublisherClient
+import com.dreamscale.htmflow.client.FlowClient
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class PublisherResourceSpec extends Specification {
 
     @Autowired
-    PublisherClient publisherClient
+    FlowClient publisherClient
 
     def "addIfmBatch should not explode"() {
         given:

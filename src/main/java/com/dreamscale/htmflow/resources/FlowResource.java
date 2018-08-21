@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping(path = ResourcePaths.PUBLISHER_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-public class PublisherResource {
+@RequestMapping(path = ResourcePaths.FLOW_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+public class FlowResource {
 
     @PostMapping(ResourcePaths.BATCH_PATH)
     public void addIFMBatch(@RequestBody NewIFMBatch batch) {
