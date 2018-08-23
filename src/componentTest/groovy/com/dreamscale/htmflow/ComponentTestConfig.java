@@ -5,6 +5,8 @@ import com.dreamscale.htmflow.client.OrganizationClient;
 import com.dreamscale.htmflow.client.ProjectClient;
 import com.dreamscale.htmflow.client.FlowClient;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.client.JournalClient;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import spock.mock.DetachedMockFactory;
 
 import java.util.UUID;
 
@@ -22,6 +25,17 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Autowired
     JacksonFeignBuilder jacksonFeignBuilder;
+
+//    @Bean
+//        DetachedMockFactory detachedMockFactory() {
+//        return new DetachedMockFactory();
+//    }
+//
+//    @Bean
+//    @Primary
+//    public JiraConnectionFactory mockJiraConnectionFactory() {
+//        return detachedMockFactory().Mock(JiraConnectionFactory.class);
+//    }
 
     @Bean
     JournalClient journalClient() {
