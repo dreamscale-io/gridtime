@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChunkEventInputDto {
+public class IntentionInputDto {
     private String description;
     private UUID projectId;
     private UUID taskId;

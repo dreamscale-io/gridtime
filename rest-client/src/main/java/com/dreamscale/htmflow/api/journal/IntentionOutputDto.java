@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChunkEventOutputDto {
+public class IntentionOutputDto {
 
     private UUID id;
     private LocalDateTime position;

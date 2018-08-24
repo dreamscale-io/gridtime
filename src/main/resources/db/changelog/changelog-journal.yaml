@@ -7,7 +7,7 @@ databaseChangeLog:
         file: db/journal/create_task.sql
 
   - include:
-        file: db/journal/create_chunk_event.sql
+        file: db/journal/create_intention.sql
 
   - include:
         file: db/journal/create_recent_project.sql

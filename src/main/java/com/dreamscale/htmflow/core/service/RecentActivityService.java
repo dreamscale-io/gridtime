@@ -47,7 +47,7 @@ public class RecentActivityService {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-    public void updateRecentProjects(ChunkEventEntity activeChunkEvent) {
+    public void updateRecentProjects(IntentionEntity activeChunkEvent) {
 
         List<RecentProjectEntity> recentProjects = recentProjectRepository.findByMemberId(activeChunkEvent.getMemberId());
 
@@ -64,7 +64,7 @@ public class RecentActivityService {
 
     }
 
-    public void updateRecentTasks(ChunkEventEntity activeChunkEvent) {
+    public void updateRecentTasks(IntentionEntity activeChunkEvent) {
 
         List<RecentTaskEntity> recentTasks = recentTaskRepository.findByMemberIdAndProjectId(activeChunkEvent.getMemberId(), activeChunkEvent.getProjectId());
 
@@ -153,7 +153,7 @@ public class RecentActivityService {
         }
     }
 
-    private RecentProjectEntity createRecentProject(ChunkEventEntity activeChunkEvent) {
+    private RecentProjectEntity createRecentProject(IntentionEntity activeChunkEvent) {
         return RecentProjectEntity.builder()
                 .id(UUID.randomUUID())
                 .projectId(activeChunkEvent.getProjectId())
@@ -162,7 +162,7 @@ public class RecentActivityService {
                 .lastAccessed(LocalDateTime.now()).build();
     }
 
-    private RecentTaskEntity createRecentTask(ChunkEventEntity activeChunkEvent) {
+    private RecentTaskEntity createRecentTask(IntentionEntity activeChunkEvent) {
         return RecentTaskEntity.builder()
                 .id(UUID.randomUUID())
                 .taskId(activeChunkEvent.getTaskId())

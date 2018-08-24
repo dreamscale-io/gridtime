@@ -1,8 +1,6 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
 import com.dreamscale.htmflow.api.project.*;
 import feign.Headers;
 import feign.Param;

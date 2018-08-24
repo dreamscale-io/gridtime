@@ -1,13 +1,13 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto
+import com.dreamscale.htmflow.api.journal.IntentionInputDto
+import com.dreamscale.htmflow.api.journal.IntentionOutputDto
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.client.ProjectClient
-import com.dreamscale.htmflow.core.domain.ChunkEventRepository
+import com.dreamscale.htmflow.core.domain.IntentionRepository
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
@@ -44,7 +44,7 @@ class JournalResourceSpec extends Specification {
     @Autowired
     TaskRepository taskRepository
     @Autowired
-    ChunkEventRepository chunkEventRepository
+    IntentionRepository intentionRepository
 
     @Autowired
     RecentProjectRepository recentProjectRepository
@@ -58,7 +58,7 @@ class JournalResourceSpec extends Specification {
     def setup() {
         projectRepository.deleteAll()
         taskRepository.deleteAll()
-        chunkEventRepository.deleteAll()
+        intentionRepository.deleteAll()
         organizationRepository.deleteAll()
         organizationMemberRepository.deleteAll()
         recentProjectRepository.deleteAll()
@@ -70,16 +70,16 @@ class JournalResourceSpec extends Specification {
         TaskEntity task = createOrganizationAndTask();
         createMembership(task.getOrganizationId(), testUser.getId());
 
-        ChunkEventInputDto chunkEvent = aRandom.chunkEventInputDto().forTask(task).build();
+        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build();
 
         when:
-        ChunkEventOutputDto output = journalClient.createChunkEvent(chunkEvent)
+        IntentionOutputDto output = journalClient.createIntention(intentionInputDto)
 
         then:
         assert output != null
         assert output.getId() != null
-        assert output.getTaskId() == chunkEvent.getTaskId()
-        assert output.description == chunkEvent.getDescription()
+        assert output.getTaskId() == intentionInputDto.getTaskId()
+        assert output.description == intentionInputDto.getDescription()
     }
 
     def "get recent chunks"() {
@@ -87,14 +87,14 @@ class JournalResourceSpec extends Specification {
         TaskEntity task = createOrganizationAndTask();
         createMembership(task.getOrganizationId(), testUser.getId());
 
-        ChunkEventInputDto chunkEvent1 = aRandom.chunkEventInputDto().forTask(task).build();
-        ChunkEventInputDto chunkEvent2 = aRandom.chunkEventInputDto().forTask(task).build();
+        IntentionInputDto chunkEvent1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto chunkEvent2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createChunkEvent(chunkEvent1)
-        journalClient.createChunkEvent(chunkEvent2)
+        journalClient.createIntention(chunkEvent1)
+        journalClient.createIntention(chunkEvent2)
 
         when:
-        List<ChunkEventOutputDto>  chunks = journalClient.getRecentChunks();
+        List<IntentionOutputDto> chunks = journalClient.getRecentIntentions();
 
         then:
         assert chunks != null
@@ -126,15 +126,15 @@ class JournalResourceSpec extends Specification {
         TaskEntity task4 = aRandom.taskEntity().forProject(project2).build()
         taskRepository.save(task4)
 
-        ChunkEventInputDto chunkEvent1 = aRandom.chunkEventInputDto().forTask(task1).build();
-        ChunkEventInputDto chunkEvent2 = aRandom.chunkEventInputDto().forTask(task2).build();
-        ChunkEventInputDto chunkEvent3 = aRandom.chunkEventInputDto().forTask(task3).build();
-        ChunkEventInputDto chunkEvent4 = aRandom.chunkEventInputDto().forTask(task4).build();
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task1).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task2).build();
+        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task3).build();
+        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task4).build();
 
-        journalClient.createChunkEvent(chunkEvent1)
-        journalClient.createChunkEvent(chunkEvent2)
-        journalClient.createChunkEvent(chunkEvent3)
-        journalClient.createChunkEvent(chunkEvent4)
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
+        journalClient.createIntention(intention3)
+        journalClient.createIntention(intention4)
 
         when:
         RecentTasksByProjectDto recentTasksByProject = projectClient.getRecentTasksByProject();
@@ -157,18 +157,18 @@ class JournalResourceSpec extends Specification {
         TaskEntity task = createOrganizationAndTask();
         OrganizationMemberEntity memberWithChunks = createMembership(task.getOrganizationId(), testUser.getId());
 
-        ChunkEventInputDto chunkEvent1 = aRandom.chunkEventInputDto().forTask(task).build();
-        ChunkEventInputDto chunkEvent2 = aRandom.chunkEventInputDto().forTask(task).build();
+        IntentionInputDto chunkEvent1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto chunkEvent2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createChunkEvent(chunkEvent1)
-        journalClient.createChunkEvent(chunkEvent2)
+        journalClient.createIntention(chunkEvent1)
+        journalClient.createIntention(chunkEvent2)
 
         //change active user to a different user
         testUser.setId(UUID.randomUUID())
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
 
         when:
-        List<ChunkEventOutputDto>  chunks = journalClient.getRecentChunksForMember(memberWithChunks.getId().toString());
+        List<IntentionOutputDto> chunks = journalClient.getRecentIntentionsForMember(memberWithChunks.getId().toString());
 
         then:
         assert chunks != null

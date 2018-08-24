@@ -45,9 +45,9 @@ public interface JiraClient {
 
 
 //
-//    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.CHUNK_PATH
+//    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH
 //            + "?from_date={fromDate}&to_date={toDate}")
-//    List<ChunkEventOutputDto> getChunks(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
+//    List<IntentionOutputDto> getIntentions(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
 //
 //
 //    curl -v 'https://dreamscale.atlassian.net/rest/api/2/search?jql=project%3D10000&fields=id,key,summary' --user janelle@dreamscale.io:9KC0iM24tfXf8iKDVP2q4198 | jq

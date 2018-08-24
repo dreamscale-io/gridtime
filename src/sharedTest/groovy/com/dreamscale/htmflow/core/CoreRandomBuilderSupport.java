@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core;
 
-import com.dreamscale.htmflow.api.journal.RandomChunkEventInputDtoBuilder;
+import com.dreamscale.htmflow.api.journal.RandomIntentionInputDtoBuilder;
 import com.dreamscale.htmflow.core.domain.RandomOrganizationEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomOrganizationMemberEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomProjectEntityBuilder;
@@ -26,7 +26,7 @@ public class CoreRandomBuilderSupport {
     }
 
 
-    public RandomChunkEventInputDtoBuilder chunkEventInputDto() {
-        return new RandomChunkEventInputDtoBuilder();
+    public RandomIntentionInputDtoBuilder intentionInputDto() {
+        return new RandomIntentionInputDtoBuilder();
     }
 }

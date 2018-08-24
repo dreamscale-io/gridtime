@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset dreamscale:0
-create table chunk_event (
+create table intention (
   id uuid primary key not null,
   position timestamp,
   description text,

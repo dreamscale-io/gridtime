@@ -1,11 +1,9 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto;
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto;
+import com.dreamscale.htmflow.api.journal.IntentionInputDto;
+import com.dreamscale.htmflow.api.journal.IntentionOutputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
-import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,7 @@ import java.util.UUID;
 public class JournalService {
 
     @Autowired
-    private ChunkEventRepository chunkEventRepository;
+    private IntentionRepository intentionRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -42,55 +40,55 @@ public class JournalService {
 
     @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<ChunkEventInputDto, ChunkEventEntity> chunkInputMapper;
-    private DtoEntityMapper<ChunkEventOutputDto, ChunkEventEntity> chunkOutputMapper;
+    private DtoEntityMapper<IntentionInputDto, IntentionEntity> intentionInputMapper;
+    private DtoEntityMapper<IntentionOutputDto, IntentionEntity> intentionOutputMapper;
 
     @PostConstruct
     private void init() {
-        chunkInputMapper = mapperFactory.createDtoEntityMapper(ChunkEventInputDto.class, ChunkEventEntity.class);
-        chunkOutputMapper = mapperFactory.createDtoEntityMapper(ChunkEventOutputDto.class, ChunkEventEntity.class);
+        intentionInputMapper = mapperFactory.createDtoEntityMapper(IntentionInputDto.class, IntentionEntity.class);
+        intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionOutputDto.class, IntentionEntity.class);
     }
 
-    public ChunkEventOutputDto createChunkEvent(UUID masterAccountId, ChunkEventInputDto chunkEventInput) {
+    public IntentionOutputDto createIntention(UUID masterAccountId, IntentionInputDto chunkEventInput) {
         UUID organizationId = getOrganizationIdForProject(chunkEventInput.getProjectId());
         UUID memberId = getMemberIdForAccount(masterAccountId, organizationId);
 
-        ChunkEventEntity chunkEventEntity = chunkInputMapper.toEntity(chunkEventInput);
-        chunkEventEntity.setId(UUID.randomUUID());
-        chunkEventEntity.setPosition(LocalDateTime.now());
-        chunkEventEntity.setOrganizationId(organizationId);
-        chunkEventEntity.setMemberId(memberId);
+        IntentionEntity intentionEntity = intentionInputMapper.toEntity(chunkEventInput);
+        intentionEntity.setId(UUID.randomUUID());
+        intentionEntity.setPosition(LocalDateTime.now());
+        intentionEntity.setOrganizationId(organizationId);
+        intentionEntity.setMemberId(memberId);
 
-        chunkEventRepository.save(chunkEventEntity);
+        intentionRepository.save(intentionEntity);
 
-        recentActivityService.updateRecentProjects(chunkEventEntity);
-        recentActivityService.updateRecentTasks(chunkEventEntity);
+        recentActivityService.updateRecentProjects(intentionEntity);
+        recentActivityService.updateRecentTasks(intentionEntity);
 
-        return chunkOutputMapper.toApi(chunkEventEntity);
+        return intentionOutputMapper.toApi(intentionEntity);
     }
 
-    public List<ChunkEventOutputDto> getRecentChunks(UUID masterAccountId) {
+    public List<IntentionOutputDto> getRecentIntentions(UUID masterAccountId) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 
-        List<ChunkEventEntity> chunkEventEntities = chunkEventRepository.findTop100ByMemberIdOrderByPosition(memberId);
-        return chunkOutputMapper.toApiList(chunkEventEntities);
+        List<IntentionEntity> intentionEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
+        return intentionOutputMapper.toApiList(intentionEntities);
     }
 
-    public List<ChunkEventOutputDto> getRecentChunksForMember(UUID masterAccountId, UUID memberId) {
+    public List<IntentionOutputDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         validateMemberWithinOrg(organization, memberId);
 
-        List<ChunkEventEntity> chunkEventEntities = chunkEventRepository.findTop100ByMemberIdOrderByPosition(memberId);
-        return chunkOutputMapper.toApiList(chunkEventEntities);
+        List<IntentionEntity> chunkEventEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
+        return intentionOutputMapper.toApiList(chunkEventEntities);
     }
 
-    public List<ChunkEventOutputDto> getChunksWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
+    public List<IntentionOutputDto> getIntentionsWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 
-        //List<ChunkEventEntity> chunkEventEntities = chunkEventRepository.findChunksByMemberIdWithinRange(memberId, start, end);
-        return null; //chunkOutputMapper.toApiList(chunkEventEntities);
+        //List<IntentionEntity> chunkEventEntities = intentionRepository.findChunksByMemberIdWithinRange(memberId, start, end);
+        return null; //intentionOutputMapper.toApiList(chunkEventEntities);
     }
 
     private UUID getMemberIdForAccount(UUID masterAccountId, UUID organizationId) {

@@ -1,8 +1,6 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.journal.ChunkEventInputDto
-import com.dreamscale.htmflow.api.journal.ChunkEventOutputDto
 import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
@@ -10,7 +8,6 @@ import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.TaskDto
 import com.dreamscale.htmflow.api.project.TaskInputDto
-import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.client.ProjectClient
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
@@ -20,7 +17,6 @@ import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.ProjectRepository
-import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
