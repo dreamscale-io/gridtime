@@ -33,7 +33,7 @@ dependencies {
 
     sharedTestCompile project(path: "rest-client", configuration: "mainTestRuntime")
     sharedTestCompile "org.dreamscale:common-spring-boot-rest-test:${commonSpringBootVersion}"
-    sharedTestCompile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
     sharedTestCompile "cglib:cglib-nodep:3.2.0"
     sharedTestCompile("org.spockframework:spock-core:${spockVersion}") {
         exclude group: "org.codehaus.groovy"

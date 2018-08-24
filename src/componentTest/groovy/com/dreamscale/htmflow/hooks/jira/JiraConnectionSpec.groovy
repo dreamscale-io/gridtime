@@ -28,7 +28,7 @@ class JiraConnectionSpec extends Specification {
 
         then:
         println projects
-        assert projects.size() == 1
+        assert projects.size() == 5
     }
 
     def "should get jira tasks"() {
@@ -54,7 +54,7 @@ class JiraConnectionSpec extends Specification {
 
         then:
         println users
-        assert users.size() == 3
+        assert users.size() == 5
     }
 
     def "get transitions for a task"() {

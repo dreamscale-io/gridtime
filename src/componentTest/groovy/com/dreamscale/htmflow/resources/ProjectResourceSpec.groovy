@@ -73,7 +73,7 @@ class ProjectResourceSpec extends Specification {
 		List<ProjectDto> projects = projectClient.getProjects()
 
 		then:
-		assert projects.size() == 2
+		assert projects.size() == 6
 		assert projects[0].id == entity.id
 		assert projects[0].name == entity.name
 		assert projects[0].externalId == entity.externalId
@@ -156,5 +156,10 @@ class ProjectResourceSpec extends Specification {
 				.organizationId(organizationId)
 				.build()
 	}
+
+
+
+
+
 
 }
