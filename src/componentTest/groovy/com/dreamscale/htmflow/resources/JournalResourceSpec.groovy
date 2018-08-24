@@ -65,7 +65,7 @@ class JournalResourceSpec extends Specification {
         recentTaskRepository.deleteAll()
     }
 
-    def "should save new chunk"() {
+    def "should save new intention"() {
         given:
         TaskEntity task = createOrganizationAndTask();
         createMembership(task.getOrganizationId(), testUser.getId());
@@ -82,23 +82,23 @@ class JournalResourceSpec extends Specification {
         assert output.description == intentionInputDto.getDescription()
     }
 
-    def "get recent chunks"() {
+    def "get recent intentions"() {
         given:
         TaskEntity task = createOrganizationAndTask();
         createMembership(task.getOrganizationId(), testUser.getId());
 
-        IntentionInputDto chunkEvent1 = aRandom.intentionInputDto().forTask(task).build();
-        IntentionInputDto chunkEvent2 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createIntention(chunkEvent1)
-        journalClient.createIntention(chunkEvent2)
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
 
         when:
-        List<IntentionOutputDto> chunks = journalClient.getRecentIntentions();
+        List<IntentionOutputDto> intentions = journalClient.getRecentIntentions();
 
         then:
-        assert chunks != null
-        assert chunks.size() == 2
+        assert intentions != null
+        assert intentions.size() == 2
     }
 
     def "get recent projects and tasks"() {
@@ -152,27 +152,27 @@ class JournalResourceSpec extends Specification {
     }
 
 
-    def "get recent chunks for other member"() {
+    def "get recent intentions for other member"() {
         given:
         TaskEntity task = createOrganizationAndTask();
-        OrganizationMemberEntity memberWithChunks = createMembership(task.getOrganizationId(), testUser.getId());
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), testUser.getId());
 
-        IntentionInputDto chunkEvent1 = aRandom.intentionInputDto().forTask(task).build();
-        IntentionInputDto chunkEvent2 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createIntention(chunkEvent1)
-        journalClient.createIntention(chunkEvent2)
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
 
-        //change active user to a different user
+        //change active logged in user to a different user within same organization
         testUser.setId(UUID.randomUUID())
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
 
         when:
-        List<IntentionOutputDto> chunks = journalClient.getRecentIntentionsForMember(memberWithChunks.getId().toString());
+        List<IntentionOutputDto> intentions = journalClient.getRecentIntentionsForMember(memberWithIntentions.getId().toString());
 
         then:
-        assert chunks != null
-        assert chunks.size() == 2
+        assert intentions != null
+        assert intentions.size() == 2
     }
 
     private TaskEntity createOrganizationAndTask() {

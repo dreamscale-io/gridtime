@@ -10,7 +10,7 @@ public interface IntentionRepository extends CrudRepository<IntentionEntity, UUI
     List<IntentionEntity> findTop100ByMemberIdOrderByPosition(UUID memberId);
 
 
-   // List<IntentionEntity> findChunksByMemberIdWithinRange(UUID memberId, LocalDateTime start, LocalDateTime end);
+   // List<IntentionEntity> findIntentionsByMemberIdWithinRange(UUID memberId, LocalDateTime start, LocalDateTime end);
 }
 
 //findTop3ByLastname

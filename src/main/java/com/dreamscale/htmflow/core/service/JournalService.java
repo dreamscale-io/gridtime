@@ -49,11 +49,11 @@ public class JournalService {
         intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionOutputDto.class, IntentionEntity.class);
     }
 
-    public IntentionOutputDto createIntention(UUID masterAccountId, IntentionInputDto chunkEventInput) {
-        UUID organizationId = getOrganizationIdForProject(chunkEventInput.getProjectId());
+    public IntentionOutputDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
+        UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
         UUID memberId = getMemberIdForAccount(masterAccountId, organizationId);
 
-        IntentionEntity intentionEntity = intentionInputMapper.toEntity(chunkEventInput);
+        IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
         intentionEntity.setPosition(LocalDateTime.now());
         intentionEntity.setOrganizationId(organizationId);
@@ -79,16 +79,16 @@ public class JournalService {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         validateMemberWithinOrg(organization, memberId);
 
-        List<IntentionEntity> chunkEventEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
-        return intentionOutputMapper.toApiList(chunkEventEntities);
+        List<IntentionEntity> intentionEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
+        return intentionOutputMapper.toApiList(intentionEntities);
     }
 
     public List<IntentionOutputDto> getIntentionsWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 
-        //List<IntentionEntity> chunkEventEntities = intentionRepository.findChunksByMemberIdWithinRange(memberId, start, end);
-        return null; //intentionOutputMapper.toApiList(chunkEventEntities);
+        //List<IntentionEntity> intentionEntities = intentionRepository.findIntentionsByMemberIdWithinRange(memberId, start, end);
+        return null; //intentionOutputMapper.toApiList(intentionEntities);
     }
 
     private UUID getMemberIdForAccount(UUID masterAccountId, UUID organizationId) {
