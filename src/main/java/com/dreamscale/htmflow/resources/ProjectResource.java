@@ -3,17 +3,20 @@ package com.dreamscale.htmflow.resources;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.project.TaskInputDto;
-import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.ProjectService;
-import com.dreamscale.htmflow.core.service.RecentActivityService;
 import com.dreamscale.htmflow.core.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +38,7 @@ public class ProjectResource {
     /**
      * Retrieve all projects for the organization
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping()
     List<ProjectDto> getAllProjects() {
         return projectService.getAllProjects(getDefaultOrgId());
@@ -44,7 +48,7 @@ public class ProjectResource {
      * Autocomplete search finds the top 10 tasks with a name that starts with the provided search string.
      * Search must include a number, so search for FP-1 will return results, whereas searching for FP is a BadRequest
      */
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.SEARCH_PATH + "/{startsWith}")
     List<TaskDto> findTasksStartingWith(@PathVariable("id") String projectId, @PathVariable("startsWith") String startsWith) {
 
@@ -55,7 +59,7 @@ public class ProjectResource {
      * Creates a new task in Jira, assigns it to the user, and moves the state to In Progress.
      * The returned TaskDto includes the information for the newly created task.
      */
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {
         RequestContext context = RequestContext.get();

@@ -26,14 +26,15 @@ allprojects {
 dependencies {
     compile project(path: "rest-client")
     compile "org.dreamscale:common-spring-boot-rest:${commonSpringBootVersion}"
-
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    compile "org.springframework.boot:spring-boot-starter-security"
     compile "postgresql:postgresql:9.0-801.jdbc4"
     compile "org.liquibase:liquibase-core"
 
+    compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+
     sharedTestCompile project(path: "rest-client", configuration: "mainTestRuntime")
     sharedTestCompile "org.dreamscale:common-spring-boot-rest-test:${commonSpringBootVersion}"
-    compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
     sharedTestCompile "cglib:cglib-nodep:3.2.0"
     sharedTestCompile("org.spockframework:spock-core:${spockVersion}") {
         exclude group: "org.codehaus.groovy"

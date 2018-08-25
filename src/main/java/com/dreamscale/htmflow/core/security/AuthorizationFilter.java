@@ -6,6 +6,8 @@ import org.dreamscale.exception.ForbiddenException;
 import org.dreamscale.springboot.security.SecurityErrorCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -13,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +31,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		RequestContext context = null;
+		ApiKeyAuthenticationToken authentication = null;
 
 		if (requiresAuth(request) && notOptionsRequest(request)) {
 			logger.debug("Checking API-Key...");
@@ -43,19 +47,39 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			if (masterAccountId == null) {
 				throw new ForbiddenException(SecurityErrorCodes.NOT_AUTHORIZED, "Failed to resolve user with apiKey=" + apiKey + " or connectId="+connectionId);
 			}
+			log.debug("Resolved user with apiKey={}, connectionId={}, masterAccountId={}", apiKey, connectionId, masterAccountId);
+			authentication = createAuthenticationToken(apiKey, connectionId, masterAccountId);
 			context = RequestContext.builder()
 					.masterAccountId(masterAccountId)
 					.build();
 		}
 
+		if (authentication != null) {
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			RequestContext.set(context);
+		}
+
 		try {
-			if (context != null) {
-				RequestContext.set(context);
-			}
 			filterChain.doFilter(request, response);
 		} finally {
+			SecurityContextHolder.getContext().setAuthentication(null);
 			RequestContext.clear();
 		}
+	}
+
+	private ApiKeyAuthenticationToken createAuthenticationToken(String apiKey, String connectionId, UUID masterAccountId) {
+		String credential = apiKey != null ? apiKey : connectionId;
+		AuthorityList authorities = new AuthorityList();
+		// TODO: figure out how to determine user/org admin
+		boolean isUser = true;
+		boolean isOrgAdmin = false;
+		if (isUser) {
+			authorities.addRole(StandardRole.USER);
+		}
+		if (isOrgAdmin) {
+			authorities.addRole(StandardRole.ORG_ADMIN);
+		}
+		return new ApiKeyAuthenticationToken(masterAccountId, credential, authorities);
 	}
 
 	private UUID lookupAccount(String apiKey, String connectionId) {
@@ -78,13 +102,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		String servletPath = request.getServletPath();
 		String method = request.getMethod();
 
-		List<String> allHtmFlowPaths = new ArrayList<>();
-		allHtmFlowPaths.add(ResourcePaths.ACCOUNT_PATH);
-		allHtmFlowPaths.add(ResourcePaths.ORGANIZATION_PATH);
-		allHtmFlowPaths.add(ResourcePaths.PROJECT_PATH);
-		allHtmFlowPaths.add(ResourcePaths.JOURNAL_PATH);
-		allHtmFlowPaths.add(ResourcePaths.FLOW_PATH);
-
 		List<String> noAuthPostPaths = new ArrayList<>();
 		noAuthPostPaths.add(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH);
 		noAuthPostPaths.add(ResourcePaths.ORGANIZATION_PATH);
@@ -92,19 +109,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		List<String> noAuthGetPaths = new ArrayList<>();
 		noAuthGetPaths.add(ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH);
 
-		boolean needsAuth = false;
-
-		if (startsWithAny(servletPath, allHtmFlowPaths)) {
-			needsAuth = true;
-
-			if (method.equals("POST") && startsWithAny(servletPath, noAuthPostPaths)) {
-				needsAuth = false;
-			}
-			if (method.equals("GET") && startsWithAny(servletPath, noAuthGetPaths)) {
-				needsAuth = false;
-			}
+		boolean needsAuth = true;
+		if (method.equals("POST") && startsWithAny(servletPath, noAuthPostPaths)) {
+			needsAuth = false;
 		}
-
+		if (method.equals("GET") && startsWithAny(servletPath, noAuthGetPaths)) {
+			needsAuth = false;
+		}
 		return needsAuth;
 	}
 
