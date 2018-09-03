@@ -21,3 +21,5 @@ databaseChangeLog:
   - include:
         file: db/organization/create_member_status_view.sql
 
+  - include:
+        file: db/organization/create_config_project_sync.sql

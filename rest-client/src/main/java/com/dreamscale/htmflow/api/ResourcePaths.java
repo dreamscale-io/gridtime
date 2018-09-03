@@ -25,6 +25,11 @@ public class ResourcePaths {
     public static final String FLOW_PATH = "/flow";
     public static final String BATCH_PATH = "/batch";
 
+    public static final String ADMIN_PATH = "/admin";
+    public static final String CONFIG_PATH = "/config";
+    public static final String SYNC_PATH = "/sync";
+
+
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
 
