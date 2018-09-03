@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.client.AdminClient
 import com.dreamscale.htmflow.core.domain.ConfigProjectSyncRepository
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -43,5 +44,16 @@ public class AdminResourceSpec extends Specification {
         then:
         assert outputDto.id != null
 
+    }
+
+    def "should throw an error if the org does not exist"() {
+        given:
+        ProjectSyncInputDto syncDto = new ProjectSyncInputDto(UUID.randomUUID(), "jira_project")
+
+        when:
+        ProjectSyncOutputDto outputDto = adminClient.configProjectSync(syncDto)
+
+        then:
+        thrown(BadRequestException)
     }
 }
