@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.admin.ProjectSyncInputDto;
 import com.dreamscale.htmflow.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.htmflow.core.service.AdminService;
+import com.dreamscale.htmflow.core.service.JiraService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

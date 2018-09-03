@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.domain.RandomOrganizationEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomOrganizationMemberEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomProjectEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomTaskEntityBuilder;
+import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraProjectDtoBuilder;
 
 public class CoreRandomBuilderSupport {
 
@@ -29,4 +30,6 @@ public class CoreRandomBuilderSupport {
     public RandomIntentionInputDtoBuilder intentionInputDto() {
         return new RandomIntentionInputDtoBuilder();
     }
+
+    public RandomJiraProjectDtoBuilder jiraProjectDto() { return new RandomJiraProjectDtoBuilder(); }
 }

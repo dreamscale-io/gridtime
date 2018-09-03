@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.core.domain.ConfigProjectSyncRepository;
 import com.dreamscale.htmflow.core.domain.OrganizationEntity;
 import com.dreamscale.htmflow.core.domain.OrganizationRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +23,18 @@ import java.util.UUID;
 public class AdminService {
 
     @Autowired
-    ConfigProjectSyncRepository configProjectSyncRepository;
+    private JiraService jiraService;
 
     @Autowired
-    OrganizationRepository organizationRepository;
+    private ConfigProjectSyncRepository configProjectSyncRepository;
+
+    @Autowired
+    private OrganizationRepository organizationRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectSyncOutputDto, ConfigProjectSyncEntity> projectSyncMapper;
+
     @PostConstruct
     private void init() {
         projectSyncMapper = mapperFactory.createDtoEntityMapper(ProjectSyncOutputDto.class, ConfigProjectSyncEntity.class);
@@ -40,6 +45,11 @@ public class AdminService {
         OrganizationEntity organizationEntity = organizationRepository.findById(projectSyncDto.getOrganizationId());
         if (organizationEntity == null) {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
+        }
+
+        JiraProjectDto jiraProject = jiraService.getProjectByName(projectSyncDto.getProjectName());
+        if (jiraProject == null) {
+            throw  new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_PROJECT, "Jira project not found");
         }
 
         ConfigProjectSyncEntity existingEntity = configProjectSyncRepository.findByOrganizationIdAndProjectName(

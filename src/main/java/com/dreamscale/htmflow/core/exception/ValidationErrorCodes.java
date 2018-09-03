@@ -7,7 +7,8 @@ import static com.dreamscale.htmflow.core.exception.ValidationErrorCodeGroups.VA
 
 public enum ValidationErrorCodes implements ErrorCodes {
 
-    MISSING_OR_INVALID_ORGANIZATION(1, VALIDATION);
+    MISSING_OR_INVALID_ORGANIZATION(1, VALIDATION),
+    MISSING_OR_INVALID_JIRA_PROJECT(2, VALIDATION);
 
     private int subcode;
     private ValidationErrorCodeGroups errorCodeGroup;

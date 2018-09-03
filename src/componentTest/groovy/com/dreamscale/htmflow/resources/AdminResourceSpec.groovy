@@ -7,6 +7,8 @@ import com.dreamscale.htmflow.client.AdminClient
 import com.dreamscale.htmflow.core.domain.ConfigProjectSyncRepository
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
+import com.dreamscale.htmflow.core.service.JiraService
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -18,6 +20,9 @@ public class AdminResourceSpec extends Specification {
 
     @Autowired
     AdminClient adminClient
+
+    @Autowired
+    JiraService mockJiraService;
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -38,6 +43,10 @@ public class AdminResourceSpec extends Specification {
 
         ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "jira_project")
 
+        JiraProjectDto jiraProjectDto = aRandom.jiraProjectDto().name("jira_project").build()
+
+        mockJiraService.getProjectByName("jira_project") >> jiraProjectDto
+
         when:
         ProjectSyncOutputDto outputDto = adminClient.configProjectSync(syncDto)
 
@@ -55,5 +64,21 @@ public class AdminResourceSpec extends Specification {
 
         then:
         thrown(BadRequestException)
+    }
+
+    def "should throw an error if jira project is not valid"() {
+
+        given:
+        OrganizationEntity organizationEntity = aRandom.organizationEntity().build()
+        organizationRepository.save(organizationEntity)
+
+        ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "invalid_project")
+
+        when:
+        ProjectSyncOutputDto outputDto = adminClient.configProjectSync(syncDto)
+
+        then:
+        thrown(BadRequestException)
+
     }
 }
