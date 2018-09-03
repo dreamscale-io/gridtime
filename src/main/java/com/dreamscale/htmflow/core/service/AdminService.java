@@ -47,7 +47,7 @@ public class AdminService {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
         }
 
-        JiraProjectDto jiraProject = jiraService.getProjectByName(projectSyncDto.getProjectName());
+        JiraProjectDto jiraProject = jiraService.getProjectByName(organizationEntity.getId(), projectSyncDto.getProjectName());
         if (jiraProject == null) {
             throw  new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_PROJECT, "Jira project not found");
         }
