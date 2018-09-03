@@ -1,13 +1,16 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.core.domain.OrganizationEntity;
-import com.dreamscale.htmflow.core.domain.OrganizationRepository;
+import com.dreamscale.htmflow.api.project.TaskDto;
+import com.dreamscale.htmflow.api.project.TaskInputDto;
+import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraNewTaskDto;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,5 +86,33 @@ public class JiraService {
         }
 
         return projectsFound;
+    }
+
+    public JiraTaskDto createNewTask(UUID organizationId, String externalProjectId, String externalUserId, TaskInputDto taskInputDto) {
+
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        if (org == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
+        }
+
+        JiraConnection connection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
+
+        JiraUserDto jiraUserDto = connection.getUserByKey(externalUserId);
+
+        if (jiraUserDto == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_USER, "Jira user not found");
+        }
+
+        JiraNewTaskDto newTaskDto = new JiraNewTaskDto(taskInputDto.getSummary(),
+                taskInputDto.getDescription(),
+                externalProjectId,
+                "Task");
+
+        JiraTaskDto newTask = connection.createTask(newTaskDto);
+
+        connection.updateTransition(newTask.getKey(), "In Progress");
+        connection.updateAssignee(newTask.getKey(), externalUserId);
+
+        return newTask;
     }
 }

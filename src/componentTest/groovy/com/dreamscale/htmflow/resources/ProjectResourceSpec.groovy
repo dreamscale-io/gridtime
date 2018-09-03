@@ -19,6 +19,8 @@ import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.ProjectRepository
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
+import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
 import spock.lang.Specification
@@ -46,7 +48,10 @@ class ProjectResourceSpec extends Specification {
 	OrganizationMemberRepository organizationMemberRepository
 
 	@Autowired
-	MasterAccountEntity testUser;
+	JiraService mockJiraService
+
+	@Autowired
+	MasterAccountEntity testUser
 
 	def setup() {
 		projectRepository.deleteAll()
@@ -63,17 +68,17 @@ class ProjectResourceSpec extends Specification {
 		OrganizationMemberEntity organizationMemberEntity = createOrganizationMember(organizationEntity.getId(), testUser.getId())
 		organizationMemberRepository.save(organizationMemberEntity)
 
-		ProjectEntity entity = aRandom.projectEntity().build()
-		projectRepository.save(entity)
+		ProjectEntity projectEntity = aRandom.projectEntity().build()
+		projectRepository.save(projectEntity)
 
 		when:
 		List<ProjectDto> projects = projectClient.getProjects()
 
 		then:
 		assert projects.size() == 1
-		assert projects[0].id == entity.id
-		assert projects[0].name == entity.name
-		assert projects[0].externalId == entity.externalId
+		assert projects[0].id == projectEntity.id
+		assert projects[0].name == projectEntity.name
+		assert projects[0].externalId == projectEntity.externalId
 	}
 
 	def "should retrieve task list"() {
@@ -104,7 +109,7 @@ class ProjectResourceSpec extends Specification {
 		assert tasks.size() == 4
 	}
 
-	@Ignore
+
 	def "should create new task"() {
 		given:
 
@@ -120,13 +125,16 @@ class ProjectResourceSpec extends Specification {
 		MembershipDetailsDto memberDetails = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 		testUser.id = memberDetails.masterAccountId
 
-		List<ProjectDto> projects = projectClient.getProjects();
-		UUID projectId = projects.get(0).getId();
+		ProjectEntity projectEntity = aRandom.projectEntity().build()
+		projectRepository.save(projectEntity)
+
+		JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
+		mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto
 
 		TaskInputDto taskInputDto = new TaskInputDto("Hello summary!", "description!!")
 
 		when:
-		TaskDto task = projectClient.createNewTask(projectId.toString(), taskInputDto)
+		TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
 
 		then:
 		println task

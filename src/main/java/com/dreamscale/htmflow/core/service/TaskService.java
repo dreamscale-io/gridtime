@@ -36,7 +36,7 @@ public class TaskService {
     private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
-    private JiraConnectionFactory jiraConnectionFactory;
+    private JiraService jiraService;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -58,34 +58,20 @@ public class TaskService {
 
     public TaskDto createNewTask(UUID organizationId, UUID projectId, UUID masterAccountId, TaskInputDto taskInputDto) {
 
-        OrganizationEntity org = organizationRepository.findById(organizationId);
+        ProjectEntity project = projectRepository.findById(projectId);
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
 
-        JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
-
-        ProjectEntity project = projectRepository.findById(projectId);
-
-        JiraUserDto jiraUserDto = jiraConnection.getUserByKey(membership.getExternalId());
-
-        JiraNewTaskDto newTaskDto = new JiraNewTaskDto(taskInputDto.getSummary(),
-                taskInputDto.getDescription(),
-                project.getExternalId(),
-                "Task");
-
-        JiraTaskDto newTask = jiraConnection.createTask(newTaskDto);
+        JiraTaskDto jiraTaskDto = jiraService.createNewTask(organizationId, project.getExternalId(), membership.getExternalId(), taskInputDto);
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());
-        taskEntity.setName(newTask.getKey());
+        taskEntity.setName(jiraTaskDto.getKey());
         taskEntity.setSummary(taskInputDto.getSummary());
-        taskEntity.setExternalId(newTask.getId());
+        taskEntity.setExternalId(jiraTaskDto.getId());
         taskEntity.setProjectId(projectId);
         taskEntity.setOrganizationId(organizationId);
 
         taskRepository.save(taskEntity);
-
-        jiraConnection.updateTransition(newTask.getKey(), "In Progress");
-        jiraConnection.updateAssignee(newTask.getKey(), membership.getExternalId());
 
         return taskMapper.toApi(taskEntity);
     }
