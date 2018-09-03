@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface ConfigProjectSyncRepository extends CrudRepository<ConfigProjectSyncEntity, UUID> {
 
-    ConfigProjectSyncEntity findByOrganizationIdAndProjectName(UUID organizationId, String projectName);
+    ConfigProjectSyncEntity findByOrganizationIdAndProjectExternalId(UUID organizationId, String projectExternalId);
 
     List<ConfigProjectSyncEntity> findByOrganizationId(UUID organizationId);
 }

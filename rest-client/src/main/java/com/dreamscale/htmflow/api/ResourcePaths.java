@@ -28,6 +28,7 @@ public class ResourcePaths {
     public static final String ADMIN_PATH = "/admin";
     public static final String CONFIG_PATH = "/config";
     public static final String SYNC_PATH = "/sync";
+    public static final String JIRA_PATH = "/jira";
 
 
     public static final String USER_PROFILE_PATH = "/userprofile";
@@ -35,4 +36,5 @@ public class ResourcePaths {
 
     public static final String API_KEY_HEADER = "X-API-KEY";
     public static final String CONNECT_ID_HEADER = "X-CONNECT-ID";
+
 }

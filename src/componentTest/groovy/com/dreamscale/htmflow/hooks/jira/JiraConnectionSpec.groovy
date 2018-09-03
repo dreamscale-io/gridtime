@@ -54,7 +54,7 @@ class JiraConnectionSpec extends Specification {
 
         then:
         println users
-        assert users.size() == 5
+        assert users.size() == 6
     }
 
     def "get transitions for a task"() {

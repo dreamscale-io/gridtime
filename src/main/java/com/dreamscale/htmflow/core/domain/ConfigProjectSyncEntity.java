@@ -22,7 +22,7 @@ public class ConfigProjectSyncEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
-    @Column(name = "project_name")
-    private String projectName;
+    @Column(name = "project_external_id")
+    private String projectExternalId;
 
 }

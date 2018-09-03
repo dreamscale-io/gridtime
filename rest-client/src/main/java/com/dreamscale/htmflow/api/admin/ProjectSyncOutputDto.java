@@ -15,5 +15,5 @@ public class ProjectSyncOutputDto {
 
     UUID id;
     UUID organizationId;
-    String projectName;
+    String projectExternalId;
 }

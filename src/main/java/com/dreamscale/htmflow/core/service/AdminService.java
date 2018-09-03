@@ -26,6 +26,9 @@ public class AdminService {
     private JiraService jiraService;
 
     @Autowired
+    private JiraSyncService jiraSyncService;
+
+    @Autowired
     private ConfigProjectSyncRepository configProjectSyncRepository;
 
     @Autowired
@@ -52,7 +55,7 @@ public class AdminService {
             throw  new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_PROJECT, "Jira project not found");
         }
 
-        ConfigProjectSyncEntity existingEntity = configProjectSyncRepository.findByOrganizationIdAndProjectName(
+        ConfigProjectSyncEntity existingEntity = configProjectSyncRepository.findByOrganizationIdAndProjectExternalId(
                 projectSyncDto.getOrganizationId(), projectSyncDto.getProjectName());
 
         ProjectSyncOutputDto configSaved;
@@ -64,7 +67,7 @@ public class AdminService {
             ConfigProjectSyncEntity configProjectSyncEntity = new ConfigProjectSyncEntity();
             configProjectSyncEntity.setId(UUID.randomUUID());
             configProjectSyncEntity.setOrganizationId(projectSyncDto.getOrganizationId());
-            configProjectSyncEntity.setProjectName(projectSyncDto.getProjectName());
+            configProjectSyncEntity.setProjectExternalId(jiraProject.getId());
 
             configProjectSyncRepository.save(configProjectSyncEntity);
 
@@ -73,4 +76,13 @@ public class AdminService {
 
         return configSaved;
     }
+
+    public void synchronizeAllOrgs() {
+        Iterable<OrganizationEntity> orgs = organizationRepository.findAll();
+
+        for (OrganizationEntity org : orgs) {
+            jiraSyncService.synchronizeProjectsWithJira(org.getId());
+        }
+    }
+
 }

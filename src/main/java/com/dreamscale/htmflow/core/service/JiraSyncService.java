@@ -20,24 +20,26 @@ public class JiraSyncService {
     @Autowired
     TaskRepository taskRepository;
 
-    public void synchronizeProjectsWithJira(UUID organizationId, JiraConnection jiraConnection) {
+    @Autowired
+    ConfigProjectSyncRepository configProjectSyncRepository;
+
+    @Autowired
+    JiraService jiraService;
+
+
+    public void synchronizeProjectsWithJira(UUID organizationId) {
+
+        List<ConfigProjectSyncEntity> projectsToSync = configProjectSyncRepository.findByOrganizationId(organizationId);
+        List<String> externalIds = extractExternalIds(projectsToSync);
+
+        List<JiraProjectDto> jiraProjects = jiraService.getFilteredProjects(organizationId, externalIds);
         List<ProjectEntity> dbProjects = projectRepository.findByOrganizationId(organizationId);
-        List<JiraProjectDto> jiraProjects = jiraConnection.getProjects();
 
-        saveProjectUpdates(organizationId, dbProjects, jiraProjects);
+        saveProjectAndTaskUpdates(organizationId, dbProjects, jiraProjects);
+
     }
 
-    public void synchronizeOpenTasksWithJira(UUID organizationId, UUID projectId, JiraConnection jiraConnection) {
-
-        ProjectEntity dbProject = projectRepository.findById(projectId);
-        List<TaskEntity> dbTasks = taskRepository.findByProjectId(projectId);
-
-        List<JiraTaskDto> jiraTasks = jiraConnection.getOpenTasksForProject(dbProject.getExternalId());
-
-        saveTaskUpdates(organizationId, dbProject, dbTasks, jiraTasks);
-    }
-
-    private void saveProjectUpdates(UUID organizationId, List<ProjectEntity> dbProjects, List<JiraProjectDto> jiraProjects) {
+    private void saveProjectAndTaskUpdates(UUID organizationId, List<ProjectEntity> dbProjects, List<JiraProjectDto> jiraProjects) {
         Map<String, ProjectEntity> dbProjectsByExternalId = createEntityMapByExternalId(dbProjects);
 
         for (JiraProjectDto jiraProject : jiraProjects) {
@@ -47,9 +49,31 @@ public class JiraSyncService {
                 dbProject = createProjectEntityFromJiraProject(organizationId, jiraProject);
                 projectRepository.save(dbProject);
             }
+
+            synchronizeOpenTasks(organizationId, dbProject);
         }
 
     }
+
+    private void synchronizeOpenTasks(UUID organizationId, ProjectEntity dbProject) {
+
+        List<TaskEntity> dbTasks = taskRepository.findByProjectId(dbProject.getId());
+
+        List<JiraTaskDto> jiraTasks = jiraService.getOpenTasksForProject(organizationId, dbProject.getExternalId());
+
+        saveTaskUpdates(organizationId, dbProject, dbTasks, jiraTasks);
+    }
+
+
+    private List<String> extractExternalIds(List<ConfigProjectSyncEntity> projectsToSync) {
+        List<String> externalIds = new ArrayList<>();
+        for (ConfigProjectSyncEntity project : projectsToSync) {
+            externalIds.add(project.getProjectExternalId());
+        }
+        return externalIds;
+    }
+
+
 
     private void saveTaskUpdates(UUID organizationId, ProjectEntity dbProject, List<TaskEntity> dbTasks, List<JiraTaskDto> jiraTasks) {
         Map<String, TaskEntity> dbTasksByExternalId = createEntityMapByExternalId(dbTasks);

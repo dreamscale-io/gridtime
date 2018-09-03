@@ -20,12 +20,6 @@ import java.util.UUID;
 public class ProjectService {
 
     @Autowired
-    private JiraConnectionFactory jiraConnectionFactory;
-
-    @Autowired
-    private JiraSyncService jiraSyncService;
-
-    @Autowired
     private OrganizationRepository organizationRepository;
 
     @Autowired
@@ -47,27 +41,15 @@ public class ProjectService {
 
     public List<ProjectDto> getAllProjects(UUID organizationId) {
 
-        JiraConnection jiraConnection = connectToOrgJira(organizationId);
-        jiraSyncService.synchronizeProjectsWithJira(organizationId, jiraConnection);
-
         Iterable<ProjectEntity> projectEntities = projectRepository.findAll();
         return projectMapper.toApiList(projectEntities);
     }
 
     public List<TaskDto> getAllTasksForProject(UUID organizationId, UUID projectId) {
 
-        JiraConnection jiraConnection = connectToOrgJira(organizationId);
-        jiraSyncService.synchronizeOpenTasksWithJira(organizationId, projectId, jiraConnection);
-
         Iterable<TaskEntity> taskEntities = taskRepository.findByProjectId(projectId);
         return taskMapper.toApiList(taskEntities);
 
-    }
-
-    private JiraConnection connectToOrgJira(UUID organizationId) {
-        OrganizationEntity org = organizationRepository.findById(organizationId);
-
-        return jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
     }
 
 }

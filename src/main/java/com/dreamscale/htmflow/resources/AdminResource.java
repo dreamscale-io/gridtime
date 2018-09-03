@@ -29,5 +29,11 @@ public class AdminResource {
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
 
+    @PostMapping(ResourcePaths.JIRA_PATH + ResourcePaths.SYNC_PATH)
+    void synchronizeWithJira() {
+        adminService.synchronizeAllOrgs();
+    }
+
+
 
 }

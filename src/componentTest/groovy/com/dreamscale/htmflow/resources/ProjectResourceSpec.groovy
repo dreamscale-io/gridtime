@@ -17,6 +17,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.ProjectRepository
+import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
@@ -69,7 +70,7 @@ class ProjectResourceSpec extends Specification {
 		List<ProjectDto> projects = projectClient.getProjects()
 
 		then:
-		assert projects.size() == 6
+		assert projects.size() == 1
 		assert projects[0].id == entity.id
 		assert projects[0].name == entity.name
 		assert projects[0].externalId == entity.externalId
@@ -83,14 +84,24 @@ class ProjectResourceSpec extends Specification {
 		OrganizationMemberEntity organizationMemberEntity = createOrganizationMember(organizationEntity.getId(), testUser.getId())
 		organizationMemberRepository.save(organizationMemberEntity)
 
-		List<ProjectDto> projects = projectClient.getProjects();
-		UUID projectId = projects.get(0).getId();
+		ProjectEntity projectEntity = aRandom.projectEntity().build()
+		projectRepository.save(projectEntity)
+
+		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).build()
+		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).build()
+		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).build()
+		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).build()
+
+		taskRepository.save(taskEntity1)
+		taskRepository.save(taskEntity2)
+		taskRepository.save(taskEntity3)
+		taskRepository.save(taskEntity4)
 
 		when:
-		List<TaskDto> tasks = projectClient.getOpenTasksForProject(projectId.toString())
+		List<TaskDto> tasks = projectClient.getOpenTasksForProject(projectEntity.id.toString())
 
 		then:
-		assert tasks.size() > 0
+		assert tasks.size() == 4
 	}
 
 	@Ignore

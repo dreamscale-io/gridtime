@@ -15,4 +15,10 @@ public interface AdminClient {
     @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.SYNC_PATH)
     ProjectSyncOutputDto configProjectSync(ProjectSyncInputDto projectSyncDto);
 
+
+    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.JIRA_PATH + ResourcePaths.SYNC_PATH)
+    void syncAllOrgs();
+
+
+
 }
