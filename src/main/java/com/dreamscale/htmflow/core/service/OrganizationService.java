@@ -47,6 +47,9 @@ public class OrganizationService {
     private JiraConnectionFactory jiraConnectionFactory;
 
     @Autowired
+    private JiraService jiraService;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<OrganizationInputDto, OrganizationEntity> orgInputMapper;
     private DtoEntityMapper<OrganizationDto, OrganizationEntity> orgOutputMapper;
@@ -185,7 +188,7 @@ public class OrganizationService {
         OrganizationEntity orgEntity = organizationRepository.findById(organizationDto.getId());
 
         //if user is invalid, this will throw a 404
-        JiraUserDto jiraUser = lookupMatchingJiraUser(orgEntity, membershipInputDto.getOrgEmail());
+        JiraUserDto jiraUser = jiraService.getUserByEmail(orgEntity.getId(), membershipInputDto.getOrgEmail());
 
         MasterAccountEntity masterAccountEntity = new MasterAccountEntity();
         masterAccountEntity.setId(UUID.randomUUID());
@@ -221,26 +224,6 @@ public class OrganizationService {
         return membership;
     }
 
-
-    private JiraUserDto lookupMatchingJiraUser(OrganizationEntity orgEntity, String email) {
-        JiraConnection jiraConnection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
-
-        List<JiraUserDto> jiraUsers = jiraConnection.getUsers();
-
-        JiraUserDto selectedUser = null;
-        for (JiraUserDto jiraUser : jiraUsers) {
-            String jiraEmail = jiraUser.getEmailAddress();
-            if (jiraEmail != null && jiraEmail.equalsIgnoreCase(email)) {
-                selectedUser = jiraUser;
-            }
-        }
-
-        if (selectedUser == null) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "user not found", null, LoggingLevel.WARN));
-        }
-
-        return selectedUser;
-    }
 
     public OrganizationMemberEntity getDefaultMembership(UUID masterAccountId) {
         List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);

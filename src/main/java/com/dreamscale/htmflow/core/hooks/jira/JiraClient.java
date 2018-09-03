@@ -42,6 +42,8 @@ public interface JiraClient {
     @RequestLine("POST "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}" + JiraPaths.TRANSITIONS_PATH)
     void updateStatus(@Param("id") String id, JiraStatusPatch statusPatch);
 
+    @RequestLine("DELETE "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH + "/{id}")
+    void deleteTask(@Param("id") String id);
 
 
 //

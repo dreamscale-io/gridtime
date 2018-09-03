@@ -94,4 +94,8 @@ public class JiraConnection {
     public JiraUserDto getUserByKey(String userKey) {
         return jiraClient.getUser(userKey);
     }
+
+    public void deleteTask(String taskKey) {
+        jiraClient.deleteTask(taskKey);
+    }
 }
