@@ -22,7 +22,7 @@ public interface OrganizationClient {
     OrganizationDto decodeInvitation(@Param("token") String inviteToken);
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
-    MembershipDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
+    MemberRegistrationDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
 
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
     List<OrgMemberStatusDto> getMembers(@Param("id") String organizationId);

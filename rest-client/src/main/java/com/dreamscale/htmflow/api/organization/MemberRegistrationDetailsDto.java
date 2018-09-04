@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MembershipDetailsDto {
+public class MemberRegistrationDetailsDto {
     private UUID memberId;
     private String orgEmail;
     private String fullName;

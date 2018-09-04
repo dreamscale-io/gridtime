@@ -55,7 +55,7 @@ public class OrganizationResource {
      * A new master account will be created using the email, along with a product activation code
      */
     @PostMapping("/{id}" + ResourcePaths.MEMBER_PATH)
-    public MembershipDetailsDto registerMember(@PathVariable("id") String organizationId, @RequestBody MembershipInputDto membershipInputDto) {
+    public MemberRegistrationDetailsDto registerMember(@PathVariable("id") String organizationId, @RequestBody MembershipInputDto membershipInputDto) {
 
         return organizationService.registerMember(UUID.fromString(organizationId), membershipInputDto);
     }

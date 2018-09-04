@@ -1,14 +1,13 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.StubMasterAccountIdResolver
 import com.dreamscale.htmflow.api.account.AccountActivationDto
 import com.dreamscale.htmflow.api.account.ActivationCodeDto
-import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrgMemberStatusDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
+import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
@@ -16,9 +15,7 @@ import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
-import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
-import com.dreamscale.htmflow.core.security.MasterAccountIdResolver
 import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -117,7 +114,7 @@ class OrganizationResourceSpec extends Specification {
 
         when:
 
-        MembershipDetailsDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
+        MemberRegistrationDetailsDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         then:
         assert membershipDto != null
@@ -142,7 +139,7 @@ class OrganizationResourceSpec extends Specification {
         JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
         mockJiraService.getUserByEmail(_, _) >> janelleUser
 
-        MembershipDetailsDto detailsDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
+        MemberRegistrationDetailsDto detailsDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         ActivationCodeDto activationCode = new ActivationCodeDto();
         activationCode.setActivationCode(detailsDto.getActivationCode());

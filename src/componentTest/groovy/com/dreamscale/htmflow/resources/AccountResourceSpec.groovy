@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.api.account.AccountActivationDto
 import com.dreamscale.htmflow.api.account.ConnectionStatusDto
 import com.dreamscale.htmflow.api.account.HeartbeatDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
-import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
+import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
@@ -60,7 +60,7 @@ class AccountResourceSpec extends Specification {
         JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
         mockJiraService.getUserByEmail(_, _) >> janelleUser
 
-        MembershipDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
+        MemberRegistrationDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
 
         ActivationCodeDto activationCode = new ActivationCodeDto();
         activationCode.setActivationCode(membershipDto.getActivationCode());

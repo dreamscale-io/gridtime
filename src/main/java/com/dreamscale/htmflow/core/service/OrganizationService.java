@@ -147,7 +147,7 @@ public class OrganizationService {
         return organizationDto;
     }
 
-    public MembershipDetailsDto registerMember(UUID organizationId, MembershipInputDto membershipInputDto) {
+    public MemberRegistrationDetailsDto registerMember(UUID organizationId, MembershipInputDto membershipInputDto) {
 
         //if invitation is invalid, this will throw a 404
         OrganizationDto organizationDto = decodeInvitation(membershipInputDto.getInviteToken());
@@ -185,7 +185,7 @@ public class OrganizationService {
         activeAccountStatusRepository.save(accountStatusEntity);
 
 
-        MembershipDetailsDto membership = new MembershipDetailsDto();
+        MemberRegistrationDetailsDto membership = new MemberRegistrationDetailsDto();
         membership.setMemberId(memberEntity.getId());
         membership.setOrgEmail(memberEntity.getEmail());
         membership.setMasterAccountId(masterAccountEntity.getId());

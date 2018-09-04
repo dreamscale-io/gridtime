@@ -3,14 +3,17 @@ package com.dreamscale.htmflow.resources;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.admin.ProjectSyncInputDto;
 import com.dreamscale.htmflow.api.admin.ProjectSyncOutputDto;
+import com.dreamscale.htmflow.api.organization.AutoConfigInputDto;
+import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto;
 import com.dreamscale.htmflow.core.service.AdminService;
-import com.dreamscale.htmflow.core.service.JiraService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,11 +32,29 @@ public class AdminResource {
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
 
+
+    /**
+     * Synchronize all Jira Projects for all organizations
+     */
     @PostMapping(ResourcePaths.JIRA_PATH + ResourcePaths.SYNC_PATH)
     void synchronizeWithJira() {
         adminService.synchronizeAllOrgs();
     }
 
+    /**
+     * Configure DreamScale Organization with all membership accounts ready for activation
+     */
+    @PostMapping(ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.DREAMSCALE_PATH)
+    List<MemberRegistrationDetailsDto> configureDreamScaleOrg(@RequestBody AutoConfigInputDto inputConfig) {
+        return adminService.configureDreamScale(inputConfig);
+    }
 
+    /**
+     * Configure OnPrem Organization with all membership accounts ready for activation
+     */
+    @PostMapping(ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.ONPREM_PATH)
+    List<MemberRegistrationDetailsDto>  configureOnPremOrg(@RequestBody AutoConfigInputDto inputConfig) {
+        return adminService.configureOnPrem(inputConfig);
+    }
 
 }

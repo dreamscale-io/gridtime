@@ -1,10 +1,6 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
-import com.dreamscale.htmflow.api.organization.MembershipInputDto
-import com.dreamscale.htmflow.api.organization.OrganizationDto
-import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.TaskDto
 import com.dreamscale.htmflow.api.project.TaskInputDto
@@ -22,7 +18,6 @@ import com.dreamscale.htmflow.core.domain.TaskRepository
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
 import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
