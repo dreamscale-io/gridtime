@@ -9,10 +9,8 @@ import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraNewTaskDto;
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto;
+import com.dreamscale.htmflow.core.hooks.jira.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ErrorEntity;
 import org.dreamscale.exception.WebApplicationException;
@@ -24,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class JiraService {
 
@@ -81,6 +80,18 @@ public class JiraService {
         return projectsFound;
     }
 
+    public JiraSearchResultPage getOpenTasksForProject(UUID organizationId, String externalProjectId, int startAt, int maxResults) {
+        OrganizationEntity orgEntity = organizationRepository.findById(organizationId);
+
+        if (orgEntity == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
+        }
+
+        JiraConnection connection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
+
+        return connection.getOpenTasksForProject(externalProjectId, startAt, maxResults);
+    }
+
     public List<JiraTaskDto> getOpenTasksForProject(UUID organizationId, String externalProjectId) {
         OrganizationEntity orgEntity = organizationRepository.findById(organizationId);
 
@@ -90,7 +101,22 @@ public class JiraService {
 
         JiraConnection connection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
 
-        return connection.getOpenTasksForProject(externalProjectId);
+        int startAt = 0;
+        int maxResults = 100;
+
+        JiraSearchResultPage page = connection.getOpenTasksForProject(externalProjectId, startAt, maxResults);
+        log.info("Fetching "+page.getTotal() + " total tasks");
+
+        List<JiraTaskDto> allTasks = new ArrayList<>();
+        allTasks.addAll(page.getIssues());
+
+        while (page.getTotal() > startAt + maxResults) {
+            startAt += maxResults;
+            page = connection.getOpenTasksForProject(externalProjectId, startAt, maxResults);
+            allTasks.addAll(page.getIssues());
+        }
+
+        return allTasks;
     }
 
 
@@ -157,18 +183,10 @@ public class JiraService {
 
         JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
 
-        List<JiraUserDto> jiraUsers = jiraConnection.getUsers();
-
-        JiraUserDto selectedUser = null;
-        for (JiraUserDto jiraUser : jiraUsers) {
-            String jiraEmail = jiraUser.getEmailAddress();
-            if (jiraEmail != null && jiraEmail.equalsIgnoreCase(email)) {
-                selectedUser = jiraUser;
-            }
-        }
+        JiraUserDto selectedUser = jiraConnection.getUserByEmail(email);
 
         if (selectedUser == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_USER, "Jira User not found");
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_USER, "Jira User not found: "+email);
         }
 
         return selectedUser;

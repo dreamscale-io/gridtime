@@ -137,9 +137,11 @@ public class AdminService {
         OrganizationDto onpremOrg = organizationService.createOrganization(orgInput);
 
         configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "Toyota"));
+        configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "NBCU CPG"));
 
         List<MemberRegistrationDetailsDto> registrations = new ArrayList<>();
 
+        //toyota team
         registrations.add(registerMember(onpremOrg, "janelle_klein@onprem.com"));
         registrations.add(registerMember(onpremOrg, "adrian@onprem.com"));
         registrations.add(registerMember(onpremOrg, "pat@onprem.com"));
@@ -149,6 +151,17 @@ public class AdminService {
         registrations.add(registerMember(onpremOrg, "george@onprem.com"));
         registrations.add(registerMember(onpremOrg, "joegarcia@onprem.com"));
         registrations.add(registerMember(onpremOrg, "joshdeford@onprem.com"));
+
+        //cpg team
+        registrations.add(registerMember(onpremOrg, "ashley@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "corey@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "mfitzpatrick@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "kristian@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "joseph@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "mattk@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "noel@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "richard@onprem.com"));
+        registrations.add(registerMember(onpremOrg, "swetha@onprem.com"));
 
         return registrations;
     }

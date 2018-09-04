@@ -9,6 +9,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraSearchResultPage
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
 import org.dreamscale.exception.BadRequestException;
@@ -48,6 +49,18 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 		then:
 		assert jiraProjectDto != null;
+	}
+
+	def "should fetch a user by email"() {
+		given:
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
+
+		when:
+		JiraUserDto jiraUserDto = jiraService.getUserByEmail(validOrg.getId(), "janelle@dreamscale.io")
+
+		then:
+		assert jiraUserDto != null;
 	}
 
 	def "should throw exception if org not found"() {
@@ -99,6 +112,23 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 		then:
 		assert openTasks.size() == 3
+	}
+
+	def "should page through all tasks for project"() {
+		given:
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
+
+		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
+
+		when:
+		JiraSearchResultPage page1 = jiraService.getOpenTasksForProject(validOrg.id, project.id, 0, 2)
+		JiraSearchResultPage page2 = jiraService.getOpenTasksForProject(validOrg.id, project.id, 2, 2)
+
+		then:
+		assert page1.issues.size() == 2
+		assert page2.issues.size() == 1
+
 	}
 
 	def "should create new task and move to in progress and assign then done"() {

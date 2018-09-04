@@ -18,15 +18,12 @@ public class JiraConnection {
         return jiraClient.getProjects();
     }
 
-    public List<JiraTaskDto> getOpenTasksForProject(String projectId) {
+    public JiraSearchResultPage getOpenTasksForProject(String projectId, int startAt, int maxResults) {
         System.out.println(projectId);
         String jql = "project="+projectId+" and status not in (Done) order by updated desc";
-        String fields = "id,key,summary";
+        String fields = "id,key,summary,status";
 
-        JiraSearchResultPage searchResultPage = jiraClient.getTasks(jql, fields);
-
-        //TODO page through all the results
-        return searchResultPage.getIssues();
+        return jiraClient.getTasksByPage(jql, fields, startAt, maxResults);
     }
 
     public List<JiraUserDto> getUsers() {
@@ -38,6 +35,16 @@ public class JiraConnection {
             }
         }
         return filteredUsers;
+    }
+
+
+    public JiraUserDto getUserByEmail(String email) {
+        List<JiraUserDto> usersFound = jiraClient.findUserByEmail(email);
+        if (usersFound.size() > 0) {
+            return usersFound.get(0);
+        } else {
+            return null;
+        }
     }
 
     public JiraTaskDto createTask(JiraNewTaskDto newTask) {

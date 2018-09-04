@@ -20,9 +20,20 @@ public interface JiraClient {
             "?jql={query}&fields={fields}")
     JiraSearchResultPage getTasks(@Param("query") String query, @Param("fields") String fields);
 
+    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.SEARCH_PATH +
+            "?jql={query}&fields={fields}&startAt={start}&maxResults={max}")
+    JiraSearchResultPage getTasksByPage(@Param("query") String query,
+                                        @Param("fields") String fields,
+                                        @Param("start") int startAt,
+                                        @Param("max") int maxResults);
+
     @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
             "?username=%25&includeActive=true&includeInactive=false")
     List<JiraUserDto> getUsers();
+
+    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
+            "?username={email}&includeActive=true&includeInactive=false")
+    List<JiraUserDto> findUserByEmail(@Param("email") String email);
 
     @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + "?key={user}")
     JiraUserDto getUser(@Param("user") String userKey);
