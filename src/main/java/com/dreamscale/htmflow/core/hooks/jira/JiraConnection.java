@@ -24,6 +24,8 @@ public class JiraConnection {
         String fields = "id,key,summary";
 
         JiraSearchResultPage searchResultPage = jiraClient.getTasks(jql, fields);
+
+        //TODO page through all the results
         return searchResultPage.getIssues();
     }
 

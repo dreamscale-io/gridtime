@@ -12,8 +12,6 @@ import java.util.*;
 @Service
 public class JiraSyncService {
 
-
-
     @Autowired
     ProjectRepository projectRepository;
 
@@ -88,6 +86,31 @@ public class JiraSyncService {
                 taskRepository.save(dbTask);
             }
         }
+
+        List<TaskEntity> dbTasksNotOpenInJira = findDbTasksNotOpenInJira(dbTasks, jiraTasks);
+
+        for (TaskEntity dbTaskNotInJira : dbTasksNotOpenInJira) {
+            dbTaskNotInJira.setStatus("Done");
+            taskRepository.save(dbTaskNotInJira);
+        }
+    }
+
+    private List<TaskEntity> findDbTasksNotOpenInJira(List<TaskEntity> dbTasks, List<JiraTaskDto> jiraTasks) {
+        Map<String, JiraTaskDto> jiraTasksById = new HashMap<>();
+
+        for (JiraTaskDto jiraTask : jiraTasks) {
+            jiraTasksById.put(jiraTask.getId(), jiraTask);
+        }
+
+        List<TaskEntity> dbTasksNotInJira = new ArrayList<>();
+
+        for (TaskEntity dbTask : dbTasks) {
+            if (jiraTasksById.get(dbTask.getExternalId()) == null) {
+                dbTasksNotInJira.add(dbTask);
+            }
+        }
+
+        return dbTasksNotInJira;
     }
 
     private boolean isTaskUpdated(TaskEntity dbTask, JiraTaskDto jiraTask) {
