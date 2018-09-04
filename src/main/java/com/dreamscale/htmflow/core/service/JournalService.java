@@ -4,12 +4,11 @@ import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.journal.IntentionOutputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamscale.exception.ErrorEntity;
-import org.dreamscale.exception.WebApplicationException;
-import org.dreamscale.logging.LoggingLevel;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -94,7 +93,7 @@ public class JournalService {
     private UUID getMemberIdForAccount(UUID masterAccountId, UUID organizationId) {
         OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
         if (memberEntity == null) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "membership not found", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found");
         } else {
             return memberEntity.getId();
         }
@@ -103,7 +102,7 @@ public class JournalService {
     private UUID getOrganizationIdForProject(UUID projectId) {
         ProjectEntity projectEntity = projectRepository.findById(projectId);
         if (projectEntity == null) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "project not found", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Project not found");
         } else {
             return projectEntity.getOrganizationId();
         }
@@ -112,7 +111,7 @@ public class JournalService {
     private void validateMemberWithinOrg(OrganizationDto organization, UUID memberId) {
         OrganizationMemberEntity otherMember = organizationMemberRepository.findById(memberId);
         if (otherMember == null || !otherMember.getOrganizationId().equals(organization.getId())) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "member not found in organization", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
         }
     }
 

@@ -6,8 +6,10 @@ import com.dreamscale.htmflow.api.account.HeartbeatDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ErrorEntity;
 import org.dreamscale.exception.WebApplicationException;
 import org.dreamscale.logging.LoggingLevel;
@@ -30,7 +32,7 @@ public class AccountService implements MasterAccountIdResolver {
     public AccountActivationDto activate(String activationCode) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
         if (masterAccountEntity == null) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "activationCode not found", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_ACTIVATION_CODE, "Activation code not found");
         }
 
         String apiKey = generateAPIKey();

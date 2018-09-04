@@ -5,15 +5,13 @@ import com.dreamscale.htmflow.api.organization.*;
 import com.dreamscale.htmflow.api.status.ConnectionResultDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamscale.exception.ErrorEntity;
-import org.dreamscale.exception.WebApplicationException;
-import org.dreamscale.logging.LoggingLevel;
+import org.dreamscale.exception.BadRequestException;
+import org.dreamscale.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -143,7 +141,7 @@ public class OrganizationService {
             organizationDto.setInviteLink(constructInvitationLink(inviteToken));
             organizationDto.setConnectionStatus(Status.VALID);
         } else {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "token not found", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITE_TOKEN, "Token not found");
         }
 
         return organizationDto;
@@ -155,8 +153,7 @@ public class OrganizationService {
         OrganizationDto organizationDto = decodeInvitation(membershipInputDto.getInviteToken());
 
         if (!organizationDto.getId().equals(organizationId)) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null,
-                    "invitation token doesn't match organization", null, LoggingLevel.WARN));
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Invitation token doesn't match organization");
         }
 
         OrganizationEntity orgEntity = organizationRepository.findById(organizationDto.getId());
@@ -203,7 +200,7 @@ public class OrganizationService {
         List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
 
         if (orgMemberships == null || orgMemberships.size() == 0) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "default organization not found", null, LoggingLevel.ERROR));
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
         }
 
         return orgMemberships.get(0);
@@ -213,7 +210,7 @@ public class OrganizationService {
         List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
 
         if (orgMemberships == null || orgMemberships.size() == 0) {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "default organization not found", null, LoggingLevel.ERROR));
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
         }
 
         OrganizationEntity organizationEntity = organizationRepository.findById(orgMemberships.get(0).getOrganizationId());
@@ -248,14 +245,10 @@ public class OrganizationService {
             }
 
         } else {
-            throw new WebApplicationException(404, new ErrorEntity("404", null, "members not found", null, LoggingLevel.WARN));
+            throw new NotFoundException("No members found in organization");
         }
 
         return orgMemberDtos;
     }
 
-    private class ConnectionResult {
-        Status status;
-        String errorMessage;
-    }
 }
