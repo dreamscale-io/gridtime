@@ -66,7 +66,8 @@ public class TaskService {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());
         taskEntity.setName(jiraTaskDto.getKey());
-        taskEntity.setSummary(taskInputDto.getSummary());
+        taskEntity.setSummary(jiraTaskDto.getSummary());
+        taskEntity.setStatus(jiraTaskDto.getStatus());
         taskEntity.setExternalId(jiraTaskDto.getId());
         taskEntity.setProjectId(projectId);
         taskEntity.setOrganizationId(organizationId);

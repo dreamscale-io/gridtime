@@ -16,6 +16,8 @@ public class TaskDto {
     private UUID id;
     private String name;
     private String summary;
+    private String status;
+
     private String externalId;
 
     private UUID projectId;

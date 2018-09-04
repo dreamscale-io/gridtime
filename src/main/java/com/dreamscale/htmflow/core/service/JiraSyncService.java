@@ -12,7 +12,7 @@ import java.util.*;
 @Service
 public class JiraSyncService {
 
-    private static final String JIRA_SUMMARY = "summary";
+
 
     @Autowired
     ProjectRepository projectRepository;
@@ -74,7 +74,6 @@ public class JiraSyncService {
     }
 
 
-
     private void saveTaskUpdates(UUID organizationId, ProjectEntity dbProject, List<TaskEntity> dbTasks, List<JiraTaskDto> jiraTasks) {
         Map<String, TaskEntity> dbTasksByExternalId = createEntityMapByExternalId(dbTasks);
 
@@ -92,13 +91,23 @@ public class JiraSyncService {
     }
 
     private boolean isTaskUpdated(TaskEntity dbTask, JiraTaskDto jiraTask) {
-        Object jiraSummary = jiraTask.getFields().get(JIRA_SUMMARY);
+        String jiraSummary = jiraTask.getSummary();
         String dbSummary = dbTask.getSummary();
-        return jiraSummary != null && !jiraSummary.toString().equals(dbSummary);
+
+        boolean summaryIsDifferent = jiraSummary != null && !jiraSummary.equals(dbSummary);
+
+        String jiraStatus = jiraTask.getStatus();
+        String dbStatus = dbTask.getStatus();
+
+        boolean statusIsDifferent = jiraStatus != null && !jiraStatus.equals(dbStatus);
+
+        return summaryIsDifferent || statusIsDifferent;
     }
 
+
     private TaskEntity updateTaskFields(TaskEntity dbTask, JiraTaskDto jiraTask) {
-        dbTask.setSummary(jiraTask.getFields().get(JIRA_SUMMARY).toString());
+        dbTask.setSummary(jiraTask.getSummary());
+        dbTask.setStatus(jiraTask.getStatus());
         return dbTask;
     }
 
@@ -107,7 +116,8 @@ public class JiraSyncService {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());
         taskEntity.setName(jiraTask.getKey());
-        taskEntity.setSummary(jiraTask.getFields().get(JIRA_SUMMARY).toString());
+        taskEntity.setSummary(jiraTask.getSummary());
+        taskEntity.setStatus(jiraTask.getStatus());
         taskEntity.setExternalId(jiraTask.getId());
         taskEntity.setProjectId(projectId);
         taskEntity.setOrganizationId(organizationId);

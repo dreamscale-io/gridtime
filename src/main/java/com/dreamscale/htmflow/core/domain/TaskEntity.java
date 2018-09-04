@@ -20,6 +20,7 @@ public class TaskEntity implements External {
     private UUID id;
     private String name;
     private String summary;
+    private String status;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "organization_id")

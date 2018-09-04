@@ -116,15 +116,15 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 		then:
 		assert newTask.key != null
-		assert newTask.fields.get("status").get("name") == "In Progress"
-		assert newTask.fields.get("assignee").get("emailAddress") == "janelle@dreamscale.io"
+		assert newTask.status == "In Progress"
+		assert newTask.assignee == "janelle@dreamscale.io"
 
 		when:
 		JiraTaskDto closedTask = jiraService.closeTask(validOrg.id, newTask.key);
 
 		then:
 		assert closedTask != null
-		assert closedTask.fields.get("status").get("name") == "Done"
+		assert closedTask.status == "Done"
 
 		when:
 		jiraService.deleteTask(validOrg.id, newTask.key);

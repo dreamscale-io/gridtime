@@ -120,7 +120,7 @@ class ProjectResourceSpec extends Specification {
 		JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
 		mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto
 
-		TaskInputDto taskInputDto = new TaskInputDto("Hello summary!", "description!!")
+		TaskInputDto taskInputDto = new TaskInputDto(newJiraTaskDto.summary, "description!!")
 
 		when:
 		TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
@@ -128,7 +128,7 @@ class ProjectResourceSpec extends Specification {
 		then:
 		assert task != null
 		assert task.externalId != null
-		assert task.summary == "Hello summary!"
+		assert task.summary == newJiraTaskDto.summary
 	}
 
 	private OrganizationEntity createOrganization() {
