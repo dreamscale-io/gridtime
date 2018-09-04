@@ -9,15 +9,21 @@ import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrgMemberStatusDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
+import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.domain.ProjectEntity
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver
+import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+
+import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
 class OrganizationResourceSpec extends Specification {
@@ -33,6 +39,9 @@ class OrganizationResourceSpec extends Specification {
 
 	@Autowired
 	MasterAccountRepository masterAccountRepository
+
+    @Autowired
+    JiraService mockJiraService
 
     @Autowired
     MasterAccountEntity testUser;
@@ -103,6 +112,9 @@ class OrganizationResourceSpec extends Specification {
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
 
+        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        mockJiraService.getUserByEmail(_, _) >> jiraUserDto
+
         when:
 
         MembershipDetailsDto membershipDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
@@ -112,7 +124,7 @@ class OrganizationResourceSpec extends Specification {
         assert membershipDto.getMemberId() != null
         assert membershipDto.getMasterAccountId() != null
         assert membershipDto.getOrgEmail() == membershipInputDto.getOrgEmail()
-        assert membershipDto.getFullName() == "Janelle Klein" //pulled from Jira
+        assert membershipDto.getFullName() == jiraUserDto.displayName
         assert membershipDto.getActivationCode() != null
 
     }
@@ -127,6 +139,9 @@ class OrganizationResourceSpec extends Specification {
         MembershipInputDto membershipInputDto = new MembershipInputDto()
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
+        JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        mockJiraService.getUserByEmail(_, _) >> janelleUser
+
         MembershipDetailsDto detailsDto = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         ActivationCodeDto activationCode = new ActivationCodeDto();
@@ -141,6 +156,9 @@ class OrganizationResourceSpec extends Specification {
         testUser.setId(masterAccountEntity.getId())
 
         membershipInputDto.setOrgEmail("kara@dreamscale.io")
+        JiraUserDto karaUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        mockJiraService.getUserByEmail(_, _) >> karaUser
+
         organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
 
         when:
@@ -161,6 +179,8 @@ class OrganizationResourceSpec extends Specification {
         organization.setJiraSiteUrl("dreamscale.atlassian.net")
         organization.setJiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
 
+        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
+
         return organization;
     }
 
@@ -170,6 +190,8 @@ class OrganizationResourceSpec extends Specification {
         organization.setJiraUser("fake")
         organization.setJiraSiteUrl("dreamscale.atlassian.net")
         organization.setJiraApiKey("blabla")
+
+        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.FAILED, "failed")
 
         return organization;
     }

@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.organization.*;
+import com.dreamscale.htmflow.api.status.ConnectionResultDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
@@ -44,9 +45,6 @@ public class OrganizationService {
     private MemberStatusRepository memberStatusRepository;
 
     @Autowired
-    private JiraConnectionFactory jiraConnectionFactory;
-
-    @Autowired
     private JiraService jiraService;
 
     @Autowired
@@ -63,17 +61,17 @@ public class OrganizationService {
     public OrganizationDto createOrganization(OrganizationInputDto orgInputDto) {
 
         OrganizationEntity inputOrgEntity = orgInputMapper.toEntity(orgInputDto);
-        ConnectionResult connectionResult = validateJiraConnection(inputOrgEntity);
+        ConnectionResultDto connectionResult = jiraService.validateJiraConnection(inputOrgEntity);
 
         OrganizationDto outputDto = null;
 
-        if (connectionResult.status == Status.FAILED) {
+        if (connectionResult.getStatus() == Status.FAILED) {
             outputDto = orgOutputMapper.toApi(inputOrgEntity);
-            outputDto.setConnectionStatus(connectionResult.status);
-            outputDto.setConnectionFailedMessage(connectionResult.errorMessage);
+            outputDto.setConnectionStatus(connectionResult.getStatus());
+            outputDto.setConnectionFailedMessage(connectionResult.getMessage());
         } else {
             outputDto = findOrCreateOrganization(orgInputDto);
-            outputDto.setConnectionStatus(connectionResult.status);
+            outputDto.setConnectionStatus(connectionResult.getStatus());
         }
 
         return outputDto;
@@ -120,30 +118,6 @@ public class OrganizationService {
         return inviteToken;
     }
 
-    private ConnectionResult validateJiraConnection(OrganizationEntity orgEntity) {
-        ConnectionResult result = new ConnectionResult();
-
-        if (jiraUserNotInOrgDomain(orgEntity.getDomainName(), orgEntity.getJiraUser())) {
-            result.status = Status.FAILED;
-            result.errorMessage = "Jira user not in organization domain";
-        } else {
-            try {
-                JiraConnection connection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
-                connection.validate();
-                result.status = Status.VALID;
-            } catch (Exception ex) {
-                result.status = Status.FAILED;
-                result.errorMessage = "Failed to connect to Jira";
-                //result.errorMessage = ex.getMessage();
-            }
-        }
-
-        return result;
-    }
-
-    private boolean jiraUserNotInOrgDomain(String domainName, String jiraUser) {
-        return domainName == null || jiraUser == null || !jiraUser.toLowerCase().endsWith(domainName.toLowerCase());
-    }
 
     private String generateToken() {
         return UUID.randomUUID().toString().replace("-", "");

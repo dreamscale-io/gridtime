@@ -10,13 +10,18 @@ import com.dreamscale.htmflow.api.organization.MembershipDetailsDto
 import com.dreamscale.htmflow.api.organization.MembershipInputDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
+import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
+import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+
+import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
 class AccountResourceSpec extends Specification {
@@ -32,6 +37,9 @@ class AccountResourceSpec extends Specification {
     @Autowired
     MasterAccountRepository masterAccountRepository
 
+    @Autowired
+    JiraService mockJiraService
+
     def setup() {
         organizationRepository.deleteAll()
         masterAccountRepository.deleteAll()
@@ -41,11 +49,16 @@ class AccountResourceSpec extends Specification {
         given:
 
         OrganizationInputDto organization = createValidOrganization()
+        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
+
         OrganizationDto organizationDto = organizationClient.createOrganization(organization)
 
         MembershipInputDto membershipInputDto = new MembershipInputDto()
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
+
+        JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        mockJiraService.getUserByEmail(_, _) >> janelleUser
 
         MembershipDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
 

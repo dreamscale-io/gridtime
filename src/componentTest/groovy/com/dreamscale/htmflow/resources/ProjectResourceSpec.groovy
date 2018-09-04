@@ -113,17 +113,11 @@ class ProjectResourceSpec extends Specification {
 	def "should create new task"() {
 		given:
 
-		OrganizationInputDto organization = createOrganizationInput()
+		OrganizationEntity organizationEntity = createOrganization();
+		organizationRepository.save(organizationEntity)
 
-		OrganizationDto organizationDto = organizationClient.createOrganization(organization)
-		OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken());
-
-		MembershipInputDto membershipInputDto = new MembershipInputDto()
-		membershipInputDto.setInviteToken(organizationDto.getInviteToken())
-		membershipInputDto.setOrgEmail("janelle@dreamscale.io")
-
-		MembershipDetailsDto memberDetails = organizationClient.registerMember(inviteOrg.getId().toString(), membershipInputDto)
-		testUser.id = memberDetails.masterAccountId
+		OrganizationMemberEntity organizationMemberEntity = createOrganizationMember(organizationEntity.getId(), testUser.getId())
+		organizationMemberRepository.save(organizationMemberEntity)
 
 		ProjectEntity projectEntity = aRandom.projectEntity().build()
 		projectRepository.save(projectEntity)
@@ -137,21 +131,9 @@ class ProjectResourceSpec extends Specification {
 		TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
 
 		then:
-		println task
 		assert task != null
 		assert task.externalId != null
 		assert task.summary == "Hello summary!"
-	}
-
-	private OrganizationInputDto createOrganizationInput() {
-		OrganizationInputDto organization = new OrganizationInputDto();
-		organization.setOrgName("DreamScale")
-		organization.setDomainName("dreamscale.io")
-		organization.setJiraUser("janelle@dreamscale.io")
-		organization.setJiraSiteUrl("dreamscale.atlassian.net")
-		organization.setJiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
-
-		return organization;
 	}
 
 	private OrganizationEntity createOrganization() {

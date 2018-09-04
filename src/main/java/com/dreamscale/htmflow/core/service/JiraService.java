@@ -3,6 +3,8 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.project.TaskInputDto;
+import com.dreamscale.htmflow.api.status.ConnectionResultDto;
+import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
@@ -170,5 +172,29 @@ public class JiraService {
         }
 
         return selectedUser;
+    }
+
+    public ConnectionResultDto validateJiraConnection(OrganizationEntity orgEntity) {
+        ConnectionResultDto result = new ConnectionResultDto();
+
+        if (jiraUserNotInOrgDomain(orgEntity.getDomainName(), orgEntity.getJiraUser())) {
+            result.setStatus(Status.FAILED);
+            result.setMessage("Jira user not in organization domain");
+        } else {
+            try {
+                JiraConnection connection = jiraConnectionFactory.connect(orgEntity.getJiraSiteUrl(), orgEntity.getJiraUser(), orgEntity.getJiraApiKey());
+                connection.validate();
+                result.setStatus(Status.VALID);
+            } catch (Exception ex) {
+                result.setStatus(Status.FAILED);
+                result.setMessage("Failed to connect to Jira");
+            }
+        }
+
+        return result;
+    }
+
+    private boolean jiraUserNotInOrgDomain(String domainName, String jiraUser) {
+        return domainName == null || jiraUser == null || !jiraUser.toLowerCase().endsWith(domainName.toLowerCase());
     }
 }

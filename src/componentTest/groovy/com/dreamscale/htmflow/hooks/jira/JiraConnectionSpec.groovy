@@ -28,7 +28,7 @@ class JiraConnectionSpec extends Specification {
 
         then:
         println projects
-        assert projects.size() == 5
+        assert projects.size() == 6
     }
 
     def "should get jira tasks"() {

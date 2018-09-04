@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.project.TaskInputDto
 import com.dreamscale.htmflow.client.OrganizationClient
+import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
@@ -39,7 +40,8 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should fetch a jira project by name"() {
 		given:
-		OrganizationDto validOrg = organizationClient.createOrganization(createValidOrganization());
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
 
 		when:
 		JiraProjectDto jiraProjectDto = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
@@ -59,7 +61,8 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should throw exception if project not found"() {
 		given:
-		OrganizationDto validOrg = organizationClient.createOrganization(createValidOrganization());
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
 
 		when:
 		JiraProjectDto jiraProjectDto = jiraService.getProjectByName(validOrg.id, "unknown-project")
@@ -70,7 +73,8 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should filter projects by list of ids"() {
 		given:
-		OrganizationDto validOrg = organizationClient.createOrganization(createValidOrganization());
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
 
 		JiraProjectDto project1 = jiraService.getProjectByName(validOrg.getId(), "flow-data-plugins")
 		JiraProjectDto project2 = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
@@ -85,7 +89,8 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should get all open tasks for project"() {
 		given:
-		OrganizationDto validOrg = organizationClient.createOrganization(createValidOrganization());
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
 
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
 
@@ -98,8 +103,9 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should create new task and move to in progress and assign then done"() {
 		given:
-		OrganizationDto validOrg = organizationClient.createOrganization(createValidOrganization());
-
+		OrganizationEntity validOrg = createValidOrganization();
+		organizationRepository.save(validOrg)
+		
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
 		JiraUserDto jiraUser = jiraService.getUserByEmail(validOrg.getId(), "janelle@dreamscale.io")
 
@@ -128,17 +134,16 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	}
 
-
-
-	private OrganizationInputDto createValidOrganization() {
-		OrganizationInputDto organization = new OrganizationInputDto();
-		organization.setOrgName("DreamScale")
-		organization.setDomainName("dreamscale.io")
-		organization.setJiraUser("janelle@dreamscale.io")
-		organization.setJiraSiteUrl("dreamscale.atlassian.net")
-		organization.setJiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
-
-		return organization;
+	private OrganizationEntity createValidOrganization() {
+		return OrganizationEntity.builder()
+				.id(UUID.randomUUID())
+				.orgName("DreamScale")
+				.domainName("dreamscale.io")
+				.jiraUser("janelle@dreamscale.io")
+				.jiraSiteUrl("dreamscale.atlassian.net")
+				.jiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
+				.build()
 	}
+
 
 }
