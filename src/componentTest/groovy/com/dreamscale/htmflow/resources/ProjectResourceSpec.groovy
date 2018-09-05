@@ -73,30 +73,6 @@ class ProjectResourceSpec extends Specification {
 		assert projects[0].externalId == projectEntity.externalId
 	}
 
-	def "should retrieve task list"() {
-		given:
-		OrganizationEntity org = createOrgAndTestUserMembership();
-
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
-		projectRepository.save(projectEntity)
-
-		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).build()
-		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).build()
-		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).build()
-		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).build()
-
-		taskRepository.save(taskEntity1)
-		taskRepository.save(taskEntity2)
-		taskRepository.save(taskEntity3)
-		taskRepository.save(taskEntity4)
-
-		when:
-		List<TaskDto> tasks = projectClient.getOpenTasksForProject(projectEntity.id.toString())
-
-		then:
-		assert tasks.size() == 4
-	}
-
 	def "should find tasks starting with search string"() {
 		given:
 		OrganizationEntity organizationEntity = createOrgAndTestUserMembership();

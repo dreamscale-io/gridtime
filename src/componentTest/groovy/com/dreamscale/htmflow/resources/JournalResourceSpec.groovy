@@ -2,11 +2,10 @@ package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.journal.IntentionInputDto
-import com.dreamscale.htmflow.api.journal.IntentionOutputDto
+import com.dreamscale.htmflow.api.journal.IntentionDto
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto
 import com.dreamscale.htmflow.client.JournalClient
-import com.dreamscale.htmflow.client.ProjectClient
 import com.dreamscale.htmflow.core.domain.IntentionRepository
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
@@ -29,9 +28,6 @@ class JournalResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient
-
-    @Autowired
-    ProjectClient projectClient
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -73,13 +69,13 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build();
 
         when:
-        IntentionOutputDto output = journalClient.createIntention(intentionInputDto)
+        IntentionDto intention = journalClient.createIntention(intentionInputDto)
 
         then:
-        assert output != null
-        assert output.getId() != null
-        assert output.getTaskId() == intentionInputDto.getTaskId()
-        assert output.description == intentionInputDto.getDescription()
+        assert intention != null
+        assert intention.getId() != null
+        assert intention.getTaskId() == intentionInputDto.getTaskId()
+        assert intention.description == intentionInputDto.getDescription()
     }
 
     def "get recent intentions"() {
@@ -94,12 +90,38 @@ class JournalResourceSpec extends Specification {
         journalClient.createIntention(intention2)
 
         when:
-        List<IntentionOutputDto> intentions = journalClient.getRecentIntentions();
+        List<IntentionDto> intentions = journalClient.getRecentIntentions();
 
         then:
         assert intentions != null
         assert intentions.size() == 2
     }
+
+    def "get recent intentions with limit"() {
+        given:
+        TaskEntity task = createOrganizationAndTask();
+        createMembership(task.getOrganizationId(), testUser.getId());
+
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build();
+
+
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
+        journalClient.createIntention(intention3)
+        journalClient.createIntention(intention4)
+
+
+        when:
+        List<IntentionDto> intentions = journalClient.getRecentIntentionsWithLimit(3);
+
+        then:
+        assert intentions != null
+        assert intentions.size() == 3
+    }
+
 
     def "get recent projects and tasks"() {
         given:
@@ -137,7 +159,7 @@ class JournalResourceSpec extends Specification {
         journalClient.createIntention(intention4)
 
         when:
-        RecentTasksByProjectDto recentTasksByProject = projectClient.getRecentTasksByProject();
+        RecentTasksByProjectDto recentTasksByProject = journalClient.getRecentTasksByProject();
 
         then:
         assert recentTasksByProject != null
@@ -168,11 +190,35 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
 
         when:
-        List<IntentionOutputDto> intentions = journalClient.getRecentIntentionsForMember(memberWithIntentions.getId().toString());
+        List<IntentionDto> intentions = journalClient.getRecentIntentionsForMember(memberWithIntentions.getId().toString());
 
         then:
         assert intentions != null
         assert intentions.size() == 2
+    }
+
+    def "get recent intentions for other member with limit"() {
+        given:
+        TaskEntity task = createOrganizationAndTask();
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), testUser.getId());
+
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
+
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
+
+        //change active logged in user to a different user within same organization
+        testUser.setId(UUID.randomUUID())
+        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
+
+        when:
+        List<IntentionDto> intentions = journalClient.getRecentIntentionsForMemberWithLimit(
+                memberWithIntentions.getId().toString(), 1);
+
+        then:
+        assert intentions != null
+        assert intentions.size() == 1
     }
 
     private TaskEntity createOrganizationAndTask() {

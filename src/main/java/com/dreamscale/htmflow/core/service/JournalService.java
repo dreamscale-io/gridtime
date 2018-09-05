@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.service;
 
+import com.dreamscale.htmflow.api.journal.IntentionDto;
 import com.dreamscale.htmflow.api.journal.IntentionInputDto;
-import com.dreamscale.htmflow.api.journal.IntentionOutputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
@@ -40,15 +40,15 @@ public class JournalService {
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<IntentionInputDto, IntentionEntity> intentionInputMapper;
-    private DtoEntityMapper<IntentionOutputDto, IntentionEntity> intentionOutputMapper;
+    private DtoEntityMapper<IntentionDto, IntentionEntity> intentionOutputMapper;
 
     @PostConstruct
     private void init() {
         intentionInputMapper = mapperFactory.createDtoEntityMapper(IntentionInputDto.class, IntentionEntity.class);
-        intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionOutputDto.class, IntentionEntity.class);
+        intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionDto.class, IntentionEntity.class);
     }
 
-    public IntentionOutputDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
+    public IntentionDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
         UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
         UUID memberId = getMemberIdForAccount(masterAccountId, organizationId);
 
@@ -66,23 +66,23 @@ public class JournalService {
         return intentionOutputMapper.toApi(intentionEntity);
     }
 
-    public List<IntentionOutputDto> getRecentIntentions(UUID masterAccountId) {
+    public List<IntentionDto> getRecentIntentions(UUID masterAccountId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
+        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdWithLimit(memberId, limit);
         return intentionOutputMapper.toApiList(intentionEntities);
     }
 
-    public List<IntentionOutputDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId) {
+    public List<IntentionDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         validateMemberWithinOrg(organization, memberId);
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findTop100ByMemberIdOrderByPosition(memberId);
+        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdWithLimit(memberId, limit);
         return intentionOutputMapper.toApiList(intentionEntities);
     }
 
-    public List<IntentionOutputDto> getIntentionsWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
+    public List<IntentionDto> getIntentionsWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 

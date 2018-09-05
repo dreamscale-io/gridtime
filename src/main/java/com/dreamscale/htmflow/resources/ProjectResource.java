@@ -31,26 +31,19 @@ public class ProjectResource {
     @Autowired
     private OrganizationService organizationService;
 
-    @Autowired
-    private RecentActivityService recentActivityService;
 
+    /**
+     * Retrieve all projects for the organization
+     */
     @GetMapping()
     List<ProjectDto> getAllProjects() {
-
         return projectService.getAllProjects(getDefaultOrgId());
     }
 
-    @GetMapping("/{id}" + ResourcePaths.TASK_PATH)
-    List<TaskDto> getAllOpenTasksForProject(@PathVariable("id") String projectId) {
-
-        return projectService.getAllTasksForProject(getDefaultOrgId(), UUID.fromString(projectId));
-    }
-
-    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.NAME_PATH + "/{name}")
-    TaskDto findTaskByName(@PathVariable("id") String projectId, @PathVariable("name") String taskName) {
-
-        return taskService.findByTaskName(getDefaultOrgId(), UUID.fromString(projectId), taskName);
-    }
+    /**
+     * Autocomplete search finds the top 10 tasks with a name that starts with the provided search string.
+     * Search must include a number, so search for FP-1 will return results, whereas searching for FP is a BadRequest
+     */
 
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.SEARCH_PATH + "/{startsWith}")
     List<TaskDto> findTasksStartingWith(@PathVariable("id") String projectId, @PathVariable("startsWith") String startsWith) {
@@ -58,15 +51,10 @@ public class ProjectResource {
         return taskService.findTasksStartingWith(getDefaultOrgId(), UUID.fromString(projectId), startsWith);
     }
 
-
-
-    @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
-    RecentTasksByProjectDto getRecentTasksByProject() {
-        RequestContext context = RequestContext.get();
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
-
-        return recentActivityService.getRecentTasksByProject(memberEntity.getId());
-    }
+    /**
+     * Creates a new task in Jira, assigns it to the user, and moves the state to In Progress.
+     * The returned TaskDto includes the information for the newly created task.
+     */
 
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntentionOutputDto {
+public class IntentionDto {
 
     private UUID id;
     private LocalDateTime position;
