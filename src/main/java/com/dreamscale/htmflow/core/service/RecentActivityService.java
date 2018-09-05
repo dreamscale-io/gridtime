@@ -47,35 +47,35 @@ public class RecentActivityService {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-    public void updateRecentProjects(IntentionEntity activeChunkEvent) {
+    public void updateRecentProjects(IntentionEntity activeIntention) {
 
-        List<RecentProjectEntity> recentProjects = recentProjectRepository.findByMemberId(activeChunkEvent.getMemberId());
+        List<RecentProjectEntity> recentProjects = recentProjectRepository.findByMemberId(activeIntention.getMemberId());
 
-        RecentProjectEntity matchingProject = findMatchingProject(recentProjects, activeChunkEvent.getProjectId());
+        RecentProjectEntity matchingProject = findMatchingProject(recentProjects, activeIntention.getProjectId());
         if (matchingProject != null) {
             matchingProject.setLastAccessed(LocalDateTime.now());
             recentProjectRepository.save(matchingProject);
         } else {
             deleteOldestProjectOverMaxRecent(recentProjects);
 
-            RecentProjectEntity activeProject = createRecentProject(activeChunkEvent);
+            RecentProjectEntity activeProject = createRecentProject(activeIntention);
             recentProjectRepository.save(activeProject);
         }
 
     }
 
-    public void updateRecentTasks(IntentionEntity activeChunkEvent) {
+    public void updateRecentTasks(IntentionEntity activeIntention) {
 
-        List<RecentTaskEntity> recentTasks = recentTaskRepository.findByMemberIdAndProjectId(activeChunkEvent.getMemberId(), activeChunkEvent.getProjectId());
+        List<RecentTaskEntity> recentTasks = recentTaskRepository.findByMemberIdAndProjectId(activeIntention.getMemberId(), activeIntention.getProjectId());
 
-        RecentTaskEntity matchingTask = findMatchingTask(recentTasks, activeChunkEvent.getTaskId());
+        RecentTaskEntity matchingTask = findMatchingTask(recentTasks, activeIntention.getTaskId());
         if (matchingTask != null) {
             matchingTask.setLastAccessed(LocalDateTime.now());
             recentTaskRepository.save(matchingTask);
         } else {
             deleteOldestTaskOverMaxRecent(recentTasks);
 
-            RecentTaskEntity recentTask = createRecentTask(activeChunkEvent);
+            RecentTaskEntity recentTask = createRecentTask(activeIntention);
             recentTaskRepository.save(recentTask);
         }
 

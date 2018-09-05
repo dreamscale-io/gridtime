@@ -22,23 +22,15 @@ import java.util.UUID;
 public class ProjectService {
 
     @Autowired
-    private OrganizationRepository organizationRepository;
-
-    @Autowired
     private ProjectRepository projectRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
-    private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
 
     @PostConstruct
     private void init() {
         projectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, ProjectEntity.class);
-        taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
     public List<ProjectDto> getAllProjects(UUID organizationId) {
@@ -47,20 +39,5 @@ public class ProjectService {
         return projectMapper.toApiList(projectEntities);
     }
 
-    public List<TaskDto> getAllTasksForProject(UUID organizationId, UUID projectId) {
-        validateProjectWithinOrg(organizationId, projectId);
-
-        Iterable<TaskEntity> taskEntities = taskRepository.findByProjectId(projectId);
-        return taskMapper.toApiList(taskEntities);
-
-    }
-
-    private void validateProjectWithinOrg(UUID orgId, UUID projectId) {
-        ProjectEntity projectEntity = projectRepository.findById(projectId);
-
-        if (projectEntity == null || !projectEntity.getOrganizationId().equals(orgId)) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Project not found in Org");
-        }
-    }
 
 }

@@ -244,8 +244,6 @@ public class OrganizationService {
                 orgMemberDtos.add(orgMemberDto);
             }
 
-        } else {
-            throw new NotFoundException("No members found in organization");
         }
 
         return orgMemberDtos;

@@ -28,9 +28,6 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private OrganizationRepository organizationRepository;
-
-    @Autowired
     private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
@@ -38,20 +35,11 @@ public class TaskService {
 
     @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
     private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
 
     @PostConstruct
     private void init() {
-        projectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, ProjectEntity.class);
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
-    }
-
-    public TaskDto findByTaskName(UUID organizationId, UUID projectId, String taskName) {
-        //TODO make this case insensitive search, so toyot-123 and TOYOT-123 both work
-
-        TaskEntity taskEntity = taskRepository.findByProjectIdAndName(projectId, taskName);
-        return taskMapper.toApi(taskEntity);
     }
 
     public TaskDto createNewTask(UUID organizationId, UUID projectId, UUID masterAccountId, TaskInputDto taskInputDto) {

@@ -54,7 +54,7 @@ public class JournalService {
 
     public IntentionDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
         UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
-        UUID memberId = getMemberIdForAccount(masterAccountId, organizationId);
+        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organizationId);
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
@@ -72,7 +72,7 @@ public class JournalService {
 
     public List<IntentionDto> getRecentIntentions(UUID masterAccountId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
+        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
         List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdWithLimit(memberId, limit);
         return intentionOutputMapper.toApiList(intentionEntities);
@@ -88,7 +88,7 @@ public class JournalService {
 
     public List<IntentionDto> getHistoricalIntentions(UUID masterAccountId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
+        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
         List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         return intentionOutputMapper.toApiList(intentionEntities);
@@ -102,7 +102,7 @@ public class JournalService {
         return intentionOutputMapper.toApiList(intentionEntities);
     }
 
-    private UUID getMemberIdForAccount(UUID masterAccountId, UUID organizationId) {
+    private UUID getMemberIdForAccountAndValidate(UUID masterAccountId, UUID organizationId) {
         OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
         if (memberEntity == null) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found");
