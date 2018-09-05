@@ -53,7 +53,7 @@ public class TeamService {
         return teamOutputMapper.toApi(teamEntity);
     }
 
-    public List<TeamMemberDto> addMembersToTeam(UUID orgId, UUID teamId, TeamMembersToAddInputDto membersToAdd) {
+    public List<TeamMemberDto> addMembersToTeam(UUID orgId, UUID teamId, List<UUID> membersToAdd) {
         OrganizationEntity org = validateOrganization(orgId);
         TeamEntity team = validateTeam(orgId, teamId);
 
@@ -61,7 +61,7 @@ public class TeamService {
 
         List<TeamMemberDto> teamMembers = new ArrayList<>();
 
-        for (UUID memberId : membersToAdd.getMemberIds()) {
+        for (UUID memberId : membersToAdd) {
             MemberStatusEntity memberStatus = memberStatusRepository.findOne(memberId);
             validateMember(memberId, memberStatus, orgId);
 
@@ -95,8 +95,8 @@ public class TeamService {
         }
     }
 
-    private void validateNotEmpty(TeamMembersToAddInputDto membersToAdd) {
-        if (membersToAdd.getMemberIds() == null || membersToAdd.getMemberIds().isEmpty()) {
+    private void validateNotEmpty(List<UUID> membersToAdd) {
+        if (membersToAdd == null || membersToAdd.isEmpty()) {
             throw new BadRequestException(ValidationErrorCodes.NO_INPUTS_PROVIDED, "No members to add");
         }
     }

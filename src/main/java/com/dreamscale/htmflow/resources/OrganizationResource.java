@@ -89,7 +89,7 @@ public class OrganizationResource {
                                                @PathVariable("id") String teamId,
                                                @RequestBody TeamMembersToAddInputDto teamMemberInputDto) {
 
-        return teamService.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto);
+        return teamService.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto.getMemberIds());
     }
 
 
