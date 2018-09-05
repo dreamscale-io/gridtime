@@ -19,10 +19,6 @@ public interface JournalClient {
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH)
     IntentionDto createIntention(IntentionInputDto chunkEvent);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH
-            + "?from_date={fromDate}&to_date={toDate}")
-    List<IntentionDto> getIntentions(@Param("fromDate") String fromDate, @Param("toDate") String toDate);
-
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + ResourcePaths.RECENT_PATH)
     List<IntentionDto> getRecentIntentions();
 
@@ -37,6 +33,16 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + ResourcePaths.RECENT_PATH
             + "?member={memberId}&limit={limit}")
     List<IntentionDto> getRecentIntentionsForMemberWithLimit(@Param("memberId") String memberId, @Param("limit") Integer limit);
+
+
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + ResourcePaths.HISTORY_PATH
+            + "?before_date={beforeDate}&limit={limit}")
+    List<IntentionDto> getHistoricalIntentionsWithLimit(@Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
+
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + ResourcePaths.HISTORY_PATH
+            + "?member={memberId}&before_date={beforeDate}&limit={limit}")
+    List<IntentionDto> getHistoricalIntentionsForMemberWithLimit(@Param("memberId") String memberId, @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
+
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksByProjectDto getRecentTasksByProject();

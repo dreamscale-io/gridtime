@@ -18,8 +18,12 @@ import com.dreamscale.htmflow.core.domain.RecentProjectRepository
 import com.dreamscale.htmflow.core.domain.RecentTaskRepository
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
+import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator
+import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+
+import java.time.LocalDateTime
 
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
@@ -49,6 +53,9 @@ class JournalResourceSpec extends Specification {
     RecentTaskRepository recentTaskRepository
 
     @Autowired
+    TimeService mockTimeService
+
+    @Autowired
     MasterAccountEntity testUser
 
     def setup() {
@@ -59,6 +66,7 @@ class JournalResourceSpec extends Specification {
         organizationMemberRepository.deleteAll()
         recentProjectRepository.deleteAll()
         recentTaskRepository.deleteAll()
+
     }
 
     def "should save new intention"() {
@@ -69,7 +77,7 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build();
 
         when:
-        IntentionDto intention = journalClient.createIntention(intentionInputDto)
+        IntentionDto intention = createIntentionWithClient(intentionInputDto)
 
         then:
         assert intention != null
@@ -86,8 +94,8 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
+        createIntentionWithClient(intention1)
+        createIntentionWithClient(intention2)
 
         when:
         List<IntentionDto> intentions = journalClient.getRecentIntentions();
@@ -108,14 +116,43 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build();
 
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
-        journalClient.createIntention(intention3)
-        journalClient.createIntention(intention4)
-
+        createIntentionWithClient(intention1)
+        createIntentionWithClient(intention2)
+        createIntentionWithClient(intention3)
+        createIntentionWithClient(intention4)
 
         when:
         List<IntentionDto> intentions = journalClient.getRecentIntentionsWithLimit(3);
+
+        then:
+        assert intentions != null
+        assert intentions.size() == 3
+    }
+
+    def "get historical intentions before date"() {
+        given:
+        TaskEntity task = createOrganizationAndTask();
+        createMembership(task.getOrganizationId(), testUser.getId());
+
+        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task).build();
+        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build();
+
+        3 * mockTimeService.now() >> LocalDateTime.now().minusDays(5)
+
+        journalClient.createIntention(intention1)
+        journalClient.createIntention(intention2)
+        journalClient.createIntention(intention3)
+
+        1 * mockTimeService.now() >> LocalDateTime.now()
+
+        journalClient.createIntention(intention4)
+
+        String beforeDateStr = DateTimeAPITranslator.convertToString(LocalDateTime.now().minusDays(1));
+
+        when:
+        List<IntentionDto> intentions = journalClient.getHistoricalIntentionsWithLimit(beforeDateStr, 5);
 
         then:
         assert intentions != null
@@ -153,10 +190,10 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task3).build();
         IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task4).build();
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
-        journalClient.createIntention(intention3)
-        journalClient.createIntention(intention4)
+        createIntentionWithClient(intention1)
+        createIntentionWithClient(intention2)
+        createIntentionWithClient(intention3)
+        createIntentionWithClient(intention4)
 
         when:
         RecentTasksByProjectDto recentTasksByProject = journalClient.getRecentTasksByProject();
@@ -182,8 +219,8 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
+        createIntentionWithClient(intention1)
+        createIntentionWithClient(intention2)
 
         //change active logged in user to a different user within same organization
         testUser.setId(UUID.randomUUID())
@@ -205,8 +242,8 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build();
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build();
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
+        createIntentionWithClient(intention1)
+        createIntentionWithClient(intention2)
 
         //change active logged in user to a different user within same organization
         testUser.setId(UUID.randomUUID())
@@ -219,6 +256,11 @@ class JournalResourceSpec extends Specification {
         then:
         assert intentions != null
         assert intentions.size() == 1
+    }
+
+    private IntentionDto createIntentionWithClient(IntentionInputDto intentionInputDto) {
+        1 * mockTimeService.now() >> LocalDateTime.now()
+        return journalClient.createIntention(intentionInputDto)
     }
 
     private TaskEntity createOrganizationAndTask() {

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,9 @@ public class JournalService {
     @Autowired
     private RecentActivityService recentActivityService;
 
+    @Autowired
+    private TimeService timeService;
+
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -54,7 +58,7 @@ public class JournalService {
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
-        intentionEntity.setPosition(LocalDateTime.now());
+        intentionEntity.setPosition(timeService.now());
         intentionEntity.setOrganizationId(organizationId);
         intentionEntity.setMemberId(memberId);
 
@@ -82,12 +86,20 @@ public class JournalService {
         return intentionOutputMapper.toApiList(intentionEntities);
     }
 
-    public List<IntentionDto> getIntentionsWithinRange(UUID masterAccountId, LocalDateTime start, LocalDateTime end) {
+    public List<IntentionDto> getHistoricalIntentions(UUID masterAccountId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccount(masterAccountId, organization.getId());
 
-        //List<IntentionEntity> intentionEntities = intentionRepository.findIntentionsByMemberIdWithinRange(memberId, start, end);
-        return null; //intentionOutputMapper.toApiList(intentionEntities);
+        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        return intentionOutputMapper.toApiList(intentionEntities);
+    }
+
+    public List<IntentionDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
+        OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
+        validateMemberWithinOrg(organization, memberId);
+
+        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        return intentionOutputMapper.toApiList(intentionEntities);
     }
 
     private UUID getMemberIdForAccount(UUID masterAccountId, UUID organizationId) {

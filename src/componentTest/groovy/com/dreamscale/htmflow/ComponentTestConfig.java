@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.core.service.JiraService;
+import com.dreamscale.htmflow.core.service.TimeService;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.test.BaseTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,12 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Primary
     public JiraService mockJiraService() {
         return detachedMockFactory().Mock(JiraService.class);
+    }
+
+    @Bean
+    @Primary
+    public TimeService mockTimeService() {
+        return detachedMockFactory().Mock(TimeService.class);
     }
 
     @Bean
