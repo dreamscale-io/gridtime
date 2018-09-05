@@ -20,7 +20,7 @@ public class ResourcePaths {
     public static final String ORGANIZATION_PATH = "/organization";
     public static final String MEMBER_PATH = "/member";
     public static final String INVITATION_PATH = "/invitation";
-    public static final String UNBOUND_PATH = "/unbound";
+    public static final String TEAM_PATH = "/team";
 
     public static final String FLOW_PATH = "/flow";
     public static final String BATCH_PATH = "/batch";

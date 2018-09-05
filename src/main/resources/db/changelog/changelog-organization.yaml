@@ -23,3 +23,9 @@ databaseChangeLog:
 
   - include:
         file: db/organization/create_config_project_sync.sql
+
+  - include:
+        file: db/organization/create_team.sql
+
+  - include:
+        file: db/organization/create_team_member.sql

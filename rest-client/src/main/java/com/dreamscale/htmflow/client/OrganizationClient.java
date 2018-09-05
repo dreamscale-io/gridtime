@@ -2,11 +2,16 @@ package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.organization.*;
+import com.dreamscale.htmflow.api.team.TeamDto;
+import com.dreamscale.htmflow.api.team.TeamInputDto;
+import com.dreamscale.htmflow.api.team.TeamMemberDto;
+import com.dreamscale.htmflow.api.team.TeamMembersToAddInputDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 
 import java.util.List;
+import java.util.UUID;
 
 @Headers({
         "Content-Type: application/json",
@@ -26,4 +31,13 @@ public interface OrganizationClient {
 
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
     List<OrgMemberStatusDto> getMembers(@Param("id") String organizationId);
+
+    @RequestLine("POST "+ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH)
+    TeamDto createTeam(@Param("id") String organizationId, TeamInputDto teamInputDto);
+
+    @RequestLine("POST "+ResourcePaths.ORGANIZATION_PATH + "/{orgId}"  + ResourcePaths.TEAM_PATH  + "/{id}"
+            + ResourcePaths.MEMBER_PATH)
+    List<TeamMemberDto> addMembersToTeam(@Param("orgId") String organizationId, @Param("id") String teamId,
+                                         TeamMembersToAddInputDto teamMemberInputDto);
+
 }
