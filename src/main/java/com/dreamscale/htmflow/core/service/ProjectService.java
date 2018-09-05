@@ -3,11 +3,13 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,15 +43,24 @@ public class ProjectService {
 
     public List<ProjectDto> getAllProjects(UUID organizationId) {
 
-        Iterable<ProjectEntity> projectEntities = projectRepository.findAll();
+        Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationId(organizationId);
         return projectMapper.toApiList(projectEntities);
     }
 
     public List<TaskDto> getAllTasksForProject(UUID organizationId, UUID projectId) {
+        validateProjectWithinOrg(organizationId, projectId);
 
         Iterable<TaskEntity> taskEntities = taskRepository.findByProjectId(projectId);
         return taskMapper.toApiList(taskEntities);
 
+    }
+
+    private void validateProjectWithinOrg(UUID orgId, UUID projectId) {
+        ProjectEntity projectEntity = projectRepository.findById(projectId);
+
+        if (projectEntity == null || !projectEntity.getOrganizationId().equals(orgId)) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Project not found in Org");
+        }
     }
 
 }

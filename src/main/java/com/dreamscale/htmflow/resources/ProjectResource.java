@@ -52,6 +52,14 @@ public class ProjectResource {
         return taskService.findByTaskName(getDefaultOrgId(), UUID.fromString(projectId), taskName);
     }
 
+    @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.SEARCH_PATH + "/{startsWith}")
+    List<TaskDto> findTasksStartingWith(@PathVariable("id") String projectId, @PathVariable("startsWith") String startsWith) {
+
+        return taskService.findTasksStartingWith(getDefaultOrgId(), UUID.fromString(projectId), startsWith);
+    }
+
+
+
     @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksByProjectDto getRecentTasksByProject() {
         RequestContext context = RequestContext.get();

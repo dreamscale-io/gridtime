@@ -20,4 +20,6 @@ public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
             "and rt.project_id=(:projectId) " +
             "order by rt.last_accessed desc ")
     List<TaskEntity> findByRecentMemberAccess(@Param("memberId") UUID memberId, @Param("projectId") UUID projectId);
+
+    List<TaskEntity> findTop10ByProjectIdAndNameStartingWith(UUID projectId, String nameStartsWith);
 }
