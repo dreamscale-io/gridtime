@@ -39,7 +39,7 @@ public class AccountResource {
      * Activate your master account to get a permanent API-Key to use for all future requests
      * that will be tied to your account
      * @param activationCode Provided by /organization/{id}/member service registration
-     * @return
+     * @return AccountActivationDto
      */
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
@@ -47,6 +47,11 @@ public class AccountResource {
         return accountService.activate(activationCode.getActivationCode());
     }
 
+    /**
+     * Keep alive signal so we can tell when the user's go offline
+     * @param heartbeat delta is the lag time between pings
+     * @return SimpleStatusDto
+     */
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
 
@@ -54,6 +59,11 @@ public class AccountResource {
         return accountService.heartbeat(context.getMasterAccountId(), heartbeat);
     }
 
+    /**
+     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
+     * for the duration of the session
+     * @return ConnectionStatusDto
+     */
     @PostMapping(ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login() {
 
@@ -61,6 +71,10 @@ public class AccountResource {
         return accountService.login(context.getMasterAccountId());
     }
 
+    /**
+     * Logout the user so the temporary connectionId expires
+     * @return SimpleStatusDto
+     */
     @PostMapping(ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout() {
 

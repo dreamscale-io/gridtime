@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = ResourcePaths.FLOW_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class FlowResource {
 
+    /**
+     * Saves a batch of flow activity and events for the user
+     */
     @PostMapping(ResourcePaths.BATCH_PATH)
     public void addIFMBatch(@RequestBody NewIFMBatch batch) {
         log.info("addIfmBatch, batch={}", batch);

@@ -32,7 +32,6 @@ public class AdminResource {
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
 
-
     /**
      * Synchronize all Jira Projects for all organizations
      */
