@@ -84,13 +84,42 @@ public class OrganizationResource {
     /**
      * Add one or more members to an existing team
      */
-    @PostMapping("/{orgId}" + ResourcePaths.TEAM_PATH + "/{id}" + ResourcePaths.MEMBER_PATH)
+    @PostMapping("/{orgId}" + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
     public List<TeamMemberDto> addMemberToTeam(@PathVariable("orgId") String organizationId,
-                                               @PathVariable("id") String teamId,
+                                               @PathVariable("teamId") String teamId,
                                                @RequestBody TeamMembersToAddInputDto teamMemberInputDto) {
 
         return teamService.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto.getMemberIds());
     }
+
+    /**
+     * Get all the teams for the Organization
+     */
+    @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH)
+    public List<TeamDto> getTeams(@PathVariable("orgId") String organizationId) {
+
+        return teamService.getTeams(UUID.fromString(organizationId));
+    }
+
+    /**
+     * Get all my teams within the Organization
+     */
+    @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
+    public List<TeamDto> getMyTeams(@PathVariable("orgId") String organizationId) {
+        RequestContext context = RequestContext.get();
+        return teamService.getMyTeams(UUID.fromString(organizationId), context.getMasterAccountId());
+    }
+
+    /**
+     * Get all my team members within a team, and their status
+     */
+    @GetMapping("/{orgId}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
+    public List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@PathVariable("orgId") String organizationId,  @PathVariable("teamId") String teamId) {
+
+        return teamService.getStatusOfTeamMembers(UUID.fromString(organizationId), UUID.fromString(teamId));
+    }
+
+
 
 
 }

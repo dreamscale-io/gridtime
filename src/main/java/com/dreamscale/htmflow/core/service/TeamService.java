@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.service;
 
+import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
-import com.dreamscale.htmflow.api.team.TeamMembersToAddInputDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
@@ -32,12 +32,18 @@ public class TeamService {
     private MemberStatusRepository memberStatusRepository;
 
     @Autowired
+    private TeamMemberWorkStatusRepository teamMemberWorkStatusRepository;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamDto, TeamEntity> teamOutputMapper;
+    private DtoEntityMapper<TeamMemberWorkStatusDto, TeamMemberWorkStatusEntity> teamMemberStatusMapper;
+
 
     @PostConstruct
     private void init() {
         teamOutputMapper = mapperFactory.createDtoEntityMapper(TeamDto.class, TeamEntity.class);
+        teamMemberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberWorkStatusDto.class, TeamMemberWorkStatusEntity.class);
     }
 
 
@@ -123,5 +129,22 @@ public class TeamService {
         }
 
         return orgEntity;
+    }
+
+    public List<TeamDto> getTeams(UUID orgId) {
+        List<TeamEntity> teamEntityList = teamRepository.findByOrganizationId(orgId);
+        return teamOutputMapper.toApiList(teamEntityList);
+    }
+
+    public List<TeamDto> getMyTeams(UUID orgId, UUID masterAccountId) {
+        List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByMembership(orgId, masterAccountId);
+        return teamOutputMapper.toApiList(teamEntityList);
+    }
+
+    public List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(UUID orgId, UUID teamId) {
+        List<TeamMemberWorkStatusEntity> teamMemberStatusList =
+                teamMemberWorkStatusRepository.findByOrganizationIdAndTeamId(orgId, teamId);
+
+        return teamMemberStatusMapper.toApiList(teamMemberStatusList);
     }
 }

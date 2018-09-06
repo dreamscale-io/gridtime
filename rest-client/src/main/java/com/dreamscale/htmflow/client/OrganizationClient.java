@@ -40,4 +40,15 @@ public interface OrganizationClient {
     List<TeamMemberDto> addMembersToTeam(@Param("orgId") String organizationId, @Param("id") String teamId,
                                          TeamMembersToAddInputDto teamMemberInputDto);
 
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH)
+    List<TeamDto> getTeams(@Param("id") String organizationId);
+
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
+    List<TeamDto> getMyTeams(@Param("id") String organizationId);
+
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
+    List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@Param("id") String organizationId, @Param("teamId") String teamId);
+
+
+
 }

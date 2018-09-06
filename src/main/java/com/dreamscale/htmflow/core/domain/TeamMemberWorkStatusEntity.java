@@ -8,35 +8,43 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "active_work_status")
+@Entity(name = "team_member_work_status_view")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActiveWorkStatusEntity {
+public class TeamMemberWorkStatusEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "organization_id")
+    private UUID teamId;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "member_id")
-    private UUID member_id;
+    private String email;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "last_activity")
+    private LocalDateTime lastActivity;
+
+    @Column(name = "active_status")
+    private ActiveAccountStatus activeStatus;
+
     @Column(name = "active_task_id")
     private UUID activeTaskId;
 
-    @Column(name = "working_on")
-    private String workingOn;
+    private String activeTaskName;
 
-    @Column(name = "last_update")
-    private LocalDateTime lastUpdate;
+    private String activeTaskSummary;
+
+    private String workingOn;
 
 }
 

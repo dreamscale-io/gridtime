@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.api.organization.OrgMemberStatusDto
 import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto
+import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto
 import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.api.team.TeamDto
@@ -20,6 +21,8 @@ import com.dreamscale.htmflow.core.domain.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.MasterAccountRepository
 import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.domain.TeamMemberRepository
+import com.dreamscale.htmflow.core.domain.TeamRepository
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,6 +49,12 @@ class OrganizationResourceSpec extends Specification {
 	MasterAccountRepository masterAccountRepository
 
     @Autowired
+    TeamRepository teamRepository
+
+    @Autowired
+    TeamMemberRepository teamMemberRepository
+
+    @Autowired
     JiraService mockJiraService
 
     @Autowired
@@ -55,6 +64,8 @@ class OrganizationResourceSpec extends Specification {
 		organizationRepository.deleteAll()
 		masterAccountRepository.deleteAll()
         organizationMemberRepository.deleteAll()
+        teamRepository.deleteAll()
+        teamMemberRepository.deleteAll()
 	}
 
     def "should not create organization with failed Jira connect"() {
@@ -175,6 +186,22 @@ class OrganizationResourceSpec extends Specification {
         assert team.name == "Team Unicorn"
     }
 
+    def "should get teams within the org"() {
+        given:
+        OrganizationDto org = createOrganizationWithClient();
+
+        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Lightning"))
+
+        when:
+        List<TeamDto> teams = organizationClient.getTeams(org.id.toString())
+
+        then:
+        assert teams != null
+        assert teams.size() == 2
+    }
+
+
     def "should add members to team"() {
         given:
 
@@ -202,6 +229,61 @@ class OrganizationResourceSpec extends Specification {
         assert teamMembers.get(1).memberName == registration2.fullName
         assert teamMembers.get(1).memberEmail == registration2.orgEmail
 
+    }
+
+    def "should retrieve my teams that I am a member of"() {
+        given:
+
+        OrganizationDto org = createOrganizationWithClient();
+
+        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
+        MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
+
+        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team 1"))
+        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team 2"))
+        TeamDto teamOther = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Other"))
+
+        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
+
+        organizationClient.addMembersToTeam(org.id.toString(), team1.id.toString(), teamMembersToAdd);
+        organizationClient.addMembersToTeam(org.id.toString(), team2.id.toString(), teamMembersToAdd);
+
+        TeamMembersToAddInputDto otherTeamMembers = new TeamMembersToAddInputDto([registration2.memberId])
+        organizationClient.addMembersToTeam(org.id.toString(), teamOther.id.toString(), otherTeamMembers);
+
+        //active request coming from janelle
+        testUser.id = registration1.masterAccountId
+
+        when:
+        List<TeamDto> myTeams = organizationClient.getMyTeams(org.id.toString())
+
+        then:
+        assert myTeams != null
+        assert myTeams.size() == 2
+
+    }
+
+    def "should retrieve team member status of specified team"() {
+        given:
+
+        OrganizationDto org = createOrganizationWithClient();
+
+        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
+        MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
+        MemberRegistrationDetailsDto registration3 = registerMemberWithClient(org, "mike@dreamscale.io")
+
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+
+        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId, registration3.memberId])
+
+        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd);
+
+        when:
+        List<TeamMemberWorkStatusDto> teamMemberStatusList = organizationClient.getStatusOfTeamMembers(org.id.toString(), team.id.toString())
+
+        then:
+        assert teamMemberStatusList != null
+        assert teamMemberStatusList.size() == 3
     }
 
     private MemberRegistrationDetailsDto registerMemberWithClient(OrganizationDto organizationDto, String memberEmail) {
