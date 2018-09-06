@@ -37,6 +37,9 @@ public class RecentActivityService {
     private TaskRepository taskRepository;
 
     @Autowired
+    private ActiveWorkStatusRepository activeWorkStatusRepository;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
     private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
@@ -79,6 +82,20 @@ public class RecentActivityService {
             recentTaskRepository.save(recentTask);
         }
 
+        ActiveWorkStatusEntity workStatus = activeWorkStatusRepository.findByMemberId(activeIntention.getMemberId());
+
+        if (workStatus == null) {
+            workStatus = new ActiveWorkStatusEntity();
+            workStatus.setId(UUID.randomUUID());
+            workStatus.setMemberId(activeIntention.getMemberId());
+            workStatus.setOrganizationId(activeIntention.getOrganizationId());
+        }
+
+        workStatus.setActiveTaskId(activeIntention.getTaskId());
+        workStatus.setLastUpdate(LocalDateTime.now());
+        workStatus.setWorkingOn(activeIntention.getDescription());
+
+        activeWorkStatusRepository.save(workStatus);
     }
 
     public RecentTasksByProjectDto getRecentTasksByProject(UUID memberId) {

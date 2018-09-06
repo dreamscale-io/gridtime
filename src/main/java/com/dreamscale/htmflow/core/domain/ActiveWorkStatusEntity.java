@@ -26,7 +26,7 @@ public class ActiveWorkStatusEntity {
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "member_id")
-    private UUID member_id;
+    private UUID memberId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "active_task_id")
