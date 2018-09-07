@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+  - include:
+        file: db/flow/create_flow_activity.sql
+
+  - include:
+            file: db/flow/create_flow_activity_seq.sql
+
+  - include:
+            file: db/flow/create_flow_event.sql
+
+  - include:
+            file: db/flow/create_flow_event_seq.sql
