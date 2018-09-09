@@ -6,7 +6,6 @@ create table flow_activity (
   member_id     uuid             not null,
   start_time    timestamp without time zone,
   end_time      timestamp without time zone,
-  duration      integer,
   activity_type text,
   metadata      text
 );

@@ -30,7 +30,7 @@ public class FlowEventEntity {
 	private LocalDateTime timePosition;
 
 	@Enumerated(EnumType.STRING)
-	private EventType type;
+	private EventType eventType;
 
 	private String metadata;
 

@@ -30,7 +30,9 @@ public class FlowActivityEntity {
 	@Column(name = "end_time")
 	private LocalDateTime end;
 
-	private Duration duration;
+	public Duration getDuration() {
+		return Duration.between(start, end);
+	}
 
 	@Enumerated(EnumType.STRING)
 	private FlowActivityType activityType;

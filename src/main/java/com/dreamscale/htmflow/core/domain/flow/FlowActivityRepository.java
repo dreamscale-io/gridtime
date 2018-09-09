@@ -20,4 +20,5 @@ public interface FlowActivityRepository extends CrudRepository<FlowActivityEntit
 										 @Param("start") LocalDateTime start,
 										 @Param("end") LocalDateTime end);
 
+	List<FlowActivityEntity> findByMemberId(UUID memberId);
 }

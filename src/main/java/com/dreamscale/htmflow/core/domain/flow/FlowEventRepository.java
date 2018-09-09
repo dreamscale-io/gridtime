@@ -21,5 +21,7 @@ public interface FlowEventRepository extends CrudRepository<FlowEventEntity, Lon
                                          @Param("start") LocalDateTime start,
                                          @Param("end") LocalDateTime end);
 
+    List<FlowEventEntity> findByMemberId(UUID memberId);
+
 
 }

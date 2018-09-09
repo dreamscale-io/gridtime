@@ -1,5 +1,8 @@
 package com.dreamscale.htmflow.core;
 
+import com.dreamscale.htmflow.api.activity.*;
+import com.dreamscale.htmflow.api.batch.*;
+import com.dreamscale.htmflow.api.event.RandomSnippetEventBuilder;
 import com.dreamscale.htmflow.api.journal.RandomIntentionInputDtoBuilder;
 import com.dreamscale.htmflow.core.domain.RandomOrganizationEntityBuilder;
 import com.dreamscale.htmflow.core.domain.RandomOrganizationMemberEntityBuilder;
@@ -38,5 +41,22 @@ public class CoreRandomBuilderSupport {
     public RandomJiraTaskDtoBuilder jiraTaskDto() { return new RandomJiraTaskDtoBuilder(); }
 
     public RandomJiraUserDtoBuilder jiraUserDto() { return new RandomJiraUserDtoBuilder(); }
+
+    public RandomFlowBatchBuilder flowBatch() { return new RandomFlowBatchBuilder(); }
+
+    public RandomEditorActivityBuilder editorActivity() { return new RandomEditorActivityBuilder(); }
+
+    public RandomExecutionActivityBuilder executionActivity() { return new RandomExecutionActivityBuilder(); }
+
+    public RandomModificationActivityBuilder modificationActivity() { return new RandomModificationActivityBuilder(); }
+
+    public RandomIdleActivityBuilder idleActivity() { return new RandomIdleActivityBuilder(); }
+
+    public RandomExternalActivityBuilder externalActivity() { return new RandomExternalActivityBuilder(); }
+
+    public RandomBatchEventBuilder event() { return new RandomBatchEventBuilder(); }
+
+    public RandomSnippetEventBuilder snippetEvent() { return new RandomSnippetEventBuilder(); }
+
 
 }
