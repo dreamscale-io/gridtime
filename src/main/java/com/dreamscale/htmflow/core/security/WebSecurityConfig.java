@@ -1,11 +1,13 @@
 package com.dreamscale.htmflow.core.security;
 
+import com.dreamscale.htmflow.api.ResourcePaths;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,8 +27,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // TODO: investigate enabling csrf
         http.csrf().disable()
-                .addFilterBefore(authorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH).permitAll()
+                .antMatchers(ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH).permitAll()
+                .antMatchers(ResourcePaths.PROJECT_PATH + "/**").hasRole("USER")
+                .antMatchers(ResourcePaths.JOURNAL_PATH + "/**").hasRole("USER")
+                .antMatchers(ResourcePaths.FLOW_PATH + "/**").hasRole("USER")
+                .antMatchers("/**").authenticated();
     }
 
 }

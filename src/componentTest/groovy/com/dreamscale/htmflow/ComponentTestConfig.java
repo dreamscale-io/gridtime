@@ -1,9 +1,12 @@
 package com.dreamscale.htmflow;
 
-import com.dreamscale.htmflow.client.*;
+import com.dreamscale.htmflow.client.AccountClient;
+import com.dreamscale.htmflow.client.AdminClient;
+import com.dreamscale.htmflow.client.FlowClient;
+import com.dreamscale.htmflow.client.JournalClient;
+import com.dreamscale.htmflow.client.OrganizationClient;
+import com.dreamscale.htmflow.client.ProjectClient;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
-import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.core.service.JiraService;
@@ -64,6 +67,10 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     AdminClient adminClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, AdminClient.class);
+    }
+
+    AccountClient unauthenticatedAccountClient() {
+        return jacksonFeignBuilder.target(AccountClient.class, baseUrl);
     }
 
     @Bean
