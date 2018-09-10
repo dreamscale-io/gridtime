@@ -35,7 +35,7 @@ public class FlowEventEntity {
 	private String metadata;
 
 	@Transient
-	private MetadataFields metadataFields = new MetadataFields();
+	private final MetadataFields metadataFields = new MetadataFields();
 
 	public void setMetadataField(String key, Object value) {
 		metadataFields.set(key, value);
