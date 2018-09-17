@@ -1,0 +1,9 @@
+--liquibase formatted sql
+
+--changeset dreamscale:0
+create view journal_entry_view as
+select i.*, t.name task_name, p.name project_name
+from intention i
+join task t on i.task_id = t.id
+join project p on i.project_id = p.id;
+

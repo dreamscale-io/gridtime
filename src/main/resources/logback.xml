@@ -3,7 +3,7 @@
     <include resource="org/dreamscale/logback/common.xml"/>
 
     <logger name="com.dreamscale" level="DEBUG"/>
-    <logger name="rest.invocation" level="DEBUG"/>
+    <logger name="rest.invocation" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

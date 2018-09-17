@@ -1,8 +1,9 @@
 package com.dreamscale.htmflow.resources;
 
-import com.dreamscale.htmflow.api.journal.IntentionDto;
 import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.journal.JournalEntryDto;
+import com.dreamscale.htmflow.api.journal.RecentJournalDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,7 +42,7 @@ public class JournalResource {
      */
 
     @PostMapping(ResourcePaths.INTENTION_PATH)
-    IntentionDto createIntention(@RequestBody IntentionInputDto intentionInput) {
+    JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
         return journalService.createIntention(context.getMasterAccountId(), intentionInput);
     }
@@ -50,17 +52,29 @@ public class JournalResource {
      * either for the current user (if member not provided), or for another memberId within the org
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
-    @GetMapping(ResourcePaths.INTENTION_PATH + ResourcePaths.RECENT_PATH)
-    List<IntentionDto> getRecentIntentionsForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
+    @GetMapping(ResourcePaths.RECENT_PATH)
+    RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
+        List<JournalEntryDto> journalEntries;
+
         if (memberId.isPresent()) {
-            return journalService.getRecentIntentionsForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), effectiveLimit);
+            journalEntries = journalService.getRecentIntentionsForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), effectiveLimit);
         } else {
-            return journalService.getRecentIntentions(context.getMasterAccountId(), effectiveLimit);
+            journalEntries = journalService.getRecentIntentions(context.getMasterAccountId(), effectiveLimit);
         }
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        RecentTasksByProjectDto recentActivity = recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
+
+        RecentJournalDto recentJournalDto = new RecentJournalDto();
+        recentJournalDto.setRecentIntentions(journalEntries);
+        recentJournalDto.setRecentProjects(recentActivity.getRecentProjects());
+        recentJournalDto.setRecentTasksByProjectId(recentActivity.getRecentTasksByProjectId());
+
+        return recentJournalDto;
     }
 
     /**
@@ -72,7 +86,7 @@ public class JournalResource {
      * @return List<IntentionDto>
      */
     @GetMapping(ResourcePaths.INTENTION_PATH + ResourcePaths.HISTORY_PATH)
-    List<IntentionDto> getHistoricalIntentionsBeforeDate(@RequestParam("before_date") String beforeDateStr,
+    List<JournalEntryDto> getHistoricalIntentionsBeforeDate(@RequestParam("before_date") String beforeDateStr,
                                                @RequestParam("member") Optional<String> memberId,
                                                @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -92,12 +106,12 @@ public class JournalResource {
      * a project/task combination, the recent lists are automatically updated
      */
 
-    @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
+    @GetMapping(ResourcePaths.RECENT_PATH + ResourcePaths.TASK_PATH)
     RecentTasksByProjectDto getRecentTasksByProject() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return recentActivityService.getRecentTasksByProject(memberEntity.getId());
+        return recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
 

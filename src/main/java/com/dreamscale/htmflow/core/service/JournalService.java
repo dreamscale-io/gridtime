@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.journal.IntentionDto;
 import com.dreamscale.htmflow.api.journal.IntentionInputDto;
+import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
@@ -26,6 +27,9 @@ public class JournalService {
     private IntentionRepository intentionRepository;
 
     @Autowired
+    private JournalEntryRepository journalEntryRepository;
+
+    @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
@@ -45,14 +49,16 @@ public class JournalService {
     private MapperFactory mapperFactory;
     private DtoEntityMapper<IntentionInputDto, IntentionEntity> intentionInputMapper;
     private DtoEntityMapper<IntentionDto, IntentionEntity> intentionOutputMapper;
+    private DtoEntityMapper<JournalEntryDto, JournalEntryEntity> journalEntryOutputMapper;
 
     @PostConstruct
     private void init() {
         intentionInputMapper = mapperFactory.createDtoEntityMapper(IntentionInputDto.class, IntentionEntity.class);
         intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionDto.class, IntentionEntity.class);
+        journalEntryOutputMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
     }
 
-    public IntentionDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
+    public JournalEntryDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
         UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organizationId);
 
@@ -67,39 +73,41 @@ public class JournalService {
         recentActivityService.updateRecentProjects(intentionEntity);
         recentActivityService.updateRecentTasks(intentionEntity);
 
-        return intentionOutputMapper.toApi(intentionEntity);
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+
+        return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
-    public List<IntentionDto> getRecentIntentions(UUID masterAccountId, int limit) {
+    public List<JournalEntryDto> getRecentIntentions(UUID masterAccountId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdWithLimit(memberId, limit);
-        return intentionOutputMapper.toApiList(intentionEntities);
+        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
+        return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<IntentionDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
+    public List<JournalEntryDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         validateMemberWithinOrg(organization, memberId);
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdWithLimit(memberId, limit);
-        return intentionOutputMapper.toApiList(intentionEntities);
+        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
+        return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<IntentionDto> getHistoricalIntentions(UUID masterAccountId, LocalDateTime beforeDate, Integer limit) {
+    public List<JournalEntryDto> getHistoricalIntentions(UUID masterAccountId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
-        return intentionOutputMapper.toApiList(intentionEntities);
+        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<IntentionDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
+    public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
         validateMemberWithinOrg(organization, memberId);
 
-        List<IntentionEntity> intentionEntities = intentionRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
-        return intentionOutputMapper.toApiList(intentionEntities);
+        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
     private UUID getMemberIdForAccountAndValidate(UUID masterAccountId, UUID organizationId) {

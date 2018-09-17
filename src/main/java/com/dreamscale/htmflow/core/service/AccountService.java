@@ -31,21 +31,27 @@ public class AccountService implements MasterAccountIdResolver {
 
     public AccountActivationDto activate(String activationCode) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
-        if (masterAccountEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_ACTIVATION_CODE, "Activation code not found");
-        }
-
-        String apiKey = generateAPIKey();
-        masterAccountEntity.setApiKey(apiKey);
-        masterAccountEntity.setActivationDate(LocalDateTime.now());
-
-        masterAccountRepository.save(masterAccountEntity);
-
-        //TODO also clear activation code on successful activation so it's 1x use
 
         AccountActivationDto accountActivationDto = new AccountActivationDto();
-        accountActivationDto.setEmail(masterAccountEntity.getMasterEmail());
-        accountActivationDto.setApiKey(apiKey);
+
+        if (masterAccountEntity == null) {
+            accountActivationDto.setMessage("Activation code not found.");
+            accountActivationDto.setStatus(Status.FAILED);
+        } else {
+
+            String apiKey = generateAPIKey();
+            masterAccountEntity.setApiKey(apiKey);
+            masterAccountEntity.setActivationDate(LocalDateTime.now());
+
+            masterAccountRepository.save(masterAccountEntity);
+
+            //TODO also clear activation code on successful activation so it's 1x use
+
+            accountActivationDto.setEmail(masterAccountEntity.getMasterEmail());
+            accountActivationDto.setApiKey(apiKey);
+            accountActivationDto.setMessage("Your account has been successfully activated.");
+            accountActivationDto.setStatus(Status.VALID);
+        }
 
         return accountActivationDto;
     }

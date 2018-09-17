@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -98,21 +97,58 @@ public class RecentActivityService {
         activeWorkStatusRepository.save(workStatus);
     }
 
-    public RecentTasksByProjectDto getRecentTasksByProject(UUID memberId) {
+    public RecentTasksByProjectDto getRecentTasksByProject(UUID organizationId, UUID memberId) {
         RecentTasksByProjectDto recentTasksByProjectDto = new RecentTasksByProjectDto();
 
         List<ProjectEntity> recentProjects = projectRepository.findByRecentMemberAccess(memberId);
-        List<ProjectDto> projectDtos = projectMapper.toApiList(recentProjects);
+        List<ProjectEntity> allProjects = projectRepository.findByOrganizationId(organizationId);
+
+        List<ProjectEntity> recentProjectsWithDefaults = combineRecentProjectsWithDefaults(recentProjects, allProjects);
+
+        List<ProjectDto> projectDtos = projectMapper.toApiList(recentProjectsWithDefaults);
 
         for (ProjectDto projectDto : projectDtos) {
 
             List<TaskEntity> recentTasks = taskRepository.findByRecentMemberAccess(memberId, projectDto.getId());
-            List<TaskDto> taskDtos = taskMapper.toApiList(recentTasks);
+            List<TaskEntity> defaultTasks = taskRepository.findTop5ByProjectIdOrderByExternalId(projectDto.getId());
+            List<TaskEntity> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, defaultTasks);
+
+            List<TaskDto> taskDtos = taskMapper.toApiList(recentTasksWithDefaults);
 
             recentTasksByProjectDto.addRecentProjectTasks(projectDto, taskDtos);
         }
 
         return recentTasksByProjectDto;
+    }
+
+    private List<TaskEntity> combineRecentTasksWithDefaults(List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks) {
+
+        Map<UUID, TaskEntity> recentTaskMap = new LinkedHashMap<>();
+
+        for (TaskEntity recentTask : recentTasks) {
+            recentTaskMap.put(recentTask.getId(), recentTask);
+        }
+
+        for (TaskEntity defaultTask : defaultTasks) {
+            recentTaskMap.putIfAbsent(defaultTask.getId(), defaultTask);
+        }
+
+        return new ArrayList<>(recentTaskMap.values());
+    }
+
+
+    private List<ProjectEntity> combineRecentProjectsWithDefaults(List<ProjectEntity> recentProjects, List<ProjectEntity> defaultProjects) {
+        Map<UUID, ProjectEntity> recentProjectMap = new LinkedHashMap<>();
+
+        for (ProjectEntity recentProject : recentProjects) {
+            recentProjectMap.put(recentProject.getId(), recentProject);
+        }
+
+        for (ProjectEntity defaultProject : defaultProjects) {
+            recentProjectMap.putIfAbsent(defaultProject.getId(), defaultProject);
+        }
+
+        return new ArrayList<>(recentProjectMap.values());
     }
 
     private RecentProjectEntity findMatchingProject(List<RecentProjectEntity> recentProjects, UUID projectId) {

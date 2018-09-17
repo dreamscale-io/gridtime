@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.journal.IntentionInputDto
 import com.dreamscale.htmflow.api.journal.IntentionDto
+import com.dreamscale.htmflow.api.journal.JournalEntryDto
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto
 import com.dreamscale.htmflow.client.JournalClient
@@ -77,7 +78,7 @@ class JournalResourceSpec extends Specification {
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build();
 
         when:
-        IntentionDto intention = createIntentionWithClient(intentionInputDto)
+        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
 
         then:
         assert intention != null
@@ -98,7 +99,7 @@ class JournalResourceSpec extends Specification {
         createIntentionWithClient(intention2)
 
         when:
-        List<IntentionDto> intentions = journalClient.getRecentIntentions();
+        List<JournalEntryDto> intentions = journalClient.getRecentJournal().recentIntentions;
 
         then:
         assert intentions != null
@@ -122,7 +123,7 @@ class JournalResourceSpec extends Specification {
         createIntentionWithClient(intention4)
 
         when:
-        List<IntentionDto> intentions = journalClient.getRecentIntentionsWithLimit(3);
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalWithLimit(3).recentIntentions;
 
         then:
         assert intentions != null
@@ -152,7 +153,7 @@ class JournalResourceSpec extends Specification {
         String beforeDateStr = DateTimeAPITranslator.convertToString(LocalDateTime.now().minusDays(1));
 
         when:
-        List<IntentionDto> intentions = journalClient.getHistoricalIntentionsWithLimit(beforeDateStr, 5);
+        List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(beforeDateStr, 5);
 
         then:
         assert intentions != null
@@ -227,7 +228,7 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
 
         when:
-        List<IntentionDto> intentions = journalClient.getRecentIntentionsForMember(memberWithIntentions.getId().toString());
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalForMember(memberWithIntentions.getId().toString()).recentIntentions;
 
         then:
         assert intentions != null
@@ -250,15 +251,15 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId());
 
         when:
-        List<IntentionDto> intentions = journalClient.getRecentIntentionsForMemberWithLimit(
-                memberWithIntentions.getId().toString(), 1);
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalForMemberWithLimit(
+                memberWithIntentions.getId().toString(), 1).recentIntentions;
 
         then:
         assert intentions != null
         assert intentions.size() == 1
     }
 
-    private IntentionDto createIntentionWithClient(IntentionInputDto intentionInputDto) {
+    private JournalEntryDto createIntentionWithClient(IntentionInputDto intentionInputDto) {
         1 * mockTimeService.now() >> LocalDateTime.now()
         return journalClient.createIntention(intentionInputDto)
     }

@@ -14,4 +14,6 @@ public class AccountActivationDto {
 
     String email;
     String apiKey;
+    String message;
+    Status status;
 }
