@@ -34,7 +34,7 @@ public class JournalResource {
     @Autowired
     private RecentActivityService recentActivityService;
 
-    private static final Integer DEFAULT_LIMIT = 20;
+    private static final Integer DEFAULT_LIMIT = 100;
 
 
     /**

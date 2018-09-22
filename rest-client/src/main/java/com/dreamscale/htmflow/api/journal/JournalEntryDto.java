@@ -21,5 +21,6 @@ public class JournalEntryDto {
     private UUID taskId;
 
     private String taskName;
+    private String taskSummary;
     private String projectName;
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,6 +84,8 @@ public class JournalService {
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
+        Collections.reverse(journalEntryEntities);
+
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
@@ -91,6 +94,8 @@ public class JournalService {
         validateMemberWithinOrg(organization, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
+        Collections.reverse(journalEntryEntities);
+
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
@@ -99,6 +104,8 @@ public class JournalService {
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        Collections.reverse(journalEntryEntities);
+
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
@@ -107,6 +114,8 @@ public class JournalService {
         validateMemberWithinOrg(organization, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
+        Collections.reverse(journalEntryEntities);
+
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
