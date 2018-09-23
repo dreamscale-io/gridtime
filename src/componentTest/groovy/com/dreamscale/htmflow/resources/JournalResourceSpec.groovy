@@ -2,10 +2,10 @@ package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.journal.IntentionInputDto
-import com.dreamscale.htmflow.api.journal.IntentionDto
 import com.dreamscale.htmflow.api.journal.JournalEntryDto
+import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto
 import com.dreamscale.htmflow.api.project.ProjectDto
-import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto
+import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.core.domain.IntentionRepository
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity
@@ -161,7 +161,7 @@ class JournalResourceSpec extends Specification {
     }
 
 
-    def "get recent projects and tasks"() {
+    def "get recent tasks summary"() {
         given:
         OrganizationEntity organization = aRandom.organizationEntity().build()
         organizationRepository.save(organization)
@@ -197,19 +197,59 @@ class JournalResourceSpec extends Specification {
         createIntentionWithClient(intention4)
 
         when:
-        RecentTasksByProjectDto recentTasksByProject = journalClient.getRecentTasksByProject();
+        RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentTasksSummary();
 
         then:
-        assert recentTasksByProject != null
-        assert recentTasksByProject.getRecentProjects().size() == 2
+        assert recentTasksSummary != null
+        assert recentTasksSummary.getRecentProjects().size() == 2
 
-        ProjectDto recentProject1 = recentTasksByProject.getRecentProjects().get(0);
-        ProjectDto recentProject2 = recentTasksByProject.getRecentProjects().get(1);
+        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0);
+        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1);
 
-        assert recentTasksByProject.getRecentTasks(recentProject1.getId()).size() == 2;
-        assert recentTasksByProject.getRecentTasks(recentProject2.getId()).size() == 2;
+        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 2;
+        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 2;
 
     }
+
+    def "create a new task reference in the journal"() {
+        given:
+        OrganizationEntity organization = aRandom.organizationEntity().build()
+        organizationRepository.save(organization)
+
+        createMembership(organization.getId(), testUser.getId());
+
+        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
+        projectRepository.save(project1)
+
+        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).build()
+        projectRepository.save(project2)
+
+        TaskEntity task1 = aRandom.taskEntity().forProject(project1).build()
+        taskRepository.save(task1)
+
+        TaskEntity task2 = aRandom.taskEntity().forProject(project1).build()
+        taskRepository.save(task2)
+
+        TaskReferenceInputDto taskReferenceDto = new TaskReferenceInputDto()
+
+        taskReferenceDto.setTaskName(task1.name)
+
+        when:
+        RecentTasksSummaryDto recentTasksSummary = journalClient.createTaskReference(taskReferenceDto);
+
+        then:
+        assert recentTasksSummary.getActiveTask() != null
+
+        assert recentTasksSummary != null
+        assert recentTasksSummary.getRecentProjects().size() == 2
+
+        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0);
+        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1);
+
+        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 2;
+
+    }
+
 
 
     def "get recent intentions for other member"() {

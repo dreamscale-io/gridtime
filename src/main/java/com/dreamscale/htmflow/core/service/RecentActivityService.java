@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
+import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
@@ -97,8 +98,9 @@ public class RecentActivityService {
         activeWorkStatusRepository.save(workStatus);
     }
 
-    public RecentTasksByProjectDto getRecentTasksByProject(UUID organizationId, UUID memberId) {
-        RecentTasksByProjectDto recentTasksByProjectDto = new RecentTasksByProjectDto();
+    public RecentTasksSummaryDto getRecentTasksByProject(UUID organizationId, UUID memberId) {
+
+        RecentTasksSummaryDto recentTasksSummaryDto = new RecentTasksSummaryDto();
 
         List<ProjectEntity> recentProjects = projectRepository.findByRecentMemberAccess(memberId);
         List<ProjectEntity> allProjects = projectRepository.findByOrganizationId(organizationId);
@@ -115,11 +117,39 @@ public class RecentActivityService {
 
             List<TaskDto> taskDtos = taskMapper.toApiList(recentTasksWithDefaults);
 
-            recentTasksByProjectDto.addRecentProjectTasks(projectDto, taskDtos);
+            recentTasksSummaryDto.addRecentProjectTasks(projectDto, taskDtos);
         }
 
-        return recentTasksByProjectDto;
+        return recentTasksSummaryDto;
     }
+
+    public RecentTasksSummaryDto createTaskReferenceInJournal(UUID organizationId, UUID memberId, String taskName) {
+
+        TaskEntity taskEntity = taskRepository.findByOrganizationIdAndName(organizationId, taskName);
+        TaskDto taskDto = taskMapper.toApi(taskEntity);
+
+        if (taskDto != null) {
+
+            List<RecentTaskEntity> recentTasks = recentTaskRepository.findByMemberIdAndProjectId(memberId, taskDto.getProjectId());
+            RecentTaskEntity matchingTask = findMatchingTask(recentTasks, taskDto.getId());
+
+            if (matchingTask != null) {
+                matchingTask.setLastAccessed(LocalDateTime.now());
+                recentTaskRepository.save(matchingTask);
+            } else {
+                deleteOldestTaskOverMaxRecent(recentTasks);
+
+                RecentTaskEntity recentTask = createRecentTask(organizationId, memberId, taskDto);
+                recentTaskRepository.save(recentTask);
+            }
+        }
+
+        RecentTasksSummaryDto recentTasksSummaryDto = getRecentTasksByProject(organizationId, memberId);
+        recentTasksSummaryDto.setActiveTask(taskDto);
+
+        return recentTasksSummaryDto;
+    }
+
 
     private List<TaskEntity> combineRecentTasksWithDefaults(List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks) {
 
@@ -130,7 +160,9 @@ public class RecentActivityService {
         }
 
         for (TaskEntity defaultTask : defaultTasks) {
-            recentTaskMap.putIfAbsent(defaultTask.getId(), defaultTask);
+            if (recentTaskMap.size() < 5) {
+                recentTaskMap.putIfAbsent(defaultTask.getId(), defaultTask);
+            }
         }
 
         return new ArrayList<>(recentTaskMap.values());
@@ -145,7 +177,9 @@ public class RecentActivityService {
         }
 
         for (ProjectEntity defaultProject : defaultProjects) {
-            recentProjectMap.putIfAbsent(defaultProject.getId(), defaultProject);
+            if (recentProjectMap.size() < 5) {
+                recentProjectMap.putIfAbsent(defaultProject.getId(), defaultProject);
+            }
         }
 
         return new ArrayList<>(recentProjectMap.values());
@@ -222,6 +256,16 @@ public class RecentActivityService {
                 .projectId(activeChunkEvent.getProjectId())
                 .memberId(activeChunkEvent.getMemberId())
                 .organizationId(activeChunkEvent.getOrganizationId())
+                .lastAccessed(LocalDateTime.now()).build();
+    }
+
+    private RecentTaskEntity createRecentTask(UUID organizationId, UUID memberId, TaskDto taskDto) {
+        return RecentTaskEntity.builder()
+                .id(UUID.randomUUID())
+                .taskId(taskDto.getId())
+                .projectId(taskDto.getProjectId())
+                .memberId(memberId)
+                .organizationId(organizationId)
                 .lastAccessed(LocalDateTime.now()).build();
     }
 

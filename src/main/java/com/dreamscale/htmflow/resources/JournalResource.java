@@ -4,8 +4,9 @@ import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.api.journal.RecentJournalDto;
+import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
-import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
+import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator;
 import com.dreamscale.htmflow.core.security.RequestContext;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +41,7 @@ public class JournalResource {
      * Create a new Intention in the user's Journal
      */
 
-    @PostMapping(ResourcePaths.INTENTION_PATH)
+    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
         return journalService.createIntention(context.getMasterAccountId(), intentionInput);
@@ -52,7 +52,7 @@ public class JournalResource {
      * either for the current user (if member not provided), or for another memberId within the org
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
-    @GetMapping(ResourcePaths.RECENT_PATH)
+    @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)
     RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
 
@@ -67,7 +67,7 @@ public class JournalResource {
         }
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
-        RecentTasksByProjectDto recentActivity = recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
+        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
 
         RecentJournalDto recentJournalDto = new RecentJournalDto();
         recentJournalDto.setRecentIntentions(journalEntries);
@@ -85,8 +85,8 @@ public class JournalResource {
      * @param limit number of records to retrieve
      * @return List<IntentionDto>
      */
-    @GetMapping(ResourcePaths.INTENTION_PATH + ResourcePaths.HISTORY_PATH)
-    List<JournalEntryDto> getHistoricalIntentionsBeforeDate(@RequestParam("before_date") String beforeDateStr,
+    @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.HISTORY_PATH)
+    List<JournalEntryDto> getHistoricalEntriesBeforeDate(@RequestParam("before_date") String beforeDateStr,
                                                @RequestParam("member") Optional<String> memberId,
                                                @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -102,12 +102,27 @@ public class JournalResource {
     }
 
     /**
+     * Look up a task by name, for entry referencing into the journal.  Task to find is expected to be unique,
+     * and a search to Jira able of returning any details of the task, and any other recently accessed tasks
+     * in a summary
+     */
+
+    @PostMapping(ResourcePaths.TASK_PATH)
+    RecentTasksSummaryDto createTaskReferenceInJournal(@RequestBody TaskReferenceInputDto taskReference) {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return recentActivityService.createTaskReferenceInJournal(memberEntity.getOrganizationId(), memberEntity.getId(), taskReference.getTaskName());
+    }
+
+
+    /**
      * Gets a mapping of all the projects and tasks recently used by the user.  By creating Intentions against
      * a project/task combination, the recent lists are automatically updated
      */
 
-    @GetMapping(ResourcePaths.RECENT_PATH + ResourcePaths.TASK_PATH)
-    RecentTasksByProjectDto getRecentTasksByProject() {
+    @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
+    RecentTasksSummaryDto getRecentTasksByProject() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 

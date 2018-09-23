@@ -3,7 +3,10 @@ package com.dreamscale.htmflow.api;
 public class ResourcePaths {
 
     public static final String JOURNAL_PATH = "/journal";
+    public static final String ENTRY_PATH = "/entry";
+
     public static final String INTENTION_PATH = "/intention";
+
     public static final String RECENT_PATH = "/recent";
     public static final String HISTORY_PATH = "/history";
 
