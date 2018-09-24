@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow;
 
-import com.dreamscale.htmflow.core.security.AuthorizationFilter;
 import com.dreamscale.htmflow.core.security.RequestContext;
+import com.dreamscale.htmflow.core.security.WebSecurityConfig;
 import org.dreamscale.feign.DefaultFeignConfig;
 import org.dreamscale.springboot.config.CommonSpringBootConfig;
 import org.springframework.boot.SpringApplication;
@@ -14,17 +14,13 @@ import org.springframework.context.annotation.Import;
 @ComponentScan("com.dreamscale.htmflow")
 @Import({
         DefaultFeignConfig.class,
-        CommonSpringBootConfig.class
+        CommonSpringBootConfig.class,
+        WebSecurityConfig.class
 })
 public class HtmFlow {
 
     public static void main(String[] args) {
         SpringApplication.run(HtmFlow.class, args);
-    }
-
-    @Bean
-    public AuthorizationFilter authorizationFilter() {
-        return new AuthorizationFilter();
     }
 
     @Bean

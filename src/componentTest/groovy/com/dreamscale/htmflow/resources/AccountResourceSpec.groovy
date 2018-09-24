@@ -29,6 +29,8 @@ class AccountResourceSpec extends Specification {
     @Autowired
     AccountClient accountClient
     @Autowired
+    AccountClient unauthenticatedAccountClient
+    @Autowired
     OrganizationClient organizationClient
 
     @Autowired
@@ -47,7 +49,6 @@ class AccountResourceSpec extends Specification {
 
     def "should activate account and create APIKey"() {
         given:
-
         OrganizationInputDto organization = createValidOrganization()
         mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
 
@@ -66,8 +67,7 @@ class AccountResourceSpec extends Specification {
         activationCode.setActivationCode(membershipDto.getActivationCode());
 
         when:
-
-        AccountActivationDto activationDto = accountClient.activate(activationCode);
+        AccountActivationDto activationDto = unauthenticatedAccountClient.activate(activationCode);
 
         then:
         assert activationDto != null
@@ -76,8 +76,6 @@ class AccountResourceSpec extends Specification {
     }
 
     def "should login"() {
-        given:
-
         when:
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
@@ -88,8 +86,6 @@ class AccountResourceSpec extends Specification {
     }
 
     def "should logout"() {
-        given:
-
         when:
         SimpleStatusDto statusDto = accountClient.logout()
 
@@ -104,7 +100,6 @@ class AccountResourceSpec extends Specification {
         accountClient.login();
 
         when:
-
         SimpleStatusDto statusDto = accountClient.heartbeat(heartbeatDto)
 
         then:

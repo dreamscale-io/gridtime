@@ -2,12 +2,11 @@ package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.batch.NewIFMBatch;
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.FlowService;
-import com.dreamscale.htmflow.core.service.OrganizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +23,7 @@ public class FlowResource {
     /**
      * Saves a batch of flow activity and events for the user
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.BATCH_PATH)
     public void saveFlowBatch(@RequestBody NewIFMBatch batch) {
         log.info("addFlowBatch, batch={}", batch);
