@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.activity.*;
 import com.dreamscale.htmflow.api.batch.NewBatchEvent;
-import com.dreamscale.htmflow.api.batch.NewIFMBatch;
+import com.dreamscale.htmflow.api.batch.NewFlowBatch;
 import com.dreamscale.htmflow.api.event.EventType;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
@@ -33,7 +33,7 @@ public class FlowService {
     FlowEventRepository flowEventRepository;
 
 
-    public void saveFlowBatch(UUID masterAccountId, NewIFMBatch batch) {
+    public void saveFlowBatch(UUID masterAccountId, NewFlowBatch batch) {
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 
         Duration timeAdjustment = calculateTimeAdjustment(batch.getTimeSent());
@@ -45,8 +45,6 @@ public class FlowService {
         saveExternalActivity(memberEntity.getId(), timeAdjustment, batch.getExternalActivityList());
 
         saveEvents(memberEntity.getId(), timeAdjustment, batch.getEventList());
-        saveSnippetEvents(memberEntity.getId(), timeAdjustment, batch.getSnippetEventList());
-
     }
 
     private void saveEvents(UUID memberId, Duration adjustment, List<NewBatchEvent> eventList) {
@@ -63,20 +61,22 @@ public class FlowService {
         }
     }
 
-    private void saveSnippetEvents(UUID memberId, Duration adjustment, List<NewSnippetEvent> snippetEvents) {
-        for (NewSnippetEvent snippetEvent : snippetEvents) {
-            FlowEventEntity entity = new FlowEventEntity();
+    public void saveSnippetEvent(UUID masterAccountId, NewSnippetEvent snippetEvent) {
+        // TOOD: this seems wrong... what is the 'default' membership and why are we getting it here?
+        // shouldn't an api key be tied to a specific membership?  seems like a security hole
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 
-            entity.setEventType(EventType.SNIPPET);
-            entity.setMemberId(memberId);
-            entity.setTimePosition(snippetEvent.getPosition().plus(adjustment));
+        FlowEventEntity entity = FlowEventEntity.builder()
+                .eventType(EventType.SNIPPET)
+                .memberId(memberEntity.getId())
+                .timePosition(snippetEvent.getPosition())
+                .build();
 
-            entity.setMetadataField("comment", snippetEvent.getComment());
-            entity.setMetadataField("source", snippetEvent.getSource());
-            entity.setMetadataField("snippet", snippetEvent.getSnippet());
+        entity.setMetadataField("comment", snippetEvent.getComment());
+        entity.setMetadataField("source", snippetEvent.getSource());
+        entity.setMetadataField("snippet", snippetEvent.getSnippet());
 
-            flowEventRepository.save(entity);
-        }
+        flowEventRepository.save(entity);
     }
 
     private void saveIdleActivity(UUID memberId, Duration adjustment, List<NewIdleActivity> idleActivityList) {

@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core;
 
-import com.dreamscale.htmflow.api.batch.NewIFMBatch;
 import lombok.experimental.Delegate;
 import org.dreamscale.testsupport.RandomGenerator;
 

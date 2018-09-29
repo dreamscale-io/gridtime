@@ -1,7 +1,8 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.batch.NewIFMBatch;
+import com.dreamscale.htmflow.api.batch.NewFlowBatch;
+import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.FlowService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +26,18 @@ public class FlowResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.BATCH_PATH)
-    public void saveFlowBatch(@RequestBody NewIFMBatch batch) {
-        log.info("addFlowBatch, batch={}", batch);
-
+    public void saveFlowBatch(@RequestBody NewFlowBatch batch) {
         RequestContext context = RequestContext.get();
-
+        log.info("addFlowBatch, user={}, batch={}", context.getMasterAccountId(), batch);
         flowService.saveFlowBatch(context.getMasterAccountId(), batch);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.SNIPPET_PATH)
+    public void saveFlowSnippet(@RequestBody NewSnippetEvent snippet) {
+        RequestContext context = RequestContext.get();
+        log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
+        flowService.saveSnippetEvent(context.getMasterAccountId(), snippet);
     }
 
 }
