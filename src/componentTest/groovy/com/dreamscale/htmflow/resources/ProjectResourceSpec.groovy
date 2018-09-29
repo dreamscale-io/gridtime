@@ -58,7 +58,7 @@ class ProjectResourceSpec extends Specification {
 
 	def "should retrieve project list"() {
 		given:
-		OrganizationEntity org = createOrgAndTestUserMembership();
+		OrganizationEntity org = createOrgAndTestUserMembership()
 
 		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
 		projectRepository.save(projectEntity)
@@ -75,7 +75,7 @@ class ProjectResourceSpec extends Specification {
 
 	def "should find tasks starting with search string"() {
 		given:
-		OrganizationEntity organizationEntity = createOrgAndTestUserMembership();
+		OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
 		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
 		projectRepository.save(projectEntity)
@@ -99,7 +99,7 @@ class ProjectResourceSpec extends Specification {
 
 	def "should refuse to search when search string is too short"() {
 		given:
-		OrganizationEntity organizationEntity = createOrgAndTestUserMembership();
+		OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
 		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
 		projectRepository.save(projectEntity)
@@ -124,7 +124,7 @@ class ProjectResourceSpec extends Specification {
 	def "should create new task"() {
 		given:
 
-		OrganizationEntity org = createOrgAndTestUserMembership();
+		OrganizationEntity org = createOrgAndTestUserMembership()
 
 		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
 		projectRepository.save(projectEntity)
@@ -144,13 +144,13 @@ class ProjectResourceSpec extends Specification {
 	}
 
 	private OrganizationEntity createOrgAndTestUserMembership() {
-		OrganizationEntity organizationEntity = createOrganization();
+		OrganizationEntity organizationEntity = createOrganization()
 		organizationRepository.save(organizationEntity)
 
 		OrganizationMemberEntity organizationMemberEntity = createOrganizationMember(organizationEntity.getId(), testUser.getId())
 		organizationMemberRepository.save(organizationMemberEntity)
 
-		return organizationEntity;
+		return organizationEntity
 
 	}
 

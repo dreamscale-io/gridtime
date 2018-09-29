@@ -27,19 +27,19 @@ public class AdminResourceSpec extends Specification {
     AdminClient adminClient
 
     @Autowired
-    JiraService mockJiraService;
+    JiraService mockJiraService
 
     @Autowired
     OrganizationRepository organizationRepository
 
     @Autowired
-    ConfigProjectSyncRepository configProjectSyncRepository;
+    ConfigProjectSyncRepository configProjectSyncRepository
 
     @Autowired
-    ProjectRepository projectRepository;
+    ProjectRepository projectRepository
 
     @Autowired
-    TaskRepository taskRepository;
+    TaskRepository taskRepository
 
 
     def setup() {
@@ -104,7 +104,7 @@ public class AdminResourceSpec extends Specification {
         ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "jira_project")
         JiraProjectDto jiraProjectDto = aRandom.jiraProjectDto().name("jira_project").build()
 
-        JiraTaskDto jiraTaskDto = aRandom.jiraTaskDto().build();
+        JiraTaskDto jiraTaskDto = aRandom.jiraTaskDto().build()
 
         mockJiraService.getProjectByName(organizationEntity.id, "jira_project") >> jiraProjectDto
         mockJiraService.getFilteredProjects(organizationEntity.id, _) >> [jiraProjectDto]
@@ -119,7 +119,7 @@ public class AdminResourceSpec extends Specification {
         assert dbProjects != null
         assert dbProjects.size() > 0
 
-        List< TaskEntity> dbTasks = taskRepository.findByProjectId(dbProjects.get(0).id);
+        List< TaskEntity> dbTasks = taskRepository.findByProjectId(dbProjects.get(0).id)
         assert dbTasks.size() > 0
 
     }

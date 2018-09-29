@@ -58,7 +58,7 @@ class OrganizationResourceSpec extends Specification {
     JiraService mockJiraService
 
     @Autowired
-    MasterAccountEntity testUser;
+    MasterAccountEntity testUser
 
 	def setup() {
 		organizationRepository.deleteAll()
@@ -70,7 +70,7 @@ class OrganizationResourceSpec extends Specification {
 
     def "should not create organization with failed Jira connect"() {
         given:
-        OrganizationInputDto organization = createOrganizationWithInvalidJira();
+        OrganizationInputDto organization = createOrganizationWithInvalidJira()
 
         when:
         OrganizationDto organizationDto = organizationClient.createOrganization(organization)
@@ -107,7 +107,7 @@ class OrganizationResourceSpec extends Specification {
 
         when:
         OrganizationDto organizationDto = organizationClient.createOrganization(organization)
-        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken());
+        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken())
 
         then:
         assert inviteOrg != null
@@ -123,13 +123,13 @@ class OrganizationResourceSpec extends Specification {
         OrganizationInputDto organization = createValidOrganization()
 
         OrganizationDto organizationDto = organizationClient.createOrganization(organization)
-        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken());
+        OrganizationDto inviteOrg = organizationClient.decodeInvitation(organizationDto.getInviteToken())
 
         MembershipInputDto membershipInputDto = new MembershipInputDto()
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
 
-        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build()
         mockJiraService.getUserByEmail(_, _) >> jiraUserDto
 
         when:
@@ -149,20 +149,20 @@ class OrganizationResourceSpec extends Specification {
     def "should retrieve all members in organization"() {
         given:
 
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
 
-        ActivationCodeDto activationCode = new ActivationCodeDto();
-        activationCode.setActivationCode(registration1.getActivationCode());
+        ActivationCodeDto activationCode = new ActivationCodeDto()
+        activationCode.setActivationCode(registration1.getActivationCode())
 
-        AccountActivationDto activationDto = accountClient.activate(activationCode);
+        AccountActivationDto activationDto = accountClient.activate(activationCode)
 
-        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(activationDto.apiKey);
+        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(activationDto.apiKey)
 
         //Can only retrieve org members for orgs you are a part of,
-        testUser.setApiKey(masterAccountEntity.getApiKey());
+        testUser.setApiKey(masterAccountEntity.getApiKey())
         testUser.setId(masterAccountEntity.getId())
 
         when:
@@ -175,7 +175,7 @@ class OrganizationResourceSpec extends Specification {
 
     def "should create a team within the org"() {
         given:
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         when:
         TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
@@ -188,7 +188,7 @@ class OrganizationResourceSpec extends Specification {
 
     def "should get teams within the org"() {
         given:
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
         TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Lightning"))
@@ -205,7 +205,7 @@ class OrganizationResourceSpec extends Specification {
     def "should add members to team"() {
         given:
 
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
@@ -215,7 +215,7 @@ class OrganizationResourceSpec extends Specification {
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
 
         when:
-        List<TeamMemberDto> teamMembers = organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd);
+        List<TeamMemberDto> teamMembers = organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
 
         then:
         assert teamMembers != null
@@ -234,7 +234,7 @@ class OrganizationResourceSpec extends Specification {
     def "should retrieve my teams that I am a member of"() {
         given:
 
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
@@ -245,11 +245,11 @@ class OrganizationResourceSpec extends Specification {
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
 
-        organizationClient.addMembersToTeam(org.id.toString(), team1.id.toString(), teamMembersToAdd);
-        organizationClient.addMembersToTeam(org.id.toString(), team2.id.toString(), teamMembersToAdd);
+        organizationClient.addMembersToTeam(org.id.toString(), team1.id.toString(), teamMembersToAdd)
+        organizationClient.addMembersToTeam(org.id.toString(), team2.id.toString(), teamMembersToAdd)
 
         TeamMembersToAddInputDto otherTeamMembers = new TeamMembersToAddInputDto([registration2.memberId])
-        organizationClient.addMembersToTeam(org.id.toString(), teamOther.id.toString(), otherTeamMembers);
+        organizationClient.addMembersToTeam(org.id.toString(), teamOther.id.toString(), otherTeamMembers)
 
         //active request coming from janelle
         testUser.id = registration1.masterAccountId
@@ -266,7 +266,7 @@ class OrganizationResourceSpec extends Specification {
     def "should retrieve team member status of specified team"() {
         given:
 
-        OrganizationDto org = createOrganizationWithClient();
+        OrganizationDto org = createOrganizationWithClient()
 
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
@@ -276,7 +276,7 @@ class OrganizationResourceSpec extends Specification {
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId, registration3.memberId])
 
-        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd);
+        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
 
         when:
         List<TeamMemberWorkStatusDto> teamMemberStatusList = organizationClient.getStatusOfTeamMembers(org.id.toString(), team.id.toString())
@@ -292,7 +292,7 @@ class OrganizationResourceSpec extends Specification {
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail(memberEmail)
 
-        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build()
         1 * mockJiraService.getUserByEmail(_, _) >> jiraUserDto
 
         return organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
@@ -309,7 +309,7 @@ class OrganizationResourceSpec extends Specification {
 
 
     private OrganizationInputDto createValidOrganization() {
-        OrganizationInputDto organization = new OrganizationInputDto();
+        OrganizationInputDto organization = new OrganizationInputDto()
         organization.setOrgName("DreamScale")
         organization.setDomainName("dreamscale.io")
         organization.setJiraUser("janelle@dreamscale.io")
@@ -318,11 +318,11 @@ class OrganizationResourceSpec extends Specification {
 
         mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
 
-        return organization;
+        return organization
     }
 
     private OrganizationInputDto createOrganizationWithInvalidJira() {
-        OrganizationInputDto organization = new OrganizationInputDto();
+        OrganizationInputDto organization = new OrganizationInputDto()
         organization.setOrgName("DreamScale")
         organization.setJiraUser("fake")
         organization.setJiraSiteUrl("dreamscale.atlassian.net")
@@ -330,7 +330,7 @@ class OrganizationResourceSpec extends Specification {
 
         mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.FAILED, "failed")
 
-        return organization;
+        return organization
     }
 
 }
