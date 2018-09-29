@@ -49,13 +49,6 @@ class ProjectResourceSpec extends Specification {
 	@Autowired
 	MasterAccountEntity testUser
 
-	def setup() {
-		projectRepository.deleteAll()
-		taskRepository.deleteAll()
-		organizationRepository.deleteAll()
-		organizationMemberRepository.deleteAll()
-	}
-
 	def "should retrieve project list"() {
 		given:
 		OrganizationEntity org = createOrgAndTestUserMembership()

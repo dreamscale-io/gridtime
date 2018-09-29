@@ -42,11 +42,6 @@ class AccountResourceSpec extends Specification {
     @Autowired
     JiraService mockJiraService
 
-    def setup() {
-        organizationRepository.deleteAll()
-        masterAccountRepository.deleteAll()
-    }
-
     def "should activate account and create APIKey"() {
         given:
         OrganizationInputDto organization = createValidOrganization()

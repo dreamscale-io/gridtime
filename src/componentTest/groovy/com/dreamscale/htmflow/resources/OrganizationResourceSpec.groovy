@@ -60,14 +60,6 @@ class OrganizationResourceSpec extends Specification {
     @Autowired
     MasterAccountEntity testUser
 
-	def setup() {
-		organizationRepository.deleteAll()
-		masterAccountRepository.deleteAll()
-        organizationMemberRepository.deleteAll()
-        teamRepository.deleteAll()
-        teamMemberRepository.deleteAll()
-	}
-
     def "should not create organization with failed Jira connect"() {
         given:
         OrganizationInputDto organization = createOrganizationWithInvalidJira()

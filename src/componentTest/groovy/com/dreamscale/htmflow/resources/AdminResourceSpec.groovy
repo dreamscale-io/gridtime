@@ -41,14 +41,6 @@ public class AdminResourceSpec extends Specification {
     @Autowired
     TaskRepository taskRepository
 
-
-    def setup() {
-        organizationRepository.deleteAll()
-        configProjectSyncRepository.deleteAll()
-        projectRepository.deleteAll()
-        taskRepository.deleteAll()
-    }
-
     def "should configure project sync for the org"() {
 
         given:

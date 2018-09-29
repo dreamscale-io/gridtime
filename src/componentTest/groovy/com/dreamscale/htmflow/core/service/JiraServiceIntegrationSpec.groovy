@@ -30,8 +30,6 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 
 	def setup() {
-		organizationRepository.deleteAll()
-
 		jiraService = new JiraService()
 		jiraService.organizationRepository = organizationRepository
 		jiraService.jiraConnectionFactory = jiraConnectionFactory

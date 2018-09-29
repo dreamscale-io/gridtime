@@ -59,17 +59,6 @@ class JournalResourceSpec extends Specification {
     @Autowired
     MasterAccountEntity testUser
 
-    def setup() {
-        projectRepository.deleteAll()
-        taskRepository.deleteAll()
-        intentionRepository.deleteAll()
-        organizationRepository.deleteAll()
-        organizationMemberRepository.deleteAll()
-        recentProjectRepository.deleteAll()
-        recentTaskRepository.deleteAll()
-
-    }
-
     def "should save new intention"() {
         given:
         TaskEntity task = createOrganizationAndTask()

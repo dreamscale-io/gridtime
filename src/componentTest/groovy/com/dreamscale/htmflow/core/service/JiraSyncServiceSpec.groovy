@@ -36,13 +36,6 @@ public class JiraSyncServiceSpec extends Specification {
 	@Autowired
 	JiraService mockJiraService
 
-	def setup() {
-		organizationRepository.deleteAll()
-		configProjectSyncRepository.deleteAll()
-		projectRepository.deleteAll()
-		taskRepository.deleteAll()
-	}
-
 	def "should update task status if updated in Jira"() {
 		given:
 		OrganizationEntity org = aRandom.organizationEntity().build()

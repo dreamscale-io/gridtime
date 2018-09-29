@@ -49,11 +49,6 @@ class FlowResourceSpec extends Specification {
     OrganizationMemberEntity member
 
     def setup() {
-        flowActivityRepository.deleteAll()
-        flowEventRepository.deleteAll()
-        organizationRepository.deleteAll()
-        organizationMemberRepository.deleteAll()
-
         mockTimeService.now() >> LocalDateTime.now()
 
         org = createOrganization()
