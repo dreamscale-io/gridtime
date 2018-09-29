@@ -65,16 +65,16 @@ class FlowResourceSpec extends Specification {
 
     def "should save all the things"() {
         given:
-        OrganizationEntity org = createOrganization();
-        OrganizationMemberEntity member = createMembership(org.getId(), testUser.getId());
+        OrganizationEntity org = createOrganization()
+        OrganizationMemberEntity member = createMembership(org.getId(), testUser.getId())
 
-        NewIFMBatch flowBatch = aRandom.flowBatch().build();
+        NewIFMBatch flowBatch = aRandom.flowBatch().build()
 
         when:
-        flowClient.addIFMBatch(flowBatch);
+        flowClient.addIFMBatch(flowBatch)
 
-        List<FlowActivityEntity> activities = flowActivityRepository.findByMemberId(member.getId());
-        List<FlowEventEntity> events = flowEventRepository.findByMemberId(member.getId());
+        List<FlowActivityEntity> activities = flowActivityRepository.findByMemberId(member.getId())
+        List<FlowEventEntity> events = flowEventRepository.findByMemberId(member.getId())
 
         then:
         assert activities != null
@@ -99,7 +99,7 @@ class FlowResourceSpec extends Specification {
                 .build()
         organizationMemberRepository.save(member)
 
-        return member;
+        return member
     }
 
 }
