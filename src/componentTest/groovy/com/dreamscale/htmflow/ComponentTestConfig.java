@@ -6,6 +6,8 @@ import com.dreamscale.htmflow.client.FlowClient;
 import com.dreamscale.htmflow.client.JournalClient;
 import com.dreamscale.htmflow.client.OrganizationClient;
 import com.dreamscale.htmflow.client.ProjectClient;
+import com.dreamscale.htmflow.core.CoreARandom;
+import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
@@ -98,5 +100,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     public MasterAccountIdResolver userIdResolver() {
         return new StubMasterAccountIdResolver(testUser());
     }
+
+    @Bean
+    public CoreRandomBuilderSupport coreRandomBuilderSupport() {
+        return CoreARandom.aRandom.coreRandomBuilderSupport;
+    }
+
 
 }

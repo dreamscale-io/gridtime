@@ -10,6 +10,6 @@ public class CoreARandom {
     @Delegate
     private RandomGenerator randomGenerator = new RandomGenerator();
     @Delegate
-    private CoreRandomBuilderSupport coreRandomBuilderSupport = new CoreRandomBuilderSupport();
+    public CoreRandomBuilderSupport coreRandomBuilderSupport = new CoreRandomBuilderSupport();
 
 }

@@ -53,8 +53,7 @@ class ProjectResourceSpec extends Specification {
 		given:
 		OrganizationEntity org = createOrgAndTestUserMembership()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
-		projectRepository.save(projectEntity)
+		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).save()
 
 		when:
 		List<ProjectDto> projects = projectClient.getProjects()
@@ -70,18 +69,12 @@ class ProjectResourceSpec extends Specification {
 		given:
 		OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
-		projectRepository.save(projectEntity)
+		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).save()
 
-		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").build()
-		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").build()
-		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-137").build()
-		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").build()
-
-		taskRepository.save(taskEntity1)
-		taskRepository.save(taskEntity2)
-		taskRepository.save(taskEntity3)
-		taskRepository.save(taskEntity4)
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-137").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").save()
 
 		when:
 		List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-1")
@@ -94,21 +87,15 @@ class ProjectResourceSpec extends Specification {
 		given:
 		OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
-		projectRepository.save(projectEntity)
+		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).save()
 
-		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").build()
-		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").build()
-		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-227").build()
-		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").build()
-
-		taskRepository.save(taskEntity1)
-		taskRepository.save(taskEntity2)
-		taskRepository.save(taskEntity3)
-		taskRepository.save(taskEntity4)
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-227").save()
+		aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").save()
 
 		when:
-		List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-")
+		projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-")
 
 		then:
 		thrown(BadRequestException)
@@ -119,8 +106,7 @@ class ProjectResourceSpec extends Specification {
 
 		OrganizationEntity org = createOrgAndTestUserMembership()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
-		projectRepository.save(projectEntity)
+		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).save()
 
 		JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
 		mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto

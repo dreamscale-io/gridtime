@@ -9,9 +9,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
-import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository
-import com.dreamscale.htmflow.core.domain.flow.FlowEventEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowEventRepository
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +49,7 @@ class FlowResourceSpec extends Specification {
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
 
-        org = createOrganization()
+        org = aRandom.organizationEntity().save()
         member = createMembership(org.getId(), testUser.getId())
     }
 
@@ -66,7 +64,7 @@ class FlowResourceSpec extends Specification {
         assert flowActivityRepository.findByMemberId(member.getId()).size() == 5
         assert flowEventRepository.findByMemberId(member.getId()).size() == 1
     }
-    
+
     def "addSnippet should save the snippet"() {
         given:
         NewSnippetEvent snippet = aRandom.snippetEvent().build()
@@ -80,21 +78,11 @@ class FlowResourceSpec extends Specification {
     }
 
 
-    private OrganizationEntity createOrganization() {
-        OrganizationEntity organization = aRandom.organizationEntity().build()
-        organizationRepository.save(organization)
-
-        return organization
-    }
-
     private OrganizationMemberEntity createMembership(UUID organizationId, UUID masterAccountId) {
-        OrganizationMemberEntity member = aRandom.memberEntity()
+        aRandom.memberEntity()
                 .organizationId(organizationId)
                 .masterAccountId(masterAccountId)
-                .build()
-        organizationMemberRepository.save(member)
-
-        return member
+                .save()
     }
 
 }

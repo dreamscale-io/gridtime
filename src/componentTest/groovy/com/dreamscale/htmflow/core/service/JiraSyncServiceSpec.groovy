@@ -38,8 +38,7 @@ public class JiraSyncServiceSpec extends Specification {
 
 	def "should update task status if updated in Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
 		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]
@@ -71,8 +70,7 @@ public class JiraSyncServiceSpec extends Specification {
 
 	def "should close tasks if no longer retrieved from Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
 		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]
@@ -98,8 +96,7 @@ public class JiraSyncServiceSpec extends Specification {
 
 	def "should not explode if closed tasks are re-opened in Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
 		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]

@@ -152,28 +152,17 @@ class JournalResourceSpec extends Specification {
 
     def "get recent projects and tasks"() {
         given:
-        OrganizationEntity organization = aRandom.organizationEntity().build()
-        organizationRepository.save(organization)
+        OrganizationEntity organization = aRandom.organizationEntity().save()
 
         createMembership(organization.getId(), testUser.getId())
 
-        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
-        projectRepository.save(project1)
+        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).save()
+        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).save()
 
-        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).build()
-        projectRepository.save(project2)
-
-        TaskEntity task1 = aRandom.taskEntity().forProject(project1).build()
-        taskRepository.save(task1)
-
-        TaskEntity task2 = aRandom.taskEntity().forProject(project1).build()
-        taskRepository.save(task2)
-
-        TaskEntity task3 = aRandom.taskEntity().forProject(project2).build()
-        taskRepository.save(task3)
-
-        TaskEntity task4 = aRandom.taskEntity().forProject(project2).build()
-        taskRepository.save(task4)
+        TaskEntity task1 = aRandom.taskEntity().forProject(project1).save()
+        TaskEntity task2 = aRandom.taskEntity().forProject(project1).save()
+        TaskEntity task3 = aRandom.taskEntity().forProject(project2).save()
+        TaskEntity task4 = aRandom.taskEntity().forProject(project2).save()
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task1).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task2).build()
@@ -254,14 +243,11 @@ class JournalResourceSpec extends Specification {
     }
 
     private TaskEntity createOrganizationAndTask() {
-        OrganizationEntity organization = aRandom.organizationEntity().build()
-        organizationRepository.save(organization)
+        OrganizationEntity organization = aRandom.organizationEntity().save()
 
-        ProjectEntity project = aRandom.projectEntity().forOrg(organization).build()
-        projectRepository.save(project)
+        ProjectEntity project = aRandom.projectEntity().forOrg(organization).save()
 
-        TaskEntity task = aRandom.taskEntity().forProject(project).build()
-        taskRepository.save(task)
+        TaskEntity task = aRandom.taskEntity().forProject(project).save()
 
         return task
     }
@@ -270,8 +256,7 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity()
                 .organizationId(organizationId)
                 .masterAccountId(masterAccountId)
-                .build()
-        organizationMemberRepository.save(member)
+                .save()
 
         return member
     }

@@ -4,7 +4,10 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.OrganizationMemberEntityBuilder {
 
-	RandomOrganizationMemberEntityBuilder() {
+	private OrganizationMemberRepository organizationMemberRepository
+
+	RandomOrganizationMemberEntityBuilder(OrganizationMemberRepository organizationMemberRepository) {
+		this.organizationMemberRepository = organizationMemberRepository
 		id(aRandom.uuid())
 		.masterAccountId(aRandom.uuid())
 		.organizationId(aRandom.uuid())
@@ -20,6 +23,10 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 	RandomOrganizationMemberEntityBuilder forAccount(MasterAccountEntity masterAccountEntity) {
 		masterAccountId(masterAccountEntity.getId())
 		return this
+	}
+
+	OrganizationMemberEntity save() {
+		organizationMemberRepository.save(build())
 	}
 
 }

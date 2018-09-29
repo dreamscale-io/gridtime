@@ -44,8 +44,7 @@ public class AdminResourceSpec extends Specification {
     def "should configure project sync for the org"() {
 
         given:
-        OrganizationEntity organizationEntity = aRandom.organizationEntity().build()
-        organizationRepository.save(organizationEntity)
+        OrganizationEntity organizationEntity = aRandom.organizationEntity().save()
 
         ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "jira_project")
 
@@ -75,8 +74,7 @@ public class AdminResourceSpec extends Specification {
     def "should throw an error if jira project is not valid"() {
 
         given:
-        OrganizationEntity organizationEntity = aRandom.organizationEntity().build()
-        organizationRepository.save(organizationEntity)
+        OrganizationEntity organizationEntity = aRandom.organizationEntity().save()
 
         ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "invalid_project")
 
@@ -90,8 +88,7 @@ public class AdminResourceSpec extends Specification {
 
     def "should sync configured projects and tasks"() {
         given:
-        OrganizationEntity organizationEntity = aRandom.organizationEntity().build()
-        organizationRepository.save(organizationEntity)
+        OrganizationEntity organizationEntity = aRandom.organizationEntity().save()
 
         ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "jira_project")
         JiraProjectDto jiraProjectDto = aRandom.jiraProjectDto().name("jira_project").build()
