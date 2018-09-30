@@ -90,7 +90,6 @@ public class AdminResourceSpec extends Specification {
         given:
         OrganizationEntity organizationEntity = aRandom.organizationEntity().save()
 
-        ProjectSyncInputDto syncDto = new ProjectSyncInputDto(organizationEntity.getId(), "jira_project")
         JiraProjectDto jiraProjectDto = aRandom.jiraProjectDto().name("jira_project").build()
 
         JiraTaskDto jiraTaskDto = aRandom.jiraTaskDto().build()

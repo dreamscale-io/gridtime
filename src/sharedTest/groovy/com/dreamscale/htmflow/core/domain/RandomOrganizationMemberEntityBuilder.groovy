@@ -25,6 +25,11 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 		return this
 	}
 
+	RandomOrganizationMemberEntityBuilder forOrgAndAccount(OrganizationEntity organization, MasterAccountEntity masterAccountEntity) {
+		forOrg(organization)
+		forAccount(masterAccountEntity)
+	}
+
 	OrganizationMemberEntity save() {
 		organizationMemberRepository.save(build())
 	}

@@ -106,9 +106,6 @@ class AccountResourceSpec extends Specification {
         OrganizationInputDto organization = new OrganizationInputDto()
         organization.setOrgName("DreamScale")
         organization.setDomainName("dreamscale.io")
-        organization.setJiraUser("janelle@dreamscale.io")
-        organization.setJiraSiteUrl("dreamscale.atlassian.net")
-        organization.setJiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
 
         return organization
     }

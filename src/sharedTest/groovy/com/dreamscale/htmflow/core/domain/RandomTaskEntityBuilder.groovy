@@ -22,6 +22,11 @@ class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
         return this
     }
 
+    RandomTaskEntityBuilder forProjectAndName(ProjectEntity projectEntity, String name) {
+        this.name(name)
+        forProject(projectEntity)
+    }
+
     TaskEntity save() {
         taskRepository.save(build())
     }
