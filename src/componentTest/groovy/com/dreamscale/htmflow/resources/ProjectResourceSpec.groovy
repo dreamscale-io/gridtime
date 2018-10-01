@@ -26,155 +26,108 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 @ComponentTest
 class ProjectResourceSpec extends Specification {
 
-	@Autowired
-	ProjectClient projectClient
+    @Autowired
+    ProjectClient projectClient
 
-	@Autowired
-	OrganizationClient organizationClient
+    @Autowired
+    OrganizationClient organizationClient
 
-	@Autowired
-	ProjectRepository projectRepository
-	@Autowired
-	TaskRepository taskRepository
+    @Autowired
+    ProjectRepository projectRepository
+    @Autowired
+    TaskRepository taskRepository
 
-	@Autowired
-	OrganizationRepository organizationRepository
+    @Autowired
+    OrganizationRepository organizationRepository
 
-	@Autowired
-	OrganizationMemberRepository organizationMemberRepository
+    @Autowired
+    OrganizationMemberRepository organizationMemberRepository
 
-	@Autowired
-	JiraService mockJiraService
+    @Autowired
+    JiraService mockJiraService
 
-	@Autowired
-	MasterAccountEntity testUser
+    @Autowired
+    MasterAccountEntity testUser
 
-	def setup() {
-		projectRepository.deleteAll()
-		taskRepository.deleteAll()
-		organizationRepository.deleteAll()
-		organizationMemberRepository.deleteAll()
-	}
+    def "should retrieve project list"() {
+        given:
+        OrganizationEntity org = createOrgAndTestUserMembership()
 
-	def "should retrieve project list"() {
-		given:
-		OrganizationEntity org = createOrgAndTestUserMembership();
+        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(org).save()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
-		projectRepository.save(projectEntity)
+        when:
+        List<ProjectDto> projects = projectClient.getProjects()
 
-		when:
-		List<ProjectDto> projects = projectClient.getProjects()
+        then:
+        assert projects.size() == 1
+        assert projects[0].id == projectEntity.id
+        assert projects[0].name == projectEntity.name
+        assert projects[0].externalId == projectEntity.externalId
+    }
 
-		then:
-		assert projects.size() == 1
-		assert projects[0].id == projectEntity.id
-		assert projects[0].name == projectEntity.name
-		assert projects[0].externalId == projectEntity.externalId
-	}
+    def "should find tasks starting with search string"() {
+        given:
+        OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
-	def "should find tasks starting with search string"() {
-		given:
-		OrganizationEntity organizationEntity = createOrgAndTestUserMembership();
+        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(organizationEntity).save()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
-		projectRepository.save(projectEntity)
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-123").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-124").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-137").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-211").save()
 
-		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").build()
-		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").build()
-		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-137").build()
-		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").build()
+        when:
+        List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-1")
 
-		taskRepository.save(taskEntity1)
-		taskRepository.save(taskEntity2)
-		taskRepository.save(taskEntity3)
-		taskRepository.save(taskEntity4)
+        then:
+        assert tasks.size() == 3
+    }
 
-		when:
-		List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-1")
+    def "should refuse to search when search string is too short"() {
+        given:
+        OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
-		then:
-		assert tasks.size() == 3
-	}
+        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(organizationEntity).save()
 
-	def "should refuse to search when search string is too short"() {
-		given:
-		OrganizationEntity organizationEntity = createOrgAndTestUserMembership();
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-123").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-124").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-227").save()
+        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-211").save()
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(organizationEntity.getId()).build()
-		projectRepository.save(projectEntity)
+        when:
+        projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-")
 
-		TaskEntity taskEntity1 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-123").build()
-		TaskEntity taskEntity2 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-124").build()
-		TaskEntity taskEntity3 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-227").build()
-		TaskEntity taskEntity4 = aRandom.taskEntity().projectId(projectEntity.id).name("FD-211").build()
+        then:
+        thrown(BadRequestException)
+    }
 
-		taskRepository.save(taskEntity1)
-		taskRepository.save(taskEntity2)
-		taskRepository.save(taskEntity3)
-		taskRepository.save(taskEntity4)
+    def "should create new task"() {
+        given:
 
-		when:
-		List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-")
+        OrganizationEntity org = createOrgAndTestUserMembership()
 
-		then:
-		thrown(BadRequestException)
-	}
+        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(org).save()
 
-	def "should create new task"() {
-		given:
+        JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
+        mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto
 
-		OrganizationEntity org = createOrgAndTestUserMembership();
+        TaskInputDto taskInputDto = new TaskInputDto(newJiraTaskDto.summary, "description!!")
 
-		ProjectEntity projectEntity = aRandom.projectEntity().organizationId(org.id).build()
-		projectRepository.save(projectEntity)
+        when:
+        TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
 
-		JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
-		mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto
+        then:
+        assert task != null
+        assert task.externalId != null
+        assert task.summary == newJiraTaskDto.summary
+    }
 
-		TaskInputDto taskInputDto = new TaskInputDto(newJiraTaskDto.summary, "description!!")
-
-		when:
-		TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
-
-		then:
-		assert task != null
-		assert task.externalId != null
-		assert task.summary == newJiraTaskDto.summary
-	}
-
-	private OrganizationEntity createOrgAndTestUserMembership() {
-		OrganizationEntity organizationEntity = createOrganization();
-		organizationRepository.save(organizationEntity)
-
-		OrganizationMemberEntity organizationMemberEntity = createOrganizationMember(organizationEntity.getId(), testUser.getId())
-		organizationMemberRepository.save(organizationMemberEntity)
-
-		return organizationEntity;
-
-	}
-
-	private OrganizationEntity createOrganization() {
-		return OrganizationEntity.builder()
-				.id(UUID.randomUUID())
-				.orgName("DreamScale")
-				.jiraUser("janelle@dreamscale.io")
-				.jiraSiteUrl("dreamscale.atlassian.net")
-				.jiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
-				.build()
-	}
-
-	private OrganizationMemberEntity createOrganizationMember(UUID organizationId, UUID masterAccountId) {
-		return OrganizationMemberEntity.builder()
-				.id(UUID.randomUUID())
-				.masterAccountId(masterAccountId)
-				.organizationId(organizationId)
-				.build()
-	}
-
-
-
-
-
+    private OrganizationEntity createOrgAndTestUserMembership() {
+        OrganizationEntity organization = aRandom.organizationEntity().save()
+        aRandom.memberEntity()
+                .forOrgAndAccount(organization, testUser)
+                .save()
+        return organization
+    }
 
 }

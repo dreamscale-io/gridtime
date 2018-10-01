@@ -24,6 +24,7 @@ public class ResourcePaths {
 
     public static final String FLOW_PATH = "/flow";
     public static final String BATCH_PATH = "/batch";
+    public static final String SNIPPET_PATH = "/snippet";
 
     public static final String ADMIN_PATH = "/admin";
     public static final String CONFIG_PATH = "/config";
