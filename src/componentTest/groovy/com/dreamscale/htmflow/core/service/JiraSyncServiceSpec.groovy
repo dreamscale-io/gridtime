@@ -1,15 +1,6 @@
-package com.dreamscale.htmflow.core.service;
+package com.dreamscale.htmflow.core.service
 
-import com.dreamscale.htmflow.ComponentTest;
-import com.dreamscale.htmflow.api.account.AccountActivationDto;
-import com.dreamscale.htmflow.api.account.ActivationCodeDto;
-import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto;
-import com.dreamscale.htmflow.api.organization.MembershipInputDto;
-import com.dreamscale.htmflow.api.organization.OrganizationDto;
-import com.dreamscale.htmflow.api.organization.OrganizationInputDto;
-import com.dreamscale.htmflow.api.status.ConnectionResultDto;
-import com.dreamscale.htmflow.api.status.Status
-import com.dreamscale.htmflow.core.domain.ConfigProjectSyncEntity
+import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.ConfigProjectSyncRepository
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
@@ -18,12 +9,11 @@ import com.dreamscale.htmflow.core.domain.ProjectRepository
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.TaskRepository
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import spock.lang.Specification;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 
-import static com.dreamscale.htmflow.core.CoreARandom.aRandom;
+import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
 public class JiraSyncServiceSpec extends Specification {
@@ -46,19 +36,11 @@ public class JiraSyncServiceSpec extends Specification {
 	@Autowired
 	JiraService mockJiraService
 
-	def setup() {
-		organizationRepository.deleteAll()
-		configProjectSyncRepository.deleteAll()
-		projectRepository.deleteAll()
-		taskRepository.deleteAll()
-	}
-
 	def "should update task status if updated in Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
-		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build();
+		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]
 
 		JiraTaskDto jiraTask = aRandom.jiraTaskDto().status("In Progress").build()
@@ -88,10 +70,9 @@ public class JiraSyncServiceSpec extends Specification {
 
 	def "should close tasks if no longer retrieved from Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
-		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build();
+		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]
 
 		JiraTaskDto jiraTask = aRandom.jiraTaskDto().status("In Progress").build()
@@ -115,10 +96,9 @@ public class JiraSyncServiceSpec extends Specification {
 
 	def "should not explode if closed tasks are re-opened in Jira"() {
 		given:
-		OrganizationEntity org = aRandom.organizationEntity().build()
-		organizationRepository.save(org)
+		OrganizationEntity org = aRandom.organizationEntity().save()
 
-		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build();
+		JiraProjectDto jiraProject = aRandom.jiraProjectDto().build()
 		mockJiraService.getFilteredProjects(_, _) >> [jiraProject]
 
 		JiraTaskDto jiraTask = aRandom.jiraTaskDto().status("In Progress").build()

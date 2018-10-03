@@ -29,6 +29,8 @@ class AccountResourceSpec extends Specification {
     @Autowired
     AccountClient accountClient
     @Autowired
+    AccountClient unauthenticatedAccountClient
+    @Autowired
     OrganizationClient organizationClient
 
     @Autowired
@@ -40,14 +42,8 @@ class AccountResourceSpec extends Specification {
     @Autowired
     JiraService mockJiraService
 
-    def setup() {
-        organizationRepository.deleteAll()
-        masterAccountRepository.deleteAll()
-    }
-
     def "should activate account and create APIKey"() {
         given:
-
         OrganizationInputDto organization = createValidOrganization()
         mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
 
@@ -57,17 +53,16 @@ class AccountResourceSpec extends Specification {
         membershipInputDto.setInviteToken(organizationDto.getInviteToken())
         membershipInputDto.setOrgEmail("janelle@dreamscale.io")
 
-        JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build();
+        JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build()
         mockJiraService.getUserByEmail(_, _) >> janelleUser
 
         MemberRegistrationDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
 
-        ActivationCodeDto activationCode = new ActivationCodeDto();
-        activationCode.setActivationCode(membershipDto.getActivationCode());
+        ActivationCodeDto activationCode = new ActivationCodeDto()
+        activationCode.setActivationCode(membershipDto.getActivationCode())
 
         when:
-
-        AccountActivationDto activationDto = accountClient.activate(activationCode);
+        AccountActivationDto activationDto = unauthenticatedAccountClient.activate(activationCode)
 
         then:
         assert activationDto != null
@@ -76,20 +71,16 @@ class AccountResourceSpec extends Specification {
     }
 
     def "should login"() {
-        given:
-
         when:
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
         then:
         assert connectionStatusDto != null
-        assert connectionStatusDto.getConnectionId() != null;
+        assert connectionStatusDto.getConnectionId() != null
         assert connectionStatusDto.status == Status.VALID
     }
 
     def "should logout"() {
-        given:
-
         when:
         SimpleStatusDto statusDto = accountClient.logout()
 
@@ -100,11 +91,10 @@ class AccountResourceSpec extends Specification {
 
     def "should update heartbeat"() {
         given:
-        HeartbeatDto heartbeatDto = new HeartbeatDto();
-        accountClient.login();
+        HeartbeatDto heartbeatDto = new HeartbeatDto()
+        accountClient.login()
 
         when:
-
         SimpleStatusDto statusDto = accountClient.heartbeat(heartbeatDto)
 
         then:
@@ -113,14 +103,11 @@ class AccountResourceSpec extends Specification {
     }
 
     private OrganizationInputDto createValidOrganization() {
-        OrganizationInputDto organization = new OrganizationInputDto();
+        OrganizationInputDto organization = new OrganizationInputDto()
         organization.setOrgName("DreamScale")
         organization.setDomainName("dreamscale.io")
-        organization.setJiraUser("janelle@dreamscale.io")
-        organization.setJiraSiteUrl("dreamscale.atlassian.net")
-        organization.setJiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
 
-        return organization;
+        return organization
     }
 
 }

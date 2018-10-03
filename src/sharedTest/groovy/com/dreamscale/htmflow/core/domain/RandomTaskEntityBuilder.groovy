@@ -4,7 +4,10 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
 
-    RandomTaskEntityBuilder() {
+    private TaskRepository taskRepository
+
+    RandomTaskEntityBuilder(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository
         id(aRandom.uuid())
                 .name(aRandom.text(10))
                 .summary(aRandom.text(30))
@@ -16,6 +19,16 @@ class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
     RandomTaskEntityBuilder forProject(ProjectEntity projectEntity) {
         projectId(projectEntity.getId())
         organizationId(projectEntity.getOrganizationId())
-        return this;
+        return this
     }
+
+    RandomTaskEntityBuilder forProjectAndName(ProjectEntity projectEntity, String name) {
+        this.name(name)
+        forProject(projectEntity)
+    }
+
+    TaskEntity save() {
+        taskRepository.save(build())
+    }
+
 }

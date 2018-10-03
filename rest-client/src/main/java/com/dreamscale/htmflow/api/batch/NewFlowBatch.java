@@ -22,7 +22,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewIFMBatch {
+public class NewFlowBatch {
 
     private LocalDateTime timeSent;
 
@@ -38,8 +38,6 @@ public class NewIFMBatch {
     private List<NewModificationActivity> modificationActivityList;
     @Singular("event")
     private List<NewBatchEvent> eventList;
-    @Singular("snippetEvent")
-    private List<NewSnippetEvent> snippetEventList;
 
     private List<List> getBatchItemLists() {
         ArrayList<List> batchItemLists = new ArrayList<>(10);
@@ -49,7 +47,6 @@ public class NewIFMBatch {
         batchItemLists.add(getNotNullList(executionActivityList));
         batchItemLists.add(getNotNullList(modificationActivityList));
         batchItemLists.add(getNotNullList(eventList));
-        batchItemLists.add(getNotNullList(snippetEventList));
         return batchItemLists;
     }
 

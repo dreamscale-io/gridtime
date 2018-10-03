@@ -1,8 +1,6 @@
-package com.dreamscale.htmflow.core.service;
+package com.dreamscale.htmflow.core.service
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.organization.OrganizationDto
-import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.project.TaskInputDto
 import com.dreamscale.htmflow.client.OrganizationClient
 import com.dreamscale.htmflow.core.domain.OrganizationEntity
@@ -12,9 +10,9 @@ import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraSearchResultPage
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
-import org.dreamscale.exception.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
-import spock.lang.Specification;
+import org.dreamscale.exception.BadRequestException
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 
 @ComponentTest
 public class JiraServiceIntegrationSpec extends Specification {
@@ -25,42 +23,40 @@ public class JiraServiceIntegrationSpec extends Specification {
 	OrganizationClient organizationClient
 
 	@Autowired
-	OrganizationRepository organizationRepository;
+	OrganizationRepository organizationRepository
 
 	@Autowired
-	JiraConnectionFactory jiraConnectionFactory;
+	JiraConnectionFactory jiraConnectionFactory
 
 
 	def setup() {
-		organizationRepository.deleteAll()
-
 		jiraService = new JiraService()
 		jiraService.organizationRepository = organizationRepository
-		jiraService.jiraConnectionFactory = jiraConnectionFactory;
+		jiraService.jiraConnectionFactory = jiraConnectionFactory
 	}
 
 	def "should fetch a jira project by name"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		when:
 		JiraProjectDto jiraProjectDto = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
 
 		then:
-		assert jiraProjectDto != null;
+		assert jiraProjectDto != null
 	}
 
 	def "should fetch a user by email"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		when:
 		JiraUserDto jiraUserDto = jiraService.getUserByEmail(validOrg.getId(), "janelle@dreamscale.io")
 
 		then:
-		assert jiraUserDto != null;
+		assert jiraUserDto != null
 	}
 
 	def "should throw exception if org not found"() {
@@ -74,7 +70,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should throw exception if project not found"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		when:
@@ -86,7 +82,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should filter projects by list of ids"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		JiraProjectDto project1 = jiraService.getProjectByName(validOrg.getId(), "flow-data-plugins")
@@ -102,7 +98,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should get all open tasks for project"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
@@ -116,7 +112,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should page through all tasks for project"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
@@ -133,7 +129,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 	def "should create new task and move to in progress and assign then done"() {
 		given:
-		OrganizationEntity validOrg = createValidOrganization();
+		OrganizationEntity validOrg = createValidOrganization()
 		organizationRepository.save(validOrg)
 		
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
@@ -150,14 +146,14 @@ public class JiraServiceIntegrationSpec extends Specification {
 		assert newTask.assignee == "janelle@dreamscale.io"
 
 		when:
-		JiraTaskDto closedTask = jiraService.closeTask(validOrg.id, newTask.key);
+		JiraTaskDto closedTask = jiraService.closeTask(validOrg.id, newTask.key)
 
 		then:
 		assert closedTask != null
 		assert closedTask.status == "Done"
 
 		when:
-		jiraService.deleteTask(validOrg.id, newTask.key);
+		jiraService.deleteTask(validOrg.id, newTask.key)
 
 		then:
 		assert true

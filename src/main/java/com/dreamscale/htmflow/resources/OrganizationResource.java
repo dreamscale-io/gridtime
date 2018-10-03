@@ -10,6 +10,7 @@ import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,8 @@ public class OrganizationResource {
      * @param orgInputDto
      * @return OrganizationDto
      */
+    // TODO: @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public OrganizationDto createOrganization(@RequestBody OrganizationInputDto orgInputDto) {
 
@@ -54,6 +57,8 @@ public class OrganizationResource {
     /**
      * Get a list of all the members in the Organization
      */
+    // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{id}" + ResourcePaths.MEMBER_PATH)
     public List<OrgMemberStatusDto> getMembers(@PathVariable("id") String organizationId) {
         RequestContext context = RequestContext.get();
@@ -65,6 +70,8 @@ public class OrganizationResource {
      * Creates a new member within an organization associated with the specified Jira email
      * A new master account will be created using the email, along with a product activation code
      */
+    // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}" + ResourcePaths.MEMBER_PATH)
     public MemberRegistrationDetailsDto registerMember(@PathVariable("id") String organizationId,
                                                        @RequestBody MembershipInputDto membershipInputDto) {
@@ -75,6 +82,8 @@ public class OrganizationResource {
     /**
      * Creates a new team for organizing members, affecting what members you see on your side panel
      */
+    // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}" + ResourcePaths.TEAM_PATH)
     public TeamDto createTeam(@PathVariable("id") String organizationId, @RequestBody TeamInputDto teamInputDto) {
 
@@ -84,6 +93,7 @@ public class OrganizationResource {
     /**
      * Add one or more members to an existing team
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{orgId}" + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
     public List<TeamMemberDto> addMemberToTeam(@PathVariable("orgId") String organizationId,
                                                @PathVariable("teamId") String teamId,
@@ -95,6 +105,7 @@ public class OrganizationResource {
     /**
      * Get all the teams for the Organization
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH)
     public List<TeamDto> getTeams(@PathVariable("orgId") String organizationId) {
 
@@ -104,6 +115,7 @@ public class OrganizationResource {
     /**
      * Get all my teams within the Organization
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
     public List<TeamDto> getMyTeams(@PathVariable("orgId") String organizationId) {
         RequestContext context = RequestContext.get();
@@ -113,6 +125,7 @@ public class OrganizationResource {
     /**
      * Get all my team members within a team, and their status
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{orgId}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
     public List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@PathVariable("orgId") String organizationId,  @PathVariable("teamId") String teamId) {
 

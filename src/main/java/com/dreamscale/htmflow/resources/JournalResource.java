@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.resources;
 
-import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.api.journal.RecentJournalDto;
 import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto;
@@ -14,7 +14,13 @@ import com.dreamscale.htmflow.core.service.JournalService;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.RecentActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,11 +42,10 @@ public class JournalResource {
 
     private static final Integer DEFAULT_LIMIT = 100;
 
-
     /**
      * Create a new Intention in the user's Journal
      */
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
@@ -52,6 +57,7 @@ public class JournalResource {
      * either for the current user (if member not provided), or for another memberId within the org
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)
     RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -85,8 +91,10 @@ public class JournalResource {
      * @param limit number of records to retrieve
      * @return List<IntentionDto>
      */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.HISTORY_PATH)
-    List<JournalEntryDto> getHistoricalEntriesBeforeDate(@RequestParam("before_date") String beforeDateStr,
+    List<JournalEntryDto> getHistoricalIntentionsBeforeDate(@RequestParam("before_date") String beforeDateStr,
                                                @RequestParam("member") Optional<String> memberId,
                                                @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -121,6 +129,7 @@ public class JournalResource {
      * a project/task combination, the recent lists are automatically updated
      */
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksSummaryDto getRecentTasksByProject() {
         RequestContext context = RequestContext.get();
