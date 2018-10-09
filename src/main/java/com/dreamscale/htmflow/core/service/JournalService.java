@@ -45,6 +45,9 @@ public class JournalService {
     @Autowired
     private TimeService timeService;
 
+    @Autowired
+    private XPService xpService;
+
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -62,6 +65,8 @@ public class JournalService {
     public JournalEntryDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
         UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organizationId);
+
+        xpService.grantXP(organizationId, memberId, 10);
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());

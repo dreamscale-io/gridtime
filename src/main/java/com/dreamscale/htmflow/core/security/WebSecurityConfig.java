@@ -37,6 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(ResourcePaths.PROJECT_PATH + "/**").hasRole("USER")
                 .antMatchers(ResourcePaths.JOURNAL_PATH + "/**").hasRole("USER")
                 .antMatchers(ResourcePaths.FLOW_PATH + "/**").hasRole("USER")
+                .antMatchers(ResourcePaths.ADMIN_PATH + "/**").permitAll()
                 .antMatchers("/**").authenticated();
     }
 
