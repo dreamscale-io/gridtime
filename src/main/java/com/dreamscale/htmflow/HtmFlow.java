@@ -2,6 +2,7 @@ package com.dreamscale.htmflow;
 
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.security.WebSecurityConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.feign.DefaultFeignConfig;
 import org.dreamscale.springboot.config.CommonSpringBootConfig;
 import org.springframework.boot.SpringApplication;
@@ -17,9 +18,14 @@ import org.springframework.context.annotation.Import;
         CommonSpringBootConfig.class,
         WebSecurityConfig.class
 })
+
+@Slf4j
 public class HtmFlow {
 
+
     public static void main(String[] args) {
+
+        log.info("JDBC: "+System.getenv().get("JDBC_DATABASE_URL"));
         SpringApplication.run(HtmFlow.class, args);
     }
 
