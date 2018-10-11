@@ -26,7 +26,17 @@ public class JiraTaskDto {
     private static final String JIRA_ASSIGNEE = "assignee";
     private static final String JIRA_ASSIGNEE_EMAIL = "emailAddress";
 
+    private static final String JIRA_PROJECT = "project";
+    private static final String JIRA_ID = "id";
 
+
+    public String getProjectId() {
+        String projectId = null;
+        if (getFields().get(JIRA_PROJECT) != null) {
+            projectId = ((Map) getFields().get(JIRA_PROJECT)).get(JIRA_ID).toString();
+        }
+        return projectId;
+    }
 
     public String getSummary() {
         String jiraSummary = null;

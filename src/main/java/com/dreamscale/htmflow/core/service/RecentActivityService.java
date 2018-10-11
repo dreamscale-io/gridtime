@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.api.project.RecentTasksByProjectDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
+import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
+import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,9 @@ public class RecentActivityService {
 
     @Autowired
     private ActiveWorkStatusRepository activeWorkStatusRepository;
+
+    @Autowired
+    private JiraConnectionFactory jiraConnectionFactory;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -126,6 +131,11 @@ public class RecentActivityService {
     public RecentTasksSummaryDto createTaskReferenceInJournal(UUID organizationId, UUID memberId, String taskName) {
 
         TaskEntity taskEntity = taskRepository.findByOrganizationIdAndName(organizationId, taskName);
+
+        if (taskEntity == null) {
+            taskEntity = findTaskInJiraAndUpdateDB(organizationId, taskName);
+        }
+
         TaskDto taskDto = taskMapper.toApi(taskEntity);
 
         if (taskDto != null) {
@@ -150,8 +160,36 @@ public class RecentActivityService {
         return recentTasksSummaryDto;
     }
 
+    private TaskEntity findTaskInJiraAndUpdateDB(UUID organizationId, String taskName) {
 
-    private List<TaskEntity> combineRecentTasksWithDefaults(List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks) {
+        TaskEntity taskEntity = null;
+        //try Jira as a fallback if we can't find the task
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        if (org != null) {
+            JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
+            JiraTaskDto jiraTask = jiraConnection.getTask(taskName);
+            if (jiraTask != null) {
+
+                ProjectEntity projectEntity = projectRepository.findByExternalId(jiraTask.getProjectId());
+
+                if (projectEntity != null) {
+                    taskEntity = new TaskEntity();
+                    taskEntity.setId(UUID.randomUUID());
+                    taskEntity.setName(jiraTask.getKey());
+                    taskEntity.setSummary(jiraTask.getSummary());
+                    taskEntity.setStatus(jiraTask.getStatus());
+                    taskEntity.setExternalId(jiraTask.getId());
+                    taskEntity.setProjectId(projectEntity.getId());
+                    taskEntity.setOrganizationId(organizationId);
+                    taskRepository.save(taskEntity);
+                }
+            }
+        }
+        return taskEntity;
+    }
+
+    private List<TaskEntity> combineRecentTasksWithDefaults
+            (List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks) {
 
         Map<UUID, TaskEntity> recentTaskMap = new LinkedHashMap<>();
 
@@ -169,7 +207,8 @@ public class RecentActivityService {
     }
 
 
-    private List<ProjectEntity> combineRecentProjectsWithDefaults(List<ProjectEntity> recentProjects, List<ProjectEntity> defaultProjects) {
+    private List<ProjectEntity> combineRecentProjectsWithDefaults
+            (List<ProjectEntity> recentProjects, List<ProjectEntity> defaultProjects) {
         Map<UUID, ProjectEntity> recentProjectMap = new LinkedHashMap<>();
 
         for (ProjectEntity recentProject : recentProjects) {
