@@ -28,7 +28,7 @@ dependencies {
     compile "org.dreamscale:common-spring-boot-rest:${commonSpringBootVersion}"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-security"
-    compile "postgresql:postgresql:9.0-801.jdbc4"
+    compile "org.postgresql:postgresql:42.2.5"
     compile "org.liquibase:liquibase-core"
 
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
