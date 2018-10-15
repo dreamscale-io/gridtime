@@ -116,8 +116,10 @@ public class AdminService {
         registrations.add(registerMember(dreamScaleOrg, "mike@dreamscale.io"));
         registrations.add(registerMember(dreamScaleOrg, "kara@dreamscale.io"));
         registrations.add(registerMember(dreamScaleOrg, "bethlrichardson@gmail.com"));
+        registrations.add(registerMember(dreamScaleOrg, "tobias@davistobias.com"));
+        registrations.add(registerMember(dreamScaleOrg, "michael.feathers@gmail.com"));
 
-        TeamDto team = teamService.createTeam(dreamScaleOrg.getId(), "Unicorn");
+        TeamDto team = teamService.createTeam(dreamScaleOrg.getId(), "Phoenix");
 
         List<UUID> memberIds = extractMemberIds(registrations);
         teamService.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
