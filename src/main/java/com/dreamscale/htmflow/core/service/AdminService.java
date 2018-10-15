@@ -175,6 +175,9 @@ public class AdminService {
         cpgRegistrations.add(registerMember(onpremOrg, "richard@onprem.com"));
         cpgRegistrations.add(registerMember(onpremOrg, "swetha@onprem.com"));
 
+        cpgRegistrations.add(registerMember(onpremOrg, "christophe@onprem.com"));
+        cpgRegistrations.add(registerMember(onpremOrg, "jeremy@onprem.com"));
+
         List<UUID> cpgMemberIds = extractMemberIds(cpgRegistrations);
 
         TeamDto cpgTeam = teamService.createTeam(onpremOrg.getId(), "CPG");
