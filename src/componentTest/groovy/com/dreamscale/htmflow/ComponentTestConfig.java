@@ -76,8 +76,13 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    FlowClient publisherClient() {
+    FlowClient flowClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, FlowClient.class);
+    }
+
+    @Bean
+    FlowClient unauthenticatedFlowClient() {
+        return jacksonFeignBuilder.target(FlowClient.class, baseUrl);
     }
 
     @Bean

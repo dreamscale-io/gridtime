@@ -18,4 +18,7 @@ public interface FlowClient {
     @RequestLine("POST " + ResourcePaths.FLOW_PATH + ResourcePaths.SNIPPET_PATH)
     void addSnippet(NewSnippetEvent snippet);
 
+    @RequestLine("GET " + ResourcePaths.FLOW_PATH + ResourcePaths.AUTH_PING_PATH)
+    void authPing();
+
 }
