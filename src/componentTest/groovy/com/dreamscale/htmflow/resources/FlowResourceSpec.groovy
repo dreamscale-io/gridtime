@@ -12,6 +12,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationRepository
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository
 import com.dreamscale.htmflow.core.domain.flow.FlowEventRepository
 import com.dreamscale.htmflow.core.service.TimeService
+import org.dreamscale.exception.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -24,6 +25,9 @@ class FlowResourceSpec extends Specification {
 
     @Autowired
     FlowClient flowClient
+
+    @Autowired
+    FlowClient unauthenticatedFlowClient
 
     @Autowired
     FlowActivityRepository flowActivityRepository
@@ -75,6 +79,20 @@ class FlowResourceSpec extends Specification {
         then:
         assert flowActivityRepository.findByMemberId(member.getId()).size() == 0
         assert flowEventRepository.findByMemberId(member.getId()).size() == 1
+    }
+
+    def "authPing should throw ForbiddenException if not authorized"() {
+        when:
+        flowClient.authPing()
+        
+        then:
+        notThrown(Exception)
+
+        when:
+        unauthenticatedFlowClient.authPing()
+
+        then:
+        thrown(ForbiddenException)
     }
 
 
