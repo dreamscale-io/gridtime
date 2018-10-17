@@ -84,7 +84,7 @@ public class XPService {
             Level level = xpEntry.getValue();
             xpRequired += level.xpRequired;
 
-            if (currentXp > xpRequired) {
+            if (currentXp >= xpRequired) {
                 currentLevel = level;
                 unspentXp -= level.xpRequired;
             }
