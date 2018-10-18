@@ -1,0 +1,7 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v001/alter_intention_add_flamerating.sql
+
+  - include:
+        file: db/v001/replace_journal_entry_view.sql

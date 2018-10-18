@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.journal.FlameRatingInputDto
 import com.dreamscale.htmflow.api.journal.IntentionInputDto
 import com.dreamscale.htmflow.api.journal.JournalEntryDto
 import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto
@@ -74,6 +75,24 @@ class JournalResourceSpec extends Specification {
         assert intention.getId() != null
         assert intention.getTaskId() == intentionInputDto.getTaskId()
         assert intention.description == intentionInputDto.getDescription()
+    }
+
+    def "should update flame rating"() {
+        given:
+        TaskEntity task = createOrganizationAndTask()
+        createMembership(task.getOrganizationId(), testUser.getId())
+
+        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
+        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
+        int flameRating = 3;
+
+        when:
+        JournalEntryDto result = journalClient.saveFlameRating(new FlameRatingInputDto(intention.getId(), flameRating));
+
+        then:
+        assert result != null
+        assert result.getId() == intention.getId()
+        assert result.getFlameRating() == flameRating;
     }
 
     def "get recent intentions"() {

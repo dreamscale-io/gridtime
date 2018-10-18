@@ -18,6 +18,10 @@ public interface JournalClient {
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(IntentionInputDto chunkEvent);
 
+    @RequestLine("PUT " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto saveFlameRating(FlameRatingInputDto flameRatingInput);
+
+
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH  + ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)
     RecentJournalDto getRecentJournal();
 

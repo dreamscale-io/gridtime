@@ -1,10 +1,7 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.journal.IntentionInputDto;
-import com.dreamscale.htmflow.api.journal.JournalEntryDto;
-import com.dreamscale.htmflow.api.journal.RecentJournalDto;
-import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto;
+import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
@@ -15,12 +12,7 @@ import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.RecentActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +42,13 @@ public class JournalResource {
     JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
         return journalService.createIntention(context.getMasterAccountId(), intentionInput);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PutMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto saveFlameRating(@RequestBody FlameRatingInputDto flameRatingInputDto) {
+        RequestContext context = RequestContext.get();
+        return journalService.saveFlameRating(context.getMasterAccountId(), flameRatingInputDto);
     }
 
     /**

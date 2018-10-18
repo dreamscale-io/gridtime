@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.service;
 
+import com.dreamscale.htmflow.api.journal.FlameRatingInputDto;
 import com.dreamscale.htmflow.api.journal.IntentionDto;
 import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.journal.JournalEntryDto;
@@ -149,5 +150,25 @@ public class JournalService {
         }
     }
 
+    private void validateMemberWithinOrg(UUID organizationId, UUID masterAccountId) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
 
+        if (membership == null || !membership.getOrganizationId().equals(organizationId)) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
+        }
+    }
+
+    public JournalEntryDto saveFlameRating(UUID masterAccountId, FlameRatingInputDto flameRatingInputDto) {
+        IntentionEntity intentionEntity = intentionRepository.findOne(flameRatingInputDto.getId());
+
+        validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+
+        if (flameRatingInputDto.isValid()) {
+            intentionEntity.setFlameRating(flameRatingInputDto.getFlameRating());
+            intentionRepository.save(intentionEntity);
+        }
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+
+        return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
 }
