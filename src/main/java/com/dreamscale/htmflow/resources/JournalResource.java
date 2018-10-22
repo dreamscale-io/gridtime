@@ -45,7 +45,7 @@ public class JournalResource {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PutMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
+    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
     JournalEntryDto saveFlameRating(@RequestBody FlameRatingInputDto flameRatingInputDto) {
         RequestContext context = RequestContext.get();
         return journalService.saveFlameRating(context.getMasterAccountId(), flameRatingInputDto);

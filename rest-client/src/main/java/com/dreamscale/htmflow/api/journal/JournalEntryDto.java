@@ -24,5 +24,5 @@ public class JournalEntryDto {
     private String taskSummary;
     private String projectName;
 
-    private int flameRating;
+    private Integer flameRating;
 }
