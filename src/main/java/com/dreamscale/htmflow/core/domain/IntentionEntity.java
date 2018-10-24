@@ -34,5 +34,5 @@ public class IntentionEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    private int flameRating;
+    private Integer flameRating;
 }
