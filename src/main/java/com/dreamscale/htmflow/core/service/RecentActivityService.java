@@ -130,7 +130,11 @@ public class RecentActivityService {
 
     public RecentTasksSummaryDto createTaskReferenceInJournal(UUID organizationId, UUID memberId, String taskName) {
 
-        TaskEntity taskEntity = taskRepository.findByOrganizationIdAndName(organizationId, taskName);
+        List<TaskEntity> taskEntities = taskRepository.findByOrganizationIdAndName(organizationId, taskName);
+        TaskEntity taskEntity = null;
+        if (taskEntities.size() > 0) {
+            taskEntity = taskEntities.get(0);
+        }
 
         if (taskEntity == null) {
             taskEntity = findTaskInJiraAndUpdateDB(organizationId, taskName);
