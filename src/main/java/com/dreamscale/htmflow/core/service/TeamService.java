@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.core.service;
 
+import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
+import com.dreamscale.htmflow.api.organization.TeamWithMembersDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
 import com.dreamscale.htmflow.core.domain.*;
@@ -18,6 +20,12 @@ import java.util.UUID;
 
 @Service
 public class TeamService {
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private MasterAccountRepository masterAccountRepository;
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -146,5 +154,37 @@ public class TeamService {
                 teamMemberWorkStatusRepository.findByOrganizationIdAndTeamId(orgId, teamId);
 
         return teamMemberStatusMapper.toApiList(teamMemberStatusList);
+    }
+
+    public TeamWithMembersDto getMeAndMyTeam(UUID masterAccountId) {
+        OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
+        MasterAccountEntity masterAccount = masterAccountRepository.findById(masterAccountId);
+
+        List<TeamDto> teams = getTeams(orgDto.getId());
+
+        TeamWithMembersDto teamWithMembers = null;
+
+        if (teams.size() > 0) {
+            TeamDto team = teams.get(0);
+
+            teamWithMembers = new TeamWithMembersDto();
+            teamWithMembers.setOrganizationId(team.getOrganizationId());
+            teamWithMembers.setTeamId(team.getId());
+            teamWithMembers.setTeamName(team.getName());
+
+            List<TeamMemberWorkStatusDto> teamMembers = getStatusOfTeamMembers(team.getOrganizationId(), team.getId());
+
+            for (TeamMemberWorkStatusDto teamMember : teamMembers) {
+                if (teamMember.getEmail() != null && teamMember.getEmail().equalsIgnoreCase(masterAccount.getMasterEmail())) {
+                    teamWithMembers.setMe(teamMember);
+                } else {
+                    teamWithMembers.addMember(teamMember);
+                }
+            }
+
+        }
+
+        return teamWithMembers;
+
     }
 }

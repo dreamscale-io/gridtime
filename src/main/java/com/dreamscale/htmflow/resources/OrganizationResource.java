@@ -103,6 +103,16 @@ public class OrganizationResource {
     }
 
     /**
+     * Get status of Me, and all my team members
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.TEAM_PATH )
+    public TeamWithMembersDto getMeAndMyTeam() {
+        RequestContext context = RequestContext.get();
+        return teamService.getMeAndMyTeam(context.getMasterAccountId());
+    }
+
+    /**
      * Get all the teams for the Organization
      */
     @PreAuthorize("hasRole('ROLE_USER')")

@@ -49,6 +49,8 @@ public interface OrganizationClient {
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
     List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@Param("id") String organizationId, @Param("teamId") String teamId);
 
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH )
+    TeamWithMembersDto getMeAndMyTeam();
 
 
 }

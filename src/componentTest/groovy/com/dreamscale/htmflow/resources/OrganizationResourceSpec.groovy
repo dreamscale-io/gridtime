@@ -9,6 +9,7 @@ import com.dreamscale.htmflow.api.organization.OrganizationDto
 import com.dreamscale.htmflow.api.organization.OrganizationInputDto
 import com.dreamscale.htmflow.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto
+import com.dreamscale.htmflow.api.organization.TeamWithMembersDto
 import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.api.team.TeamDto
@@ -276,6 +277,32 @@ class OrganizationResourceSpec extends Specification {
         then:
         assert teamMemberStatusList != null
         assert teamMemberStatusList.size() == 3
+    }
+
+    def "should retrieve team member status of me and my team"() {
+        given:
+
+        OrganizationDto org = createOrganizationWithClient()
+
+        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
+        MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
+        MemberRegistrationDetailsDto registration3 = registerMemberWithClient(org, "mike@dreamscale.io")
+
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+
+        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId, registration3.memberId])
+
+        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
+
+        testUser.id = registration1.masterAccountId;
+
+        when:
+        TeamWithMembersDto meAndMyTeam = organizationClient.getMeAndMyTeam()
+
+        then:
+        assert meAndMyTeam != null
+        assert meAndMyTeam.getMe() != null
+        assert meAndMyTeam.getTeamMembers().size() == 2
     }
 
     private MemberRegistrationDetailsDto registerMemberWithClient(OrganizationDto organizationDto, String memberEmail) {
