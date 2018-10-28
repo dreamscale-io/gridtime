@@ -5,3 +5,9 @@ databaseChangeLog:
 
   - include:
         file: db/v001/replace_journal_entry_view.sql
+
+  - include:
+        file: db/v001/create_mood.sql
+
+  - include:
+        file: db/v001/replace_team_member_work_status_view.sql

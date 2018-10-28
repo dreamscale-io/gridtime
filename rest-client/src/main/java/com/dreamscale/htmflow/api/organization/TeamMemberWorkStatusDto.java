@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.api.organization;
 
+import com.dreamscale.htmflow.api.status.XPSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,9 @@ public class TeamMemberWorkStatusDto {
 
     private String email;
     private String fullName;
+    private String moodRating;
+
+    private XPSummaryDto xpSummary;
 
     private LocalDateTime lastActivity;
     private String activeStatus;

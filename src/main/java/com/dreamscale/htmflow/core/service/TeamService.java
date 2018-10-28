@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
 import com.dreamscale.htmflow.api.organization.TeamWithMembersDto;
+import com.dreamscale.htmflow.api.status.XPSummaryDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
 import com.dreamscale.htmflow.core.domain.*;
@@ -23,6 +24,9 @@ public class TeamService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private XPService xpService;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -153,7 +157,17 @@ public class TeamService {
         List<TeamMemberWorkStatusEntity> teamMemberStatusList =
                 teamMemberWorkStatusRepository.findByOrganizationIdAndTeamId(orgId, teamId);
 
-        return teamMemberStatusMapper.toApiList(teamMemberStatusList);
+        List<TeamMemberWorkStatusDto> teamMemberStatusDtos = new ArrayList<>();
+
+        for (TeamMemberWorkStatusEntity memberStatusEntity : teamMemberStatusList) {
+            TeamMemberWorkStatusDto memberStatusDto = teamMemberStatusMapper.toApi(memberStatusEntity);
+
+            XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
+            memberStatusDto.setXpSummary(xpSummary);
+            teamMemberStatusDtos.add(memberStatusDto);
+        }
+
+        return teamMemberStatusDtos;
     }
 
     public TeamWithMembersDto getMeAndMyTeam(UUID masterAccountId) {

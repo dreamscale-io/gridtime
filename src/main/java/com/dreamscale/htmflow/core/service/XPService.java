@@ -52,13 +52,13 @@ public class XPService {
         MemberXPEntity memberXPEntity = memberXPRepository.findByMemberId(memberId);
 
         if (memberXPEntity != null) {
-            return calculateCurrentXpState(memberXPEntity);
+            return calculateCurrentXpState(memberXPEntity.getTotalXp());
         } else {
             return createDefaultXpSummary();
         }
     }
 
-    private XPSummaryDto calculateCurrentXpState(MemberXPEntity memberXPEntity) {
+    private XPSummaryDto calculateCurrentXpState(Integer totalXp) {
 
         Map<Integer, Level> levels = new TreeMap<>();
 
@@ -73,7 +73,7 @@ public class XPService {
         levels.put(9, Level.builder().levelNumber(9).title("Peer Mentor").xpRequired(1020).build());
         levels.put(10, Level.builder().levelNumber(10).title("Peer Mentor").xpRequired(1310).build());
 
-        int currentXp = memberXPEntity.getTotalXp();
+        int currentXp = totalXp;
 
         int xpRequired = 0;
         Level currentLevel = levels.get(1);
@@ -111,6 +111,15 @@ public class XPService {
         xpSummary.setXpRequiredToLevel(50);
         xpSummary.setTitle("n00b");
         return xpSummary;
+    }
+
+    public XPSummaryDto translateToXPSummary(Integer totalXp) {
+        if (totalXp != null) {
+            return calculateCurrentXpState(totalXp);
+        } else {
+            return createDefaultXpSummary();
+        }
+
     }
 
     @Builder

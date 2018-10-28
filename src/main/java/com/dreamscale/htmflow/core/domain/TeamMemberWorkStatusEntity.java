@@ -28,6 +28,10 @@ public class TeamMemberWorkStatusEntity {
 
     private String email;
 
+    private Integer moodRating;
+
+    private Integer totalXp;
+
     @Column(name = "full_name")
     private String fullName;
 
