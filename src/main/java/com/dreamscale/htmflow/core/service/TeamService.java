@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TeamService {
@@ -159,15 +157,29 @@ public class TeamService {
 
         List<TeamMemberWorkStatusDto> teamMemberStatusDtos = new ArrayList<>();
 
+        //todo why isn't XP showing up for members?
+
         for (TeamMemberWorkStatusEntity memberStatusEntity : teamMemberStatusList) {
             TeamMemberWorkStatusDto memberStatusDto = teamMemberStatusMapper.toApi(memberStatusEntity);
 
             XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
             memberStatusDto.setXpSummary(xpSummary);
+            memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
+
             teamMemberStatusDtos.add(memberStatusDto);
         }
 
+        teamMemberStatusDtos = sortMembers (teamMemberStatusDtos);
+
         return teamMemberStatusDtos;
+    }
+
+    private String createShortName(String fullName) {
+        String shortName = fullName;
+        if (fullName != null && fullName.contains(" ")) {
+            shortName = fullName.substring(0, fullName.indexOf(" "));
+        }
+        return shortName;
     }
 
     public TeamWithMembersDto getMeAndMyTeam(UUID masterAccountId) {
@@ -188,6 +200,8 @@ public class TeamService {
 
             List<TeamMemberWorkStatusDto> teamMembers = getStatusOfTeamMembers(team.getOrganizationId(), team.getId());
 
+
+
             for (TeamMemberWorkStatusDto teamMember : teamMembers) {
                 if (teamMember.getEmail() != null && teamMember.getEmail().equalsIgnoreCase(masterAccount.getMasterEmail())) {
                     teamWithMembers.setMe(teamMember);
@@ -201,4 +215,25 @@ public class TeamService {
         return teamWithMembers;
 
     }
+
+    private List<TeamMemberWorkStatusDto> sortMembers(List<TeamMemberWorkStatusDto> teamMembers) {
+
+        teamMembers.sort((member1, member2) -> {
+            int compare = 0;
+
+            if (member1.getActiveStatus() != null && member2.getActiveStatus() != null) {
+                Integer orderMember1 = ActiveAccountStatus.valueOf(member1.getActiveStatus()).getOrder();
+                Integer orderMember2 = ActiveAccountStatus.valueOf(member2.getActiveStatus()).getOrder();
+
+                compare = orderMember1.compareTo(orderMember2);
+            }
+            if (compare == 0 && member1.getXpSummary() != null && member2.getXpSummary() != null) {
+                compare = Integer.compare(member2.getXpSummary().getTotalXP(), member1.getXpSummary().getTotalXP());
+            }
+            return compare;
+        });
+
+        return teamMembers;
+    }
+
 }

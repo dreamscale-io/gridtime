@@ -19,6 +19,7 @@ public class TeamMemberWorkStatusDto {
 
     private String email;
     private String fullName;
+    private String shortName;
     private String moodRating;
 
     private XPSummaryDto xpSummary;
