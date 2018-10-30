@@ -32,4 +32,19 @@ public class TaskEntity implements External {
     @Column(name = "project_id")
     private UUID projectId;
 
+    public static final String DEFAULT_TASK_NAME = "No Task";
+
+
+    public TaskEntity configureDefaultTask() {
+        name = DEFAULT_TASK_NAME;
+        summary = "(No Task Selected)";
+        status = "In Progress";
+        externalId = "-1";
+
+        return this;
+    }
+
+    public boolean isDefaultTask() {
+        return name != null && name.equals(DEFAULT_TASK_NAME);
+    }
 }

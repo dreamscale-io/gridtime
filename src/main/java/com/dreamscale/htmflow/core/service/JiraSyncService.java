@@ -48,9 +48,22 @@ public class JiraSyncService {
                 projectRepository.save(dbProject);
             }
 
+            synchronizeDefaultTasks(organizationId, dbProject);
             synchronizeOpenTasks(organizationId, dbProject);
         }
+    }
 
+    private void synchronizeDefaultTasks(UUID organizationId, ProjectEntity dbProject) {
+        TaskEntity defaultTask = taskRepository.findByProjectIdAndName(dbProject.getId(), TaskEntity.DEFAULT_TASK_NAME);
+
+        if (defaultTask == null) {
+            defaultTask = new TaskEntity().configureDefaultTask();
+            defaultTask.setId(UUID.randomUUID());
+            defaultTask.setProjectId(dbProject.getId());
+            defaultTask.setOrganizationId(organizationId);
+
+            taskRepository.save(defaultTask);
+        }
     }
 
     private void synchronizeOpenTasks(UUID organizationId, ProjectEntity dbProject) {
@@ -60,6 +73,7 @@ public class JiraSyncService {
         List<JiraTaskDto> jiraTasks = jiraService.getOpenTasksForProject(organizationId, dbProject.getExternalId());
 
         saveTaskUpdates(organizationId, dbProject, dbTasks, jiraTasks);
+
     }
 
 
@@ -90,9 +104,15 @@ public class JiraSyncService {
         List<TaskEntity> dbTasksNotOpenInJira = findDbTasksNotOpenInJira(dbTasks, jiraTasks);
 
         for (TaskEntity dbTaskNotInJira : dbTasksNotOpenInJira) {
-            dbTaskNotInJira.setStatus("Done");
-            taskRepository.save(dbTaskNotInJira);
+            if (shouldBeInJira(dbTaskNotInJira)) {
+                dbTaskNotInJira.setStatus("Done");
+                taskRepository.save(dbTaskNotInJira);
+            }
         }
+    }
+
+    private boolean shouldBeInJira(TaskEntity taskEntity) {
+        return !taskEntity.isDefaultTask();
     }
 
     private List<TaskEntity> findDbTasksNotOpenInJira(List<TaskEntity> dbTasks, List<JiraTaskDto> jiraTasks) {

@@ -12,7 +12,7 @@ public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
 
     List<TaskEntity> findByProjectId(UUID projectId);
 
-    List<TaskEntity> findTop5ByProjectIdOrderByExternalId(UUID projectId);
+    List<TaskEntity> findTop5ByProjectIdOrderByExternalIdDesc(UUID projectId);
 
     TaskEntity findByProjectIdAndName(UUID projectId, String taskName);
 

@@ -80,7 +80,8 @@ public class RecentActivityService {
         if (matchingTask != null) {
             matchingTask.setLastAccessed(LocalDateTime.now());
             recentTaskRepository.save(matchingTask);
-        } else {
+
+        } else if (isNotDefaultTask(activeIntention.getTaskId())) {
             deleteOldestTaskOverMaxRecent(recentTasks);
 
             RecentTaskEntity recentTask = createRecentTask(activeIntention);
@@ -103,6 +104,12 @@ public class RecentActivityService {
         activeWorkStatusRepository.save(workStatus);
     }
 
+    private boolean isNotDefaultTask(UUID taskId) {
+        TaskEntity taskEntity = taskRepository.findOne(taskId);
+
+        return !(taskEntity != null && taskEntity.isDefaultTask());
+    }
+
     public RecentTasksSummaryDto getRecentTasksByProject(UUID organizationId, UUID memberId) {
 
         RecentTasksSummaryDto recentTasksSummaryDto = new RecentTasksSummaryDto();
@@ -117,8 +124,11 @@ public class RecentActivityService {
         for (ProjectDto projectDto : projectDtos) {
 
             List<TaskEntity> recentTasks = taskRepository.findByRecentMemberAccess(memberId, projectDto.getId());
-            List<TaskEntity> defaultTasks = taskRepository.findTop5ByProjectIdOrderByExternalId(projectDto.getId());
-            List<TaskEntity> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, defaultTasks);
+            List<TaskEntity> defaultTasks = taskRepository.findTop5ByProjectIdOrderByExternalIdDesc(projectDto.getId());
+
+            TaskEntity noTaskDefaultTask = taskRepository.findByProjectIdAndName(projectDto.getId(), TaskEntity.DEFAULT_TASK_NAME);
+
+            List<TaskEntity> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, defaultTasks, noTaskDefaultTask);
 
             List<TaskDto> taskDtos = taskMapper.toApiList(recentTasksWithDefaults);
 
@@ -193,12 +203,16 @@ public class RecentActivityService {
     }
 
     private List<TaskEntity> combineRecentTasksWithDefaults
-            (List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks) {
+            (List<TaskEntity> recentTasks, List<TaskEntity> defaultTasks, TaskEntity noTaskTask) {
 
         Map<UUID, TaskEntity> recentTaskMap = new LinkedHashMap<>();
 
         for (TaskEntity recentTask : recentTasks) {
             recentTaskMap.put(recentTask.getId(), recentTask);
+        }
+
+        if (noTaskTask != null) {
+            recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
         }
 
         for (TaskEntity defaultTask : defaultTasks) {

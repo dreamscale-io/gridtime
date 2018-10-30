@@ -54,8 +54,10 @@ public class JiraSyncServiceSpec extends Specification {
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)
-		assert tasks.size() == 1
-		assert tasks.get(0).status == "In Progress"
+		assert tasks.size() == 2
+
+		TaskEntity nonDefaultTask = getNonDefaultTask(tasks);
+		assert nonDefaultTask.status == "In Progress"
 
 		when:
 		jiraTask.fields.get("status").put("name", "Needs Review")
@@ -63,9 +65,23 @@ public class JiraSyncServiceSpec extends Specification {
 
 		then:
 		List<TaskEntity> updatedTasks = taskRepository.findByProjectId(projects.get(0).id)
-		assert updatedTasks.size() == 1
-		assert updatedTasks.get(0).status == "Needs Review"
+		assert updatedTasks.size() == 2
 
+		TaskEntity reviewTask = getNonDefaultTask(updatedTasks);
+		assert reviewTask.status == "Needs Review"
+
+	}
+
+	private TaskEntity getNonDefaultTask(List<TaskEntity> tasks) {
+		TaskEntity nonDefaultTask = null;
+
+		for (TaskEntity task : tasks) {
+			if (!task.isDefaultTask()) {
+				nonDefaultTask = task;
+				break;
+			}
+		}
+		return nonDefaultTask;
 	}
 
 	def "should close tasks if no longer retrieved from Jira"() {
@@ -89,8 +105,10 @@ public class JiraSyncServiceSpec extends Specification {
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)
-		assert tasks.size() == 1
-		assert tasks.get(0).status == "Done"
+		assert tasks.size() == 2
+
+		TaskEntity nonDefaultTask = getNonDefaultTask(tasks);
+		assert nonDefaultTask.status == "Done"
 
 	}
 
@@ -117,8 +135,10 @@ public class JiraSyncServiceSpec extends Specification {
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)
-		assert tasks.size() == 1
-		assert tasks.get(0).status == "In Progress"
+		assert tasks.size() == 2
+
+		TaskEntity nonDefaultTask = getNonDefaultTask(tasks);
+		assert nonDefaultTask.status == "In Progress"
 	}
 
 }
