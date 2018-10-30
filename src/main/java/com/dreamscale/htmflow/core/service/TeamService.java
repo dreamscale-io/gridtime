@@ -186,7 +186,7 @@ public class TeamService {
         OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
         MasterAccountEntity masterAccount = masterAccountRepository.findById(masterAccountId);
 
-        List<TeamDto> teams = getTeams(orgDto.getId());
+        List<TeamDto> teams = getMyTeams(orgDto.getId(), masterAccountId);
 
         TeamWithMembersDto teamWithMembers = null;
 
@@ -199,8 +199,6 @@ public class TeamService {
             teamWithMembers.setTeamName(team.getName());
 
             List<TeamMemberWorkStatusDto> teamMembers = getStatusOfTeamMembers(team.getOrganizationId(), team.getId());
-
-
 
             for (TeamMemberWorkStatusDto teamMember : teamMembers) {
                 if (teamMember.getEmail() != null && teamMember.getEmail().equalsIgnoreCase(masterAccount.getMasterEmail())) {
