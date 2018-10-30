@@ -207,12 +207,12 @@ public class RecentActivityService {
 
         Map<UUID, TaskEntity> recentTaskMap = new LinkedHashMap<>();
 
-        for (TaskEntity recentTask : recentTasks) {
-            recentTaskMap.put(recentTask.getId(), recentTask);
-        }
-
         if (noTaskTask != null) {
             recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
+        }
+
+        for (TaskEntity recentTask : recentTasks) {
+            recentTaskMap.put(recentTask.getId(), recentTask);
         }
 
         for (TaskEntity defaultTask : defaultTasks) {
