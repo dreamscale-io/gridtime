@@ -35,4 +35,7 @@ public class IntentionEntity {
     private UUID memberId;
 
     private Integer flameRating;
+
+    private String finishStatus;
+    private LocalDateTime finishTime;
 }

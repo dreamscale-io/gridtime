@@ -26,6 +26,9 @@ public class JournalEntryEntity {
     private String taskSummary;
     private Integer flameRating;
 
+    private String finishStatus;
+    private LocalDateTime finishTime;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID projectId;
 

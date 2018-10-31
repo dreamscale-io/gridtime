@@ -11,3 +11,9 @@ databaseChangeLog:
 
   - include:
         file: db/v001/replace_team_member_work_status_view.sql
+
+  - include:
+        file: db/v001/alter_intention_add_finish_state.sql
+
+  - include:
+        file: db/v001/replace_journal_entry_view_with_finish_status.sql

@@ -69,6 +69,8 @@ public class JournalService {
 
         xpService.grantXP(organizationId, memberId, 10);
 
+        closeLastIntention(memberId);
+
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
         intentionEntity.setPosition(timeService.now());
@@ -83,6 +85,18 @@ public class JournalService {
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    private void closeLastIntention(UUID memberId) {
+        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
+
+        if (lastIntentionList.size() > 0) {
+            IntentionEntity lastIntention = lastIntentionList.get(0);
+            lastIntention.setFinishStatus("done");
+            lastIntention.setFinishTime(timeService.now());
+
+            intentionRepository.save(lastIntention);
+        }
     }
 
     public List<JournalEntryDto> getRecentIntentions(UUID masterAccountId, int limit) {
