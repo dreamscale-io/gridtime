@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.api.journal.IntentionInputDto;
 import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -69,11 +70,13 @@ public class JournalService {
 
         xpService.grantXP(organizationId, memberId, 10);
 
-        closeLastIntention(memberId);
+        LocalDateTime creationTime = timeService.now();
+
+        closeLastIntention(memberId, creationTime);
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
-        intentionEntity.setPosition(timeService.now());
+        intentionEntity.setPosition(creationTime);
         intentionEntity.setOrganizationId(organizationId);
         intentionEntity.setMemberId(memberId);
 
@@ -87,13 +90,13 @@ public class JournalService {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
-    private void closeLastIntention(UUID memberId) {
+    private void closeLastIntention(UUID memberId, LocalDateTime finishTime) {
         List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
             lastIntention.setFinishStatus("done");
-            lastIntention.setFinishTime(timeService.now());
+            lastIntention.setFinishTime(finishTime);
 
             intentionRepository.save(lastIntention);
         }
@@ -182,6 +185,33 @@ public class JournalService {
             intentionRepository.save(intentionEntity);
         }
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+
+        return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    public JournalEntryDto finishIntention(UUID masterAccountId, UUID intentionId) {
+
+        return updateFinishStatus(masterAccountId, intentionId, FinishStatus.done);
+    }
+
+    public JournalEntryDto abortIntention(UUID masterAccountId, UUID intentionId) {
+
+        return updateFinishStatus(masterAccountId, intentionId, FinishStatus.aborted);
+    }
+
+    private JournalEntryDto updateFinishStatus(UUID masterAccountId, UUID intentionId, FinishStatus finishStatus) {
+        IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
+
+        if (intentionEntity != null) {
+            validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+
+            intentionEntity.setFinishStatus(finishStatus.name());
+            intentionEntity.setFinishTime(timeService.now());
+
+            intentionRepository.save(intentionEntity);
+        }
+
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionId);
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }

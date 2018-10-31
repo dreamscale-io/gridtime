@@ -25,4 +25,5 @@ public class JournalEntryDto {
     private String projectName;
 
     private Integer flameRating;
+    private String finishStatus;
 }

@@ -51,6 +51,20 @@ public class JournalResource {
         return journalService.saveFlameRating(context.getMasterAccountId(), flameRatingInputDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.DONE_PATH)
+    JournalEntryDto finishIntention(@RequestBody IntentionRefInputDto intentionRefInputDto) {
+        RequestContext context = RequestContext.get();
+        return journalService.finishIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.ABORT_PATH)
+    JournalEntryDto abortIntention(@RequestBody IntentionRefInputDto intentionRefInputDto) {
+        RequestContext context = RequestContext.get();
+        return journalService.abortIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+    }
+
     /**
      * Get all recent Intentions in the Journal, ordered by time descending,
      * either for the current user (if member not provided), or for another memberId within the org

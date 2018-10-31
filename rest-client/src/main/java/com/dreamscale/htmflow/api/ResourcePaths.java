@@ -7,6 +7,14 @@ public class ResourcePaths {
 
     public static final String INTENTION_PATH = "/intention";
     public static final String FLAME_PATH = "/flame";
+    public static final String DONE_PATH = "/done";
+    public static final String ABORT_PATH = "/abort";
+
+    //TODO refactor to use more structured URLs /intention/{id}/pain/5
+    public static final String PAIN_PATH = "/pain";
+    public static final String JOY_PATH = "/joy";
+
+
 
     public static final String RECENT_PATH = "/recent";
     public static final String HISTORY_PATH = "/history";
