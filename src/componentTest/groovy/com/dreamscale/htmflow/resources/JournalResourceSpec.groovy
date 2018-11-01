@@ -1,9 +1,10 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.journal.FinishStatus
 import com.dreamscale.htmflow.api.journal.FlameRatingInputDto
 import com.dreamscale.htmflow.api.journal.IntentionInputDto
-import com.dreamscale.htmflow.api.journal.IntentionRefInputDto
+import com.dreamscale.htmflow.api.journal.IntentionFinishInputDto
 import com.dreamscale.htmflow.api.journal.JournalEntryDto
 import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto
 import com.dreamscale.htmflow.api.project.ProjectDto
@@ -106,30 +107,12 @@ class JournalResourceSpec extends Specification {
 
         1 * mockTimeService.now() >> LocalDateTime.now()
         when:
-        JournalEntryDto result = journalClient.finishIntention(new IntentionRefInputDto(intention.getId()));
+        JournalEntryDto result = journalClient.finishIntention(new IntentionFinishInputDto(intention.getId(), FinishStatus.done));
 
         then:
         assert result != null
         assert result.getId() == intention.getId()
         assert result.getFinishStatus() == "done";
-    }
-
-    def "should abort intention"() {
-        given:
-        TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
-
-        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
-        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
-
-        1 * mockTimeService.now() >> LocalDateTime.now()
-        when:
-        JournalEntryDto result = journalClient.abortIntention(new IntentionRefInputDto(intention.getId()));
-
-        then:
-        assert result != null
-        assert result.getId() == intention.getId()
-        assert result.getFinishStatus() == "aborted";
     }
 
 

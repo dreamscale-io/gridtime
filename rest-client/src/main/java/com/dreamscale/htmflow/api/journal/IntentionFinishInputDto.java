@@ -11,7 +11,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntentionRefInputDto {
+public class IntentionFinishInputDto {
 
     private UUID id;
+    private FinishStatus finishStatus;
 }

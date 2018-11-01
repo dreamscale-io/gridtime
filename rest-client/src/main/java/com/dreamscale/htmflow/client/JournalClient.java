@@ -21,12 +21,8 @@ public interface JournalClient {
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
     JournalEntryDto saveFlameRating(FlameRatingInputDto flameRatingInput);
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.DONE_PATH)
-    JournalEntryDto finishIntention(IntentionRefInputDto intentionRefInputDto);
-
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.ABORT_PATH)
-    JournalEntryDto abortIntention(IntentionRefInputDto intentionRefInputDto);
-
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.FINISH_PATH)
+    JournalEntryDto finishIntention(IntentionFinishInputDto intentionFinishInputDto);
 
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH  + ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)

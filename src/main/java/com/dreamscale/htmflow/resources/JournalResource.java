@@ -5,11 +5,13 @@ import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.JournalService;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.RecentActivityService;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -52,19 +54,18 @@ public class JournalResource {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.DONE_PATH)
-    JournalEntryDto finishIntention(@RequestBody IntentionRefInputDto intentionRefInputDto) {
+    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FINISH_PATH)
+    JournalEntryDto finishIntention(@RequestBody IntentionFinishInputDto intentionRefInputDto) {
         RequestContext context = RequestContext.get();
-        return journalService.finishIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
-    }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.ABORT_PATH)
-    JournalEntryDto abortIntention(@RequestBody IntentionRefInputDto intentionRefInputDto) {
-        RequestContext context = RequestContext.get();
-        return journalService.abortIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+        if (FinishStatus.done.equals(intentionRefInputDto.getFinishStatus())) {
+            return journalService.finishIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+        } else if (FinishStatus.aborted.equals(intentionRefInputDto.getFinishStatus())) {
+            return journalService.abortIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+        } else {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_FINISH_STATUS, "Invalid finish status");
+        }
     }
-
     /**
      * Get all recent Intentions in the Journal, ordered by time descending,
      * either for the current user (if member not provided), or for another memberId within the org

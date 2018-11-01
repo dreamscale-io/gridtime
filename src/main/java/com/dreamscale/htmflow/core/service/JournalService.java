@@ -95,10 +95,13 @@ public class JournalService {
 
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
-            lastIntention.setFinishStatus("done");
-            lastIntention.setFinishTime(finishTime);
 
-            intentionRepository.save(lastIntention);
+            if (lastIntention.getFinishStatus() == null) {
+                lastIntention.setFinishStatus("done");
+                lastIntention.setFinishTime(finishTime);
+
+                intentionRepository.save(lastIntention);
+            }
         }
     }
 
