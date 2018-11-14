@@ -17,3 +17,13 @@ databaseChangeLog:
 
   - include:
         file: db/v001/replace_journal_entry_view_with_finish_status.sql
+
+  - include:
+        file: db/v001/create_wtf_session.sql
+
+  - include:
+        file: db/v001/alter_active_work_status_add_alarm.sql
+
+  - include:
+        file: db/v001/replace_work_status_view_with_alarm.sql
+

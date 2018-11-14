@@ -35,6 +35,19 @@ public class ActiveWorkStatusEntity {
     @Column(name = "working_on")
     private String workingOn;
 
+    @Column(name = "spirit_status")
+    private String spiritStatus;
+
+    @Column(name = "spirit_message")
+    private String spiritMessage;
+
+    @Column(name = "active_session_start")
+    private LocalDateTime activeSessionStart;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @Column(name = "active_session_id")
+    private UUID activeSessionId;
+
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
 

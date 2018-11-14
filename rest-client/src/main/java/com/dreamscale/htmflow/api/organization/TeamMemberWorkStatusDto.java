@@ -32,4 +32,8 @@ public class TeamMemberWorkStatusDto {
     private String activeTaskSummary;
     private String workingOn;
 
+    private String spiritStatus;
+    private String spiritMessage;
+
+    private Long alarmDurationInSeconds;
 }

@@ -25,7 +25,6 @@ public class HtmFlow {
 
     public static void main(String[] args) {
 
-        log.info("JDBC: "+System.getenv().get("JDBC_DATABASE_URL"));
         SpringApplication.run(HtmFlow.class, args);
     }
 

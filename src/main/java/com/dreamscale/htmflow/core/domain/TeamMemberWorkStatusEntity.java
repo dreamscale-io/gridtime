@@ -50,6 +50,15 @@ public class TeamMemberWorkStatusEntity {
 
     private String workingOn;
 
+    private String spiritStatus;
+
+    private String spiritMessage;
+
+    private LocalDateTime activeSessionStart;
+
+    @Column(name = "active_session_id")
+    private UUID activeSessionId;
+
 }
 
 

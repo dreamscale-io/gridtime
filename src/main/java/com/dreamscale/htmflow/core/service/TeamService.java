@@ -27,6 +27,9 @@ public class TeamService {
     private XPService xpService;
 
     @Autowired
+    private WTFService wtfService;
+
+    @Autowired
     private MasterAccountRepository masterAccountRepository;
 
     @Autowired
@@ -161,6 +164,9 @@ public class TeamService {
 
         for (TeamMemberWorkStatusEntity memberStatusEntity : teamMemberStatusList) {
             TeamMemberWorkStatusDto memberStatusDto = teamMemberStatusMapper.toApi(memberStatusEntity);
+
+            Long alarmDuration = wtfService.calculateAlarmDuration(memberStatusEntity.getActiveSessionStart());
+            memberStatusDto.setAlarmDurationInSeconds(alarmDuration);
 
             XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
             memberStatusDto.setXpSummary(xpSummary);

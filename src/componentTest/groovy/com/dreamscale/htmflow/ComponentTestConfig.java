@@ -1,11 +1,6 @@
 package com.dreamscale.htmflow;
 
-import com.dreamscale.htmflow.client.AccountClient;
-import com.dreamscale.htmflow.client.AdminClient;
-import com.dreamscale.htmflow.client.FlowClient;
-import com.dreamscale.htmflow.client.JournalClient;
-import com.dreamscale.htmflow.client.OrganizationClient;
-import com.dreamscale.htmflow.client.ProjectClient;
+import com.dreamscale.htmflow.client.*;
 import com.dreamscale.htmflow.core.CoreARandom;
 import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
 import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
@@ -78,6 +73,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     FlowClient flowClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, FlowClient.class);
+    }
+
+    @Bean
+    SpiritClient spiritClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, SpiritClient.class);
     }
 
     @Bean
