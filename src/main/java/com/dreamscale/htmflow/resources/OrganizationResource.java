@@ -142,7 +142,12 @@ public class OrganizationResource {
         return teamService.getStatusOfTeamMembers(UUID.fromString(organizationId), UUID.fromString(teamId));
     }
 
-
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.TEAM_PATH + ResourcePaths.MEMBER_PATH )
+    public MemberRegistrationDetailsDto addMemberToMyTeam(String newMemberEmail) {
+        RequestContext context = RequestContext.get();
+        return teamService.addMemberToMyTeam(context.getMasterAccountId(), newMemberEmail);
+    }
 
 
 }

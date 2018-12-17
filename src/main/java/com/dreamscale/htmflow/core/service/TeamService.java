@@ -1,8 +1,6 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.api.organization.OrganizationDto;
-import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.htmflow.api.organization.TeamWithMembersDto;
+import com.dreamscale.htmflow.api.organization.*;
 import com.dreamscale.htmflow.api.status.XPSummaryDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
@@ -188,6 +186,28 @@ public class TeamService {
         return shortName;
     }
 
+    public MemberRegistrationDetailsDto addMemberToMyTeam(UUID masterAccountId, String newMemberEmail) {
+        OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
+
+        MembershipInputDto membershipInputDto = new MembershipInputDto();
+        membershipInputDto.setInviteToken(orgDto.getInviteToken());
+        membershipInputDto.setOrgEmail(newMemberEmail);
+
+        MemberRegistrationDetailsDto registration = organizationService.registerMember(orgDto.getId(), membershipInputDto);
+
+        List<TeamDto> teams = getMyTeams(orgDto.getId(), masterAccountId);
+
+        if (teams.size() > 0) {
+            TeamDto team = teams.get(0);
+
+            this.addMembersToTeam(orgDto.getId(), team.getId(), Arrays.asList(registration.getMemberId()));
+
+        }
+
+        return registration;
+    }
+
+
     public TeamWithMembersDto getMeAndMyTeam(UUID masterAccountId) {
         OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
         MasterAccountEntity masterAccount = masterAccountRepository.findById(masterAccountId);
@@ -239,5 +259,6 @@ public class TeamService {
 
         return teamMembers;
     }
+
 
 }

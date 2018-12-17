@@ -127,6 +127,7 @@ public class AdminService {
         return registrations;
     }
 
+
     public List<MemberRegistrationDetailsDto> configureOnPrem(AutoConfigInputDto inputConfig) {
 
         OrganizationInputDto orgInput = new OrganizationInputDto();
