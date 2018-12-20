@@ -217,6 +217,24 @@ public class OrganizationService {
         return orgOutputMapper.toApi(organizationEntity);
     }
 
+    public OrganizationDto getDefaultOrganizationWithInvitation(UUID masterAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+
+        if (orgMemberships == null || orgMemberships.size() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
+        }
+
+        OrganizationEntity organizationEntity = organizationRepository.findById(orgMemberships.get(0).getOrganizationId());
+
+        OrganizationInviteTokenEntity inviteToken = inviteTokenRepository.findByOrganizationId(organizationEntity.getId());
+
+        OrganizationDto outputOrg = orgOutputMapper.toApi(organizationEntity);
+        outputOrg.setConnectionStatus(Status.VALID);
+        outputOrg.setInviteLink(constructInvitationLink(inviteToken.getToken()));
+        outputOrg.setInviteToken(inviteToken.getToken());
+
+        return outputOrg;
+    }
 
     public List<OrgMemberStatusDto> getMembersForOrganization(UUID organizationId, UUID masterAccountId) {
 

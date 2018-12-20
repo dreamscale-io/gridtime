@@ -52,5 +52,9 @@ public interface OrganizationClient {
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH )
     TeamWithMembersDto getMeAndMyTeam();
 
+    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH +  ResourcePaths.MEMBER_PATH )
+    MemberRegistrationDetailsDto addMemberToMyTeam(String memberEmail);
+
+
 
 }

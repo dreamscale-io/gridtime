@@ -187,7 +187,7 @@ public class TeamService {
     }
 
     public MemberRegistrationDetailsDto addMemberToMyTeam(UUID masterAccountId, String newMemberEmail) {
-        OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
+        OrganizationDto orgDto = organizationService.getDefaultOrganizationWithInvitation(masterAccountId);
 
         MembershipInputDto membershipInputDto = new MembershipInputDto();
         membershipInputDto.setInviteToken(orgDto.getInviteToken());

@@ -224,6 +224,33 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
+    def "should add member to my team with email"() {
+        given:
+
+        OrganizationDto org = createOrganizationWithClient()
+
+        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+
+        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId])
+
+        List<TeamMemberDto> teamMembers = organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
+
+        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress("kara@dreamscale.io").build()
+        1 * mockJiraService.getUserByEmail(_, _) >> jiraUserDto
+
+        when:
+        testUser.id = registration1.masterAccountId;
+        MemberRegistrationDetailsDto registration2 = organizationClient.addMemberToMyTeam("kara@dreamscale.io")
+
+        then:
+        assert registration2 != null
+        assert registration2.orgEmail == "kara@dreamscale.io"
+        assert registration2.activationCode != null
+
+    }
+
+
     def "should retrieve my teams that I am a member of"() {
         given:
 

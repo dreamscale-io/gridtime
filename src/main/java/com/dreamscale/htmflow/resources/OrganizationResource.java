@@ -144,7 +144,7 @@ public class OrganizationResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TEAM_PATH + ResourcePaths.MEMBER_PATH )
-    public MemberRegistrationDetailsDto addMemberToMyTeam(String newMemberEmail) {
+    public MemberRegistrationDetailsDto addMemberToMyTeam(@RequestBody  String newMemberEmail) {
         RequestContext context = RequestContext.get();
         return teamService.addMemberToMyTeam(context.getMasterAccountId(), newMemberEmail);
     }
