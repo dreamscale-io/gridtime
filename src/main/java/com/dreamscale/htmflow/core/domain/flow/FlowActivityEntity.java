@@ -30,6 +30,8 @@ public class FlowActivityEntity {
 	@Column(name = "end_time")
 	private LocalDateTime end;
 
+	private String component;
+
 	public Duration getDuration() {
 		return Duration.between(start, end);
 	}

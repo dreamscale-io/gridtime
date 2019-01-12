@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewEditorActivity {
+public class NewEditorActivity implements Activity {
 
     private Long durationInSeconds;
     private LocalDateTime endTime;

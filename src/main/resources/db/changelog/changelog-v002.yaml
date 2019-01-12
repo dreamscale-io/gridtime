@@ -1,0 +1,5 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v002/alter_flow_activity_add_component.sql
+

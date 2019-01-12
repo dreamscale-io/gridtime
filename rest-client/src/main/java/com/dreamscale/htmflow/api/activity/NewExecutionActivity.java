@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewExecutionActivity {
+public class NewExecutionActivity implements Activity {
 
     private Long durationInSeconds;
     private LocalDateTime endTime;

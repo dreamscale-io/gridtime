@@ -9,6 +9,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository
 import com.dreamscale.htmflow.core.domain.flow.FlowEventRepository
 import com.dreamscale.htmflow.core.service.TimeService
@@ -55,6 +56,21 @@ class FlowResourceSpec extends Specification {
 
         org = aRandom.organizationEntity().save()
         member = createMembership(org.getId(), testUser.getId())
+    }
+
+    def "addBatch should assign component to all the saved things"() {
+        given:
+        NewFlowBatch flowBatch = aRandom.flowBatch().build()
+
+        when:
+        flowClient.addBatch(flowBatch)
+
+        List<FlowActivityEntity> activities = flowActivityRepository.findByMemberId(member.getId())
+
+        then:
+        assert activities.size() == 5
+        assert activities.get(0).component != null
+
     }
 
     def "addBatch should save all the things"() {

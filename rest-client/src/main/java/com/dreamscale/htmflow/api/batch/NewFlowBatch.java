@@ -1,17 +1,8 @@
 package com.dreamscale.htmflow.api.batch;
 
-import com.dreamscale.htmflow.api.activity.NewEditorActivity;
-import com.dreamscale.htmflow.api.activity.NewExecutionActivity;
-import com.dreamscale.htmflow.api.activity.NewExternalActivity;
-import com.dreamscale.htmflow.api.activity.NewIdleActivity;
-import com.dreamscale.htmflow.api.activity.NewModificationActivity;
-import com.dreamscale.htmflow.api.event.NewSnippetEvent;
+import com.dreamscale.htmflow.api.activity.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +29,18 @@ public class NewFlowBatch {
     private List<NewModificationActivity> modificationActivityList;
     @Singular("event")
     private List<NewBatchEvent> eventList;
+
+
+    public List getAllBatchActivity() {
+        List batchActivity = new ArrayList<>();
+        batchActivity.addAll(getNotNullList(editorActivityList));
+        batchActivity.addAll(getNotNullList(externalActivityList));
+        batchActivity.addAll(getNotNullList(idleActivityList));
+        batchActivity.addAll(getNotNullList(executionActivityList));
+        batchActivity.addAll(getNotNullList(modificationActivityList));
+
+        return batchActivity;
+    }
 
     private List<List> getBatchItemLists() {
         ArrayList<List> batchItemLists = new ArrayList<>(10);
