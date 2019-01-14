@@ -19,7 +19,7 @@ public class ComponentLookupService {
 
     Map<UUID, ProjectBuckets> projectBucketsByProjectId = new HashMap<>();
 
-    void configureMapping(UUID projectId, String bucket, String bucketMatcherWithStars) {
+    public void configureMapping(UUID projectId, String bucket, String bucketMatcherWithStars) {
 
         ProjectBuckets projectBuckets = findOrCreateProjectBuckets(projectId);
         projectBuckets.configureBucket(bucket, bucketMatcherWithStars);
