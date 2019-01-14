@@ -33,6 +33,12 @@ public class FlowService {
     @Autowired
     FlowEventRepository flowEventRepository;
 
+    @Autowired
+    ComponentLookupService componentLookupService;
+
+    @Autowired
+    RecentActivityService recentActivityService;
+
     //okay, next thing I need to do, is wire in a component lookup service, that will get used on batch processing
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
@@ -79,7 +85,8 @@ public class FlowService {
     //and look up the component for that, caching all the things for that project, or returning a default
 
     private String lookupComponent(UUID projectId, NewEditorActivity editorActivity) {
-        return "default";
+
+        return componentLookupService.lookupComponent(projectId, editorActivity.getFilePath());
     }
 
     //query the most recent flow activity for a member feed, look at the component of the last batch,
@@ -87,7 +94,7 @@ public class FlowService {
 
     private String lookupComponentOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
 
-        return "default";
+        return recentActivityService.lookupComponentOfMostRecentActivity(memberEntity);
     }
 
     //what is the most recent intention of the user that this batch corresponds to, the entire batch
@@ -96,7 +103,7 @@ public class FlowService {
     //at some point, and somehow guess at the project from the file activity or something
 
     private UUID lookupProjectIdOfMostRecentIntention(OrganizationMemberEntity memberEntity) {
-        return null;
+        return recentActivityService.lookupProjectIdOfMostRecentActivity(memberEntity);
     }
 
     private List<Activity> sortAllItemsByTime(List<Activity> allBatchActivity) {

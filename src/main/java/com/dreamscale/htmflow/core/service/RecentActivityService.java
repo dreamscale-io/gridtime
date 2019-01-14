@@ -4,6 +4,8 @@ import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
+import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnection;
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
@@ -43,6 +45,9 @@ public class RecentActivityService {
 
     @Autowired
     private JiraConnectionFactory jiraConnectionFactory;
+
+    @Autowired
+    private FlowActivityRepository flowActivityRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -103,6 +108,28 @@ public class RecentActivityService {
 
         activeWorkStatusRepository.save(workStatus);
     }
+
+    public String lookupComponentOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
+        String component = "default";
+        FlowActivityEntity flowActivityEntity = flowActivityRepository.findFirst1ByMemberIdOrderByEndDesc(memberEntity.getId());
+
+        if (flowActivityEntity != null) {
+            component = flowActivityEntity.getComponent();
+        }
+
+        return component;
+    }
+
+    public UUID lookupProjectIdOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
+        UUID projectId = null;
+
+        RecentProjectEntity recentProjectEntity = recentProjectRepository.findFirst1ByMemberIdOrderByLastAccessedDesc(memberEntity.getId());
+        if (recentProjectEntity != null) {
+            projectId = recentProjectEntity.getProjectId();
+        }
+        return projectId;
+    }
+
 
     private boolean isNotDefaultTask(UUID taskId) {
         TaskEntity taskEntity = taskRepository.findOne(taskId);
@@ -325,6 +352,7 @@ public class RecentActivityService {
                 .organizationId(organizationId)
                 .lastAccessed(LocalDateTime.now()).build();
     }
+
 
 
 }

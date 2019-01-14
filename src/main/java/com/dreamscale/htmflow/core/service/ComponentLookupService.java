@@ -38,4 +38,7 @@ public class ComponentLookupService {
         //
     }
 
+    public String lookupComponent(UUID projectId, String filePath) {
+        return "default";
+    }
 }

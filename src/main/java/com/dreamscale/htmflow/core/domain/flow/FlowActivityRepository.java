@@ -21,4 +21,6 @@ public interface FlowActivityRepository extends CrudRepository<FlowActivityEntit
 										 @Param("end") LocalDateTime end);
 
 	List<FlowActivityEntity> findByMemberId(UUID memberId);
+
+	FlowActivityEntity findFirst1ByMemberIdOrderByEndDesc(UUID memberId);
 }
