@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProjectBucketMapper {
+public class ProjectBuckets {
 
     private Map<String, String> packageToBucketMap;
     private List<BucketMatcher> bucketMatchers;
 
-    public ProjectBucketMapper() {
+    public ProjectBuckets() {
         packageToBucketMap = new HashMap<>();
         bucketMatchers = new ArrayList<>();
 
