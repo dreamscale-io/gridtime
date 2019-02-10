@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.mapping;
 
 public class CPGBucketConfig {
 
-    ProjectBuckets createBuckets() {
+    public ProjectBuckets createBuckets() {
 
         ProjectBuckets projectBuckets = new ProjectBuckets();
 

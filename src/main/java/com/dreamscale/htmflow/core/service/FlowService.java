@@ -43,7 +43,6 @@ public class FlowService {
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
 
-
     public void saveFlowBatch(UUID masterAccountId, NewFlowBatch batch) {
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 

@@ -18,18 +18,29 @@ public class ComponentLookupService {
     FlowActivityRepository flowActivityRepository;
 
     Map<UUID, ProjectBuckets> projectBucketsByProjectId = new HashMap<>();
+    ProjectBuckets defaultProjectBuckets = new ProjectBuckets();
 
     public void configureMapping(UUID projectId, String bucket, String bucketMatcherWithStars) {
 
         ProjectBuckets projectBuckets = findOrCreateProjectBuckets(projectId);
         projectBuckets.configureBucket(bucket, bucketMatcherWithStars);
+    }
 
+    public void configureDefaultBuckets(ProjectBuckets defaultProjectBuckets) {
+        this.defaultProjectBuckets = defaultProjectBuckets;
+    }
+
+    public String lookupDefaultComponent(String filePath) {
+        return lookupComponent(null, filePath);
     }
 
     public String lookupComponent(UUID projectId, String filePath) {
-
-        ProjectBuckets projectBuckets = findOrCreateProjectBuckets(projectId);
-        return projectBuckets.identifyBucket(filePath);
+        if (projectId != null) {
+            ProjectBuckets projectBuckets = findOrCreateProjectBuckets(projectId);
+            return projectBuckets.identifyBucket(filePath);
+        } else {
+            return defaultProjectBuckets.identifyBucket(filePath);
+        }
     }
 
     private ProjectBuckets findOrCreateProjectBuckets(UUID projectId) {
