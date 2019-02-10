@@ -43,6 +43,7 @@ public class ResourcePaths {
     public static final String SYNC_PATH = "/sync";
     public static final String JIRA_PATH = "/jira";
     public static final String ORG_PATH = "/org";
+    public static final String BUCKET_PATH = "/bucket";
     public static final String DREAMSCALE_PATH = "/dreamscale";
     public static final String ONPREM_PATH = "/onprem";
 

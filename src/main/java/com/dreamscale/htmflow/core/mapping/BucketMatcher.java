@@ -1,7 +1,6 @@
 package com.dreamscale.htmflow.core.mapping;
 
-public class BucketMatcher {
-
+public abstract class BucketMatcher {
 
     private final String bucketName;
     private final String bucketRegex;

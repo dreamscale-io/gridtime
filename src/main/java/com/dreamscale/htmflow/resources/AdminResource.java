@@ -56,4 +56,18 @@ public class AdminResource {
         return adminService.configureOnPrem(inputConfig);
     }
 
+
+    /**
+     * Configure OnPrem component buckets so that all Idea Flow data gets dereferenced into components
+     * This is memory resident, not persistent, but maybe should be persistent too?  Would mayb
+     */
+    @PostMapping(ResourcePaths.CONFIG_PATH + ResourcePaths.BUCKET_PATH + ResourcePaths.ONPREM_PATH)
+    List<MemberRegistrationDetailsDto>  configureOnPremBuckets(@RequestBody AutoConfigInputDto inputConfig) {
+
+        //TODO make this configure the buckets
+
+        return adminService.configureOnPrem(inputConfig);
+    }
+
+
 }

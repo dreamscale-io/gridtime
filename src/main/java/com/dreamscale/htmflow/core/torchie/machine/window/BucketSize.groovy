@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.torchie.machine.window
 
 enum BucketSize {
-    MIN10, HOURS, DAYS, WEEKS, QUARTERS, YEARS
+    MIN20, HOURS, DAYS, DECAN_WEEKS, LUNAR_MONTHS, TRINE_SEASONS, CIRCLE_YEARS
 }
+
+
