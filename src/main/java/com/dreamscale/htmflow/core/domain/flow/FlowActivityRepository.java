@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.domain.flow;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public interface FlowActivityRepository extends CrudRepository<FlowActivityEntity, Long> {
+public interface FlowActivityRepository extends PagingAndSortingRepository<FlowActivityEntity, Long> {
 
 	@Query(nativeQuery = true, value = "select * from flow_activity " +
 			"where member_id =(:memberId) " +

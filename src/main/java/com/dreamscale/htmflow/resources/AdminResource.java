@@ -32,6 +32,16 @@ public class AdminResource {
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
 
+
+    /**
+     * Synchronize all Jira Projects for all organizations
+     */
+    @PostMapping(ResourcePaths.JOB_PATH + ResourcePaths.UPDATE_PATH + ResourcePaths.ACTIVITY_PATH)
+    void runJobToUpdateFlowActivityComponents() {
+        adminService.runJobToUpdateFlowActivityComponents();
+    }
+
+
     /**
      * Synchronize all Jira Projects for all organizations
      */

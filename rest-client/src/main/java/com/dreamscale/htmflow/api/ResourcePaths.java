@@ -13,6 +13,11 @@ public class ResourcePaths {
     public static final String PAIN_PATH = "/pain";
     public static final String JOY_PATH = "/joy";
 
+    public static final String JOB_PATH = "/job";
+    public static final String UPDATE_PATH = "/update";
+    public static final String ACTIVITY_PATH = "/activity";
+
+
 
 
     public static final String RECENT_PATH = "/recent";
