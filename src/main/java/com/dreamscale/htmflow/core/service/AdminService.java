@@ -10,6 +10,7 @@ import com.dreamscale.htmflow.core.domain.OrganizationEntity;
 import com.dreamscale.htmflow.core.domain.OrganizationRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
+import com.dreamscale.htmflow.core.job.UpdateFlowActivityJob;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,9 @@ public class AdminService {
 
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private UpdateFlowActivityJob updateFlowActivityJob;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -207,4 +211,7 @@ public class AdminService {
         return organizationService.registerMember(org.getId(), membership);
     }
 
+    public void runJobToUpdateFlowActivityComponents() {
+        updateFlowActivityJob.run();
+    }
 }
