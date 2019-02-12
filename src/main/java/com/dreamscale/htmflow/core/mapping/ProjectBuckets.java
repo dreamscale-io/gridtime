@@ -40,9 +40,13 @@ public class ProjectBuckets {
     }
 
     private String extractFolderPath(String filePath) {
-        int indexOfLastSlash = filePath.lastIndexOf("/");
+        if (filePath != null) {
+            int indexOfLastSlash = filePath.lastIndexOf("/");
 
-        return filePath.subSequence(0, indexOfLastSlash + 1).toString();
+            return filePath.subSequence(0, indexOfLastSlash + 1).toString();
+        } else {
+            return "";
+        }
     }
 
     public void configureBucket(String bucketName, String bucketMatcherWithStars) {
