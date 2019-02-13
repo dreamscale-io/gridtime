@@ -18,9 +18,9 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Actuals", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ForeignExchangeMapper.xml");
 
         projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/domain/adjustment/*");
-        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/AdjustmentsController");
-        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/BulkEditController");
-        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/OtherRevenueAdjustmentsController");
+        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/AdjustmentsController.java");
+        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/BulkEditController.java");
+        projectBuckets.configureBucket("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/OtherRevenueAdjustmentsController.java");
         projectBuckets.configureBucket("Adjustment", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/OtherRevenueAdjustmentMapper.xml");
 
 
@@ -29,7 +29,7 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Agent", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/AgentMapper.xml");
 
         projectBuckets.configureBucket("Asset", "*/src/main/java/com/nbcuniversal/forecasting/domain/asset/*");
-        projectBuckets.configureBucket("Asset", "*/src/main/java/com/nbcuniversal/forecasting/controller/AssetController");
+        projectBuckets.configureBucket("Asset", "*/src/main/java/com/nbcuniversal/forecasting/controller/AssetController.java");
         projectBuckets.configureBucket("Asset", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/AssetDeferralPeriodMapper.xml");
         projectBuckets.configureBucket("Asset", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/AssetMapper.xml");
 
@@ -37,7 +37,7 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Audit", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/AuditMapper.xml");
 
         projectBuckets.configureBucket("Channel", "*/src/main/java/com/nbcuniversal/forecasting/domain/channel/*");
-        projectBuckets.configureBucket("Channel", "*/src/main/java/com/nbcuniversal/forecasting/controller/ChannelController");
+        projectBuckets.configureBucket("Channel", "*/src/main/java/com/nbcuniversal/forecasting/controller/ChannelController.java");
         projectBuckets.configureBucket("Channel", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ChannelMapper.xml");
 
         projectBuckets.configureBucket("Cmf", "*/src/main/java/com/nbcuniversal/forecasting/domain/cmf/*");
@@ -46,7 +46,7 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Common", "*/src/main/java/com/nbcuniversal/forecasting/domain/common/*");
 
         projectBuckets.configureBucket("Contract", "*/src/main/java/com/nbcuniversal/forecasting/domain/contract/*");
-        projectBuckets.configureBucket("Contract", "*/src/main/java/com/nbcuniversal/forecasting/controller/ContractController");
+        projectBuckets.configureBucket("Contract", "*/src/main/java/com/nbcuniversal/forecasting/controller/ContractController.java");
         projectBuckets.configureBucket("Contract", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ContractDetailsMapper.xml");
         projectBuckets.configureBucket("Contract", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ContractMapper.xml");
         projectBuckets.configureBucket("Contract", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ContractObjectMapper.xml");
@@ -55,11 +55,11 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Contract", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/PriorQuarterMapper.xml");
 
         projectBuckets.configureBucket("Currency", "*/src/main/java/com/nbcuniversal/forecasting/domain/currency/*");
-        projectBuckets.configureBucket("Currency", "*/src/main/java/com/nbcuniversal/forecasting/controller/CurrencyController");
+        projectBuckets.configureBucket("Currency", "*/src/main/java/com/nbcuniversal/forecasting/controller/CurrencyController.java");
         projectBuckets.configureBucket("Currency", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/CurrencyMapper.xml");
 
         projectBuckets.configureBucket("Dealmaker", "*/src/main/java/com/nbcuniversal/forecasting/domain/dealmaker/*");
-        projectBuckets.configureBucket("Dealmaker", "*/src/main/java/com/nbcuniversal/forecasting/controller/DealmakerController");
+        projectBuckets.configureBucket("Dealmaker", "*/src/main/java/com/nbcuniversal/forecasting/controller/DealmakerController.java");
         projectBuckets.configureBucket("Dealmaker", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/DealmakerFinanceMapper.xml");
         projectBuckets.configureBucket("Dealmaker", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/DealmakerMapper.xml");
 
@@ -91,11 +91,11 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Invite", "*/src/main/java/com/nbcuniversal/forecasting/domain/invite/*");
 
         projectBuckets.configureBucket("Justification", "*/src/main/java/com/nbcuniversal/forecasting/domain/justification/*");
-        projectBuckets.configureBucket("Justification", "*/src/main/java/com/nbcuniversal/forecasting/controller/JustificationController");
+        projectBuckets.configureBucket("Justification", "*/src/main/java/com/nbcuniversal/forecasting/controller/JustificationController.java");
         projectBuckets.configureBucket("Justification", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/JustificationMapper.xml");
 
         projectBuckets.configureBucket("Licensee", "*/src/main/java/com/nbcuniversal/forecasting/domain/licensee/*");
-        projectBuckets.configureBucket("Licensee", "*/src/main/java/com/nbcuniversal/forecasting/controller/LicenseeController");
+        projectBuckets.configureBucket("Licensee", "*/src/main/java/com/nbcuniversal/forecasting/controller/LicenseeController.java");
         projectBuckets.configureBucket("Licensee", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/LicenseeMapper.xml");
 
         projectBuckets.configureBucket("Command", "*/src/main/java/com/nbcuniversal/forecasting/domain/command/*");
@@ -104,13 +104,13 @@ public class CPGBucketConfig {
 
 
         projectBuckets.configureBucket("Product", "*/src/main/java/com/nbcuniversal/forecasting/domain/product/*");
-        projectBuckets.configureBucket("Product", "*/src/main/java/com/nbcuniversal/forecasting/controller/ProductController");
+        projectBuckets.configureBucket("Product", "*/src/main/java/com/nbcuniversal/forecasting/controller/ProductController.java");
         projectBuckets.configureBucket("Product", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ProductMapper.xml");
 
         projectBuckets.configureBucket("Product Group", "*/src/main/java/com/nbcuniversal/forecasting/domain/productgroup/*");
 
         projectBuckets.configureBucket("Rate Type", "*/src/main/java/com/nbcuniversal/forecasting/domain/ratetype/*");
-        projectBuckets.configureBucket("Rate Type", "*/src/main/java/com/nbcuniversal/forecasting/controller/RateTypeController");
+        projectBuckets.configureBucket("Rate Type", "*/src/main/java/com/nbcuniversal/forecasting/controller/RateTypeController.java");
         projectBuckets.configureBucket("Rate Type", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/RateTypeMapper.xml");
 
         projectBuckets.configureBucket("Reaccrual Report", "*/src/main/java/com/nbcuniversal/forecasting/domain/reaccrual/*");
@@ -129,8 +129,8 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Saml", "*/src/main/java/com/nbcuniversal/forecasting/domain/saml/*");
 
         projectBuckets.configureBucket("Sap", "*/src/main/java/com/nbcuniversal/forecasting/domain/sap/*");
-        projectBuckets.configureBucket("Sap", "*/src/main/java/com/nbcuniversal/forecasting/controller/SAPExportController");
-        projectBuckets.configureBucket("Sap", "*/src/main/java/com/nbcuniversal/forecasting/controller/SudCalculationController");
+        projectBuckets.configureBucket("Sap", "*/src/main/java/com/nbcuniversal/forecasting/controller/SAPExportController.java");
+        projectBuckets.configureBucket("Sap", "*/src/main/java/com/nbcuniversal/forecasting/controller/SudCalculationController.java");
         projectBuckets.configureBucket("Sap", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/SAPCalculationMapper.xml");
         projectBuckets.configureBucket("Sap", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/SAPExportAccountMapper.xml");
         projectBuckets.configureBucket("Sap", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/SAPReportContentMapper.xml");
@@ -141,21 +141,21 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Term", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/TermMapper.xml");
 
         projectBuckets.configureBucket("Territory", "*/src/main/java/com/nbcuniversal/forecasting/domain/territory/*");
-        projectBuckets.configureBucket("Territory", "*/src/main/java/com/nbcuniversal/forecasting/controller/TerritoryController");
+        projectBuckets.configureBucket("Territory", "*/src/main/java/com/nbcuniversal/forecasting/controller/TerritoryController.java");
         projectBuckets.configureBucket("Territory", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/TerritoryMapper.xml");
 
         projectBuckets.configureBucket("User", "*/src/main/java/com/nbcuniversal/forecasting/domain/user/*");
-        projectBuckets.configureBucket("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController");
+        projectBuckets.configureBucket("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java");
         projectBuckets.configureBucket("User", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/UserMapper.xml");
 
         projectBuckets.configureBucket("Utils", "*/src/main/java/com/nbcuniversal/forecasting/domain/utils/*");
 
         projectBuckets.configureBucket("Version", "*/src/main/java/com/nbcuniversal/forecasting/domain/version/*");
-        projectBuckets.configureBucket("Version", "*/src/main/java/com/nbcuniversal/forecasting/controller/ForecastVersionController");
+        projectBuckets.configureBucket("Version", "*/src/main/java/com/nbcuniversal/forecasting/controller/ForecastVersionController.java");
         projectBuckets.configureBucket("Version", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ForecastVersionMapper.xml");
 
         projectBuckets.configureBucket("Cron Jobs", "*/src/main/java/com/nbcuniversal/forecasting/scheduler/*");
-        projectBuckets.configureBucket("Cron Jobs", "*/src/main/java/com/nbcuniversal/forecasting/controller/CronJobController");
+        projectBuckets.configureBucket("Cron Jobs", "*/src/main/java/com/nbcuniversal/forecasting/controller/CronJobController.java");
 
         projectBuckets.configureBucket("RSG Integration", "*/src/main/java/com/nbcuniversal/forecasting/integration/rsg/*");
         projectBuckets.configureBucket("RSG Integration", "*/src/main/resources/com/nbcuniversal/forecasting/mapper/ForecastSubmissionMapper.xml");
@@ -165,10 +165,10 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("GTM Integration", "*/src/main/java/com/nbcuniversal/forecasting/integration/gtm/*");
         projectBuckets.configureBucket("GTM Integration", "*/src/main/java/com/nbcuniversal/forecasting/integration/gtm/*");
 
-        projectBuckets.configureBucket("Cache", "*/src/main/java/com/nbcuniversal/forecasting/controller/CacheController");
+        projectBuckets.configureBucket("Cache", "*/src/main/java/com/nbcuniversal/forecasting/controller/CacheController.java");
 
 
-        projectBuckets.configureBucket("Code Migrations", "*/src/main/java/com/nbcuniversal/forecasting/controller/CodeMigrationController");
+        projectBuckets.configureBucket("Code Migrations", "*/src/main/java/com/nbcuniversal/forecasting/controller/CodeMigrationController.java");
         projectBuckets.configureBucket("Authenticator", "*/src/main/java/com/nbcuniversal/forecasting/authenticator/*");
         projectBuckets.configureBucket("Authorizer", "*/src/main/java/com/nbcuniversal/forecasting/authorizer/*");
 

@@ -12,6 +12,16 @@ class ProjectBucketsSpec extends Specification {
         projectBuckets = new ProjectBuckets()
     }
 
+    def "should match controllers"() {
+        given:
+        projectBuckets.configureBucket("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java");
+
+        when:
+        String bucketName = projectBuckets.identifyBucket("/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java")
+
+        then:
+        assert bucketName == "User"
+    }
 
     def "should match unit test extensions"() {
         given:
