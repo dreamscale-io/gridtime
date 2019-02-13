@@ -186,6 +186,9 @@ public class CPGBucketConfig {
                 );
         projectBuckets.configureBucket("Test Support", "*/src/test/groovy/com/nbcuniversal/forecasting/*");
 
+        projectBuckets.configureBucket("Other", "*/src/main/java/com/nbcuniversal/forecasting/*");
+
+
         return projectBuckets;
     }
 }

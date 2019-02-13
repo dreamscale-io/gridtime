@@ -12,6 +12,26 @@ class ProjectBucketsSpec extends Specification {
         projectBuckets = new ProjectBuckets()
     }
 
+    ///src/main/java/com/nbcuniversal/forecasting/config/MappingConfig.java
+    ///src/main/java/com/nbcuniversal/forecasting/domain/BigDecimalUtils.java
+    ////src/main/java/com/nbcuniversal/forecasting/config/DevDirectClient.java
+    ///src/test/java/com/nbcuniversal/forecasting/controller/response/service/ForecastDetailsServiceImplTestUtils.java"
+
+    def "should match buckets with excludes"() {
+        given:
+        projectBuckets.configureBucketWithExclusions("Test Support",
+                "*/src/test/java/com/nbcuniversal/forecasting/*",
+                "*/src/test/java/com/nbcuniversal/forecasting/*IT.java",
+                "*/src/test/java/com/nbcuniversal/forecasting/*Test.java"
+        );
+
+        when:
+        String bucketName = projectBuckets.identifyBucket("/src/test/java/com/nbcuniversal/forecasting/controller/response/service/ForecastDetailsServiceImplTestUtils.java")
+
+        then:
+        assert bucketName == "Test Support"
+    }
+
     def "should match controllers"() {
         given:
         projectBuckets.configureBucket("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java");
