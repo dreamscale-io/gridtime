@@ -172,6 +172,9 @@ public class CPGBucketConfig {
         projectBuckets.configureBucket("Authenticator", "*/src/main/java/com/nbcuniversal/forecasting/authenticator/*");
         projectBuckets.configureBucket("Authorizer", "*/src/main/java/com/nbcuniversal/forecasting/authorizer/*");
 
+
+        ///src/test/java/com/nbcuniversal/forecasting/controller/UserControllerTest.java
+
         projectBuckets.configureBucket("Unit Tests", "*/src/test/java/com/nbcuniversal/forecasting/*Test.java");
         projectBuckets.configureBucket("Integration Tests", "*/src/test/java/com/nbcuniversal/forecasting/*IT.java");
         projectBuckets.configureBucket("Integration Tests", "*/src/test/groovy/specs/*Spec.groovy");

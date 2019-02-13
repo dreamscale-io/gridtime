@@ -12,6 +12,18 @@ class ProjectBucketsSpec extends Specification {
         projectBuckets = new ProjectBuckets()
     }
 
+
+    def "should match unit test extensions"() {
+        given:
+        projectBuckets.configureBucket("Unit Tests", "/src/test/java/com/nbcuniversal/forecasting/*Test.java");
+
+        when:
+        String bucketName = projectBuckets.identifyBucket("/src/test/java/com/nbcuniversal/forecasting/controller/UserControllerTest.java")
+
+        then:
+        assert bucketName == "Unit Tests"
+    }
+
     def "should use configuration to identify component name"() {
         given:
         projectBuckets.configureBucket("comp1", "/src/main/java/com/company/project/comp/*")

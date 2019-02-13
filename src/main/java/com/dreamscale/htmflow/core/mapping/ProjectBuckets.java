@@ -24,7 +24,7 @@ public class ProjectBuckets {
 
         if (bucketName == null) {
             for (BucketMatcher bucketMatcher : bucketMatchers) {
-                if (bucketMatcher.matches(folderPath)) {
+                if (bucketMatcher.matches(filePath)) {
                     bucketName = bucketMatcher.getBucketName();
                     packageToBucketMap.put(folderPath, bucketName);
                     break;
