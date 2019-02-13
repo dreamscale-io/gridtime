@@ -32,9 +32,9 @@ public class UpdateFlowActivityJob {
             for (FlowActivityEntity flowActivityEntity : currentPage) {
 
                 String filePath = flowActivityEntity.getMetadataValue("filePath");
-                String component = componentLookupService.lookupDefaultComponent(filePath);
 
-                if (flowActivityEntity.getComponent() == null) {
+                if (flowActivityEntity.getComponent() == null || flowActivityEntity.getComponent().equals("default")) {
+                    String component = componentLookupService.lookupDefaultComponent(filePath);
                     flowActivityEntity.setComponent(component);
                     flowActivityRepository.save(flowActivityEntity);
                 }

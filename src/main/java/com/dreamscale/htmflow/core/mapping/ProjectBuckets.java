@@ -56,11 +56,11 @@ public class ProjectBuckets {
     }
 
     public void configureBucketWithExclusions(String bucketName, String bucketMatcherWithStars, String ... exclusionMatchersWithStars) {
-        String bucketRegex = bucketMatcherWithStars.replace("*", "\\S*");
+        String bucketRegex = bucketMatcherWithStars.replaceAll("\\*", "\\S*");
 
         List<String> exclusionRegexMatchers = new ArrayList<>();
         for (String exclusionMatcher : exclusionMatchersWithStars) {
-            exclusionRegexMatchers.add(exclusionMatcher.replace("*", "\\S*"));
+            exclusionRegexMatchers.add(exclusionMatcher.replaceAll("\\*", "\\S*"));
         }
 
         bucketMatchers.add(new BucketMatcherWithExclusions(bucketName, bucketRegex, exclusionRegexMatchers));
