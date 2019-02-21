@@ -59,6 +59,9 @@ public class ResourcePaths {
     public static final String ABORT_PATH = "/abort";
     public static final String XP_PATH = "/xp";
 
+    public static final String CIRCLE_PATH = "/circle";
+
+
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
 

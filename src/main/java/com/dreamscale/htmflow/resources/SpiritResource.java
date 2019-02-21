@@ -106,7 +106,7 @@ public class SpiritResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return wtfService.pushWTFStatus(memberEntity.getOrganizationId(), memberEntity.getId(), wtfStatusDto);
+        return wtfService.pushWTFStatus(memberEntity.getOrganizationId(), memberEntity.getId(), wtfStatusDto.getProblemStatement());
     }
 
     /**

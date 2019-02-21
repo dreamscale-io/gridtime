@@ -66,6 +66,9 @@ public class ComponentTestConfig extends BaseTestConfig {
         return createClientWithStaticApiKey(jacksonFeignBuilder, AdminClient.class);
     }
 
+    @Bean
+    CircleClient circleClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, CircleClient.class); }
+
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);
     }

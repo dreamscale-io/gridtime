@@ -75,7 +75,7 @@ public class WTFService {
     }
 
 
-    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, WtfStatusInputDto wtfStatusDto) {
+    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, String problemDescription) {
 
         WtfSessionEntity wtfSession = new WtfSessionEntity();
 
@@ -83,14 +83,14 @@ public class WTFService {
         wtfSession.setOrganizationId(organizationId);
         wtfSession.setMemberId(memberId);
         wtfSession.setStartTime(timeService.now());
-        wtfSession.setProblemStatement(wtfStatusDto.getProblemStatement());
+        wtfSession.setProblemStatement(problemDescription);
 
         wtfSessionRepository.save(wtfSession);
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
         if (activeWorkStatusEntity != null) {
-            String problemStatus = wtfStatusDto.getProblemStatement();
+            String problemStatus = problemDescription;
             if (problemStatus == null) {
                 problemStatus = "";
             }

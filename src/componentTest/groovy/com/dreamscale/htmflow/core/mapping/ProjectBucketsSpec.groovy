@@ -17,6 +17,17 @@ class ProjectBucketsSpec extends Specification {
     ////src/main/java/com/nbcuniversal/forecasting/config/DevDirectClient.java
     ///src/test/java/com/nbcuniversal/forecasting/controller/response/service/ForecastDetailsServiceImplTestUtils.java"
 
+    def "should match resources"() {
+        given:
+        projectBuckets.configureBucket("Test", "*/src/test/resources/com/nbcuniversal/forecasting*")
+
+        when:
+        String bucketName = projectBuckets.identifyBucket("/src/test/resources/com/nbcuniversal/forecasting/domain/SQLUtils.sql");
+
+        then:
+        assert bucketName == "Test"
+    }
+
     def "should match buckets with excludes"() {
         given:
         projectBuckets.configureBucketWithExclusions("Test Support",
