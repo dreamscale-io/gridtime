@@ -28,6 +28,11 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		RequestContext context = null;
 		ApiKeyAuthenticationToken authentication = null;
 
+		if (isSwaggerPath(request)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		if (apiKey != null || connectionId != null) {
 			UUID masterAccountId = lookupAccount(apiKey, connectionId);
 			if (masterAccountId == null) {
@@ -51,6 +56,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			SecurityContextHolder.getContext().setAuthentication(null);
 			RequestContext.clear();
 		}
+	}
+
+	private boolean isSwaggerPath(HttpServletRequest request) {
+		return request.getServletPath().equals("/v2/api-docs") ||
+				request.getServletPath().equals("/swagger-ui.html") ||
+				request.getServletPath().startsWith("/swagger-resources/configuration/") ||
+				request.getServletPath().startsWith("/webjars/springfox-swagger-ui/");
 	}
 
 	private ApiKeyAuthenticationToken createAuthenticationToken(String apiKey, String connectionId, UUID masterAccountId) {
