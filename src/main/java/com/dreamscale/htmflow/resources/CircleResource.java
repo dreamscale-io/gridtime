@@ -46,7 +46,7 @@ public class CircleResource {
 
         wtfService.pushWTFStatus(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
 
-        return circleService.createNewAdhocCircle(circleSessionInputDto.getProblemDescription());
+        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
     }
 
 

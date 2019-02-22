@@ -18,5 +18,6 @@ public class CircleDto {
     String circleName;
 
     List<CircleMemberDto> members;
+
     String scrapbookPublicKey;
 }

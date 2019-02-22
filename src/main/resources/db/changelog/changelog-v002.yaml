@@ -3,3 +3,11 @@ databaseChangeLog:
   - include:
         file: db/v002/alter_flow_activity_add_component.sql
 
+  - include:
+        file: db/v002/circle/create_circle.sql
+
+  - include:
+        file: db/v002/circle/create_circle_member.sql
+
+  - include:
+        file: db/v002/circle/create_circle_snippet.sql

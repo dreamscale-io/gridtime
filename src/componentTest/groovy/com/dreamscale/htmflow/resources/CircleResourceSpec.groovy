@@ -43,7 +43,9 @@ class CircleResourceSpec extends Specification {
         CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         then:
-        assert circle == null
+        assert circle != null
+        assert circle.members != null
+        assert circle.members.size() == 1
     }
 
 
