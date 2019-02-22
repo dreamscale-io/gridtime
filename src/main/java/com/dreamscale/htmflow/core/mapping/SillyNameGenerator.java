@@ -1,7 +1,12 @@
 package com.dreamscale.htmflow.core.mapping;
 
+import com.google.common.io.Resources;
+
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,10 +42,12 @@ public class SillyNameGenerator {
 
         List<String> dictionaryValues = new ArrayList<>();
 
-        Path path = Paths.get(getClass().getResource("/dictionary/"+dictionaryFileName).toURI());
+        URL url = getClass().getResource("/dictionary/"+dictionaryFileName);
 
-        try (Stream<String> lines = Files.lines(path)) {
-            lines.forEach(s -> dictionaryValues.add(s.trim().toLowerCase()));
+        List<String> rawLines = Resources.readLines(url, Charset.defaultCharset());
+
+        for (String line: rawLines) {
+            dictionaryValues.add(line.trim().toLowerCase());
         }
 
         return dictionaryValues;
