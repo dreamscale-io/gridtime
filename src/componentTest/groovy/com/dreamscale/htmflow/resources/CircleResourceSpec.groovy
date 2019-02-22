@@ -45,8 +45,11 @@ class CircleResourceSpec extends Specification {
         then:
         assert circle != null
         assert circle.circleName != null
+        assert circle.getPublicKey() != null
+
         assert circle.members != null
         assert circle.members.size() == 1
+
     }
 
 

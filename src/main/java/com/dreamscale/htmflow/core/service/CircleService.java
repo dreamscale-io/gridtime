@@ -6,22 +6,22 @@ import com.dreamscale.htmflow.api.circle.SnippetType;
 import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
 import com.dreamscale.htmflow.api.status.WtfStatusInputDto;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.InternalServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -59,6 +59,7 @@ public class CircleService {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
         circleEntity.setCircleName(sillyNameGenerator.random());
+        configurePublicPrivateKeyPairs(circleEntity);
 
         circleRepository.save(circleEntity);
 
@@ -86,5 +87,29 @@ public class CircleService {
         circleDto.setMembers(memberDtos);
 
         return circleDto;
+    }
+
+    private void configurePublicPrivateKeyPairs(CircleEntity circleEntity) {
+
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
+
+            // Initialize KeyPairGenerator.
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            keyGen.initialize(1024, random);
+
+            // Generate Key Pairs, a private key and a public key.
+            KeyPair keyPair = keyGen.generateKeyPair();
+            PrivateKey privateKey = keyPair.getPrivate();
+            PublicKey publicKey = keyPair.getPublic();
+
+            Base64.Encoder encoder = Base64.getEncoder();
+
+            circleEntity.setPublicKey(encoder.encodeToString(publicKey.getEncoded()));
+            circleEntity.setPrivateKey(encoder.encodeToString(privateKey.getEncoded()));
+        } catch (Exception ex) {
+            log.error("Unable to generate public/private keypairs", ex);
+            throw new InternalServerException(ValidationErrorCodes.FAILED_PUBLICKEY_GENERATION, "Unable to generate public/private keypairs");
+        }
     }
 }
