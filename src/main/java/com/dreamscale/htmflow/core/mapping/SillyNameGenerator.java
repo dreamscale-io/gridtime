@@ -37,8 +37,7 @@ public class SillyNameGenerator {
 
         List<String> dictionaryValues = new ArrayList<>();
 
-        Path path = Paths.get(getClass().getClassLoader()
-                .getResource("dictionary/"+dictionaryFileName).toURI());
+        Path path = Paths.get(getClass().getResource("/dictionary/"+dictionaryFileName).toURI());
 
         try (Stream<String> lines = Files.lines(path)) {
             lines.forEach(s -> dictionaryValues.add(s.trim().toLowerCase()));
