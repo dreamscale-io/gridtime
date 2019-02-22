@@ -8,11 +8,14 @@ import com.dreamscale.htmflow.api.status.WtfStatusInputDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,6 +39,8 @@ public class CircleService {
     @Autowired
     TimeService timeService;
 
+    SillyNameGenerator sillyNameGenerator;
+
     @Autowired
     private MapperFactory mapperFactory;
 
@@ -43,16 +48,17 @@ public class CircleService {
     private DtoEntityMapper<CircleMemberDto, CircleMemberEntity> circleMemberMapper;
 
     @PostConstruct
-    private void init() {
+    private void init() throws IOException, URISyntaxException {
         circleMapper = mapperFactory.createDtoEntityMapper(CircleDto.class, CircleEntity.class);
         circleMemberMapper = mapperFactory.createDtoEntityMapper(CircleMemberDto.class, CircleMemberEntity.class);
+        sillyNameGenerator = new SillyNameGenerator();
     }
 
 
     public CircleDto createNewAdhocCircle(UUID organizationId, UUID memberId, String problemStatement) {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
-        circleEntity.setCircleName("funnyname");
+        circleEntity.setCircleName(sillyNameGenerator.random());
 
         circleRepository.save(circleEntity);
 
