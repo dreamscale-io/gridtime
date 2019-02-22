@@ -11,3 +11,12 @@ databaseChangeLog:
 
   - include:
         file: db/v002/circle/create_circle_snippet.sql
+
+  - include:
+        file: db/v002/circle/create_circle_feed.sql
+
+  - include:
+        file: db/v002/circle/drop_circle_snippet.sql
+
+  - include:
+        file: db/v002/circle/create_member_name_view.sql

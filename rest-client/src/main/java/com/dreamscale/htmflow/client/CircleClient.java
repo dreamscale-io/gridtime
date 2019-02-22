@@ -1,11 +1,10 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.circle.ChatMessageInputDto;
 import com.dreamscale.htmflow.api.circle.CircleDto;
-import com.dreamscale.htmflow.api.circle.CircleSessionInputDto;
-import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.htmflow.api.status.WtfStatusInputDto;
-import com.dreamscale.htmflow.api.status.XPSummaryDto;
+import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto;
+import com.dreamscale.htmflow.api.circle.FeedMessageDto;
 import feign.Headers;
 import feign.RequestLine;
 
@@ -16,6 +15,11 @@ import feign.RequestLine;
 public interface CircleClient {
 
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH )
-    CircleDto createNewAdhocWTFCircle(CircleSessionInputDto circleSessionInputDto);
+    CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
+
+
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.CHAT_PATH)
+    FeedMessageDto postChatMessageToCircleFeed(ChatMessageInputDto chatMessageInputDto);
+
 
 }

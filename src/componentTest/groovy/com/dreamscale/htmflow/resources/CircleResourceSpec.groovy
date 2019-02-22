@@ -1,19 +1,13 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.circle.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
-import com.dreamscale.htmflow.api.circle.CircleSessionInputDto
-import com.dreamscale.htmflow.api.project.ProjectDto
-import com.dreamscale.htmflow.api.project.TaskDto
-import com.dreamscale.htmflow.api.project.TaskInputDto
+import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
+import com.dreamscale.htmflow.api.circle.FeedMessageDto
+import com.dreamscale.htmflow.api.circle.MessageType
 import com.dreamscale.htmflow.client.CircleClient
-import com.dreamscale.htmflow.client.OrganizationClient
-import com.dreamscale.htmflow.client.ProjectClient
 import com.dreamscale.htmflow.core.domain.*
-import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto
-import com.dreamscale.htmflow.core.service.JiraService
-import org.dreamscale.exception.BadRequestException
-import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -36,7 +30,7 @@ class CircleResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
         testUser.setId(member.getMasterAccountId())
 
-        CircleSessionInputDto circleSessionInputDto = new CircleSessionInputDto();
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
@@ -52,5 +46,31 @@ class CircleResourceSpec extends Specification {
 
     }
 
+    def "should post a chat message to circle feed"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
+        chatMessageInputDto.setChatMessage("Here's a chat message")
+        chatMessageInputDto.setCircleId(circle.id)
+
+        when:
+        FeedMessageDto feedMessageDto = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
+
+        then:
+        assert feedMessageDto != null
+        assert feedMessageDto.getMessageType() == MessageType.CHAT
+        assert feedMessageDto.getMessage() == "Here's a chat message"
+
+        assert feedMessageDto.getCircleMemberDto() != null
+    }
 
 }

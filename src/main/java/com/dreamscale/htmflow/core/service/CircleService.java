@@ -1,10 +1,6 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.api.circle.CircleDto;
-import com.dreamscale.htmflow.api.circle.CircleMemberDto;
-import com.dreamscale.htmflow.api.circle.SnippetType;
-import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.htmflow.api.status.WtfStatusInputDto;
+import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
@@ -19,8 +15,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.*;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -34,7 +28,10 @@ public class CircleService {
     CircleMemberRepository circleMemberRepository;
 
     @Autowired
-    CircleSnippetRepository circleSnippetRepository;
+    CircleFeedRepository circleFeedRepository;
+
+    @Autowired
+    MemberNameRepository memberNameRepository;
 
     @Autowired
     TimeService timeService;
@@ -46,11 +43,14 @@ public class CircleService {
 
     private DtoEntityMapper<CircleDto, CircleEntity> circleMapper;
     private DtoEntityMapper<CircleMemberDto, CircleMemberEntity> circleMemberMapper;
+    private DtoEntityMapper<FeedMessageDto, CircleFeedEntity> feedMessageMapper;
 
     @PostConstruct
     private void init() throws IOException, URISyntaxException {
         circleMapper = mapperFactory.createDtoEntityMapper(CircleDto.class, CircleEntity.class);
         circleMemberMapper = mapperFactory.createDtoEntityMapper(CircleMemberDto.class, CircleMemberEntity.class);
+        feedMessageMapper = mapperFactory.createDtoEntityMapper(FeedMessageDto.class, CircleFeedEntity.class);
+
         sillyNameGenerator = new SillyNameGenerator();
     }
 
@@ -70,23 +70,35 @@ public class CircleService {
 
         circleMemberRepository.save(circleMemberEntity);
 
-        CircleSnippetEntity circleSnippetEntity = new CircleSnippetEntity();
-        circleSnippetEntity.setId(UUID.randomUUID());
-        circleSnippetEntity.setCircleId(circleEntity.getId());
-        circleSnippetEntity.setSnippetType(SnippetType.PROBLEM_STATEMENT);
-        circleSnippetEntity.setMetadataField("problem_statement", problemStatement);
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setCircleId(circleEntity.getId());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setMessageType(MessageType.PROBLEM_STATEMENT);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, problemStatement);
 
-        circleSnippetRepository.save(circleSnippetEntity);
+        circleFeedRepository.save(circleFeedEntity);
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
-        CircleMemberDto circleMember = circleMemberMapper.toApi(circleMemberEntity);
 
         List<CircleMemberDto> memberDtos = new ArrayList<>();
-        memberDtos.add(circleMember);
+        memberDtos.add(createCircleMember(memberId));
 
         circleDto.setMembers(memberDtos);
 
         return circleDto;
+    }
+
+    private CircleMemberDto createCircleMember(UUID memberId) {
+        MemberNameEntity memberNameEntity = memberNameRepository.findOne(memberId);
+        CircleMemberDto circleMemberDto = new CircleMemberDto();
+        circleMemberDto.setMemberId(memberId);
+
+        if (memberNameEntity != null) {
+            circleMemberDto.setFullName(memberNameEntity.getFullName());
+        }
+
+        return circleMemberDto;
     }
 
     private void configurePublicPrivateKeyPairs(CircleEntity circleEntity) {
@@ -111,5 +123,25 @@ public class CircleService {
             log.error("Unable to generate public/private keypairs", ex);
             throw new InternalServerException(ValidationErrorCodes.FAILED_PUBLICKEY_GENERATION, "Unable to generate public/private keypairs");
         }
+    }
+
+    public FeedMessageDto postChatMessageToCircleFeed(UUID organizationId, UUID memberId, ChatMessageInputDto chatMessageInputDto) {
+
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setTimePosition(timeService.now());
+
+        circleFeedEntity.setCircleId(chatMessageInputDto.getCircleId());
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, chatMessageInputDto.getChatMessage());
+        circleFeedEntity.setMessageType(MessageType.CHAT);
+
+        circleFeedRepository.save(circleFeedEntity);
+
+        FeedMessageDto feedMessageDto = feedMessageMapper.toApi(circleFeedEntity);
+        feedMessageDto.setMessage(circleFeedEntity.getMetadataValue(CircleFeedEntity.MESSAGE_FIELD));
+
+        feedMessageDto.setCircleMemberDto(createCircleMember(memberId));
+        return feedMessageDto;
     }
 }

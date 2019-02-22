@@ -1,15 +1,15 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
+import com.dreamscale.htmflow.api.circle.FeedMessageDto;
+import com.dreamscale.htmflow.api.circle.ChatMessageInputDto;
 import com.dreamscale.htmflow.api.circle.CircleDto;
-import com.dreamscale.htmflow.api.circle.CircleSessionInputDto;
-import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
+import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.CircleService;
 import com.dreamscale.htmflow.core.service.OrganizationService;
 import com.dreamscale.htmflow.core.service.WTFService;
-import com.dreamscale.htmflow.core.service.XPService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,20 +33,38 @@ public class CircleResource {
      * Creates a new adhoc circle for troubleshooting the WTF, and "pulls the andon cord" for the team member,
      * updating the work status, for all team members to see.  The team member, will automatically be added
      * to the circle
-     * @param circleSessionInputDto CircleSessionInputDto
+     * @param circleSessionInputDto CreateWTFCircleInputDto
      * @return CircleDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH)
-    public CircleDto createNewAdhocCircle(@RequestBody CircleSessionInputDto circleSessionInputDto) {
+    public CircleDto createNewWTFCircle(@RequestBody CreateWTFCircleInputDto circleSessionInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("createNewAdhocCircle, user={}", context.getMasterAccountId());
+        log.info("createNewWTFCircle, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         wtfService.pushWTFStatus(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
 
         return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
+    }
+
+
+    /**
+     * Posts a new chat message to the circle's feed
+     * @param chatMessageInputDto CreateWTFCircleInputDto
+     * @return CircleDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + ResourcePaths.CHAT_PATH)
+    public FeedMessageDto postChatMessageToCircleFeed(@RequestBody ChatMessageInputDto chatMessageInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("postChatMessageToCircleFeed, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.postChatMessageToCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), chatMessageInputDto);
+
     }
 
 
