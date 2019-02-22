@@ -38,6 +38,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(ResourcePaths.JOURNAL_PATH + "/**").hasRole("USER")
                 .antMatchers(ResourcePaths.FLOW_PATH + "/**").hasRole("USER")
                 .antMatchers(ResourcePaths.ADMIN_PATH + "/**").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/webjars/springfox-swagger-ui/**").permitAll()
                 .antMatchers("/**").authenticated();
     }
 
