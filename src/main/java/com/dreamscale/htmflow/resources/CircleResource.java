@@ -1,10 +1,7 @@
 package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.circle.FeedMessageDto;
-import com.dreamscale.htmflow.api.circle.ChatMessageInputDto;
-import com.dreamscale.htmflow.api.circle.CircleDto;
-import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto;
+import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.CircleService;
@@ -14,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -67,6 +67,20 @@ public class CircleResource {
 
     }
 
+    /**
+     * Retrieve all the messages posted to the circle's feed
+     * @return List<FeedMessageDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.WTF_PATH + ResourcePaths.FEED_PATH)
+    public List<FeedMessageDto> getAllMessagesForCircleFeed(@RequestParam("circle_id") String circleId) {
+        RequestContext context = RequestContext.get();
+        log.info("getAllMessagesForCircleFeed, user={}", context.getMasterAccountId());
 
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.getAllMessagesForCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+
+    }
 
 }

@@ -4,14 +4,7 @@ import com.dreamscale.htmflow.api.activity.*;
 import com.dreamscale.htmflow.api.batch.*;
 import com.dreamscale.htmflow.api.event.RandomSnippetEventBuilder;
 import com.dreamscale.htmflow.api.journal.RandomIntentionInputDtoBuilder;
-import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository;
-import com.dreamscale.htmflow.core.domain.OrganizationRepository;
-import com.dreamscale.htmflow.core.domain.ProjectRepository;
-import com.dreamscale.htmflow.core.domain.RandomOrganizationEntityBuilder;
-import com.dreamscale.htmflow.core.domain.RandomOrganizationMemberEntityBuilder;
-import com.dreamscale.htmflow.core.domain.RandomProjectEntityBuilder;
-import com.dreamscale.htmflow.core.domain.RandomTaskEntityBuilder;
-import com.dreamscale.htmflow.core.domain.TaskRepository;
+import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraProjectDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraTaskDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraUserDtoBuilder;
@@ -28,12 +21,19 @@ public class CoreRandomBuilderSupport {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private MasterAccountRepository masterAccountRepository;
+
     public RandomProjectEntityBuilder projectEntity() {
         return new RandomProjectEntityBuilder(projectRepository);
     }
 
     public RandomOrganizationEntityBuilder organizationEntity() {
         return new RandomOrganizationEntityBuilder(organizationRepository);
+    }
+
+    public RandomMasterAccountEntityBuilder masterAccountEntity() {
+        return new RandomMasterAccountEntityBuilder(masterAccountRepository);
     }
 
     public RandomOrganizationMemberEntityBuilder memberEntity() {
