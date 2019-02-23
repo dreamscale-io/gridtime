@@ -30,7 +30,7 @@ class CircleResourceSpec extends Specification {
     TimeService mockTimeService
 
     def setup() {
-        //mockTimeService.now() >> LocalDateTime.now()
+        mockTimeService.now() >> LocalDateTime.now()
     }
 
     def "should create a circle"() {
@@ -54,6 +54,31 @@ class CircleResourceSpec extends Specification {
         assert circle.members != null
         assert circle.members.size() == 1
 
+    }
+
+    def "should close a circle"() {
+        given:
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        CircleInputDto circleInputDto = new CircleInputDto();
+        circleInputDto.setCircleId(circle.id);
+        when:
+
+        circleClient.closeCircle(circleInputDto);
+        List<FeedMessageDto> messages = circleClient.getAllMessagesForCircleFeed(circle.id.toString());
+
+        then:
+        assert messages != null
+        assert messages.size() == 2
+        assert messages.get(1).message == "Circle closed."
     }
 
     def "should post a chat message to circle feed"() {
@@ -95,16 +120,13 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        2 * mockTimeService.now() >> LocalDateTime.now().minusDays(3)
         CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
         chatMessageInputDto.setCircleId(circle.id)
 
-        1 * mockTimeService.now() >> LocalDateTime.now().minusDays(2)
         FeedMessageDto feedMessage1 = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
-        1 * mockTimeService.now() >> LocalDateTime.now().minusDays(1)
         FeedMessageDto feedMessage2 = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
 
         when:
@@ -113,8 +135,6 @@ class CircleResourceSpec extends Specification {
         then:
         assert feedMessages != null
         assert feedMessages.size() == 3
-
-        assert feedMessages.get(0).messageType == MessageType.PROBLEM_STATEMENT
 
         for (FeedMessageDto message : feedMessages) {
             assert message.timePosition != null

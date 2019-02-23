@@ -16,10 +16,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class WTFService {
-
-    @Autowired
-    WtfSessionRepository wtfSessionRepository;
+public class ActiveStatusService {
 
     @Autowired
     ActiveWorkStatusRepository activeWorkStatusRepository;
@@ -54,18 +51,12 @@ public class WTFService {
     private TeamMemberWorkStatusDto updateActiveStatus(UUID memberId, String resolution, String newStatus) {
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
-        if (activeWorkStatusEntity != null && activeWorkStatusEntity.getActiveSessionId() != null) {
-            WtfSessionEntity wtfSession = wtfSessionRepository.findOne(activeWorkStatusEntity.getActiveSessionId());
-
-            wtfSession.setEndTime(timeService.now());
-            wtfSession.setResolution(resolution);
-
-            wtfSessionRepository.save(wtfSession);
+        if (activeWorkStatusEntity != null && activeWorkStatusEntity.getActiveCircleId() != null) {
 
             activeWorkStatusEntity.setSpiritStatus(newStatus);
             activeWorkStatusEntity.setSpiritMessage(null);
-            activeWorkStatusEntity.setActiveSessionId(null);
-            activeWorkStatusEntity.setActiveSessionStart(null);
+            activeWorkStatusEntity.setActiveCircleId(null);
+            activeWorkStatusEntity.setActiveCircleStart(null);
 
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
@@ -75,17 +66,7 @@ public class WTFService {
     }
 
 
-    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, String problemDescription) {
-
-        WtfSessionEntity wtfSession = new WtfSessionEntity();
-
-        wtfSession.setId(UUID.randomUUID());
-        wtfSession.setOrganizationId(organizationId);
-        wtfSession.setMemberId(memberId);
-        wtfSession.setStartTime(timeService.now());
-        wtfSession.setProblemStatement(problemDescription);
-
-        wtfSessionRepository.save(wtfSession);
+    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, UUID circleId, String problemDescription) {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
@@ -95,8 +76,8 @@ public class WTFService {
                 problemStatus = "";
             }
 
-            activeWorkStatusEntity.setActiveSessionId(wtfSession.getId());
-            activeWorkStatusEntity.setActiveSessionStart(wtfSession.getStartTime());
+            activeWorkStatusEntity.setActiveCircleId(circleId);
+            activeWorkStatusEntity.setActiveCircleStart(timeService.now());
             activeWorkStatusEntity.setSpiritStatus("WTF?!");
             activeWorkStatusEntity.setSpiritMessage(problemStatus);
 

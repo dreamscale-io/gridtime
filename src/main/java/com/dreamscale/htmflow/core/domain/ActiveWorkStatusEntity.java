@@ -41,12 +41,12 @@ public class ActiveWorkStatusEntity {
     @Column(name = "spirit_message")
     private String spiritMessage;
 
-    @Column(name = "active_session_start")
-    private LocalDateTime activeSessionStart;
+    @Column(name = "active_circle_start")
+    private LocalDateTime activeCircleStart;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "active_session_id")
-    private UUID activeSessionId;
+    @Column(name = "active_circle_id")
+    private UUID activeCircleId;
 
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;

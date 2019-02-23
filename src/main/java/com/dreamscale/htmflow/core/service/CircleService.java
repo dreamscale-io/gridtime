@@ -1,7 +1,10 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.circle.*;
+import com.dreamscale.htmflow.api.event.EventType;
+import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.flow.FlowEventEntity;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -35,6 +38,9 @@ public class CircleService {
 
     @Autowired
     CircleFeedMessageRepository circleFeedWithMembersRepository;
+
+    @Autowired
+    ActiveStatusService activeStatusService;
 
     @Autowired
     TimeService timeService;
@@ -92,7 +98,26 @@ public class CircleService {
 
         circleDto.setMembers(memberDtos);
 
+        activeStatusService.pushWTFStatus(organizationId, memberId, circleDto.getId(), problemStatement);
+
         return circleDto;
+    }
+
+    public void closeCircle(UUID organizationId, UUID memberId, UUID circleId) {
+        CircleEntity circleEntity = circleRepository.findOne(circleId);
+
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setCircleId(circleEntity.getId());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setMessageType(MessageType.STATUS_UPDATE);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, "Circle closed.");
+        circleFeedEntity.setTimePosition(timeService.now());
+
+        circleFeedRepository.save(circleFeedEntity);
+
+        activeStatusService.resolveWTFWithYay(organizationId, memberId);
+
     }
 
     private CircleMemberDto createCircleMember(UUID memberId, String fullName) {
@@ -175,4 +200,33 @@ public class CircleService {
 
         return feedMessageDtos;
     }
+
+    public void saveSnippetEvent(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
+//        //I need the active circle,
+//
+//        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+//        circleFeedEntity.setId(UUID.randomUUID());
+//        circleFeedEntity.setMemberId(memberId);
+//        circleFeedEntity.setTimePosition(timeService.now());
+//
+//        circleFeedEntity.setCircleId(chatMessageInputDto.getCircleId());
+//        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, chatMessageInputDto.getChatMessage());
+//        circleFeedEntity.setMessageType(MessageType.CHAT);
+//
+//
+//
+//        FlowEventEntity entity = FlowEventEntity.builder()
+//                .eventType(EventType.SNIPPET)
+//                .memberId(memberEntity.getId())
+//                .timePosition(snippetEvent.getPosition())
+//                .build();
+//
+//        entity.setMetadataField("comment", snippetEvent.getComment());
+//        entity.setMetadataField("source", snippetEvent.getSource());
+//        entity.setMetadataField("snippet", snippetEvent.getSnippet());
+//
+//        flowEventRepository.save(entity);
+    }
+
+
 }

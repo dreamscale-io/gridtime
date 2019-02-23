@@ -25,7 +25,7 @@ public class TeamService {
     private XPService xpService;
 
     @Autowired
-    private WTFService wtfService;
+    private ActiveStatusService wtfService;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;

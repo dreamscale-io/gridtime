@@ -2,11 +2,12 @@ package com.dreamscale.htmflow.resources;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.circle.*;
+import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.CircleService;
 import com.dreamscale.htmflow.core.service.OrganizationService;
-import com.dreamscale.htmflow.core.service.WTFService;
+import com.dreamscale.htmflow.core.service.ActiveStatusService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,8 +21,6 @@ import java.util.UUID;
 @RequestMapping(path = ResourcePaths.CIRCLE_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class CircleResource {
 
-    @Autowired
-    WTFService wtfService;
 
     @Autowired
     OrganizationService organizationService;
@@ -44,11 +43,28 @@ public class CircleResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        wtfService.pushWTFStatus(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
+        CircleDto circleDto = circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
 
-        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
+        return circleDto;
+
     }
 
+    /**
+     * Closes an existing circle, and resolves with YAY!
+     * @param circleInputDto CircleInputDto
+     * @return CircleDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + ResourcePaths.RESOLVE_PATH)
+    public void closeWTFCircle(@RequestBody CircleInputDto circleInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("closeWTFCircle, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        circleService.closeCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleInputDto.getCircleId());
+
+    }
 
     /**
      * Posts a new chat message to the circle's feed
@@ -65,6 +81,17 @@ public class CircleResource {
 
         return circleService.postChatMessageToCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), chatMessageInputDto);
 
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + ResourcePaths.SNIPPET_PATH)
+    public void saveFlowSnippet(@RequestBody NewSnippetEvent snippet) {
+        RequestContext context = RequestContext.get();
+        log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        circleService.saveSnippetEvent(memberEntity.getOrganizationId(), memberEntity.getId(),  snippet);
     }
 
     /**

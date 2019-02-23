@@ -17,13 +17,12 @@ public interface CircleClient {
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH )
     CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 
-
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.CHAT_PATH)
     FeedMessageDto postChatMessageToCircleFeed(ChatMessageInputDto chatMessageInputDto);
 
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.FEED_PATH+"?circle_id={circleId}")
     List<FeedMessageDto> getAllMessagesForCircleFeed(@Param("circleId") String circleId );
 
-
-
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.RESOLVE_PATH)
+    void closeCircle(CircleInputDto circleInputDto);
 }
