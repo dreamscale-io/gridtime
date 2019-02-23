@@ -7,7 +7,6 @@ import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.CircleService;
 import com.dreamscale.htmflow.core.service.OrganizationService;
-import com.dreamscale.htmflow.core.service.ActiveStatusService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,11 +49,26 @@ public class CircleResource {
     }
 
     /**
+     * Retrieves all open circles
+     * @return CircleDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping()
+    public List<CircleDto> getAllOpenCircles() {
+        RequestContext context = RequestContext.get();
+        log.info("createNewWTFCircle, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.getAllOpenCircles(memberEntity.getOrganizationId(), memberEntity.getId());
+    }
+
+    /**
      * Closes an existing circle, and resolves with YAY!
      * @return CircleDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{id}"  + ResourcePaths.RESOLVE_PATH)
+    @PostMapping("/{id}"  + ResourcePaths.CLOSE_PATH)
     public void closeWTFCircle(@PathVariable("id") String circleId) {
         RequestContext context = RequestContext.get();
         log.info("closeWTFCircle, user={}", context.getMasterAccountId());

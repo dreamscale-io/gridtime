@@ -18,9 +18,17 @@ public class CircleEntity {
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
+
     private String circleName;
 
     private String publicKey;
     private String privateKey;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 
 }

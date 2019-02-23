@@ -56,6 +56,27 @@ class CircleResourceSpec extends Specification {
 
     }
 
+    def "should return all open circles"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle2 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        when:
+        List<CircleDto> circles = circleClient.getAllOpenCircles()
+
+        then:
+        assert circles != null
+        assert circles.size() == 2
+    }
+
     def "should close a circle"() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()

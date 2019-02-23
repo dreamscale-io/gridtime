@@ -65,11 +65,18 @@ public class CircleService {
         sillyNameGenerator = new SillyNameGenerator();
     }
 
+    public List<CircleDto> getAllOpenCircles(UUID organizationId, UUID memberId) {
+        List<CircleEntity> circleEntities = circleRepository.findAllOpenCirclesForOrganization(organizationId);
+        return circleMapper.toApiList(circleEntities);
+    }
 
     public CircleDto createNewAdhocCircle(UUID organizationId, UUID memberId, String problemStatement) {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
         circleEntity.setCircleName(sillyNameGenerator.random());
+        circleEntity.setStartTime(timeService.now());
+        circleEntity.setOrganizationId(organizationId);
+
         configurePublicPrivateKeyPairs(circleEntity);
 
         circleRepository.save(circleEntity);
@@ -105,6 +112,9 @@ public class CircleService {
 
     public void closeCircle(UUID organizationId, UUID memberId, UUID circleId) {
         CircleEntity circleEntity = circleRepository.findOne(circleId);
+        circleEntity.setEndTime(timeService.now());
+
+        circleRepository.save(circleEntity);
 
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
@@ -184,6 +194,8 @@ public class CircleService {
         return feedMessageDto;
     }
 
+
+
     public List<FeedMessageDto> getAllMessagesForCircleFeed(UUID organizationId, UUID memberId, UUID circleId) {
 
         List<CircleFeedMessageEntity> messageEntities = circleFeedWithMembersRepository.findByCircleIdOrderByTimePosition(circleId);
@@ -227,6 +239,7 @@ public class CircleService {
 //
 //        flowEventRepository.save(entity);
     }
+
 
 
 }

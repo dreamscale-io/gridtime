@@ -61,7 +61,7 @@ public class ResourcePaths {
     public static final String CIRCLE_PATH = "/circle";
     public static final String ACTIVE_PATH = "/active";
     public static final String WTF_PATH = "/wtf";
-    public static final String RESOLVE_PATH = "/resolve";
+    public static final String CLOSE_PATH = "/close";
     public static final String CHAT_PATH = "/chat";
     public static final String FEED_PATH = "/feed";
 

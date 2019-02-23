@@ -14,6 +14,10 @@ import java.util.List;
 })
 public interface CircleClient {
 
+
+    @RequestLine("GET " + ResourcePaths.CIRCLE_PATH )
+    List<CircleDto> getAllOpenCircles();
+
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH )
     CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 
@@ -23,6 +27,6 @@ public interface CircleClient {
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + "/{id}" + ResourcePaths.FEED_PATH)
     List<FeedMessageDto> getAllMessagesForCircleFeed(@Param("id") String circleId );
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.RESOLVE_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.CLOSE_PATH)
     void closeCircle(@Param("id") String circleId);
 }
