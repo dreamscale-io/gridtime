@@ -164,15 +164,15 @@ public class CircleService {
         }
     }
 
-    public FeedMessageDto postChatMessageToCircleFeed(UUID organizationId, UUID memberId, ChatMessageInputDto chatMessageInputDto) {
+    public FeedMessageDto postChatMessageToCircleFeed(UUID organizationId, UUID memberId, UUID circleId, String chatMessage) {
 
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
         circleFeedEntity.setMemberId(memberId);
         circleFeedEntity.setTimePosition(timeService.now());
 
-        circleFeedEntity.setCircleId(chatMessageInputDto.getCircleId());
-        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, chatMessageInputDto.getChatMessage());
+        circleFeedEntity.setCircleId(circleId);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, chatMessage);
         circleFeedEntity.setMessageType(MessageType.CHAT);
 
         circleFeedRepository.save(circleFeedEntity);

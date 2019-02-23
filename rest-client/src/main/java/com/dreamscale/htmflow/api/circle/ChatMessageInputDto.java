@@ -13,6 +13,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ChatMessageInputDto {
 
-    UUID circleId;
     String chatMessage;
 }

@@ -14,15 +14,15 @@ import java.util.List;
 })
 public interface CircleClient {
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH )
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH )
     CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.CHAT_PATH)
-    FeedMessageDto postChatMessageToCircleFeed(ChatMessageInputDto chatMessageInputDto);
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.CHAT_PATH)
+    FeedMessageDto postChatMessageToCircleFeed(@Param("id") String circleId, ChatMessageInputDto chatMessageInputDto);
 
-    @RequestLine("GET " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.FEED_PATH+"?circle_id={circleId}")
-    List<FeedMessageDto> getAllMessagesForCircleFeed(@Param("circleId") String circleId );
+    @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + "/{id}" + ResourcePaths.FEED_PATH)
+    List<FeedMessageDto> getAllMessagesForCircleFeed(@Param("id") String circleId );
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH +  ResourcePaths.WTF_PATH + ResourcePaths.RESOLVE_PATH)
-    void closeCircle(CircleInputDto circleInputDto);
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.RESOLVE_PATH)
+    void closeCircle(@Param("id") String circleId);
 }

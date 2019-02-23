@@ -68,11 +68,9 @@ class CircleResourceSpec extends Specification {
 
         CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
-        CircleInputDto circleInputDto = new CircleInputDto();
-        circleInputDto.setCircleId(circle.id);
         when:
 
-        circleClient.closeCircle(circleInputDto);
+        circleClient.closeCircle(circle.id.toString());
         List<FeedMessageDto> messages = circleClient.getAllMessagesForCircleFeed(circle.id.toString());
 
         then:
@@ -95,10 +93,9 @@ class CircleResourceSpec extends Specification {
 
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
-        chatMessageInputDto.setCircleId(circle.id)
 
         when:
-        FeedMessageDto feedMessageDto = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
+        FeedMessageDto feedMessageDto = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         then:
         assert feedMessageDto != null
@@ -124,10 +121,9 @@ class CircleResourceSpec extends Specification {
 
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
-        chatMessageInputDto.setCircleId(circle.id)
 
-        FeedMessageDto feedMessage1 = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
-        FeedMessageDto feedMessage2 = circleClient.postChatMessageToCircleFeed(chatMessageInputDto)
+        FeedMessageDto feedMessage1 = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        FeedMessageDto feedMessage2 = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         when:
         List<FeedMessageDto> feedMessages = circleClient.getAllMessagesForCircleFeed(circle.id.toString())
