@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.InternalServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -380,5 +381,16 @@ public class CircleService {
     }
 
 
+    public CircleKeyDto retrieveKey(UUID organizationId, UUID memberId, UUID circleId) {
+        CircleKeyDto circleKeyDto = null;
+        CircleEntity circleEntity = circleRepository.findByOwnerMemberIdAndId(memberId, circleId);
+        if (circleEntity != null) {
+            circleKeyDto = new CircleKeyDto();
+            circleKeyDto.setPrivateKey(circleEntity.getPrivateKey());
+        } else {
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCLE_KEY, "Unable to retrieve circle key");
+        }
 
+        return circleKeyDto;
+    }
 }

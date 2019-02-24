@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.circle.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
 import com.dreamscale.htmflow.api.circle.CircleInputDto
+import com.dreamscale.htmflow.api.circle.CircleKeyDto
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.circle.FeedMessageDto
 import com.dreamscale.htmflow.api.circle.MessageType
@@ -98,6 +99,27 @@ class CircleResourceSpec extends Specification {
         assert activeCircle != null
         assert activeCircle.id == circle1.id
     }
+
+    def "should return circle key"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        when:
+        CircleKeyDto circleKeyDto = circleClient.getCircleKey(circle1.id.toString())
+
+        then:
+        assert circleKeyDto != null
+        assert circleKeyDto.privateKey != null
+    }
+
 
     def "should return all shelved do it later circles"() {
         given:

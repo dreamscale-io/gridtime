@@ -24,4 +24,6 @@ public interface CircleRepository extends CrudRepository<CircleEntity, UUID> {
             "and c.on_shelf = true " +
             "order by c.start_time ")
     List<CircleEntity> findAllDoItLaterCircles(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
+
+    CircleEntity findByOwnerMemberIdAndId(UUID ownerMemberId, UUID id);
 }

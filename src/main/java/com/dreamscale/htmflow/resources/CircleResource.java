@@ -69,7 +69,7 @@ public class CircleResource {
     @GetMapping()
     public List<CircleDto> getAllOpenCircles() {
         RequestContext context = RequestContext.get();
-        log.info("createNewWTFCircle, user={}", context.getMasterAccountId());
+        log.info("getAllOpenCircles, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
@@ -92,7 +92,22 @@ public class CircleResource {
     }
 
     /**
-     * Closes an existing circle, and resolves with YAY!
+     * Retrieves the encryption key for the circle's scrapbook file store
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{id}"  + ResourcePaths.KEY_PATH)
+    public CircleKeyDto getCircleKey(@PathVariable("id") String circleId) {
+        RequestContext context = RequestContext.get();
+        log.info("getCircleKey, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.retrieveKey(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+    }
+
+
+    /**
+     * Closes an existing circle, and resolves the member status with YAY!
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.CLOSE_PATH)
@@ -121,7 +136,7 @@ public class CircleResource {
     }
 
     /**
-     * Resume an existing circle, by adding to the do it later queue
+     * Resume an existing shelved circle on the do it later queue
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.RESUME_PATH)
@@ -160,7 +175,7 @@ public class CircleResource {
     @PostMapping("/{id}"  + ResourcePaths.FEED_PATH + ResourcePaths.SCREENSHOT_PATH)
     public FeedMessageDto postScreenshotReferenceToCircleFeed(@PathVariable("id") String circleId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("postChatMessageToCircleFeed, user={}", context.getMasterAccountId());
+        log.info("postScreenshotReferenceToCircleFeed, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
@@ -169,11 +184,17 @@ public class CircleResource {
     }
 
 
+    /**
+     * Posts a code snippet to the active circle feed for the member, intended to be used from the IDE plugin
+     * where the context of the active circle is not known
+     * @param snippet NewSnippetEvent
+     * @return FeedMessageDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ACTIVE_PATH + ResourcePaths.FEED_PATH + ResourcePaths.SNIPPET_PATH)
     public FeedMessageDto postSnippetToActiveCircleFeed(@RequestBody NewSnippetEvent snippet) {
         RequestContext context = RequestContext.get();
-        log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
+        log.info("postSnippetToActiveCircleFeed, user={}, snippet={}", context.getMasterAccountId(), snippet);
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 

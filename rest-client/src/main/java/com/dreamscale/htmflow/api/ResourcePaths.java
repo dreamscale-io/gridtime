@@ -59,6 +59,7 @@ public class ResourcePaths {
     public static final String XP_PATH = "/xp";
 
     public static final String CIRCLE_PATH = "/circle";
+    public static final String KEY_PATH = "/key";
     public static final String TRANSITION_PATH = "/transition";
     public static final String DO_IT_LATER_PATH = "/doitlater";
     public static final String CLOSE_PATH = "/close";
