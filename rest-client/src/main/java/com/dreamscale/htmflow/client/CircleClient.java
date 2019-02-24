@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.circle.*;
+import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -18,15 +19,22 @@ public interface CircleClient {
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH )
     List<CircleDto> getAllOpenCircles();
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH )
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH)
     CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.CHAT_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.FEED_PATH + ResourcePaths.CHAT_PATH)
     FeedMessageDto postChatMessageToCircleFeed(@Param("id") String circleId, ChatMessageInputDto chatMessageInputDto);
+
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.FEED_PATH + ResourcePaths.SCREENSHOT_PATH)
+    FeedMessageDto postScreenshotReferenceToCircleFeed(@Param("id") String circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto);
+
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + ResourcePaths.ACTIVE_PATH + ResourcePaths.FEED_PATH + ResourcePaths.SNIPPET_PATH)
+    FeedMessageDto postSnippetToActiveCircleFeed(NewSnippetEvent newSnippetEvent);
+
 
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + "/{id}" + ResourcePaths.FEED_PATH)
     List<FeedMessageDto> getAllMessagesForCircleFeed(@Param("id") String circleId );
 
-    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.CLOSE_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.CLOSE_PATH)
     void closeCircle(@Param("id") String circleId);
 }

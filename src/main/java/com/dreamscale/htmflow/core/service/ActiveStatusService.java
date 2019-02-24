@@ -37,6 +37,15 @@ public class ActiveStatusService {
         teamMemberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberWorkStatusDto.class, TeamMemberWorkStatusEntity.class);
     }
 
+    public UUID getActiveCircleId(UUID organizationId, UUID memberId) {
+        ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
+
+        UUID activeCircle = null;
+        if (activeWorkStatusEntity != null) {
+            activeCircle = activeWorkStatusEntity.getActiveCircleId();
+        }
+        return activeCircle;
+    }
 
     public TeamMemberWorkStatusDto resolveWTFWithYay(UUID organizationId, UUID memberId) {
 
@@ -70,19 +79,20 @@ public class ActiveStatusService {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
-        if (activeWorkStatusEntity != null) {
-            String problemStatus = problemDescription;
-            if (problemStatus == null) {
-                problemStatus = "";
-            }
-
-            activeWorkStatusEntity.setActiveCircleId(circleId);
-            activeWorkStatusEntity.setActiveCircleStart(timeService.now());
-            activeWorkStatusEntity.setSpiritStatus("WTF?!");
-            activeWorkStatusEntity.setSpiritMessage(problemStatus);
-
-            activeWorkStatusRepository.save(activeWorkStatusEntity);
+        if (activeWorkStatusEntity == null) {
+            activeWorkStatusEntity = new ActiveWorkStatusEntity();
+            activeWorkStatusEntity.setId(UUID.randomUUID());
+            activeWorkStatusEntity.setOrganizationId(organizationId);
+            activeWorkStatusEntity.setMemberId(memberId);
         }
+
+        activeWorkStatusEntity.setLastUpdate(timeService.now());
+        activeWorkStatusEntity.setActiveCircleId(circleId);
+        activeWorkStatusEntity.setActiveCircleStart(timeService.now());
+        activeWorkStatusEntity.setSpiritStatus("WTF?!");
+        activeWorkStatusEntity.setSpiritMessage(problemDescription);
+
+        activeWorkStatusRepository.save(activeWorkStatusEntity);
 
         TeamMemberWorkStatusEntity myStatusEntity = teamMemberWorkStatusRepository.findOne(memberId);
         TeamMemberWorkStatusDto myStatusDto = teamMemberStatusMapper.toApi(myStatusEntity);

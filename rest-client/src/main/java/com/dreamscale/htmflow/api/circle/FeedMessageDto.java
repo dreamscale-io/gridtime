@@ -19,7 +19,13 @@ public class FeedMessageDto {
     private CircleMemberDto circleMemberDto;
 
     private MessageType messageType;
+
+    //optional fields
     private String message;
+    private String fileName;
+    private String filePath;
+    private String snippetSource;
+    private String snippet;
 
 
 }

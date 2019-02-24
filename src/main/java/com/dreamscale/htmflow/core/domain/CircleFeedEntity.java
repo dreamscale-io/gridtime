@@ -20,6 +20,14 @@ public class CircleFeedEntity {
 
     public static String MESSAGE_FIELD = "message";
 
+    public static String FILE_NAME_FIELD = "name";
+    public static String FILEPATH_FIELD = "filePath";
+
+    public static String SNIPPET_SOURCE_FIELD = "snippetSource";
+    public static String SNIPPET_FIELD = "snippet";
+
+
+
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;

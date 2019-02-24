@@ -1,10 +1,8 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.circle.*;
-import com.dreamscale.htmflow.api.event.EventType;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.domain.flow.FlowEventEntity;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -194,6 +192,64 @@ public class CircleService {
         return feedMessageDto;
     }
 
+    public FeedMessageDto postScreenshotReferenceToCircleFeed(UUID organizationId, UUID memberId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setTimePosition(timeService.now());
+
+        circleFeedEntity.setCircleId(circleId);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, "Added screenshot for "+screenshotReferenceInputDto.getFileName());
+        circleFeedEntity.setMetadataField(CircleFeedEntity.FILE_NAME_FIELD, screenshotReferenceInputDto.getFileName());
+        circleFeedEntity.setMetadataField(CircleFeedEntity.FILEPATH_FIELD, screenshotReferenceInputDto.getFilePath());
+        circleFeedEntity.setMessageType(MessageType.SCREENSHOT);
+
+        circleFeedRepository.save(circleFeedEntity);
+
+        FeedMessageDto feedMessageDto = feedMessageMapper.toApi(circleFeedEntity);
+
+        feedMessageDto.setMessage(circleFeedEntity.getMetadataValue(CircleFeedEntity.MESSAGE_FIELD));
+        feedMessageDto.setFileName(circleFeedEntity.getMetadataValue(CircleFeedEntity.FILE_NAME_FIELD));
+        feedMessageDto.setFilePath(circleFeedEntity.getMetadataValue(CircleFeedEntity.FILEPATH_FIELD));
+
+        feedMessageDto.setCircleMemberDto(createCircleMember(memberId));
+        return feedMessageDto;
+
+    }
+
+    public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
+
+        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, memberId);
+
+        FeedMessageDto feedMessageDto = null;
+
+        if (activeCircleId != null) {
+
+            CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+            circleFeedEntity.setId(UUID.randomUUID());
+            circleFeedEntity.setMemberId(memberId);
+            circleFeedEntity.setTimePosition(timeService.now());
+
+            circleFeedEntity.setCircleId(activeCircleId);
+            circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, "Added snippet from "+snippetEvent.getSource());
+            circleFeedEntity.setMetadataField(CircleFeedEntity.SNIPPET_SOURCE_FIELD, snippetEvent.getSource());
+            circleFeedEntity.setMetadataField(CircleFeedEntity.SNIPPET_FIELD, snippetEvent.getSnippet());
+            circleFeedEntity.setMessageType(MessageType.SNIPPET);
+
+            circleFeedRepository.save(circleFeedEntity);
+
+            feedMessageDto = feedMessageMapper.toApi(circleFeedEntity);
+
+            feedMessageDto.setMessage(circleFeedEntity.getMetadataValue(CircleFeedEntity.MESSAGE_FIELD));
+            feedMessageDto.setSnippetSource(circleFeedEntity.getMetadataValue(CircleFeedEntity.SNIPPET_SOURCE_FIELD));
+            feedMessageDto.setSnippet(circleFeedEntity.getMetadataValue(CircleFeedEntity.SNIPPET_FIELD));
+
+            feedMessageDto.setCircleMemberDto(createCircleMember(memberId));
+        }
+
+        return feedMessageDto;
+
+    }
 
 
     public List<FeedMessageDto> getAllMessagesForCircleFeed(UUID organizationId, UUID memberId, UUID circleId) {
@@ -213,32 +269,6 @@ public class CircleService {
         return feedMessageDtos;
     }
 
-    public void saveSnippetEvent(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
-//        //I need the active circle,
-//
-//        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
-//        circleFeedEntity.setId(UUID.randomUUID());
-//        circleFeedEntity.setMemberId(memberId);
-//        circleFeedEntity.setTimePosition(timeService.now());
-//
-//        circleFeedEntity.setCircleId(chatMessageInputDto.getCircleId());
-//        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, chatMessageInputDto.getChatMessage());
-//        circleFeedEntity.setMessageType(MessageType.CHAT);
-//
-//
-//
-//        FlowEventEntity entity = FlowEventEntity.builder()
-//                .eventType(EventType.SNIPPET)
-//                .memberId(memberEntity.getId())
-//                .timePosition(snippetEvent.getPosition())
-//                .build();
-//
-//        entity.setMetadataField("comment", snippetEvent.getComment());
-//        entity.setMetadataField("source", snippetEvent.getSource());
-//        entity.setMetadataField("snippet", snippetEvent.getSnippet());
-//
-//        flowEventRepository.save(entity);
-    }
 
 
 

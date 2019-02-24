@@ -7,6 +7,8 @@ import com.dreamscale.htmflow.api.circle.CircleInputDto
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.circle.FeedMessageDto
 import com.dreamscale.htmflow.api.circle.MessageType
+import com.dreamscale.htmflow.api.circle.ScreenshotReferenceInputDto
+import com.dreamscale.htmflow.api.event.NewSnippetEvent
 import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.core.domain.*
 import com.dreamscale.htmflow.core.service.TimeService
@@ -123,6 +125,62 @@ class CircleResourceSpec extends Specification {
         assert feedMessageDto.getMessageType() == MessageType.CHAT
         assert feedMessageDto.getMessage() == "Here's a chat message"
 
+        assert feedMessageDto.getCircleMemberDto() != null
+    }
+
+    def "should post a screenshot to circle feed"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
+        screenshotReferenceInputDto.setFileName("file name");
+        screenshotReferenceInputDto.setFilePath("/some/path/to/file")
+
+        when:
+        FeedMessageDto feedMessageDto = circleClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
+
+        then:
+        assert feedMessageDto != null
+        assert feedMessageDto.getMessageType() == MessageType.SCREENSHOT
+        assert feedMessageDto.getMessage() != null
+        assert feedMessageDto.getFilePath() != null
+        assert feedMessageDto.getFileName() != null
+        assert feedMessageDto.getCircleMemberDto() != null
+    }
+
+    def "should post a snippet to active circle feed"() {
+        given:
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        NewSnippetEvent newSnippetEvent = new NewSnippetEvent();
+        newSnippetEvent.setSnippet("{some code}")
+        newSnippetEvent.setSource("Source.java")
+
+        when:
+        FeedMessageDto feedMessageDto = circleClient.postSnippetToActiveCircleFeed(newSnippetEvent)
+
+        then:
+        assert feedMessageDto != null
+        assert feedMessageDto.getMessageType() == MessageType.SNIPPET
+        assert feedMessageDto.getMessage() != null
+        assert feedMessageDto.getSnippetSource() != null
+        assert feedMessageDto.getSnippet() != null
         assert feedMessageDto.getCircleMemberDto() != null
     }
 

@@ -28,7 +28,7 @@ public class CircleResource {
     CircleService circleService;
 
     /**
-     * Creates a new adhoc circle for troubleshooting the WTF, and "pulls the andon cord" for the team member,
+     * Creates a new adhoc circle for troubleshooting a WTF, and "pulls the andon cord" for the team member,
      * updating the work status, for all team members to see.  The team member, will automatically be added
      * to the circle
      * @param circleSessionInputDto CreateWTFCircleInputDto
@@ -42,15 +42,13 @@ public class CircleResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        CircleDto circleDto = circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
-
-        return circleDto;
+        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
 
     }
 
     /**
-     * Retrieves all open circles
-     * @return CircleDto
+     * Retrieves all open circles across all users in the organization
+     * @return List<CircleDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping()
@@ -65,10 +63,9 @@ public class CircleResource {
 
     /**
      * Closes an existing circle, and resolves with YAY!
-     * @return CircleDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{id}"  + ResourcePaths.CLOSE_PATH)
+    @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.CLOSE_PATH)
     public void closeWTFCircle(@PathVariable("id") String circleId) {
         RequestContext context = RequestContext.get();
         log.info("closeWTFCircle, user={}", context.getMasterAccountId());
@@ -81,11 +78,11 @@ public class CircleResource {
 
     /**
      * Posts a new chat message to the circle's feed
-     * @param chatMessageInputDto CreateWTFCircleInputDto
-     * @return CircleDto
+     * @param chatMessageInputDto ChatMessageInputDto
+     * @return FeedMessageDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{id}"  + ResourcePaths.CHAT_PATH)
+    @PostMapping("/{id}"  + ResourcePaths.FEED_PATH + ResourcePaths.CHAT_PATH)
     public FeedMessageDto postChatMessageToCircleFeed(@PathVariable("id") String circleId, @RequestBody ChatMessageInputDto chatMessageInputDto) {
         RequestContext context = RequestContext.get();
         log.info("postChatMessageToCircleFeed, user={}", context.getMasterAccountId());
@@ -96,15 +93,33 @@ public class CircleResource {
 
     }
 
+    /**
+     * Posts a new screenshot file reference to the circle's feed
+     * @param screenshotReferenceInputDto ScreenshotReferenceInputDto
+     * @return FeedMessageDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ACTIVE_PATH + ResourcePaths.SNIPPET_PATH)
-    public void saveFlowSnippet(@RequestBody NewSnippetEvent snippet) {
+    @PostMapping("/{id}"  + ResourcePaths.FEED_PATH + ResourcePaths.SCREENSHOT_PATH)
+    public FeedMessageDto postScreenshotReferenceToCircleFeed(@PathVariable("id") String circleId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("postChatMessageToCircleFeed, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.postScreenshotReferenceToCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId), screenshotReferenceInputDto);
+
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.ACTIVE_PATH + ResourcePaths.FEED_PATH + ResourcePaths.SNIPPET_PATH)
+    public FeedMessageDto postSnippetToActiveCircleFeed(@RequestBody NewSnippetEvent snippet) {
         RequestContext context = RequestContext.get();
         log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        circleService.saveSnippetEvent(memberEntity.getOrganizationId(), memberEntity.getId(),  snippet);
+        return circleService.postSnippetToActiveCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(),  snippet);
     }
 
     /**
