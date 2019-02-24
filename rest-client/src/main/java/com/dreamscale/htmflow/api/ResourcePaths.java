@@ -40,7 +40,6 @@ public class ResourcePaths {
 
     public static final String FLOW_PATH = "/flow";
     public static final String BATCH_PATH = "/batch";
-    public static final String SNIPPET_PATH = "/snippet";
     public static final String AUTH_PING_PATH = "/authPing";
 
     public static final String ADMIN_PATH = "/admin";
@@ -54,20 +53,23 @@ public class ResourcePaths {
 
     public static final String SPIRIT_PATH = "/spirit";
     public static final String STATUS_PATH = "/status";
+    public static final String WTF_PATH = "/wtf";
     public static final String YAY_PATH = "/yay";
     public static final String ABORT_PATH = "/abort";
     public static final String XP_PATH = "/xp";
 
     public static final String CIRCLE_PATH = "/circle";
-
     public static final String TRANSITION_PATH = "/transition";
+    public static final String DO_IT_LATER_PATH = "/doitlater";
+    public static final String CLOSE_PATH = "/close";
+    public static final String RESUME_PATH = "/resume";
 
     public static final String ACTIVE_PATH = "/active";
-    public static final String WTF_PATH = "/wtf";
-    public static final String CLOSE_PATH = "/close";
-    public static final String SCREENSHOT_PATH = "/screenshot";
-    public static final String CHAT_PATH = "/chat";
+
     public static final String FEED_PATH = "/feed";
+    public static final String SCREENSHOT_PATH = "/screenshot";
+    public static final String SNIPPET_PATH = "/snippet";
+    public static final String CHAT_PATH = "/chat";
 
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";

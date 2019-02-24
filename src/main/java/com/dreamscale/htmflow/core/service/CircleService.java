@@ -108,7 +108,7 @@ public class CircleService {
         return circleDto;
     }
 
-    public void closeCircle(UUID organizationId, UUID memberId, UUID circleId) {
+    public CircleDto closeCircle(UUID organizationId, UUID memberId, UUID circleId) {
         CircleEntity circleEntity = circleRepository.findOne(circleId);
         circleEntity.setEndTime(timeService.now());
 
@@ -125,6 +125,8 @@ public class CircleService {
         circleFeedRepository.save(circleFeedEntity);
 
         activeStatusService.resolveWTFWithYay(organizationId, memberId);
+
+        return circleMapper.toApi(circleEntity);
 
     }
 

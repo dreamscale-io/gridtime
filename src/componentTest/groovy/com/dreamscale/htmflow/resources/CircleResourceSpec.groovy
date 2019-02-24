@@ -93,10 +93,11 @@ class CircleResourceSpec extends Specification {
 
         when:
 
-        circleClient.closeCircle(circle.id.toString());
+        CircleDto circleDto = circleClient.closeCircle(circle.id.toString());
         List<FeedMessageDto> messages = circleClient.getAllMessagesForCircleFeed(circle.id.toString());
 
         then:
+        assert circleDto != null
         assert messages != null
         assert messages.size() == 2
         assert messages.get(1).message == "Circle closed."

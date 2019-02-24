@@ -62,18 +62,61 @@ public class CircleResource {
     }
 
     /**
+     * Retrieves all circles on the members do it later list
+     * @return List<CircleDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.DO_IT_LATER_PATH)
+    public List<CircleDto> getAllDoItLaterCircles() {
+        RequestContext context = RequestContext.get();
+        log.info("getAllDoItLaterCircles, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.getAllOpenCircles(memberEntity.getOrganizationId(), memberEntity.getId());
+    }
+
+    /**
      * Closes an existing circle, and resolves with YAY!
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.CLOSE_PATH)
-    public void closeWTFCircle(@PathVariable("id") String circleId) {
+    public CircleDto closeWTFCircle(@PathVariable("id") String circleId) {
         RequestContext context = RequestContext.get();
         log.info("closeWTFCircle, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        circleService.closeCircle(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.closeCircle(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+    }
 
+    /**
+     * Shelves an existing circle, by adding to the do it later queue
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.DO_IT_LATER_PATH)
+    public CircleDto shelveCircleWithDoItLater(@PathVariable("id") String circleId) {
+        RequestContext context = RequestContext.get();
+        log.info("shelveCircleWithDoItLater, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), "");
+
+    }
+
+    /**
+     * Resume an existing circle, by adding to the do it later queue
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.RESUME_PATH)
+    public CircleDto resumeAnExistingCircleOnDoItLaterShelf(@PathVariable("id") String circleId) {
+        RequestContext context = RequestContext.get();
+        log.info("resumeAnExistingCircleOnDoItLaterShelf, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), "");
     }
 
     /**
