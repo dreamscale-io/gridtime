@@ -16,8 +16,12 @@ public class CircleDto {
 
     UUID id;
     String circleName;
+    String problemDescription;
 
     List<CircleMemberDto> members;
 
     String publicKey;
+
+    Long durationInSeconds;
+    Boolean onShelf;
 }

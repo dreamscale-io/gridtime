@@ -22,13 +22,26 @@ public class CircleEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID ownerMemberId;
+
     private String circleName;
+
+    private String problemDescription;
 
     private String publicKey;
     private String privateKey;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    private boolean onShelf;
+    private LocalDateTime lastShelfTime;
+    private LocalDateTime lastResumeTime;
+
+
+    private Long durationInSeconds;
+
 
 
 }

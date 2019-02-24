@@ -29,3 +29,9 @@ databaseChangeLog:
 
   - include:
         file: db/v002/circle/alter_circle_add_startend_times.sql
+
+  - include:
+        file: db/v002/circle/alter_circle_add_shelf_and_duration.sql
+
+  - include:
+        file: db/v002/circle/alter_circle_add_owner.sql

@@ -58,7 +58,7 @@ public class CircleResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return null;
+        return circleService.getActiveCircle(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
     /**
@@ -88,7 +88,7 @@ public class CircleResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.getAllOpenCircles(memberEntity.getOrganizationId(), memberEntity.getId());
+        return circleService.getAllDoItLaterCircles(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
     /**
@@ -116,7 +116,7 @@ public class CircleResource {
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), "");
+        return circleService.shelveCircleWithDoItLater(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
 
     }
 
@@ -125,13 +125,13 @@ public class CircleResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{id}"  + ResourcePaths.TRANSITION_PATH + ResourcePaths.RESUME_PATH)
-    public CircleDto resumeAnExistingCircleOnDoItLaterShelf(@PathVariable("id") String circleId) {
+    public CircleDto resumeAnExistingCircleFromDoItLaterShelf(@PathVariable("id") String circleId) {
         RequestContext context = RequestContext.get();
         log.info("resumeAnExistingCircleOnDoItLaterShelf, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), "");
+        return circleService.resumeAnExistingCircleFromDoItLaterShelf(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
     }
 
     /**

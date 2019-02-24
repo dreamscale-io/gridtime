@@ -47,5 +47,5 @@ public interface CircleClient {
     CircleDto shelveCircleWithDoItLater(@Param("id") String circleId);
 
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH  + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.RESUME_PATH)
-    CircleDto resumeAnExistingCircleOnDoItLaterShelf(@Param("id") String circleId);
+    CircleDto resumeAnExistingCircleFromDoItLaterShelf(@Param("id") String circleId);
 }

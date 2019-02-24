@@ -16,6 +16,8 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -68,12 +70,22 @@ public class CircleService {
         return circleMapper.toApiList(circleEntities);
     }
 
+    public List<CircleDto> getAllDoItLaterCircles(UUID organizationId, UUID memberId) {
+        List<CircleEntity> circleEntities = circleRepository.findAllDoItLaterCircles(organizationId, memberId);
+        return circleMapper.toApiList(circleEntities);
+
+    }
+
     public CircleDto createNewAdhocCircle(UUID organizationId, UUID memberId, String problemStatement) {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
         circleEntity.setCircleName(sillyNameGenerator.random());
         circleEntity.setStartTime(timeService.now());
+        circleEntity.setOwnerMemberId(memberId);
+        circleEntity.setDurationInSeconds(0L);
+        circleEntity.setProblemDescription(problemStatement);
         circleEntity.setOrganizationId(organizationId);
+        circleEntity.setOnShelf(false);
 
         configurePublicPrivateKeyPairs(circleEntity);
 
@@ -112,6 +124,13 @@ public class CircleService {
         CircleEntity circleEntity = circleRepository.findOne(circleId);
         circleEntity.setEndTime(timeService.now());
 
+        long durationInSeconds = calculateDuration(circleEntity, timeService.now());
+        circleEntity.setDurationInSeconds(durationInSeconds);
+
+        circleEntity.setOnShelf(false);
+        circleEntity.setLastShelfTime(null);
+        circleEntity.setLastResumeTime(null);
+
         circleRepository.save(circleEntity);
 
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
@@ -128,6 +147,77 @@ public class CircleService {
 
         return circleMapper.toApi(circleEntity);
 
+    }
+
+    public CircleDto shelveCircleWithDoItLater(UUID organizationId, UUID memberId, UUID circleId) {
+        CircleEntity circleEntity = circleRepository.findOne(circleId);
+
+        long durationInSeconds = calculateDuration(circleEntity, timeService.now());
+        circleEntity.setDurationInSeconds(durationInSeconds);
+
+        circleEntity.setOnShelf(true);
+        circleEntity.setLastShelfTime(timeService.now());
+        circleEntity.setLastResumeTime(null);
+
+        circleRepository.save(circleEntity);
+
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setCircleId(circleEntity.getId());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setMessageType(MessageType.STATUS_UPDATE);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, "Circle placed on 'Do It Later' shelf.");
+        circleFeedEntity.setTimePosition(timeService.now());
+
+        circleFeedRepository.save(circleFeedEntity);
+
+        activeStatusService.resolveWTFWithAbort(organizationId, memberId);
+
+        return circleMapper.toApi(circleEntity);
+
+    }
+
+    public CircleDto resumeAnExistingCircleFromDoItLaterShelf(UUID organizationId, UUID memberId, UUID circleId) {
+        CircleEntity circleEntity = circleRepository.findOne(circleId);
+
+        circleEntity.setOnShelf(false);
+        circleEntity.setLastResumeTime(timeService.now());
+        circleEntity.setLastShelfTime(null);
+
+        circleRepository.save(circleEntity);
+
+        CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
+        circleFeedEntity.setId(UUID.randomUUID());
+        circleFeedEntity.setCircleId(circleEntity.getId());
+        circleFeedEntity.setMemberId(memberId);
+        circleFeedEntity.setMessageType(MessageType.STATUS_UPDATE);
+        circleFeedEntity.setMetadataField(CircleFeedEntity.MESSAGE_FIELD, "Circle resumed from 'Do It Later' shelf.");
+        circleFeedEntity.setTimePosition(timeService.now());
+
+        circleFeedRepository.save(circleFeedEntity);
+
+        activeStatusService.pushWTFStatus(organizationId, memberId, circleId, circleEntity.getProblemDescription());
+
+        return circleMapper.toApi(circleEntity);
+    }
+
+    private long calculateDuration(CircleEntity circleEntity, LocalDateTime now) {
+        long totalDuration = 0;
+
+        if (circleEntity.getDurationInSeconds() != null) {
+            totalDuration = circleEntity.getDurationInSeconds();
+        }
+
+        //either take the additional time from start, or from resume
+        if (circleEntity.getLastResumeTime() == null) {
+            long additionalDuration = ChronoUnit.SECONDS.between(circleEntity.getStartTime(), now);
+            totalDuration += additionalDuration;
+        } else {
+            long additionalDuration = ChronoUnit.SECONDS.between(circleEntity.getLastResumeTime(), now);
+            totalDuration += additionalDuration;
+        }
+
+        return totalDuration;
     }
 
     private CircleMemberDto createCircleMember(UUID memberId, String fullName) {
@@ -219,6 +309,24 @@ public class CircleService {
 
     }
 
+    public CircleDto getActiveCircle(UUID organizationId, UUID memberId) {
+
+        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, memberId);
+
+        CircleDto activeCircle = null;
+        if (activeCircleId != null) {
+            CircleEntity circleEntity = circleRepository.findOne(activeCircleId);
+
+            activeCircle = circleMapper.toApi(circleEntity);
+            List<CircleMemberDto> memberDtos = new ArrayList<>();
+            memberDtos.add(createCircleMember(memberId));
+
+            activeCircle.setMembers(memberDtos);
+        }
+
+        return activeCircle;
+    }
+
     public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
 
         UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, memberId);
@@ -270,7 +378,6 @@ public class CircleService {
 
         return feedMessageDtos;
     }
-
 
 
 

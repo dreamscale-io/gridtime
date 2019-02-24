@@ -79,6 +79,49 @@ class CircleResourceSpec extends Specification {
         assert circles.size() == 2
     }
 
+    def "should return active circle"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        when:
+        CircleDto activeCircle = circleClient.getActiveCircle()
+
+        then:
+        assert activeCircle != null
+        assert activeCircle.id == circle1.id
+    }
+
+    def "should return all shelved do it later circles"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle2 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        when:
+        circleClient.shelveCircleWithDoItLater(circle1.id.toString())
+        List<CircleDto> circles = circleClient.getAllDoItLaterCircles()
+
+        then:
+        assert circles != null
+        assert circles.size() == 1
+    }
+
+
     def "should close a circle"() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
@@ -102,6 +145,51 @@ class CircleResourceSpec extends Specification {
         assert messages.size() == 2
         assert messages.get(1).message == "Circle closed."
     }
+
+    def "should shelf a circle with do it later"() {
+        given:
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        when:
+
+        CircleDto circleDto = circleClient.shelveCircleWithDoItLater(circle.id.toString());
+
+        then:
+        assert circleDto != null
+        assert circleDto.onShelf == true
+    }
+
+    def "should resume a circle from do it later"() {
+        given:
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        testUser.setId(member.getMasterAccountId())
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        CircleDto circleShelved = circleClient.shelveCircleWithDoItLater(circle.id.toString());
+
+        when:
+
+        CircleDto resumedCircle = circleClient.resumeAnExistingCircleFromDoItLaterShelf(circle.id.toString());
+
+        then:
+        assert resumedCircle != null
+        assert resumedCircle.onShelf == false
+    }
+
 
     def "should post a chat message to circle feed"() {
         given:
