@@ -19,6 +19,9 @@ public interface CircleClient {
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH )
     List<CircleDto> getAllOpenCircles();
 
+    @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + ResourcePaths.ACTIVE_PATH )
+    CircleDto getActiveCircle();
+
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + ResourcePaths.DO_IT_LATER_PATH)
     List<CircleDto> getAllDoItLaterCircles();
 

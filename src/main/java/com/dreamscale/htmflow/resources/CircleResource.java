@@ -47,6 +47,21 @@ public class CircleResource {
     }
 
     /**
+     * Retrieves the active circle for the user
+     * @return List<CircleDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.ACTIVE_PATH)
+    public CircleDto getActiveCircle() {
+        RequestContext context = RequestContext.get();
+        log.info("getActiveCircle, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return null;
+    }
+
+    /**
      * Retrieves all open circles across all users in the organization
      * @return List<CircleDto>
      */
