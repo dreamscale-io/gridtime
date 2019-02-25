@@ -35,3 +35,12 @@ databaseChangeLog:
 
   - include:
         file: db/v002/circle/alter_circle_add_owner.sql
+
+  - include:
+        file: db/v002/status/drop_work_status_view.sql
+
+  - include:
+        file: db/v002/status/alter_active_account_status_rename_status.sql
+
+  - include:
+        file: db/v002/status/replace_work_status_view_clean_status.sql

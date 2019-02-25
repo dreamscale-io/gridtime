@@ -28,7 +28,7 @@ public class MemberStatusEntity {
     private LocalDateTime lastActivity;
 
     @Column(name = "active_status")
-    private ActiveAccountStatus activeStatus;
+    private OnlineStatus activeStatus;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;

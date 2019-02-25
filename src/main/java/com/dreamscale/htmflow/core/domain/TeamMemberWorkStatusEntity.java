@@ -28,8 +28,6 @@ public class TeamMemberWorkStatusEntity {
 
     private String email;
 
-    private Integer moodRating;
-
     private Integer totalXp;
 
     @Column(name = "full_name")
@@ -38,8 +36,8 @@ public class TeamMemberWorkStatusEntity {
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 
-    @Column(name = "active_status")
-    private ActiveAccountStatus activeStatus;
+    @Column(name = "online_status")
+    private OnlineStatus onlineStatus;
 
     @Column(name = "active_task_id")
     private UUID activeTaskId;
@@ -50,14 +48,8 @@ public class TeamMemberWorkStatusEntity {
 
     private String workingOn;
 
-    private String spiritStatus;
-
-    private String spiritMessage;
-
-    private LocalDateTime activeSessionStart;
-
-    @Column(name = "active_session_id")
-    private UUID activeSessionId;
+    @Column(name = "active_circle_id")
+    private UUID activeCircleId;
 
 }
 

@@ -11,7 +11,6 @@ import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
-import org.dreamscale.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -180,7 +179,7 @@ public class OrganizationService {
 
         ActiveAccountStatusEntity accountStatusEntity = new ActiveAccountStatusEntity();
         accountStatusEntity.setMasterAccountId(masterAccountEntity.getId());
-        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Offline);
+        accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
 
         activeAccountStatusRepository.save(accountStatusEntity);
 

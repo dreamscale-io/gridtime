@@ -163,9 +163,6 @@ public class TeamService {
         for (TeamMemberWorkStatusEntity memberStatusEntity : teamMemberStatusList) {
             TeamMemberWorkStatusDto memberStatusDto = teamMemberStatusMapper.toApi(memberStatusEntity);
 
-            Long alarmDuration = wtfService.calculateAlarmDuration(memberStatusEntity.getActiveSessionStart());
-            memberStatusDto.setAlarmDurationInSeconds(alarmDuration);
-
             XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
             memberStatusDto.setXpSummary(xpSummary);
             memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
@@ -246,8 +243,8 @@ public class TeamService {
             int compare = 0;
 
             if (member1.getActiveStatus() != null && member2.getActiveStatus() != null) {
-                Integer orderMember1 = ActiveAccountStatus.valueOf(member1.getActiveStatus()).getOrder();
-                Integer orderMember2 = ActiveAccountStatus.valueOf(member2.getActiveStatus()).getOrder();
+                Integer orderMember1 = OnlineStatus.valueOf(member1.getActiveStatus()).getOrder();
+                Integer orderMember2 = OnlineStatus.valueOf(member2.getActiveStatus()).getOrder();
 
                 compare = orderMember1.compareTo(orderMember2);
             }

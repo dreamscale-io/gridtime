@@ -62,11 +62,7 @@ public class ActiveStatusService {
 
         if (activeWorkStatusEntity != null && activeWorkStatusEntity.getActiveCircleId() != null) {
 
-            activeWorkStatusEntity.setSpiritStatus(newStatus);
-            activeWorkStatusEntity.setSpiritMessage(null);
             activeWorkStatusEntity.setActiveCircleId(null);
-            activeWorkStatusEntity.setActiveCircleStart(null);
-
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
 
@@ -88,20 +84,12 @@ public class ActiveStatusService {
 
         activeWorkStatusEntity.setLastUpdate(timeService.now());
         activeWorkStatusEntity.setActiveCircleId(circleId);
-        activeWorkStatusEntity.setActiveCircleStart(timeService.now());
-        activeWorkStatusEntity.setSpiritStatus("WTF?!");
-        activeWorkStatusEntity.setSpiritMessage(problemDescription);
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
         TeamMemberWorkStatusEntity myStatusEntity = teamMemberWorkStatusRepository.findOne(memberId);
-        TeamMemberWorkStatusDto myStatusDto = teamMemberStatusMapper.toApi(myStatusEntity);
+        return teamMemberStatusMapper.toApi(myStatusEntity);
 
-        if (myStatusDto != null) {
-            myStatusDto.setAlarmDurationInSeconds(calculateAlarmDuration(myStatusEntity.getActiveSessionStart()));
-        }
-
-        return myStatusDto;
     }
 
     public Long calculateAlarmDuration(LocalDateTime alarmTime) {

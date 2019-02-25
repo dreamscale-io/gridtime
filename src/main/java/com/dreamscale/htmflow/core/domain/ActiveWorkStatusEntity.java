@@ -35,15 +35,6 @@ public class ActiveWorkStatusEntity {
     @Column(name = "working_on")
     private String workingOn;
 
-    @Column(name = "spirit_status")
-    private String spiritStatus;
-
-    @Column(name = "spirit_message")
-    private String spiritMessage;
-
-    @Column(name = "active_circle_start")
-    private LocalDateTime activeCircleStart;
-
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "active_circle_id")
     private UUID activeCircleId;

@@ -1,13 +1,13 @@
 package com.dreamscale.htmflow.core.domain;
 
-public enum ActiveAccountStatus {
+public enum OnlineStatus {
 
     //Note, these are mapped to DB enum entries, so order is fixed in DB history
     Online(1), Offline(2);
 
     private final int order;
 
-    ActiveAccountStatus(int order) {
+    OnlineStatus(int order) {
         this.order = order;
     }
 

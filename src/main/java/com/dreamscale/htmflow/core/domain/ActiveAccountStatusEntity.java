@@ -30,7 +30,7 @@ public class ActiveAccountStatusEntity {
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 
-    @Column(name = "active_status")
-    private ActiveAccountStatus activeStatus;
+    @Column(name = "online_status")
+    private OnlineStatus onlineStatus;
 
 }

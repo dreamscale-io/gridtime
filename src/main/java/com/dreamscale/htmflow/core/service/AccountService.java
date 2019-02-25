@@ -6,13 +6,8 @@ import com.dreamscale.htmflow.api.account.HeartbeatDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
-import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamscale.exception.BadRequestException;
-import org.dreamscale.exception.ErrorEntity;
-import org.dreamscale.exception.WebApplicationException;
-import org.dreamscale.logging.LoggingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +55,7 @@ public class AccountService implements MasterAccountIdResolver {
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
-        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Online);
+        accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
 
         accountStatusRepository.save(accountStatusEntity);
 
@@ -71,7 +66,7 @@ public class AccountService implements MasterAccountIdResolver {
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
 
-        accountStatusEntity.setActiveStatus(ActiveAccountStatus.Offline);
+        accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
         accountStatusEntity.setConnectionId(null);
 
         accountStatusRepository.save(accountStatusEntity);
@@ -97,8 +92,8 @@ public class AccountService implements MasterAccountIdResolver {
     }
 
     private boolean isNotOnline(ActiveAccountStatusEntity accountStatusEntity) {
-        return (accountStatusEntity.getActiveStatus() == null
-                || accountStatusEntity.getActiveStatus() != ActiveAccountStatus.Online);
+        return (accountStatusEntity.getOnlineStatus() == null
+                || accountStatusEntity.getOnlineStatus() != OnlineStatus.Online);
     }
 
     private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID masterAccountId) {
