@@ -139,32 +139,6 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
-    def "should retrieve all members in organization"() {
-        given:
-
-        OrganizationDto org = createOrganizationWithClient()
-
-        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
-        MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
-
-        ActivationCodeDto activationCode = new ActivationCodeDto()
-        activationCode.setActivationCode(registration1.getActivationCode())
-
-        AccountActivationDto activationDto = accountClient.activate(activationCode)
-
-        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(activationDto.apiKey)
-
-        //Can only retrieve org members for orgs you are a part of,
-        testUser.setApiKey(masterAccountEntity.getApiKey())
-        testUser.setId(masterAccountEntity.getId())
-
-        when:
-        List<OrgMemberStatusDto> orgMembers = organizationClient.getMembers(org.getId().toString())
-
-        then:
-        assert orgMembers != null
-        assert orgMembers.size() == 2
-    }
 
     def "should create a team within the org"() {
         given:

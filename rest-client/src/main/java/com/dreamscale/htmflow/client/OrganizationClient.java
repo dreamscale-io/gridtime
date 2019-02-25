@@ -29,9 +29,6 @@ public interface OrganizationClient {
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
     MemberRegistrationDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
 
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
-    List<OrgMemberStatusDto> getMembers(@Param("id") String organizationId);
-
     @RequestLine("POST "+ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH)
     TeamDto createTeam(@Param("id") String organizationId, TeamInputDto teamInputDto);
 

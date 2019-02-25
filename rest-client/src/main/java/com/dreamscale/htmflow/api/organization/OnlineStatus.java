@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.domain;
+package com.dreamscale.htmflow.api.organization;
 
 public enum OnlineStatus {
 

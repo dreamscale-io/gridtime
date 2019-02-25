@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.account.AccountActivationDto;
 import com.dreamscale.htmflow.api.account.ConnectionStatusDto;
 import com.dreamscale.htmflow.api.account.HeartbeatDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
+import com.dreamscale.htmflow.api.organization.OnlineStatus;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;

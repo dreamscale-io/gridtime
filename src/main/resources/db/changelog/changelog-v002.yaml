@@ -44,3 +44,6 @@ databaseChangeLog:
 
   - include:
         file: db/v002/status/replace_work_status_view_clean_status.sql
+
+  - include:
+        file: db/v002/status/replace_member_status_view_add_active_circle.sql

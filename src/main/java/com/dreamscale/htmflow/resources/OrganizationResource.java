@@ -55,18 +55,6 @@ public class OrganizationResource {
     }
 
     /**
-     * Get a list of all the members in the Organization
-     */
-    // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{id}" + ResourcePaths.MEMBER_PATH)
-    public List<OrgMemberStatusDto> getMembers(@PathVariable("id") String organizationId) {
-        RequestContext context = RequestContext.get();
-        UUID organizationUuid = UUID.fromString(organizationId);
-        return organizationService.getMembersForOrganization(organizationUuid, context.getMasterAccountId());
-    }
-
-    /**
      * Creates a new member within an organization associated with the specified Jira email
      * A new master account will be created using the email, along with a product activation code
      */

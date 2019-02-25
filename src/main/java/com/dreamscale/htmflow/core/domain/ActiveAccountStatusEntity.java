@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.domain;
 
+import com.dreamscale.htmflow.api.organization.OnlineStatus;
 import lombok.*;
 
 import javax.persistence.Column;

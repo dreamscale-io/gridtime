@@ -316,17 +316,26 @@ public class CircleService {
 
         CircleDto activeCircle = null;
         if (activeCircleId != null) {
-            CircleEntity circleEntity = circleRepository.findOne(activeCircleId);
-
-            activeCircle = circleMapper.toApi(circleEntity);
-            List<CircleMemberDto> memberDtos = new ArrayList<>();
-            memberDtos.add(createCircleMember(memberId));
-
-            activeCircle.setMembers(memberDtos);
+            activeCircle = getCircle(memberId, activeCircleId);
         }
 
         return activeCircle;
     }
+
+    public CircleDto getCircle(UUID memberId, UUID circleId) {
+        CircleDto circleDto = null;
+
+        CircleEntity circleEntity = circleRepository.findOne(circleId);
+
+        circleDto = circleMapper.toApi(circleEntity);
+        List<CircleMemberDto> memberDtos = new ArrayList<>();
+        memberDtos.add(createCircleMember(memberId));
+
+        circleDto.setMembers(memberDtos);
+
+        return circleDto;
+    }
+
 
     public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
 
@@ -393,4 +402,6 @@ public class CircleService {
 
         return circleKeyDto;
     }
+
+
 }

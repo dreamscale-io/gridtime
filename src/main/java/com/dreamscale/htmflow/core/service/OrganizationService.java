@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -235,35 +234,5 @@ public class OrganizationService {
         return outputOrg;
     }
 
-    public List<OrgMemberStatusDto> getMembersForOrganization(UUID organizationId, UUID masterAccountId) {
-
-        List<OrgMemberStatusDto> orgMemberDtos = new ArrayList<>();
-
-        //first, need to figure out what org the user is part of, later on we can set the active org
-
-        OrganizationMemberEntity orgMembership = memberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
-
-        if (orgMembership != null) {
-
-            List<MemberStatusEntity> peersAndMe = memberStatusRepository.findByOrganizationId(organizationId);
-
-            //"select o.id, o.email, o.full_name, a.last_activity, a.active_status " +
-
-            for (MemberStatusEntity memberStatusEntity : peersAndMe) {
-                OrgMemberStatusDto orgMemberDto = OrgMemberStatusDto.builder()
-                        .memberId(memberStatusEntity.getId())
-                        .email(memberStatusEntity.getEmail())
-                        .fullName(memberStatusEntity.getFullName())
-                        .lastActivity(memberStatusEntity.getLastActivity())
-                        .memberStatus(memberStatusEntity.getActiveStatus().name())
-                        .build();
-
-                orgMemberDtos.add(orgMemberDto);
-            }
-
-        }
-
-        return orgMemberDtos;
-    }
 
 }
