@@ -24,4 +24,5 @@ public interface MemberStatusRepository extends CrudRepository<MemberStatusEntit
             "and tm.member_id != (:me) ")
     List<MemberStatusEntity> findByTeamIdAndNotMe(@Param("teamId") UUID teamId, @Param("me") UUID myId );
 
+    MemberStatusEntity findById(UUID memberId);
 }

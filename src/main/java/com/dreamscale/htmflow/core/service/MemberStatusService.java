@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class MemberStatusService {
 
@@ -41,7 +43,9 @@ public class MemberStatusService {
 
     public MemberWorkStatusDto getMyCurrentStatus(UUID organizationId, UUID memberId) {
 
-        MemberStatusEntity memberStatusEntity = memberStatusRepository.findOne(memberId);
+        MemberStatusEntity memberStatusEntity = memberStatusRepository.findById(memberId);
+        log.debug("Who am I? "+memberStatusEntity.getId() + ", "+memberStatusEntity.getFullName());
+
         return toDto(memberStatusEntity);
     }
 
