@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,15 +56,17 @@ public class MemberStatusService {
 
         UUID teamId = teamEntityList.get(0).getId();
 
-        List<MemberWorkStatusDto> memberWorkStatusDtos = new ArrayList<>();
-        memberWorkStatusDtos.add(getMyCurrentStatus(organizationId, memberId));
+        LinkedList<MemberWorkStatusDto> memberWorkStatusDtos = new LinkedList<>();
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
         for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
             memberWorkStatusDtos.add(toDto(memberStatusEntity));
         }
+        sortMembers(memberWorkStatusDtos);
 
-        return sortMembers(memberWorkStatusDtos);
+        memberWorkStatusDtos.addFirst(getMyCurrentStatus(organizationId, memberId));
+
+        return memberWorkStatusDtos;
     }
 
     private MemberWorkStatusDto toDto(MemberStatusEntity memberStatusEntity) {
@@ -89,7 +92,7 @@ public class MemberStatusService {
         return shortName;
     }
 
-    private List<MemberWorkStatusDto> sortMembers(List<MemberWorkStatusDto> teamMembers) {
+    private void sortMembers(List<MemberWorkStatusDto> teamMembers) {
 
         teamMembers.sort((member1, member2) -> {
             int compare = 0;
@@ -106,7 +109,6 @@ public class MemberStatusService {
             return compare;
         });
 
-        return teamMembers;
     }
 
 
