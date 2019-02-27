@@ -22,6 +22,7 @@ public class ResourcePaths {
 
     public static final String RECENT_PATH = "/recent";
     public static final String HISTORY_PATH = "/history";
+    public static final String TASKREF_PATH = "/taskref";
 
     public static final String PROJECT_PATH = "/project";
     public static final String TASK_PATH = "/task";

@@ -15,45 +15,44 @@ import java.util.List;
 })
 public interface JournalClient {
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.INTENTION_PATH)
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(IntentionInputDto chunkEvent);
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto saveFlameRating(FlameRatingInputDto flameRatingInput);
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto updateRetroFlameRating(@Param("id") String id, FlameRatingInputDto flameRatingInput);
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.FINISH_PATH)
-    JournalEntryDto finishIntention(IntentionFinishInputDto intentionFinishInputDto);
+    @RequestLine("POST " +ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
+    JournalEntryDto finishIntention(@Param("id") String id, IntentionFinishInputDto intentionFinishInputDto);
 
-
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH  + ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH)
     RecentJournalDto getRecentJournal();
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH +  ResourcePaths.RECENT_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
             + "?limit={limit}")
     RecentJournalDto getRecentJournalWithLimit(@Param("limit") Integer limit);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
       + "?member={memberId}")
     RecentJournalDto getRecentJournalForMember(@Param("memberId") String memberId);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH +  ResourcePaths.RECENT_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
             + "?member={memberId}&limit={limit}")
     RecentJournalDto getRecentJournalForMemberWithLimit(@Param("memberId") String memberId, @Param("limit") Integer limit);
 
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.HISTORY_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
             + "?before_date={beforeDate}&limit={limit}")
     List<JournalEntryDto> getHistoricalIntentionsWithLimit(@Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ENTRY_PATH + ResourcePaths.HISTORY_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
             + "?member={memberId}&before_date={beforeDate}&limit={limit}")
     List<JournalEntryDto> getHistoricalIntentionsForMemberWithLimit(@Param("memberId") String memberId, @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
-    RecentTasksSummaryDto getRecentTasksSummary();
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
+    RecentTasksSummaryDto getRecentTaskReferencesSummary();
 
-    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASK_PATH)
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReference(TaskReferenceInputDto taskReferenceDto);
 
 

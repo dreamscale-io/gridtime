@@ -1,27 +1,11 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.journal.FinishStatus
-import com.dreamscale.htmflow.api.journal.FlameRatingInputDto
-import com.dreamscale.htmflow.api.journal.IntentionInputDto
-import com.dreamscale.htmflow.api.journal.IntentionFinishInputDto
-import com.dreamscale.htmflow.api.journal.JournalEntryDto
-import com.dreamscale.htmflow.api.journal.TaskReferenceInputDto
+import com.dreamscale.htmflow.api.journal.*
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto
 import com.dreamscale.htmflow.client.JournalClient
-import com.dreamscale.htmflow.core.domain.IntentionRepository
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity
-import com.dreamscale.htmflow.core.domain.OrganizationEntity
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
-import com.dreamscale.htmflow.core.domain.OrganizationMemberRepository
-import com.dreamscale.htmflow.core.domain.OrganizationRepository
-import com.dreamscale.htmflow.core.domain.ProjectEntity
-import com.dreamscale.htmflow.core.domain.ProjectRepository
-import com.dreamscale.htmflow.core.domain.RecentProjectRepository
-import com.dreamscale.htmflow.core.domain.RecentTaskRepository
-import com.dreamscale.htmflow.core.domain.TaskEntity
-import com.dreamscale.htmflow.core.domain.TaskRepository
+import com.dreamscale.htmflow.core.domain.*
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +16,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class JournalResourceSpec extends Specification {
+class JournalHistoryResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient
@@ -89,7 +73,7 @@ class JournalResourceSpec extends Specification {
         int flameRating = 3;
 
         when:
-        JournalEntryDto result = journalClient.saveFlameRating(new FlameRatingInputDto(intention.getId(), flameRating));
+        JournalEntryDto result = journalClient.updateRetroFlameRating(intention.getId().toString(), new FlameRatingInputDto(flameRating));
 
         then:
         assert result != null
@@ -107,7 +91,7 @@ class JournalResourceSpec extends Specification {
 
         1 * mockTimeService.now() >> LocalDateTime.now()
         when:
-        JournalEntryDto result = journalClient.finishIntention(new IntentionFinishInputDto(intention.getId(), FinishStatus.done));
+        JournalEntryDto result = journalClient.finishIntention(intention.getId().toString(), new IntentionFinishInputDto(FinishStatus.done));
 
         then:
         assert result != null
@@ -216,7 +200,7 @@ class JournalResourceSpec extends Specification {
 
         when:
 
-        RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentTasksSummary();
+        RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentTaskReferencesSummary();
 
         then:
         assert recentTasksSummary != null

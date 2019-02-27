@@ -178,8 +178,8 @@ public class JournalService {
         }
     }
 
-    public JournalEntryDto saveFlameRating(UUID masterAccountId, FlameRatingInputDto flameRatingInputDto) {
-        IntentionEntity intentionEntity = intentionRepository.findOne(flameRatingInputDto.getId());
+    public JournalEntryDto saveFlameRating(UUID masterAccountId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
+        IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
         validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
 

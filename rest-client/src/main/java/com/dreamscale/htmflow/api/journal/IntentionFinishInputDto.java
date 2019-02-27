@@ -13,6 +13,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class IntentionFinishInputDto {
 
-    private UUID id;
     private FinishStatus finishStatus;
 }

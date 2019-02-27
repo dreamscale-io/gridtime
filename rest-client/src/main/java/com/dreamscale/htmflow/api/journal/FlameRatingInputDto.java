@@ -13,7 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class FlameRatingInputDto {
 
-    private UUID id;
     private int flameRating; //flame rating from -5 to 5
 
     public boolean isValid() {

@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-public class JournalResource {
+public class JournalHistoryResource {
 
     @Autowired
     private JournalService journalService;
@@ -40,39 +40,41 @@ public class JournalResource {
      * Create a new Intention in the user's Journal
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.INTENTION_PATH)
-    JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
+    @PostMapping(ResourcePaths.INTENTION_PATH )
+    JournalEntryDto createNewIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
         return journalService.createIntention(context.getMasterAccountId(), intentionInput);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto saveFlameRating(@RequestBody FlameRatingInputDto flameRatingInputDto) {
+    @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto updateRetroFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
         RequestContext context = RequestContext.get();
-        return journalService.saveFlameRating(context.getMasterAccountId(), flameRatingInputDto);
+        return journalService.saveFlameRating(context.getMasterAccountId(), UUID.fromString(intentionId), flameRatingInputDto);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.FINISH_PATH)
-    JournalEntryDto finishIntention(@RequestBody IntentionFinishInputDto intentionRefInputDto) {
+    @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
+    JournalEntryDto finishIntention(@PathVariable("id") String intentionId, @RequestBody IntentionFinishInputDto intentionRefInputDto) {
         RequestContext context = RequestContext.get();
 
         if (FinishStatus.done.equals(intentionRefInputDto.getFinishStatus())) {
-            return journalService.finishIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+            return journalService.finishIntention(context.getMasterAccountId(), UUID.fromString(intentionId));
         } else if (FinishStatus.aborted.equals(intentionRefInputDto.getFinishStatus())) {
-            return journalService.abortIntention(context.getMasterAccountId(), intentionRefInputDto.getId());
+            return journalService.abortIntention(context.getMasterAccountId(), UUID.fromString(intentionId));
         } else {
             throw new BadRequestException(ValidationErrorCodes.INVALID_FINISH_STATUS, "Invalid finish status");
         }
     }
+
+
     /**
-     * Get all recent Intentions in the Journal, ordered by time descending,
+     * Get an overview of the recent Intentions in the Journal, ordered by time descending,
      * either for the current user (if member not provided), or for another memberId within the org
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.RECENT_PATH)
+    @GetMapping()
     RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
 
@@ -107,8 +109,8 @@ public class JournalResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.ENTRY_PATH + ResourcePaths.HISTORY_PATH)
-    List<JournalEntryDto> getHistoricalIntentionsBeforeDate(@RequestParam("before_date") String beforeDateStr,
+    @GetMapping(ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH)
+    List<JournalEntryDto> getHistoricalIntentionsFeedBeforeDate(@RequestParam("before_date") String beforeDateStr,
                                                @RequestParam("member") Optional<String> memberId,
                                                @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -129,7 +131,7 @@ public class JournalResource {
      * in a summary
      */
 
-    @PostMapping(ResourcePaths.TASK_PATH)
+    @PostMapping(ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReferenceInJournal(@RequestBody TaskReferenceInputDto taskReference) {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
@@ -144,8 +146,8 @@ public class JournalResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.TASK_PATH + ResourcePaths.RECENT_PATH)
-    RecentTasksSummaryDto getRecentTasksByProject() {
+    @GetMapping(ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
+    RecentTasksSummaryDto getRecentTaskReferencesSummary() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
 
