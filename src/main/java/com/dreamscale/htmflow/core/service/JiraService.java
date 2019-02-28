@@ -149,6 +149,17 @@ public class JiraService {
         return connection.getTask(newTask.getKey());
     }
 
+    public JiraTaskDto getTask(UUID organizationId, String taskKey) {
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        if (org == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
+        }
+
+        JiraConnection connection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
+
+        return connection.getTask(taskKey);
+    }
+
     public JiraTaskDto closeTask(UUID organizationId, String taskKey) {
         OrganizationEntity org = organizationRepository.findById(organizationId);
         if (org == null) {

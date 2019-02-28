@@ -44,7 +44,7 @@ public class RecentActivityService {
     private ActiveWorkStatusRepository activeWorkStatusRepository;
 
     @Autowired
-    private JiraConnectionFactory jiraConnectionFactory;
+    private JiraService jiraService;
 
     @Autowired
     private FlowActivityRepository flowActivityRepository;
@@ -204,11 +204,12 @@ public class RecentActivityService {
     private TaskEntity findTaskInJiraAndUpdateDB(UUID organizationId, String taskName) {
 
         TaskEntity taskEntity = null;
+
         //try Jira as a fallback if we can't find the task
         OrganizationEntity org = organizationRepository.findById(organizationId);
         if (org != null) {
-            JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
-            JiraTaskDto jiraTask = jiraConnection.getTask(taskName);
+
+            JiraTaskDto jiraTask = jiraService.getTask(organizationId, taskName);
             if (jiraTask != null) {
 
                 ProjectEntity projectEntity = projectRepository.findByExternalId(jiraTask.getProjectId());

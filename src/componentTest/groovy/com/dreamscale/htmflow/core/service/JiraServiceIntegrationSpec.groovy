@@ -47,6 +47,20 @@ public class JiraServiceIntegrationSpec extends Specification {
 		assert jiraProjectDto != null
 	}
 
+	def "should fetch a jira ticket by id"() {
+		given:
+		OrganizationEntity validOrg = createValidOrganization()
+		organizationRepository.save(validOrg)
+
+		when:
+		JiraTaskDto jiraTaskDto = jiraService.getTask(validOrg.getId(), "FP-207")
+
+		then:
+		assert jiraTaskDto != null
+		assert jiraTaskDto.key == "FP-207"
+	}
+
+
 	def "should fetch a user by email"() {
 		given:
 		OrganizationEntity validOrg = createValidOrganization()
