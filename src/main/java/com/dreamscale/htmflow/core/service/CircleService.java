@@ -68,7 +68,12 @@ public class CircleService {
 
     public List<CircleDto> getAllOpenCircles(UUID organizationId, UUID memberId) {
         List<CircleEntity> circleEntities = circleRepository.findAllOpenCirclesForOrganization(organizationId);
-        return circleMapper.toApiList(circleEntities);
+        List<CircleDto> circles = circleMapper.toApiList(circleEntities);
+
+        for (CircleDto circle: circles) {
+            circle.setDurationInSeconds(calculateEffectiveDuration(circle));
+        }
+        return circles;
     }
 
     public List<CircleDto> getAllDoItLaterCircles(UUID organizationId, UUID memberId) {
@@ -199,7 +204,10 @@ public class CircleService {
 
         activeStatusService.pushWTFStatus(organizationId, memberId, circleId, circleEntity.getProblemDescription());
 
-        return circleMapper.toApi(circleEntity);
+        CircleDto circleDto = circleMapper.toApi(circleEntity);
+        circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
+
+        return circleDto;
     }
 
     private long calculateDuration(CircleEntity circleEntity, LocalDateTime now) {
@@ -326,8 +334,9 @@ public class CircleService {
         CircleDto circleDto = null;
 
         CircleEntity circleEntity = circleRepository.findOne(circleId);
-
         circleDto = circleMapper.toApi(circleEntity);
+        circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
+
         List<CircleMemberDto> memberDtos = new ArrayList<>();
         memberDtos.add(createCircleMember(memberId));
 
@@ -336,6 +345,18 @@ public class CircleService {
         return circleDto;
     }
 
+    private Long calculateEffectiveDuration(CircleDto circleDto) {
+        LocalDateTime startTimer = circleDto.getStartTime();
+
+        if (circleDto.getLastResumeTime() != null) {
+            startTimer = circleDto.getLastResumeTime();
+        }
+
+        long seconds = startTimer.until( timeService.now(), ChronoUnit.SECONDS);
+        seconds += circleDto.getDurationInSeconds();
+
+        return seconds;
+    }
 
     public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID memberId, NewSnippetEvent snippetEvent) {
 
