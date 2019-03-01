@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class MemberStatusService {
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<MemberWorkStatusDto, MemberStatusEntity> memberStatusMapper;
+
+    @Autowired
+    private TimeService timeService;
 
     @PostConstruct
     private void init() {
@@ -78,10 +83,25 @@ public class MemberStatusService {
 
         if (memberStatusEntity.getActiveCircleId() != null) {
             CircleDto circleDto = circleService.getCircle(memberStatusEntity.getId(), memberStatusEntity.getActiveCircleId());
+
+            circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
             memberStatusDto.setActiveCircle(circleDto);
         }
 
         return memberStatusDto;
+    }
+
+    private Long calculateEffectiveDuration(CircleDto circleDto) {
+        LocalDateTime startTimer = circleDto.getStartTime();
+
+        if (circleDto.getLastResumeTime() != null) {
+            startTimer = circleDto.getLastResumeTime();
+        }
+
+        long seconds = startTimer.until( timeService.now(), ChronoUnit.SECONDS);
+        seconds += circleDto.getDurationInSeconds();
+
+        return seconds;
     }
 
     private String createShortName(String fullName) {
