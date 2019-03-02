@@ -36,6 +36,7 @@ public class CircleContextEntity {
     private Integer flameRating;
 
     private String finishStatus;
+    private LocalDateTime finishTime;
 
     private UUID circleId;
 }

@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
+import com.dreamscale.htmflow.api.journal.FinishStatus;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
@@ -42,6 +43,12 @@ public class CircleService {
 
     @Autowired
     ActiveStatusService activeStatusService;
+
+    @Autowired
+    CircleContextRepository circleContextRepository;
+
+    @Autowired
+    IntentionRepository intentionRepository;
 
     @Autowired
     TimeService timeService;
@@ -104,6 +111,9 @@ public class CircleService {
 
         circleMemberRepository.save(circleMemberEntity);
 
+        CircleContextEntity circleContextEntity = createCircleContextEntity(organizationId, memberId, circleEntity);
+        circleContextRepository.save(circleContextEntity);
+
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
         circleFeedEntity.setCircleId(circleEntity.getId());
@@ -139,6 +149,14 @@ public class CircleService {
 
         circleRepository.save(circleEntity);
 
+        CircleContextEntity circleContextEntity = circleContextRepository.findLastByCircleId(circleId);
+        if (circleContextEntity != null) {
+            circleContextEntity.setFinishStatus(FinishStatus.done.name());
+            circleContextEntity.setFinishTime(circleEntity.getEndTime());
+
+            circleContextRepository.save(circleContextEntity);
+        }
+
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
         circleFeedEntity.setCircleId(circleEntity.getId());
@@ -167,6 +185,14 @@ public class CircleService {
 
         circleRepository.save(circleEntity);
 
+        CircleContextEntity circleContextEntity = circleContextRepository.findLastByCircleId(circleId);
+        if (circleContextEntity != null) {
+            circleContextEntity.setFinishStatus(FinishStatus.aborted.name());
+            circleContextEntity.setFinishTime(timeService.now());
+
+            circleContextRepository.save(circleContextEntity);
+        }
+
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
         circleFeedEntity.setCircleId(circleEntity.getId());
@@ -192,6 +218,9 @@ public class CircleService {
 
         circleRepository.save(circleEntity);
 
+        CircleContextEntity circleContextEntity = createCircleContextFromHistoricalContext(organizationId, memberId, circleEntity);
+        circleContextRepository.save(circleContextEntity);
+
         CircleFeedEntity circleFeedEntity = new CircleFeedEntity();
         circleFeedEntity.setId(UUID.randomUUID());
         circleFeedEntity.setCircleId(circleEntity.getId());
@@ -208,6 +237,42 @@ public class CircleService {
         circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
 
         return circleDto;
+    }
+
+    private CircleContextEntity createCircleContextFromHistoricalContext(UUID organizationId, UUID memberId, CircleEntity circleEntity) {
+        CircleContextEntity circleContextEntity = new CircleContextEntity();
+        circleContextEntity.setId(UUID.randomUUID());
+        circleContextEntity.setMemberId(memberId);
+        circleContextEntity.setOrganizationId(organizationId);
+        circleContextEntity.setDescription(circleEntity.getProblemDescription());
+        circleContextEntity.setCircleId(circleEntity.getId());
+
+        CircleContextEntity historicalContext = circleContextRepository.findFirstByCircleId(circleEntity.getId());
+
+        if (historicalContext != null) {
+            circleContextEntity.setProjectId(historicalContext.getProjectId());
+            circleContextEntity.setTaskId(historicalContext.getTaskId());
+        }
+        return circleContextEntity;
+    }
+
+    private CircleContextEntity createCircleContextEntity(UUID organizationId, UUID memberId, CircleEntity circleEntity) {
+
+        CircleContextEntity circleContextEntity = new CircleContextEntity();
+        circleContextEntity.setId(UUID.randomUUID());
+        circleContextEntity.setMemberId(memberId);
+        circleContextEntity.setOrganizationId(organizationId);
+        circleContextEntity.setDescription(circleEntity.getProblemDescription());
+        circleContextEntity.setCircleId(circleEntity.getId());
+
+        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
+
+        if (lastIntentionList.size() > 0) {
+            IntentionEntity lastIntention = lastIntentionList.get(0);
+            circleContextEntity.setProjectId(lastIntention.getProjectId());
+            circleContextEntity.setTaskId(lastIntention.getTaskId());
+        }
+        return circleContextEntity;
     }
 
     private long calculateDuration(CircleEntity circleEntity, LocalDateTime now) {
