@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.domain;
 
-import com.dreamscale.htmflow.api.journal.JournalEntryType;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -8,27 +7,19 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "journal_entry_view")
+@Entity(name = "circle_context")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JournalEntryEntity {
+public class CircleContextEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private LocalDateTime position;
     private String description;
-
-    private String taskName;
-    private String projectName;
-    private String taskSummary;
-    private Integer flameRating;
-
-    private String finishStatus;
-    private LocalDateTime finishTime;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID projectId;
@@ -42,8 +33,9 @@ public class JournalEntryEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    String journalEntryType;
+    private Integer flameRating;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private String finishStatus;
+
     private UUID circleId;
 }

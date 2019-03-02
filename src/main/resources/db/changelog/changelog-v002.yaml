@@ -47,3 +47,9 @@ databaseChangeLog:
 
   - include:
         file: db/v002/status/replace_member_status_view_add_active_circle.sql
+
+  - include:
+        file: db/v002/circle/create_circle_context.sql
+
+  - include:
+        file: db/v002/replace_journal_entry_view.sql

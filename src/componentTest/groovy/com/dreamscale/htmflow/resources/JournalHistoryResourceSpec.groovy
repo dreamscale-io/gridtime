@@ -54,13 +54,14 @@ class JournalHistoryResourceSpec extends Specification {
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
 
         when:
-        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
+        JournalEntryDto journalEntry = createIntentionWithClient(intentionInputDto)
 
         then:
-        assert intention != null
-        assert intention.getId() != null
-        assert intention.getTaskId() == intentionInputDto.getTaskId()
-        assert intention.description == intentionInputDto.getDescription()
+        assert journalEntry != null
+        assert journalEntry.getId() != null
+        assert journalEntry.getTaskId() == intentionInputDto.getTaskId()
+        assert journalEntry.description == intentionInputDto.getDescription()
+        assert journalEntry.journalEntryType == JournalEntryType.Intention
     }
 
     def "should update flame rating"() {

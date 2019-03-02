@@ -26,4 +26,7 @@ public class JournalEntryDto {
 
     private Integer flameRating;
     private String finishStatus;
+
+    private JournalEntryType journalEntryType;
+    private UUID circleId;
 }
