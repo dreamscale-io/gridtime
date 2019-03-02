@@ -262,6 +262,7 @@ public class CircleService {
         circleContextEntity.setId(UUID.randomUUID());
         circleContextEntity.setMemberId(memberId);
         circleContextEntity.setOrganizationId(organizationId);
+        circleContextEntity.setPosition(timeService.now());
         circleContextEntity.setDescription(circleEntity.getProblemDescription());
         circleContextEntity.setCircleId(circleEntity.getId());
 
