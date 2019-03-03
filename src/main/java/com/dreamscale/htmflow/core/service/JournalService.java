@@ -30,6 +30,9 @@ public class JournalService {
     private IntentionRepository intentionRepository;
 
     @Autowired
+    private CircleContextRepository circleContextRepository;
+
+    @Autowired
     private JournalEntryRepository journalEntryRepository;
 
     @Autowired
@@ -192,6 +195,19 @@ public class JournalService {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
+    public JournalEntryDto saveFlameRatingForWTFCircle(UUID masterAccountId, UUID circleContextId, FlameRatingInputDto flameRatingInputDto) {
+        CircleContextEntity circleContextEntity = circleContextRepository.findOne(circleContextId);
+
+        validateMemberWithinOrg(circleContextEntity.getOrganizationId(), masterAccountId);
+        if (flameRatingInputDto.isValid()) {
+            circleContextEntity.setFlameRating(flameRatingInputDto.getFlameRating());
+            circleContextRepository.save(circleContextEntity);
+        }
+
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(circleContextEntity.getId());
+        return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
     public JournalEntryDto finishIntention(UUID masterAccountId, UUID intentionId) {
 
         return updateFinishStatus(masterAccountId, intentionId, FinishStatus.done);
@@ -218,4 +234,6 @@ public class JournalService {
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
+
+
 }

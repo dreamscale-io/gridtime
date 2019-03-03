@@ -1,9 +1,12 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.circle.CircleDto
+import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.journal.*
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto
+import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.core.domain.*
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator
@@ -20,6 +23,9 @@ class JournalHistoryResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient
+
+    @Autowired
+    private CircleClient circleClient;
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -79,6 +85,29 @@ class JournalHistoryResourceSpec extends Specification {
         then:
         assert result != null
         assert result.getId() == intention.getId()
+        assert result.getFlameRating() == flameRating;
+    }
+
+    def "should update WTF Circle flame rating"() {
+        given:
+        TaskEntity task = createOrganizationAndTask()
+        createMembership(task.getOrganizationId(), testUser.getId())
+
+        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
+        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
+
+        mockTimeService.now() >> LocalDateTime.now()
+
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("problem"))
+
+        int flameRating = 3;
+
+        when:
+        JournalEntryDto result = journalClient.updateWTFCircleFlameRating(circle.circleContext.id.toString(), new FlameRatingInputDto(flameRating));
+
+        then:
+        assert result != null
+        assert result.getId() == circle.circleContext.getId()
         assert result.getFlameRating() == flameRating;
     }
 

@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
+import com.dreamscale.htmflow.client.CircleClient;
 import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class JournalHistoryResource {
+
 
     @Autowired
     private JournalService journalService;
@@ -46,6 +48,13 @@ public class JournalHistoryResource {
         return journalService.createIntention(context.getMasterAccountId(), intentionInput);
     }
 
+
+    /**
+     * Annotate the Intention with a flame rating
+     * @param intentionId
+     * @param flameRatingInputDto
+     * @return JournalEntryDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
     JournalEntryDto updateRetroFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
@@ -53,6 +62,12 @@ public class JournalHistoryResource {
         return journalService.saveFlameRating(context.getMasterAccountId(), UUID.fromString(intentionId), flameRatingInputDto);
     }
 
+    /**
+     * Mark the Intention with a FinishStatus immediately, rather than closing by starting a new Intention
+     * @param intentionId
+     * @param intentionRefInputDto
+     * @return JournalEntryDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
     JournalEntryDto finishIntention(@PathVariable("id") String intentionId, @RequestBody IntentionFinishInputDto intentionRefInputDto) {
@@ -65,6 +80,13 @@ public class JournalHistoryResource {
         } else {
             throw new BadRequestException(ValidationErrorCodes.INVALID_FINISH_STATUS, "Invalid finish status");
         }
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto updateWTFCircleFlameRating(@PathVariable("id") String circleContextId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
+        RequestContext context = RequestContext.get();
+        return journalService.saveFlameRatingForWTFCircle(context.getMasterAccountId(), UUID.fromString(circleContextId), flameRatingInputDto);
     }
 
 

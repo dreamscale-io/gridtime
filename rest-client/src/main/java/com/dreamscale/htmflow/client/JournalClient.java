@@ -19,7 +19,10 @@ public interface JournalClient {
     JournalEntryDto createIntention(IntentionInputDto chunkEvent);
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto updateRetroFlameRating(@Param("id") String id, FlameRatingInputDto flameRatingInput);
+    JournalEntryDto updateRetroFlameRating(@Param("id") String intentionId, FlameRatingInputDto flameRatingInput);
+
+    @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.WTF_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
+    JournalEntryDto updateWTFCircleFlameRating(@Param("id") String circleContextId, FlameRatingInputDto flameRatingInput);
 
     @RequestLine("POST " +ResourcePaths.JOURNAL_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
     JournalEntryDto finishIntention(@Param("id") String id, IntentionFinishInputDto intentionFinishInputDto);
