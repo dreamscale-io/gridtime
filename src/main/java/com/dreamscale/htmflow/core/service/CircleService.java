@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.api.journal.FinishStatus;
+import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
@@ -51,6 +52,9 @@ public class CircleService {
     IntentionRepository intentionRepository;
 
     @Autowired
+    JournalEntryRepository journalEntryRepository;
+
+    @Autowired
     TimeService timeService;
 
     SillyNameGenerator sillyNameGenerator;
@@ -62,6 +66,7 @@ public class CircleService {
     private DtoEntityMapper<CircleMemberDto, CircleMemberEntity> circleMemberMapper;
     private DtoEntityMapper<FeedMessageDto, CircleFeedEntity> feedMessageMapper;
     private DtoEntityMapper<FeedMessageDto, CircleFeedMessageEntity> circleFeedMessageMapper;
+    private DtoEntityMapper<JournalEntryDto, JournalEntryEntity> journalEntryMapper;
 
     @PostConstruct
     private void init() throws IOException, URISyntaxException {
@@ -69,7 +74,7 @@ public class CircleService {
         circleMemberMapper = mapperFactory.createDtoEntityMapper(CircleMemberDto.class, CircleMemberEntity.class);
         feedMessageMapper = mapperFactory.createDtoEntityMapper(FeedMessageDto.class, CircleFeedEntity.class);
         circleFeedMessageMapper = mapperFactory.createDtoEntityMapper(FeedMessageDto.class, CircleFeedMessageEntity.class);
-
+        journalEntryMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
         sillyNameGenerator = new SillyNameGenerator();
     }
 
@@ -128,12 +133,25 @@ public class CircleService {
 
         List<CircleMemberDto> memberDtos = new ArrayList<>();
         memberDtos.add(createCircleMember(memberId));
-
         circleDto.setMembers(memberDtos);
+
+        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
         activeStatusService.pushWTFStatus(organizationId, memberId, circleDto.getId(), problemStatement);
 
         return circleDto;
+    }
+
+    public CircleDto getActiveCircle(UUID organizationId, UUID memberId) {
+
+        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, memberId);
+
+        CircleDto activeCircle = null;
+        if (activeCircleId != null) {
+            activeCircle = getCircle(memberId, activeCircleId);
+        }
+
+        return activeCircle;
     }
 
     public CircleDto closeCircle(UUID organizationId, UUID memberId, UUID circleId) {
@@ -169,8 +187,10 @@ public class CircleService {
 
         activeStatusService.resolveWTFWithYay(organizationId, memberId);
 
-        return circleMapper.toApi(circleEntity);
+        CircleDto circleDto = circleMapper.toApi(circleEntity);
+        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
+        return circleDto;
     }
 
     public CircleDto shelveCircleWithDoItLater(UUID organizationId, UUID memberId, UUID circleId) {
@@ -205,7 +225,10 @@ public class CircleService {
 
         activeStatusService.resolveWTFWithAbort(organizationId, memberId);
 
-        return circleMapper.toApi(circleEntity);
+        CircleDto circleDto = circleMapper.toApi(circleEntity);
+        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
+
+        return circleDto;
 
     }
 
@@ -235,8 +258,23 @@ public class CircleService {
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
         circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
+        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
         return circleDto;
+    }
+
+    private JournalEntryDto getLastCircleContextDto(UUID circleId) {
+        CircleContextEntity circleContextEntity = circleContextRepository.findLastByCircleId(circleId);
+        return translateToContextDto(circleContextEntity);
+    }
+
+    private JournalEntryDto translateToContextDto(CircleContextEntity circleContextEntity) {
+        if (circleContextEntity != null) {
+            JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(circleContextEntity.getId());
+            return journalEntryMapper.toApi(journalEntryEntity);
+        } else {
+            return null;
+        }
     }
 
     private CircleContextEntity createCircleContextFromHistoricalContext(UUID organizationId, UUID memberId, CircleEntity circleEntity) {
@@ -384,19 +422,7 @@ public class CircleService {
 
     }
 
-    public CircleDto getActiveCircle(UUID organizationId, UUID memberId) {
-
-        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, memberId);
-
-        CircleDto activeCircle = null;
-        if (activeCircleId != null) {
-            activeCircle = getCircle(memberId, activeCircleId);
-        }
-
-        return activeCircle;
-    }
-
-    public CircleDto getCircle(UUID memberId, UUID circleId) {
+    CircleDto getCircle(UUID memberId, UUID circleId) {
         CircleDto circleDto = null;
 
         CircleEntity circleEntity = circleRepository.findOne(circleId);
@@ -407,6 +433,8 @@ public class CircleService {
         memberDtos.add(createCircleMember(memberId));
 
         circleDto.setMembers(memberDtos);
+
+        circleDto.setCircleContext(getLastCircleContextDto(circleEntity.getId()));
 
         return circleDto;
     }

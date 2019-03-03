@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.api.circle;
 
+import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class CircleDto {
     LocalDateTime lastResumeTime;
 
     List<CircleMemberDto> members;
+    JournalEntryDto circleContext;
 
     String publicKey;
 

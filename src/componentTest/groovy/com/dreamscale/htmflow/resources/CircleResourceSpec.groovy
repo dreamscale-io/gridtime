@@ -169,6 +169,7 @@ class CircleResourceSpec extends Specification {
         assert messages.get(1).message == "Circle closed."
     }
 
+
     def "should shelf a circle with do it later"() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
