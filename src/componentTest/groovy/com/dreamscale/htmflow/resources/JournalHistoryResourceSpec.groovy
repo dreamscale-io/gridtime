@@ -88,28 +88,6 @@ class JournalHistoryResourceSpec extends Specification {
         assert result.getFlameRating() == flameRating;
     }
 
-    def "should update WTF Circle flame rating"() {
-        given:
-        TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
-
-        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
-        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
-
-        mockTimeService.now() >> LocalDateTime.now()
-
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("problem"))
-
-        int flameRating = 3;
-
-        when:
-        JournalEntryDto result = journalClient.updateWTFCircleFlameRating(circle.circleContext.id.toString(), new FlameRatingInputDto(flameRating));
-
-        then:
-        assert result != null
-        assert result.getId() == circle.circleContext.getId()
-        assert result.getFlameRating() == flameRating;
-    }
 
     def "should finish intention"() {
         given:
@@ -146,7 +124,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 3 //task switch event added
+        assert intentions.size() == 2 //task switch event added
     }
 
     def "get recent intentions with limit"() {
@@ -200,7 +178,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 4
+        assert intentions.size() == 3
     }
 
 
@@ -305,7 +283,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 3
+        assert intentions.size() == 2
     }
 
     def "get recent intentions for other member with limit"() {

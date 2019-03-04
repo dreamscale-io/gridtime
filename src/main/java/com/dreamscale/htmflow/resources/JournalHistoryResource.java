@@ -82,14 +82,6 @@ public class JournalHistoryResource {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto updateWTFCircleFlameRating(@PathVariable("id") String circleContextId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
-        RequestContext context = RequestContext.get();
-        return journalService.saveFlameRatingForWTFCircle(context.getMasterAccountId(), UUID.fromString(circleContextId), flameRatingInputDto);
-    }
-
-
     /**
      * Get an overview of the recent Intentions in the Journal, ordered by time descending,
      * either for the current user (if member not provided), or for another memberId within the org

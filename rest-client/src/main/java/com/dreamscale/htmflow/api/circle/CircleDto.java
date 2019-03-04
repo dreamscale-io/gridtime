@@ -25,7 +25,6 @@ public class CircleDto {
     LocalDateTime lastResumeTime;
 
     List<CircleMemberDto> members;
-    JournalEntryDto circleContext;
 
     String publicKey;
 

@@ -135,8 +135,6 @@ public class CircleService {
         memberDtos.add(createCircleMember(memberId));
         circleDto.setMembers(memberDtos);
 
-        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
-
         activeStatusService.pushWTFStatus(organizationId, memberId, circleDto.getId(), problemStatement);
 
         return circleDto;
@@ -188,7 +186,6 @@ public class CircleService {
         activeStatusService.resolveWTFWithYay(organizationId, memberId);
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
-        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
         return circleDto;
     }
@@ -226,7 +223,6 @@ public class CircleService {
         activeStatusService.resolveWTFWithAbort(organizationId, memberId);
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
-        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
         return circleDto;
 
@@ -258,24 +254,10 @@ public class CircleService {
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
         circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
-        circleDto.setCircleContext(translateToContextDto(circleContextEntity));
 
         return circleDto;
     }
 
-    private JournalEntryDto getLastCircleContextDto(UUID circleId) {
-        CircleContextEntity circleContextEntity = circleContextRepository.findLastByCircleId(circleId);
-        return translateToContextDto(circleContextEntity);
-    }
-
-    private JournalEntryDto translateToContextDto(CircleContextEntity circleContextEntity) {
-        if (circleContextEntity != null) {
-            JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(circleContextEntity.getId());
-            return journalEntryMapper.toApi(journalEntryEntity);
-        } else {
-            return null;
-        }
-    }
 
     private CircleContextEntity createCircleContextFromHistoricalContext(UUID organizationId, UUID memberId, CircleEntity circleEntity) {
         CircleContextEntity circleContextEntity = new CircleContextEntity();
@@ -434,7 +416,6 @@ public class CircleService {
 
         circleDto.setMembers(memberDtos);
 
-        circleDto.setCircleContext(getLastCircleContextDto(circleEntity.getId()));
 
         return circleDto;
     }
