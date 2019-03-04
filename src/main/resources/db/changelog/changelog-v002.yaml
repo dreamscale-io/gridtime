@@ -53,3 +53,9 @@ databaseChangeLog:
 
   - include:
         file: db/v002/replace_journal_entry_view.sql
+
+  - include:
+        file: db/v002/create_task_switch_event.sql
+
+  - include:
+        file: db/v002/replace_journal_entry_view_with_taskswitch.sql

@@ -36,6 +36,9 @@ public class JournalService {
     private JournalEntryRepository journalEntryRepository;
 
     @Autowired
+    private TaskSwitchEventRepository taskSwitchEventRepository;
+
+    @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
@@ -49,6 +52,9 @@ public class JournalService {
 
     @Autowired
     private TimeService timeService;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private XPService xpService;
@@ -75,7 +81,13 @@ public class JournalService {
 
         LocalDateTime creationTime = timeService.now();
 
-        closeLastIntention(memberId, creationTime);
+        IntentionEntity lastIntention = closeLastIntention(memberId, creationTime);
+        if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
+            TaskSwitchEventEntity taskSwitchEventEntity =
+                    createTaskSwitchJournalEntry(organizationId, memberId, creationTime, intentionInputDto);
+            taskSwitchEventRepository.save(taskSwitchEventEntity);
+        }
+
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
@@ -93,7 +105,24 @@ public class JournalService {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
-    private void closeLastIntention(UUID memberId, LocalDateTime finishTime) {
+    private TaskSwitchEventEntity createTaskSwitchJournalEntry(UUID organizationId, UUID memberId, LocalDateTime creationTime, IntentionInputDto intentionInputDto) {
+        TaskSwitchEventEntity taskSwitchEventEntity = new TaskSwitchEventEntity();
+        taskSwitchEventEntity.setId(UUID.randomUUID());
+        taskSwitchEventEntity.setProjectId(intentionInputDto.getProjectId());
+        taskSwitchEventEntity.setTaskId(intentionInputDto.getTaskId());
+        taskSwitchEventEntity.setOrganizationId(organizationId);
+        taskSwitchEventEntity.setMemberId(memberId);
+        taskSwitchEventEntity.setPosition(creationTime.minusSeconds(1));
+
+        TaskEntity taskEntity = taskRepository.findOne(intentionInputDto.getTaskId());
+        if (taskEntity != null) {
+            taskSwitchEventEntity.setDescription(taskEntity.getSummary());
+        }
+
+        return taskSwitchEventEntity;
+    }
+
+    private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime finishTime) {
         List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
@@ -105,7 +134,9 @@ public class JournalService {
 
                 intentionRepository.save(lastIntention);
             }
+            return lastIntention;
         }
+        return null;
     }
 
     public List<JournalEntryDto> getRecentIntentions(UUID masterAccountId, int limit) {

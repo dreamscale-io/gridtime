@@ -146,7 +146,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 2
+        assert intentions.size() == 3 //task switch event added
     }
 
     def "get recent intentions with limit"() {
@@ -200,7 +200,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 3
+        assert intentions.size() == 4
     }
 
 
@@ -305,7 +305,7 @@ class JournalHistoryResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 2
+        assert intentions.size() == 3
     }
 
     def "get recent intentions for other member with limit"() {
