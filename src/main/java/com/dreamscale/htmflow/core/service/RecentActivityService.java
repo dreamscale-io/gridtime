@@ -235,12 +235,22 @@ public class RecentActivityService {
 
         Map<UUID, TaskEntity> recentTaskMap = new LinkedHashMap<>();
 
-        if (noTaskTask != null) {
-            recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
-        }
+        int numberAdded = 0;
 
+        //either add the noTaskTask as the 5th last entry, if it's not among recent
         for (TaskEntity recentTask : recentTasks) {
             recentTaskMap.put(recentTask.getId(), recentTask);
+            numberAdded++;
+
+            if (numberAdded == 4 && recentTaskMap.get(noTaskTask.getId()) == null) {
+                recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
+                break;
+            }
+        }
+
+        //or if there's not yet 4 entries in recent, add to the top
+        if (noTaskTask != null) {
+            recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
         }
 
         for (TaskEntity defaultTask : defaultTasks) {
