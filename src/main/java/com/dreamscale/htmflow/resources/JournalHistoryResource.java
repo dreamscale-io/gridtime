@@ -94,21 +94,13 @@ public class JournalHistoryResource {
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
-        List<JournalEntryDto> journalEntries;
+        RecentJournalDto recentJournalDto;
 
         if (memberId.isPresent()) {
-            journalEntries = journalService.getRecentIntentionsForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), effectiveLimit);
+            recentJournalDto = journalService.getJournalForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), effectiveLimit);
         } else {
-            journalEntries = journalService.getRecentIntentions(context.getMasterAccountId(), effectiveLimit);
+            recentJournalDto = journalService.getJournalForSelf(context.getMasterAccountId(), effectiveLimit);
         }
-
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
-        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
-
-        RecentJournalDto recentJournalDto = new RecentJournalDto();
-        recentJournalDto.setRecentIntentions(journalEntries);
-        recentJournalDto.setRecentProjects(recentActivity.getRecentProjects());
-        recentJournalDto.setRecentTasksByProjectId(recentActivity.getRecentTasksByProjectId());
 
         return recentJournalDto;
     }

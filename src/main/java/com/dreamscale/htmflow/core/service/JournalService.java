@@ -1,10 +1,8 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.api.journal.FlameRatingInputDto;
-import com.dreamscale.htmflow.api.journal.IntentionDto;
-import com.dreamscale.htmflow.api.journal.IntentionInputDto;
-import com.dreamscale.htmflow.api.journal.JournalEntryDto;
+import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
+import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
@@ -151,7 +149,7 @@ public class JournalService {
 
     public List<JournalEntryDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        validateMemberWithinOrg(organization, memberId);
+        validateMemberWithinOrgByMemberId(organization.getId(), memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -171,7 +169,7 @@ public class JournalService {
 
     public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        validateMemberWithinOrg(organization, memberId);
+        validateMemberWithinOrgByMemberId(organization.getId(), memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -197,9 +195,9 @@ public class JournalService {
         }
     }
 
-    private void validateMemberWithinOrg(OrganizationDto organization, UUID memberId) {
+    private void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
         OrganizationMemberEntity otherMember = organizationMemberRepository.findById(memberId);
-        if (otherMember == null || !otherMember.getOrganizationId().equals(organization.getId())) {
+        if (otherMember == null || !otherMember.getOrganizationId().equals(organizationId)) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
         }
     }
@@ -254,4 +252,35 @@ public class JournalService {
     }
 
 
+    public RecentJournalDto getJournalForMember(UUID masterAccountId, UUID otherMemberId, Integer effectiveLimit) {
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(masterAccountId);
+        validateMemberWithinOrgByMemberId(invokingMember.getOrganizationId(), otherMemberId);
+
+        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(masterAccountId, otherMemberId, effectiveLimit);
+        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(invokingMember.getOrganizationId(), otherMemberId);
+
+        RecentJournalDto recentJournalDto = new RecentJournalDto();
+        recentJournalDto.setRecentIntentions(journalEntries);
+        recentJournalDto.setRecentProjects(recentActivity.getRecentProjects());
+        recentJournalDto.setRecentTasksByProjectId(recentActivity.getRecentTasksByProjectId());
+
+        return recentJournalDto;
+
+    }
+
+    public RecentJournalDto getJournalForSelf(UUID masterAccountId, Integer effectiveLimit) {
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(masterAccountId);
+
+        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(masterAccountId, invokingMember.getId(), effectiveLimit);
+        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(invokingMember.getOrganizationId(), invokingMember.getId());
+
+        RecentJournalDto recentJournalDto = new RecentJournalDto();
+        recentJournalDto.setRecentIntentions(journalEntries);
+        recentJournalDto.setRecentProjects(recentActivity.getRecentProjects());
+        recentJournalDto.setRecentTasksByProjectId(recentActivity.getRecentTasksByProjectId());
+
+        return recentJournalDto;
+    }
 }
