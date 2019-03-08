@@ -166,7 +166,6 @@ class CircleResourceSpec extends Specification {
         assert circleDto != null
         assert messages != null
         assert messages.size() == 2
-        assert messages.get(1).message == "Circle closed."
     }
 
 

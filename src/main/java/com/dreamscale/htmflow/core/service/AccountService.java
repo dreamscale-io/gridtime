@@ -122,6 +122,11 @@ public class AccountService implements MasterAccountIdResolver {
         return masterAccountId;
     }
 
+    public LocalDateTime getActivationDate(UUID masterAccountId) {
+        MasterAccountEntity masterAccountEntity = masterAccountRepository.findById(masterAccountId);
+        return masterAccountEntity.getActivationDate();
+    }
+
     @Override
     public UUID findAccountIdByConnectionId(String connectionId) {
         UUID masterAccountId = null;
@@ -136,4 +141,6 @@ public class AccountService implements MasterAccountIdResolver {
     private String generateAPIKey() {
         return UUID.randomUUID().toString().replace("-", "");
     }
+
+
 }

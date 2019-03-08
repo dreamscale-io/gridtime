@@ -26,6 +26,9 @@ public class OrganizationService {
     private OrganizationRepository organizationRepository;
 
     @Autowired
+    OrganizationMemberRepository organizationMemberRepository;
+
+    @Autowired
     private OrganizationInviteTokenRepository inviteTokenRepository;
 
     @Autowired
@@ -234,5 +237,19 @@ public class OrganizationService {
         return outputOrg;
     }
 
+    public void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
+        OrganizationMemberEntity otherMember = organizationMemberRepository.findById(memberId);
+        if (otherMember == null || !otherMember.getOrganizationId().equals(organizationId)) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
+        }
+    }
+
+    public void validateMemberWithinOrg(UUID organizationId, UUID masterAccountId) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
+
+        if (membership == null || !membership.getOrganizationId().equals(organizationId)) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
+        }
+    }
 
 }

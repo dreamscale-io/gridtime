@@ -5,8 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface MemberXPRepository extends CrudRepository<MemberXPEntity, UUID> {
+public interface SpiritNetworkEventRepository extends CrudRepository<SpiritNetworkEventEntity, UUID> {
 
-    MemberXPEntity findByMemberId(UUID memberId);
 
 }

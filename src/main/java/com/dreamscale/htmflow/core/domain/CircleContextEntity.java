@@ -31,7 +31,7 @@ public class CircleContextEntity {
     private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID memberId;
+    private UUID spiritId;
 
     private Integer flameRating;
 

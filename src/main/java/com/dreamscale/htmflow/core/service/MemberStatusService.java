@@ -2,8 +2,7 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.circle.CircleDto;
 import com.dreamscale.htmflow.api.organization.*;
-import com.dreamscale.htmflow.api.status.XPSummaryDto;
-import com.dreamscale.htmflow.api.team.TeamDto;
+import com.dreamscale.htmflow.api.spirit.XPSummaryDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -12,9 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +20,7 @@ import java.util.UUID;
 public class MemberStatusService {
 
     @Autowired
-    private XPService xpService;
+    private SpiritService xpService;
 
     @Autowired
     private CircleService circleService;

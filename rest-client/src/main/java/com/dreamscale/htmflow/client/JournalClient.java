@@ -32,7 +32,7 @@ public interface JournalClient {
     RecentJournalDto getRecentJournalWithLimit(@Param("limit") Integer limit);
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
-      + "?member={memberId}")
+            + "?member={memberId}")
     RecentJournalDto getRecentJournalForMember(@Param("memberId") String memberId);
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH

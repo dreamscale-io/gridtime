@@ -53,6 +53,12 @@ public class ResourcePaths {
     public static final String ONPREM_PATH = "/onprem";
 
     public static final String SPIRIT_PATH = "/spirit";
+    public static final String LINK_PATH = "/link";
+    public static final String UNLINK_PATH = "/unlink";
+    public static final String NETWORK_PATH = "/network";
+
+    public static final String RIP_PATH = "/restinpeace";
+
     public static final String STATUS_PATH = "/status";
     public static final String WTF_PATH = "/wtf";
     public static final String YAY_PATH = "/yay";

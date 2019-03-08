@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.organization.*;
-import com.dreamscale.htmflow.api.status.XPSummaryDto;
+import com.dreamscale.htmflow.api.spirit.XPSummaryDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
 import com.dreamscale.htmflow.core.domain.*;
@@ -22,7 +22,7 @@ public class TeamService {
     private OrganizationService organizationService;
 
     @Autowired
-    private XPService xpService;
+    private SpiritService xpService;
 
     @Autowired
     private ActiveStatusService wtfService;

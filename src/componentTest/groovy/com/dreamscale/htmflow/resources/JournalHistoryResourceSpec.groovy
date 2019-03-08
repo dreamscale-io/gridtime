@@ -1,8 +1,6 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.circle.CircleDto
-import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.journal.*
 import com.dreamscale.htmflow.api.project.ProjectDto
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto

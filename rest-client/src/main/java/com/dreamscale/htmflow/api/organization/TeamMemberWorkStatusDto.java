@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.api.organization;
 
-import com.dreamscale.htmflow.api.status.XPSummaryDto;
+import com.dreamscale.htmflow.api.spirit.XPSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

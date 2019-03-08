@@ -1,19 +1,17 @@
-package com.dreamscale.htmflow.api.circle;
-
+package com.dreamscale.htmflow.api.spirit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircleMemberDto {
+public class SpiritDto {
 
-    UUID spiritId;
-    String fullName;
+    private XPSummaryDto xpSummary;
+    private ActiveLinksNetworkDto activeSpiritLinks;
+
 }

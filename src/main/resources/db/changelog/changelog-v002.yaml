@@ -62,3 +62,33 @@ databaseChangeLog:
 
   - include:
         file: db/v002/replace_journal_entry_view_strip.sql
+
+  - include:
+        file: db/v002/spirit/replace_member_name_view.sql
+
+  - include:
+        file: db/v002/spirit/replace_circle_feed_message_view.sql
+
+  - include:
+        file: db/v002/spirit/create_spirit_network_event.sql
+
+  - include:
+        file: db/v002/spirit/create_active_spirit_link.sql
+
+  - include:
+        file: db/v002/spirit/alter_circle_member_rename_member_id.sql
+
+  - include:
+        file: db/v002/spirit/alter_circle_feed_rename_member_id.sql
+
+  - include:
+        file: db/v002/spirit/alter_circle_context_rename_member_id.sql
+
+  - include:
+        file: db/v002/spirit/alter_team_member_xp_rename.sql
+
+  - include:
+        file: db/v002/spirit/create_torchie_tombstone.sql
+
+  - include:
+        file: db/v002/spirit/alter_table_active_spirit_link_unique.sql

@@ -28,9 +28,6 @@ public class JournalService {
     private IntentionRepository intentionRepository;
 
     @Autowired
-    private CircleContextRepository circleContextRepository;
-
-    @Autowired
     private JournalEntryRepository journalEntryRepository;
 
     @Autowired
@@ -55,7 +52,7 @@ public class JournalService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private XPService xpService;
+    private SpiritService xpService;
 
 
     @Autowired
@@ -149,7 +146,7 @@ public class JournalService {
 
     public List<JournalEntryDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        validateMemberWithinOrgByMemberId(organization.getId(), memberId);
+        organizationService.validateMemberWithinOrgByMemberId(organization.getId(), memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -169,7 +166,7 @@ public class JournalService {
 
     public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
         OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        validateMemberWithinOrgByMemberId(organization.getId(), memberId);
+        organizationService.validateMemberWithinOrgByMemberId(organization.getId(), memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -195,25 +192,10 @@ public class JournalService {
         }
     }
 
-    private void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
-        OrganizationMemberEntity otherMember = organizationMemberRepository.findById(memberId);
-        if (otherMember == null || !otherMember.getOrganizationId().equals(organizationId)) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
-        }
-    }
-
-    private void validateMemberWithinOrg(UUID organizationId, UUID masterAccountId) {
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
-
-        if (membership == null || !membership.getOrganizationId().equals(organizationId)) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
-        }
-    }
-
     public JournalEntryDto saveFlameRating(UUID masterAccountId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
-        validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+        organizationService.validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
 
         if (flameRatingInputDto.isValid()) {
             intentionEntity.setFlameRating(flameRatingInputDto.getFlameRating());
@@ -238,7 +220,7 @@ public class JournalService {
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
         if (intentionEntity != null) {
-            validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+            organizationService.validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
 
             intentionEntity.setFinishStatus(finishStatus.name());
             intentionEntity.setFinishTime(timeService.now());
@@ -255,7 +237,7 @@ public class JournalService {
     public RecentJournalDto getJournalForMember(UUID masterAccountId, UUID otherMemberId, Integer effectiveLimit) {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(masterAccountId);
-        validateMemberWithinOrgByMemberId(invokingMember.getOrganizationId(), otherMemberId);
+        organizationService.validateMemberWithinOrgByMemberId(invokingMember.getOrganizationId(), otherMemberId);
 
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(masterAccountId, otherMemberId, effectiveLimit);
         RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(invokingMember.getOrganizationId(), otherMemberId);

@@ -25,5 +25,14 @@ public interface CircleRepository extends CrudRepository<CircleEntity, UUID> {
             "order by c.start_time ")
     List<CircleEntity> findAllDoItLaterCircles(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
 
+    @Query(nativeQuery = true, value = "select * from circle c " +
+            "where c.organization_id = (:organizationId) " +
+            "and exists (select 1 from circle_member cm " +
+            "where c.id = cm.circle_id " +
+            "and cm.spirit_id = (:spiritId)) " +
+            "order by c.start_time ")
+    List<CircleEntity> findAllByParticipation(@Param("organizationId") UUID organizationId, @Param("spiritId") UUID spiritId);
+
+
     CircleEntity findByOwnerMemberIdAndId(UUID ownerMemberId, UUID id);
 }

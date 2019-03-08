@@ -40,9 +40,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("createNewWTFCircle, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.createNewAdhocCircle(memberEntity.getOrganizationId(), memberEntity.getId(), circleSessionInputDto.getProblemDescription());
+        return circleService.createNewAdhocCircle(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), circleSessionInputDto.getProblemDescription());
 
     }
 
@@ -56,9 +56,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("getActiveCircle, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.getActiveCircle(memberEntity.getOrganizationId(), memberEntity.getId());
+        return circleService.getActiveCircle(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
     /**
@@ -71,9 +71,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("getAllOpenCircles, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.getAllOpenCircles(memberEntity.getOrganizationId(), memberEntity.getId());
+        return circleService.getAllOpenCircles(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
     /**
@@ -86,9 +86,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("getAllDoItLaterCircles, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.getAllDoItLaterCircles(memberEntity.getOrganizationId(), memberEntity.getId());
+        return circleService.getAllDoItLaterCircles(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
     /**
@@ -100,9 +100,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("getCircleKey, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.retrieveKey(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.retrieveKey(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId));
     }
 
 
@@ -115,9 +115,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("closeWTFCircle, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.closeCircle(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.closeCircle(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId));
     }
 
     /**
@@ -129,9 +129,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("shelveCircleWithDoItLater, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.shelveCircleWithDoItLater(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.shelveCircleWithDoItLater(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId));
 
     }
 
@@ -144,9 +144,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("resumeAnExistingCircleOnDoItLaterShelf, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.resumeAnExistingCircleFromDoItLaterShelf(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.resumeAnExistingCircleFromDoItLaterShelf(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId));
     }
 
     /**
@@ -160,9 +160,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("postChatMessageToCircleFeed, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.postChatMessageToCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId), chatMessageInputDto.getChatMessage());
+        return circleService.postChatMessageToCircleFeed(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId), chatMessageInputDto.getChatMessage());
 
     }
 
@@ -177,9 +177,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("postScreenshotReferenceToCircleFeed, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.postScreenshotReferenceToCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId), screenshotReferenceInputDto);
+        return circleService.postScreenshotReferenceToCircleFeed(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId), screenshotReferenceInputDto);
 
     }
 
@@ -196,9 +196,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("postSnippetToActiveCircleFeed, user={}, snippet={}", context.getMasterAccountId(), snippet);
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.postSnippetToActiveCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(),  snippet);
+        return circleService.postSnippetToActiveCircleFeed(invokingSpirit.getOrganizationId(), invokingSpirit.getId(),  snippet);
     }
 
     /**
@@ -211,9 +211,9 @@ public class CircleResource {
         RequestContext context = RequestContext.get();
         log.info("getAllMessagesForCircleFeed, user={}", context.getMasterAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circleService.getAllMessagesForCircleFeed(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(circleId));
+        return circleService.getAllMessagesForCircleFeed(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), UUID.fromString(circleId));
 
     }
 

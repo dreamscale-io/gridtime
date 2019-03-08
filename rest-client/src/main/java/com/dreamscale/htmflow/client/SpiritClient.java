@@ -1,16 +1,12 @@
 package com.dreamscale.htmflow.client;
 
 import com.dreamscale.htmflow.api.ResourcePaths;
-import com.dreamscale.htmflow.api.batch.NewFlowBatch;
-import com.dreamscale.htmflow.api.event.NewSnippetEvent;
-import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.htmflow.api.project.TaskDto;
-import com.dreamscale.htmflow.api.project.TaskInputDto;
-import com.dreamscale.htmflow.api.status.WtfStatusInputDto;
-import com.dreamscale.htmflow.api.status.XPSummaryDto;
+import com.dreamscale.htmflow.api.spirit.*;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+
+import java.util.List;
 
 @Headers({
         "Content-Type: application/json",
@@ -18,17 +14,32 @@ import feign.RequestLine;
 })
 public interface SpiritClient {
 
-    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.XP_PATH)
-    XPSummaryDto getLatestXP();
+    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH)
+    SpiritDto getMySpirit();
 
-    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH +  ResourcePaths.STATUS_PATH + ResourcePaths.WTF_PATH)
-    TeamMemberWorkStatusDto pushWTFStatus(WtfStatusInputDto wtfStatusInputDto);
+    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.NETWORK_PATH)
+    SpiritNetworkDto getMySpiritNetwork();
 
-    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH +  ResourcePaths.STATUS_PATH + ResourcePaths.YAY_PATH)
-    TeamMemberWorkStatusDto resolveWithYay();
+    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + "/{id}")
+    SpiritDto getFriendSpirit(@Param("id") String spiritId);
 
-    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH +  ResourcePaths.STATUS_PATH + ResourcePaths.ABORT_PATH)
-    TeamMemberWorkStatusDto resolveWithAbort();
+    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.NETWORK_PATH)
+    SpiritNetworkDto getFriendSpiritNetwork(@Param("id") String spiritId);
+
+    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.LINK_PATH)
+    ActiveLinksNetworkDto linkToSpirit(@Param("id") String spiritId);
+
+    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.UNLINK_PATH)
+    ActiveLinksNetworkDto unlinkSpirit(@Param("id") String spiritId);
+
+    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.TRANSITION_PATH + ResourcePaths.UNLINK_PATH)
+    void unlinkMe();
+
+    @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.TRANSITION_PATH + ResourcePaths.RIP_PATH)
+    TorchieTombstoneDto restInPeace(TombstoneInputDto tombStoneInputDto);
+
+    @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.RIP_PATH)
+    List<TorchieTombstoneDto> getMyTombstones();
 
 
 }

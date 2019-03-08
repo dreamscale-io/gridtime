@@ -24,6 +24,9 @@ public class CoreRandomBuilderSupport {
     @Autowired
     private MasterAccountRepository masterAccountRepository;
 
+    @Autowired
+    private SpiritXPRepository spiritXPRepository;
+
     public RandomProjectEntityBuilder projectEntity() {
         return new RandomProjectEntityBuilder(projectRepository);
     }
@@ -40,6 +43,9 @@ public class CoreRandomBuilderSupport {
         return new RandomOrganizationMemberEntityBuilder(organizationMemberRepository);
     }
 
+    public RandomSpiritXPEntityBuilder spiritXPEntity() {
+        return new RandomSpiritXPEntityBuilder(spiritXPRepository);
+    }
 
     public RandomTaskEntityBuilder taskEntity() {
         return new RandomTaskEntityBuilder(taskRepository);

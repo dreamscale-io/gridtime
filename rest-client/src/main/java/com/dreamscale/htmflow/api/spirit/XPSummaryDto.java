@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.api.status;
+package com.dreamscale.htmflow.api.spirit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
