@@ -51,22 +51,15 @@ public class SpiritService {
     }
 
 
-    public SpiritDto getMySpirit(UUID organizationId, UUID spiritId) {
+    public SpiritDto getSpirit(UUID organizationId, UUID spiritId) {
         SpiritDto spiritDto = new SpiritDto();
+        spiritDto.setSpiritId(spiritId);
         spiritDto.setXpSummary(this.getLatestXPForSpirit(spiritId));
         spiritDto.setActiveSpiritLinks(this.getActiveLinksNetwork(organizationId, spiritId));
 
         return spiritDto;
     }
 
-    public SpiritDto getFriendSpirit(UUID organizationId, UUID invokingSpirit, UUID friendSpirit) {
-
-        SpiritDto friendSpiritDto = new SpiritDto();
-        friendSpiritDto.setXpSummary(this.getLatestXPForSpirit(friendSpirit));
-        friendSpiritDto.setActiveSpiritLinks(this.getActiveLinksNetwork(organizationId, friendSpirit));
-
-        return friendSpiritDto;
-    }
 
     public ActiveLinksNetworkDto linkToSpirit(UUID organizationId, UUID invokingSpirit, UUID friendSpirit) {
 

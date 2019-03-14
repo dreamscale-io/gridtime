@@ -33,10 +33,10 @@ public class SpiritResource {
     @GetMapping(ResourcePaths.ME_PATH )
     public SpiritDto getMySpirit() {
         RequestContext context = RequestContext.get();
-        log.info("getMySpirit, user={}", context.getMasterAccountId());
+        log.info("getSpirit, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
-        return spiritService.getMySpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
+        return spiritService.getSpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
     /**
@@ -68,7 +68,7 @@ public class SpiritResource {
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
         organizationService.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
-        return spiritService.getFriendSpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
+        return spiritService.getSpirit(invokingSpirit.getOrganizationId(), friendSpiritId);
     }
 
     /**
