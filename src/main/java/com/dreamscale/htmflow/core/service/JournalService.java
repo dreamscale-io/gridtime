@@ -3,6 +3,8 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
+import com.dreamscale.htmflow.api.spirit.ActiveLinksNetworkDto;
+import com.dreamscale.htmflow.api.spirit.SpiritLinkDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -52,19 +55,17 @@ public class JournalService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private SpiritService xpService;
+    private SpiritService spiritService;
 
 
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<IntentionInputDto, IntentionEntity> intentionInputMapper;
-    private DtoEntityMapper<IntentionDto, IntentionEntity> intentionOutputMapper;
     private DtoEntityMapper<JournalEntryDto, JournalEntryEntity> journalEntryOutputMapper;
 
     @PostConstruct
     private void init() {
         intentionInputMapper = mapperFactory.createDtoEntityMapper(IntentionInputDto.class, IntentionEntity.class);
-        intentionOutputMapper = mapperFactory.createDtoEntityMapper(IntentionDto.class, IntentionEntity.class);
         journalEntryOutputMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
     }
 
@@ -72,7 +73,29 @@ public class JournalService {
         UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
         UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organizationId);
 
-        xpService.grantXP(organizationId, memberId, 10);
+        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+
+        IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto);
+
+        if (!activeLinksNetwork.isEmpty()) {
+            List<UUID> membersToMulticast = new ArrayList<>();
+
+            for (SpiritLinkDto link : activeLinksNetwork.getSpiritLinks()) {
+                membersToMulticast.add(link.getFriendSpiritId());
+            }
+
+            for (UUID memberForCreation : membersToMulticast) {
+                createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto);
+            }
+
+        }
+
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
+        return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
+        spiritService.grantXP(organizationId, memberId, 10);
 
         LocalDateTime creationTime = timeService.now();
 
@@ -82,7 +105,6 @@ public class JournalService {
                     createTaskSwitchJournalEntry(organizationId, memberId, creationTime, intentionInputDto);
             taskSwitchEventRepository.save(taskSwitchEventEntity);
         }
-
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
@@ -95,9 +117,9 @@ public class JournalService {
         recentActivityService.updateRecentProjects(intentionEntity);
         recentActivityService.updateRecentTasks(intentionEntity);
 
-        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+        return intentionEntity;
 
-        return journalEntryOutputMapper.toApi(journalEntryEntity);
+
     }
 
     private TaskSwitchEventEntity createTaskSwitchJournalEntry(UUID organizationId, UUID memberId, LocalDateTime creationTime, IntentionInputDto intentionInputDto) {

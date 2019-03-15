@@ -31,4 +31,8 @@ public class ActiveLinksNetworkDto {
     public boolean containsOneLink() {
         return (spiritLinks.size() == 1);
     }
+
+    public boolean isEmpty() {
+        return spiritLinks.isEmpty();
+    }
 }

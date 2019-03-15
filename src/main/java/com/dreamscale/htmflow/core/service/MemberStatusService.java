@@ -48,7 +48,7 @@ public class MemberStatusService {
         MemberStatusEntity memberStatusEntity = memberStatusRepository.findById(memberId);
         log.debug("Who am I? "+memberStatusEntity.getId() + ", "+memberStatusEntity.getFullName());
 
-        return toDto(memberStatusEntity);
+        return toDtoWithDetails(memberStatusEntity);
     }
 
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId) {
@@ -61,7 +61,7 @@ public class MemberStatusService {
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
         for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
-            memberWorkStatusDtos.add(toDto(memberStatusEntity));
+            memberWorkStatusDtos.add(toDtoWithDetails(memberStatusEntity));
         }
         sortMembers(memberWorkStatusDtos);
 
@@ -70,7 +70,7 @@ public class MemberStatusService {
         return memberWorkStatusDtos;
     }
 
-    private MemberWorkStatusDto toDto(MemberStatusEntity memberStatusEntity) {
+    private MemberWorkStatusDto toDtoWithDetails(MemberStatusEntity memberStatusEntity) {
         MemberWorkStatusDto memberStatusDto = memberStatusMapper.toApi(memberStatusEntity);
 
         XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
