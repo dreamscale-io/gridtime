@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class JournalHistoryResourceSpec extends Specification {
+class JournalResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient

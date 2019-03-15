@@ -69,29 +69,51 @@ public class JournalService {
         journalEntryOutputMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
     }
 
-    public JournalEntryDto createIntention(UUID masterAccountId, IntentionInputDto intentionInputDto) {
-        UUID organizationId = getOrganizationIdForProject(intentionInputDto.getProjectId());
-        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organizationId);
+    public JournalEntryDto createIntention(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
+        UUID organizationIdForProject = getOrganizationIdForProject(intentionInputDto.getProjectId());
 
-        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+        validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
         IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto);
 
-        if (!activeLinksNetwork.isEmpty()) {
-            List<UUID> membersToMulticast = new ArrayList<>();
+        List<UUID> membersToMulticast = lookupMulticastMemberIds(organizationId, memberId);
 
-            for (SpiritLinkDto link : activeLinksNetwork.getSpiritLinks()) {
-                membersToMulticast.add(link.getFriendSpiritId());
-            }
-
-            for (UUID memberForCreation : membersToMulticast) {
-                createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto);
-            }
-
+        for (UUID memberForCreation : membersToMulticast) {
+            createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto);
         }
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    private List<UUID> lookupMulticastMemberIds(UUID organizationId, UUID memberId) {
+        List<UUID> membersToMulticast = new ArrayList<>();
+
+        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+        if (!activeLinksNetwork.isEmpty()) {
+
+            for (SpiritLinkDto link : activeLinksNetwork.getSpiritLinks()) {
+                membersToMulticast.add(link.getFriendSpiritId());
+            }
+        }
+
+        return membersToMulticast;
+    }
+
+    private void validateMemberOrgMatchesProjectOrg(UUID organizationId, UUID organizationIdForProject) {
+
+        if (organizationId == null || !organizationId.equals(organizationIdForProject)) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "project org doesn't match member org");
+        }
+
+    }
+
+    private void validateMemberIdMatchesIntentionMemberId(UUID memberId, UUID memberIdForIntention) {
+
+        if (memberId == null || !memberId.equals(memberIdForIntention)) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "member from request doesn't match member from the intention");
+        }
+
     }
 
     private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
@@ -156,9 +178,8 @@ public class JournalService {
         return null;
     }
 
-    public List<JournalEntryDto> getRecentIntentions(UUID masterAccountId, int limit) {
-        OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
+    public List<JournalEntryDto> getRecentIntentionsForMember(UUID organizationId, UUID memberId, int limit) {
+        organizationService.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -166,19 +187,8 @@ public class JournalService {
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<JournalEntryDto> getRecentIntentionsForMember(UUID masterAccountId, UUID memberId, int limit) {
-        OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        organizationService.validateMemberWithinOrgByMemberId(organization.getId(), memberId);
-
-        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
-        Collections.reverse(journalEntryEntities);
-
-        return journalEntryOutputMapper.toApiList(journalEntryEntities);
-    }
-
-    public List<JournalEntryDto> getHistoricalIntentions(UUID masterAccountId, LocalDateTime beforeDate, Integer limit) {
-        OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        UUID memberId = getMemberIdForAccountAndValidate(masterAccountId, organization.getId());
+    public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID organizationId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
+        organizationService.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -186,24 +196,6 @@ public class JournalService {
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID masterAccountId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
-        OrganizationDto organization = organizationService.getDefaultOrganization(masterAccountId);
-        organizationService.validateMemberWithinOrgByMemberId(organization.getId(), memberId);
-
-        List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
-        Collections.reverse(journalEntryEntities);
-
-        return journalEntryOutputMapper.toApiList(journalEntryEntities);
-    }
-
-    private UUID getMemberIdForAccountAndValidate(UUID masterAccountId, UUID organizationId) {
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
-        if (memberEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found");
-        } else {
-            return memberEntity.getId();
-        }
-    }
 
     private UUID getOrganizationIdForProject(UUID projectId) {
         ProjectEntity projectEntity = projectRepository.findById(projectId);
@@ -214,10 +206,11 @@ public class JournalService {
         }
     }
 
-    public JournalEntryDto saveFlameRating(UUID masterAccountId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
+    public JournalEntryDto saveFlameRating(UUID organizationId, UUID memberId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
-        organizationService.validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+        validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
+        validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
 
         if (flameRatingInputDto.isValid()) {
             intentionEntity.setFlameRating(flameRatingInputDto.getFlameRating());
@@ -228,21 +221,39 @@ public class JournalService {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
-    public JournalEntryDto finishIntention(UUID masterAccountId, UUID intentionId) {
+    public JournalEntryDto finishIntention(UUID organizationId, UUID memberId, UUID intentionId) {
 
-        return updateFinishStatus(masterAccountId, intentionId, FinishStatus.done);
+        JournalEntryDto myJournalEntry = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.done);
+        updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.done);
+
+        return myJournalEntry;
     }
 
-    public JournalEntryDto abortIntention(UUID masterAccountId, UUID intentionId) {
+    public JournalEntryDto abortIntention(UUID organizationId, UUID memberId, UUID intentionId) {
+        JournalEntryDto journalEntryDto = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.aborted);
+        updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.aborted);
 
-        return updateFinishStatus(masterAccountId, intentionId, FinishStatus.aborted);
+        return journalEntryDto;
     }
 
-    private JournalEntryDto updateFinishStatus(UUID masterAccountId, UUID intentionId, FinishStatus finishStatus) {
+    private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
+        List<UUID> multiCastMemberIds = lookupMulticastMemberIds(organizationId, memberId);
+        for (UUID multiMember : multiCastMemberIds) {
+
+            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(multiMember, 1);
+            if (lastIntentionList.size() > 0) {
+                updateFinishStatus(organizationId, multiMember, lastIntentionList.get(0).getId(), finishStatus);
+            }
+
+        }
+    }
+
+    private JournalEntryDto updateFinishStatus(UUID organizationId, UUID memberId,  UUID intentionId, FinishStatus finishStatus) {
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
         if (intentionEntity != null) {
-            organizationService.validateMemberWithinOrg(intentionEntity.getOrganizationId(), masterAccountId);
+            validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
+            validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
 
             intentionEntity.setFinishStatus(finishStatus.name());
             intentionEntity.setFinishTime(timeService.now());
@@ -256,13 +267,12 @@ public class JournalService {
     }
 
 
-    public RecentJournalDto getJournalForMember(UUID masterAccountId, UUID otherMemberId, Integer effectiveLimit) {
+    public RecentJournalDto getJournalForMember(UUID organizationId, UUID otherMemberId, Integer effectiveLimit) {
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(masterAccountId);
-        organizationService.validateMemberWithinOrgByMemberId(invokingMember.getOrganizationId(), otherMemberId);
+        organizationService.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
 
-        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(masterAccountId, otherMemberId, effectiveLimit);
-        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(invokingMember.getOrganizationId(), otherMemberId);
+        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, otherMemberId, effectiveLimit);
+        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(organizationId, otherMemberId);
 
         RecentJournalDto recentJournalDto = new RecentJournalDto();
         recentJournalDto.setRecentIntentions(journalEntries);
@@ -273,12 +283,10 @@ public class JournalService {
 
     }
 
-    public RecentJournalDto getJournalForSelf(UUID masterAccountId, Integer effectiveLimit) {
+    public RecentJournalDto getJournalForSelf(UUID organizationId, UUID memberId, Integer effectiveLimit) {
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(masterAccountId);
-
-        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(masterAccountId, invokingMember.getId(), effectiveLimit);
-        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(invokingMember.getOrganizationId(), invokingMember.getId());
+        List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, memberId, effectiveLimit);
+        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(organizationId, memberId);
 
         RecentJournalDto recentJournalDto = new RecentJournalDto();
         recentJournalDto.setRecentIntentions(journalEntries);

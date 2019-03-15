@@ -24,7 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-public class JournalHistoryResource {
+public class JournalResource {
 
 
     @Autowired
@@ -45,7 +45,10 @@ public class JournalHistoryResource {
     @PostMapping(ResourcePaths.INTENTION_PATH )
     JournalEntryDto createNewIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
-        return journalService.createIntention(context.getMasterAccountId(), intentionInput);
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return journalService.createIntention(memberEntity.getOrganizationId(), memberEntity.getId(), intentionInput);
     }
 
 
@@ -59,7 +62,10 @@ public class JournalHistoryResource {
     @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
     JournalEntryDto updateRetroFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
         RequestContext context = RequestContext.get();
-        return journalService.saveFlameRating(context.getMasterAccountId(), UUID.fromString(intentionId), flameRatingInputDto);
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return journalService.saveFlameRating(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId), flameRatingInputDto);
     }
 
     /**
@@ -73,10 +79,13 @@ public class JournalHistoryResource {
     JournalEntryDto finishIntention(@PathVariable("id") String intentionId, @RequestBody IntentionFinishInputDto intentionRefInputDto) {
         RequestContext context = RequestContext.get();
 
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+
         if (FinishStatus.done.equals(intentionRefInputDto.getFinishStatus())) {
-            return journalService.finishIntention(context.getMasterAccountId(), UUID.fromString(intentionId));
+            return journalService.finishIntention(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId));
         } else if (FinishStatus.aborted.equals(intentionRefInputDto.getFinishStatus())) {
-            return journalService.abortIntention(context.getMasterAccountId(), UUID.fromString(intentionId));
+            return journalService.abortIntention(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId));
         } else {
             throw new BadRequestException(ValidationErrorCodes.INVALID_FINISH_STATUS, "Invalid finish status");
         }
@@ -92,14 +101,16 @@ public class JournalHistoryResource {
     RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
 
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
         Integer effectiveLimit = getEffectiveLimit(limit);
 
         RecentJournalDto recentJournalDto;
 
         if (memberId.isPresent()) {
-            recentJournalDto = journalService.getJournalForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), effectiveLimit);
+            recentJournalDto = journalService.getJournalForMember(memberEntity.getOrganizationId(), UUID.fromString(memberId.get()), effectiveLimit);
         } else {
-            recentJournalDto = journalService.getJournalForSelf(context.getMasterAccountId(), effectiveLimit);
+            recentJournalDto = journalService.getJournalForSelf(memberEntity.getOrganizationId(), memberEntity.getId(), effectiveLimit);
         }
 
         return recentJournalDto;
@@ -121,13 +132,15 @@ public class JournalHistoryResource {
                                                @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
 
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
         Integer effectiveLimit = getEffectiveLimit(limit);
         LocalDateTime beforeDate = DateTimeAPITranslator.convertToDateTime(beforeDateStr);
 
         if (memberId.isPresent()) {
-            return journalService.getHistoricalIntentionsForMember(context.getMasterAccountId(), UUID.fromString(memberId.get()), beforeDate, effectiveLimit);
+            return journalService.getHistoricalIntentionsForMember(memberEntity.getOrganizationId(), UUID.fromString(memberId.get()), beforeDate, effectiveLimit);
         } else {
-            return journalService.getHistoricalIntentions(context.getMasterAccountId(), beforeDate, effectiveLimit);
+            return journalService.getHistoricalIntentionsForMember(memberEntity.getOrganizationId(), memberEntity.getId(), beforeDate, effectiveLimit);
         }
     }
 
