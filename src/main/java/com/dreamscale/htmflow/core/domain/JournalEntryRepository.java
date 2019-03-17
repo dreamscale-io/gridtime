@@ -24,4 +24,13 @@ public interface JournalEntryRepository extends CrudRepository<JournalEntryEntit
                                                             @Param("beforeDate") Timestamp beforeDate,
                                                             @Param("limit") int limit);
 
+    @Query(nativeQuery = true, value = "select * from journal_entry_view " +
+            "where member_id=(:memberId) " +
+            "and position >= (:afterDate) " +
+            "order by position asc limit (:limit)")
+    List<JournalEntryEntity> findByMemberIdAfterDateWithLimit(@Param("memberId") UUID memberId,
+                                                               @Param("afterDate") Timestamp afterDate,
+                                                               @Param("limit") int limit);
+
+
 }

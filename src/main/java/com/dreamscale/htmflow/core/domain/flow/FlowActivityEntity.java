@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FlowActivityEntity {
+public class FlowActivityEntity implements Cloneable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "flow_activity_seq_gen")
@@ -43,18 +43,23 @@ public class FlowActivityEntity {
 	@Transient
 	private final MetadataFields metadataFields = new MetadataFields();
 
-	public void setMetadataField(String key, Object value) {
-		metadataFields.set(key, value);
+	public void setMetadataField(FlowActivityMetadataField field, Object value) {
+		metadataFields.set(field.name(), value);
 		metadata = metadataFields.toJson();
 	}
 
-	public String getMetadataValue(String key) {
-		return metadataFields.get(key);
+	public String getMetadataValue(FlowActivityMetadataField field) {
+		return metadataFields.get(field.name());
 	}
 
 	@PostLoad
 	private void postLoad() {
 		metadataFields.fromJson(metadata);
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 
 }

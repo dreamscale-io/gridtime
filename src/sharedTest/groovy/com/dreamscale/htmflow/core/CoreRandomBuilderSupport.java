@@ -5,6 +5,8 @@ import com.dreamscale.htmflow.api.batch.*;
 import com.dreamscale.htmflow.api.event.RandomSnippetEventBuilder;
 import com.dreamscale.htmflow.api.journal.RandomIntentionInputDtoBuilder;
 import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
+import com.dreamscale.htmflow.core.domain.flow.RandomFlowActivityEntityBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraProjectDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraTaskDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraUserDtoBuilder;
@@ -20,6 +22,12 @@ public class CoreRandomBuilderSupport {
     private OrganizationMemberRepository organizationMemberRepository;
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private IntentionRepository intentionRepository;
+
+    @Autowired
+    private FlowActivityRepository flowActivityRepository;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -51,6 +59,9 @@ public class CoreRandomBuilderSupport {
         return new RandomTaskEntityBuilder(taskRepository);
     }
 
+    public RandomIntentionEntityBuilder intentionEntity() { return new RandomIntentionEntityBuilder(intentionRepository);}
+
+    public RandomFlowActivityEntityBuilder flowActivityEntity() { return new RandomFlowActivityEntityBuilder(flowActivityRepository);}
 
     public RandomIntentionInputDtoBuilder intentionInputDto() {
         return new RandomIntentionInputDtoBuilder();

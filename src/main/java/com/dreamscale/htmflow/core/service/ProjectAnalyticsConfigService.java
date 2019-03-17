@@ -13,7 +13,7 @@ public class ProjectAnalyticsConfigService {
     //and we will eventually need some way, to fan these out horizontally
 
     //for now, we can have an admin service that configures a table with a project analytics configuration
-    //then a service that can read that configuration, instantiate a mapper that can operate on the incoming stream
+    //then a service that can read that configuration, instantiate a structure that can operate on the incoming stream
 
     //so for today, I should write the admin service, and the persistence service,
     // and the service that loads the project configuration that can resolve components for files,

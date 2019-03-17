@@ -23,6 +23,9 @@ public class AccountService implements MasterAccountIdResolver {
     private MasterAccountRepository masterAccountRepository;
 
     @Autowired
+    private OrganizationMemberRepository organizationMemberRepository;
+
+    @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
 
     public AccountActivationDto activate(String activationCode) {
@@ -127,6 +130,11 @@ public class AccountService implements MasterAccountIdResolver {
         return masterAccountEntity.getActivationDate();
     }
 
+    public LocalDateTime getActivationDateForMember(UUID memberId) {
+        OrganizationMemberEntity member = organizationMemberRepository.findById(memberId);
+        return getActivationDate(member.getMasterAccountId());
+    }
+
     @Override
     public UUID findAccountIdByConnectionId(String connectionId) {
         UUID masterAccountId = null;
@@ -141,6 +149,7 @@ public class AccountService implements MasterAccountIdResolver {
     private String generateAPIKey() {
         return UUID.randomUUID().toString().replace("-", "");
     }
+
 
 
 }

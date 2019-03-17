@@ -88,6 +88,7 @@ public class SpiritService {
             SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
             spiritLinkDto.setSpiritId(invokingSpirit);
             spiritLinkDto.setFriendSpiritId(friendSpirit);
+            spiritLinkDto.setName(getMemberName(friendSpirit));
             spiritNetwork.addSpiritLink(spiritLinkDto);
         }
 

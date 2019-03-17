@@ -124,7 +124,7 @@ public class FlowService {
             entity.setMemberId(memberId);
             entity.setTimePosition(event.getPosition().plus(adjustment));
 
-            entity.setMetadataField("comment", event.getComment());
+            entity.setMetadataField(FlowEventMetadataField.comment, event.getComment());
 
             flowEventRepository.save(entity);
         }
@@ -141,9 +141,9 @@ public class FlowService {
                 .timePosition(snippetEvent.getPosition())
                 .build();
 
-        entity.setMetadataField("comment", snippetEvent.getComment());
-        entity.setMetadataField("source", snippetEvent.getSource());
-        entity.setMetadataField("snippet", snippetEvent.getSnippet());
+        entity.setMetadataField(FlowEventMetadataField.comment, snippetEvent.getComment());
+        entity.setMetadataField(FlowEventMetadataField.source, snippetEvent.getSource());
+        entity.setMetadataField(FlowEventMetadataField.snippet, snippetEvent.getSnippet());
 
         flowEventRepository.save(entity);
     }
@@ -172,7 +172,7 @@ public class FlowService {
             entity.setStart(externalActivity.getEndTime().plus(adjustment).minusSeconds(externalActivity.getDurationInSeconds()));
             entity.setEnd(externalActivity.getEndTime().plus(adjustment));
 
-            entity.setMetadataField("comment", externalActivity.getComment());
+            entity.setMetadataField(FlowActivityMetadataField.comment, externalActivity.getComment());
 
             entity.setComponent(component);
             flowActivityRepository.save(entity);
@@ -188,7 +188,7 @@ public class FlowService {
             entity.setStart(modificationActivity.getEndTime().plus(adjustment).minusSeconds(modificationActivity.getDurationInSeconds()));
             entity.setEnd(modificationActivity.getEndTime().plus(adjustment));
 
-            entity.setMetadataField("modificationCount", modificationActivity.getModificationCount());
+            entity.setMetadataField(FlowActivityMetadataField.modificationCount, modificationActivity.getModificationCount());
 
             entity.setComponent(component);
             flowActivityRepository.save(entity);
@@ -204,10 +204,10 @@ public class FlowService {
             entity.setStart(executionActivity.getEndTime().plus(adjustment).minusSeconds(executionActivity.getDurationInSeconds()));
             entity.setEnd(executionActivity.getEndTime().plus(adjustment));
 
-            entity.setMetadataField("processName", executionActivity.getProcessName());
-            entity.setMetadataField("executionTaskType", executionActivity.getExecutionTaskType());
-            entity.setMetadataField("exitCode", executionActivity.getExitCode());
-            entity.setMetadataField("isDebug", executionActivity.isDebug());
+            entity.setMetadataField(FlowActivityMetadataField.processName, executionActivity.getProcessName());
+            entity.setMetadataField(FlowActivityMetadataField.executionTaskType, executionActivity.getExecutionTaskType());
+            entity.setMetadataField(FlowActivityMetadataField.exitCode, executionActivity.getExitCode());
+            entity.setMetadataField(FlowActivityMetadataField.isDebug, executionActivity.isDebug());
 
             entity.setComponent(component);
 
@@ -225,8 +225,8 @@ public class FlowService {
         entity.setStart(editorActivity.getEndTime().plus(adjustment).minusSeconds(editorActivity.getDurationInSeconds()));
         entity.setEnd(editorActivity.getEndTime().plus(adjustment));
 
-        entity.setMetadataField("filePath", editorActivity.getFilePath());
-        entity.setMetadataField("isModified", editorActivity.isModified());
+        entity.setMetadataField(FlowActivityMetadataField.filePath, editorActivity.getFilePath());
+        entity.setMetadataField(FlowActivityMetadataField.isModified, editorActivity.isModified());
 
         entity.setComponent(component);
 

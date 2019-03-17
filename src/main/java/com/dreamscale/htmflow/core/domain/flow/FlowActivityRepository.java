@@ -24,4 +24,16 @@ public interface FlowActivityRepository extends PagingAndSortingRepository<FlowA
 	List<FlowActivityEntity> findByMemberId(UUID memberId);
 
 	FlowActivityEntity findFirst1ByMemberIdOrderByEndDesc(UUID memberId);
+
+	@Query(nativeQuery = true, value = "select * from flow_activity " +
+			"where member_id=(:memberId) " +
+			"and start_time >= (:afterDate) " +
+			"and id >= (:sequence) " +
+			"and activity_type in ('Editor', 'Modification') "+
+			"order by start_time, id asc limit (:limit)")
+    List<FlowActivityEntity> findFileActivityByMemberIdAfterDateWithLimit(@Param("memberId") UUID memberId,
+																		  @Param("afterDate") Timestamp afterDate,
+																		  @Param("sequence") Long sequence,
+																		  @Param("limit") int limit);
+
 }

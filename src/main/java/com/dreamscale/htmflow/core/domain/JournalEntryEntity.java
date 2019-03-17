@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.domain;
 
-import com.dreamscale.htmflow.api.journal.JournalEntryType;
 import lombok.*;
 
 import javax.persistence.Entity;

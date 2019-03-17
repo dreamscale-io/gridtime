@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.job;
 
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
+import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class UpdateFlowActivityJob {
 
             for (FlowActivityEntity flowActivityEntity : currentPage) {
 
-                String filePath = flowActivityEntity.getMetadataValue("filePath");
+                String filePath = flowActivityEntity.getMetadataValue(FlowActivityMetadataField.filePath);
 
                 if (flowActivityEntity.getComponent() == null || flowActivityEntity.getComponent().equals("default")) {
                     String component = componentLookupService.lookupDefaultComponent(filePath);
