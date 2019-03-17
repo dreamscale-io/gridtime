@@ -92,3 +92,9 @@ databaseChangeLog:
 
   - include:
         file: db/v002/spirit/alter_table_active_spirit_link_unique.sql
+
+  - include:
+        file: db/v002/alter_intention_add_linked.sql
+
+  - include:
+        file: db/v002/replace_journal_entry_view_with_links.sql

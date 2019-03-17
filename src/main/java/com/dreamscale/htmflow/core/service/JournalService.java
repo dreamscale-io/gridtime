@@ -74,12 +74,16 @@ public class JournalService {
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
-        IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto);
-
         List<UUID> membersToMulticast = lookupMulticastMemberIds(organizationId, memberId);
+        boolean isLinked = false;
+        if (membersToMulticast.size() > 0) {
+            isLinked = true;
+        }
+
+        IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto, isLinked);
 
         for (UUID memberForCreation : membersToMulticast) {
-            createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto);
+            createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto, isLinked);
         }
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
@@ -116,7 +120,7 @@ public class JournalService {
 
     }
 
-    private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
+    private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
         spiritService.grantXP(organizationId, memberId, 10);
 
         LocalDateTime creationTime = timeService.now();
@@ -132,6 +136,7 @@ public class JournalService {
         intentionEntity.setId(UUID.randomUUID());
         intentionEntity.setPosition(creationTime);
         intentionEntity.setOrganizationId(organizationId);
+        intentionEntity.setLinked(isLinked);
         intentionEntity.setMemberId(memberId);
 
         intentionRepository.save(intentionEntity);

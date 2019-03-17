@@ -27,6 +27,7 @@ public class JournalEntryEntity {
     private String taskSummary;
     private Integer flameRating;
 
+    private Boolean linked;
     private String finishStatus;
     private LocalDateTime finishTime;
 
