@@ -39,6 +39,9 @@ public class SpiritService {
     SpiritXPRepository spiritXPRepository;
 
     @Autowired
+    MemberNameRepository memberNameRepository;
+
+    @Autowired
     TimeService timeService;
 
     @Autowired
@@ -118,7 +121,7 @@ public class SpiritService {
                     SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
                     spiritLinkDto.setSpiritId(spiritId);
                     spiritLinkDto.setFriendSpiritId(spiritLinkEntity.getSpiritId());
-
+                    spiritLinkDto.setName(getMemberName(spiritLinkEntity.getSpiritId()));
                     activeLinksNetworkDto.addSpiritLink(spiritLinkDto);
                 }
             }
@@ -127,6 +130,15 @@ public class SpiritService {
         }
 
         return activeLinksNetworkDto;
+    }
+
+    private String getMemberName(UUID spiritId) {
+        String memberName = null;
+        MemberNameEntity memberNameEntity = memberNameRepository.findBySpiritId(spiritId);
+        if (memberNameEntity != null) {
+            memberName = memberNameEntity.getFullName();
+        }
+        return memberName;
     }
 
     public void unlinkMe(UUID organizationId, UUID spiritId) {

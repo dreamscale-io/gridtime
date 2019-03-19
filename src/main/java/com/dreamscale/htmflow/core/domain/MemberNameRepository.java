@@ -16,4 +16,6 @@ public interface MemberNameRepository extends CrudRepository<MemberNameEntity, U
             "and cm.circle_id = (:circleId))")
     List<MemberNameEntity> findAllByCircleId(@Param("circleId") UUID circleId);
 
+    MemberNameEntity findBySpiritId(UUID spiritId);
+
 }

@@ -17,4 +17,5 @@ public class SpiritLinkDto {
 
     private UUID spiritId;
     private UUID friendSpiritId;
+    private String name;
 }
