@@ -22,20 +22,12 @@ public class FlowSequenceMapper {
     private Map<StructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
     private Map<StructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
 
-    private Map<LayerType, Layer> layerMap;
-
-    private LayerType activeLayerType;
-    private Layer activeLayer;
+    private Map<LayerType, Layer> layerMap = new HashMap<>();
 
     public FlowSequenceMapper(OuterGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
         this.internalClock = new InnerGeometryClock(
                 storyCoordinates.getClockTime(),
                 storyCoordinates.panRight(zoomLevel).getClockTime());
-    }
-
-    public void changeActiveLayer(LayerType layerType) {
-        this.activeLayerType = layerType;
-        this.activeLayer = findOrCreateLayer(layerType);
     }
 
     private Layer findOrCreateLayer(LayerType layerType) {
@@ -47,15 +39,17 @@ public class FlowSequenceMapper {
         return layer;
     }
 
-    public void addMovements(List<MovementEvent> movementsToAdd) {
+    public void addMovements(LayerType layerType, List<MovementEvent> movementsToAdd) {
         for (MovementEvent movement : movementsToAdd) {
-            addMovement(movement);
+            addMovement(layerType, movement);
         }
     }
 
-    public void addMovement(MovementEvent movement) {
+    public void addMovement(LayerType layerType, MovementEvent movement) {
+        Layer layer = findOrCreateLayer(layerType);
+
         if (movement != null) {
-            currentMoment = activeLayer.addMovement(internalClock, movement);
+            currentMoment = layer.addMovement(internalClock, movement);
         }
     }
 
@@ -68,7 +62,6 @@ public class FlowSequenceMapper {
         }
         return relativeSequence;
     }
-
 
 
     public InnerGeometryClock.Coords getCurrentMoment() {
@@ -101,5 +94,11 @@ public class FlowSequenceMapper {
         for (Layer layer: layerMap.values()) {
             layer.repairSortingAndSequenceNumbers();
         }
+    }
+
+    public List<MovementEvent> getContextMovements() {
+        Layer contextLayer = layerMap.get(LayerType.CONTEXT_CHANGES);
+
+        return contextLayer.getMovements();
     }
 }

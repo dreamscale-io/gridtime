@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.LayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.MovementEvent;
@@ -30,32 +31,40 @@ public class ContextMapper {
     }
 
 
-    public MovementEvent changeContext(ContextChangeEvent contextEvent) {
+    public MovementEvent beginContext(ContextBeginningEvent beginningEvent) {
         MovementEvent movement = null;
 
-        if (this.currentContextMap.get(contextEvent.getStructureLevel()) == null) {
-            initContext(contextEvent);
+        ContextBeginningEvent currentContext = currentContextMap.get(beginningEvent.getStructureLevel());
+
+        if (currentContext == null) {
+            this.currentContextMap.put(beginningEvent.getStructureLevel(), beginningEvent);
+            movement = new MovementEvent(beginningEvent.getPosition(), beginningEvent);
         } else {
-            StructureLevel structureLevel = contextEvent.getStructureLevel();
+            StructureLevel structureLevel = beginningEvent.getStructureLevel();
             RelativeSequence sequence = findOrCreateSequence(structureLevel);
             int nextSequence = sequence.increment();
-            contextEvent.setRelativeSequence(nextSequence);
+            beginningEvent.setRelativeSequence(nextSequence);
 
-            movement = new MovementEvent(contextEvent.getPosition(), contextEvent);
+            movement = new MovementEvent(beginningEvent.getPosition(), beginningEvent);
 
-            if (contextEvent instanceof ContextBeginningEvent) {
-                this.currentContextMap.put(structureLevel, (ContextBeginningEvent) contextEvent);
-            }
+            currentContextMap.put(structureLevel, beginningEvent);
         }
         return movement;
     }
 
-    private void initContext(ContextChangeEvent contextEvent) {
-        if (contextEvent instanceof ContextBeginningEvent) {
-            this.currentContextMap.put(contextEvent.getStructureLevel(), (ContextBeginningEvent) contextEvent);
-        }
-    }
+    public MovementEvent endContext(ContextEndingEvent endingEvent) {
+        MovementEvent movement = null;
 
+        StructureLevel structureLevel = endingEvent.getStructureLevel();
+        RelativeSequence sequence = findOrCreateSequence(structureLevel);
+        int nextSequence = sequence.increment();
+        endingEvent.setRelativeSequence(nextSequence);
+
+        movement = new MovementEvent(endingEvent.getPosition(), endingEvent);
+
+        currentContextMap.put(structureLevel, null);
+        return movement;
+    }
 
     public ContextBeginningEvent lookupCurrentContext(StructureLevel structureLevel) {
         return this.currentContextMap.get(structureLevel);
@@ -98,4 +107,6 @@ public class ContextMapper {
     public List<ContextChangeEvent> getContextStructure() {
         return new ArrayList<>(currentContextMap.values());
     }
+
+
 }

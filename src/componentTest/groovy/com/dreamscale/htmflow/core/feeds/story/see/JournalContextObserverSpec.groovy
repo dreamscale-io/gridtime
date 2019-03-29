@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.domain.JournalEntryEntity
 import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus
+import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
@@ -12,6 +13,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEven
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
+import com.dreamscale.htmflow.core.feeds.story.feature.sequence.MovementEvent
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -22,11 +24,12 @@ public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
     StoryFrame storyFrame
+    OuterGeometryClock clock
 
     def setup() {
+        clock = new OuterGeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyFrame = new StoryFrame(ZoomLevel.MIN)
-
+        storyFrame = new StoryFrame(clock.getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create project & task switch events"() {
@@ -50,11 +53,7 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(storyFrame, window)
-        List<ContextChangeEvent> contextEvents = storyFrame.getContextStructure();
-
-        for (ContextChangeEvent contextEvent : contextEvents) {
-            println contextEvent
-        }
+        List<ContextChangeEvent> contextEvents = toContextEventList(storyFrame.getContextMovements());
 
         then:
         assert contextEvents != null
@@ -105,6 +104,7 @@ public class JournalContextObserverSpec extends Specification {
         assert contextEvents.get(8) instanceof ContextBeginningEvent
     }
 
+
     def "should only end open intentions within window"() {
         given:
         ProjectEntity project = aRandom.projectEntity().build();
@@ -124,18 +124,13 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(storyFrame, window)
 
-        StoryFrame nextFrame = new StoryFrame(ZoomLevel.MIN);
+        StoryFrame nextFrame = new StoryFrame(clock.getCoordinates().panRight(ZoomLevel.MIN), ZoomLevel.MIN);
         nextFrame.carryOverFrameContext(storyFrame);
         Window nextWindow = new Window(time2, time4)
 
         when:
         journalContextObserver.see(nextFrame, nextWindow)
-        List<ContextChangeEvent> contextEvents = nextFrame.getContextStructure();
-
-        for (ContextChangeEvent contextEvent : contextEvents) {
-            println contextEvent
-        }
-
+        List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getContextMovements());
         then:
         assert contextEvents != null
         assert contextEvents.size() == 1
@@ -144,6 +139,16 @@ public class JournalContextObserverSpec extends Specification {
         assert contextEvents.get(0).position == time3
         assert contextEvents.get(0) instanceof ContextEndingEvent
 
+    }
+
+    private List<ContextChangeEvent> toContextEventList(List<MovementEvent> movements) {
+
+        List<ContextChangeEvent> contextEvents = new ArrayList<>();
+        for (MovementEvent movementEvent : movements) {
+            contextEvents.add(movementEvent.reference as ContextChangeEvent);
+            println movementEvent.reference
+        }
+        contextEvents
     }
 
 

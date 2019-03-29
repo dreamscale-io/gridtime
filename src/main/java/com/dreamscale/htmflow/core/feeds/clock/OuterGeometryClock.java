@@ -18,7 +18,7 @@ public class OuterGeometryClock {
     private Coords coords;
 
 
-    OuterGeometryClock(LocalDateTime clockTime) {
+    public OuterGeometryClock(LocalDateTime clockTime) {
         this.clockTime = clockTime;
         this.coords = createGeometryCoords(clockTime);
     }

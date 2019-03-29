@@ -65,4 +65,8 @@ public class Layer {
     public void initSequence(int startingValue) {
         relativeSequence.reset(startingValue);
     }
+
+    public List<MovementEvent> getMovements() {
+        return movementsOverTime;
+    }
 }

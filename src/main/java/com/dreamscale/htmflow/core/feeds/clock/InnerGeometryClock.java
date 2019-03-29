@@ -79,28 +79,6 @@ public class InnerGeometryClock {
                 halfNotes);
     }
 
-
-
-    private static int findLastWeekOfPriorYear(LocalDateTime clock) {
-        LocalDate startOfPriorYear = LocalDate.of(clock.getYear() - 1, 1, 1);
-        LocalDate firstMondayOfPriorYear = startOfPriorYear.with(firstInMonth(DayOfWeek.MONDAY));
-
-        LocalDate endOfPriorYear = LocalDate.of(clock.getYear() - 1, 12, 31);
-
-        return Math.floorDiv((endOfPriorYear.getDayOfYear() - firstMondayOfPriorYear.getDayOfYear()),
-                ZoomLevel.WEEK.buckets());
-
-    }
-
-    private static int calcWeekdayOffset(LocalDateTime clock) {
-        DayOfWeek dayOfWeek = clock.getDayOfWeek();
-        return dayOfWeek.getValue();
-    }
-
-    private static int calcMinuteBuckets(LocalDateTime clock) {
-        return Math.floorDiv( clock.getMinute() , ZoomLevel.MIN.buckets() ) + 1;
-    }
-
     @AllArgsConstructor
     @Getter
     @ToString

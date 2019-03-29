@@ -4,7 +4,6 @@ import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
@@ -28,7 +27,7 @@ public class StoryFrame {
 
 
     //this is to support a corner case for carrying over context endings from prior frames
-    private ContextEndingEvent exitContextToAddWhenInWindow;
+    private ContextEndingEvent savedContextToAddWhenInWindow;
 
     public StoryFrame(OuterGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
         this.storyCoordinates = storyCoordinates;
@@ -42,84 +41,42 @@ public class StoryFrame {
         this.spatialGeometryMapper = new SpatialGeometryMapper();
         this.flowSequenceMapper = new FlowSequenceMapper(storyCoordinates, zoomLevel);
 
-
     }
 
-    //////////// Properties that describe the Active State ////////////
+    //Change the active context, such as active project, task, or intention
 
-    public OuterGeometryClock.Coords getStoryCoordinates() {
-        return storyCoordinates;
+    public void beginContext(ContextBeginningEvent contextBeginningEvent) {
+        MovementEvent movement = contextMapper.beginContext(contextBeginningEvent);
+        flowSequenceMapper.addMovement(LayerType.CONTEXT_CHANGES, movement);
     }
 
-    public ZoomLevel getZoomLevel() {
-        return zoomLevel;
+    public void endContext(ContextEndingEvent contextEndingEvent) {
+        MovementEvent movement = contextMapper.endContext(contextEndingEvent);
+        flowSequenceMapper.addMovement(LayerType.CONTEXT_CHANGES, movement);
     }
-
-    public FocalPoint getCurrentFocalPoint() {
-        return spatialGeometryMapper.getCurrentFocalPoint();
-    }
-
-    public LocationInPlace getCurrentLocationInPlace() {
-        return spatialGeometryMapper.getCurrentLocationInPlace();
-    }
-
-    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
-        return this.contextMapper.getCurrentContext(structureLevel);
-    }
-
-    public InnerGeometryClock.Coords getCurrentMoment() {
-         return this.flowSequenceMapper.getCurrentMoment();
-    }
-
-    public List<ContextChangeEvent> getContextStructure() {
-        return contextMapper.getContextStructure();
-    }
-
-    public List<FocalPoint> getPlaceStructure() {
-        return spatialGeometryMapper.getPlaceStructure();
-    }
-
 
     /**
      * Walk through a sequence of events, and the StoryFrame will build a model of locations in space,
-     * and flowing movements through time, that can be played back like music
-     *
-     * @param moment
-     * @param placeName
-     * @param locationPath
-     * @param timeInLocation
+     * and movements through time, that can be played back like music
      */
 
     public void gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
 
         List<MovementEvent> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
-        flowSequenceMapper.addMovements(movements);
+        flowSequenceMapper.addMovements(LayerType.LOCATION_CHANGES, movements);
     }
 
     /**
      * Modification activity is aggregated by the SpatialGeometryMapper for each location,
-     * to get an overall idea of how much modification is happening, as a way to finger print the FocalPoint,
-     * then the FlowSequenceMapper captures the rhythms of modification, the starts and stops,
-     * as a heuristic detection of friction
-     *
-     * @param moment
-     * @param modificationCount
-     *
+     * to get an overall idea of how much modification is happening,
+     * then the FlowSequenceMapper captures the rhythm of modification, the starts and stops,
+     * as a heuristic detection of experienced friction
      */
+
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
 
         spatialGeometryMapper.modifyCurrentLocation(modificationCount);
         flowSequenceMapper.modifyActiveFlow(moment, modificationCount);
-    }
-
-    /**
-     * Change the primary context of the activity, such as switching projects, tasks, or changing intentions
-     * @param contextEvent
-     */
-
-    public void changeContext(ContextChangeEvent contextEvent) {
-        MovementEvent movement = contextMapper.changeContext(contextEvent);
-        flowSequenceMapper.addMovement(movement);
     }
 
     /**
@@ -155,7 +112,7 @@ public class StoryFrame {
         carryOverFrameContext(StructureLevel.TASK, previousStoryFrame);
         carryOverFrameContext(StructureLevel.INTENTION, previousStoryFrame);
 
-        setExitContextToAddWhenInWindow(previousStoryFrame.getExitContextToAddWhenInWindow());
+        saveContextToAddWhenInWindow(previousStoryFrame.getSavedContextToAddWhenInWindow());
     }
 
     private void carryOverFrameContext(StructureLevel structureLevel, StoryFrame previousStoryFrame) {
@@ -168,7 +125,6 @@ public class StoryFrame {
     private int getCurrentRelativePosition(StructureLevel structureLevel) {
         return this.contextMapper.getCurrentSequenceNumber(structureLevel);
     }
-
 
     private Map<LayerType, RelativeSequence> getLayerSequences() {
         return this.flowSequenceMapper.getLayerSequences();
@@ -185,16 +141,49 @@ public class StoryFrame {
      * @param exitContextEvent
      *
      */
-    public void setExitContextToAddWhenInWindow(ContextEndingEvent exitContextEvent) {
-        this.exitContextToAddWhenInWindow = exitContextEvent;
+    public void saveContextToAddWhenInWindow(ContextEndingEvent exitContextEvent) {
+        this.savedContextToAddWhenInWindow = exitContextEvent;
     }
 
 
-    public ContextEndingEvent getExitContextToAddWhenInWindow() {
-        return exitContextToAddWhenInWindow;
+    public ContextEndingEvent getSavedContextToAddWhenInWindow() {
+        return savedContextToAddWhenInWindow;
     }
 
 
+    //////////// Properties that describe the Active State ////////////
+
+    public OuterGeometryClock.Coords getStoryCoordinates() {
+        return storyCoordinates;
+    }
+
+    public ZoomLevel getZoomLevel() {
+        return zoomLevel;
+    }
+
+    public FocalPoint getCurrentFocalPoint() {
+        return spatialGeometryMapper.getCurrentFocalPoint();
+    }
+
+    public LocationInPlace getCurrentLocationInPlace() {
+        return spatialGeometryMapper.getCurrentLocationInPlace();
+    }
+
+    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
+        return this.contextMapper.getCurrentContext(structureLevel);
+    }
+
+    public InnerGeometryClock.Coords getCurrentMoment() {
+        return this.flowSequenceMapper.getCurrentMoment();
+    }
+
+    public List<MovementEvent> getContextMovements() {
+        return flowSequenceMapper.getContextMovements();
+    }
+
+    public List<FocalPoint> getPlaceStructure() {
+        return spatialGeometryMapper.getPlaceStructure();
+    }
 
 
 }
