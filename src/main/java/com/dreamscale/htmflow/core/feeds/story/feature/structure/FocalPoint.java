@@ -3,60 +3,43 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FocalPoint implements FlowFeature {
 
+    private String placeName;
 
-
-    private String name;
-
-    private final Map<String, LocationInPlace> locationMap;
-    private final Map<String, Edge> edgeMap;
     private final GravityBall gravityBall;
 
     private LocationInPlace currentLocation;
-    private int locationIndex;
 
     private static final String ENTRANCE_OF_PLACE = "[entrance]";
     private static final String EXIT_OF_PLACE = "[exit]";
 
 
+    public FocalPoint(String placeName, String initialLocationPath) {
+        this.placeName = placeName;
 
-    public FocalPoint(String name, String initialLocationPath) {
-        this.name = name;
-        this.locationMap = new HashMap<>();
-        this.edgeMap = new HashMap<>();
+        this.gravityBall = new GravityBall(this);
+        this.gravityBall.gotoLocationInSpace(initialLocationPath);
 
-        this.gravityBall = new GravityBall();
+        this.currentLocation = gravityBall.getCurrentLocation();
 
-        this.currentLocation = new LocationInPlace(this, initialLocationPath, 0);
-        this.locationIndex = 1;
     }
 
     public String getName() {
-        return name;
+        return placeName;
     }
 
     public LocationInPlace goToLocation(String locationPath, Duration timeInLocation) {
-        LocationInPlace fromLocation = currentLocation;
-        LocationInPlace toLocation = findOrCreateLocation(locationPath);
 
-        fromLocation.visit();
-        toLocation.visit();
+        LocationInPlace location = gravityBall.gotoLocationInSpace(locationPath);
+        gravityBall.growHeavyWithFocus(timeInLocation);
 
-        toLocation.spendTime(timeInLocation);
+        currentLocation = location;
 
-        Edge edge = findOrCreateEdge(fromLocation, toLocation);
-        edge.visit();
-
-        gravityBall.createParticleFromTraversal(fromLocation, toLocation);
-        gravityBall.growWithFocus(timeInLocation);
-
-        currentLocation = toLocation;
-        return toLocation;
+        return currentLocation;
     }
+
 
     public LocationInPlace getCurrentLocation() {
         return currentLocation;
@@ -66,7 +49,6 @@ public class FocalPoint implements FlowFeature {
         currentLocation.modify(modificationCount);
     }
 
-
     public LocationInPlace exit() {
         return goToLocation(EXIT_OF_PLACE, Duration.ofSeconds(0));
     }
@@ -75,56 +57,7 @@ public class FocalPoint implements FlowFeature {
         return goToLocation(ENTRANCE_OF_PLACE, Duration.ofSeconds(0));
     }
 
-    private LocationInPlace findOrCreateLocation(String locationPath) {
-        LocationInPlace location = locationMap.get(locationPath);
-        if (location == null) {
-            location = new LocationInPlace(this,locationPath, locationIndex++);
-            locationMap.put(locationPath, location);
-        }
-        return location;
-    }
-
-    private Edge findOrCreateEdge(LocationInPlace locationA, LocationInPlace locationB) {
-       String edgeKey = createKey(locationA, locationB);
-
-       Edge edge = edgeMap.get(edgeKey);
-
-       if (edge == null) {
-           edge = new Edge(locationA, locationB);
-           edgeMap.put(edgeKey, edge);
-       }
-
-        return edge;
-    }
-
-    private String createKey(LocationInPlace locationA, LocationInPlace locationB) {
-        String pathA = locationA.getLocationPath();
-        String pathB = locationB.getLocationPath();
-
-        if (pathA.compareTo(pathB) > 0) {
-            pathA = locationB.getLocationPath();
-            pathB = locationA.getLocationPath();
-        }
-
-        return pathA + pathB;
-    }
 
 
-    private class Edge {
-
-        private final LocationInPlace locationA;
-        private final LocationInPlace locationB;
-        private int visitCounter;
-
-        Edge(LocationInPlace locationA, LocationInPlace locationB) {
-            this.locationA = locationA;
-            this.locationB = locationB;
-            this.visitCounter = 0;
-        }
-
-        void visit() {
-            this.visitCounter++;
-        }
-    }
 
 }
