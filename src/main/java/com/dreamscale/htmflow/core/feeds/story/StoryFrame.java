@@ -1,13 +1,13 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.see.MusicalGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
+import com.dreamscale.htmflow.core.feeds.clock.StoryGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowContextBeginningEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowContextEndingEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowStructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInThought;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
 
 import java.time.Duration;
@@ -16,30 +16,30 @@ import java.util.*;
 
 public class StoryFrame {
 
-    private final OuterGeometryClock.Coords storyCoordinates;
+    private final StoryGeometryClock.Coords storyCoordinates;
     private final ZoomLevel zoomLevel;
 
-    private final InnerGeometryClock internalClock;
+    private final MusicalGeometryClock internalClock;
 
-    private final ContextMapper contextMapper;
-    private final SpatialGeometryMapper spatialGeometryMapper;
-    private final FlowSequenceMapper flowSequenceMapper;
+    private final IdeaFlowContextMapper contextMapper;
+    private final IdeaFlowSpatialGeometryMapper spatialGeometryMapper;
+    private final IdeaFlowSequenceMapper flowSequenceMapper;
 
 
     //this is to support a corner case for carrying over context endings from prior frames
-    private ContextEndingEvent savedContextToAddWhenInWindow;
+    private IdeaFlowContextEndingEvent savedContextToAddWhenInWindow;
 
-    public StoryFrame(OuterGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
+    public StoryFrame(StoryGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
         this.storyCoordinates = storyCoordinates;
         this.zoomLevel = zoomLevel;
 
-        this.internalClock = new InnerGeometryClock(
+        this.internalClock = new MusicalGeometryClock(
                 storyCoordinates.getClockTime(),
                 storyCoordinates.panRight(zoomLevel).getClockTime());
 
-        this.contextMapper = new ContextMapper();
-        this.spatialGeometryMapper = new SpatialGeometryMapper();
-        this.flowSequenceMapper = new FlowSequenceMapper(storyCoordinates, zoomLevel);
+        this.contextMapper = new IdeaFlowContextMapper();
+        this.spatialGeometryMapper = new IdeaFlowSpatialGeometryMapper();
+        this.flowSequenceMapper = new IdeaFlowSequenceMapper(storyCoordinates, zoomLevel);
 
     }
 
@@ -47,18 +47,18 @@ public class StoryFrame {
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void beginContext(ContextBeginningEvent contextBeginningEvent) {
-        MovementEvent movement = contextMapper.beginContext(contextBeginningEvent);
-        flowSequenceMapper.addMovement(LayerType.CONTEXT_CHANGES, movement);
+    public void beginContext(IdeaFlowContextBeginningEvent contextBeginningEvent) {
+        IdeaFlowMovementEvent movement = contextMapper.beginContext(contextBeginningEvent);
+        flowSequenceMapper.addMovement(IdeaFlowLayerType.CONTEXT_CHANGES, movement);
     }
 
     /**
      * End an active context, such as project, task, or intention
      */
 
-    public void endContext(ContextEndingEvent contextEndingEvent) {
-        MovementEvent movement = contextMapper.endContext(contextEndingEvent);
-        flowSequenceMapper.addMovement(LayerType.CONTEXT_CHANGES, movement);
+    public void endContext(IdeaFlowContextEndingEvent contextEndingEvent) {
+        IdeaFlowMovementEvent movement = contextMapper.endContext(contextEndingEvent);
+        flowSequenceMapper.addMovement(IdeaFlowLayerType.CONTEXT_CHANGES, movement);
     }
 
     /**
@@ -68,8 +68,8 @@ public class StoryFrame {
 
     public void gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
 
-        List<MovementEvent> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
-        flowSequenceMapper.addMovements(LayerType.LOCATION_CHANGES, movements);
+        List<IdeaFlowMovementEvent> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
+        flowSequenceMapper.addMovements(IdeaFlowLayerType.LOCATION_CHANGES, movements);
     }
 
     /**
@@ -86,16 +86,13 @@ public class StoryFrame {
     }
 
     /**
-     * After filling a story frame across multiple passes of data loading, sometimes the
-     * sequences get out of order, and need to be re-sorted.
-     *
-     * Call this when finishing up a new layer of stuff to put the story frame back into a good state,
-     * before passing it onward.  This operation is generally deferred to the end of a load,
-     * so that sorting isn't unnecessarily done over and over again.
+     * After filling in a StoryFrame with a layer of stuff, call this with each layer to put the frame
+     * back into a good final state
      */
 
-    public void repairStoryFrameAfterLoad() {
-        flowSequenceMapper.repairSortingAndSequenceNumbers();
+    public void finishStoryFrameAfterLoad() {
+        spatialGeometryMapper.finish();
+        flowSequenceMapper.finish();
     }
 
     /**
@@ -109,30 +106,30 @@ public class StoryFrame {
 
     public void carryOverFrameContext(StoryFrame previousStoryFrame) {
         FocalPoint place = previousStoryFrame.getCurrentFocalPoint();
-        LocationInPlace locationInPlace = previousStoryFrame.getCurrentLocationInPlace();
+        LocationInThought locationInPlace = previousStoryFrame.getCurrentLocationInPlace();
 
         this.spatialGeometryMapper.initPlaceFromPriorContext(place, locationInPlace);
         this.flowSequenceMapper.initLayerSequencesFromPriorContext(previousStoryFrame.getLayerSequences());
 
-        carryOverFrameContext(StructureLevel.PROJECT, previousStoryFrame);
-        carryOverFrameContext(StructureLevel.TASK, previousStoryFrame);
-        carryOverFrameContext(StructureLevel.INTENTION, previousStoryFrame);
+        carryOverFrameContext(IdeaFlowStructureLevel.PROJECT, previousStoryFrame);
+        carryOverFrameContext(IdeaFlowStructureLevel.TASK, previousStoryFrame);
+        carryOverFrameContext(IdeaFlowStructureLevel.INTENTION, previousStoryFrame);
 
         saveContextToAddWhenInWindow(previousStoryFrame.getSavedContextToAddWhenInWindow());
     }
 
-    private void carryOverFrameContext(StructureLevel structureLevel, StoryFrame previousStoryFrame) {
+    private void carryOverFrameContext(IdeaFlowStructureLevel structureLevel, StoryFrame previousStoryFrame) {
 
         this.contextMapper.initContextFromPriorContext(previousStoryFrame.getCurrentContext(structureLevel));
         this.contextMapper.initSequenceFromPriorContext(structureLevel, previousStoryFrame.getCurrentRelativePosition(structureLevel));
 
     }
 
-    private int getCurrentRelativePosition(StructureLevel structureLevel) {
+    private int getCurrentRelativePosition(IdeaFlowStructureLevel structureLevel) {
         return this.contextMapper.getCurrentSequenceNumber(structureLevel);
     }
 
-    private Map<LayerType, RelativeSequence> getLayerSequences() {
+    private Map<IdeaFlowLayerType, RelativeSequence> getLayerSequences() {
         return this.flowSequenceMapper.getLayerSequences();
     }
 
@@ -147,18 +144,18 @@ public class StoryFrame {
      * @param exitContextEvent
      *
      */
-    public void saveContextToAddWhenInWindow(ContextEndingEvent exitContextEvent) {
+    public void saveContextToAddWhenInWindow(IdeaFlowContextEndingEvent exitContextEvent) {
         this.savedContextToAddWhenInWindow = exitContextEvent;
     }
 
 
-    public ContextEndingEvent getSavedContextToAddWhenInWindow() {
+    public IdeaFlowContextEndingEvent getSavedContextToAddWhenInWindow() {
         return savedContextToAddWhenInWindow;
     }
 
     //////////// Properties that describe the Active State ////////////
 
-    public OuterGeometryClock.Coords getStoryCoordinates() {
+    public StoryGeometryClock.Coords getStoryCoordinates() {
         return storyCoordinates;
     }
 
@@ -170,19 +167,19 @@ public class StoryFrame {
         return spatialGeometryMapper.getCurrentFocalPoint();
     }
 
-    public LocationInPlace getCurrentLocationInPlace() {
+    public LocationInThought getCurrentLocationInPlace() {
         return spatialGeometryMapper.getCurrentLocationInPlace();
     }
 
-    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
+    public IdeaFlowContextBeginningEvent getCurrentContext(IdeaFlowStructureLevel structureLevel) {
         return this.contextMapper.getCurrentContext(structureLevel);
     }
 
-    public InnerGeometryClock.Coords getCurrentMoment() {
+    public MusicalGeometryClock.Coords getCurrentMoment() {
         return this.flowSequenceMapper.getCurrentMoment();
     }
 
-    public List<MovementEvent> getContextMovements() {
+    public List<IdeaFlowMovementEvent> getContextMovements() {
         return flowSequenceMapper.getContextMovements();
     }
 

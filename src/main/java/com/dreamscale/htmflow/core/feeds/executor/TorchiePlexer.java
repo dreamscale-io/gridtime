@@ -5,12 +5,12 @@ import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 
 import java.util.UUID;
 
-public class Torchie {
+public class TorchiePlexer {
 
     private final UUID memberId;
     private final ZoomableIdeaFlow zoomableIdeaFlow;
 
-    public Torchie(UUID memberId, ZoomableIdeaFlow zoomableIdeaFlow) {
+    public TorchiePlexer(UUID memberId, ZoomableIdeaFlow zoomableIdeaFlow) {
         this.memberId = memberId;
         this.zoomableIdeaFlow = zoomableIdeaFlow;
     }

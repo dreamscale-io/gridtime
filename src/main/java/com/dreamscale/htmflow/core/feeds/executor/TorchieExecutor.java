@@ -1,11 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
-import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
+import com.dreamscale.htmflow.core.feeds.common.ZoomableIdeaFlow;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
-import com.dreamscale.htmflow.core.feeds.story.see.FlowObserverFactory;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.FlowSource;
+import com.dreamscale.htmflow.core.feeds.story.see.IdeaFlowObserverFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.IdeaFlowSource;
 import com.dreamscale.htmflow.core.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class TorchieExecutor {
     private FetchStrategyFactory fetchStrategyFactory;
 
     @Autowired
-    private FlowObserverFactory flowObserverFactory;
+    private IdeaFlowObserverFactory flowObserverFactory;
 
     @Autowired
     private AccountService accountService;
@@ -60,18 +60,18 @@ public class TorchieExecutor {
 
         SharedFeaturePool sharedFeaturePool = new SharedFeaturePool(memberId, metronome.getActiveCoordinates());
 
-        metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
+        metronome.addFlowToChain(new IdeaFlowSource(memberId, sharedFeaturePool,
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.JOURNAL_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER)
+                flowObserverFactory.get(IdeaFlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER)
         ));
 
-        metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
+        metronome.addFlowToChain(new IdeaFlowSource(memberId, sharedFeaturePool,
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.FILE_ACTIVITY_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER)));
+                flowObserverFactory.get(IdeaFlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER)));
 
-        ZoomableFlow zoomableFlow = new ZoomableFlow(metronome, memberId, sharedFeaturePool);
+        ZoomableIdeaFlow zoomableIdeaFlow = new ZoomableIdeaFlow(metronome, memberId, sharedFeaturePool);
 
-        return new Torchie(memberId, zoomableFlow);
+        return new Torchie(memberId, zoomableIdeaFlow);
 
     }
 

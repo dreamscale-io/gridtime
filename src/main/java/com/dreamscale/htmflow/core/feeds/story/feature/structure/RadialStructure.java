@@ -4,26 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RadialStructure {
-    private LocationInPlace center;
+    private LocationInThought center;
     private Ring firstRing = new Ring();
     private List<Ring> outerRings = new ArrayList<>();
 
-    public void placeCenter(LocationInPlace centerOfFocus) {
+    public void placeCenter(LocationInThought centerOfFocus) {
         this.center = centerOfFocus;
     }
 
-    public void addLocationToFirstRing(LocationInPlace connectToLocation, int traversalCount, double focusWeight) {
+    public void addLocationToFirstRing(LocationInThought connectToLocation, int traversalCount, double focusWeight) {
         firstRing.addElement(connectToLocation);
 
         Link link = new Link(center, connectToLocation, traversalCount, focusWeight);
         firstRing.addLinkToInnerRing(link);
     }
 
-    public List<LocationInPlace> getLocationsInFirstRing() {
+    public List<LocationInThought> getLocationsInFirstRing() {
         return firstRing.getLocationsInRing();
     }
 
-    public void addExtraLinkWithinFirstRing(LocationInPlace locationA, LocationInPlace locationB, int traversalCount, double focusWeight) {
+    public void addExtraLinkWithinFirstRing(LocationInThought locationA, LocationInThought locationB, int traversalCount, double focusWeight) {
         Link link = new Link(locationA, locationB, traversalCount, focusWeight);
         firstRing.addLinkWithinRing(link);
     }
@@ -31,12 +31,12 @@ public class RadialStructure {
 
     public static class Ring {
 
-        List<LocationInPlace> locationsInRing = new ArrayList<>();
+        List<LocationInThought> locationsInRing = new ArrayList<>();
         List<Link> linksToInnerRing = new ArrayList<>();
         List<Link> linksWithinRing = new ArrayList<>();
         List<Link> linksToOuterRing = new ArrayList<>();
 
-        public void addElement(LocationInPlace connectToLocation) {
+        public void addElement(LocationInThought connectToLocation) {
             locationsInRing.add(connectToLocation);
         }
 
@@ -48,19 +48,19 @@ public class RadialStructure {
             this.linksWithinRing.add(link);
         }
 
-        public List<LocationInPlace> getLocationsInRing() {
+        public List<LocationInThought> getLocationsInRing() {
             return locationsInRing;
         }
     }
 
     public static class Link {
 
-        private final LocationInPlace from;
-        private final LocationInPlace to;
+        private final LocationInThought from;
+        private final LocationInThought to;
         private final int traversalCount;
         private final double focusWeight;
 
-        public Link(LocationInPlace from, LocationInPlace to, int traversalCount, double focusWeight) {
+        public Link(LocationInThought from, LocationInThought to, int traversalCount, double focusWeight) {
             this.from = from;
             this.to = to;
             this.traversalCount = traversalCount;

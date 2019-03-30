@@ -5,15 +5,15 @@ import com.dreamscale.htmflow.core.domain.JournalEntryEntity
 import com.dreamscale.htmflow.core.domain.ProjectEntity
 import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
+import com.dreamscale.htmflow.core.feeds.clock.StoryGeometryClock
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowContextBeginningEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowContextEndingEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowContextChangeEvent
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
-import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
+import com.dreamscale.htmflow.core.feeds.story.feature.context.IdeaFlowStructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.MovementEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.sequence.IdeaFlowMovementEvent
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -22,13 +22,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 public class JournalContextObserverSpec extends Specification {
 
-    JournalContextObserver journalContextObserver
+    IdeaFlowJournalContextObserver journalContextObserver
     StoryFrame storyFrame
-    OuterGeometryClock clock
+    StoryGeometryClock clock
 
     def setup() {
-        clock = new OuterGeometryClock(LocalDateTime.now())
-        journalContextObserver = new JournalContextObserver()
+        clock = new StoryGeometryClock(LocalDateTime.now())
+        journalContextObserver = new IdeaFlowJournalContextObserver()
         storyFrame = new StoryFrame(clock.getCoordinates(), ZoomLevel.MIN)
     }
 
@@ -53,55 +53,55 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(storyFrame, window)
-        List<ContextChangeEvent> contextEvents = toContextEventList(storyFrame.getContextMovements());
+        List<IdeaFlowContextChangeEvent> contextEvents = toContextEventList(storyFrame.getContextMovements());
 
         then:
         assert contextEvents != null
         assert contextEvents.size() == 9
-        assert contextEvents.get(0).structureLevel == StructureLevel.PROJECT
+        assert contextEvents.get(0).structureLevel == IdeaFlowStructureLevel.PROJECT
         assert contextEvents.get(0).referenceId == project.id
         assert contextEvents.get(0).position == time1
-        assert contextEvents.get(0) instanceof ContextBeginningEvent
+        assert contextEvents.get(0) instanceof IdeaFlowContextBeginningEvent
 
-        assert contextEvents.get(1).structureLevel == StructureLevel.TASK
+        assert contextEvents.get(1).structureLevel == IdeaFlowStructureLevel.TASK
         assert contextEvents.get(1).referenceId == task1.id
         assert contextEvents.get(1).position == time1
-        assert contextEvents.get(1) instanceof ContextBeginningEvent
+        assert contextEvents.get(1) instanceof IdeaFlowContextBeginningEvent
 
-        assert contextEvents.get(2).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(2).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(2).referenceId == journalEntry1.get().id
         assert contextEvents.get(2).position == time1
-        assert contextEvents.get(2) instanceof ContextBeginningEvent
+        assert contextEvents.get(2) instanceof IdeaFlowContextBeginningEvent
 
-        assert contextEvents.get(3).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(3).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(3).referenceId == journalEntry1.get().id
         assert contextEvents.get(3).position == time2
-        assert contextEvents.get(3) instanceof ContextEndingEvent
+        assert contextEvents.get(3) instanceof IdeaFlowContextEndingEvent
 
-        assert contextEvents.get(4).structureLevel == StructureLevel.TASK
+        assert contextEvents.get(4).structureLevel == IdeaFlowStructureLevel.TASK
         assert contextEvents.get(4).referenceId == task1.id
         assert contextEvents.get(4).position == time2
-        assert contextEvents.get(4) instanceof ContextEndingEvent
+        assert contextEvents.get(4) instanceof IdeaFlowContextEndingEvent
 
-        assert contextEvents.get(5).structureLevel == StructureLevel.TASK
+        assert contextEvents.get(5).structureLevel == IdeaFlowStructureLevel.TASK
         assert contextEvents.get(5).referenceId == task2.id
         assert contextEvents.get(5).position == time2
-        assert contextEvents.get(5) instanceof ContextBeginningEvent
+        assert contextEvents.get(5) instanceof IdeaFlowContextBeginningEvent
 
-        assert contextEvents.get(6).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(6).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(6).referenceId == journalEntry2.get().id
         assert contextEvents.get(6).position == time2
-        assert contextEvents.get(6) instanceof ContextBeginningEvent
+        assert contextEvents.get(6) instanceof IdeaFlowContextBeginningEvent
 
-        assert contextEvents.get(7).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(7).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(7).referenceId == journalEntry2.get().id
         assert contextEvents.get(7).position == time3
-        assert contextEvents.get(7) instanceof ContextEndingEvent
+        assert contextEvents.get(7) instanceof IdeaFlowContextEndingEvent
 
-        assert contextEvents.get(8).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(8).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(8).referenceId == journalEntry3.get().id
         assert contextEvents.get(8).position == time3
-        assert contextEvents.get(8) instanceof ContextBeginningEvent
+        assert contextEvents.get(8) instanceof IdeaFlowContextBeginningEvent
     }
 
 
@@ -130,22 +130,22 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(nextFrame, nextWindow)
-        List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getContextMovements());
+        List<IdeaFlowContextChangeEvent> contextEvents = toContextEventList(nextFrame.getContextMovements());
         then:
         assert contextEvents != null
         assert contextEvents.size() == 1
-        assert contextEvents.get(0).structureLevel == StructureLevel.INTENTION
+        assert contextEvents.get(0).structureLevel == IdeaFlowStructureLevel.INTENTION
         assert contextEvents.get(0).referenceId == journalEntry1.get().id
         assert contextEvents.get(0).position == time3
-        assert contextEvents.get(0) instanceof ContextEndingEvent
+        assert contextEvents.get(0) instanceof IdeaFlowContextEndingEvent
 
     }
 
-    private List<ContextChangeEvent> toContextEventList(List<MovementEvent> movements) {
+    private List<IdeaFlowContextChangeEvent> toContextEventList(List<IdeaFlowMovementEvent> movements) {
 
-        List<ContextChangeEvent> contextEvents = new ArrayList<>();
-        for (MovementEvent movementEvent : movements) {
-            contextEvents.add(movementEvent.reference as ContextChangeEvent);
+        List<IdeaFlowContextChangeEvent> contextEvents = new ArrayList<>();
+        for (IdeaFlowMovementEvent movementEvent : movements) {
+            contextEvents.add(movementEvent.reference as IdeaFlowContextChangeEvent);
             println movementEvent.reference
         }
         contextEvents

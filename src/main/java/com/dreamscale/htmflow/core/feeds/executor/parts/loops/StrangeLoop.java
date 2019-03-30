@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.loops;
 
 
-import com.dreamscale.htmflow.core.feeds.common.Flow;
+import com.dreamscale.htmflow.core.feeds.common.IdeaFlow;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategy;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class StrangeLoop {
 
-    private List<Flow> flowsToPlay;
+    private List<IdeaFlow> flowsToPlay;
     private List<LoopStrategy> loops;
     private List<SinkStrategy> sinks;
 
@@ -26,8 +26,8 @@ public class StrangeLoop {
         this.sinks = new ArrayList<>();
     }
 
-    public void playFeed(Flow flow) {
-        this.flowsToPlay.add(flow);
+    public void playFeed(IdeaFlow ideaFlow) {
+        this.flowsToPlay.add(ideaFlow);
     }
 
     public void sink(SinkStrategy sinkStrategy) {

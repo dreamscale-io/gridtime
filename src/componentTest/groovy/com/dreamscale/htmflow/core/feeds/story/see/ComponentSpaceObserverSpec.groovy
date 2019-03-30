@@ -20,11 +20,11 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 public class ComponentSpaceObserverSpec extends Specification {
 
-    ComponentSpaceObserver componentSpaceObserver
+    IdeaFlowComponentSpaceObserver componentSpaceObserver
     StoryFrame storyFrame
 
     def setup() {
-        componentSpaceObserver = new ComponentSpaceObserver()
+        componentSpaceObserver = new IdeaFlowComponentSpaceObserver()
 
         ComponentLookupService componentLookupServiceMock =
                 [lookupComponent: { UUID projectId, String filePath -> return "place" }] as ComponentLookupService

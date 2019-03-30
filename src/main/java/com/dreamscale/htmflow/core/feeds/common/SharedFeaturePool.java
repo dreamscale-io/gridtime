@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.common;
 
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
+import com.dreamscale.htmflow.core.feeds.clock.StoryGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrameSequence;
 
@@ -15,11 +15,11 @@ public class SharedFeaturePool {
     private final HashMap<ZoomLevel, StoryFrameSequence> storySequenceByZoomLevel;
 
     private ZoomLevel activeZoomLevel;
-    private OuterGeometryClock.Coords activeJobCoordinates;
-    private OuterGeometryClock.Coords activeFocusCoordinates;
+    private StoryGeometryClock.Coords activeJobCoordinates;
+    private StoryGeometryClock.Coords activeFocusCoordinates;
 
 
-    public SharedFeaturePool(UUID memberId, OuterGeometryClock.Coords startingCoordinates) {
+    public SharedFeaturePool(UUID memberId, StoryGeometryClock.Coords startingCoordinates) {
 
         this.memberId = memberId;
 
@@ -50,7 +50,7 @@ public class SharedFeaturePool {
 
     //TODO this will need to load data for active coordinates, and trigger "work to do" as needed to fill in details
 
-    public StoryFrame getActiveStoryFrameAtZoomLevel(OuterGeometryClock.Coords activeFocus, ZoomLevel zoomLevel) {
+    public StoryFrame getActiveStoryFrameAtZoomLevel(StoryGeometryClock.Coords activeFocus, ZoomLevel zoomLevel) {
         this.activeFocusCoordinates = activeFocus;
         return storySequenceByZoomLevel.get(zoomLevel).getActiveStoryFrame();
     }

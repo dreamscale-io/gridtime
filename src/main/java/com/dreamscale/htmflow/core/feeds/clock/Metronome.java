@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.clock;
 
-import com.dreamscale.htmflow.core.feeds.common.Flow;
+import com.dreamscale.htmflow.core.feeds.common.IdeaFlow;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,28 +14,28 @@ import java.util.List;
 @Slf4j
 public class Metronome {
 
-    private OuterGeometryClock clock;
+    private StoryGeometryClock clock;
 
-    private OuterGeometryClock.Coords fromClockPosition;
-    private OuterGeometryClock.Coords toClockPosition;
+    private StoryGeometryClock.Coords fromClockPosition;
+    private StoryGeometryClock.Coords toClockPosition;
 
-    private final List<Flow> flowChain;
+    private final List<IdeaFlow> ideaFlowChain;
     private final List<ClockChangeListener> clockChangeListeners;
 
     public Metronome(LocalDateTime startTime) {
-        this.clock = new OuterGeometryClock(startTime);
+        this.clock = new StoryGeometryClock(startTime);
         this.fromClockPosition = clock.getCoordinates();
 
-        this.flowChain = new ArrayList<>();
+        this.ideaFlowChain = new ArrayList<>();
         this.clockChangeListeners = new ArrayList<>();
     }
 
-    public OuterGeometryClock.Coords getActiveCoordinates() {
+    public StoryGeometryClock.Coords getActiveCoordinates() {
         return fromClockPosition;
     }
 
     public void tick() {
-        OuterGeometryClock.Coords nextCoordinates = clock.tick();
+        StoryGeometryClock.Coords nextCoordinates = clock.tick();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
@@ -63,9 +63,9 @@ public class Metronome {
     }
 
     private void tickForwardFlowChain() {
-        for (Flow flow : flowChain) {
+        for (IdeaFlow ideaFlow : ideaFlowChain) {
             try {
-                flow.tick(fromClockPosition.getClockTime(), toClockPosition.getClockTime());
+                ideaFlow.tick(fromClockPosition.getClockTime(), toClockPosition.getClockTime());
             } catch (InterruptedException ex) {
                 log.error("Job interrupted", ex);
             }
@@ -82,17 +82,17 @@ public class Metronome {
         }
     }
 
-    public OuterGeometryClock.Coords getFromClockPosition() {
+    public StoryGeometryClock.Coords getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public OuterGeometryClock.Coords getToClockPosition() {
+    public StoryGeometryClock.Coords getToClockPosition() {
         return this.toClockPosition;
     }
 
 
-    public void addFlowToChain(Flow flow) {
-        this.flowChain.add(flow);
+    public void addFlowToChain(IdeaFlow ideaFlow) {
+        this.ideaFlowChain.add(ideaFlow);
     }
 
     public void notifyClockTick(ClockChangeListener clockChangeListener) {

@@ -1,16 +1,17 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.IdeaFlowFeature;
 
 import java.time.Duration;
 
-public class FocalPoint implements FlowFeature {
+public class FocalPoint implements IdeaFlowFeature {
 
     private String placeName;
 
-    private final GravityBall gravityBall;
+    private final GravityBallOfThoughts gravityBall;
+    private RadialStructure radialStructure;
 
-    private LocationInPlace currentLocation;
+    private LocationInThought currentLocation;
 
     private static final String ENTRANCE_OF_PLACE = "[entrance]";
     private static final String EXIT_OF_PLACE = "[exit]";
@@ -19,7 +20,7 @@ public class FocalPoint implements FlowFeature {
     public FocalPoint(String placeName, String initialLocationPath) {
         this.placeName = placeName;
 
-        this.gravityBall = new GravityBall(this);
+        this.gravityBall = new GravityBallOfThoughts(this);
         this.gravityBall.gotoLocationInSpace(initialLocationPath);
 
         this.currentLocation = gravityBall.getCurrentLocation();
@@ -30,9 +31,9 @@ public class FocalPoint implements FlowFeature {
         return placeName;
     }
 
-    public LocationInPlace goToLocation(String locationPath, Duration timeInLocation) {
+    public LocationInThought goToLocation(String locationPath, Duration timeInLocation) {
 
-        LocationInPlace location = gravityBall.gotoLocationInSpace(locationPath);
+        LocationInThought location = gravityBall.gotoLocationInSpace(locationPath);
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -40,8 +41,11 @@ public class FocalPoint implements FlowFeature {
         return currentLocation;
     }
 
+    public void buildRadialStructure() {
+        this.radialStructure = gravityBall.buildRadialStructure();
+    }
 
-    public LocationInPlace getCurrentLocation() {
+    public LocationInThought getCurrentLocation() {
         return currentLocation;
     }
 
@@ -49,11 +53,11 @@ public class FocalPoint implements FlowFeature {
         currentLocation.modify(modificationCount);
     }
 
-    public LocationInPlace exit() {
+    public LocationInThought exit() {
         return goToLocation(EXIT_OF_PLACE, Duration.ofSeconds(0));
     }
 
-    public LocationInPlace enter() {
+    public LocationInThought enter() {
         return goToLocation(ENTRANCE_OF_PLACE, Duration.ofSeconds(0));
     }
 
