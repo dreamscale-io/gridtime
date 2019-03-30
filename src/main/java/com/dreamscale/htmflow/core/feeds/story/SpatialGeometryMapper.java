@@ -46,6 +46,38 @@ public class SpatialGeometryMapper {
         return movements;
     }
 
+    public void finishAndCreateStructureMap() {
+        //first, get the number of main focal point locations to divide the map in, and make tiles
+
+        int focalPointCount = placeMap.size();
+
+        //for each focal point, there can be bridges to 3 other places.
+        //bridge groups, (5) 1 => 2 bridges, (4) 2 => 3 bridges,
+
+        //calculate mass
+
+        //closeness to center, determined by calculating mass of traversals, and time spent
+
+        //then do a second pass, where I count min hops to center
+        // (think in a ball, this it outside rings vs inside rings)
+        // Once I know what ring distance ring it's in, I can sort into rings
+
+
+
+        //sort by heavy...
+
+        // /focus/1/location/1/{path, fileName, time, modification}
+        // /focus/2/location/3
+        // /focus/3
+
+        //
+
+        // /component
+
+        // []  []
+        // []  []
+    }
+
     private MovementEvent gotoLocationAndCreateMovement(LocalDateTime moment, String locationPath, Duration timeInLocation) {
         LocationInPlace locationInPlace = currentPlace.goToLocation(locationPath, timeInLocation);
         return new MovementEvent(moment, locationInPlace);

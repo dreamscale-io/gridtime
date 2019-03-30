@@ -42,4 +42,8 @@ public class LocationInPlace implements FlowFeature {
     public String getPlaceName() {
         return place.getName();
     }
+
+    public String toKey() {
+       return "["+ place.getName() + "]:"+locationPath;
+    }
 }

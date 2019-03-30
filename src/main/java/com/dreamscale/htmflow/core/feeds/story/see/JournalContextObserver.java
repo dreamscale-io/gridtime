@@ -155,10 +155,6 @@ public class JournalContextObserver implements FlowObserver {
             }
 
         }
-
-
-
-
     }
 
     private void createIntentionDoneIfNotNull(StoryFrame storyFrame, JournalEntryEntity journalEntry, ContextBeginningEvent lastIntentionStart) {

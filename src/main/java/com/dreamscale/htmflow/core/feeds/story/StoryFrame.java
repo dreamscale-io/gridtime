@@ -43,12 +43,18 @@ public class StoryFrame {
 
     }
 
-    //Change the active context, such as active project, task, or intention
+    /**
+     * Change the active context, such as starting project, task, or intention
+     */
 
     public void beginContext(ContextBeginningEvent contextBeginningEvent) {
         MovementEvent movement = contextMapper.beginContext(contextBeginningEvent);
         flowSequenceMapper.addMovement(LayerType.CONTEXT_CHANGES, movement);
     }
+
+    /**
+     * End an active context, such as project, task, or intention
+     */
 
     public void endContext(ContextEndingEvent contextEndingEvent) {
         MovementEvent movement = contextMapper.endContext(contextEndingEvent);
@@ -149,7 +155,6 @@ public class StoryFrame {
     public ContextEndingEvent getSavedContextToAddWhenInWindow() {
         return savedContextToAddWhenInWindow;
     }
-
 
     //////////// Properties that describe the Active State ////////////
 

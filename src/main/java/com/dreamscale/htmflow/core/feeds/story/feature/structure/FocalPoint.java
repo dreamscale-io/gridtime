@@ -9,10 +9,12 @@ import java.util.Map;
 public class FocalPoint implements FlowFeature {
 
 
+
     private String name;
 
     private final Map<String, LocationInPlace> locationMap;
     private final Map<String, Edge> edgeMap;
+    private final GravityBall gravityBall;
 
     private LocationInPlace currentLocation;
     private int locationIndex;
@@ -27,6 +29,8 @@ public class FocalPoint implements FlowFeature {
         this.locationMap = new HashMap<>();
         this.edgeMap = new HashMap<>();
 
+        this.gravityBall = new GravityBall();
+
         this.currentLocation = new LocationInPlace(this, initialLocationPath, 0);
         this.locationIndex = 1;
     }
@@ -34,8 +38,6 @@ public class FocalPoint implements FlowFeature {
     public String getName() {
         return name;
     }
-
-
 
     public LocationInPlace goToLocation(String locationPath, Duration timeInLocation) {
         LocationInPlace fromLocation = currentLocation;
@@ -48,6 +50,9 @@ public class FocalPoint implements FlowFeature {
 
         Edge edge = findOrCreateEdge(fromLocation, toLocation);
         edge.visit();
+
+        gravityBall.createParticleFromTraversal(fromLocation, toLocation);
+        gravityBall.growWithFocus(timeInLocation);
 
         currentLocation = toLocation;
         return toLocation;
@@ -103,8 +108,6 @@ public class FocalPoint implements FlowFeature {
 
         return pathA + pathB;
     }
-
-
 
 
     private class Edge {
