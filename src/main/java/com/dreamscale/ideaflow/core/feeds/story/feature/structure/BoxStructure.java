@@ -2,22 +2,17 @@ package com.dreamscale.ideaflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
+import java.util.List;
+
 public class BoxStructure implements IdeaFlowFeature {
 
-    private final String bridgeKey;
-    private final LocationInFocus fromLocation;
-    private final LocationInFocus toLocation;
+    private final String placeName;
+    private final List<RadialStructure> thoughtBubbles;
 
-    private int visitCount;
-
-    public BoxStructure(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
-        this.bridgeKey = bridgeKey;
-        this.fromLocation = fromLocation;
-        this.toLocation = toLocation;
-        this.visitCount = 0;
+    public BoxStructure(String placeName, List<RadialStructure> thoughtBubbles) {
+        this.placeName = placeName;
+        this.thoughtBubbles = thoughtBubbles;
     }
 
-    public void visit() {
-        visitCount++;
-    }
+
 }

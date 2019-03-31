@@ -70,6 +70,14 @@ public class GravityBallOfThoughts {
 
         DecayingGrowthRate decayingGrowth = new DecayingGrowthRate(timeInLocation);
 
+        //pushing a new thought particle on the tracer, also has a side-effect of decreasing the weight
+        //of ALL existing particles by 1 increment of decay, for any particles linked in the active tracer,
+        //grow the particle weight
+
+        for (ThoughtParticle existingParticle : thoughtParticleMap.values()) {
+            existingParticle.decayWithFocusElsewhere(decayingGrowth);
+        }
+
         for (ThoughtParticle particle : thoughtTracer) {
             particle.growHeavyWithFocus(decayingGrowth, timeInLocation);
 
@@ -93,15 +101,15 @@ public class GravityBallOfThoughts {
         if (thoughtTracer.size() > TRACER_LENGTH) {
             thoughtTracer.removeLast();
         }
+
     }
 
-    public List<RadialStructure> buildRadialStructures() {
+    public List<RadialStructure> extractThoughtBubbles() {
 
         List<ThoughtParticle> particlesByWeight = getNormalizedParticlesSortedByWeight();
 
         List<ThoughtParticle> enterExitTransitions = findEnterExitTransitions(particlesByWeight);
         particlesByWeight.removeAll(enterExitTransitions);
-
 
         List<RadialStructure> radialStructures = new ArrayList<>();
 
@@ -491,6 +499,7 @@ public class GravityBallOfThoughts {
     private class DecayingGrowthRate {
         private final long scaleRelativeToTime;
         double growthRate = 1;
+        double decayRate = 1;
         int risingDenominator = 1;
 
         DecayingGrowthRate(Duration scaleRelativeToTime) {
@@ -501,11 +510,20 @@ public class GravityBallOfThoughts {
             risingDenominator++;
 
             this.growthRate = 1.0 / risingDenominator;
+            this.decayRate = 1.0 / risingDenominator;
         }
 
-        double calculateFor(double timeInSeconds) {
+        double calculateGrowthFor(double timeInSeconds) {
             if (scaleRelativeToTime >= 0) {
                 return growthRate * ((1.0 * timeInSeconds) / scaleRelativeToTime);
+            } else {
+                return 0;
+            }
+        }
+
+        public double calculateDecayFor(double timeInSeconds) {
+            if (scaleRelativeToTime >= 0) {
+                return decayRate * ((1.0 * timeInSeconds) / scaleRelativeToTime);
             } else {
                 return 0;
             }
@@ -529,7 +547,12 @@ public class GravityBallOfThoughts {
         }
 
         void growHeavyWithFocus(DecayingGrowthRate decayingGrowthRate, Duration timeInLocation) {
-            this.weight += Math.floor(Math.sqrt(timeInLocation.getSeconds()) * decayingGrowthRate.calculateFor(velocityOfTransition));
+            this.weight += Math.sqrt(timeInLocation.getSeconds()) * decayingGrowthRate.calculateGrowthFor(velocityOfTransition);
+        }
+
+
+        void decayWithFocusElsewhere(DecayingGrowthRate decayingGrowth) {
+            weight -= Math.sqrt(weight) * decayingGrowth.calculateDecayFor(velocityOfTransition);
         }
 
         void normalizeWeight(double minWeight, double maxWeight) {

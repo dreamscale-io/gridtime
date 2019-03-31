@@ -12,7 +12,7 @@ public class FocalPoint implements IdeaFlowFeature {
     private final GravityBallOfThoughts gravityBall;
 
     private LocationInFocus currentLocation;
-    private List<RadialStructure> extractedRadialStructures;
+    private List<RadialStructure> extractedThoughtBubbles;
 
 
     public FocalPoint(String placeName, String initialLocationPath) {
@@ -39,13 +39,16 @@ public class FocalPoint implements IdeaFlowFeature {
         return currentLocation;
     }
 
-    public List<RadialStructure> getExtractedRadialStructures() {
-        return extractedRadialStructures;
+    public List<RadialStructure> getThoughtBubbles() {
+        if (extractedThoughtBubbles == null) {
+            this.extractedThoughtBubbles = gravityBall.extractThoughtBubbles();
+        }
+        return extractedThoughtBubbles;
     }
 
-    public List<RadialStructure> buildRadialStructures() {
-        this.extractedRadialStructures = gravityBall.buildRadialStructures();
-        return this.extractedRadialStructures;
+    private List<RadialStructure> extractThoughtBubbles() {
+        this.extractedThoughtBubbles = gravityBall.extractThoughtBubbles();
+        return this.extractedThoughtBubbles;
     }
 
     public LocationInFocus getCurrentLocation() {
