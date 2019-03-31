@@ -50,4 +50,8 @@ public class LocationInFocus implements IdeaFlowFeature {
     public Duration getTotalTimeInvestment() {
         return totalTimeInvestment;
     }
+
+    public String toString() {
+        return "[Location]:" + locationPath;
+    }
 }

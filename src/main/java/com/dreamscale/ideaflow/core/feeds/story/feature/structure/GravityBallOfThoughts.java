@@ -104,14 +104,14 @@ public class GravityBallOfThoughts {
 
     }
 
-    public List<RadialStructure> extractThoughtBubbles() {
+    public List<ThoughtBubble> extractThoughtBubbles() {
 
         List<ThoughtParticle> particlesByWeight = getNormalizedParticlesSortedByWeight();
 
         List<ThoughtParticle> enterExitTransitions = findEnterExitTransitions(particlesByWeight);
         particlesByWeight.removeAll(enterExitTransitions);
 
-        List<RadialStructure> radialStructures = new ArrayList<>();
+        List<ThoughtBubble> thoughtBubbles = new ArrayList<>();
 
         //if I've got left over stuff after a loop, these are disconnected networks with alt-centers,
         // so make radial structures for each network
@@ -126,7 +126,7 @@ public class GravityBallOfThoughts {
             enterExitTransitions.removeAll(particlesUsed);
             particlesByWeight.removeAll(particlesUsed);
 
-            radialStructures.add(radialStructure);
+            thoughtBubbles.add(new ThoughtBubble(radialStructure));
 
             //we should deplete our particles, but just in case, make sure we don't loop forever
             if (lastParticlesRemaining == particlesByWeight.size()) {
@@ -136,7 +136,7 @@ public class GravityBallOfThoughts {
             }
         }
 
-        return radialStructures;
+        return thoughtBubbles;
 
     }
 

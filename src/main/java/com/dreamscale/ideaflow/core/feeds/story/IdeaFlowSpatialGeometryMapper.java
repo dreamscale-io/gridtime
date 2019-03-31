@@ -48,14 +48,13 @@ public class IdeaFlowSpatialGeometryMapper {
         BoxAndBridgeStructure boxAndBridgeStructure = new BoxAndBridgeStructure();
 
         for (FocalPoint thought : mainThoughtSequence) {
-            List<RadialStructure> thoughtBubbles = thought.getThoughtBubbles();
+            List<ThoughtBubble> thoughtBubbles = thought.getThoughtBubbles();
             boxAndBridgeStructure.createThoughtBox(thought.getPlaceName(), thoughtBubbles);
         }
 
         for (BridgeStructure bridgeBetweenBoxes : bridgeMap.values()) {
             boxAndBridgeStructure.createBridge(bridgeBetweenBoxes);
         }
-        boxAndBridgeStructure.finish();
 
         extractedBoxAndBridgeStructure = boxAndBridgeStructure;
 
