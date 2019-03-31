@@ -10,7 +10,7 @@ import java.util.*;
 public class IdeaFlowSpatialGeometryMapper {
 
     private Map<String, FocalPoint> placeMap = new HashMap<>();
-    private Map<String, BridgeStructure> bridgeMap = new HashMap<>();
+    private Map<String, Bridge> bridgeMap = new HashMap<>();
 
     private List<FocalPoint> mainThoughtSequence = new ArrayList<>();
     private FocalPoint currentPlace;
@@ -52,7 +52,7 @@ public class IdeaFlowSpatialGeometryMapper {
             boxAndBridgeStructure.createThoughtBox(thought.getPlaceName(), thoughtBubbles);
         }
 
-        for (BridgeStructure bridgeBetweenBoxes : bridgeMap.values()) {
+        for (Bridge bridgeBetweenBoxes : bridgeMap.values()) {
             boxAndBridgeStructure.createBridge(bridgeBetweenBoxes);
         }
 
@@ -77,7 +77,7 @@ public class IdeaFlowSpatialGeometryMapper {
 
         LocationInFocus enterLocation = toPlace.enter();
         LocationInFocus toLocation = toPlace.goToLocation(toLocationPath, timeInLocation);
-        BridgeStructure bridgeCrossed = findOrCreateBridge(fromLocation, toLocation);
+        Bridge bridgeCrossed = findOrCreateBridge(fromLocation, toLocation);
         bridgeCrossed.visit();
 
         movements.add(new IdeaFlowMovementEvent(moment, bridgeCrossed));
@@ -100,15 +100,15 @@ public class IdeaFlowSpatialGeometryMapper {
         return place;
     }
 
-    private BridgeStructure findOrCreateBridge(LocationInFocus fromLocation, LocationInFocus toLocation) {
+    private Bridge findOrCreateBridge(LocationInFocus fromLocation, LocationInFocus toLocation) {
         String fromLocationKey = fromLocation.getMainFocusName() + ":" + fromLocation.getLocationPath();
         String toLocationKey = toLocation.getMainFocusName() + ":" + toLocation.getLocationPath();
 
         String bridgeKey = fromLocationKey + "=>" + toLocationKey;
 
-        BridgeStructure bridge = this.bridgeMap.get(bridgeKey);
+        Bridge bridge = this.bridgeMap.get(bridgeKey);
         if (bridge == null) {
-            bridge = new BridgeStructure(bridgeKey, fromLocation, toLocation);
+            bridge = new Bridge(bridgeKey, fromLocation, toLocation);
             this.bridgeMap.put(bridgeKey, bridge);
 
         }

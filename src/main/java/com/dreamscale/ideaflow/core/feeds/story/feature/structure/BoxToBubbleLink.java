@@ -9,7 +9,7 @@ public class BoxToBubbleLink implements IdeaFlowFeature {
 
     private final ThoughtBubble thoughtBubble;
 
-    private final Set<BridgeStructure> bridges = new HashSet<>();
+    private final Set<Bridge> bridges = new HashSet<>();
     private final Set<LocationInFocus> connectedLocations = new HashSet<>();
 
 
@@ -21,8 +21,8 @@ public class BoxToBubbleLink implements IdeaFlowFeature {
         return thoughtBubble == bubble;
     }
 
-    public void addBridgeToSet(BridgeStructure bridgeStructure) {
-        this.bridges.add(bridgeStructure);
+    public void addBridgeToSet(Bridge bridge) {
+        this.bridges.add(bridge);
     }
 
     public void addConnectedLocationToSet(LocationInFocus location) {
@@ -31,7 +31,7 @@ public class BoxToBubbleLink implements IdeaFlowFeature {
 
     public int getVisitCount() {
         int totalVisits = 0;
-        for (BridgeStructure bridge : bridges) {
+        for (Bridge bridge : bridges) {
             totalVisits += bridge.getVisitCount();
         }
         return totalVisits;

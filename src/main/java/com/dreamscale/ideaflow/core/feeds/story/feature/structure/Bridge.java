@@ -2,30 +2,30 @@ package com.dreamscale.ideaflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
-public class BridgeStructure implements IdeaFlowFeature {
+public class Bridge implements IdeaFlowFeature {
 
     private final String bridgeKey;
 
-    private BoxStructure fromBox;
-    private BoxStructure toBox;
+    private Box fromBox;
+    private Box toBox;
     private final LocationInFocus fromLocation;
     private final LocationInFocus toLocation;
 
     private int visitCount;
     private int relativeSequence;
 
-    public BridgeStructure(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
+    public Bridge(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
         this.bridgeKey = bridgeKey;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
         this.visitCount = 0;
     }
 
-    public void setFromBox(BoxStructure boxWithFromLocation) {
+    public void setFromBox(Box boxWithFromLocation) {
         this.fromBox = boxWithFromLocation;
     }
 
-    public void setToBox(BoxStructure boxWithToLocation) {
+    public void setToBox(Box boxWithToLocation) {
         this.toBox = boxWithToLocation;
     }
 

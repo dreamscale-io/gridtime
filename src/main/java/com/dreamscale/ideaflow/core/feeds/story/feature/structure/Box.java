@@ -5,7 +5,7 @@ import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoxStructure implements IdeaFlowFeature {
+public class Box implements IdeaFlowFeature {
 
     private final String placeName;
     private final List<ThoughtBubble> thoughtBubbles;
@@ -13,7 +13,7 @@ public class BoxStructure implements IdeaFlowFeature {
     private final List<BoxToBubbleLink> boxToBubbleLinks = new ArrayList<>();
     private int relativeSequence;
 
-    public BoxStructure(String placeName, List<ThoughtBubble> thoughtBubbles) {
+    public Box(String placeName, List<ThoughtBubble> thoughtBubbles) {
         this.placeName = placeName;
         this.thoughtBubbles = thoughtBubbles;
 
@@ -24,7 +24,7 @@ public class BoxStructure implements IdeaFlowFeature {
         }
     }
 
-    public void linkToBridge(BridgeStructure bridgeBetweenBoxes, LocationInFocus locationInBubble) {
+    public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInFocus locationInBubble) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(locationInBubble);
 
         BoxToBubbleLink boxToBubble = findOrCreateBoxToBubbleLink(bubbleFound);

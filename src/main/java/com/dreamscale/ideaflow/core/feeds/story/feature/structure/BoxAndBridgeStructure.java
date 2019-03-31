@@ -7,25 +7,25 @@ public class BoxAndBridgeStructure {
 
     private int relativeBoxSequence = 1;
     private int relativeBridgeSequence = 1;
-    private List<BoxStructure> boxes = new ArrayList<>();
-    private List<BridgeStructure> bridges = new ArrayList<>();
+    private List<Box> boxes = new ArrayList<>();
+    private List<Bridge> bridges = new ArrayList<>();
 
     public void createThoughtBox(String placeName, List<ThoughtBubble> thoughtBubbles) {
 
-        BoxStructure box = new BoxStructure(placeName, thoughtBubbles);
+        Box box = new Box(placeName, thoughtBubbles);
         box.setRelativeSequence(relativeBoxSequence);
         boxes.add(box);
 
         relativeBoxSequence++;
     }
 
-    public void createBridge(BridgeStructure bridgeBetweenBoxes) {
+    public void createBridge(Bridge bridgeBetweenBoxes) {
 
         LocationInFocus fromLocation = bridgeBetweenBoxes.getFromLocation();
         LocationInFocus toLocation = bridgeBetweenBoxes.getToLocation();
 
-        BoxStructure boxWithFromLocation = findBoxContaining(fromLocation);
-        BoxStructure boxWithToLocation = findBoxContaining(toLocation);
+        Box boxWithFromLocation = findBoxContaining(fromLocation);
+        Box boxWithToLocation = findBoxContaining(toLocation);
 
         validateBoxFound(boxWithFromLocation, fromLocation);
         validateBoxFound(boxWithToLocation, toLocation);
@@ -42,15 +42,15 @@ public class BoxAndBridgeStructure {
         relativeBridgeSequence++;
     }
 
-    private void validateBoxFound(BoxStructure boxWithFromLocation, LocationInFocus location) {
+    private void validateBoxFound(Box boxWithFromLocation, LocationInFocus location) {
         if (boxWithFromLocation == null) {
             throw new RuntimeException("Logic error, box not found for location: "+location);
         }
     }
 
-    private BoxStructure findBoxContaining(LocationInFocus location) {
-        BoxStructure boxFound = null;
-        for (BoxStructure box : boxes) {
+    private Box findBoxContaining(LocationInFocus location) {
+        Box boxFound = null;
+        for (Box box : boxes) {
             if (box.contains(location)) {
                 boxFound = box;
             }
