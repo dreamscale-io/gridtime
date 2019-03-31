@@ -4,7 +4,7 @@ import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
 import java.time.Duration;
 
-public class LocationInThought implements IdeaFlowFeature {
+public class LocationInFocus implements IdeaFlowFeature {
 
     private final FocalPoint mainFocus;
     private final String locationPath;
@@ -14,7 +14,7 @@ public class LocationInThought implements IdeaFlowFeature {
     private Duration totalTimeInvestment;
     private int visitCounter;
 
-    LocationInThought(FocalPoint mainFocus, String locationPath, int locationIndex) {
+    LocationInFocus(FocalPoint mainFocus, String locationPath, int locationIndex) {
         this.mainFocus = mainFocus;
         this.locationPath = locationPath;
         this.totalTimeInvestment = Duration.ofSeconds(0);
@@ -40,11 +40,11 @@ public class LocationInThought implements IdeaFlowFeature {
     }
 
     public String getMainFocusName() {
-        return mainFocus.getName();
+        return mainFocus.getPlaceName();
     }
 
     public String toKey() {
-       return "["+ mainFocus.getName() + "]:"+locationPath;
+       return "["+ mainFocus.getPlaceName() + "]:"+locationPath;
     }
 
     public Duration getTotalTimeInvestment() {

@@ -3,22 +3,20 @@ package com.dreamscale.ideaflow.core.feeds.story.feature.structure;
 import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
 import java.time.Duration;
+import java.util.List;
 
 public class FocalPoint implements IdeaFlowFeature {
 
-    private String name;
+    private String placeName;
 
     private final GravityBallOfThoughts gravityBall;
-    private RadialStructure extractedRadialStructure;
 
-    private LocationInThought currentLocation;
-
-    private static final String ENTRANCE_OF_PLACE = "[entrance]";
-    private static final String EXIT_OF_PLACE = "[exit]";
+    private LocationInFocus currentLocation;
+    private List<RadialStructure> extractedRadialStructures;
 
 
-    public FocalPoint(String name, String initialLocationPath) {
-        this.name = name;
+    public FocalPoint(String placeName, String initialLocationPath) {
+        this.placeName = placeName;
 
         this.gravityBall = new GravityBallOfThoughts(this);
         this.gravityBall.gotoLocationInSpace(initialLocationPath);
@@ -27,13 +25,13 @@ public class FocalPoint implements IdeaFlowFeature {
 
     }
 
-    public String getName() {
-        return name;
+    public String getPlaceName() {
+        return placeName;
     }
 
-    public LocationInThought goToLocation(String locationPath, Duration timeInLocation) {
+    public LocationInFocus goToLocation(String locationPath, Duration timeInLocation) {
 
-        LocationInThought location = gravityBall.gotoLocationInSpace(locationPath);
+        LocationInFocus location = gravityBall.gotoLocationInSpace(locationPath);
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -41,15 +39,16 @@ public class FocalPoint implements IdeaFlowFeature {
         return currentLocation;
     }
 
-    public RadialStructure getExtractedRadialStructure() {
-        return extractedRadialStructure;
+    public List<RadialStructure> getExtractedRadialStructures() {
+        return extractedRadialStructures;
     }
 
-    public void buildRadialStructure() {
-        this.extractedRadialStructure = gravityBall.buildRadialStructure();
+    public List<RadialStructure> buildRadialStructures() {
+        this.extractedRadialStructures = gravityBall.buildRadialStructures();
+        return this.extractedRadialStructures;
     }
 
-    public LocationInThought getCurrentLocation() {
+    public LocationInFocus getCurrentLocation() {
         return currentLocation;
     }
 
@@ -57,12 +56,16 @@ public class FocalPoint implements IdeaFlowFeature {
         currentLocation.modify(modificationCount);
     }
 
-    public LocationInThought exit() {
-        return goToLocation(EXIT_OF_PLACE, Duration.ofSeconds(0));
+    public LocationInFocus exit() {
+        currentLocation = gravityBall.gotoExit();
+
+        return currentLocation;
     }
 
-    public LocationInThought enter() {
-        return goToLocation(ENTRANCE_OF_PLACE, Duration.ofSeconds(0));
+    public LocationInFocus enter() {
+        currentLocation = gravityBall.gotoEntrance();
+
+        return currentLocation;
     }
 
 

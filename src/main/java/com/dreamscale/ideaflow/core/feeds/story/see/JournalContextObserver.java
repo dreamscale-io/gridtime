@@ -15,7 +15,7 @@ import java.util.List;
  * Identifies the beginning of tasks and intentions as the beginning and ending of songs,
  * at two levels of story abstraction
  */
-public class IdeaFlowJournalContextObserver implements IdeaFlowObserver {
+public class JournalContextObserver implements IdeaFlowObserver {
 
     @Override
     public void see(StoryFrame currentStoryFrame, Window window) {

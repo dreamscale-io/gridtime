@@ -6,7 +6,7 @@ import com.dreamscale.ideaflow.core.domain.TaskEntity
 import com.dreamscale.ideaflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.ideaflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.ideaflow.core.domain.flow.FlowActivityType
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.ideaflow.core.feeds.common.ZoomLevel
 import com.dreamscale.ideaflow.core.feeds.story.StoryFrame
 import com.dreamscale.ideaflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
@@ -21,18 +21,18 @@ import static com.dreamscale.ideaflow.core.CoreARandom.aRandom
 
 public class ComponentSpaceObserverSpec extends Specification {
 
-    IdeaFlowComponentSpaceObserver componentSpaceObserver
+    ComponentSpaceObserver componentSpaceObserver
     StoryFrame storyFrame
 
     def setup() {
-        componentSpaceObserver = new IdeaFlowComponentSpaceObserver()
+        componentSpaceObserver = new ComponentSpaceObserver()
 
         ComponentLookupService componentLookupServiceMock =
                 [lookupComponent: { UUID projectId, String filePath -> return "mainFocus" }] as ComponentLookupService
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryFrame(new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryFrame(new OuterGeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create Location traversals inside a Place"() {

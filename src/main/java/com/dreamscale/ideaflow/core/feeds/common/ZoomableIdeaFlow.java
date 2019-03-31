@@ -1,7 +1,7 @@
 package com.dreamscale.ideaflow.core.feeds.common;
 
 import com.dreamscale.ideaflow.core.feeds.clock.ClockChangeListener;
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.ideaflow.core.feeds.clock.Metronome;
 import com.dreamscale.ideaflow.core.feeds.story.StoryFrame;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class ZoomableIdeaFlow implements ClockChangeListener {
     private final LinkedList<Runnable> workToDo;
 
     private ZoomLevel zoomLevel;
-    private GeometryClock.Coords activeFocus;
+    private OuterGeometryClock.Coords activeFocus;
 
 
     public ZoomableIdeaFlow(Metronome metronome, UUID memberId, SharedFeaturePool sharedFeaturePool) {

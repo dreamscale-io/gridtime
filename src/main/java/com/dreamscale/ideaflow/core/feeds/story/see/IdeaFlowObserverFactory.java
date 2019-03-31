@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdeaFlowObserverFactory {
 
-    private final IdeaFlowJournalContextObserver journalContextObserver;
+    private final JournalContextObserver journalContextObserver;
 
     @Autowired
-    private IdeaFlowComponentSpaceObserver componentSpaceObserver;
+    private ComponentSpaceObserver componentSpaceObserver;
 
     IdeaFlowObserverFactory() {
-        this.journalContextObserver = new IdeaFlowJournalContextObserver();
+        this.journalContextObserver = new JournalContextObserver();
     }
 
     public IdeaFlowObserver get(ObserverType observerType) {

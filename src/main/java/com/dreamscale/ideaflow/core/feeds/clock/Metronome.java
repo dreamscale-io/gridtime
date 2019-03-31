@@ -14,28 +14,28 @@ import java.util.List;
 @Slf4j
 public class Metronome {
 
-    private GeometryClock clock;
+    private OuterGeometryClock clock;
 
-    private GeometryClock.Coords fromClockPosition;
-    private GeometryClock.Coords toClockPosition;
+    private OuterGeometryClock.Coords fromClockPosition;
+    private OuterGeometryClock.Coords toClockPosition;
 
     private final List<IdeaFlow> ideaFlowChain;
     private final List<ClockChangeListener> clockChangeListeners;
 
     public Metronome(LocalDateTime startTime) {
-        this.clock = new GeometryClock(startTime);
+        this.clock = new OuterGeometryClock(startTime);
         this.fromClockPosition = clock.getCoordinates();
 
         this.ideaFlowChain = new ArrayList<>();
         this.clockChangeListeners = new ArrayList<>();
     }
 
-    public GeometryClock.Coords getActiveCoordinates() {
+    public OuterGeometryClock.Coords getActiveCoordinates() {
         return fromClockPosition;
     }
 
     public void tick() {
-        GeometryClock.Coords nextCoordinates = clock.tick();
+        OuterGeometryClock.Coords nextCoordinates = clock.tick();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
@@ -82,11 +82,11 @@ public class Metronome {
         }
     }
 
-    public GeometryClock.Coords getFromClockPosition() {
+    public OuterGeometryClock.Coords getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public GeometryClock.Coords getToClockPosition() {
+    public OuterGeometryClock.Coords getToClockPosition() {
         return this.toClockPosition;
     }
 

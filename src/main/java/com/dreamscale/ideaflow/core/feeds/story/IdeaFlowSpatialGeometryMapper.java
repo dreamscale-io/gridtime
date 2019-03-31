@@ -9,33 +9,34 @@ import java.util.*;
 
 public class IdeaFlowSpatialGeometryMapper {
 
-    private Map<String, FocalPoint> thoughtMap = new HashMap<>();
-    private Map<String, ThoughtBridge> bridgeMap = new HashMap<>();
+    private Map<String, FocalPoint> placeMap = new HashMap<>();
+    private Map<String, BridgeStructure> bridgeMap = new HashMap<>();
 
-    private FocalPoint currentThought;
+    private List<FocalPoint> mainThoughtSequence = new ArrayList<>();
+    private FocalPoint currentPlace;
     private BoxAndBridgeStructure extractedBoxAndBridgeStructure;
 
-    public List<IdeaFlowMovementEvent> gotoLocation(LocalDateTime moment, String thoughtName, String locationPath, Duration timeInLocation) {
+    public List<IdeaFlowMovementEvent> gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
 
         List<IdeaFlowMovementEvent> movements = new ArrayList<>();
 
-        if (currentThought == null) {
-            FocalPoint thought = findOrCreateThought(thoughtName, locationPath);
-            currentThought = thought;
-            movements.add(new IdeaFlowMovementEvent(moment, thought));
+        if (currentPlace == null) {
+            FocalPoint place = findOrCreatePlace(placeName, locationPath);
+            currentPlace = place;
+            movements.add(new IdeaFlowMovementEvent(moment, place));
 
             IdeaFlowMovementEvent movement = gotoLocationAndCreateMovement(moment, locationPath, timeInLocation);
             movements.add(movement);
 
-        } else if (currentThought.getName().equals(thoughtName)) {
+        } else if (currentPlace.getPlaceName().equals(placeName)) {
 
             IdeaFlowMovementEvent movement = gotoLocationAndCreateMovement(moment, locationPath, timeInLocation);
             movements.add(movement);
 
-        } else if (!currentThought.getName().equals(thoughtName)) {
+        } else if (!currentPlace.getPlaceName().equals(placeName)) {
 
-            FocalPoint newPlace = findOrCreateThought(thoughtName, locationPath);
-            List<IdeaFlowMovementEvent> bridgeMovements = crossBridge(moment, currentThought, newPlace, locationPath, timeInLocation);
+            FocalPoint nextPlace = findOrCreatePlace(placeName, locationPath);
+            List<IdeaFlowMovementEvent> bridgeMovements = crossBridge(moment, currentPlace, nextPlace, locationPath, timeInLocation);
             movements.addAll(bridgeMovements);
         }
 
@@ -44,68 +45,70 @@ public class IdeaFlowSpatialGeometryMapper {
 
     public void finish() {
 
-        this.extractedBoxAndBridgeStructure = new BoxAndBridgeStructure();
+        BoxAndBridgeStructure boxAndBridgeStructure = new BoxAndBridgeStructure();
 
-        Collection<FocalPoint> thoughts = thoughtMap.values();
-        for (FocalPoint thought : thoughts) {
-            thought.buildRadialStructure();
+        for (FocalPoint thought : mainThoughtSequence) {
+            List<RadialStructure> thoughtBubbles = thought.buildRadialStructures();
+            boxAndBridgeStructure.createBox(thought.getPlaceName(), thoughtBubbles);
         }
 
-        extractedBoxAndBridgeStructure.addMainThoughtsAsBoxes(thoughts);
-        extractedBoxAndBridgeStructure.addBridgesBetweenThoughts(bridgeMap.values());
+        boxAndBridgeStructure.addBridgesBetweenBoxes(bridgeMap.values());
 
-        extractedBoxAndBridgeStructure.finish();
+        boxAndBridgeStructure.finish();
+
+        extractedBoxAndBridgeStructure = boxAndBridgeStructure;
 
     }
 
     private IdeaFlowMovementEvent gotoLocationAndCreateMovement(LocalDateTime moment, String locationPath, Duration timeInLocation) {
-        LocationInThought locationInPlace = currentThought.goToLocation(locationPath, timeInLocation);
-        return new IdeaFlowMovementEvent(moment, locationInPlace);
+        LocationInFocus locationInFocus = currentPlace.goToLocation(locationPath, timeInLocation);
+        return new IdeaFlowMovementEvent(moment, locationInFocus);
     }
 
 
-    private List<IdeaFlowMovementEvent> crossBridge(LocalDateTime moment, FocalPoint fromThought, FocalPoint toThought, String toLocationPath, Duration timeInLocation) {
+    private List<IdeaFlowMovementEvent> crossBridge(LocalDateTime moment, FocalPoint fromPlace, FocalPoint toPlace, String toLocationPath, Duration timeInLocation) {
 
         List<IdeaFlowMovementEvent> movements = new ArrayList<>();
 
-        LocationInThought fromLocation = fromThought.getCurrentLocation();
-        LocationInThought exitLocation = fromThought.exit();
+        LocationInFocus fromLocation = fromPlace.getCurrentLocation();
+        LocationInFocus exitLocation = fromPlace.exit();
 
         movements.add(new IdeaFlowMovementEvent(moment, exitLocation));
 
-        LocationInThought enterLocation = toThought.enter();
-        LocationInThought toLocation = toThought.goToLocation(toLocationPath, timeInLocation);
-        ThoughtBridge bridgeCrossed = findOrCreateBridge(fromLocation, toLocation);
+        LocationInFocus enterLocation = toPlace.enter();
+        LocationInFocus toLocation = toPlace.goToLocation(toLocationPath, timeInLocation);
+        BridgeStructure bridgeCrossed = findOrCreateBridge(fromLocation, toLocation);
         bridgeCrossed.visit();
 
         movements.add(new IdeaFlowMovementEvent(moment, bridgeCrossed));
         movements.add(new IdeaFlowMovementEvent(moment, enterLocation));
         movements.add(new IdeaFlowMovementEvent(moment, toLocation));
 
-        currentThought = toThought;
+        currentPlace = toPlace;
 
         return movements;
     }
 
 
-    private FocalPoint findOrCreateThought(String name, String locationPath) {
-        FocalPoint thought = this.thoughtMap.get(name);
-        if (thought == null) {
-            thought = new FocalPoint(name, locationPath);
-            this.thoughtMap.put(thought.getName(), thought);
+    private FocalPoint findOrCreatePlace(String placeName, String locationPath) {
+        FocalPoint place = this.placeMap.get(placeName);
+        if (place == null) {
+            place = new FocalPoint(placeName, locationPath);
+            this.placeMap.put(place.getPlaceName(), place);
+            this.mainThoughtSequence.add(place);
         }
-        return thought;
+        return place;
     }
 
-    private ThoughtBridge findOrCreateBridge(LocationInThought fromLocation, LocationInThought toLocation) {
+    private BridgeStructure findOrCreateBridge(LocationInFocus fromLocation, LocationInFocus toLocation) {
         String fromLocationKey = fromLocation.getMainFocusName() + ":" + fromLocation.getLocationPath();
         String toLocationKey = toLocation.getMainFocusName() + ":" + toLocation.getLocationPath();
 
         String bridgeKey = fromLocationKey + "=>" + toLocationKey;
 
-        ThoughtBridge bridge = this.bridgeMap.get(bridgeKey);
+        BridgeStructure bridge = this.bridgeMap.get(bridgeKey);
         if (bridge == null) {
-            bridge = new ThoughtBridge(bridgeKey, fromLocation, toLocation);
+            bridge = new BridgeStructure(bridgeKey, fromLocation, toLocation);
             this.bridgeMap.put(bridgeKey, bridge);
 
         }
@@ -116,28 +119,28 @@ public class IdeaFlowSpatialGeometryMapper {
        return extractedBoxAndBridgeStructure;
     }
 
-    public FocalPoint getCurrentFocalPoint() {
-        return currentThought;
+    public FocalPoint getCurrentPlace() {
+        return currentPlace;
     }
 
-    public LocationInThought getCurrentLocationInThought() {
-        LocationInThought location = null;
-        if (currentThought != null) {
-            location = currentThought.getCurrentLocation();
+    public LocationInFocus getCurrentLocationInPlace() {
+        LocationInFocus location = null;
+        if (currentPlace != null) {
+            location = currentPlace.getCurrentLocation();
         }
         return location;
     }
 
-    public void initFocalPointFromPriorContext(FocalPoint focalPoint, LocationInThought locationInPlace) {
-        if (focalPoint != null) {
-            currentThought = new FocalPoint(focalPoint.getName(), locationInPlace.getLocationPath());
+    public void initPlaceFromPriorContext(FocalPoint place, LocationInFocus locationInFocus) {
+        if (place != null) {
+            currentPlace = new FocalPoint(place.getPlaceName(), locationInFocus.getLocationPath());
         }
 
     }
 
     public void modifyCurrentLocation(int modificationCount) {
-        if (currentThought != null) {
-            currentThought.modifyCurrentLocation(modificationCount);
+        if (currentPlace != null) {
+            currentPlace.modifyCurrentLocation(modificationCount);
         }
     }
 }

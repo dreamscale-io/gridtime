@@ -1,6 +1,6 @@
 package com.dreamscale.ideaflow.core.feeds.story.feature.sequence;
 
-import com.dreamscale.ideaflow.core.feeds.story.see.MusicalGeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ public class IdeaFlowMovementEvent implements IdeaFlowFeature {
     private final Object reference;
     private int relativeOffset = 0;
 
-    private MusicalGeometryClock.Coords coords;
+    private InnerGeometryClock.Coords coords;
 
     public IdeaFlowMovementEvent(LocalDateTime moment, Object reference) {
         this.moment = moment;
@@ -22,7 +22,7 @@ public class IdeaFlowMovementEvent implements IdeaFlowFeature {
         this.relativeOffset = nextSequence;
     }
 
-    public void setCoordinates(MusicalGeometryClock.Coords coords) {
+    public void setCoordinates(InnerGeometryClock.Coords coords) {
         this.coords = coords;
     }
 
@@ -43,7 +43,7 @@ public class IdeaFlowMovementEvent implements IdeaFlowFeature {
     }
 
 
-    public MusicalGeometryClock.Coords getCoordinates() {
+    public InnerGeometryClock.Coords getCoordinates() {
         return this.coords;
     }
 }

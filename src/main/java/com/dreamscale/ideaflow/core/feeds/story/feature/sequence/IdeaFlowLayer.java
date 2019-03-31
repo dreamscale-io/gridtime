@@ -1,6 +1,6 @@
 package com.dreamscale.ideaflow.core.feeds.story.feature.sequence;
 
-import com.dreamscale.ideaflow.core.feeds.story.see.MusicalGeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.InnerGeometryClock;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,7 +19,7 @@ public class IdeaFlowLayer {
         this.layerType = layerType;
     }
 
-    public MusicalGeometryClock.Coords addMovement(MusicalGeometryClock internalClock, IdeaFlowMovementEvent movement) {
+    public InnerGeometryClock.Coords addMovement(InnerGeometryClock internalClock, IdeaFlowMovementEvent movement) {
         int nextSequence = relativeSequence.increment();
 
         movement.setCoordinates(internalClock.createCoords(movement.getMoment()));

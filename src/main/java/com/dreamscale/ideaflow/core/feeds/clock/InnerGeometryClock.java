@@ -1,4 +1,4 @@
-package com.dreamscale.ideaflow.core.feeds.story.see;
+package com.dreamscale.ideaflow.core.feeds.clock;
 
 import com.dreamscale.ideaflow.core.feeds.clock.BeatsPerBucket;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  * will align with also align with absolute time, such that each beat is 1 minute, and a quarter note is 5 minutes.
  *
  */
-public class MusicalGeometryClock {
+public class InnerGeometryClock {
 
     private final LocalDateTime fromClockTime;
     private final LocalDateTime toClockTime;
@@ -32,7 +32,7 @@ public class MusicalGeometryClock {
 
     private Coords coords;
 
-    public MusicalGeometryClock(LocalDateTime fromClockTime, LocalDateTime toClockTime) {
+    public InnerGeometryClock(LocalDateTime fromClockTime, LocalDateTime toClockTime) {
         this.fromClockTime = fromClockTime;
         this.toClockTime = toClockTime;
 

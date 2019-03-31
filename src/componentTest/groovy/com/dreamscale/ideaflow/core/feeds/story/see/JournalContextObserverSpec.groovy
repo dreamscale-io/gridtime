@@ -5,7 +5,7 @@ import com.dreamscale.ideaflow.core.domain.JournalEntryEntity
 import com.dreamscale.ideaflow.core.domain.ProjectEntity
 import com.dreamscale.ideaflow.core.domain.TaskEntity
 import com.dreamscale.ideaflow.core.domain.flow.FinishStatus
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.ideaflow.core.feeds.common.ZoomLevel
 import com.dreamscale.ideaflow.core.feeds.story.feature.context.IdeaFlowContextBeginningEvent
 import com.dreamscale.ideaflow.core.feeds.story.feature.context.IdeaFlowContextEndingEvent
@@ -22,13 +22,13 @@ import static com.dreamscale.ideaflow.core.CoreARandom.aRandom
 
 public class JournalContextObserverSpec extends Specification {
 
-    IdeaFlowJournalContextObserver journalContextObserver
+    JournalContextObserver journalContextObserver
     StoryFrame storyFrame
-    GeometryClock clock
+    OuterGeometryClock clock
 
     def setup() {
-        clock = new GeometryClock(LocalDateTime.now())
-        journalContextObserver = new IdeaFlowJournalContextObserver()
+        clock = new OuterGeometryClock(LocalDateTime.now())
+        journalContextObserver = new JournalContextObserver()
         storyFrame = new StoryFrame(clock.getCoordinates(), ZoomLevel.MIN)
     }
 

@@ -2,15 +2,15 @@ package com.dreamscale.ideaflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.ideaflow.core.feeds.story.feature.IdeaFlowFeature;
 
-public class ThoughtBridge implements IdeaFlowFeature {
+public class BoxStructure implements IdeaFlowFeature {
 
     private final String bridgeKey;
-    private final LocationInThought fromLocation;
-    private final LocationInThought toLocation;
+    private final LocationInFocus fromLocation;
+    private final LocationInFocus toLocation;
 
     private int visitCount;
 
-    public ThoughtBridge(String bridgeKey, LocationInThought fromLocation, LocationInThought toLocation) {
+    public BoxStructure(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
         this.bridgeKey = bridgeKey;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;

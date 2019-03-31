@@ -1,22 +1,22 @@
 package com.dreamscale.ideaflow.core.feeds.executor
 
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
 class GeometryClockSpec extends Specification {
 
-    GeometryClock geometryClock
+    OuterGeometryClock geometryClock
 
 
     def "should generate coords matching start of year"() {
         given:
         LocalDateTime clockStart = LocalDateTime.of(2019, 1, 7, 4, 20)
-        geometryClock = new GeometryClock(clockStart)
+        geometryClock = new OuterGeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        OuterGeometryClock.Coords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null
@@ -32,10 +32,10 @@ class GeometryClockSpec extends Specification {
     def "should count by weeks with monday starts"() {
         given:
         LocalDateTime clockStart = LocalDateTime.of(2019, 1, 27, 4, 20)
-        geometryClock = new GeometryClock(clockStart)
+        geometryClock = new OuterGeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        OuterGeometryClock.Coords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null
@@ -48,10 +48,10 @@ class GeometryClockSpec extends Specification {
     def "should consider days before first monday part of last year "() {
         given:
         LocalDateTime clockStart = LocalDateTime.of(2019, 1, 1, 4, 20)
-        geometryClock = new GeometryClock(clockStart)
+        geometryClock = new OuterGeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        OuterGeometryClock.Coords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null

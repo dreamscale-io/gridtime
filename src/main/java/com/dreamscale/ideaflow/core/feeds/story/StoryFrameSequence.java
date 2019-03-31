@@ -1,19 +1,19 @@
 package com.dreamscale.ideaflow.core.feeds.story;
 
 import com.dreamscale.ideaflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock;
 
 import java.util.LinkedList;
 
 public class StoryFrameSequence {
 
         private final ZoomLevel zoomLevel;
-        private final GeometryClock.Coords activeStoryCoordinates;
+        private final OuterGeometryClock.Coords activeStoryCoordinates;
         LinkedList<StoryFrame> storyFrames;
 
         StoryFrame activeStoryFrame;
 
-        public StoryFrameSequence(ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
+        public StoryFrameSequence(ZoomLevel zoomLevel, OuterGeometryClock.Coords storyCoordinates) {
             this.zoomLevel = zoomLevel;
             this.activeStoryCoordinates = storyCoordinates;
             this.activeStoryFrame = new StoryFrame(storyCoordinates, zoomLevel);

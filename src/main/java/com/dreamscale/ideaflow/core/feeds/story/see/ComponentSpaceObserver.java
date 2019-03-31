@@ -19,7 +19,7 @@ import java.util.UUID;
  * by counting traversals from location to location to estimate a heuristic for organizing "gravity"
  */
 @Component
-public class IdeaFlowComponentSpaceObserver implements IdeaFlowObserver {
+public class ComponentSpaceObserver implements IdeaFlowObserver {
 
     @Autowired
     ComponentLookupService componentLookupService;

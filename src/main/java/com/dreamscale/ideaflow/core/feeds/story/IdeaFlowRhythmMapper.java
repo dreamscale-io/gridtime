@@ -1,7 +1,7 @@
 package com.dreamscale.ideaflow.core.feeds.story;
 
-import com.dreamscale.ideaflow.core.feeds.story.see.MusicalGeometryClock;
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.ideaflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.ideaflow.core.feeds.story.feature.context.IdeaFlowContextBeginningEvent;
 import com.dreamscale.ideaflow.core.feeds.story.feature.context.IdeaFlowStructureLevel;
@@ -13,18 +13,18 @@ import com.dreamscale.ideaflow.core.feeds.story.feature.sequence.RelativeSequenc
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class IdeaFlowSequenceMapper {
+public class IdeaFlowRhythmMapper {
 
-    private final MusicalGeometryClock internalClock;
-    private MusicalGeometryClock.Coords currentMoment;
+    private final InnerGeometryClock internalClock;
+    private InnerGeometryClock.Coords currentMoment;
 
     private Map<IdeaFlowStructureLevel, IdeaFlowContextBeginningEvent> currentContextMap = new HashMap<>();
     private Map<IdeaFlowStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
 
     private Map<IdeaFlowLayerType, IdeaFlowLayer> layerMap = new HashMap<>();
 
-    public IdeaFlowSequenceMapper(GeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
-        this.internalClock = new MusicalGeometryClock(
+    public IdeaFlowRhythmMapper(OuterGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
+        this.internalClock = new InnerGeometryClock(
                 storyCoordinates.getClockTime(),
                 storyCoordinates.panRight(zoomLevel).getClockTime());
     }
@@ -63,7 +63,7 @@ public class IdeaFlowSequenceMapper {
     }
 
 
-    public MusicalGeometryClock.Coords getCurrentMoment() {
+    public InnerGeometryClock.Coords getCurrentMoment() {
         return null;
     }
 

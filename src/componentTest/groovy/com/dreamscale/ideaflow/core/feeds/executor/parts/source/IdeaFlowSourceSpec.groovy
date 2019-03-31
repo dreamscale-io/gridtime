@@ -5,7 +5,7 @@ import com.dreamscale.ideaflow.core.domain.IntentionEntity
 import com.dreamscale.ideaflow.core.domain.ProjectEntity
 import com.dreamscale.ideaflow.core.domain.TaskEntity
 import com.dreamscale.ideaflow.core.domain.flow.FlowActivityEntity
-import com.dreamscale.ideaflow.core.feeds.clock.GeometryClock
+import com.dreamscale.ideaflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.ideaflow.core.feeds.common.SharedFeaturePool
 import com.dreamscale.ideaflow.core.feeds.story.StoryFrame
 import com.dreamscale.ideaflow.core.feeds.executor.parts.fetch.FileActivityFetcher
@@ -37,7 +37,7 @@ class IdeaFlowSourceSpec extends Specification {
 
     def setup() {
         this.memberId = UUID.randomUUID();
-        this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates());
+        this.featurePool = new SharedFeaturePool(memberId, new OuterGeometryClock(LocalDateTime.now()).getCoordinates());
 
         IdeaFlowObserver flowObserverMock =
                 [see: { StoryFrame storyFrame, Window window -> this.latestWindow = window }] as IdeaFlowObserver

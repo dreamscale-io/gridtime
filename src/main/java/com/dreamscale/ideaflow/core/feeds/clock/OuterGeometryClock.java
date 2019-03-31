@@ -11,14 +11,14 @@ import java.time.LocalDateTime;
 
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
-public class GeometryClock {
+public class OuterGeometryClock {
 
     private LocalDateTime clockTime;
 
     private Coords coords;
 
 
-    public GeometryClock(LocalDateTime clockTime) {
+    public OuterGeometryClock(LocalDateTime clockTime) {
         this.clockTime = clockTime;
         this.coords = createGeometryCoords(clockTime);
     }
@@ -173,53 +173,53 @@ public class GeometryClock {
         //pan left functions
 
         public Coords minusMinutes() {
-            return GeometryClock.createGeometryCoords(clockTime.minusMinutes(ZoomLevel.MIN.buckets()));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusMinutes(ZoomLevel.MIN.buckets()));
         }
 
         public Coords minusHour() {
-            return GeometryClock.createGeometryCoords(clockTime.minusHours(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusHours(1));
         }
 
         public Coords minusDay() {
-            return GeometryClock.createGeometryCoords(clockTime.minusDays(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusDays(1));
         }
 
         public Coords minusWeek() {
-            return GeometryClock.createGeometryCoords(clockTime.minusWeeks(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusWeeks(1));
         }
 
         public Coords minusBlock() {
-            return GeometryClock.createGeometryCoords(clockTime.minusWeeks(ZoomLevel.BLOCK.buckets()));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusWeeks(ZoomLevel.BLOCK.buckets()));
         }
 
         public Coords minusYear() {
-            return GeometryClock.createGeometryCoords(clockTime.minusYears(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.minusYears(1));
         }
 
         // pan right functions
 
         public Coords plusMinutes() {
-            return GeometryClock.createGeometryCoords(clockTime.plusMinutes(ZoomLevel.MIN.buckets()));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusMinutes(ZoomLevel.MIN.buckets()));
         }
 
         public Coords plusHour() {
-            return GeometryClock.createGeometryCoords(clockTime.plusHours(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusHours(1));
         }
 
         public Coords plusDay() {
-            return GeometryClock.createGeometryCoords(clockTime.plusDays(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusDays(1));
         }
 
         public Coords plusWeek() {
-            return GeometryClock.createGeometryCoords(clockTime.plusWeeks(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusWeeks(1));
         }
 
         public Coords plusBlock() {
-            return GeometryClock.createGeometryCoords(clockTime.plusWeeks(ZoomLevel.BLOCK.buckets()));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusWeeks(ZoomLevel.BLOCK.buckets()));
         }
 
         public Coords plusYear() {
-            return GeometryClock.createGeometryCoords(clockTime.plusYears(1));
+            return OuterGeometryClock.createGeometryCoords(clockTime.plusYears(1));
         }
     }
 
