@@ -7,7 +7,7 @@ public interface ContextChangeEvent {
 
     UUID getReferenceId();
     LocalDateTime getPosition();
-    StructureLevel getStructureLevel();
+    ContextStructureLevel getStructureLevel();
     int getRelativeSequence();
     void setRelativeSequence(int sequence);
 }

@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,7 +69,7 @@ public class ComponentSpaceObserver implements FlowObserver {
     private UUID getLastOpenProjectId(StoryFrame storyFrame) {
         UUID lastOpenProjectId = null;
 
-        ContextBeginningEvent lastOpenProject = storyFrame.getCurrentContext(StructureLevel.PROJECT);
+        ContextBeginningEvent lastOpenProject = storyFrame.getCurrentContext().getProjectContext();
         if (lastOpenProject != null) {
             lastOpenProjectId = lastOpenProject.getReferenceId();
         }

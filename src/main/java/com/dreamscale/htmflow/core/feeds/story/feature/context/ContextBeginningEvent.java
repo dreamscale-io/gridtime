@@ -14,7 +14,7 @@ import java.util.UUID;
 public class ContextBeginningEvent implements FlowFeature, ContextChangeEvent {
 
     private UUID referenceId;
-    private StructureLevel structureLevel;
+    private ContextStructureLevel structureLevel;
     private String name;
     private String description;
     private LocalDateTime position;

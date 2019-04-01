@@ -10,7 +10,7 @@ public class BoxToBubbleLink implements FlowFeature {
     private final ThoughtBubble thoughtBubble;
 
     private final Set<Bridge> bridges = new HashSet<>();
-    private final Set<LocationInFocus> connectedLocations = new HashSet<>();
+    private final Set<LocationInPlace> connectedLocations = new HashSet<>();
 
 
     public BoxToBubbleLink(ThoughtBubble bubble) {
@@ -25,7 +25,7 @@ public class BoxToBubbleLink implements FlowFeature {
         this.bridges.add(bridge);
     }
 
-    public void addConnectedLocationToSet(LocationInFocus location) {
+    public void addConnectedLocationToSet(LocationInPlace location) {
         connectedLocations.add(location);
     }
 

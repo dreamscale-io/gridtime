@@ -1,4 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
 
-public class ExecutionContext {
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+
+public class ExecutionContext implements FlowFeature {
 }

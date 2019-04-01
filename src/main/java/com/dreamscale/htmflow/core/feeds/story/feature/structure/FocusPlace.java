@@ -1,21 +1,22 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.mapper.GravityBallOfThoughts;
 
 import java.time.Duration;
 import java.util.List;
 
-public class FocalPoint implements FlowFeature {
+public class FocusPlace implements FlowFeature {
 
     private String placeName;
 
     private final GravityBallOfThoughts gravityBall;
 
-    private LocationInFocus currentLocation;
+    private LocationInPlace currentLocation;
     private List<ThoughtBubble> extractedThoughtBubbles;
 
 
-    public FocalPoint(String placeName, String initialLocationPath) {
+    public FocusPlace(String placeName, String initialLocationPath) {
         this.placeName = placeName;
 
         this.gravityBall = new GravityBallOfThoughts(this);
@@ -29,9 +30,9 @@ public class FocalPoint implements FlowFeature {
         return placeName;
     }
 
-    public LocationInFocus goToLocation(String locationPath, Duration timeInLocation) {
+    public LocationInPlace goToLocation(String locationPath, Duration timeInLocation) {
 
-        LocationInFocus location = gravityBall.gotoLocationInSpace(locationPath);
+        LocationInPlace location = gravityBall.gotoLocationInSpace(locationPath);
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -51,21 +52,21 @@ public class FocalPoint implements FlowFeature {
         return this.extractedThoughtBubbles;
     }
 
-    public LocationInFocus getCurrentLocation() {
+    public LocationInPlace getCurrentLocationInPlace() {
         return currentLocation;
     }
 
-    public void modifyCurrentLocation(int modificationCount) {
+    public void modifyCurrentLocationInFocus(int modificationCount) {
         currentLocation.modify(modificationCount);
     }
 
-    public LocationInFocus exit() {
+    public LocationInPlace exit() {
         currentLocation = gravityBall.gotoExit();
 
         return currentLocation;
     }
 
-    public LocationInFocus enter() {
+    public LocationInPlace enter() {
         currentLocation = gravityBall.gotoEntrance();
 
         return currentLocation;

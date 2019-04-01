@@ -6,8 +6,11 @@ import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
+import com.dreamscale.htmflow.core.feeds.story.mapper.FlowContextMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.FlowRhythmMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.SpatialGeometryMapper;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -124,23 +127,24 @@ public class StoryFrame {
      */
 
     public void carryOverFrameContext(StoryFrame previousStoryFrame) {
+        CarryOverContext carryOverContext = previousStoryFrame.getCarryOverContext();
 
-        this.spatialGeometryMapper.initFromCarryOverContext(previousStoryFrame.getCarryOverSpatialMapperContext());
-        this.flowRhythmMapper.initFromCarryOverContext(previousStoryFrame.getCarryOverFlowRhythmMapperContext());
-        this.contextMapper.initFromCarryOverContext(previousStoryFrame.getCarryOverContextMapperContext());
+        this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
+        this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);
+
+        Movement sideEffectMovement = this.contextMapper.initFromCarryOverContext(carryOverContext);
+        this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, sideEffectMovement);
     }
 
-    private SpatialGeometryMapper.CarryOverContext getCarryOverSpatialMapperContext() {
-        return spatialGeometryMapper.getCarryOverContext();
-    }
+    public CarryOverContext getCarryOverContext() {
 
-    private FlowContextMapper.CarryOverContext getCarryOverContextMapperContext() {
-        return contextMapper.getCarryOverContext();
-    }
+        CarryOverContext carryOverContext = new CarryOverContext("[StoryFrame]");
 
+        carryOverContext.addSubContext(contextMapper.getCarryOverContext());
+        carryOverContext.addSubContext(spatialGeometryMapper.getCarryOverContext());
+        carryOverContext.addSubContext(flowRhythmMapper.getCarryOverContext());
 
-    private FlowRhythmMapper.CarryOverContext getCarryOverFlowRhythmMapperContext() {
-        return this.flowRhythmMapper.getCarryOverContext();
+        return carryOverContext;
     }
 
     //////////// Extract all the various state for persistence ////////////
@@ -149,32 +153,38 @@ public class StoryFrame {
         return storyFrameCoordinates;
     }
 
-    public InnerGeometryClock.Coords getCurrentMoment() {
-        return this.flowRhythmMapper.getCurrentMoment();
-    }
-
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
     }
 
-    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
-        return this.contextMapper.getCurrentContext(structureLevel);
+    public InnerGeometryClock.Coords getCurrentMoment() {
+        return this.flowRhythmMapper.getCurrentMoment();
     }
 
-    public FocalPoint getCurrentFocalPoint() {
-        return spatialGeometryMapper.getCurrentPlace();
+    public ContextSummary getCurrentContext() {
+        return this.contextMapper.getCurrentContextSummary();
     }
 
-    public LocationInFocus getCurrentLocationInFocus() {
-        return spatialGeometryMapper.getCurrentLocationInPlace();
+    public FocusPlace getCurrentFocalPoint() {
+        return spatialGeometryMapper.getCurrentFocusPlace();
+    }
+
+    public LocationInPlace getCurrentLocationInFocus() {
+        return spatialGeometryMapper.getCurrentLocation();
     }
 
     public BoxAndBridgeStructure getThoughtStructure() {
         return spatialGeometryMapper.getThoughtStructure();
     }
 
-    public List<Movement> getMovements(RhythmLayerType layerType) {
-        return flowRhythmMapper.getMovements(layerType);
+
+
+    public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
+        return flowRhythmMapper.getRhythmLayer(layerType);
+    }
+
+    public Set<RhythmLayerType> getRhythmLayerTypes() {
+        return flowRhythmMapper.getRhythmLayerTypes();
     }
 
 }

@@ -24,7 +24,7 @@ public class Box implements FlowFeature {
         }
     }
 
-    public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInFocus locationInBubble) {
+    public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInPlace locationInBubble) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(locationInBubble);
 
         BoxToBubbleLink boxToBubble = findOrCreateBoxToBubbleLink(bubbleFound);
@@ -49,7 +49,7 @@ public class Box implements FlowFeature {
         return boxToBubbleLinkFound;
     }
 
-    private ThoughtBubble findBubbleContainingLocation(LocationInFocus locationInBubble) {
+    private ThoughtBubble findBubbleContainingLocation(LocationInPlace locationInBubble) {
         ThoughtBubble bubbleFound = null;
 
         for (ThoughtBubble bubble : thoughtBubbles) {
@@ -61,7 +61,7 @@ public class Box implements FlowFeature {
         return bubbleFound;
     }
 
-    public boolean contains(LocationInFocus location) {
+    public boolean contains(LocationInPlace location) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(location);
 
         if (bubbleFound != null) {

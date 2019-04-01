@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class ModificationEvent extends Movement {
 
-    private final int modificationCount;
+    private final ModificationContext modificationContext;
 
-    public ModificationEvent(LocalDateTime moment, Object reference, int modificationCount) {
+    public ModificationEvent(LocalDateTime moment, Object reference, ModificationContext modificationContext) {
         super(moment, reference);
 
-        this.modificationCount = modificationCount;
+        this.modificationContext = modificationContext;
     }
 }

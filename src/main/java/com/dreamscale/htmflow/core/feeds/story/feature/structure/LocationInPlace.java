@@ -4,9 +4,9 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
 
-public class LocationInFocus implements FlowFeature {
+public class LocationInPlace implements FlowFeature {
 
-    private final FocalPoint mainFocus;
+    private final FocusPlace mainFocus;
     private final String locationPath;
     private final int locationIndex;
 
@@ -14,7 +14,7 @@ public class LocationInFocus implements FlowFeature {
     private Duration totalTimeInvestment;
     private int visitCounter;
 
-    LocationInFocus(FocalPoint mainFocus, String locationPath, int locationIndex) {
+    public LocationInPlace(FocusPlace mainFocus, String locationPath, int locationIndex) {
         this.mainFocus = mainFocus;
         this.locationPath = locationPath;
         this.totalTimeInvestment = Duration.ofSeconds(0);
@@ -27,7 +27,7 @@ public class LocationInFocus implements FlowFeature {
         return locationPath;
     }
 
-    void visit() {
+    public void visit() {
         this.visitCounter++;
     }
 

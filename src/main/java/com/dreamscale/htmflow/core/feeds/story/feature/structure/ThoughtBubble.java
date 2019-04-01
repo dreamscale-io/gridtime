@@ -12,7 +12,7 @@ public class ThoughtBubble implements FlowFeature {
         this.radialStructure = radialStructure;
     }
 
-    public boolean contains(LocationInFocus locationInBubble) {
+    public boolean contains(LocationInPlace locationInBubble) {
         return radialStructure.contains(locationInBubble);
     }
 

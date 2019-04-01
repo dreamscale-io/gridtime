@@ -1,9 +1,8 @@
-package com.dreamscale.htmflow.core.feeds.story;
+package com.dreamscale.htmflow.core.feeds.story.mapper;
 
+import com.dreamscale.htmflow.core.feeds.story.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,11 +13,11 @@ public class SpatialGeometryMapper {
     private final LocalDateTime from;
     private final LocalDateTime to;
 
-    private Map<String, FocalPoint> placeMap = new HashMap<>();
+    private Map<String, FocusPlace> placeMap = new HashMap<>();
     private Map<String, Bridge> bridgeMap = new HashMap<>();
 
-    private List<FocalPoint> mainThoughtSequence = new ArrayList<>();
-    private FocalPoint currentPlace;
+    private List<FocusPlace> mainThoughtSequence = new ArrayList<>();
+    private FocusPlace currentPlace;
     private BoxAndBridgeStructure extractedBoxAndBridgeStructure;
 
     public SpatialGeometryMapper(LocalDateTime from, LocalDateTime to) {
@@ -31,7 +30,7 @@ public class SpatialGeometryMapper {
         List<Movement> movements = new ArrayList<>();
 
         if (currentPlace == null) {
-            FocalPoint place = findOrCreatePlace(placeName, locationPath);
+            FocusPlace place = findOrCreatePlace(placeName, locationPath);
             currentPlace = place;
             movements.add(new Movement(moment, place));
 
@@ -45,7 +44,7 @@ public class SpatialGeometryMapper {
 
         } else if (!currentPlace.getPlaceName().equals(placeName)) {
 
-            FocalPoint nextPlace = findOrCreatePlace(placeName, locationPath);
+            FocusPlace nextPlace = findOrCreatePlace(placeName, locationPath);
             List<Movement> bridgeMovements = crossBridge(moment, currentPlace, nextPlace, locationPath, timeInLocation);
             movements.addAll(bridgeMovements);
         }
@@ -57,7 +56,7 @@ public class SpatialGeometryMapper {
 
         BoxAndBridgeStructure boxAndBridgeStructure = new BoxAndBridgeStructure();
 
-        for (FocalPoint thought : mainThoughtSequence) {
+        for (FocusPlace thought : mainThoughtSequence) {
             List<ThoughtBubble> thoughtBubbles = thought.getThoughtBubbles();
             boxAndBridgeStructure.createThoughtBox(thought.getPlaceName(), thoughtBubbles);
         }
@@ -71,37 +70,39 @@ public class SpatialGeometryMapper {
     }
 
     public CarryOverContext getCarryOverContext() {
-        CarryOverContext carryOverContext = new CarryOverContext();
-        carryOverContext.setCurrentPlace(getCurrentPlace());
+        CarryOverSubContext subContext = new CarryOverSubContext();
+        subContext.setCurrentFocusPlace(getCurrentFocusPlace());
+        subContext.setCurrentLocationInPlace(getCurrentLocation());
 
-        return carryOverContext;
+        return subContext.toCarryOverContext();
     }
 
     public void initFromCarryOverContext(CarryOverContext carryOverContext) {
-        FocalPoint place = carryOverContext.getCurrentPlace();
+        CarryOverSubContext subContext = new CarryOverSubContext(carryOverContext);
+        FocusPlace place = subContext.getCurrentFocusPlace();
 
         if (place != null) {
-            currentPlace = new FocalPoint(place.getPlaceName(), place.getCurrentLocation().getLocationPath());
+            currentPlace = new FocusPlace(place.getPlaceName(), place.getCurrentLocationInPlace().getLocationPath());
         }
     }
 
     private Movement gotoLocationAndCreateMovement(LocalDateTime moment, String locationPath, Duration timeInLocation) {
-        LocationInFocus locationInFocus = currentPlace.goToLocation(locationPath, timeInLocation);
-        return new Movement(moment, locationInFocus);
+        LocationInPlace location = currentPlace.goToLocation(locationPath, timeInLocation);
+        return new Movement(moment, location);
     }
 
 
-    private List<Movement> crossBridge(LocalDateTime moment, FocalPoint fromPlace, FocalPoint toPlace, String toLocationPath, Duration timeInLocation) {
+    private List<Movement> crossBridge(LocalDateTime moment, FocusPlace fromPlace, FocusPlace toPlace, String toLocationPath, Duration timeInLocation) {
 
         List<Movement> movements = new ArrayList<>();
 
-        LocationInFocus fromLocation = fromPlace.getCurrentLocation();
-        LocationInFocus exitLocation = fromPlace.exit();
+        LocationInPlace fromLocation = fromPlace.getCurrentLocationInPlace();
+        LocationInPlace exitLocation = fromPlace.exit();
 
         movements.add(new Movement(moment, exitLocation));
 
-        LocationInFocus enterLocation = toPlace.enter();
-        LocationInFocus toLocation = toPlace.goToLocation(toLocationPath, timeInLocation);
+        LocationInPlace enterLocation = toPlace.enter();
+        LocationInPlace toLocation = toPlace.goToLocation(toLocationPath, timeInLocation);
         Bridge bridgeCrossed = findOrCreateBridge(fromLocation, toLocation);
         bridgeCrossed.visit();
 
@@ -115,17 +116,17 @@ public class SpatialGeometryMapper {
     }
 
 
-    private FocalPoint findOrCreatePlace(String placeName, String locationPath) {
-        FocalPoint place = this.placeMap.get(placeName);
+    private FocusPlace findOrCreatePlace(String placeName, String locationPath) {
+        FocusPlace place = this.placeMap.get(placeName);
         if (place == null) {
-            place = new FocalPoint(placeName, locationPath);
+            place = new FocusPlace(placeName, locationPath);
             this.placeMap.put(place.getPlaceName(), place);
             this.mainThoughtSequence.add(place);
         }
         return place;
     }
 
-    private Bridge findOrCreateBridge(LocationInFocus fromLocation, LocationInFocus toLocation) {
+    private Bridge findOrCreateBridge(LocationInPlace fromLocation, LocationInPlace toLocation) {
         String fromLocationKey = fromLocation.getMainFocusName() + ":" + fromLocation.getLocationPath();
         String toLocationKey = toLocation.getMainFocusName() + ":" + toLocation.getLocationPath();
 
@@ -144,14 +145,14 @@ public class SpatialGeometryMapper {
        return extractedBoxAndBridgeStructure;
     }
 
-    public FocalPoint getCurrentPlace() {
+    public FocusPlace getCurrentFocusPlace() {
         return currentPlace;
     }
 
-    public LocationInFocus getCurrentLocationInPlace() {
-        LocationInFocus location = null;
+    public LocationInPlace getCurrentLocation() {
+        LocationInPlace location = null;
         if (currentPlace != null) {
-            location = currentPlace.getCurrentLocation();
+            location = currentPlace.getCurrentLocationInPlace();
         }
         return location;
     }
@@ -159,13 +160,44 @@ public class SpatialGeometryMapper {
 
     public void modifyCurrentLocation(int modificationCount) {
         if (currentPlace != null) {
-            currentPlace.modifyCurrentLocation(modificationCount);
+            currentPlace.modifyCurrentLocationInFocus(modificationCount);
         }
     }
 
-    @Getter
-    @Setter
-    public static class CarryOverContext {
-        FocalPoint currentPlace;
+    public static class CarryOverSubContext {
+
+        private static final String SUBCONTEXT_NAME = "[SpatialGeometryMapper]";
+
+        private static final String CURRENT_FOCUS_PLACE = "current.focus.place";
+        private static final String CURRENT_FOCUS_LOCATION_IN_PLACE = "current.focus.location.in.place";
+        private final CarryOverContext subContext;
+
+        public CarryOverSubContext() {
+            subContext = new CarryOverContext(SUBCONTEXT_NAME);
+        }
+
+        public CarryOverSubContext(CarryOverContext carryOverContext) {
+            subContext = carryOverContext.getSubContext(SUBCONTEXT_NAME);
+        }
+
+        void setCurrentFocusPlace(FocusPlace place) {
+            subContext.addKeyValue(CURRENT_FOCUS_PLACE, place);
+        }
+
+        void setCurrentLocationInPlace(LocationInPlace location) {
+            subContext.addKeyValue(CURRENT_FOCUS_LOCATION_IN_PLACE, location);
+        }
+
+        FocusPlace getCurrentFocusPlace() {
+            return (FocusPlace) subContext.getValue(CURRENT_FOCUS_PLACE);
+        }
+
+        LocationInPlace getCurrentLocationInPlace() {
+            return (LocationInPlace) subContext.getValue(CURRENT_FOCUS_PLACE);
+        }
+
+        public CarryOverContext toCarryOverContext() {
+            return subContext;
+        }
     }
 }
