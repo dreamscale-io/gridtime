@@ -1,7 +1,6 @@
-package com.dreamscale.htmflow.core.feeds.story;
+package com.dreamscale.htmflow.core.feeds.story.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.mapper.FlowContextMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

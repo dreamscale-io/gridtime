@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.feeds.story.mapper;
 
-import com.dreamscale.htmflow.core.feeds.story.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 

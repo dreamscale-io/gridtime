@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
+import com.dreamscale.htmflow.core.feeds.story.mapper.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.mapper.FlowContextMapper;
 import com.dreamscale.htmflow.core.feeds.story.mapper.FlowRhythmMapper;
 import com.dreamscale.htmflow.core.feeds.story.mapper.SpatialGeometryMapper;
