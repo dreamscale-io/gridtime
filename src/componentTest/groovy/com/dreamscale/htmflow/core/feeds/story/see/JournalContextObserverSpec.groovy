@@ -11,9 +11,9 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningE
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
-import com.dreamscale.htmflow.core.feeds.story.feature.context.FlowStructureLevel
+import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.MovementEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -53,52 +53,52 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(storyFrame, window)
-        List<ContextChangeEvent> contextEvents = toContextEventList(storyFrame.getContextMovements());
+        List<ContextChangeEvent> contextEvents = toContextEventList(storyFrame.getMovements());
 
         then:
         assert contextEvents != null
         assert contextEvents.size() == 9
-        assert contextEvents.get(0).structureLevel == FlowStructureLevel.PROJECT
+        assert contextEvents.get(0).structureLevel == StructureLevel.PROJECT
         assert contextEvents.get(0).referenceId == project.id
         assert contextEvents.get(0).position == time1
         assert contextEvents.get(0) instanceof ContextBeginningEvent
 
-        assert contextEvents.get(1).structureLevel == FlowStructureLevel.TASK
+        assert contextEvents.get(1).structureLevel == StructureLevel.TASK
         assert contextEvents.get(1).referenceId == task1.id
         assert contextEvents.get(1).position == time1
         assert contextEvents.get(1) instanceof ContextBeginningEvent
 
-        assert contextEvents.get(2).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(2).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(2).referenceId == journalEntry1.get().id
         assert contextEvents.get(2).position == time1
         assert contextEvents.get(2) instanceof ContextBeginningEvent
 
-        assert contextEvents.get(3).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(3).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(3).referenceId == journalEntry1.get().id
         assert contextEvents.get(3).position == time2
         assert contextEvents.get(3) instanceof ContextEndingEvent
 
-        assert contextEvents.get(4).structureLevel == FlowStructureLevel.TASK
+        assert contextEvents.get(4).structureLevel == StructureLevel.TASK
         assert contextEvents.get(4).referenceId == task1.id
         assert contextEvents.get(4).position == time2
         assert contextEvents.get(4) instanceof ContextEndingEvent
 
-        assert contextEvents.get(5).structureLevel == FlowStructureLevel.TASK
+        assert contextEvents.get(5).structureLevel == StructureLevel.TASK
         assert contextEvents.get(5).referenceId == task2.id
         assert contextEvents.get(5).position == time2
         assert contextEvents.get(5) instanceof ContextBeginningEvent
 
-        assert contextEvents.get(6).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(6).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(6).referenceId == journalEntry2.get().id
         assert contextEvents.get(6).position == time2
         assert contextEvents.get(6) instanceof ContextBeginningEvent
 
-        assert contextEvents.get(7).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(7).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(7).referenceId == journalEntry2.get().id
         assert contextEvents.get(7).position == time3
         assert contextEvents.get(7) instanceof ContextEndingEvent
 
-        assert contextEvents.get(8).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(8).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(8).referenceId == journalEntry3.get().id
         assert contextEvents.get(8).position == time3
         assert contextEvents.get(8) instanceof ContextBeginningEvent
@@ -130,21 +130,21 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(nextFrame, nextWindow)
-        List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getContextMovements());
+        List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getMovements());
         then:
         assert contextEvents != null
         assert contextEvents.size() == 1
-        assert contextEvents.get(0).structureLevel == FlowStructureLevel.INTENTION
+        assert contextEvents.get(0).structureLevel == StructureLevel.INTENTION
         assert contextEvents.get(0).referenceId == journalEntry1.get().id
         assert contextEvents.get(0).position == time3
         assert contextEvents.get(0) instanceof ContextEndingEvent
 
     }
 
-    private List<ContextChangeEvent> toContextEventList(List<MovementEvent> movements) {
+    private List<ContextChangeEvent> toContextEventList(List<Movement> movements) {
 
         List<ContextChangeEvent> contextEvents = new ArrayList<>();
-        for (MovementEvent movementEvent : movements) {
+        for (Movement movementEvent : movements) {
             contextEvents.add(movementEvent.reference as ContextChangeEvent);
             println movementEvent.reference
         }

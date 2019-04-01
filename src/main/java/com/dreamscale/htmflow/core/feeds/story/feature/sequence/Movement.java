@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.LocalDateTime;
 
-public class MovementEvent implements FlowFeature {
+public class Movement implements FlowFeature {
 
     private LocalDateTime moment;
     private final Object reference;
@@ -13,7 +13,7 @@ public class MovementEvent implements FlowFeature {
 
     private InnerGeometryClock.Coords coords;
 
-    public MovementEvent(LocalDateTime moment, Object reference) {
+    public Movement(LocalDateTime moment, Object reference) {
         this.moment = moment;
         this.reference = reference;
     }

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
+package com.dreamscale.htmflow.core.feeds.common;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class RelativeSequence implements FlowFeature {
+public class RelativeSequence {
     private int relativeSequence;
 
     public int increment() {

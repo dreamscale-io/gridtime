@@ -74,6 +74,14 @@ public class InnerGeometryClock {
                 halfNotes);
     }
 
+    public LocalDateTime getFromClockTime() {
+        return fromClockTime;
+    }
+
+    public LocalDateTime getToClockTime() {
+        return toClockTime;
+    }
+
     @AllArgsConstructor
     @Getter
     @ToString

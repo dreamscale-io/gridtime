@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.FlowStructureLevel;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 
 import java.util.List;
 
@@ -22,11 +22,9 @@ public class JournalContextObserver implements FlowObserver {
 
         List<Flowable> flowables = window.getFlowables();
 
-        ContextBeginningEvent lastOpenProject = currentStoryFrame.getCurrentContext(FlowStructureLevel.PROJECT);
-        ContextBeginningEvent lastOpenTask = currentStoryFrame.getCurrentContext(FlowStructureLevel.TASK);
-        ContextBeginningEvent lastOpenIntention = currentStoryFrame.getCurrentContext(FlowStructureLevel.INTENTION);
-
-        addQueuedEndingIfInWindow(currentStoryFrame, window);
+        ContextBeginningEvent lastOpenProject = currentStoryFrame.getCurrentContext(StructureLevel.PROJECT);
+        ContextBeginningEvent lastOpenTask = currentStoryFrame.getCurrentContext(StructureLevel.TASK);
+        ContextBeginningEvent lastOpenIntention = currentStoryFrame.getCurrentContext(StructureLevel.INTENTION);
 
         for (Flowable flowable : flowables) {
             if (flowable instanceof FlowableJournalEntry) {
@@ -40,21 +38,13 @@ public class JournalContextObserver implements FlowObserver {
                 createTaskStartIfSwitched(currentStoryFrame, journalEntry, lastOpenTask);
                 createIntentionStartAndEnd(window, currentStoryFrame, journalEntry);
 
-                lastOpenProject = currentStoryFrame.getCurrentContext(FlowStructureLevel.PROJECT);
-                lastOpenTask = currentStoryFrame.getCurrentContext(FlowStructureLevel.TASK);
-                lastOpenIntention = currentStoryFrame.getCurrentContext(FlowStructureLevel.INTENTION);
+                lastOpenProject = currentStoryFrame.getCurrentContext(StructureLevel.PROJECT);
+                lastOpenTask = currentStoryFrame.getCurrentContext(StructureLevel.TASK);
+                lastOpenIntention = currentStoryFrame.getCurrentContext(StructureLevel.INTENTION);
 
             }
         }
 
-    }
-
-    private void addQueuedEndingIfInWindow(StoryFrame currentStoryFrame, Window window) {
-        ContextEndingEvent endWhenInWindow = currentStoryFrame.getSavedContextToAddWhenInWindow();
-        if (endWhenInWindow != null && window.isWithin(endWhenInWindow.getPosition())) {
-            currentStoryFrame.endContext(endWhenInWindow);
-            currentStoryFrame.saveContextToAddWhenInWindow(null);
-        }
     }
 
     private void createTaskStartIfSwitched(StoryFrame currentStoryFrame, JournalEntryEntity journalEntry, ContextBeginningEvent lastOpenTask) {
@@ -88,7 +78,7 @@ public class JournalContextObserver implements FlowObserver {
     private ContextBeginningEvent createProjectBeginning(JournalEntryEntity journalEntry) {
         ContextBeginningEvent projectBeginning = new ContextBeginningEvent();
         projectBeginning.setReferenceId(journalEntry.getProjectId());
-        projectBeginning.setStructureLevel(FlowStructureLevel.PROJECT);
+        projectBeginning.setStructureLevel(StructureLevel.PROJECT);
         projectBeginning.setName(journalEntry.getProjectName());
         projectBeginning.setPosition(journalEntry.getPosition());
 
@@ -98,7 +88,7 @@ public class JournalContextObserver implements FlowObserver {
     private ContextBeginningEvent createTaskBeginning(JournalEntryEntity journalEntry) {
         ContextBeginningEvent taskBeginning = new ContextBeginningEvent();
         taskBeginning.setReferenceId(journalEntry.getTaskId());
-        taskBeginning.setStructureLevel(FlowStructureLevel.TASK);
+        taskBeginning.setStructureLevel(StructureLevel.TASK);
         taskBeginning.setName(journalEntry.getTaskName());
         taskBeginning.setDescription(journalEntry.getTaskSummary());
         taskBeginning.setPosition(journalEntry.getPosition());
@@ -109,7 +99,7 @@ public class JournalContextObserver implements FlowObserver {
     private ContextEndingEvent createTaskEnding(JournalEntryEntity journalEntry, ContextBeginningEvent lastTaskStart) {
         ContextEndingEvent taskEnding = new ContextEndingEvent();
         taskEnding.setReferenceId(lastTaskStart.getReferenceId());
-        taskEnding.setStructureLevel(FlowStructureLevel.TASK);
+        taskEnding.setStructureLevel(StructureLevel.TASK);
         taskEnding.setName(lastTaskStart.getName());
         taskEnding.setDescription(lastTaskStart.getDescription());
         taskEnding.setPosition(journalEntry.getPosition());
@@ -121,7 +111,7 @@ public class JournalContextObserver implements FlowObserver {
     private ContextEndingEvent createProjectEnding(JournalEntryEntity journalEntry, ContextBeginningEvent lastOpenProject) {
         ContextEndingEvent projectEnding = new ContextEndingEvent();
         projectEnding.setReferenceId(lastOpenProject.getReferenceId());
-        projectEnding.setStructureLevel(FlowStructureLevel.PROJECT);
+        projectEnding.setStructureLevel(StructureLevel.PROJECT);
         projectEnding.setName(lastOpenProject.getName());
         projectEnding.setPosition(journalEntry.getPosition());
         projectEnding.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
@@ -134,7 +124,7 @@ public class JournalContextObserver implements FlowObserver {
 
         ContextBeginningEvent intentionStart = new ContextBeginningEvent();
         intentionStart.setReferenceId(journalEntry.getId());
-        intentionStart.setStructureLevel(FlowStructureLevel.INTENTION);
+        intentionStart.setStructureLevel(StructureLevel.INTENTION);
         intentionStart.setDescription(journalEntry.getDescription());
         intentionStart.setPosition(journalEntry.getPosition());
 
@@ -143,7 +133,7 @@ public class JournalContextObserver implements FlowObserver {
         if (journalEntry.getFinishTime() != null) {
             ContextEndingEvent intentionEnd = new ContextEndingEvent();
             intentionEnd.setReferenceId(journalEntry.getId());
-            intentionEnd.setStructureLevel(FlowStructureLevel.INTENTION);
+            intentionEnd.setStructureLevel(StructureLevel.INTENTION);
             intentionEnd.setFinishStatus(decodeFinishStatus(journalEntry.getFinishStatus()));
             intentionEnd.setDescription(journalEntry.getDescription());
             intentionEnd.setPosition(journalEntry.getFinishTime());
@@ -151,7 +141,7 @@ public class JournalContextObserver implements FlowObserver {
             if (window.isWithin(journalEntry.getFinishTime())) {
                 storyFrame.endContext(intentionEnd);
             } else {
-                storyFrame.saveContextToAddWhenInWindow(intentionEnd);
+                storyFrame.endContextLater(intentionEnd);
             }
 
         }
@@ -163,7 +153,7 @@ public class JournalContextObserver implements FlowObserver {
         if (lastIntentionStart != null) {
             intentionEnd = new ContextEndingEvent();
             intentionEnd.setReferenceId(lastIntentionStart.getReferenceId());
-            intentionEnd.setStructureLevel(FlowStructureLevel.INTENTION);
+            intentionEnd.setStructureLevel(StructureLevel.INTENTION);
             intentionEnd.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
             intentionEnd.setDescription(lastIntentionStart.getDescription());
             intentionEnd.setPosition(journalEntry.getPosition());

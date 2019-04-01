@@ -1,15 +1,15 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
-public enum FlowStructureLevel {
+public enum StructureLevel {
     INTENTION(1), TASK(2), PROJECT(3);
 
     private final int level;
 
-    FlowStructureLevel(int level) {
+    StructureLevel(int level) {
         this.level = level;
     }
 
-    public FlowStructureLevel getInsideStructureLevel() {
+    public StructureLevel getInsideStructureLevel() {
         switch (this) {
             case INTENTION:
                 return null;

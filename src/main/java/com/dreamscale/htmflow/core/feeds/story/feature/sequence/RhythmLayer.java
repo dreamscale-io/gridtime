@@ -1,25 +1,27 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class FlowLayer {
+public class RhythmLayer {
 
-    private final FlowLayerType layerType;
+    private final RhythmLayerType layerType;
     private final RelativeSequence relativeSequence;
 
-    private List<MovementEvent> movementsOverTime = new ArrayList<>();
+    private Movement carryOverLastMovement;
+    private List<Movement> movementsOverTime = new ArrayList<>();
 
 
-    public FlowLayer(FlowLayerType layerType) {
+    public RhythmLayer(RhythmLayerType layerType) {
         this.relativeSequence = new RelativeSequence(1);
         this.layerType = layerType;
     }
 
-    public InnerGeometryClock.Coords addMovement(InnerGeometryClock internalClock, MovementEvent movement) {
+    public InnerGeometryClock.Coords addMovement(InnerGeometryClock internalClock, Movement movement) {
         int nextSequence = relativeSequence.increment();
 
         movement.setCoordinates(internalClock.createCoords(movement.getMoment()));
@@ -31,9 +33,9 @@ public class FlowLayer {
     }
 
     public void repairSortingAndSequenceNumbers() {
-        movementsOverTime.sort(new Comparator<MovementEvent>() {
+        movementsOverTime.sort(new Comparator<Movement>() {
             @Override
-            public int compare(MovementEvent move1, MovementEvent move2) {
+            public int compare(Movement move1, Movement move2) {
 
                 int compare = move1.getMoment().compareTo(move2.getMoment());
 
@@ -47,26 +49,35 @@ public class FlowLayer {
 
         //fix sequence numbers after resorting
         int sequence = 1;
-        for (MovementEvent movement : movementsOverTime) {
+        for (Movement movement : movementsOverTime) {
             movement.setRelativeOffset(sequence);
             sequence++;
         }
     }
 
-
-    public FlowLayerType getLayerType() {
+    public RhythmLayerType getLayerType() {
         return layerType;
     }
 
-    public RelativeSequence getRelativeSequence() {
-        return relativeSequence;
-    }
-
-    public void initSequence(int startingValue) {
-        relativeSequence.reset(startingValue);
-    }
-
-    public List<MovementEvent> getMovements() {
+    public List<Movement> getMovements() {
         return movementsOverTime;
+    }
+
+    public Movement getLastMovement() {
+        Movement lastMovement = null;
+
+        if (movementsOverTime.size() > 1) {
+            lastMovement = movementsOverTime.get(movementsOverTime.size() - 1);
+        }
+
+        if (lastMovement == null) {
+            lastMovement = carryOverLastMovement;
+        }
+
+        return lastMovement;
+    }
+
+    public void initContext(Movement lastMovement) {
+        this.carryOverLastMovement = lastMovement;
     }
 }

@@ -3,101 +3,136 @@ package com.dreamscale.htmflow.core.feeds.story;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.FlowStructureLevel;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.FlowLayer;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.FlowLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.MovementEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RelativeSequence;
+import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class FlowRhythmMapper {
 
+    private final LocalDateTime from;
+    private final LocalDateTime to;
     private final InnerGeometryClock internalClock;
+
     private InnerGeometryClock.Coords currentMoment;
 
-    private Map<FlowStructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
-    private Map<FlowStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
+    private Map<RhythmLayerType, RhythmLayer> layerMap = new HashMap<>();
 
-    private Map<FlowLayerType, FlowLayer> layerMap = new HashMap<>();
+    public FlowRhythmMapper(LocalDateTime from, LocalDateTime to) {
+        this.from = from;
+        this.to = to;
 
-    public FlowRhythmMapper(OuterGeometryClock.Coords storyCoordinates, ZoomLevel zoomLevel) {
-        this.internalClock = new InnerGeometryClock(
-                storyCoordinates.getClockTime(),
-                storyCoordinates.panRight(zoomLevel).getClockTime());
+        this.internalClock = new InnerGeometryClock(from, to);
     }
 
-    private FlowLayer findOrCreateLayer(FlowLayerType layerType) {
-        FlowLayer layer = this.layerMap.get(layerType);
+
+    private RhythmLayer findOrCreateLayer(RhythmLayerType layerType) {
+        RhythmLayer layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new FlowLayer(layerType);
+            layer = new RhythmLayer(layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
     }
 
-    public void addMovements(FlowLayerType layerType, List<MovementEvent> movementsToAdd) {
-        for (MovementEvent movement : movementsToAdd) {
+    public void addMovements(RhythmLayerType layerType, List<Movement> movementsToAdd) {
+        for (Movement movement : movementsToAdd) {
             addMovement(layerType, movement);
         }
     }
 
-    public void addMovement(FlowLayerType layerType, MovementEvent movement) {
-        FlowLayer layer = findOrCreateLayer(layerType);
+    public void addMovement(RhythmLayerType layerType, Movement movement) {
+        RhythmLayer layer = findOrCreateLayer(layerType);
 
         if (movement != null) {
             currentMoment = layer.addMovement(internalClock, movement);
         }
     }
 
-
-    private RelativeSequence findOrCreateSequence(FlowStructureLevel structureLevel) {
-        RelativeSequence relativeSequence = this.currentSequenceNumbers.get(structureLevel);
-        if (relativeSequence == null) {
-            relativeSequence = new RelativeSequence(1);
-            this.currentSequenceNumbers.put(structureLevel, relativeSequence);
-        }
-        return relativeSequence;
-    }
-
-
     public InnerGeometryClock.Coords getCurrentMoment() {
-        return null;
+        return currentMoment;
     }
 
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
+        RhythmLayer modificationLayer = findOrCreateLayer(RhythmLayerType.MODIFICATION);
+
+        LocationInFocus location = getLastLocation();
+
+        ModificationEvent modificationEvent = new ModificationEvent(moment, location, modificationCount);
+        modificationLayer.addMovement(internalClock, modificationEvent);
 
     }
 
-    public Map<FlowLayerType, RelativeSequence> getLayerSequences() {
-        Map<FlowLayerType, RelativeSequence> layerSequences = new HashMap<>();
-        for (FlowLayer layer : this.layerMap.values()) {
-            layerSequences.put(layer.getLayerType(), layer.getRelativeSequence());
-        }
-        return layerSequences;
+    public void executeFromCurrentLocation(LocalDateTime moment, ExecutionContext executionContext) {
+        LocationInFocus location = getLastLocation();
+
+        RhythmLayer executionLayer = layerMap.get(RhythmLayerType.EXECUTION);
+
+        ExecutionEvent executionEvent = new ExecutionEvent(moment, location, executionContext);
+        executionLayer.addMovement(internalClock, executionEvent);
+
     }
 
+    private LocationInFocus getLastLocation() {
+        RhythmLayer locationLayer = findOrCreateLayer(RhythmLayerType.LOCATION_CHANGES);
+        Movement movement = locationLayer.getLastMovement();
 
-    public void initLayerSequencesFromPriorContext(Map<FlowLayerType, RelativeSequence> layerSequences) {
-        for(FlowLayerType layerType : layerSequences.keySet()) {
-            FlowLayer layer = findOrCreateLayer(layerType);
-            int startingValue = layerSequences.get(layerType).getRelativeSequence() + 1;
-
-            layer.initSequence(startingValue);
+        LocationInFocus location = null;
+        if (movement != null && movement.getReference() instanceof LocationInFocus) {
+            location = (LocationInFocus) movement.getReference();
         }
+        return location;
+    }
+
+    public CarryOverContext getCarryOverContext() {
+        CarryOverContext carryOverContext = new CarryOverContext();
+
+        for (RhythmLayer layer : this.layerMap.values()) {
+            Movement lastMovement = layer.getLastMovement();
+            carryOverContext.addLassMovement(layer.getLayerType(), lastMovement);
+        }
+        return carryOverContext;
+    }
+
+    public void initFromCarryOverContext(CarryOverContext carryOverContext) {
+        Set<RhythmLayerType> layerTypes = carryOverContext.getLayerTypes();
+
+
+        for (RhythmLayerType layerType : layerTypes) {
+            RhythmLayer layer = findOrCreateLayer(layerType);
+
+            layer.initContext(carryOverContext.getLastMovement(layerType));
+        }
+
     }
 
     public void finish() {
-        for (FlowLayer layer: layerMap.values()) {
+        for (RhythmLayer layer: layerMap.values()) {
             layer.repairSortingAndSequenceNumbers();
         }
     }
 
-    public List<MovementEvent> getContextMovements() {
-        FlowLayer contextLayer = layerMap.get(FlowLayerType.CONTEXT_CHANGES);
-
-        return contextLayer.getMovements();
+    public List<Movement> getMovements(RhythmLayerType layerType) {
+        return layerMap.get(layerType).getMovements();
     }
+
+    public static class CarryOverContext {
+        Map<RhythmLayerType, Movement> lastMovements = new HashMap<>();
+
+        void addLassMovement(RhythmLayerType layerType, Movement movement) {
+            lastMovements.put(layerType, movement);
+        }
+
+        Movement getLastMovement(RhythmLayerType layerType) {
+            return lastMovements.get(layerType);
+        }
+
+        public Set<RhythmLayerType> getLayerTypes() {
+            return lastMovements.keySet();
+        }
+    }
+
+
 }

@@ -14,7 +14,7 @@ import java.util.UUID;
 public class ContextEndingEvent implements FlowFeature, ContextChangeEvent {
 
     private UUID referenceId;
-    private FlowStructureLevel structureLevel;
+    private StructureLevel structureLevel;
     private String name;
     private String description;
     private LocalDateTime position;
