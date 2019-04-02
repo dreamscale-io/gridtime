@@ -14,8 +14,10 @@ public class RhythmLayerMapper {
     private final RhythmLayerType layerType;
     private final RelativeSequence relativeSequence;
 
-    private Movement carryOverLastMovement;
+    private Movement carriedOverLastMovement;
     private List<Movement> movementsOverTime = new ArrayList<>();
+
+    private List<Movement> movementsToCarryUntilWithinWindow = new ArrayList<>();
 
 
     public RhythmLayerMapper(RhythmLayerType layerType) {
@@ -32,6 +34,14 @@ public class RhythmLayerMapper {
         movementsOverTime.add(movement);
 
         return movement.getCoordinates();
+    }
+
+    public void addMovementLater(Movement movement) {
+        movementsToCarryUntilWithinWindow.add(movement);
+    }
+
+    public List<Movement> getMovementsToCarryUntilWithinWindow() {
+        return movementsToCarryUntilWithinWindow;
     }
 
     public void repairSortingAndSequenceNumbers() {
@@ -73,13 +83,15 @@ public class RhythmLayerMapper {
         }
 
         if (lastMovement == null) {
-            lastMovement = carryOverLastMovement;
+            lastMovement = carriedOverLastMovement;
         }
 
         return lastMovement;
     }
 
     public void initContext(Movement lastMovement) {
-        this.carryOverLastMovement = lastMovement;
+        this.carriedOverLastMovement = lastMovement;
     }
+
+
 }

@@ -2,14 +2,13 @@ package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
 
 import java.time.LocalDateTime;
 
-public class ExecutionEvent {
+public class ExecutionStartEvent {
 
+    private LocalDateTime position;
     private final ExecutionContext executionContext;
-    private final LocalDateTime position;
 
-    public ExecutionEvent(LocalDateTime position, ExecutionContext executionContext) {
+    public ExecutionStartEvent(LocalDateTime position, ExecutionContext executionContext) {
         this.position = position;
         this.executionContext = executionContext;
     }
-
 }

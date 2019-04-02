@@ -102,8 +102,8 @@ public class StoryFrame {
      * @param moment
      * @param executionContext
      */
-    public void executeFromCurrentLocation(LocalDateTime moment, ExecutionContext executionContext) {
-        flowRhythmMapper.executeFromCurrentLocation(moment, executionContext);
+    public void execute(LocalDateTime moment, ExecutionContext executionContext) {
+        flowRhythmMapper.execute(moment, executionContext);
     }
 
 
@@ -178,8 +178,6 @@ public class StoryFrame {
         return spatialGeometryMapper.getThoughtStructure();
     }
 
-
-
     public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
         return flowRhythmMapper.getRhythmLayer(layerType);
     }
@@ -188,4 +186,7 @@ public class StoryFrame {
         return flowRhythmMapper.getRhythmLayerTypes();
     }
 
+    public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
+        return flowRhythmMapper.getLastMovement(rhythmLayerType);
+    }
 }

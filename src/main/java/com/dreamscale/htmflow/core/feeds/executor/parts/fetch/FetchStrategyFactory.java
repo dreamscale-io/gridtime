@@ -12,12 +12,17 @@ public class FetchStrategyFactory {
     @Autowired
     JournalFetcher journalFeedStrategy;
 
+    @Autowired
+    ExecutionActivityFetcher executionActivityFeedStrategy;
+
     public FetchStrategy get(StrategyType strategyType) {
         switch (strategyType) {
             case FILE_ACTIVITY_FEED:
                 return fileActivityFeedStrategy;
             case JOURNAL_FEED:
                 return journalFeedStrategy;
+            case EXECUTION_ACTIVITY_FEED:
+                return executionActivityFeedStrategy;
         }
         return null;
     }

@@ -35,4 +35,15 @@ public interface FlowActivityRepository extends PagingAndSortingRepository<FlowA
 																		  @Param("sequence") Long sequence,
 																		  @Param("limit") int limit);
 
+	@Query(nativeQuery = true, value = "select * from flow_activity " +
+			"where member_id=(:memberId) " +
+			"and start_time >= (:afterDate) " +
+			"and id >= (:sequence) " +
+			"and activity_type in ('Execution') "+
+			"order by start_time, id asc limit (:limit)")
+	List<FlowActivityEntity> findExecutionActivityByMemberIdAfterDateWithLimit(@Param("memberId") UUID memberId,
+																		  @Param("afterDate") Timestamp afterDate,
+																		  @Param("sequence") Long sequence,
+																		  @Param("limit") int limit);
+
 }

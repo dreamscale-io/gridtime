@@ -59,18 +59,29 @@ public class FlowRhythmMapper {
 
         LocationInPlace location = getLastLocation();
 
-        ModificationEvent modificationEvent = new ModificationEvent(moment, location, new ModificationContext(modificationCount));
-        modificationLayer.addMovement(internalClock, modificationEvent);
+        ModificationEvent modificationEvent = new ModificationEvent(moment, location, modificationCount);
+        modificationLayer.addMovement(internalClock, new Movement(moment, modificationEvent));
 
     }
 
-    public void executeFromCurrentLocation(LocalDateTime moment, ExecutionContext executionContext) {
-        LocationInPlace location = getLastLocation();
+    public void execute(LocalDateTime moment, ExecutionContext executionContext) {
 
         RhythmLayerMapper executionLayer = layerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
 
-        ExecutionEvent executionEvent = new ExecutionEvent(moment, location, executionContext);
-        executionLayer.addMovement(internalClock, executionEvent);
+        if (executionContext.getDuration().getSeconds() > 60) {
+            ExecutionStartEvent executionStartEvent = new ExecutionStartEvent(moment, executionContext);
+            Movement startMovement = new Movement(moment, executionStartEvent);
+            executionLayer.addMovement(internalClock, startMovement);
+
+            LocalDateTime endTime = moment.plusSeconds(executionContext.getDuration().getSeconds());
+            ExecutionEndEvent executionEndEvent = new ExecutionEndEvent(endTime, executionContext);
+            Movement endMovement = new Movement(endTime, executionEndEvent);
+            executionLayer.addMovementLater(endMovement);
+
+        } else {
+            Movement movement = new Movement(moment, new ExecutionEvent(moment, executionContext));
+            executionLayer.addMovement(internalClock, movement);
+        }
 
     }
 
@@ -91,6 +102,9 @@ public class FlowRhythmMapper {
         for (RhythmLayerMapper layer : this.layerMap.values()) {
             Movement lastMovement = layer.getLastMovement();
             subContext.addLassMovement(layer.getLayerType(), lastMovement);
+
+            List<Movement> carryOverMovements = layer.getMovementsToCarryUntilWithinWindow();
+            subContext.addCarryOverMovements(layer.getLayerType(), carryOverMovements);
         }
 
         return subContext.toCarryOverContext();
@@ -102,11 +116,31 @@ public class FlowRhythmMapper {
 
         Set<RhythmLayerType> layerTypes = subContext.getLayerTypes();
 
-
         for (RhythmLayerType layerType : layerTypes) {
             RhythmLayerMapper layer = findOrCreateLayer(layerType);
 
             layer.initContext(subContext.getLastMovement(layerType));
+
+            placeCarryOverMovements(subContext, layerType);
+        }
+
+    }
+
+    private void placeCarryOverMovements(CarryOverSubContext subContext, RhythmLayerType layerType) {
+        List<? extends Movement> carryOverMovements = subContext.getCarryOverMovements(layerType);
+        if (carryOverMovements != null) {
+            for (Movement movement : carryOverMovements) {
+
+                LocalDateTime position = movement.getMoment();
+
+                if ((from.isBefore(position) || from.isEqual(position)) && to.isAfter(position)) {
+                    addMovement(layerType, movement);
+
+                } else {
+                    RhythmLayerMapper layerMapper = layerMap.get(layerType);
+                    layerMapper.addMovementLater(movement);
+                }
+            }
         }
 
     }
@@ -125,6 +159,10 @@ public class FlowRhythmMapper {
         return layerMap.keySet();
     }
 
+    public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
+        return this.layerMap.get(rhythmLayerType).getLastMovement();
+    }
+
     public static class CarryOverSubContext {
 
         private static final String SUBCONTEXT_NAME = "[FlowRhythmMapper]";
@@ -140,11 +178,13 @@ public class FlowRhythmMapper {
         }
 
         void addLassMovement(RhythmLayerType layerType, Movement movement) {
-            subContext.addKeyValue(layerType.name(), movement);
+            String key = layerType.name() + ".last.movement";
+            subContext.addKeyValue(key, movement);
         }
 
         Movement getLastMovement(RhythmLayerType layerType) {
-            return (Movement) subContext.getValue(layerType.name());
+            String key = layerType.name() + ".last.movement";
+            return (Movement) subContext.getValue(key);
         }
 
         public Set<RhythmLayerType> getLayerTypes() {
@@ -152,14 +192,30 @@ public class FlowRhythmMapper {
 
             Set<RhythmLayerType> layerTypes = new LinkedHashSet<>();
             for (String key : keys) {
-                layerTypes.add(RhythmLayerType.valueOf(key));
+
+                String layerTypeName = parseLayerTypeFromKey(key);
+                layerTypes.add(RhythmLayerType.valueOf(layerTypeName));
             }
 
             return layerTypes;
         }
 
+        private String parseLayerTypeFromKey(String key) {
+            return key.substring(0, key.indexOf("."));
+        }
+
         public CarryOverContext toCarryOverContext() {
             return subContext;
+        }
+
+        public void addCarryOverMovements(RhythmLayerType layerType, List<Movement> carryOverMovements) {
+            String key = layerType.name() + ".carry.over.movements";
+            subContext.addKeyList(key, carryOverMovements);
+        }
+
+        public List<? extends Movement> getCarryOverMovements(RhythmLayerType layerType) {
+            String key = layerType.name() + ".carry.over.movements";
+            return (List<? extends Movement>) subContext.getKeyList(key);
         }
     }
 

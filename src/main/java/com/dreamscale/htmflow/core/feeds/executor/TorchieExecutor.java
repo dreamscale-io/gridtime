@@ -69,6 +69,10 @@ public class TorchieExecutor {
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.FILE_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER)));
 
+        metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
+                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.EXECUTION_ACTIVITY_FEED),
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER)));
+
         ZoomableFlow zoomableFlow = new ZoomableFlow(metronome, memberId, sharedFeaturePool);
 
         return new Torchie(memberId, zoomableFlow);

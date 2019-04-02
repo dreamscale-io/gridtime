@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story.mapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +26,10 @@ public class CarryOverContext {
         keyValueSerializablePairs.put(key, jsonSerializableFeature);
     }
 
+    public void addKeyList(String key, List<? extends FlowFeature> jsonSerializableFeatureList) {
+        keyValueSerializablePairs.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
+    }
+
     public FlowFeature getValue(String key) {
         return keyValueSerializablePairs.get(key);
     }
@@ -43,5 +48,23 @@ public class CarryOverContext {
 
     private String getContextOwner() {
         return contextOwner;
+    }
+
+    public List<? extends FlowFeature> getKeyList(String key) {
+        ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) keyValueSerializablePairs.get(key);
+
+        return flowFeatures.getOriginalTypedList();
+    }
+
+    private class ListOfFlowFeatures implements FlowFeature {
+        private final List<? extends FlowFeature> featureList;
+
+        ListOfFlowFeatures(List<? extends FlowFeature> featureList) {
+            this.featureList = featureList;
+        }
+
+        public List<? extends FlowFeature> getOriginalTypedList() {
+            return featureList;
+        }
     }
 }
