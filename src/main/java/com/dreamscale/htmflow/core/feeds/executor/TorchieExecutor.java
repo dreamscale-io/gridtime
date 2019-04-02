@@ -62,7 +62,8 @@ public class TorchieExecutor {
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.JOURNAL_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER)
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER)
         ));
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,

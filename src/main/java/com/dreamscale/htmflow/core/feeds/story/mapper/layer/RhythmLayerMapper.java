@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.mapper;
+package com.dreamscale.htmflow.core.feeds.story.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;

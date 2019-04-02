@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.story.see;
 
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,10 @@ public class Window {
 
     public LocalDateTime getEnd() {
         return toClockPosition;
+    }
+
+    public Duration getDuration() {
+        return Duration.between(getStart(), getEnd());
     }
 
     public List<Flowable> getFlowables() {

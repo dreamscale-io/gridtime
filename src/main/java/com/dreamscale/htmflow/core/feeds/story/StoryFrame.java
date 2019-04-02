@@ -1,5 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
@@ -8,10 +12,7 @@ import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
-import com.dreamscale.htmflow.core.feeds.story.mapper.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.mapper.FlowContextMapper;
-import com.dreamscale.htmflow.core.feeds.story.mapper.FlowRhythmMapper;
-import com.dreamscale.htmflow.core.feeds.story.mapper.SpatialGeometryMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public class StoryFrame {
     private final FlowContextMapper contextMapper;
     private final SpatialGeometryMapper spatialGeometryMapper;
     private final FlowRhythmMapper flowRhythmMapper;
+    private final FlowBandMapper timeBandMapper;
 
 
     public StoryFrame(OuterGeometryClock.Coords storyFrameCoordinates, ZoomLevel zoomLevel) {
@@ -40,6 +42,7 @@ public class StoryFrame {
         this.contextMapper = new FlowContextMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.spatialGeometryMapper = new SpatialGeometryMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.flowRhythmMapper = new FlowRhythmMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
+        this.timeBandMapper = new FlowBandMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
 
     }
 
@@ -106,6 +109,16 @@ public class StoryFrame {
         flowRhythmMapper.execute(moment, executionContext);
     }
 
+    /**
+     * Create a flame rating band over a specific time period.  These all aggregated together
+     * into an overall summarized mood.  FeelsContext should never exceed the window size
+     * @param moment
+     * @param feelsContext
+     */
+    public void feel(LocalDateTime moment, FeelsContext feelsContext) {
+        timeBandMapper.feel(moment, feelsContext);
+    }
+
 
     /**
      * After filling in a StoryFrame with a layer of stuff, call this with each layer to put the frame
@@ -132,6 +145,7 @@ public class StoryFrame {
 
         this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);
+        this.timeBandMapper.initFromCarryOverContext(carryOverContext);
 
         Movement sideEffectMovement = this.contextMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, sideEffectMovement);
@@ -144,6 +158,7 @@ public class StoryFrame {
         carryOverContext.addSubContext(contextMapper.getCarryOverContext());
         carryOverContext.addSubContext(spatialGeometryMapper.getCarryOverContext());
         carryOverContext.addSubContext(flowRhythmMapper.getCarryOverContext());
+        carryOverContext.addSubContext(timeBandMapper.getCarryOverContext());
 
         return carryOverContext;
     }
@@ -189,4 +204,10 @@ public class StoryFrame {
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
         return flowRhythmMapper.getLastMovement(rhythmLayerType);
     }
+
+    public TimeBand getLastBand(TimeBandLayerType bandLayerType) {
+        return timeBandMapper.getLastBand(bandLayerType);
+    }
+
+
 }

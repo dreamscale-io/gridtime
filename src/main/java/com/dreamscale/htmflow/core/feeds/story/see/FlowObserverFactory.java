@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 public class FlowObserverFactory {
 
     private final JournalContextObserver journalContextObserver;
+    private final JournalFeelsObserver journalFeelsObserver;
     private final ExecutionRhythmObserver executionRhythmObserver;
 
     @Autowired
@@ -14,6 +15,7 @@ public class FlowObserverFactory {
 
     FlowObserverFactory() {
         this.journalContextObserver = new JournalContextObserver();
+        this.journalFeelsObserver = new JournalFeelsObserver();
         this.executionRhythmObserver = new ExecutionRhythmObserver();
     }
 
@@ -21,6 +23,8 @@ public class FlowObserverFactory {
         switch (observerType) {
             case JOURNAL_CONTEXT_OBSERVER:
                 return journalContextObserver;
+            case JOURNAL_FEELS_OBSERVER:
+                return journalFeelsObserver;
             case COMPONENT_SPACE_OBSERVER:
                 return componentSpaceObserver;
             case EXECUTION_RHYTHM_OBSERVER:
@@ -31,6 +35,7 @@ public class FlowObserverFactory {
 
     public enum ObserverType {
         JOURNAL_CONTEXT_OBSERVER,
+        JOURNAL_FEELS_OBSERVER,
         COMPONENT_SPACE_OBSERVER,
         EXECUTION_RHYTHM_OBSERVER;
     }

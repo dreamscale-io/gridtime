@@ -1,10 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
 
 import java.time.LocalDateTime;
 
-public class ModificationEvent {
+public class ModificationEvent implements FlowFeature {
 
     private final LocalDateTime position;
     private final LocationInPlace location;

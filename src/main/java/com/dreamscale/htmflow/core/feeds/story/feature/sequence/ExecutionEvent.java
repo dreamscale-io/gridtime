@@ -1,8 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+
 import java.time.LocalDateTime;
 
-public class ExecutionEvent {
+public class ExecutionEvent implements FlowFeature {
 
     private final ExecutionContext executionContext;
     private final LocalDateTime position;
