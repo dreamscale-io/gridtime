@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "journal_link")
+@Entity(name = "journal_link_event")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
