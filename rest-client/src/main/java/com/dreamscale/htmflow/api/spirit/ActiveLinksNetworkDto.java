@@ -17,6 +17,9 @@ public class ActiveLinksNetworkDto {
 
     private UUID networkId;
 
+    private UUID myId;
+    private String myName;
+
     private List<SpiritLinkDto> spiritLinks;
 
     public ActiveLinksNetworkDto() {
