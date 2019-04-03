@@ -2,3 +2,7 @@ databaseChangeLog:
 
   - include:
         file: db/v003/feeds/create_journal_links.sql
+
+
+  - include:
+        file: db/v003/feeds/alter_journal_links.sql
