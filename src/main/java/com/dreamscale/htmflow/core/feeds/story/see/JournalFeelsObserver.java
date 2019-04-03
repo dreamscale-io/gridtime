@@ -108,8 +108,5 @@ public class JournalFeelsObserver implements FlowObserver {
         storyFrame.feel(window.getStart(), newFeelsContext);
     }
 
-    void addFeelsMovement(StoryFrame storyFrame) {
-
-    }
 
 }

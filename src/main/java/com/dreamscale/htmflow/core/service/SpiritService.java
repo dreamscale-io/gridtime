@@ -27,9 +27,6 @@ public class SpiritService {
     CircleService circleService;
 
     @Autowired
-    SpiritNetworkEventRepository spiritNetworkEventRepository;
-
-    @Autowired
     ActiveSpiritLinkRepository activeSpiritLinkRepository;
 
     @Autowired
@@ -129,6 +126,9 @@ public class SpiritService {
         } else {
             activeLinksNetworkDto.setNetworkId(UUID.randomUUID());
         }
+
+        activeLinksNetworkDto.setMyId(spiritId);
+        activeLinksNetworkDto.setMyName(getMemberName(spiritId));
 
         return activeLinksNetworkDto;
     }

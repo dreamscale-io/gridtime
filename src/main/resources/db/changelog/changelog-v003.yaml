@@ -1,4 +1,4 @@
 databaseChangeLog:
 
   - include:
-        file: db/v003/feeds/create_component_hour.sql
+        file: db/v003/feeds/create_journal_links.sql

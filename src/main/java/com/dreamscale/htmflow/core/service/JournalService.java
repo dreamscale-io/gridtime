@@ -6,12 +6,16 @@ import com.dreamscale.htmflow.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.htmflow.api.spirit.SpiritLinkDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
+import com.dreamscale.htmflow.core.domain.json.Member;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +43,7 @@ public class JournalService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private OrganizationMemberRepository organizationMemberRepository;
+    private JournalLinkRepository journalLinkRepository;
 
     @Autowired
     private OrganizationService organizationService;
@@ -55,6 +59,8 @@ public class JournalService {
 
     @Autowired
     private SpiritService spiritService;
+
+    private ObjectMapper jsonMapper = new ObjectMapper();
 
 
     @Autowired
@@ -73,35 +79,61 @@ public class JournalService {
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
-        List<UUID> membersToMulticast = lookupMulticastMemberIds(organizationId, memberId);
+        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+
         boolean isLinked = false;
-        if (membersToMulticast.size() > 0) {
+        if (!activeLinksNetwork.isEmpty()) {
             isLinked = true;
         }
 
         IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto, isLinked);
 
-        for (UUID memberForCreation : membersToMulticast) {
-            createIntentionAndGrantXPForMember(organizationId, memberForCreation, intentionInputDto, isLinked);
+        if (isLinked) {
+            createJournalLinks(myIntention, memberId, activeLinksNetwork);
+        }
+
+        for (SpiritLinkDto spiritLink : activeLinksNetwork.getSpiritLinks()) {
+            IntentionEntity otherIntention = createIntentionAndGrantXPForMember(organizationId, spiritLink.getFriendSpiritId(), intentionInputDto, isLinked);
+            createJournalLinks(otherIntention, spiritLink.getFriendSpiritId(), activeLinksNetwork);
         }
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
-    private List<UUID> lookupMulticastMemberIds(UUID organizationId, UUID memberId) {
-        List<UUID> membersToMulticast = new ArrayList<>();
+    private void createJournalLinks(IntentionEntity myIntention, UUID memberId, ActiveLinksNetworkDto activeLinksNetwork)  {
 
-        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
-        if (!activeLinksNetwork.isEmpty()) {
+        JournalLinkEntity journalLinkEntity = new JournalLinkEntity();
+        journalLinkEntity.setId(UUID.randomUUID());
+        journalLinkEntity.setIntentionId(myIntention.getId());
+        journalLinkEntity.setMemberId(memberId);
+        journalLinkEntity.setLinkedMembers(translateLinkedMembersToJson(memberId, activeLinksNetwork));
 
-            for (SpiritLinkDto link : activeLinksNetwork.getSpiritLinks()) {
-                membersToMulticast.add(link.getFriendSpiritId());
+        journalLinkRepository.save(journalLinkEntity);
+
+    }
+
+    private String translateLinkedMembersToJson(UUID orientFromMember, ActiveLinksNetworkDto activeLinksNetwork)  {
+        List<Member> members = new ArrayList<>();
+
+        for (SpiritLinkDto spiritLink : activeLinksNetwork.getSpiritLinks()) {
+            if (!spiritLink.getFriendSpiritId().equals(orientFromMember)) {
+                members.add(new Member(spiritLink.getFriendSpiritId().toString(), spiritLink.getName()));
             }
         }
+        if (!orientFromMember.equals(activeLinksNetwork.getMyId())) {
+            members.add(new Member(activeLinksNetwork.getMyId().toString(), activeLinksNetwork.getMyName()));
+        }
 
-        return membersToMulticast;
+        String json = null;
+        try {
+            json = jsonMapper.writeValueAsString(members);
+        } catch (JsonProcessingException e) {
+            log.error("Unable to serialize JSON: "+members);
+        }
+        return json;
     }
+
 
     private void validateMemberOrgMatchesProjectOrg(UUID organizationId, UUID organizationIdForProject) {
 
@@ -241,18 +273,17 @@ public class JournalService {
     }
 
     private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
-        List<UUID> multiCastMemberIds = lookupMulticastMemberIds(organizationId, memberId);
-        for (UUID multiMember : multiCastMemberIds) {
-
-            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(multiMember, 1);
+        ActiveLinksNetworkDto spiritNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+        for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
+            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {
-                updateFinishStatus(organizationId, multiMember, lastIntentionList.get(0).getId(), finishStatus);
+                updateFinishStatus(organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0).getId(), finishStatus);
             }
 
         }
     }
 
-    private JournalEntryDto updateFinishStatus(UUID organizationId, UUID memberId,  UUID intentionId, FinishStatus finishStatus) {
+    private JournalEntryDto updateFinishStatus(UUID organizationId, UUID memberId, UUID intentionId, FinishStatus finishStatus) {
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
         if (intentionEntity != null) {
@@ -299,4 +330,5 @@ public class JournalService {
 
         return recentJournalDto;
     }
+
 }
