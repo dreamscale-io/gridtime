@@ -2,11 +2,8 @@ package com.dreamscale.htmflow.core.feeds.story.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayer;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBand;
-import com.dreamscale.htmflow.core.feeds.story.mapper.layer.TimeBandLayerMapper;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.*;
+import com.dreamscale.htmflow.core.feeds.story.mapper.layer.BandLayerMapper;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -17,9 +14,7 @@ public class FlowBandMapper {
     private final LocalDateTime to;
     private final InnerGeometryClock internalClock;
 
-    private InnerGeometryClock.Coords currentMoment;
-
-    private Map<TimeBandLayerType, TimeBandLayerMapper> layerMap = new HashMap<>();
+    private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
     public FlowBandMapper(LocalDateTime from, LocalDateTime to) {
         this.from = from;
@@ -29,34 +24,22 @@ public class FlowBandMapper {
     }
 
 
-    private TimeBandLayerMapper findOrCreateLayer(TimeBandLayerType layerType) {
-        TimeBandLayerMapper layer = this.layerMap.get(layerType);
+    private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {
+        BandLayerMapper layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new TimeBandLayerMapper(layerType);
+            layer = new BandLayerMapper(internalClock, layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
-    }
-
-    public void addBand(TimeBandLayerType layerType, TimeBand band) {
-        TimeBandLayerMapper layer = findOrCreateLayer(layerType);
-
-        if (band != null) {
-            currentMoment = layer.addTimeBand(internalClock, band);
-        }
-    }
-
-    public InnerGeometryClock.Coords getCurrentMoment() {
-        return currentMoment;
     }
 
 
     public CarryOverContext getCarryOverContext() {
         CarryOverSubContext subContext = new CarryOverSubContext();
 
-        for (TimeBandLayerMapper layer : this.layerMap.values()) {
-            TimeBand lastBand = layer.getLastBand();
-            subContext.addLastBand(layer.getLayerType(), lastBand);
+        for (BandLayerMapper layer : this.layerMap.values()) {
+            subContext.setLastBand(layer.getLayerType(), layer.getLastBand());
+            subContext.setActiveBandContext(layer.getLayerType(), layer.getActiveBandContext());
         }
 
         return subContext.toCarryOverContext();
@@ -66,38 +49,46 @@ public class FlowBandMapper {
 
         CarryOverSubContext subContext = new CarryOverSubContext(carryOverContext);
 
-        Set<TimeBandLayerType> layerTypes = subContext.getLayerTypes();
+        Set<BandLayerType> layerTypes = subContext.getLayerTypes();
 
-        for (TimeBandLayerType layerType : layerTypes) {
-            TimeBandLayerMapper layer = findOrCreateLayer(layerType);
+        for (BandLayerType layerType : layerTypes) {
+            BandLayerMapper layer = findOrCreateLayer(layerType);
 
-            layer.initContext(subContext.getLastBand(layerType));
-
+            TimeBand lastBand = subContext.getLastBand(layerType);
+            BandContext activeContext = subContext.getActiveBandContext(layerType);
+            layer.initContext(lastBand, activeContext);
         }
 
     }
 
+    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, BandContext bandContext) {
+        BandLayerMapper layer = layerMap.get(bandLayerType);
+
+        layer.startBand(startBandPosition, bandContext);
+    }
+
+    public void clearBand(BandLayerType bandLayerType, LocalDateTime endBandPosition) {
+        BandLayerMapper layer = layerMap.get(bandLayerType);
+
+        layer.clearBand(endBandPosition);
+    }
 
     public void finish() {
-        for (TimeBandLayerMapper layer: layerMap.values()) {
-            layer.repairSortingAndSequenceNumbers();
+        for (BandLayerMapper layer: layerMap.values()) {
+            layer.finish();
         }
     }
 
-    public TimeBandLayer getTimeBandLayer(TimeBandLayerType layerType) {
+    public TimeBandLayer getBandLayer(BandLayerType layerType) {
         return new TimeBandLayer(from, to, layerMap.get(layerType).getTimeBands());
     }
 
-    public Set<TimeBandLayerType> getTimeBandLayerTypes() {
+    public Set<BandLayerType> getBandLayerTypes() {
         return layerMap.keySet();
     }
 
-    public TimeBand getLastBand(TimeBandLayerType bandLayerType) {
+    public TimeBand getLastBand(BandLayerType bandLayerType) {
         return this.layerMap.get(bandLayerType).getLastBand();
-    }
-
-    public void feel(LocalDateTime moment, FeelsContext feelsContext) {
-
     }
 
 
@@ -115,24 +106,34 @@ public class FlowBandMapper {
             subContext = mainContext.getSubContext(SUBCONTEXT_NAME);
         }
 
-        void addLastBand(TimeBandLayerType layerType, TimeBand timeBand) {
+        void setActiveBandContext(BandLayerType layerType, BandContext bandContext) {
+            String key = layerType.name() + ".active.context";
+            subContext.addKeyValue(key, bandContext);
+        }
+
+        BandContext getActiveBandContext(BandLayerType layerType) {
+            String key = layerType.name() + ".active.context";
+            return (BandContext) subContext.getValue(key);
+        }
+
+        void setLastBand(BandLayerType layerType, TimeBand timeBand) {
             String key = layerType.name() + ".last.band";
             subContext.addKeyValue(key, timeBand);
         }
 
-        TimeBand getLastBand(TimeBandLayerType layerType) {
+        TimeBand getLastBand(BandLayerType layerType) {
             String key = layerType.name() + ".last.band";
             return (TimeBand) subContext.getValue(key);
         }
 
-        public Set<TimeBandLayerType> getLayerTypes() {
+        public Set<BandLayerType> getLayerTypes() {
             Set<String> keys = subContext.keySet();
 
-            Set<TimeBandLayerType> layerTypes = new LinkedHashSet<>();
+            Set<BandLayerType> layerTypes = new LinkedHashSet<>();
             for (String key : keys) {
 
                 String layerTypeName = parseLayerTypeFromKey(key);
-                layerTypes.add(TimeBandLayerType.valueOf(layerTypeName));
+                layerTypes.add(BandLayerType.valueOf(layerTypeName));
             }
 
             return layerTypes;

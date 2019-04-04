@@ -8,18 +8,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
-public class FeelsContext implements FlowFeature {
+public class FeelsContext implements BandContext {
 
     private Integer flameRating;
-    private Duration duration;
 
-    public void setDuration(Duration duration) {
-        this.duration = duration;
+    public FeelsContext(Integer flameRating) {
+
+        this.flameRating = flameRating;
     }
 
-    public Duration getDuration() {
-        return this.duration;
-    }
 
 }

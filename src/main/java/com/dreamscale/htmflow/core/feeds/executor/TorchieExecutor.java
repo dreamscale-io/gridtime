@@ -63,7 +63,8 @@ public class TorchieExecutor {
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.JOURNAL_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER)
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER),
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER)
         ));
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
@@ -74,19 +75,7 @@ public class TorchieExecutor {
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.EXECUTION_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER)));
 
-        metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
-                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.PAIRING_EVENT_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.AUTHOR_OBSERVER)));
-
         ZoomableFlow zoomableFlow = new ZoomableFlow(metronome, memberId, sharedFeaturePool);
-
-        //wtfs generate events, and also feels
-        //load feels annotations, and generate feels whenever the annotated object is experienced
-
-        //when label thought, whenever that same thought is detected, it will recall the pattern by name
-
-        //familiarity model across the team, total locations vs locations visited by member, is a derived feed
-        //focus activity uses weight degrading over larger time buckets
 
         return new Torchie(memberId, zoomableFlow);
 

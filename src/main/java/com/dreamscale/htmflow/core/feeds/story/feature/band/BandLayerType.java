@@ -1,7 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.band;
 
-public enum TimeBandLayerType {
+public enum BandLayerType {
 
     FRICTION,
-    FEELS
+    FEELS,
+    PAIRING_AUTHORS
 }

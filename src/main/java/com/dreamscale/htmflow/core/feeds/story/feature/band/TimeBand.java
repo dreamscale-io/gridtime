@@ -8,19 +8,19 @@ import java.time.LocalDateTime;
 
 public class TimeBand implements FlowFeature {
 
+    private final BandContext bandContext;
     private LocalDateTime start;
     private LocalDateTime end;
 
-
-    private final Object reference;
     private int relativeOffset = 0;
 
-    private InnerGeometryClock.Coords coords;
+    private InnerGeometryClock.Coords startCoords;
+    private InnerGeometryClock.Coords endCoords;
 
-    public TimeBand(LocalDateTime start, LocalDateTime end, Object reference) {
+    public TimeBand(LocalDateTime start, LocalDateTime end, BandContext bandContext) {
         this.start = start;
         this.end = end;
-        this.reference = reference;
+        this.bandContext = bandContext;
     }
 
     public Duration getDuration() {
@@ -31,29 +31,22 @@ public class TimeBand implements FlowFeature {
         this.relativeOffset = nextSequence;
     }
 
-    public void setCoordinates(InnerGeometryClock.Coords coords) {
-        this.coords = coords;
+    public void initCoordinates(InnerGeometryClock clock) {
+
+        this.startCoords = clock.createCoords(start);
+        this.endCoords = clock.createCoords(end);
     }
 
     public LocalDateTime getMoment() {
         return start;
     }
 
-    public Object getReference() {
-        return reference;
-    }
-
     public int getRelativeOffset() {
         return relativeOffset;
     }
 
-    public boolean referencesType(Class<?> referenceObjectType) {
-        return (reference != null && reference.getClass().equals(referenceObjectType));
-    }
-
-
     public InnerGeometryClock.Coords getCoordinates() {
-        return this.coords;
+        return this.startCoords;
     }
 
     public LocalDateTime getEnd() {

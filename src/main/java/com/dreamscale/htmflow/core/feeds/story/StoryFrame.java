@@ -1,9 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.BandContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBand;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
@@ -110,15 +111,24 @@ public class StoryFrame {
     }
 
     /**
-     * Create a flame rating band over a specific time period.  These all aggregated together
-     * into an overall summarized mood.  FeelsContext should never exceed the window size
-     * @param moment
-     * @param feelsContext
+     * Start a time band at the position, that will continue for the duration, including carry over into
+     * subsequent frames until the band is cleared
+     * @param bandLayerType
+     * @param startBandPosition
+     * @param bandContext
      */
-    public void feel(LocalDateTime moment, FeelsContext feelsContext) {
-        timeBandMapper.feel(moment, feelsContext);
+    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, BandContext bandContext) {
+        timeBandMapper.startBand(bandLayerType, startBandPosition, bandContext);
     }
 
+    /**
+     * Clear the active time band in this layer, from the specified time onward, no bands will be generated
+     * @param bandLayerType
+     * @param endBandPosition
+     */
+    public void clearBand(BandLayerType bandLayerType, LocalDateTime endBandPosition) {
+        timeBandMapper.clearBand(bandLayerType, endBandPosition);
+    }
 
     /**
      * After filling in a StoryFrame with a layer of stuff, call this with each layer to put the frame
@@ -129,6 +139,7 @@ public class StoryFrame {
         contextMapper.finish();
         spatialGeometryMapper.finish();
         flowRhythmMapper.finish();
+        timeBandMapper.finish();
     }
 
     /**
@@ -193,21 +204,30 @@ public class StoryFrame {
         return spatialGeometryMapper.getThoughtStructure();
     }
 
+    public Set<RhythmLayerType> getRhythmLayerTypes() {
+        return flowRhythmMapper.getRhythmLayerTypes();
+    }
+
+    public Set<BandLayerType> getBandLayerTypes() {
+        return timeBandMapper.getBandLayerTypes();
+    }
+
     public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
         return flowRhythmMapper.getRhythmLayer(layerType);
     }
 
-    public Set<RhythmLayerType> getRhythmLayerTypes() {
-        return flowRhythmMapper.getRhythmLayerTypes();
+    public TimeBandLayer getBandLayer(BandLayerType layerType) {
+        return timeBandMapper.getBandLayer(layerType);
     }
 
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
         return flowRhythmMapper.getLastMovement(rhythmLayerType);
     }
 
-    public TimeBand getLastBand(TimeBandLayerType bandLayerType) {
+    public TimeBand getLastBand(BandLayerType bandLayerType) {
         return timeBandMapper.getLastBand(bandLayerType);
     }
+
 
 
 }

@@ -6,3 +6,6 @@ databaseChangeLog:
 
   - include:
         file: db/v003/feeds/alter_journal_links.sql
+
+  - include:
+        file: db/v003/feeds/replace_journal_entry_view_with_linkedmembers.sql

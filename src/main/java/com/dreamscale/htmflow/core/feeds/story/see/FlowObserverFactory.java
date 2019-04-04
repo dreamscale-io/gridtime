@@ -9,7 +9,7 @@ public class FlowObserverFactory {
     private final JournalContextObserver journalContextObserver;
     private final JournalFeelsObserver journalFeelsObserver;
     private final ExecutionRhythmObserver executionRhythmObserver;
-    private final AuthorObserver authorObserver;
+    private final JournalAuthorObserver journalAuthorObserver;
 
     @Autowired
     private ComponentSpaceObserver componentSpaceObserver;
@@ -17,8 +17,8 @@ public class FlowObserverFactory {
     FlowObserverFactory() {
         this.journalContextObserver = new JournalContextObserver();
         this.journalFeelsObserver = new JournalFeelsObserver();
+        this.journalAuthorObserver = new JournalAuthorObserver();
         this.executionRhythmObserver = new ExecutionRhythmObserver();
-        this.authorObserver = new AuthorObserver();
     }
 
     public FlowObserver get(ObserverType observerType) {
@@ -27,12 +27,13 @@ public class FlowObserverFactory {
                 return journalContextObserver;
             case JOURNAL_FEELS_OBSERVER:
                 return journalFeelsObserver;
+            case JOURNAL_AUTHOR_OBSERVER:
+                return journalAuthorObserver;
             case COMPONENT_SPACE_OBSERVER:
                 return componentSpaceObserver;
             case EXECUTION_RHYTHM_OBSERVER:
                 return executionRhythmObserver;
-            case AUTHOR_OBSERVER:
-                return authorObserver;
+
         }
         return null;
     }
@@ -42,6 +43,6 @@ public class FlowObserverFactory {
         JOURNAL_FEELS_OBSERVER,
         COMPONENT_SPACE_OBSERVER,
         EXECUTION_RHYTHM_OBSERVER,
-        AUTHOR_OBSERVER;
+        JOURNAL_AUTHOR_OBSERVER;
     }
 }

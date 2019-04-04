@@ -15,9 +15,6 @@ public class FetchStrategyFactory {
     @Autowired
     ExecutionActivityFetcher executionActivityFeedStrategy;
 
-    @Autowired
-    PairingEventFetcher pairingEventFeedStrategy;
-
 
     public FetchStrategy get(StrategyType strategyType) {
         switch (strategyType) {
@@ -27,8 +24,6 @@ public class FetchStrategyFactory {
                 return journalFeedStrategy;
             case EXECUTION_ACTIVITY_FEED:
                 return executionActivityFeedStrategy;
-            case PAIRING_EVENT_FEED:
-                return  pairingEventFeedStrategy;
         }
         return null;
     }
@@ -37,7 +32,6 @@ public class FetchStrategyFactory {
         JOURNAL_FEED,
         FILE_ACTIVITY_FEED,
         EXECUTION_ACTIVITY_FEED,
-        PAIRING_EVENT_FEED,
         WTF_EVENT_FEED;
     }
 }

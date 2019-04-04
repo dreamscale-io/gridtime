@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.core.domain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,7 +15,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JournalLinkEntity {
+@Slf4j
+public class JournalLinkEventEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -29,5 +32,6 @@ public class JournalLinkEntity {
 
     //json field
     private String linkedMembers;
+
 
 }

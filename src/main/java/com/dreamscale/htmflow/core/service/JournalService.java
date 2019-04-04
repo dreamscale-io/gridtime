@@ -6,7 +6,8 @@ import com.dreamscale.htmflow.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.htmflow.api.spirit.SpiritLinkDto;
 import com.dreamscale.htmflow.core.domain.*;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
-import com.dreamscale.htmflow.core.domain.json.Member;
+import com.dreamscale.htmflow.core.domain.json.LinkedMember;
+import com.dreamscale.htmflow.core.domain.json.LinkedMemberList;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -15,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +43,7 @@ public class JournalService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private JournalLinkRepository journalLinkRepository;
+    private JournalLinkEventRepository journalLinkEventRepository;
 
     @Autowired
     private OrganizationService organizationService;
@@ -103,31 +103,31 @@ public class JournalService {
 
     private void createJournalLinks(IntentionEntity myIntention, UUID memberId, ActiveLinksNetworkDto activeLinksNetwork)  {
 
-        JournalLinkEntity journalLinkEntity = new JournalLinkEntity();
+        JournalLinkEventEntity journalLinkEntity = new JournalLinkEventEntity();
         journalLinkEntity.setId(UUID.randomUUID());
         journalLinkEntity.setIntentionId(myIntention.getId());
         journalLinkEntity.setMemberId(memberId);
         journalLinkEntity.setLinkedMembers(translateLinkedMembersToJson(memberId, activeLinksNetwork));
 
-        journalLinkRepository.save(journalLinkEntity);
+        journalLinkEventRepository.save(journalLinkEntity);
 
     }
 
     private String translateLinkedMembersToJson(UUID orientFromMember, ActiveLinksNetworkDto activeLinksNetwork)  {
-        List<Member> members = new ArrayList<>();
+        List<LinkedMember> members = new ArrayList<>();
 
         for (SpiritLinkDto spiritLink : activeLinksNetwork.getSpiritLinks()) {
             if (!spiritLink.getFriendSpiritId().equals(orientFromMember)) {
-                members.add(new Member(spiritLink.getFriendSpiritId().toString(), spiritLink.getName()));
+                members.add(new LinkedMember(spiritLink.getFriendSpiritId().toString(), spiritLink.getName()));
             }
         }
         if (!orientFromMember.equals(activeLinksNetwork.getMyId())) {
-            members.add(new Member(activeLinksNetwork.getMyId().toString(), activeLinksNetwork.getMyName()));
+            members.add(new LinkedMember(activeLinksNetwork.getMyId().toString(), activeLinksNetwork.getMyName()));
         }
 
         String json = null;
         try {
-            json = jsonMapper.writeValueAsString(members);
+            json = jsonMapper.writeValueAsString(new LinkedMemberList(members));
         } catch (JsonProcessingException e) {
             log.error("Unable to serialize JSON: "+members);
         }
