@@ -71,7 +71,7 @@ public class GravityBallOfThoughts {
 
     public void growHeavyWithFocus(Duration timeInLocation) {
         currentLocation.spendTime(timeInLocation);
-        thoughtTracer.get(0).setVelocityOfTransition(timeInLocation);
+        thoughtTracer.get(0).addVelocitySample(timeInLocation);
 
         DecayingGrowthRate decayingGrowth = new DecayingGrowthRate(timeInLocation);
 
@@ -496,10 +496,6 @@ public class GravityBallOfThoughts {
         return particle;
     }
 
-    public void separateEntranceAndExitFromInsides(String entranceOfPlace, String exitOfPlace) {
-
-    }
-
 
     private class DecayingGrowthRate {
         private final long scaleRelativeToTime;
@@ -539,25 +535,29 @@ public class GravityBallOfThoughts {
         private final Link link;
         private double weight;
         private double normalizedWeight;
-        private double velocityOfTransition;
+        private double velocityWeightedAvg;
+        private int velocitySampleCount;
+
         private double normalizedVelocity;
 
         ThoughtParticle(Link link) {
             this.link = link;
             this.weight = 0;
+            velocitySampleCount = 0;
         }
 
-        void setVelocityOfTransition(Duration velocityOfTransition) {
-            this.velocityOfTransition = velocityOfTransition.getSeconds();
+        void addVelocitySample(Duration velocityOfTransition) {
+            velocityWeightedAvg = (( velocityWeightedAvg * velocitySampleCount ) + velocityOfTransition.getSeconds()) / (velocitySampleCount + 1);
+            velocitySampleCount++;
         }
 
         void growHeavyWithFocus(DecayingGrowthRate decayingGrowthRate, Duration timeInLocation) {
-            this.weight += Math.sqrt(timeInLocation.getSeconds()) * decayingGrowthRate.calculateGrowthFor(velocityOfTransition);
+            this.weight += Math.sqrt(timeInLocation.getSeconds()) * decayingGrowthRate.calculateGrowthFor(velocityWeightedAvg);
         }
 
 
         void decayWithFocusElsewhere(DecayingGrowthRate decayingGrowth) {
-            weight -= Math.sqrt(weight) * decayingGrowth.calculateDecayFor(velocityOfTransition);
+            weight -= Math.sqrt(weight) * decayingGrowth.calculateDecayFor(velocityWeightedAvg);
         }
 
         void normalizeWeight(double minWeight, double maxWeight) {
@@ -568,7 +568,7 @@ public class GravityBallOfThoughts {
 
         void normalizeVelocity(double minVelocity, double maxVelocity) {
             if ((maxVelocity - minVelocity) > 0) {
-                normalizedVelocity = (this.velocityOfTransition - minVelocity) / (maxVelocity - minVelocity);
+                normalizedVelocity = (this.velocityWeightedAvg - minVelocity) / (maxVelocity - minVelocity);
             }
         }
 
@@ -592,7 +592,7 @@ public class GravityBallOfThoughts {
             if (normalizedVelocity > 0) {
                 return normalizedVelocity;
             }
-            return velocityOfTransition;
+            return velocityWeightedAvg;
         }
 
     }
