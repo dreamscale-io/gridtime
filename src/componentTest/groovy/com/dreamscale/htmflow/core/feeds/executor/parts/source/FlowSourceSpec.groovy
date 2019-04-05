@@ -7,11 +7,10 @@ import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame
+import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher
-import com.dreamscale.htmflow.core.feeds.story.see.FlowObserver
-import com.dreamscale.htmflow.core.feeds.story.Window
+import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -40,7 +39,7 @@ class FlowSourceSpec extends Specification {
         this.featurePool = new SharedFeaturePool(memberId, new OuterGeometryClock(LocalDateTime.now()).getCoordinates());
 
         FlowObserver flowObserverMock =
-                [see: { StoryFrame storyFrame, Window window -> this.latestWindow = window }] as FlowObserver
+                [see: { StoryTile storyFrame, Window window -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)

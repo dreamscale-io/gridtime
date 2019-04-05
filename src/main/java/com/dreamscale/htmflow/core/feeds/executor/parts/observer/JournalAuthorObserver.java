@@ -1,11 +1,11 @@
-package com.dreamscale.htmflow.core.feeds.story.see;
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.json.LinkedMember;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.Window;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.PairingAuthorsContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -31,14 +31,14 @@ public class JournalAuthorObserver implements FlowObserver {
                 if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
                     List<LinkedMember> linkedMembers = journalEntry.getLinkedMembers();
 
-                    currentStoryFrame.startBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition(), new PairingAuthorsContext(linkedMembers));
+                    currentStoryTile.startBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition(), new PairingAuthorsContext(linkedMembers));
                 } else {
-                    currentStoryFrame.clearBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition());
+                    currentStoryTile.clearBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition());
                 }
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
 
     }

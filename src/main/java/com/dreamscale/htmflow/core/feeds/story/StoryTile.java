@@ -10,13 +10,13 @@ import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
-import com.dreamscale.htmflow.core.feeds.story.mapper.*;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class StoryFrame {
+public class StoryTile {
 
     private final OuterGeometryClock.Coords storyFrameCoordinates;
     private final ZoomLevel zoomLevel;
@@ -29,7 +29,7 @@ public class StoryFrame {
     private final FlowBandMapper timeBandMapper;
 
 
-    public StoryFrame(OuterGeometryClock.Coords storyFrameCoordinates, ZoomLevel zoomLevel) {
+    public StoryTile(OuterGeometryClock.Coords storyFrameCoordinates, ZoomLevel zoomLevel) {
         this.storyFrameCoordinates = storyFrameCoordinates;
         this.zoomLevel = zoomLevel;
 
@@ -151,11 +151,11 @@ public class StoryFrame {
      *
      * This orchestration is handled by the StoryFrameSequence
      *
-     * @param previousStoryFrame
+     * @param previousStoryTile
      */
 
-    public void carryOverFrameContext(StoryFrame previousStoryFrame) {
-        CarryOverContext carryOverContext = previousStoryFrame.getCarryOverContext();
+    public void carryOverFrameContext(StoryTile previousStoryTile) {
+        CarryOverContext carryOverContext = previousStoryTile.getCarryOverContext();
 
         this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);

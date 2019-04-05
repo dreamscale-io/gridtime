@@ -1,10 +1,10 @@
-package com.dreamscale.htmflow.core.feeds.story.see;
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.Window;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
 
@@ -17,7 +17,7 @@ import java.util.List;
 public class LearningStateObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -27,15 +27,15 @@ public class LearningStateObserver implements FlowObserver {
 
                 Integer flameRating = journalEntry.getFlameRating();
                 if (flameRating != null && flameRating != 0) {
-                    currentStoryFrame.startBand(BandLayerType.FEELS, journalEntry.getPosition(), new FeelsContext(flameRating));
+                    currentStoryTile.startBand(BandLayerType.FEELS, journalEntry.getPosition(), new FeelsContext(flameRating));
                 } else {
-                    currentStoryFrame.clearBand(BandLayerType.FEELS, journalEntry.getPosition());
+                    currentStoryTile.clearBand(BandLayerType.FEELS, journalEntry.getPosition());
                 }
 
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
     }
 

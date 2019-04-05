@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story;
+package com.dreamscale.htmflow.core.feeds.executor.parts.source;
 
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 

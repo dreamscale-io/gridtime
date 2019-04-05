@@ -1,13 +1,12 @@
-package com.dreamscale.htmflow.core.feeds.story.see;
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.Window;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.CircleMessageContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
 public class CircleMessageEventObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -29,12 +28,12 @@ public class CircleMessageEventObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isScrapbookEvent(circleMessageType)) {
-                    currentStoryFrame.postCircleMessage(circleMessage.getPosition(), createMessageContext(circleMessage));
+                    currentStoryTile.postCircleMessage(circleMessage.getPosition(), createMessageContext(circleMessage));
                 }
 
             }
 
-            currentStoryFrame.finishAfterLoad();
+            currentStoryTile.finishAfterLoad();
 
         }
 

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.see
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer
 
 
 import com.dreamscale.htmflow.core.domain.JournalEntryEntity
@@ -7,11 +7,11 @@ import com.dreamscale.htmflow.core.domain.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.Window
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame
+import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement
@@ -25,13 +25,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
-    StoryFrame storyFrame
+    StoryTile storyFrame
     OuterGeometryClock clock
 
     def setup() {
         clock = new OuterGeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyFrame = new StoryFrame(clock.getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryTile(clock.getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create project & task switch events"() {
@@ -116,7 +116,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new OuterGeometryClock(time1);
-        storyFrame = new StoryFrame(clock.getCoordinates(), ZoomLevel.MIN);
+        storyFrame = new StoryTile(clock.getCoordinates(), ZoomLevel.MIN);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -131,7 +131,7 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(storyFrame, window)
 
-        StoryFrame nextFrame = new StoryFrame(clock.getCoordinates().panRight(ZoomLevel.MIN).panRight(ZoomLevel.MIN), ZoomLevel.MIN);
+        StoryTile nextFrame = new StoryTile(clock.getCoordinates().panRight(ZoomLevel.MIN).panRight(ZoomLevel.MIN), ZoomLevel.MIN);
         nextFrame.carryOverFrameContext(storyFrame);
         Window nextWindow = new Window(time3, time4)
 

@@ -1,11 +1,11 @@
-package com.dreamscale.htmflow.core.feeds.story.see;
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.Window;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,11 @@ public class ComponentSpaceObserver implements FlowObserver {
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
-        UUID currentProjectId = getLastOpenProjectId(currentStoryFrame);
+        UUID currentProjectId = getLastOpenProjectId(currentStoryTile);
 
 
         for (Flowable flowable : flowables) {
@@ -37,39 +37,39 @@ public class ComponentSpaceObserver implements FlowObserver {
                 FlowActivityEntity flowActivity = (FlowActivityEntity)flowable;
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
-                    gotoLocation(currentStoryFrame, currentProjectId, flowActivity);
+                    gotoLocation(currentStoryTile, currentProjectId, flowActivity);
                 }
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Modification)) {
-                    modifyCurrentLocation(currentStoryFrame, flowActivity);
+                    modifyCurrentLocation(currentStoryTile, flowActivity);
                 }
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
     }
 
-    private void gotoLocation(StoryFrame currentStoryFrame, UUID currentProjectId, FlowActivityEntity flowActivity) {
+    private void gotoLocation(StoryTile currentStoryTile, UUID currentProjectId, FlowActivityEntity flowActivity) {
 
         String locationPath = flowActivity.getMetadataValue(FlowActivityMetadataField.filePath);
         String component = componentLookupService.lookupComponent(currentProjectId, locationPath);
 
-        currentStoryFrame.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
+        currentStoryTile.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
 
     }
 
-    private void modifyCurrentLocation(StoryFrame currentStoryFrame, FlowActivityEntity flowActivity) {
+    private void modifyCurrentLocation(StoryTile currentStoryTile, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        currentStoryFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
+        currentStoryTile.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 
-    private UUID getLastOpenProjectId(StoryFrame storyFrame) {
+    private UUID getLastOpenProjectId(StoryTile storyTile) {
         UUID lastOpenProjectId = null;
 
-        ContextBeginningEvent lastOpenProject = storyFrame.getCurrentContext().getProjectContext();
+        ContextBeginningEvent lastOpenProject = storyTile.getCurrentContext().getProjectContext();
         if (lastOpenProject != null) {
             lastOpenProjectId = lastOpenProject.getReferenceId();
         }

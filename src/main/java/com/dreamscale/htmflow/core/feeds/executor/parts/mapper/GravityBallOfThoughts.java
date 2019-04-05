@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.mapper;
+package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;

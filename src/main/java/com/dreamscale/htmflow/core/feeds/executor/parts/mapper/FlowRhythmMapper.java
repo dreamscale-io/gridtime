@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.mapper;
+package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
-import com.dreamscale.htmflow.core.feeds.story.mapper.layer.RhythmLayerMapper;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
 
 import java.time.LocalDateTime;
 import java.util.*;

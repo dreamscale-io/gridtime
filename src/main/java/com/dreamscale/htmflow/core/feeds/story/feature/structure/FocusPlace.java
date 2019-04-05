@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.mapper.GravityBallOfThoughts;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.GravityBallOfThoughts;
 
 import java.time.Duration;
 import java.util.List;

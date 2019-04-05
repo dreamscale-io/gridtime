@@ -1,9 +1,9 @@
-package com.dreamscale.htmflow.core.feeds.story.mapper;
+package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.*;
-import com.dreamscale.htmflow.core.feeds.story.mapper.layer.BandLayerMapper;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
 
 import java.time.LocalDateTime;
 import java.util.*;

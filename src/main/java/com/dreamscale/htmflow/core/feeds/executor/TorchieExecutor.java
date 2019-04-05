@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.FlowSource;
-import com.dreamscale.htmflow.core.feeds.story.see.FlowObserverFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

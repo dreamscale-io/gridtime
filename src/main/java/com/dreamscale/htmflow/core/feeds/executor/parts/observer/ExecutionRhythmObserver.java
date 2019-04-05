@@ -1,11 +1,11 @@
-package com.dreamscale.htmflow.core.feeds.story.see;
+package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.Window;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
@@ -22,11 +22,11 @@ public class ExecutionRhythmObserver implements FlowObserver {
 
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
-        Movement movement = currentStoryFrame.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
+        Movement movement = currentStoryTile.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
         boolean isRedAndWantingGreen = isRedAndWantingGreen(movement);
 
         for (Flowable flowable : flowables) {
@@ -53,13 +53,13 @@ public class ExecutionRhythmObserver implements FlowObserver {
                         isRedAndWantingGreen = false;
                     }
 
-                    currentStoryFrame.execute(flowActivity.getStart(), executionContext);
+                    currentStoryTile.execute(flowActivity.getStart(), executionContext);
                 }
 
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
     }
 

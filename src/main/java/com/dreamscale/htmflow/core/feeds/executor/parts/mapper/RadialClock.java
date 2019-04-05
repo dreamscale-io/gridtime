@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.mapper;
+package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 public class RadialClock {
 
