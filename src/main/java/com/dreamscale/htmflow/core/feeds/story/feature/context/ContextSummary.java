@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 public class ContextSummary implements FlowFeature {
 
-    private ContextBeginningEvent projectContext;
-    private ContextBeginningEvent taskContext;
-    private ContextBeginningEvent intentionContext;
+    private ContextBeginning projectContext;
+    private ContextBeginning taskContext;
+    private ContextBeginning intentionContext;
 
 }

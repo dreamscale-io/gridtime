@@ -21,8 +21,8 @@ public class BoxAndBridgeStructure {
 
     public void createBridge(Bridge bridgeBetweenBoxes) {
 
-        LocationInPlace fromLocation = bridgeBetweenBoxes.getFromLocation();
-        LocationInPlace toLocation = bridgeBetweenBoxes.getToLocation();
+        LocationInFocus fromLocation = bridgeBetweenBoxes.getFromLocation();
+        LocationInFocus toLocation = bridgeBetweenBoxes.getToLocation();
 
         Box boxWithFromLocation = findBoxContaining(fromLocation);
         Box boxWithToLocation = findBoxContaining(toLocation);
@@ -42,13 +42,13 @@ public class BoxAndBridgeStructure {
         relativeBridgeSequence++;
     }
 
-    private void validateBoxFound(Box boxWithFromLocation, LocationInPlace location) {
+    private void validateBoxFound(Box boxWithFromLocation, LocationInFocus location) {
         if (boxWithFromLocation == null) {
             throw new RuntimeException("Logic error, box not found for location: "+location);
         }
     }
 
-    private Box findBoxContaining(LocationInPlace location) {
+    private Box findBoxContaining(LocationInFocus location) {
         Box boxFound = null;
         for (Box box : boxes) {
             if (box.contains(location)) {

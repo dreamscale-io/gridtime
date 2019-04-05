@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ContextBeginningEvent implements FlowFeature, ContextChangeEvent {
+public class ContextEnding implements FlowFeature, ContextChangeEvent {
 
     private UUID referenceId;
     private ContextStructureLevel structureLevel;
@@ -19,4 +19,9 @@ public class ContextBeginningEvent implements FlowFeature, ContextChangeEvent {
     private String description;
     private LocalDateTime position;
     private int relativeSequence;
+    private FinishStatus finishStatus;
+
+    public enum FinishStatus {
+        SUCCESS, ABORT
+    }
 }

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.band;
+package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
 import com.dreamscale.htmflow.core.domain.json.LinkedMember;
 import lombok.Getter;
@@ -6,11 +6,11 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class PairingAuthorsContext implements BandContext {
+public class AuthorDetails implements Details {
 
     private List<LinkedMember> pairedAuthors;
 
-    public PairingAuthorsContext(List<LinkedMember> pairedAuthors) {
+    public AuthorDetails(List<LinkedMember> pairedAuthors) {
         this.pairedAuthors = pairedAuthors;
     }
 }

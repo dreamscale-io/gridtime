@@ -6,8 +6,8 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.PairingAuthorsContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.AuthorDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class JournalAuthorObserver implements FlowObserver {
                 if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
                     List<LinkedMember> linkedMembers = journalEntry.getLinkedMembers();
 
-                    currentStoryTile.startBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition(), new PairingAuthorsContext(linkedMembers));
+                    currentStoryTile.startBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition(), new AuthorDetails(linkedMembers));
                 } else {
                     currentStoryTile.clearBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition());
                 }

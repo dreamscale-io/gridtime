@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
+package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 

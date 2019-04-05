@@ -1,11 +1,10 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
+package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
 
-public class ExecutionContext implements FlowFeature {
-
+public class ExecutionDetails implements FlowFeature {
 
 
     private Duration duration;

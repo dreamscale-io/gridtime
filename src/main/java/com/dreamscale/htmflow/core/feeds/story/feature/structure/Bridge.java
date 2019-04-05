@@ -8,13 +8,13 @@ public class Bridge implements FlowFeature {
 
     private Box fromBox;
     private Box toBox;
-    private final LocationInPlace fromLocation;
-    private final LocationInPlace toLocation;
+    private final LocationInFocus fromLocation;
+    private final LocationInFocus toLocation;
 
     private int visitCount;
     private int relativeSequence;
 
-    public Bridge(String bridgeKey, LocationInPlace fromLocation, LocationInPlace toLocation) {
+    public Bridge(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
         this.bridgeKey = bridgeKey;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
@@ -29,11 +29,11 @@ public class Bridge implements FlowFeature {
         this.toBox = boxWithToLocation;
     }
 
-    public LocationInPlace getFromLocation() {
+    public LocationInFocus getFromLocation() {
         return fromLocation;
     }
 
-    public LocationInPlace getToLocation() {
+    public LocationInFocus getToLocation() {
         return toLocation;
     }
 

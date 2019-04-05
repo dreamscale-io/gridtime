@@ -2,8 +2,9 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,7 +40,7 @@ public class FlowBandMapper {
 
         for (BandLayerMapper layer : this.layerMap.values()) {
             subContext.setLastBand(layer.getLayerType(), layer.getLastBand());
-            subContext.setActiveBandContext(layer.getLayerType(), layer.getActiveBandContext());
+            subContext.setActiveBandContext(layer.getLayerType(), layer.getActiveDetails());
         }
 
         return subContext.toCarryOverContext();
@@ -55,16 +56,16 @@ public class FlowBandMapper {
             BandLayerMapper layer = findOrCreateLayer(layerType);
 
             TimeBand lastBand = subContext.getLastBand(layerType);
-            BandContext activeContext = subContext.getActiveBandContext(layerType);
+            Details activeContext = subContext.getActiveBandContext(layerType);
             layer.initContext(lastBand, activeContext);
         }
 
     }
 
-    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, BandContext bandContext) {
+    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, Details details) {
         BandLayerMapper layer = layerMap.get(bandLayerType);
 
-        layer.startBand(startBandPosition, bandContext);
+        layer.startBand(startBandPosition, details);
     }
 
     public void clearBand(BandLayerType bandLayerType, LocalDateTime endBandPosition) {
@@ -106,14 +107,14 @@ public class FlowBandMapper {
             subContext = mainContext.getSubContext(SUBCONTEXT_NAME);
         }
 
-        void setActiveBandContext(BandLayerType layerType, BandContext bandContext) {
+        void setActiveBandContext(BandLayerType layerType, Details details) {
             String key = layerType.name() + ".active.context";
-            subContext.addKeyValue(key, bandContext);
+            subContext.addKeyValue(key, details);
         }
 
-        BandContext getActiveBandContext(BandLayerType layerType) {
+        Details getActiveBandContext(BandLayerType layerType) {
             String key = layerType.name() + ".active.context";
-            return (BandContext) subContext.getValue(key);
+            return (Details) subContext.getValue(key);
         }
 
         void setLastBand(BandLayerType layerType, TimeBand timeBand) {

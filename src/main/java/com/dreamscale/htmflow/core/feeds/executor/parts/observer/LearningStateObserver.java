@@ -5,8 +5,8 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.FeelsDetails;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class LearningStateObserver implements FlowObserver {
 
                 Integer flameRating = journalEntry.getFlameRating();
                 if (flameRating != null && flameRating != 0) {
-                    currentStoryTile.startBand(BandLayerType.FEELS, journalEntry.getPosition(), new FeelsContext(flameRating));
+                    currentStoryTile.startBand(BandLayerType.FEELS, journalEntry.getPosition(), new FeelsDetails(flameRating));
                 } else {
                     currentStoryTile.clearBand(BandLayerType.FEELS, journalEntry.getPosition());
                 }

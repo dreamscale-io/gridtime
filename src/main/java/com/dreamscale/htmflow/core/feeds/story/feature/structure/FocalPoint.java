@@ -6,17 +6,17 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.GravityBallOfThou
 import java.time.Duration;
 import java.util.List;
 
-public class FocusPlace implements FlowFeature {
+public class FocalPoint implements FlowFeature {
 
     private String placeName;
 
     private final GravityBallOfThoughts gravityBall;
 
-    private LocationInPlace currentLocation;
+    private LocationInFocus currentLocation;
     private List<ThoughtBubble> extractedThoughtBubbles;
 
 
-    public FocusPlace(String placeName, String initialLocationPath) {
+    public FocalPoint(String placeName, String initialLocationPath) {
         this.placeName = placeName;
 
         this.gravityBall = new GravityBallOfThoughts(this);
@@ -30,9 +30,9 @@ public class FocusPlace implements FlowFeature {
         return placeName;
     }
 
-    public LocationInPlace goToLocation(String locationPath, Duration timeInLocation) {
+    public LocationInFocus goToLocation(String locationPath, Duration timeInLocation) {
 
-        LocationInPlace location = gravityBall.gotoLocationInSpace(locationPath);
+        LocationInFocus location = gravityBall.gotoLocationInSpace(locationPath);
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -52,7 +52,7 @@ public class FocusPlace implements FlowFeature {
         return this.extractedThoughtBubbles;
     }
 
-    public LocationInPlace getCurrentLocationInPlace() {
+    public LocationInFocus getCurrentLocation() {
         return currentLocation;
     }
 
@@ -60,13 +60,13 @@ public class FocusPlace implements FlowFeature {
         currentLocation.modify(modificationCount);
     }
 
-    public LocationInPlace exit() {
+    public LocationInFocus exit() {
         currentLocation = gravityBall.gotoExit();
 
         return currentLocation;
     }
 
-    public LocationInPlace enter() {
+    public LocationInFocus enter() {
         currentLocation = gravityBall.gotoEntrance();
 
         return currentLocation;

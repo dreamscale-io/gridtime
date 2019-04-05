@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.MessageContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 
 import java.util.List;
 
@@ -39,8 +39,8 @@ public class CircleMessageEventObserver implements FlowObserver {
 
     }
 
-    private MessageContext createMessageContext(CircleFeedMessageEntity circleMessage) {
-        MessageContext scrapbookMessage = new MessageContext();
+    private MessageDetails createMessageContext(CircleFeedMessageEntity circleMessage) {
+        MessageDetails scrapbookMessage = new MessageDetails();
 
         scrapbookMessage.setMessageFromTorchieId(circleMessage.getTorchieId());
         scrapbookMessage.setMessageFromName(circleMessage.getFullName());

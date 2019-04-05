@@ -6,9 +6,10 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
 import java.util.List;
 
@@ -34,26 +35,26 @@ public class ExecutionRhythmObserver implements FlowObserver {
                 FlowActivityEntity flowActivity = (FlowActivityEntity) flowable;
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Execution)) {
-                    ExecutionContext executionContext = createExecutionContext(flowActivity);
+                    ExecutionDetails executionDetails = createExecutionContext(flowActivity);
 
-                    if (!isRedAndWantingGreen && executionContext.isRed()) {
-                        executionContext.setFirstRed(true);
-                        executionContext.setIsRedAndWantingGreen(true);
+                    if (!isRedAndWantingGreen && executionDetails.isRed()) {
+                        executionDetails.setFirstRed(true);
+                        executionDetails.setIsRedAndWantingGreen(true);
                         isRedAndWantingGreen = true;
                     }
 
                     //we can execute non-unit tests in between
-                    if (isRedAndWantingGreen && !executionContext.isGreen()) {
-                        executionContext.setIsRedAndWantingGreen(true);
+                    if (isRedAndWantingGreen && !executionDetails.isGreen()) {
+                        executionDetails.setIsRedAndWantingGreen(true);
                     }
 
-                    if (isRedAndWantingGreen && executionContext.isGreen()) {
-                        executionContext.setEndOfReds(true);
-                        executionContext.setIsRedAndWantingGreen(false);
+                    if (isRedAndWantingGreen && executionDetails.isGreen()) {
+                        executionDetails.setEndOfReds(true);
+                        executionDetails.setIsRedAndWantingGreen(false);
                         isRedAndWantingGreen = false;
                     }
 
-                    currentStoryTile.execute(flowActivity.getStart(), executionContext);
+                    currentStoryTile.execute(flowActivity.getStart(), executionDetails);
                 }
 
             }
@@ -67,27 +68,27 @@ public class ExecutionRhythmObserver implements FlowObserver {
         boolean isRedAndWantingGreen = false;
 
         if (movement != null) {
-            ExecutionContext executionContext = (ExecutionContext) movement.getReference();
-            isRedAndWantingGreen = executionContext.isRedAndWantingGreen();
+            ExecutionDetails executionDetails = ((ExecuteThing) movement).getDetails();
+            isRedAndWantingGreen = executionDetails.isRedAndWantingGreen();
         }
         return isRedAndWantingGreen;
     }
 
-    private ExecutionContext createExecutionContext(FlowActivityEntity flowActivity) {
-        ExecutionContext executionContext = new ExecutionContext();
-        executionContext.setDuration(flowActivity.getDuration());
+    private ExecutionDetails createExecutionContext(FlowActivityEntity flowActivity) {
+        ExecutionDetails executionDetails = new ExecutionDetails();
+        executionDetails.setDuration(flowActivity.getDuration());
 
         String processName = flowActivity.getMetadataValue(FlowActivityMetadataField.processName);
         String executionTaskType = flowActivity.getMetadataValue(FlowActivityMetadataField.executionTaskType);
         int exitCode = convertToNumber(flowActivity.getMetadataValue(FlowActivityMetadataField.exitCode));
         boolean isDebug = convertToBoolean(flowActivity.getMetadataValue(FlowActivityMetadataField.isDebug));
 
-        executionContext.setProcessName(processName);
-        executionContext.setExecutionTaskType(executionTaskType);
-        executionContext.setExitCode(exitCode);
-        executionContext.setIsDebug(isDebug);
+        executionDetails.setProcessName(processName);
+        executionDetails.setExecutionTaskType(executionTaskType);
+        executionDetails.setExitCode(exitCode);
+        executionDetails.setIsDebug(isDebug);
 
-        return executionContext;
+        return executionDetails;
     }
 
     private boolean convertToBoolean(String metadataValue) {

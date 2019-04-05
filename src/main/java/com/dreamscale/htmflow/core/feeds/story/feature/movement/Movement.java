@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.sequence;
+package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
@@ -8,14 +8,12 @@ import java.time.LocalDateTime;
 public class Movement implements FlowFeature {
 
     private LocalDateTime moment;
-    private final Object reference;
     private int relativeOffset = 0;
 
     private InnerGeometryClock.Coords coords;
 
-    public Movement(LocalDateTime moment, Object reference) {
+    public Movement(LocalDateTime moment) {
         this.moment = moment;
-        this.reference = reference;
     }
 
     public void setRelativeOffset(int nextSequence) {
@@ -30,18 +28,9 @@ public class Movement implements FlowFeature {
         return moment;
     }
 
-    public Object getReference() {
-        return reference;
-    }
-
     public int getRelativeOffset() {
         return relativeOffset;
     }
-
-    public boolean referencesType(Class<?> referenceObjectType) {
-        return (reference != null && reference.getClass().equals(referenceObjectType));
-    }
-
 
     public InnerGeometryClock.Coords getCoordinates() {
         return this.coords;

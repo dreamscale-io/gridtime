@@ -1,14 +1,15 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.band;
+package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class TimeBand implements FlowFeature {
+public class RollingBand implements FlowFeature {
 
-    private final BandContext bandContext;
+    private final Details details;
     private LocalDateTime start;
     private LocalDateTime end;
 
@@ -17,10 +18,10 @@ public class TimeBand implements FlowFeature {
     private InnerGeometryClock.Coords startCoords;
     private InnerGeometryClock.Coords endCoords;
 
-    public TimeBand(LocalDateTime start, LocalDateTime end, BandContext bandContext) {
+    public RollingBand(LocalDateTime start, LocalDateTime end, Details details) {
         this.start = start;
         this.end = end;
-        this.bandContext = bandContext;
+        this.details = details;
     }
 
     public Duration getDuration() {

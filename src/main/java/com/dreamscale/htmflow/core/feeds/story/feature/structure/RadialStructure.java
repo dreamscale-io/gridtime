@@ -23,19 +23,19 @@ public class RadialStructure {
         activeRing = firstRing;
     }
 
-    public void placeCenter(LocationInPlace centerOfFocus) {
+    public void placeCenter(LocationInFocus centerOfFocus) {
         this.center = new RingLocation(centerOfFocus);
     }
 
-    public void placeEntrance(LocationInPlace entrance) {
+    public void placeEntrance(LocationInFocus entrance) {
         this.entrance = new RingLocation(entrance);
     }
 
-    public void placeExit(LocationInPlace exit) {
+    public void placeExit(LocationInFocus exit) {
         this.exit = new RingLocation(exit);
     }
 
-    public void addLinkFromEntrance(LocationInPlace connectToLocation, int traversalCount, double focusWeight, double velocity) {
+    public void addLinkFromEntrance(LocationInFocus connectToLocation, int traversalCount, double focusWeight, double velocity) {
         if (entrance != null) {
             RingLocation connectToRingLocation = findRingLocation(connectToLocation);
 
@@ -44,7 +44,7 @@ public class RadialStructure {
         }
     }
 
-    public void addLinkToExit(LocationInPlace connectFromLocation, int traversalCount, double focusWeight, double velocity) {
+    public void addLinkToExit(LocationInFocus connectFromLocation, int traversalCount, double focusWeight, double velocity) {
         if (exit != null) {
             RingLocation connectFromRingLocation = findRingLocation(connectFromLocation);
 
@@ -54,7 +54,7 @@ public class RadialStructure {
         }
     }
 
-    public void addLocationToFirstRing(LocationInPlace connectToLocation, int traversalCount, double focusWeight, double velocity) {
+    public void addLocationToFirstRing(LocationInFocus connectToLocation, int traversalCount, double focusWeight, double velocity) {
         Ring firstRing = rings.get(0);
 
         RingLocation connectToRingLocation = firstRing.addElement(connectToLocation);
@@ -64,12 +64,12 @@ public class RadialStructure {
     }
 
 
-    public List<LocationInPlace> getLocationsInFirstRing() {
+    public List<LocationInFocus> getLocationsInFirstRing() {
         Ring firstRing = rings.get(0);
         return firstRing.getRawLocationsInsideRing();
     }
 
-    public void addExtraLinkWithinFirstRing(LocationInPlace locationA, LocationInPlace locationB, int traversalCount, double focusWeight, double velocity) {
+    public void addExtraLinkWithinFirstRing(LocationInFocus locationA, LocationInFocus locationB, int traversalCount, double focusWeight, double velocity) {
 
         Ring firstRing = rings.get(0);
         RingLocation ringLocationA = firstRing.getRingLocationForLocation(locationA);
@@ -85,7 +85,7 @@ public class RadialStructure {
         rings.add(activeRing);
     }
 
-    public void addLocationToHighestRing(LocationInPlace locationToLinkTo, LocationInPlace locationToAdd, int traversalCount, double focusWeight, double velocity) {
+    public void addLocationToHighestRing(LocationInFocus locationToLinkTo, LocationInFocus locationToAdd, int traversalCount, double focusWeight, double velocity) {
         Ring highestRing = rings.get(rings.size() - 1);
 
         RingLocation newRingLocation = highestRing.addElement(locationToAdd);
@@ -95,7 +95,7 @@ public class RadialStructure {
         highestRing.addLinkToInnerRing(link);
     }
 
-    public void addExtraLinkWithinHighestRing(LocationInPlace locationA, LocationInPlace locationB, int traversalCount, double focusWeight, double velocity) {
+    public void addExtraLinkWithinHighestRing(LocationInFocus locationA, LocationInFocus locationB, int traversalCount, double focusWeight, double velocity) {
 
         Ring highestRing = rings.get(rings.size() - 1);
 
@@ -107,7 +107,7 @@ public class RadialStructure {
         highestRing.addLinkWithinRing(link);
     }
 
-    public boolean contains(LocationInPlace location) {
+    public boolean contains(LocationInFocus location) {
         boolean locationFound = false;
         if (center != null && center.location == location) {
             locationFound = true;
@@ -129,7 +129,7 @@ public class RadialStructure {
         }
     }
 
-    private RingLocation findRingLocation(LocationInPlace connectToLocation) {
+    private RingLocation findRingLocation(LocationInFocus connectToLocation) {
         RingLocation ringLocation = null;
 
         for (Ring ring: rings) {
@@ -145,7 +145,7 @@ public class RadialStructure {
     public static class Ring {
 
 
-        List<LocationInPlace> locationsInsideRing = new ArrayList<>();
+        List<LocationInFocus> locationsInsideRing = new ArrayList<>();
         List<RingLocation> ringLocations = new ArrayList<>();
 
         List<Link> linksToInnerRing = new ArrayList<>();
@@ -155,7 +155,7 @@ public class RadialStructure {
         RadialClock radialClock;
 
 
-        public RingLocation addElement(LocationInPlace location) {
+        public RingLocation addElement(LocationInFocus location) {
             RingLocation ringLocation = new RingLocation(location);
 
             locationsInsideRing.add(location);
@@ -164,7 +164,7 @@ public class RadialStructure {
             return ringLocation;
         }
 
-        RingLocation getRingLocationForLocation(LocationInPlace location) {
+        RingLocation getRingLocationForLocation(LocationInFocus location) {
             int index = locationsInsideRing.indexOf(location);
             return ringLocations.get(index);
         }
@@ -177,7 +177,7 @@ public class RadialStructure {
             this.linksWithinRing.add(link);
         }
 
-        public List<LocationInPlace> getRawLocationsInsideRing() {
+        public List<LocationInFocus> getRawLocationsInsideRing() {
             return locationsInsideRing;
         }
 
@@ -185,7 +185,7 @@ public class RadialStructure {
             return ringLocations;
         }
 
-        public boolean contains(LocationInPlace location) {
+        public boolean contains(LocationInFocus location) {
             return locationsInsideRing.contains(location);
         }
 
@@ -265,11 +265,11 @@ public class RadialStructure {
 
     public static class RingLocation {
 
-        private final LocationInPlace location;
+        private final LocationInFocus location;
         private int slot = 0;
         private double angle = 0;
 
-        public RingLocation(LocationInPlace location) {
+        public RingLocation(LocationInFocus location) {
             this.location = location;
         }
 

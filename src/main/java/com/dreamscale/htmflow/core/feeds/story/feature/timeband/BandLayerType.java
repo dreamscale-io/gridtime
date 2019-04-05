@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.band;
+package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 public enum BandLayerType {
 

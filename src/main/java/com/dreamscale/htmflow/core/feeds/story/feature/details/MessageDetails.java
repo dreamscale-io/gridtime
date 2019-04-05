@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.band;
+package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class MessageContext implements BandContext {
+public class MessageDetails implements Details {
 
     private UUID messageFromTorchieId;
     private String messageFromName;

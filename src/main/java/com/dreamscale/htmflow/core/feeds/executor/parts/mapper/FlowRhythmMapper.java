@@ -2,11 +2,11 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.MessageContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
 
 import java.time.LocalDateTime;
@@ -60,50 +60,47 @@ public class FlowRhythmMapper {
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
         RhythmLayerMapper modificationLayer = findOrCreateLayer(RhythmLayerType.MODIFICATION_ACTIVITY);
 
-        LocationInPlace location = getLastLocation();
+        LocationInFocus location = getLastLocation();
 
-        ModificationEvent modificationEvent = new ModificationEvent(moment, location, modificationCount);
-        modificationLayer.addMovement(internalClock, new Movement(moment, modificationEvent));
+        modificationLayer.addMovement(internalClock, new ModifyLocation(moment, location, modificationCount));
 
     }
 
-    public void execute(LocalDateTime moment, ExecutionContext executionContext) {
+    public void execute(LocalDateTime moment, ExecutionDetails executionDetails) {
 
         RhythmLayerMapper executionLayer = layerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
 
-        if (executionContext.getDuration().getSeconds() > 60) {
-            ExecutionStartEvent executionStartEvent = new ExecutionStartEvent(moment, executionContext);
-            Movement startMovement = new Movement(moment, executionStartEvent);
-            executionLayer.addMovement(internalClock, startMovement);
+        if (executionDetails.getDuration().getSeconds() > 60) {
+            ExecuteThing startExecution = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.START_LONG_EXECUTION);
+            executionLayer.addMovement(internalClock, startExecution);
 
-            LocalDateTime endTime = moment.plusSeconds(executionContext.getDuration().getSeconds());
-            ExecutionEndEvent executionEndEvent = new ExecutionEndEvent(endTime, executionContext);
-            Movement endMovement = new Movement(endTime, executionEndEvent);
-            executionLayer.addMovementLater(endMovement);
+            LocalDateTime endTime = moment.plusSeconds(executionDetails.getDuration().getSeconds());
+            ExecuteThing endExecution = new ExecuteThing(endTime, executionDetails, ExecuteThing.EventType.END_LONG_EXECUTION);
+            executionLayer.addMovementLater(endExecution);
 
         } else {
-            Movement movement = new Movement(moment, new ExecutionEvent(moment, executionContext));
-            executionLayer.addMovement(internalClock, movement);
+            Movement executeThing = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.EXECUTE_EVENT);
+            executionLayer.addMovement(internalClock, executeThing);
         }
 
     }
 
-    public void postMessage(LocalDateTime moment, MessageContext messageContext) {
+    public void postMessage(LocalDateTime moment, MessageDetails messageDetails) {
 
         RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
 
-        circleMessageLayer.addMovement(internalClock, new Movement(moment, messageContext));
+        circleMessageLayer.addMovement(internalClock, new PostMessageToCircle(moment, messageDetails));
 
     }
 
 
-    private LocationInPlace getLastLocation() {
+    private LocationInFocus getLastLocation() {
         RhythmLayerMapper locationLayer = findOrCreateLayer(RhythmLayerType.LOCATION_CHANGES);
         Movement movement = locationLayer.getLastMovement();
 
-        LocationInPlace location = null;
-        if (movement != null && movement.getReference() instanceof LocationInPlace) {
-            location = (LocationInPlace) movement.getReference();
+        LocationInFocus location = null;
+        if (movement instanceof MoveToNewLocationInBox) {
+            location = ((MoveToNewLocationInBox) movement).getLocation();
         }
         return location;
     }

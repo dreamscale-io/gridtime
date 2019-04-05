@@ -6,8 +6,8 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.CircleContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails;
 
 import java.util.List;
 
@@ -41,8 +41,8 @@ public class WTFStateObserver implements FlowObserver {
         currentStoryTile.finishAfterLoad();
     }
 
-    private CircleContext createCircleContext(CircleFeedMessageEntity circleFeedMessageEntity) {
-        return new CircleContext(circleFeedMessageEntity.getCircleId(), circleFeedMessageEntity.getCircleName());
+    private CircleDetails createCircleContext(CircleFeedMessageEntity circleFeedMessageEntity) {
+        return new CircleDetails(circleFeedMessageEntity.getCircleId(), circleFeedMessageEntity.getCircleName());
     }
 
     private boolean isCircleOpening(CircleMessageType circleMessageType) {

@@ -2,9 +2,9 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class BandLayerMapper {
     private TimeBand carriedOverLastBand;
     private List<TimeBand> bandsInWindow = new ArrayList<>();
 
-    private BandContext activeBandContext;
+    private Details activeDetails;
     private LocalDateTime activeBandStart;
 
     public BandLayerMapper(InnerGeometryClock internalClock, BandLayerType layerType) {
@@ -28,42 +28,42 @@ public class BandLayerMapper {
         this.layerType = layerType;
     }
 
-    public void startBand(LocalDateTime startBandPosition, BandContext bandContext) {
-        if (activeBandContext != null) {
-            TimeBand band = new TimeBand(activeBandStart, startBandPosition, activeBandContext);
+    public void startBand(LocalDateTime startBandPosition, Details details) {
+        if (activeDetails != null) {
+            TimeBand band = new TimeBand(activeBandStart, startBandPosition, activeDetails);
             addTimeBand(band);
         }
 
-        this.activeBandContext = bandContext;
+        this.activeDetails = details;
         this.activeBandStart = startBandPosition;
     }
 
     public void clearBand(LocalDateTime endBandPosition) {
-        if (activeBandContext != null) {
-            TimeBand band = new TimeBand(activeBandStart, endBandPosition, activeBandContext);
+        if (activeDetails != null) {
+            TimeBand band = new TimeBand(activeBandStart, endBandPosition, activeDetails);
             addTimeBand(band);
         }
 
-        this.activeBandContext = null;
+        this.activeDetails = null;
         this.activeBandStart = endBandPosition;
 
     }
 
     public void finish() {
-        if (activeBandContext != null) {
-            TimeBand band = new TimeBand(activeBandStart, internalClock.getToClockTime(), activeBandContext);
+        if (activeDetails != null) {
+            TimeBand band = new TimeBand(activeBandStart, internalClock.getToClockTime(), activeDetails);
             addTimeBand(band);
         }
     }
 
-    public void initContext(TimeBand lastBand, BandContext activeBandContext) {
+    public void initContext(TimeBand lastBand, Details activeDetails) {
         this.carriedOverLastBand = lastBand;
-        this.activeBandContext = activeBandContext;
+        this.activeDetails = activeDetails;
         this.activeBandStart = internalClock.getFromClockTime();
     }
 
-    public BandContext getActiveBandContext() {
-        return activeBandContext;
+    public Details getActiveDetails() {
+        return activeDetails;
     }
 
 

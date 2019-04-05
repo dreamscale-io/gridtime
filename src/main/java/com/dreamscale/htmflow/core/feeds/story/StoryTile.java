@@ -1,15 +1,18 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInPlace;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocusPlace;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
 
 import java.time.Duration;
@@ -48,8 +51,8 @@ public class StoryTile {
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void beginContext(ContextBeginningEvent contextBeginningEvent) {
-        Movement movement = contextMapper.beginContext(contextBeginningEvent);
+    public void beginContext(ContextBeginning contextBeginning) {
+        Movement movement = contextMapper.beginContext(contextBeginning);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
 
@@ -57,8 +60,8 @@ public class StoryTile {
      * End an active context, such as project, task, or intention
      */
 
-    public void endContext(ContextEndingEvent contextEndingEvent) {
-        Movement movement = contextMapper.endContext(contextEndingEvent);
+    public void endContext(ContextEnding contextEnding) {
+        Movement movement = contextMapper.endContext(contextEnding);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
 
@@ -67,7 +70,7 @@ public class StoryTile {
      * this special ending needs to be carried over to the proper future frame, and dropped in the right place
      */
 
-    public void endContextLater(ContextEndingEvent exitContextEvent) {
+    public void endContextLater(ContextEnding exitContextEvent) {
         this.contextMapper.endContextWhenInWindow(exitContextEvent);
     }
 
@@ -76,9 +79,9 @@ public class StoryTile {
      * and movements through time, that can be played back like music
      */
 
-    public void gotoLocation(LocalDateTime moment, String thoughtName, String locationPath, Duration timeInLocation) {
+    public void gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
 
-        List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, thoughtName, locationPath, timeInLocation);
+        List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
         flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, movements);
     }
 
@@ -101,16 +104,16 @@ public class StoryTile {
      * changes, and patterns in execution cycles.  The execution context details are passed in
      *
      * @param moment
-     * @param executionContext
+     * @param executionDetails
      */
-    public void execute(LocalDateTime moment, ExecutionContext executionContext) {
-        flowRhythmMapper.execute(moment, executionContext);
+    public void execute(LocalDateTime moment, ExecutionDetails executionDetails) {
+        flowRhythmMapper.execute(moment, executionDetails);
     }
 
 
 
-    public void postMessage(LocalDateTime moment, MessageContext messageContext) {
-        flowRhythmMapper.postMessage(moment, messageContext);
+    public void postMessage(LocalDateTime moment, MessageDetails messageDetails) {
+        flowRhythmMapper.postMessage(moment, messageDetails);
     }
 
     /**
@@ -118,10 +121,10 @@ public class StoryTile {
      * subsequent frames until the band is cleared
      * @param bandLayerType
      * @param startBandPosition
-     * @param bandContext
+     * @param details
      */
-    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, BandContext bandContext) {
-        timeBandMapper.startBand(bandLayerType, startBandPosition, bandContext);
+    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, Details details) {
+        timeBandMapper.startBand(bandLayerType, startBandPosition, details);
     }
 
     /**
@@ -195,11 +198,11 @@ public class StoryTile {
         return this.contextMapper.getCurrentContextSummary();
     }
 
-    public FocusPlace getCurrentFocalPoint() {
+    public FocalPoint getCurrentFocalPoint() {
         return spatialGeometryMapper.getCurrentFocusPlace();
     }
 
-    public LocationInPlace getCurrentLocationInFocus() {
+    public LocationInFocus getCurrentLocationInFocus() {
         return spatialGeometryMapper.getCurrentLocation();
     }
 

@@ -1,7 +1,6 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.band;
+package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -2,8 +2,8 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
-import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
