@@ -4,14 +4,14 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher;
 
 public class SinkStrategyFactory {
 
-    SaveStoryFrameStrategy saveStoryFrameStrategy;
+    SaveStoryTileStrategy saveStoryTileStrategy;
 
     JournalFetcher journalFeedStrategy;
 
     public SinkStrategy get(StrategyType strategyType) {
         switch (strategyType) {
             case SAVE_STORY_FRAME:
-                return saveStoryFrameStrategy;
+                return saveStoryTileStrategy;
         }
         return null;
     }

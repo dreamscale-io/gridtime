@@ -20,7 +20,7 @@ public class TorchieTombstoneEntity {
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID spiritId;
+    private UUID torchieId;
 
     private LocalDateTime dateOfBirth;
     private LocalDateTime dateOfDeath;

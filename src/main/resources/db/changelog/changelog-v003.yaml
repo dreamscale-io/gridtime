@@ -3,7 +3,6 @@ databaseChangeLog:
   - include:
         file: db/v003/feeds/create_journal_links.sql
 
-
   - include:
         file: db/v003/feeds/alter_journal_links.sql
 
@@ -18,4 +17,25 @@ databaseChangeLog:
 
   - include:
         file: db/v003/feeds/replace_circle_feed_message_view.sql
+
+  - include:
+        file: db/v003/refactor/alter_active_spirit_link_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/alter_circle_member_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/alter_member_name_view_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/alter_torchie_tombstone_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/alter_spirit_xp_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/alter_circle_message_rename_torchie_id.sql
+
+  - include:
+        file: db/v003/refactor/replace_circle_feed_message_view_torchie_id.sql
 

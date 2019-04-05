@@ -17,7 +17,7 @@ import java.util.UUID;
 public class CircleMessagesFetcher extends FetchStrategy {
 
     @Autowired
-    CircleMessageRepository circleMessageRepository;
+    CircleFeedMessageRepository circleFeedMessageRepository;
 
 
     @Override
@@ -26,7 +26,7 @@ public class CircleMessagesFetcher extends FetchStrategy {
         LocalDateTime afterDate = bookmark.getPosition();
 
         List<CircleFeedMessageEntity> circleMessageEntities =
-                circleMessageRepository.findByOwnerIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), fetchSize);
+                circleFeedMessageRepository.findByOwnerIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), fetchSize);
 
         List<Flowable> flowables = convertToFlowables(circleMessageEntities);
 

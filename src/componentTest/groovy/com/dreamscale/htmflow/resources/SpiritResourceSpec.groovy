@@ -45,12 +45,12 @@ class SpiritResourceSpec extends Specification {
 
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member.id).save()
 
         testUser.setId(member.getMasterAccountId())
 
         when:
-        SpiritDto spiritDto = spiritClient.getMySpirit();
+        SpiritDto spiritDto = spiritClient.getMyTorchie();
 
         then:
         assert spiritDto != null
@@ -68,13 +68,13 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
         when:
-        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToSpirit(member2.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToSpirit(member3.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
 
 
         then:
@@ -96,14 +96,14 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
         when:
-        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToSpirit(member2.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToSpirit(member3.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto3 = spiritClient.unlinkSpirit(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto3 = spiritClient.unlinkTorchie(member2.getId().toString())
 
         then:
 
@@ -119,13 +119,13 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member1 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
         when:
-        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToSpirit(member2.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.unlinkSpirit(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.unlinkTorchie(member2.getId().toString())
 
         then:
 
@@ -142,18 +142,18 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
-        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToSpirit(member2.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToSpirit(member3.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
 
         when:
         spiritClient.unlinkMe()
 
-        SpiritDto mySpirit = spiritClient.getMySpirit();
-        SpiritDto friendSpirit = spiritClient.getFriendSpirit(member3.getId().toString());
+        SpiritDto mySpirit = spiritClient.getMyTorchie();
+        SpiritDto friendSpirit = spiritClient.getFriendTorchie(member3.getId().toString());
 
         then:
         assert mySpirit != null
@@ -172,14 +172,14 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member1 = aRandom.memberEntity()
                 .masterAccountId(masterAccountEntity.id).organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
         TombstoneInputDto inputDto = new TombstoneInputDto(epitaph: "Here lies Torchie");
 
         when:
         TorchieTombstoneDto tombstoneDto = spiritClient.restInPeace(inputDto);
-        SpiritDto mySpirit = spiritClient.getMySpirit();
+        SpiritDto mySpirit = spiritClient.getMyTorchie();
 
         List<TorchieTombstoneDto> tombstones = spiritClient.getMyTombstones();
 
@@ -202,12 +202,12 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().spiritId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
-        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToSpirit(member2.getId().toString())
-        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToSpirit(member3.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
+        ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
 
         CircleDto circleDto = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("wtf help me"))
 

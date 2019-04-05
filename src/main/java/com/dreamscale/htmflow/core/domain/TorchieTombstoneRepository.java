@@ -11,9 +11,9 @@ public interface TorchieTombstoneRepository extends CrudRepository<TorchieTombst
 
 
     @Query(nativeQuery = true, value = "select * from torchie_tombstone t " +
-            "where spirit_id=(:spiritId) " +
+            "where torchie_id=(:torchieId) " +
             "order by date_of_death desc limit 1")
-    TorchieTombstoneEntity findLatestBySpiritId(@Param("spiritId") UUID spiritId);
+    TorchieTombstoneEntity findLatestByTorchieId(@Param("torchieId") UUID torchieId);
 
-    List<TorchieTombstoneEntity> findBySpiritIdOrderByDateOfDeath(UUID spiritId);
+    List<TorchieTombstoneEntity> findByTorchieIdOrderByDateOfDeath(UUID torchieId);
 }

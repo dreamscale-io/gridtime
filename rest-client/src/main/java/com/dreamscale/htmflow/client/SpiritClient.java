@@ -15,22 +15,22 @@ import java.util.List;
 public interface SpiritClient {
 
     @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH)
-    SpiritDto getMySpirit();
+    SpiritDto getMyTorchie();
 
     @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.NETWORK_PATH)
     SpiritNetworkDto getMySpiritNetwork();
 
     @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + "/{id}")
-    SpiritDto getFriendSpirit(@Param("id") String spiritId);
+    SpiritDto getFriendTorchie(@Param("id") String torchieId);
 
     @RequestLine("GET " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.NETWORK_PATH)
-    SpiritNetworkDto getFriendSpiritNetwork(@Param("id") String spiritId);
+    SpiritNetworkDto getFriendSpiritNetwork(@Param("id") String torchieId);
 
     @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.LINK_PATH)
-    ActiveLinksNetworkDto linkToSpirit(@Param("id") String spiritId);
+    ActiveLinksNetworkDto linkToTorchie(@Param("id") String torchieId);
 
     @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.UNLINK_PATH)
-    ActiveLinksNetworkDto unlinkSpirit(@Param("id") String spiritId);
+    ActiveLinksNetworkDto unlinkTorchie(@Param("id") String torchieId);
 
     @RequestLine("POST " + ResourcePaths.SPIRIT_PATH + ResourcePaths.ME_PATH + ResourcePaths.TRANSITION_PATH + ResourcePaths.UNLINK_PATH)
     void unlinkMe();

@@ -12,10 +12,10 @@ public interface MemberNameRepository extends CrudRepository<MemberNameEntity, U
 
     @Query(nativeQuery = true, value = "select * from member_name_view m " +
             "where exists (select 1 from circle_member cm " +
-            "where cm.spirit_id = m.spirit_id "+
+            "where cm.torchie_id = m.torchie_id "+
             "and cm.circle_id = (:circleId))")
     List<MemberNameEntity> findAllByCircleId(@Param("circleId") UUID circleId);
 
-    MemberNameEntity findBySpiritId(UUID spiritId);
+    MemberNameEntity findByTorchieId(UUID spiritId);
 
 }

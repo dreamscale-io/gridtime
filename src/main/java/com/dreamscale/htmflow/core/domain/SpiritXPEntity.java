@@ -23,7 +23,7 @@ public class SpiritXPEntity {
     private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID spiritId;
+    private UUID torchieId;
 
     @Column(name = "total_xp")
     private Integer totalXp;

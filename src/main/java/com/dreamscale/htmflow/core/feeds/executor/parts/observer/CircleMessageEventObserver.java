@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.CircleMessageContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.MessageContext;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class CircleMessageEventObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isScrapbookEvent(circleMessageType)) {
-                    currentStoryTile.postCircleMessage(circleMessage.getPosition(), createMessageContext(circleMessage));
+                    currentStoryTile.postMessage(circleMessage.getPosition(), createMessageContext(circleMessage));
                 }
 
             }
@@ -39,10 +39,10 @@ public class CircleMessageEventObserver implements FlowObserver {
 
     }
 
-    private CircleMessageContext createMessageContext(CircleFeedMessageEntity circleMessage) {
-        CircleMessageContext scrapbookMessage = new CircleMessageContext();
+    private MessageContext createMessageContext(CircleFeedMessageEntity circleMessage) {
+        MessageContext scrapbookMessage = new MessageContext();
 
-        scrapbookMessage.setMessageFromSpiritId(circleMessage.getSpiritId());
+        scrapbookMessage.setMessageFromTorchieId(circleMessage.getTorchieId());
         scrapbookMessage.setMessageFromName(circleMessage.getFullName());
 
         scrapbookMessage.setCircleId(circleMessage.getCircleId());

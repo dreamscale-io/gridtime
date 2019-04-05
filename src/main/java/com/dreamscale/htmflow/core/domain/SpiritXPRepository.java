@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public interface SpiritXPRepository extends CrudRepository<SpiritXPEntity, UUID> {
 
-    SpiritXPEntity findBySpiritId(UUID spiritId);
+    SpiritXPEntity findByTorchieId(UUID torchieId);
 
 }

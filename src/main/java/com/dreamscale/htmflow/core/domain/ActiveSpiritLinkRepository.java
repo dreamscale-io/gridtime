@@ -9,15 +9,15 @@ import java.util.UUID;
 
 public interface ActiveSpiritLinkRepository extends CrudRepository<ActiveSpiritLinkEntity, UUID> {
 
-    List<ActiveSpiritLinkEntity> findBySpiritId(UUID spiritId);
+    List<ActiveSpiritLinkEntity> findByTorchieId(UUID torchieId);
 
     @Query(nativeQuery = true, value = "select * from active_spirit_link net " +
             "where exists (select 1 from active_spirit_link me " +
-            "where me.spirit_id = (:spiritId) " +
+            "where me.torchie_id = (:torchieId) " +
             "and me.network_id = net.network_id) ")
-    List<ActiveSpiritLinkEntity> findMySpiritNetwork(@Param("spiritId") UUID spiritId);
+    List<ActiveSpiritLinkEntity> findMySpiritNetwork(@Param("torchieId") UUID torchieId);
 
-    ActiveSpiritLinkEntity findByNetworkIdAndSpiritId(UUID networkId, UUID spiritId);
+    ActiveSpiritLinkEntity findByNetworkIdAndTorchieId(UUID networkId, UUID torchieId);
 
     List<ActiveSpiritLinkEntity> findByNetworkId(UUID networkId);
 }

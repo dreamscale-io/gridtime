@@ -22,6 +22,6 @@ public class ActiveSpiritLinkEntity {
     private UUID networkId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID spiritId;
+    private UUID torchieId;
 
 }

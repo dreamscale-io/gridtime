@@ -51,75 +51,75 @@ public class SpiritService {
     }
 
 
-    public SpiritDto getSpirit(UUID organizationId, UUID spiritId) {
+    public SpiritDto getTorchie(UUID organizationId, UUID torchieId) {
         SpiritDto spiritDto = new SpiritDto();
-        spiritDto.setSpiritId(spiritId);
-        spiritDto.setXpSummary(this.getLatestXPForSpirit(spiritId));
-        spiritDto.setActiveSpiritLinks(this.getActiveLinksNetwork(organizationId, spiritId));
+        spiritDto.setSpiritId(torchieId);
+        spiritDto.setXpSummary(this.getLatestXPForSpirit(torchieId));
+        spiritDto.setActiveSpiritLinks(this.getActiveLinksNetwork(organizationId, torchieId));
 
         return spiritDto;
     }
 
 
-    public ActiveLinksNetworkDto linkToSpirit(UUID organizationId, UUID invokingSpirit, UUID friendSpirit) {
+    public ActiveLinksNetworkDto linkToTorchie(UUID organizationId, UUID invokingTorchie, UUID friendTorchie) {
 
-        ActiveLinksNetworkDto spiritNetwork = this.getActiveLinksNetwork(organizationId, invokingSpirit);
+        ActiveLinksNetworkDto spiritNetwork = this.getActiveLinksNetwork(organizationId, invokingTorchie);
 
-        if (!networkContainsLink(spiritNetwork, invokingSpirit)) {
-            ActiveSpiritLinkEntity meSpiritEntity = new ActiveSpiritLinkEntity();
-            meSpiritEntity.setId(UUID.randomUUID());
-            meSpiritEntity.setNetworkId(spiritNetwork.getNetworkId());
-            meSpiritEntity.setSpiritId(invokingSpirit);
+        if (!networkContainsLink(spiritNetwork, invokingTorchie)) {
+            ActiveSpiritLinkEntity meLink = new ActiveSpiritLinkEntity();
+            meLink.setId(UUID.randomUUID());
+            meLink.setNetworkId(spiritNetwork.getNetworkId());
+            meLink.setTorchieId(invokingTorchie);
 
-            activeSpiritLinkRepository.save(meSpiritEntity);
+            activeSpiritLinkRepository.save(meLink);
         }
 
-        if (!networkContainsLink(spiritNetwork, friendSpirit)) {
-            ActiveSpiritLinkEntity friendSpiritEntity = new ActiveSpiritLinkEntity();
-            friendSpiritEntity.setId(UUID.randomUUID());
-            friendSpiritEntity.setNetworkId(spiritNetwork.getNetworkId());
-            friendSpiritEntity.setSpiritId(friendSpirit);
+        if (!networkContainsLink(spiritNetwork, friendTorchie)) {
+            ActiveSpiritLinkEntity friendTorchieLink = new ActiveSpiritLinkEntity();
+            friendTorchieLink.setId(UUID.randomUUID());
+            friendTorchieLink.setNetworkId(spiritNetwork.getNetworkId());
+            friendTorchieLink.setTorchieId(friendTorchie);
 
-            activeSpiritLinkRepository.save(friendSpiritEntity);
+            activeSpiritLinkRepository.save(friendTorchieLink);
 
             SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
-            spiritLinkDto.setSpiritId(invokingSpirit);
-            spiritLinkDto.setFriendSpiritId(friendSpirit);
-            spiritLinkDto.setName(getMemberName(friendSpirit));
+            spiritLinkDto.setSpiritId(invokingTorchie);
+            spiritLinkDto.setFriendSpiritId(friendTorchie);
+            spiritLinkDto.setName(getMemberName(friendTorchie));
             spiritNetwork.addSpiritLink(spiritLinkDto);
         }
 
         return spiritNetwork;
     }
 
-    public ActiveLinksNetworkDto unlinkSpirit(UUID organizationId, UUID invokingSpiritId, UUID friendSpiritId) {
+    public ActiveLinksNetworkDto unlinkTorchie(UUID organizationId, UUID invokingTorchieId, UUID friendTorchieId) {
 
-        ActiveLinksNetworkDto spiritNetwork = this.getActiveLinksNetwork(organizationId, invokingSpiritId);
+        ActiveLinksNetworkDto spiritNetwork = this.getActiveLinksNetwork(organizationId, invokingTorchieId);
 
-        if (networkContainsLink(spiritNetwork, friendSpiritId)) {
+        if (networkContainsLink(spiritNetwork, friendTorchieId)) {
 
-            this.deleteLinks(spiritNetwork, friendSpiritId);
+            this.deleteLinks(spiritNetwork, friendTorchieId);
         }
 
-        return this.getActiveLinksNetwork(organizationId, invokingSpiritId);
+        return this.getActiveLinksNetwork(organizationId, invokingTorchieId);
     }
 
 
-    public ActiveLinksNetworkDto getActiveLinksNetwork(UUID organizationId, UUID spiritId) {
+    public ActiveLinksNetworkDto getActiveLinksNetwork(UUID organizationId, UUID torchieId) {
 
-        List<ActiveSpiritLinkEntity> spiritLinks = activeSpiritLinkRepository.findMySpiritNetwork(spiritId);
+        List<ActiveSpiritLinkEntity> torchieLinks = activeSpiritLinkRepository.findMySpiritNetwork(torchieId);
 
         ActiveLinksNetworkDto activeLinksNetworkDto = new ActiveLinksNetworkDto();
 
-        if (spiritLinks.size() > 0) {
-            for (ActiveSpiritLinkEntity spiritLinkEntity : spiritLinks) {
-                activeLinksNetworkDto.setNetworkId(spiritLinkEntity.getNetworkId());
+        if (torchieLinks.size() > 0) {
+            for (ActiveSpiritLinkEntity torchieLink : torchieLinks) {
+                activeLinksNetworkDto.setNetworkId(torchieLink.getNetworkId());
 
-                if (!spiritLinkEntity.getSpiritId().equals(spiritId)) {
+                if (!torchieLink.getTorchieId().equals(torchieId)) {
                     SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
-                    spiritLinkDto.setSpiritId(spiritId);
-                    spiritLinkDto.setFriendSpiritId(spiritLinkEntity.getSpiritId());
-                    spiritLinkDto.setName(getMemberName(spiritLinkEntity.getSpiritId()));
+                    spiritLinkDto.setSpiritId(torchieId);
+                    spiritLinkDto.setFriendSpiritId(torchieLink.getTorchieId());
+                    spiritLinkDto.setName(getMemberName(torchieLink.getTorchieId()));
                     activeLinksNetworkDto.addSpiritLink(spiritLinkDto);
                 }
             }
@@ -127,15 +127,15 @@ public class SpiritService {
             activeLinksNetworkDto.setNetworkId(UUID.randomUUID());
         }
 
-        activeLinksNetworkDto.setMyId(spiritId);
-        activeLinksNetworkDto.setMyName(getMemberName(spiritId));
+        activeLinksNetworkDto.setMyId(torchieId);
+        activeLinksNetworkDto.setMyName(getMemberName(torchieId));
 
         return activeLinksNetworkDto;
     }
 
-    private String getMemberName(UUID spiritId) {
+    private String getMemberName(UUID torchieId) {
         String memberName = null;
-        MemberNameEntity memberNameEntity = memberNameRepository.findBySpiritId(spiritId);
+        MemberNameEntity memberNameEntity = memberNameRepository.findByTorchieId(torchieId);
         if (memberNameEntity != null) {
             memberName = memberNameEntity.getFullName();
         }
@@ -148,7 +148,7 @@ public class SpiritService {
         this.deleteLinks(spiritNetwork, spiritId);
     }
 
-    private void deleteLinks(ActiveLinksNetworkDto spiritNetwork, UUID spiritId) {
+    private void deleteLinks(ActiveLinksNetworkDto spiritNetwork, UUID torchieId) {
         if (spiritNetwork.containsOneLink()) {
             List<ActiveSpiritLinkEntity> links = activeSpiritLinkRepository.findByNetworkId(spiritNetwork.getNetworkId());
             for (ActiveSpiritLinkEntity link : links) {
@@ -156,37 +156,37 @@ public class SpiritService {
             }
         } else {
             ActiveSpiritLinkEntity link =
-                    activeSpiritLinkRepository.findByNetworkIdAndSpiritId(spiritNetwork.getNetworkId(), spiritId);
+                    activeSpiritLinkRepository.findByNetworkIdAndTorchieId(spiritNetwork.getNetworkId(), torchieId);
             activeSpiritLinkRepository.delete(link);
         }
     }
 
 
-    public SpiritNetworkDto getSpiritNetwork(UUID organizationId, UUID spiritId) {
+    public SpiritNetworkDto getSpiritNetwork(UUID organizationId, UUID torchieId) {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
-        spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, spiritId));
-        spiritNetworkDto.setActiveCircles(circleService.getAllParticipatingCircles(organizationId, spiritId));
+        spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(circleService.getAllParticipatingCircles(organizationId, torchieId));
 
         return spiritNetworkDto;
     }
 
-    public TorchieTombstoneDto restInPeace(UUID masterAccountId, UUID organizationId, UUID spiritId, String epitaph) {
-        XPSummaryDto xpSummaryDto = this.getLatestXPForSpirit(spiritId);
+    public TorchieTombstoneDto restInPeace(UUID masterAccountId, UUID organizationId, UUID torchieId, String epitaph) {
+        XPSummaryDto xpSummaryDto = this.getLatestXPForSpirit(torchieId);
 
         TorchieTombstoneEntity torchieTombstoneEntity = new TorchieTombstoneEntity();
         torchieTombstoneEntity.setId(UUID.randomUUID());
-        torchieTombstoneEntity.setSpiritId(spiritId);
+        torchieTombstoneEntity.setTorchieId(torchieId);
         torchieTombstoneEntity.setLevel(xpSummaryDto.getLevel());
         torchieTombstoneEntity.setTitle(xpSummaryDto.getTitle());
         torchieTombstoneEntity.setTotalXp(xpSummaryDto.getTotalXP());
         torchieTombstoneEntity.setEpitaph(epitaph);
         torchieTombstoneEntity.setDateOfDeath(timeService.now());
-        torchieTombstoneEntity.setDateOfBirth(lookupTorchieBirthday(masterAccountId, spiritId));
+        torchieTombstoneEntity.setDateOfBirth(lookupTorchieBirthday(masterAccountId, torchieId));
 
         torchieTombstoneRepository.save(torchieTombstoneEntity);
 
-        SpiritXPEntity spiritXp = spiritXPRepository.findBySpiritId(spiritId);
+        SpiritXPEntity spiritXp = spiritXPRepository.findByTorchieId(torchieId);
         spiritXp.setTotalXp(0);
 
         spiritXPRepository.save(spiritXp);
@@ -195,14 +195,14 @@ public class SpiritService {
     }
 
     public List<TorchieTombstoneDto> getMyTombstones(UUID organizationId, UUID spiritId) {
-        List<TorchieTombstoneEntity> tombstoneEntities = torchieTombstoneRepository.findBySpiritIdOrderByDateOfDeath(spiritId);
+        List<TorchieTombstoneEntity> tombstoneEntities = torchieTombstoneRepository.findByTorchieIdOrderByDateOfDeath(spiritId);
         return torchieTombstoneMapper.toApiList(tombstoneEntities);
     }
 
     private LocalDateTime lookupTorchieBirthday(UUID masterAccountId, UUID spiritId) {
         LocalDateTime birthday = null;
 
-        TorchieTombstoneEntity lastTombstone = torchieTombstoneRepository.findLatestBySpiritId(spiritId);
+        TorchieTombstoneEntity lastTombstone = torchieTombstoneRepository.findLatestByTorchieId(spiritId);
 
         if (lastTombstone != null) {
             birthday = lastTombstone.getDateOfDeath();
@@ -240,14 +240,14 @@ public class SpiritService {
     }
 
 
-    public void grantXP(UUID organizationId, UUID spiritId, int xpAmount) {
-        SpiritXPEntity spiritXPEntity = spiritXPRepository.findBySpiritId(spiritId);
+    public void grantXP(UUID organizationId, UUID torchieId, int xpAmount) {
+        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByTorchieId(torchieId);
 
         if (spiritXPEntity == null) {
             spiritXPEntity = new SpiritXPEntity();
             spiritXPEntity.setId(UUID.randomUUID());
             spiritXPEntity.setOrganizationId(organizationId);
-            spiritXPEntity.setSpiritId(spiritId);
+            spiritXPEntity.setTorchieId(torchieId);
             spiritXPEntity.setTotalXp(xpAmount);
 
         } else {
@@ -257,9 +257,9 @@ public class SpiritService {
         spiritXPRepository.save(spiritXPEntity);
     }
 
-    private XPSummaryDto getLatestXPForSpirit(UUID spiritId) {
+    private XPSummaryDto getLatestXPForSpirit(UUID torchidId) {
 
-        SpiritXPEntity memberXPEntity = spiritXPRepository.findBySpiritId(spiritId);
+        SpiritXPEntity memberXPEntity = spiritXPRepository.findByTorchieId(torchidId);
 
         if (memberXPEntity != null) {
             return calculateCurrentXpState(memberXPEntity.getTotalXp());

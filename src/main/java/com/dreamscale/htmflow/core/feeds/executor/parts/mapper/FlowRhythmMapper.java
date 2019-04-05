@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.CircleMessageContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.MessageContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.*;
@@ -88,7 +88,7 @@ public class FlowRhythmMapper {
 
     }
 
-    public void postCircleMessage(LocalDateTime moment, CircleMessageContext messageContext) {
+    public void postMessage(LocalDateTime moment, MessageContext messageContext) {
 
         RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
 

@@ -29,8 +29,7 @@ public class CircleFeedMessageEntity {
     private String circleName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "spirit_id")
-    private UUID spiritId;
+    private UUID torchieId;
     private String fullName;
 
     private LocalDateTime position;

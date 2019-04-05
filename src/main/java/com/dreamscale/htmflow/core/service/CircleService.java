@@ -34,13 +34,13 @@ public class CircleService {
     CircleMemberRepository circleMemberRepository;
 
     @Autowired
-    CircleFeedRepository circleFeedRepository;
+    CircleMessageRepository circleMessageRepository;
 
     @Autowired
     MemberNameRepository memberNameRepository;
 
     @Autowired
-    CircleMessageRepository circleFeedWithMembersRepository;
+    CircleFeedMessageRepository circleFeedWithMembersRepository;
 
     @Autowired
     ActiveStatusService activeStatusService;
@@ -112,7 +112,7 @@ public class CircleService {
         CircleMemberEntity circleMemberEntity = new CircleMemberEntity();
         circleMemberEntity.setId(UUID.randomUUID());
         circleMemberEntity.setCircleId(circleEntity.getId());
-        circleMemberEntity.setSpiritId(spiritId);
+        circleMemberEntity.setTorchieId(spiritId);
 
         circleMemberRepository.save(circleMemberEntity);
 
@@ -122,12 +122,12 @@ public class CircleService {
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_START);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, problemStatement);
         circleMessageEntity.setPosition(timeService.now());
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         CircleDto circleDto = circleMapper.toApi(circleEntity);
 
@@ -176,12 +176,12 @@ public class CircleService {
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_CLOSED);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Circle closed.");
         circleMessageEntity.setPosition(timeService.now());
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         activeStatusService.resolveWTFWithYay(organizationId, spiritId);
 
@@ -213,12 +213,12 @@ public class CircleService {
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_SHELVED);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Circle placed on 'Do It Later' shelf.");
         circleMessageEntity.setPosition(timeService.now());
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         activeStatusService.resolveWTFWithAbort(organizationId, spiritId);
 
@@ -243,12 +243,12 @@ public class CircleService {
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_RESUMED);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Circle resumed from 'Do It Later' shelf.");
         circleMessageEntity.setPosition(timeService.now());
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         activeStatusService.pushWTFStatus(organizationId, spiritId, circleId, circleEntity.getProblemDescription());
 
@@ -363,14 +363,14 @@ public class CircleService {
 
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setPosition(timeService.now());
 
         circleMessageEntity.setCircleId(circleId);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, chatMessage);
         circleMessageEntity.setMessageType(CircleMessageType.CHAT);
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         FeedMessageDto feedMessageDto = feedMessageMapper.toApi(circleMessageEntity);
         feedMessageDto.setMessage(circleMessageEntity.getMetadataValue(CircleMessageEntity.MESSAGE_FIELD));
@@ -382,7 +382,7 @@ public class CircleService {
     public FeedMessageDto postScreenshotReferenceToCircleFeed(UUID organizationId, UUID spiritId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
-        circleMessageEntity.setSpiritId(spiritId);
+        circleMessageEntity.setTorchieId(spiritId);
         circleMessageEntity.setPosition(timeService.now());
 
         circleMessageEntity.setCircleId(circleId);
@@ -391,7 +391,7 @@ public class CircleService {
         circleMessageEntity.setMetadataField(CircleMessageEntity.FILEPATH_FIELD, screenshotReferenceInputDto.getFilePath());
         circleMessageEntity.setMessageType(CircleMessageType.SCREENSHOT);
 
-        circleFeedRepository.save(circleMessageEntity);
+        circleMessageRepository.save(circleMessageEntity);
 
         FeedMessageDto feedMessageDto = feedMessageMapper.toApi(circleMessageEntity);
 
@@ -428,7 +428,7 @@ public class CircleService {
 
         for (MemberNameEntity circleMember : circleMemberEntities) {
             CircleMemberDto circleMemberDto = new CircleMemberDto();
-            circleMemberDto.setSpiritId(circleMember.getSpiritId());
+            circleMemberDto.setSpiritId(circleMember.getTorchieId());
             circleMemberDto.setFullName(circleMember.getFullName());
 
             memberDtos.add(circleMemberDto);
@@ -453,9 +453,9 @@ public class CircleService {
         return seconds;
     }
 
-    public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID spiritId, NewSnippetEvent snippetEvent) {
+    public FeedMessageDto postSnippetToActiveCircleFeed(UUID organizationId, UUID torchieId, NewSnippetEvent snippetEvent) {
 
-        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, spiritId);
+        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, torchieId);
 
         FeedMessageDto feedMessageDto = null;
 
@@ -463,7 +463,7 @@ public class CircleService {
 
             CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
             circleMessageEntity.setId(UUID.randomUUID());
-            circleMessageEntity.setSpiritId(spiritId);
+            circleMessageEntity.setTorchieId(torchieId);
             circleMessageEntity.setPosition(timeService.now());
 
             circleMessageEntity.setCircleId(activeCircleId);
@@ -472,7 +472,7 @@ public class CircleService {
             circleMessageEntity.setMetadataField(CircleMessageEntity.SNIPPET_FIELD, snippetEvent.getSnippet());
             circleMessageEntity.setMessageType(CircleMessageType.SNIPPET);
 
-            circleFeedRepository.save(circleMessageEntity);
+            circleMessageRepository.save(circleMessageEntity);
 
             feedMessageDto = feedMessageMapper.toApi(circleMessageEntity);
 
@@ -480,7 +480,7 @@ public class CircleService {
             feedMessageDto.setSnippetSource(circleMessageEntity.getMetadataValue(CircleMessageEntity.SNIPPET_SOURCE_FIELD));
             feedMessageDto.setSnippet(circleMessageEntity.getMetadataValue(CircleMessageEntity.SNIPPET_FIELD));
 
-            feedMessageDto.setCircleMemberDto(createCircleMember(spiritId));
+            feedMessageDto.setCircleMemberDto(createCircleMember(torchieId));
         }
 
         return feedMessageDto;
@@ -488,7 +488,7 @@ public class CircleService {
     }
 
 
-    public List<FeedMessageDto> getAllMessagesForCircleFeed(UUID organizationId, UUID spiritId, UUID circleId) {
+    public List<FeedMessageDto> getAllMessagesForCircleFeed(UUID organizationId, UUID torchieId, UUID circleId) {
 
         List<CircleFeedMessageEntity> messageEntities = circleFeedWithMembersRepository.findByCircleIdOrderByPosition(circleId);
 
@@ -497,7 +497,7 @@ public class CircleService {
         for (CircleFeedMessageEntity messageEntity : messageEntities) {
             FeedMessageDto feedMessageDto = circleFeedMessageMapper.toApi(messageEntity);
             feedMessageDto.setMessage(messageEntity.getMetadataValue(CircleMessageEntity.MESSAGE_FIELD));
-            feedMessageDto.setCircleMemberDto(createCircleMember(spiritId, messageEntity.getFullName()));
+            feedMessageDto.setCircleMemberDto(createCircleMember(torchieId, messageEntity.getFullName()));
 
             feedMessageDtos.add(feedMessageDto);
         }
@@ -506,9 +506,9 @@ public class CircleService {
     }
 
 
-    public CircleKeyDto retrieveKey(UUID organizationId, UUID spiritId, UUID circleId) {
+    public CircleKeyDto retrieveKey(UUID organizationId, UUID torchieId, UUID circleId) {
         CircleKeyDto circleKeyDto = null;
-        CircleEntity circleEntity = circleRepository.findByOwnerMemberIdAndId(spiritId, circleId);
+        CircleEntity circleEntity = circleRepository.findByOwnerMemberIdAndId(torchieId, circleId);
         if (circleEntity != null) {
             circleKeyDto = new CircleKeyDto();
             circleKeyDto.setPrivateKey(circleEntity.getPrivateKey());
@@ -520,10 +520,10 @@ public class CircleService {
     }
 
 
-    public List<CircleDto> getAllParticipatingCircles(UUID organizationId, UUID spiritId) {
+    public List<CircleDto> getAllParticipatingCircles(UUID organizationId, UUID torchieId) {
         List<CircleDto> circles = new ArrayList<>();
 
-        List<CircleEntity> circleEntities = circleRepository.findAllByParticipation(organizationId, spiritId);
+        List<CircleEntity> circleEntities = circleRepository.findAllByParticipation(organizationId, torchieId);
 
         for (CircleEntity circleEntity : circleEntities) {
             List<MemberNameEntity> circleMembers = memberNameRepository.findAllByCircleId(circleEntity.getId());

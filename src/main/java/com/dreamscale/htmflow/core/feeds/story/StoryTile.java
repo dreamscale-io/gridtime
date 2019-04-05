@@ -109,8 +109,8 @@ public class StoryTile {
 
 
 
-    public void postCircleMessage(LocalDateTime moment, CircleMessageContext messageContext) {
-        flowRhythmMapper.postCircleMessage(moment, messageContext);
+    public void postMessage(LocalDateTime moment, MessageContext messageContext) {
+        flowRhythmMapper.postMessage(moment, messageContext);
     }
 
     /**

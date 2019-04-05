@@ -33,10 +33,10 @@ public class SpiritResource {
     @GetMapping(ResourcePaths.ME_PATH )
     public SpiritDto getMySpirit() {
         RequestContext context = RequestContext.get();
-        log.info("getSpirit, user={}", context.getMasterAccountId());
+        log.info("getTorchie, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
-        return spiritService.getSpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
+        return spiritService.getTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
     /**
@@ -61,14 +61,14 @@ public class SpiritResource {
     @GetMapping("/{id}" )
     public SpiritDto getFriendSpirit(@PathVariable("id") String spiritId) {
         RequestContext context = RequestContext.get();
-        log.info("getFriendSpirit, user={}", context.getMasterAccountId());
+        log.info("getFriendTorchie, user={}", context.getMasterAccountId());
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
         organizationService.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
-        return spiritService.getSpirit(invokingSpirit.getOrganizationId(), friendSpiritId);
+        return spiritService.getTorchie(invokingSpirit.getOrganizationId(), friendSpiritId);
     }
 
     /**
@@ -100,14 +100,14 @@ public class SpiritResource {
     @PostMapping("/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.LINK_PATH)
     public ActiveLinksNetworkDto linkToSpirit(@PathVariable("id") String spiritId) {
         RequestContext context = RequestContext.get();
-        log.info("linkToSpirit, user={}", context.getMasterAccountId());
+        log.info("linkToTorchie, user={}", context.getMasterAccountId());
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
         organizationService.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
-        return spiritService.linkToSpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
+        return spiritService.linkToTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
     }
 
     /**
@@ -123,14 +123,14 @@ public class SpiritResource {
     @PostMapping("/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.UNLINK_PATH)
     public ActiveLinksNetworkDto unlinkSpirit(@PathVariable("id") String spiritId) {
         RequestContext context = RequestContext.get();
-        log.info("unlinkSpirit, user={}", context.getMasterAccountId());
+        log.info("unlinkTorchie, user={}", context.getMasterAccountId());
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getMasterAccountId());
         organizationService.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
-        return spiritService.unlinkSpirit(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
+        return spiritService.unlinkTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
     }
 
     /**

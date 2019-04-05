@@ -1,15 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.band;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandContext;
 import lombok.Getter;
 
 import java.util.UUID;
 
 @Getter
-public class CircleMessageContext implements BandContext {
+public class MessageContext implements BandContext {
 
-    private UUID messageFromSpiritId;
+    private UUID messageFromTorchieId;
     private String messageFromName;
 
     private UUID messageId;
@@ -23,8 +22,8 @@ public class CircleMessageContext implements BandContext {
     private String fileName;
 
 
-    public void setMessageFromSpiritId(UUID spiritId) {
-        this.messageFromSpiritId = spiritId;
+    public void setMessageFromTorchieId(UUID torchieId) {
+        this.messageFromTorchieId = torchieId;
     }
 
     public void setMessageFromName(String fullName) {

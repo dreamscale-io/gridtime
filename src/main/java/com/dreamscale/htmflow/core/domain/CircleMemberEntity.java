@@ -18,6 +18,6 @@ public class CircleMemberEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private UUID circleId;
-    private UUID spiritId;
+    private UUID torchieId;
 
 }
