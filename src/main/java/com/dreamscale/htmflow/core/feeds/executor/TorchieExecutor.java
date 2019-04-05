@@ -78,8 +78,8 @@ public class TorchieExecutor {
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
                 fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.CIRCLE_MESSAGES_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.TROUBLESHOOTING_STATE_OBSERVER),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_SCRAPBOOK_MESSAGE_OBSERVER)));
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER),
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.CIRCLE_MESSAGE_OBSERVER)));
 
 
         ZoomableFlow zoomableFlow = new ZoomableFlow(metronome, memberId, sharedFeaturePool);

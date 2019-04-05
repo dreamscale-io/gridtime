@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.Batch;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
 import com.dreamscale.htmflow.core.feeds.story.see.FlowObserver;
-import com.dreamscale.htmflow.core.feeds.story.see.Window;
+import com.dreamscale.htmflow.core.feeds.story.Window;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

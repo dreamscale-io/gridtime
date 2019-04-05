@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.ExecutionContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.sequence.RhythmLayerType;

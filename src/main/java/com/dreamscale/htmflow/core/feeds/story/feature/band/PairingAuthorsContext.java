@@ -6,11 +6,11 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class AuthorsContext implements BandContext {
+public class PairingAuthorsContext implements BandContext {
 
     private List<LinkedMember> pairedAuthors;
 
-    public AuthorsContext(List<LinkedMember> pairedAuthors) {
+    public PairingAuthorsContext(List<LinkedMember> pairedAuthors) {
         this.pairedAuthors = pairedAuthors;
     }
 }

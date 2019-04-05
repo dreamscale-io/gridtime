@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.FeelsContext;
 

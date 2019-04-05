@@ -1,10 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBand;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.band.TimeBandLayer;
+import com.dreamscale.htmflow.core.feeds.story.feature.band.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
@@ -108,6 +105,12 @@ public class StoryFrame {
      */
     public void execute(LocalDateTime moment, ExecutionContext executionContext) {
         flowRhythmMapper.execute(moment, executionContext);
+    }
+
+
+
+    public void postCircleMessage(LocalDateTime moment, CircleMessageContext messageContext) {
+        flowRhythmMapper.postCircleMessage(moment, messageContext);
     }
 
     /**

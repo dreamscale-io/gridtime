@@ -11,7 +11,7 @@ import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher
 import com.dreamscale.htmflow.core.feeds.story.see.FlowObserver
-import com.dreamscale.htmflow.core.feeds.story.see.Window
+import com.dreamscale.htmflow.core.feeds.story.Window
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

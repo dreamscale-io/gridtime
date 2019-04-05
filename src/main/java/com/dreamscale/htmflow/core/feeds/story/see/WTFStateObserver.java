@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.domain.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.band.CircleContext;
 
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Translates the Circle Feed messages of start/stop shelf/resume on WTF Circles to TimeBands
  */
-public class TroubleshootingStateObserver implements FlowObserver {
+public class WTFStateObserver implements FlowObserver {
 
     @Override
     public void see(StoryFrame currentStoryFrame, Window window) {
@@ -27,11 +28,11 @@ public class TroubleshootingStateObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isCircleOpening(circleMessageType)) {
-                    currentStoryFrame.startBand(BandLayerType.FRICTION_TROUBLESHOOTING, circleMessage.getPosition(), createCircleContext(circleMessage));
+                    currentStoryFrame.startBand(BandLayerType.FRICTION_WTF, circleMessage.getPosition(), createCircleContext(circleMessage));
                 }
 
                 if (isCircleEnding(circleMessageType)) {
-                    currentStoryFrame.clearBand(BandLayerType.FRICTION_TROUBLESHOOTING, circleMessage.getPosition());
+                    currentStoryFrame.clearBand(BandLayerType.FRICTION_WTF, circleMessage.getPosition());
                 }
 
             }
@@ -41,7 +42,7 @@ public class TroubleshootingStateObserver implements FlowObserver {
     }
 
     private CircleContext createCircleContext(CircleFeedMessageEntity circleFeedMessageEntity) {
-        return new CircleContext(circleFeedMessageEntity.getCircleId());
+        return new CircleContext(circleFeedMessageEntity.getCircleId(), circleFeedMessageEntity.getCircleName());
     }
 
     private boolean isCircleOpening(CircleMessageType circleMessageType) {

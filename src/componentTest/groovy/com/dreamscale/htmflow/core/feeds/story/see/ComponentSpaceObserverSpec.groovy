@@ -11,6 +11,7 @@ import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
+import com.dreamscale.htmflow.core.feeds.story.Window
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure
 import com.dreamscale.htmflow.core.service.ComponentLookupService
 import spock.lang.Specification

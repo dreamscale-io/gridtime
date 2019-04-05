@@ -50,6 +50,26 @@ public class CircleFeedMessageEntity {
         metadata = metadataFields.toJson();
     }
 
+    public String getMessage() {
+        return getMetadataValue(CircleMessageEntity.MESSAGE_FIELD);
+    }
+
+    public String getFileName() {
+        return getMetadataValue(CircleMessageEntity.FILE_NAME_FIELD);
+    }
+
+    public String getFilePath() {
+        return getMetadataValue(CircleMessageEntity.FILEPATH_FIELD);
+    }
+
+    public String getSnippet() {
+        return getMetadataValue(CircleMessageEntity.SNIPPET_FIELD);
+    }
+
+    public String getSnippetSource() {
+        return getMetadataValue(CircleMessageEntity.SNIPPET_SOURCE_FIELD);
+    }
+
     public String getMetadataValue(String key) {
         return metadataFields.get(key);
     }

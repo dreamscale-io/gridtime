@@ -10,9 +10,9 @@ public class FlowObserverFactory {
     private final JournalFeelsObserver journalFeelsObserver;
     private final ExecutionRhythmObserver executionRhythmObserver;
     private final JournalAuthorObserver journalAuthorObserver;
-    private final TroubleshootingStateObserver troubleshootingStateObserver;
+    private final WTFStateObserver wtfStateObserver;
     private final LearningStateObserver learningStateObserver;
-    private final WTFScrapbookEventObserver wtfScrapbookMessageObserver;
+    private final CircleMessageEventObserver circleMessageEventObserver;
 
 
     @Autowired
@@ -23,9 +23,9 @@ public class FlowObserverFactory {
         this.journalFeelsObserver = new JournalFeelsObserver();
         this.journalAuthorObserver = new JournalAuthorObserver();
         this.executionRhythmObserver = new ExecutionRhythmObserver();
-        this.troubleshootingStateObserver = new TroubleshootingStateObserver();
+        this.wtfStateObserver = new WTFStateObserver();
         this.learningStateObserver = new LearningStateObserver();
-        this.wtfScrapbookMessageObserver = new WTFScrapbookEventObserver();
+        this.circleMessageEventObserver = new CircleMessageEventObserver();
     }
 
     public FlowObserver get(ObserverType observerType) {
@@ -40,12 +40,12 @@ public class FlowObserverFactory {
                 return componentSpaceObserver;
             case EXECUTION_RHYTHM_OBSERVER:
                 return executionRhythmObserver;
-            case TROUBLESHOOTING_STATE_OBSERVER:
-                return troubleshootingStateObserver;
+            case WTF_STATE_OBSERVER:
+                return wtfStateObserver;
             case LEARNING_STATE_OBSERVER:
                 return learningStateObserver;
-            case WTF_SCRAPBOOK_MESSAGE_OBSERVER:
-                return wtfScrapbookMessageObserver;
+            case CIRCLE_MESSAGE_OBSERVER:
+                return circleMessageEventObserver;
 
         }
         return null;
@@ -57,8 +57,8 @@ public class FlowObserverFactory {
         COMPONENT_SPACE_OBSERVER,
         EXECUTION_RHYTHM_OBSERVER,
         JOURNAL_AUTHOR_OBSERVER,
-        TROUBLESHOOTING_STATE_OBSERVER,
+        WTF_STATE_OBSERVER,
         LEARNING_STATE_OBSERVER,
-        WTF_SCRAPBOOK_MESSAGE_OBSERVER;
+        CIRCLE_MESSAGE_OBSERVER;
     }
 }

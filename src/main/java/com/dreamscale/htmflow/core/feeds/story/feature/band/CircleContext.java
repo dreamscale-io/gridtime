@@ -10,8 +10,10 @@ import java.util.UUID;
 public class CircleContext implements BandContext {
 
     private final UUID circleId;
+    private final String circleName;
 
-    public CircleContext(UUID circleId) {
+    public CircleContext(UUID circleId, String circleName) {
         this.circleId = circleId;
+        this.circleName = circleName;
     }
 }
