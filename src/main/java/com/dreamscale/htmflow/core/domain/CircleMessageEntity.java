@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.domain;
 
-import com.dreamscale.htmflow.api.circle.MessageType;
+import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.flow.MetadataFields;
 import lombok.*;
 
@@ -8,13 +8,13 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "circle_feed")
+@Entity(name = "circle_message")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircleFeedEntity {
+public class CircleMessageEntity {
 
     public static String MESSAGE_FIELD = "message";
 
@@ -38,10 +38,10 @@ public class CircleFeedEntity {
     @Column(name = "spirit_id")
     private UUID spiritId;
 
-    private LocalDateTime timePosition;
+    private LocalDateTime position;
 
     @Enumerated(EnumType.STRING)
-    private MessageType messageType;
+    private CircleMessageType messageType;
 
     private String metadata;
 

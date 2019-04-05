@@ -15,10 +15,10 @@ import java.util.UUID;
 public class FeedMessageDto {
 
     private UUID circleId;
-    private LocalDateTime timePosition;
+    private LocalDateTime position;
     private CircleMemberDto circleMemberDto;
 
-    private MessageType messageType;
+    private CircleMessageType messageType;
 
     //optional fields
     private String message;

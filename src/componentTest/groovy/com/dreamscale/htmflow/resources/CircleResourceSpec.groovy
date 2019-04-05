@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.api.circle.CircleDto
 import com.dreamscale.htmflow.api.circle.CircleKeyDto
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.circle.FeedMessageDto
-import com.dreamscale.htmflow.api.circle.MessageType
+import com.dreamscale.htmflow.api.circle.CircleMessageType
 import com.dreamscale.htmflow.api.circle.ScreenshotReferenceInputDto
 import com.dreamscale.htmflow.api.event.NewSnippetEvent
 import com.dreamscale.htmflow.client.CircleClient
@@ -233,7 +233,7 @@ class CircleResourceSpec extends Specification {
 
         then:
         assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == MessageType.CHAT
+        assert feedMessageDto.getMessageType() == CircleMessageType.CHAT
         assert feedMessageDto.getMessage() == "Here's a chat message"
 
         assert feedMessageDto.getCircleMemberDto() != null
@@ -260,7 +260,7 @@ class CircleResourceSpec extends Specification {
 
         then:
         assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == MessageType.SCREENSHOT
+        assert feedMessageDto.getMessageType() == CircleMessageType.SCREENSHOT
         assert feedMessageDto.getMessage() != null
         assert feedMessageDto.getFilePath() != null
         assert feedMessageDto.getFileName() != null
@@ -288,7 +288,7 @@ class CircleResourceSpec extends Specification {
 
         then:
         assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == MessageType.SNIPPET
+        assert feedMessageDto.getMessageType() == CircleMessageType.SNIPPET
         assert feedMessageDto.getMessage() != null
         assert feedMessageDto.getSnippetSource() != null
         assert feedMessageDto.getSnippet() != null
@@ -323,7 +323,7 @@ class CircleResourceSpec extends Specification {
         assert feedMessages.size() == 3
 
         for (FeedMessageDto message : feedMessages) {
-            assert message.timePosition != null
+            assert message.position != null
             assert message.circleMemberDto != null
         }
 

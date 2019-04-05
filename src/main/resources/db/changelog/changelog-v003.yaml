@@ -9,3 +9,13 @@ databaseChangeLog:
 
   - include:
         file: db/v003/feeds/replace_journal_entry_view_with_linkedmembers.sql
+
+  - include:
+        file: db/v003/feeds/alter_circle_feed_rename_time_position.sql
+
+  - include:
+        file: db/v003/feeds/alter_circle_feed_rename_table.sql
+
+  - include:
+        file: db/v003/feeds/replace_circle_feed_message_view.sql
+

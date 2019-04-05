@@ -4,7 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface CircleFeedRepository extends CrudRepository<CircleFeedEntity, UUID> {
+public interface CircleFeedRepository extends CrudRepository<CircleMessageEntity, UUID> {
 
 
 }

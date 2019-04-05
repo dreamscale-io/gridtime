@@ -15,6 +15,10 @@ public class FetchStrategyFactory {
     @Autowired
     ExecutionActivityFetcher executionActivityFeedStrategy;
 
+    @Autowired
+    CircleMessagesFetcher circleMessagesFetcher;
+
+
 
     public FetchStrategy get(StrategyType strategyType) {
         switch (strategyType) {
@@ -24,6 +28,8 @@ public class FetchStrategyFactory {
                 return journalFeedStrategy;
             case EXECUTION_ACTIVITY_FEED:
                 return executionActivityFeedStrategy;
+            case CIRCLE_MESSAGES_FEED:
+                return circleMessagesFetcher;
         }
         return null;
     }
@@ -32,6 +38,6 @@ public class FetchStrategyFactory {
         JOURNAL_FEED,
         FILE_ACTIVITY_FEED,
         EXECUTION_ACTIVITY_FEED,
-        WTF_EVENT_FEED;
+        CIRCLE_MESSAGES_FEED;
     }
 }

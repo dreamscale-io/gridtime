@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.domain;
 
-import com.dreamscale.htmflow.api.circle.MessageType;
+import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.flow.MetadataFields;
 import lombok.*;
 
@@ -26,15 +26,17 @@ public class CircleFeedMessageEntity {
     @Column(name = "circle_id")
     private UUID circleId;
 
+    private String circleName;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "spirit_id")
     private UUID spiritId;
     private String fullName;
 
-    private LocalDateTime timePosition;
+    private LocalDateTime position;
 
     @Enumerated(EnumType.STRING)
-    private MessageType messageType;
+    private CircleMessageType messageType;
 
 
 
