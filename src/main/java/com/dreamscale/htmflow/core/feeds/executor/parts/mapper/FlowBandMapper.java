@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
+import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
@@ -90,6 +91,17 @@ public class FlowBandMapper {
 
     public TimeBand getLastBand(BandLayerType bandLayerType) {
         return this.layerMap.get(bandLayerType).getLastBand();
+    }
+
+    public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatsPerBucket) {
+        BandLayerMapper layer = layerMap.get(bandLayerType);
+        layer.configureRollingBands(beatsPerBucket);
+    }
+
+    public void addRollingBandSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
+
+        BandLayerMapper layer = layerMap.get(bandLayerType);
+        layer.addRollingBandSample(moment, sample);
     }
 
 

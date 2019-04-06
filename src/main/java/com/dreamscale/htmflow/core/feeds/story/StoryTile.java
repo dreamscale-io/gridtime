@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
@@ -136,6 +137,14 @@ public class StoryTile {
         timeBandMapper.clearBand(bandLayerType, endBandPosition);
     }
 
+    public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatSize) {
+        timeBandMapper.configureRollingBands(bandLayerType, beatSize);
+    }
+
+    public void addRollingSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
+        timeBandMapper.addRollingBandSample(bandLayerType, moment, sample);
+    }
+
     /**
      * After filling in a StoryFrame with a layer of stuff, call this with each layer to put the frame
      * back into a good final state
@@ -233,7 +242,6 @@ public class StoryTile {
     public TimeBand getLastBand(BandLayerType bandLayerType) {
         return timeBandMapper.getLastBand(bandLayerType);
     }
-
 
 
 }

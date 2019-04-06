@@ -1,9 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
+import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.RollingAggregateBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
 
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ public class BandLayerMapper {
 
     private Details activeDetails;
     private LocalDateTime activeBandStart;
+    private boolean isRollingBandLayer = false;
 
     public BandLayerMapper(InnerGeometryClock internalClock, BandLayerType layerType) {
         this.internalClock = internalClock;
@@ -53,6 +56,18 @@ public class BandLayerMapper {
         if (activeDetails != null) {
             TimeBand band = new TimeBand(activeBandStart, internalClock.getToClockTime(), activeDetails);
             addTimeBand(band);
+        }
+
+        if (isRollingBandLayer) {
+            RollingAggregateBand lastRollingAggregate = (RollingAggregateBand)carriedOverLastBand;
+
+            for (TimeBand band : bandsInWindow) {
+                RollingAggregateBand rollingBand = (RollingAggregateBand)band;
+
+                rollingBand.aggregateWithPastObservations(lastRollingAggregate);
+
+                lastRollingAggregate = rollingBand;
+            }
         }
     }
 
@@ -100,5 +115,32 @@ public class BandLayerMapper {
     }
 
 
+    public void configureRollingBands(BeatsPerBucket beatSize) {
+        isRollingBandLayer = true;
 
+        int bandCount = BeatsPerBucket.BEAT.getBeatCount() / beatSize.getBeatCount();
+
+        InnerGeometryClock.Coords startCoords = internalClock.getCoordinates();
+
+        for (int i = 0; i < bandCount; i++) {
+            InnerGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
+
+            RollingAggregateBand band = new RollingAggregateBand(startCoords.getClockTime(), endCoords.getClockTime());
+            bandsInWindow.add(band);
+
+            startCoords = endCoords;
+        }
+    }
+
+    public void addRollingBandSample(LocalDateTime moment, double sample) {
+        for (TimeBand band : bandsInWindow) {
+            RollingAggregateBand rollingBand = (RollingAggregateBand)band;
+
+            if (rollingBand.contains(moment)) {
+                rollingBand.addSample(sample);
+                break;
+            }
+
+        }
+    }
 }

@@ -34,7 +34,7 @@ public class ComponentSpaceObserver implements FlowObserver {
 
         for (Flowable flowable : flowables) {
             if (flowable instanceof FlowActivityEntity) {
-                FlowActivityEntity flowActivity = (FlowActivityEntity)flowable;
+                FlowActivityEntity flowActivity = (FlowActivityEntity)flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
                     gotoLocation(currentStoryTile, currentProjectId, flowActivity);

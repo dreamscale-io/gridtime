@@ -1,20 +1,18 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 
 public class RollingAggregateBand extends TimeBand {
 
-    private CandleStick newestCandleStick;
+    private CandleStick withinWindowCandleStick;
     private CandleStick aggregateCandleStick;
     private LinkedList<CandleStick> pastCandleSticks; //newest stick in the front, oldest in the back
 
-    public RollingAggregateBand(LocalDateTime start, LocalDateTime end, Details details) {
-        super(start, end, details);
+    public RollingAggregateBand(LocalDateTime start, LocalDateTime end) {
+        super(start, end, null);
 
-        this.newestCandleStick = new CandleStick();
+        this.withinWindowCandleStick = new CandleStick();
         this.aggregateCandleStick = new CandleStick();
         this.pastCandleSticks = new LinkedList<>();
     }
@@ -23,7 +21,7 @@ public class RollingAggregateBand extends TimeBand {
      * Add direct samples that fall within this time bucket
      */
     public void addSample(double sample) {
-        this.newestCandleStick.addSample(sample);
+        this.withinWindowCandleStick.addSample(sample);
         this.aggregateCandleStick.addSample(sample);
     }
 
@@ -34,7 +32,7 @@ public class RollingAggregateBand extends TimeBand {
         aggregateCandleStick = new CandleStick();
 
         pastCandleSticks = rollingAggregateBand.getRolledPastCandlesMinusOldest();
-        pastCandleSticks.push(rollingAggregateBand.getNewestCandleStick());
+        pastCandleSticks.push(rollingAggregateBand.getWithinWindowCandleStick());
 
         for (CandleStick pastCandle: pastCandleSticks) {
             aggregateCandleStick.combineAggregate(pastCandle);
@@ -48,8 +46,8 @@ public class RollingAggregateBand extends TimeBand {
         return pastCandles;
     }
 
-    public CandleStick getNewestCandleStick() {
-        return newestCandleStick;
+    public CandleStick getWithinWindowCandleStick() {
+        return withinWindowCandleStick;
     }
 
     public CandleStick getAggregateCandleStick() {
@@ -57,4 +55,7 @@ public class RollingAggregateBand extends TimeBand {
     }
 
 
+    public boolean contains(LocalDateTime moment) {
+        return (moment.isEqual(getStart()) || moment.isAfter(getStart())) && moment.isBefore(getEnd());
+    }
 }
