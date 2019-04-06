@@ -4,8 +4,12 @@ import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
+import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.FlowSource;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserverFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformer;
 import com.dreamscale.htmflow.core.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +30,12 @@ public class TorchieExecutor {
 
     @Autowired
     private FlowObserverFactory flowObserverFactory;
+
+    @Autowired
+    private FlowTransformFactory flowTransformFactory;
+
+    @Autowired
+    private SinkStrategyFactory sinkStrategyFactory;
 
     @Autowired
     private AccountService accountService;
@@ -61,26 +71,30 @@ public class TorchieExecutor {
         SharedFeaturePool sharedFeaturePool = new SharedFeaturePool(memberId, metronome.getActiveCoordinates());
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
-                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.JOURNAL_FEED),
+                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.JOURNAL_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER)
-        ));
+                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER)));
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
-                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.FILE_ACTIVITY_FEED),
+                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.LEARNING_STATE_OBSERVER)));
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
-                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.EXECUTION_ACTIVITY_FEED),
+                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER)));
 
         metronome.addFlowToChain(new FlowSource(memberId, sharedFeaturePool,
-                fetchStrategyFactory.get(FetchStrategyFactory.StrategyType.CIRCLE_MESSAGES_FEED),
+                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.CIRCLE_MESSAGE_OBSERVER)));
 
+        metronome.addFlowToChain(new FlowTransformer(memberId, sharedFeaturePool,
+                flowTransformFactory.get(FlowTransformFactory.TransformType.URI_ASSIGNMENT_TRANSFORM)));
+
+        metronome.addFlowToChain(new FlowSink(memberId, sharedFeaturePool,
+                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES)));
 
         ZoomableFlow zoomableFlow = new ZoomableFlow(metronome, memberId, sharedFeaturePool);
 

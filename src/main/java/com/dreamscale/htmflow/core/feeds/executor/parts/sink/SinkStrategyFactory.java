@@ -1,22 +1,25 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.sink;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SinkStrategyFactory {
 
-    SaveStoryTileStrategy saveStoryTileStrategy;
+    @Autowired
+    SaveToPostgresSink saveToPostgresSink;
 
-    JournalFetcher journalFeedStrategy;
 
-    public SinkStrategy get(StrategyType strategyType) {
+    public SinkStrategy get(SinkType strategyType) {
         switch (strategyType) {
-            case SAVE_STORY_FRAME:
-                return saveStoryTileStrategy;
+            case SAVE_TO_POSTGRES:
+                return saveToPostgresSink;
         }
         return null;
     }
 
-    public enum StrategyType {
-        SAVE_STORY_FRAME;
+    public enum SinkType {
+        SAVE_TO_POSTGRES,
+        SAVE_TO_NEO4J;
     }
 }

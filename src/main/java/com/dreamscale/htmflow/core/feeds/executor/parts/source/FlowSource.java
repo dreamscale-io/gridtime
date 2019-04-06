@@ -69,8 +69,7 @@ public class FlowSource implements Flow {
     }
 
 
-    @Override
-    public void addFlowObserver(FlowObserver observer) {
+    private void addFlowObserver(FlowObserver observer) {
         this.flowObservers.add(observer);
     }
 

@@ -8,5 +8,4 @@ public interface Flow {
 
     void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) throws InterruptedException;
 
-    void addFlowObserver(FlowObserver observer);
 }

@@ -13,7 +13,7 @@ public class StrangeLoop {
 
     private List<Flow> flowsToPlay;
     private List<LoopStrategy> loops;
-    private List<SinkStrategy> sinks;
+    private List<SinkStrategy> sinkStrategies;
 
     private final Metronome metronome;
     private final SharedFeaturePool sharedFeaturePool;
@@ -23,7 +23,7 @@ public class StrangeLoop {
         this.sharedFeaturePool = sharedFeaturePool;
         this.flowsToPlay = new ArrayList<>();
         this.loops = new ArrayList<>();
-        this.sinks = new ArrayList<>();
+        this.sinkStrategies = new ArrayList<>();
     }
 
     public void playFeed(Flow flow) {
@@ -31,7 +31,7 @@ public class StrangeLoop {
     }
 
     public void sink(SinkStrategy sinkStrategy) {
-        this.sinks.add(sinkStrategy);
+        this.sinkStrategies.add(sinkStrategy);
     }
 
     public void searchSimilar(LoopStrategy loopStrategy) {

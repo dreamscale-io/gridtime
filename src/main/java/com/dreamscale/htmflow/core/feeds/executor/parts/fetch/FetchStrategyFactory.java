@@ -20,8 +20,8 @@ public class FetchStrategyFactory {
 
 
 
-    public FetchStrategy get(StrategyType strategyType) {
-        switch (strategyType) {
+    public FetchStrategy get(FeedType feedType) {
+        switch (feedType) {
             case FILE_ACTIVITY_FEED:
                 return fileActivityFeedStrategy;
             case JOURNAL_FEED:
@@ -34,7 +34,7 @@ public class FetchStrategyFactory {
         return null;
     }
 
-    public enum StrategyType {
+    public enum FeedType {
         JOURNAL_FEED,
         FILE_ACTIVITY_FEED,
         EXECUTION_ACTIVITY_FEED,

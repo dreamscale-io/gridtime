@@ -26,6 +26,9 @@ public class CandleStick {
     }
 
     public void combineAggregate(CandleStick candleStick) {
+        if (sampleCount + candleStick.sampleCount == 0) {
+            return; //don't divide by 0
+        }
         avg = ((avg * sampleCount) + (candleStick.avg * candleStick.sampleCount)) / (sampleCount + candleStick.sampleCount);
 
         stddev = Math.sqrt(((Math.pow(stddev, 2) * sampleCount) + (Math.pow(candleStick.stddev, 2) * candleStick.sampleCount))
