@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class AuthorDetails implements Details {
+public class AuthorDetails extends Details {
 
     private List<LinkedMember> pairedAuthors;
 

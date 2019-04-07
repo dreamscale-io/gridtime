@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story.feature.details;
 import lombok.Getter;
 
 @Getter
-public class FeelsDetails implements Details {
+public class FeelsDetails extends Details {
 
     private Integer flameRating;
 

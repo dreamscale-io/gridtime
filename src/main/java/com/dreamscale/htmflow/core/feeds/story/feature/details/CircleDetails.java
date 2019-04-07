@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class CircleDetails implements Details {
+public class CircleDetails extends Details {
 
     private final UUID circleId;
     private final String circleName;

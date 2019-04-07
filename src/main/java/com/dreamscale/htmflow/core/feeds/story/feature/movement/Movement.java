@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.LocalDateTime;
 
-public class Movement implements FlowFeature {
+public class Movement extends FlowFeature {
 
     private LocalDateTime moment;
     private int relativeOffset = 0;

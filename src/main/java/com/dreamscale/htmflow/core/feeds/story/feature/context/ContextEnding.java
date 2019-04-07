@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ContextEnding implements FlowFeature, ContextChangeEvent {
+public class ContextEnding extends FlowFeature implements ContextChangeEvent {
 
     private UUID referenceId;
     private ContextStructureLevel structureLevel;

@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.ProgressDetails;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class TimeBand implements FlowFeature {
+public class TimeBand extends FlowFeature {
 
     private Details details;
     private LocalDateTime start;

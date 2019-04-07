@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
 
-public class ExecutionDetails implements FlowFeature {
+public class ExecutionDetails extends FlowFeature {
 
 
     private Duration duration;

@@ -1,20 +1,22 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Box implements FlowFeature {
+@Getter
+public class Box extends FlowFeature {
 
-    private final String placeName;
+    private final String boxName;
     private final List<ThoughtBubble> thoughtBubbles;
 
     private final List<BoxToBubbleLink> boxToBubbleLinks = new ArrayList<>();
     private int relativeSequence;
 
-    public Box(String placeName, List<ThoughtBubble> thoughtBubbles) {
-        this.placeName = placeName;
+    public Box(String boxName, List<ThoughtBubble> thoughtBubbles) {
+        this.boxName = boxName;
         this.thoughtBubbles = thoughtBubbles;
 
         int sequence = 1;
@@ -24,7 +26,7 @@ public class Box implements FlowFeature {
         }
     }
 
-    public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInFocus locationInBubble) {
+    public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInBox locationInBubble) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(locationInBubble);
 
         BoxToBubbleLink boxToBubble = findOrCreateBoxToBubbleLink(bubbleFound);
@@ -49,7 +51,7 @@ public class Box implements FlowFeature {
         return boxToBubbleLinkFound;
     }
 
-    private ThoughtBubble findBubbleContainingLocation(LocationInFocus locationInBubble) {
+    private ThoughtBubble findBubbleContainingLocation(LocationInBox locationInBubble) {
         ThoughtBubble bubbleFound = null;
 
         for (ThoughtBubble bubble : thoughtBubbles) {
@@ -61,7 +63,7 @@ public class Box implements FlowFeature {
         return bubbleFound;
     }
 
-    public boolean contains(LocationInFocus location) {
+    public boolean contains(LocationInBox location) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(location);
 
         if (bubbleFound != null) {
@@ -75,7 +77,4 @@ public class Box implements FlowFeature {
         this.relativeSequence = relativeBoxSequence;
     }
 
-    public int getRelativeSequence() {
-        return this.relativeSequence;
-    }
 }

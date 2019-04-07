@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.common;
 
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.story.StoryTileSequence;
 
@@ -9,7 +11,7 @@ import java.util.UUID;
 
 public class SharedFeaturePool {
 
-    private final UUID memberId;
+    private final String feedUri;
 
 
     private final HashMap<ZoomLevel, StoryTileSequence> storySequenceByZoomLevel;
@@ -19,17 +21,17 @@ public class SharedFeaturePool {
     private OuterGeometryClock.Coords activeFocusCoordinates;
 
 
-    public SharedFeaturePool(UUID memberId, OuterGeometryClock.Coords startingCoordinates) {
+    public SharedFeaturePool(UUID torchieId, OuterGeometryClock.Coords startingCoordinates) {
 
-        this.memberId = memberId;
+        this.feedUri = StandardizedKeyMapper.createTorchieFeedUri(torchieId);
 
         this.storySequenceByZoomLevel = new HashMap<>();
-        this.storySequenceByZoomLevel.put(ZoomLevel.MIN, new StoryTileSequence(ZoomLevel.MIN, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.HOUR, new StoryTileSequence(ZoomLevel.HOUR, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.DAY, new StoryTileSequence(ZoomLevel.DAY, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.WEEK, new StoryTileSequence(ZoomLevel.WEEK, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.BLOCK, new StoryTileSequence(ZoomLevel.BLOCK, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.YEAR, new StoryTileSequence(ZoomLevel.YEAR, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.MIN, new StoryTileSequence(feedUri, ZoomLevel.MIN, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.HOUR, new StoryTileSequence(feedUri, ZoomLevel.HOUR, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.DAY, new StoryTileSequence(feedUri, ZoomLevel.DAY, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.WEEK, new StoryTileSequence(feedUri, ZoomLevel.WEEK, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.BLOCK, new StoryTileSequence(feedUri, ZoomLevel.BLOCK, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.YEAR, new StoryTileSequence(feedUri, ZoomLevel.YEAR, startingCoordinates));
 
         this.activeZoomLevel = ZoomLevel.MIN;
 

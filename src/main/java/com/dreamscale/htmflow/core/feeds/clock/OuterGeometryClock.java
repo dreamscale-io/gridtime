@@ -51,18 +51,25 @@ public class OuterGeometryClock {
 
         int weeksIntoBlock = calcWeeksIntoBlock(weeksIntoYear);
 
+        int blocksIntoYear = calcBlocksIntoYear(weeksIntoYear);
+
         return new Coords(nextClockTime,
                 minuteBucketsIntoHour,
                 hoursIntoDay,
                 daysIntoWeek,
                 weeksIntoYear,
                 weeksIntoBlock,
+                blocksIntoYear,
                 currentYear);
+    }
+
+    private static int calcBlocksIntoYear(int weeksIntoYear) {
+        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCK.buckets()) + 1;
     }
 
     private static int calcWeeksIntoBlock(int weeksIntoYear) {
 
-        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCK.buckets()) + 1;
+        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK.buckets());
     }
 
     private static int calcAdjustedYear(int firstMondayOffset, LocalDateTime clock) {
@@ -130,7 +137,12 @@ public class OuterGeometryClock {
         final int daysIntoWeek;
         final int weeksIntoYear;
         final int weeksIntoBlock;
+        final int blocksIntoYear;
         final int currentYear;
+
+        public String formatCoords() {
+            return currentYear + "-" + blocksIntoYear + "-" + weeksIntoBlock + "-" + daysIntoWeek + "-" + hoursIntoDay + "-" + minuteBucketsIntoHour;
+        }
 
         public Coords panLeft(ZoomLevel zoomLevel) {
 
@@ -221,6 +233,8 @@ public class OuterGeometryClock {
         public Coords plusYear() {
             return OuterGeometryClock.createGeometryCoords(clockTime.plusYears(1));
         }
+
+
     }
 
 }

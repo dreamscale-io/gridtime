@@ -1,16 +1,18 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class BoxToBubbleLink implements FlowFeature {
+@Getter
+public class BoxToBubbleLink extends FlowFeature {
 
     private final ThoughtBubble thoughtBubble;
 
     private final Set<Bridge> bridges = new HashSet<>();
-    private final Set<LocationInFocus> connectedLocations = new HashSet<>();
+    private final Set<LocationInBox> connectedLocations = new HashSet<>();
 
 
     public BoxToBubbleLink(ThoughtBubble bubble) {
@@ -25,7 +27,7 @@ public class BoxToBubbleLink implements FlowFeature {
         this.bridges.add(bridge);
     }
 
-    public void addConnectedLocationToSet(LocationInFocus location) {
+    public void addConnectedLocationToSet(LocationInBox location) {
         connectedLocations.add(location);
     }
 

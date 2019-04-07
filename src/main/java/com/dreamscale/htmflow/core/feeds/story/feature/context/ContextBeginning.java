@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ContextBeginning implements FlowFeature, ContextChangeEvent {
+public class ContextBeginning extends FlowFeature implements ContextChangeEvent {
 
     private UUID referenceId;
     private ContextStructureLevel structureLevel;

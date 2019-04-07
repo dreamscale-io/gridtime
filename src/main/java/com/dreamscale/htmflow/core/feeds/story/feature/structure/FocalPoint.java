@@ -1,23 +1,24 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.GravityBallOfThoughts;
 
 import java.time.Duration;
 import java.util.List;
 
-public class FocalPoint implements FlowFeature {
+public class FocalPoint extends FlowFeature {
 
-    private String placeName;
+    private String boxName;
 
     private final GravityBallOfThoughts gravityBall;
 
-    private LocationInFocus currentLocation;
+    private LocationInBox currentLocation;
     private List<ThoughtBubble> extractedThoughtBubbles;
 
 
-    public FocalPoint(String placeName, String initialLocationPath) {
-        this.placeName = placeName;
+    public FocalPoint(String boxName, String initialLocationPath) {
+        this.boxName = boxName;
 
         this.gravityBall = new GravityBallOfThoughts(this);
         this.gravityBall.gotoLocationInSpace(initialLocationPath);
@@ -26,13 +27,13 @@ public class FocalPoint implements FlowFeature {
 
     }
 
-    public String getPlaceName() {
-        return placeName;
+    public String getBoxName() {
+        return boxName;
     }
 
-    public LocationInFocus goToLocation(String locationPath, Duration timeInLocation) {
+    public LocationInBox goToLocation(String locationPath, Duration timeInLocation) {
 
-        LocationInFocus location = gravityBall.gotoLocationInSpace(locationPath);
+        LocationInBox location = gravityBall.gotoLocationInSpace(locationPath);
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -52,7 +53,7 @@ public class FocalPoint implements FlowFeature {
         return this.extractedThoughtBubbles;
     }
 
-    public LocationInFocus getCurrentLocation() {
+    public LocationInBox getCurrentLocation() {
         return currentLocation;
     }
 
@@ -60,19 +61,21 @@ public class FocalPoint implements FlowFeature {
         currentLocation.modify(modificationCount);
     }
 
-    public LocationInFocus exit() {
+    public LocationInBox exit() {
         currentLocation = gravityBall.gotoExit();
 
         return currentLocation;
     }
 
-    public LocationInFocus enter() {
+    public LocationInBox enter() {
         currentLocation = gravityBall.gotoEntrance();
 
         return currentLocation;
     }
 
-
+    public String toKey() {
+        return StandardizedKeyMapper.createBoxKey(boxName);
+    }
 
 
 }

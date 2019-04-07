@@ -1,20 +1,22 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.Getter;
 
-public class Bridge implements FlowFeature {
+@Getter
+public class Bridge extends FlowFeature {
 
     private final String bridgeKey;
 
     private Box fromBox;
     private Box toBox;
-    private final LocationInFocus fromLocation;
-    private final LocationInFocus toLocation;
+    private final LocationInBox fromLocation;
+    private final LocationInBox toLocation;
 
     private int visitCount;
     private int relativeSequence;
 
-    public Bridge(String bridgeKey, LocationInFocus fromLocation, LocationInFocus toLocation) {
+    public Bridge(String bridgeKey, LocationInBox fromLocation, LocationInBox toLocation) {
         this.bridgeKey = bridgeKey;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
@@ -29,11 +31,11 @@ public class Bridge implements FlowFeature {
         this.toBox = boxWithToLocation;
     }
 
-    public LocationInFocus getFromLocation() {
+    public LocationInBox getFromLocation() {
         return fromLocation;
     }
 
-    public LocationInFocus getToLocation() {
+    public LocationInBox getToLocation() {
         return toLocation;
     }
 

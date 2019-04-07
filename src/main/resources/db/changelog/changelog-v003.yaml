@@ -39,3 +39,8 @@ databaseChangeLog:
   - include:
         file: db/v003/refactor/replace_circle_feed_message_view_torchie_id.sql
 
+  - include:
+        file: db/v003/uri/create_uri_within_project.sql
+
+  - include:
+        file: db/v003/uri/create_uri_within_flow.sql

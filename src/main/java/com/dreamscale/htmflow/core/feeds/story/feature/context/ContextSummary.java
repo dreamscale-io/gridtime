@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ContextSummary implements FlowFeature {
+public class ContextSummary extends FlowFeature {
 
     private ContextBeginning projectContext;
     private ContextBeginning taskContext;

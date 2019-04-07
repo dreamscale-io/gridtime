@@ -65,7 +65,7 @@ public class ZoomableFlow implements ClockChangeListener {
         StoryTile storyTile =
                 this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
 
-        this.activeFocus = storyTile.getStoryFrameCoordinates();
+        this.activeFocus = storyTile.getTileCoordinates();
         return storyTile;
     }
 

@@ -54,7 +54,7 @@ public class CarryOverContext {
         return flowFeatures.getOriginalTypedList();
     }
 
-    private class ListOfFlowFeatures implements FlowFeature {
+    private class ListOfFlowFeatures extends FlowFeature {
         private final List<? extends FlowFeature> featureList;
 
         ListOfFlowFeatures(List<? extends FlowFeature> featureList) {

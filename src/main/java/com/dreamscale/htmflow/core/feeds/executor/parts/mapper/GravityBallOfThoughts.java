@@ -1,9 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.RadialStructure;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.ThoughtBubble;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 
 import java.time.Duration;
 import java.util.*;
@@ -18,33 +15,33 @@ import java.util.*;
 
 public class GravityBallOfThoughts {
 
-    private final Map<String, LocationInFocus> locationMap = new HashMap<>();
-    private final Map<String, Link> linkMap = new HashMap<>();
-    private final FocalPoint place;
+    private final Map<String, LocationInBox> locationMap = new HashMap<>();
+    private final Map<String, Traversal> traversalMap = new HashMap<>();
+    private final FocalPoint box;
 
     private Map<String, ThoughtParticle> thoughtParticleMap = new HashMap<>();
     private LinkedList<ThoughtParticle> thoughtTracer = new LinkedList<>();
 
-    private LocationInFocus currentLocation;
+    private LocationInBox currentLocation;
     private int locationIndex = 1;
 
     private static final int TRACER_LENGTH = 5;
 
-    private static final String ENTRANCE_OF_PLACE = "[entrance]";
-    private static final String EXIT_OF_PLACE = "[exit]";
+    private static final String ENTRANCE_OF_BOX = "[entrance]";
+    private static final String EXIT_OF_BOX = "[exit]";
 
-    private LocationInFocus exitLocation;
-    private LocationInFocus entranceLocation;
+    private LocationInBox exitLocation;
+    private LocationInBox entranceLocation;
 
 
-    public GravityBallOfThoughts(FocalPoint place) {
-        this.place = place;
+    public GravityBallOfThoughts(FocalPoint box) {
+        this.box = box;
     }
 
-    public LocationInFocus gotoLocationInSpace(String locationPath) {
+    public LocationInBox gotoLocationInSpace(String locationPath) {
 
-        LocationInFocus fromLocation = currentLocation;
-        LocationInFocus toLocation = findOrCreateLocation(locationPath);
+        LocationInBox fromLocation = currentLocation;
+        LocationInBox toLocation = findOrCreateLocation(locationPath);
 
         toLocation.visit();
         currentLocation = toLocation;
@@ -54,18 +51,18 @@ public class GravityBallOfThoughts {
         return toLocation;
     }
 
-    public LocationInFocus gotoExit() {
-        this.exitLocation = gotoLocationInSpace(EXIT_OF_PLACE);
+    public LocationInBox gotoExit() {
+        this.exitLocation = gotoLocationInSpace(EXIT_OF_BOX);
         return this.exitLocation;
     }
 
-    public LocationInFocus gotoEntrance() {
-        this.entranceLocation = gotoLocationInSpace(ENTRANCE_OF_PLACE);
+    public LocationInBox gotoEntrance() {
+        this.entranceLocation = gotoLocationInSpace(ENTRANCE_OF_BOX);
         return this.entranceLocation;
     }
 
 
-    public LocationInFocus getCurrentLocation() {
+    public LocationInBox getCurrentLocation() {
         return currentLocation;
     }
 
@@ -90,12 +87,12 @@ public class GravityBallOfThoughts {
         }
     }
 
-    private void addThoughtParticleForTraversal(LocationInFocus fromLocation, LocationInFocus toLocation) {
+    private void addThoughtParticleForTraversal(LocationInBox fromLocation, LocationInBox toLocation) {
 
-        Link edge = findOrCreateEdge(fromLocation, toLocation);
-        edge.visit();
+        Traversal traversal = findOrCreateEdge(fromLocation, toLocation);
+        traversal.visit();
 
-        ThoughtParticle particle = findOrCreateParticle(edge);
+        ThoughtParticle particle = findOrCreateParticle(traversal);
 
         pushThoughtParticleOntoTracer(particle);
     }
@@ -149,21 +146,21 @@ public class GravityBallOfThoughts {
         List<ThoughtParticle> particlesToRemove = new ArrayList<>();
 
         for (ThoughtParticle enterExitParticle : enterExitTransitions) {
-            Link link = enterExitParticle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal traversal = enterExitParticle.getLink();
+            LocationInBox locationA = traversal.getLocationA();
+            LocationInBox locationB = traversal.getLocationB();
 
-            LocationInFocus nonEnterExitLocation = getNonEnterExitNode(locationA, locationB);
+            LocationInBox nonEnterExitLocation = getNonEnterExitNode(locationA, locationB);
             if (nonEnterExitLocation == null) {
                 //this is a useless exit to enter transition, just delete it
                 particlesToRemove.add(enterExitParticle);
             } else if (radialStructure.contains(nonEnterExitLocation)) {
-                LocationInFocus enterExitLocation = getEnterExitNode(locationA, locationB);
+                LocationInBox enterExitLocation = getEnterExitNode(locationA, locationB);
 
                 if (enterExitLocation == entranceLocation) {
-                    radialStructure.addLinkFromEntrance(nonEnterExitLocation, link.getTraversalCount(), enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    radialStructure.addLinkFromEntrance(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
                 } else if (enterExitLocation == exitLocation) {
-                    radialStructure.addLinkToExit(nonEnterExitLocation, link.getTraversalCount(), enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    radialStructure.addLinkToExit(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
                 }
 
                 particlesToRemove.add(enterExitParticle);
@@ -172,7 +169,7 @@ public class GravityBallOfThoughts {
         return particlesToRemove;
     }
 
-    private LocationInFocus getEnterExitNode(LocationInFocus locationA, LocationInFocus locationB) {
+    private LocationInBox getEnterExitNode(LocationInBox locationA, LocationInBox locationB) {
         if (locationA == entranceLocation || locationA == exitLocation) {
             return locationA;
         }
@@ -183,7 +180,7 @@ public class GravityBallOfThoughts {
         return null;
     }
 
-    private LocationInFocus getNonEnterExitNode(LocationInFocus locationA, LocationInFocus locationB) {
+    private LocationInBox getNonEnterExitNode(LocationInBox locationA, LocationInBox locationB) {
         if (locationA != entranceLocation && locationA != exitLocation) {
             return locationA;
         }
@@ -196,27 +193,27 @@ public class GravityBallOfThoughts {
     private RadialStructure createRadialStructureAndRemoveParticlesUsed(List<ThoughtParticle> particlesByWeight) {
         RadialStructure radialStructure = new RadialStructure();
 
-        LocationInFocus centerOfFocus = getCenterOfFocus(particlesByWeight);
+        LocationInBox centerOfFocus = getCenterOfFocus(particlesByWeight);
         radialStructure.placeCenter(centerOfFocus);
         radialStructure.placeEntrance(entranceLocation);
         radialStructure.placeExit(exitLocation);
 
         List<ThoughtParticle> firstRingParticles = findConnectedParticles(particlesByWeight, centerOfFocus);
-        List<LocationInFocus> firstRingLocations = createFirstRing(radialStructure, firstRingParticles, centerOfFocus);
+        List<LocationInBox> firstRingLocations = createFirstRing(radialStructure, firstRingParticles, centerOfFocus);
         particlesByWeight.removeAll(firstRingParticles);
 
         List<ThoughtParticle> connectionsWithinFirstRing = findParticlesCompletelyWithinRing(particlesByWeight, firstRingLocations);
         createMoreLinksInFirstRing(radialStructure, connectionsWithinFirstRing);
         particlesByWeight.removeAll(connectionsWithinFirstRing);
 
-        List<LocationInFocus> locationsInLastRing = firstRingLocations;
+        List<LocationInBox> locationsInLastRing = firstRingLocations;
         int lastParticlesRemaining = particlesByWeight.size();
 
         //add rings until remaining particles are disconnected
 
         while (particlesByWeight.size() > 0 )  {
             List<ThoughtParticle> connectionsForNextRing = findConnectedParticles(particlesByWeight, locationsInLastRing);
-            List<LocationInFocus> nextRingLocations = createNextRing(radialStructure, connectionsForNextRing, locationsInLastRing);
+            List<LocationInBox> nextRingLocations = createNextRing(radialStructure, connectionsForNextRing, locationsInLastRing);
             particlesByWeight.removeAll(connectionsForNextRing);
 
             List<ThoughtParticle> connectionsWithinNewRing = findParticlesCompletelyWithinRing(particlesByWeight, nextRingLocations);
@@ -237,9 +234,9 @@ public class GravityBallOfThoughts {
     private List<ThoughtParticle> findEnterExitTransitions(List<ThoughtParticle> particlesByWeight) {
         List<ThoughtParticle> enterExitTransitions = new ArrayList<>();
         for (ThoughtParticle particle : particlesByWeight) {
-            Link link = particle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal link = particle.getLink();
+            LocationInBox locationA = link.getLocationA();
+            LocationInBox locationB = link.getLocationB();
 
             if (locationA == entranceLocation || locationB == entranceLocation ||
                     locationA == exitLocation || locationB == exitLocation) {
@@ -250,20 +247,20 @@ public class GravityBallOfThoughts {
         return enterExitTransitions;
     }
 
-    private List<LocationInFocus> createNextRing(RadialStructure radialStructure,
-                                                 List<ThoughtParticle> connectionsForNextRing,
-                                                 List<LocationInFocus> locationsInLastRing) {
+    private List<LocationInBox> createNextRing(RadialStructure radialStructure,
+                                               List<ThoughtParticle> connectionsForNextRing,
+                                               List<LocationInBox> locationsInLastRing) {
         radialStructure.createNextRing();
 
         for (ThoughtParticle connectedParticle : connectionsForNextRing) {
-            Link link = connectedParticle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal traversal = connectedParticle.getLink();
+            LocationInBox locationA = traversal.getLocationA();
+            LocationInBox locationB = traversal.getLocationB();
 
-            LocationInFocus locationToLinkTo = getSourceLocation(locationsInLastRing, locationA, locationB);
-            LocationInFocus locationToAdd = getConnectedLocation(locationsInLastRing, locationA, locationB);
+            LocationInBox locationToLinkTo = getSourceLocation(locationsInLastRing, locationA, locationB);
+            LocationInBox locationToAdd = getConnectedLocation(locationsInLastRing, locationA, locationB);
 
-            radialStructure.addLocationToHighestRing(locationToLinkTo, locationToAdd, link.getTraversalCount(),
+            radialStructure.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal,
                     connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
         }
 
@@ -275,11 +272,11 @@ public class GravityBallOfThoughts {
                                               List<ThoughtParticle> connectionsWithinHighestRing) {
 
         for (ThoughtParticle particle : connectionsWithinHighestRing) {
-            Link link = particle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal traversal = particle.getLink();
+            LocationInBox locationA = traversal.getLocationA();
+            LocationInBox locationB = traversal.getLocationB();
 
-            radialStructure.addExtraLinkWithinHighestRing(locationA, locationB, link.getTraversalCount(),
+            radialStructure.addExtraLinkWithinHighestRing(locationA, locationB, traversal,
                     particle.getFocusWeight(), particle.getVelocity());
         }
     }
@@ -288,28 +285,28 @@ public class GravityBallOfThoughts {
                                             List<ThoughtParticle> connectionsWithinFirstRing) {
 
         for (ThoughtParticle particle : connectionsWithinFirstRing) {
-            Link link = particle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal traversal = particle.getLink();
+            LocationInBox locationA = traversal.getLocationA();
+            LocationInBox locationB = traversal.getLocationB();
 
-            radialStructure.addExtraLinkWithinFirstRing(locationA, locationB, link.getTraversalCount(),
+            radialStructure.addExtraLinkWithinFirstRing(locationA, locationB, traversal,
                     particle.getFocusWeight(), particle.getVelocity());
         }
     }
 
 
-    private List<LocationInFocus> createFirstRing(RadialStructure radialStructure,
-                                                  List<ThoughtParticle> firstRingParticles,
-                                                  LocationInFocus centerOfFocus) {
+    private List<LocationInBox> createFirstRing(RadialStructure radialStructure,
+                                                List<ThoughtParticle> firstRingParticles,
+                                                LocationInBox centerOfFocus) {
 
         for (ThoughtParticle connectedParticle : firstRingParticles) {
-            Link link = connectedParticle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal traversal = connectedParticle.getLink();
+            LocationInBox locationA = traversal.getLocationA();
+            LocationInBox locationB = traversal.getLocationB();
 
-            LocationInFocus locationToAdd = getConnectedLocation(centerOfFocus, locationA, locationB);
+            LocationInBox locationToAdd = getConnectedLocation(centerOfFocus, locationA, locationB);
 
-            radialStructure.addLocationToFirstRing(locationToAdd, link.getTraversalCount(),
+            radialStructure.addLocationToFirstRing(locationToAdd, traversal,
                     connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
 
         }
@@ -318,13 +315,13 @@ public class GravityBallOfThoughts {
     }
 
     private List<ThoughtParticle> findParticlesCompletelyWithinRing(List<ThoughtParticle> particlesByWeight,
-                                                                    List<LocationInFocus> firstRingLocations) {
+                                                                    List<LocationInBox> firstRingLocations) {
         List<ThoughtParticle> particlesInsideRing = new ArrayList<>();
 
         for (ThoughtParticle particle : particlesByWeight) {
-            Link link = particle.getLink();
-            LocationInFocus locationA = link.getLocationA();
-            LocationInFocus locationB = link.getLocationB();
+            Traversal link = particle.getLink();
+            LocationInBox locationA = link.getLocationA();
+            LocationInBox locationB = link.getLocationB();
 
             if (firstRingLocations.contains(locationA) && firstRingLocations.contains(locationB)) {
                 particlesInsideRing.add(particle);
@@ -334,8 +331,8 @@ public class GravityBallOfThoughts {
         return particlesInsideRing;
     }
 
-    private LocationInFocus getSourceLocation(List<LocationInFocus> locationsInLastRing,
-                                              LocationInFocus locationA, LocationInFocus locationB) {
+    private LocationInBox getSourceLocation(List<LocationInBox> locationsInLastRing,
+                                            LocationInBox locationA, LocationInBox locationB) {
         if (locationsInLastRing.contains(locationA)) {
             return locationA;
         } else {
@@ -344,8 +341,8 @@ public class GravityBallOfThoughts {
 
     }
 
-    private LocationInFocus getConnectedLocation(List<LocationInFocus> locationsInLastRing,
-                                                 LocationInFocus locationA, LocationInFocus locationB) {
+    private LocationInBox getConnectedLocation(List<LocationInBox> locationsInLastRing,
+                                               LocationInBox locationA, LocationInBox locationB) {
         if (locationsInLastRing.contains(locationA)) {
             return locationB;
         } else {
@@ -353,8 +350,8 @@ public class GravityBallOfThoughts {
         }
     }
 
-    private LocationInFocus getConnectedLocation(LocationInFocus centerOfFocus,
-                                                 LocationInFocus locationA, LocationInFocus locationB) {
+    private LocationInBox getConnectedLocation(LocationInBox centerOfFocus,
+                                               LocationInBox locationA, LocationInBox locationB) {
         if (centerOfFocus == locationA) {
             return locationB;
         } else {
@@ -363,12 +360,12 @@ public class GravityBallOfThoughts {
     }
 
     private List<ThoughtParticle> findConnectedParticles(List<ThoughtParticle> particlesByWeight,
-                                                         List<LocationInFocus> lastRingLocations) {
+                                                         List<LocationInBox> lastRingLocations) {
         List<ThoughtParticle> connectedParticles = new ArrayList<>();
 
         for (ThoughtParticle particle : particlesByWeight) {
-            LocationInFocus locationA = particle.getLink().getLocationA();
-            LocationInFocus locationB = particle.getLink().getLocationB();
+            LocationInBox locationA = particle.getLink().getLocationA();
+            LocationInBox locationB = particle.getLink().getLocationB();
 
             if (lastRingLocations.contains(locationA) || lastRingLocations.contains(locationB)) {
                 connectedParticles.add(particle);
@@ -379,12 +376,12 @@ public class GravityBallOfThoughts {
     }
 
     private List<ThoughtParticle> findConnectedParticles(List<ThoughtParticle> particlesByWeight,
-                                                         LocationInFocus centerOfFocus) {
+                                                         LocationInBox centerOfFocus) {
         List<ThoughtParticle> connectedParticles = new ArrayList<>();
 
         for (ThoughtParticle particle : particlesByWeight) {
-            LocationInFocus locationA = particle.getLink().getLocationA();
-            LocationInFocus locationB = particle.getLink().getLocationB();
+            LocationInBox locationA = particle.getLink().getLocationA();
+            LocationInBox locationB = particle.getLink().getLocationB();
 
             if ((centerOfFocus == locationA || centerOfFocus == locationB)) {
                 connectedParticles.add(particle);
@@ -394,23 +391,23 @@ public class GravityBallOfThoughts {
         return connectedParticles;
     }
 
-    private LocationInFocus findOrCreateLocation(String locationPath) {
-        LocationInFocus location = locationMap.get(locationPath);
+    private LocationInBox findOrCreateLocation(String locationPath) {
+        LocationInBox location = locationMap.get(locationPath);
         if (location == null) {
-            location = new LocationInFocus(this.place, locationPath, locationIndex++);
+            location = new LocationInBox(this.box, locationPath, locationIndex++);
             locationMap.put(locationPath, location);
         }
         return location;
     }
 
-    private LocationInFocus getCenterOfFocus(List<ThoughtParticle> particlesByWeight) {
+    private LocationInBox getCenterOfFocus(List<ThoughtParticle> particlesByWeight) {
 
-        LocationInFocus center = null;
+        LocationInBox center = null;
 
         if (particlesByWeight.size() > 0) {
             ThoughtParticle heaviest = particlesByWeight.get(0);
 
-            Link link = heaviest.getLink();
+            Traversal link = heaviest.getLink();
 
             Duration timeInLocationA = link.getLocationA().getTotalTimeInvestment();
             Duration timeInLocationB = link.getLocationB().getTotalTimeInvestment();
@@ -484,7 +481,7 @@ public class GravityBallOfThoughts {
         return min;
     }
 
-    private ThoughtParticle findOrCreateParticle(Link edge) {
+    private ThoughtParticle findOrCreateParticle(Traversal edge) {
 
         String particleKey = edge.toKey();
         ThoughtParticle particle = thoughtParticleMap.get(particleKey);
@@ -532,7 +529,7 @@ public class GravityBallOfThoughts {
     }
 
     private class ThoughtParticle implements Comparable<ThoughtParticle> {
-        private final Link link;
+        private final Traversal link;
         private double weight;
         private double normalizedWeight;
         private double velocityWeightedAvg;
@@ -540,7 +537,7 @@ public class GravityBallOfThoughts {
 
         private double normalizedVelocity;
 
-        ThoughtParticle(Link link) {
+        ThoughtParticle(Traversal link) {
             this.link = link;
             this.weight = 0;
             velocitySampleCount = 0;
@@ -584,7 +581,7 @@ public class GravityBallOfThoughts {
             return Double.compare(weight, o.weight) * -1;
         }
 
-        public Link getLink() {
+        public Traversal getLink() {
             return link;
         }
 
@@ -598,64 +595,20 @@ public class GravityBallOfThoughts {
     }
 
 
-    private Link findOrCreateEdge(LocationInFocus locationA, LocationInFocus locationB) {
+    private Traversal findOrCreateEdge(LocationInBox locationA, LocationInBox locationB) {
 
-        String linkKey = createLinkKeyIgnoringOrder(locationA, locationB);
+        String traversalKey = StandardizedKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
 
-        Link link = linkMap.get(linkKey);
+        Traversal traversal = traversalMap.get(traversalKey);
 
-        if (link == null) {
-            link = new Link(locationA, locationB);
-            linkMap.put(linkKey, link);
+        if (traversal == null) {
+            traversal = new Traversal(locationA, locationB);
+            traversalMap.put(traversalKey, traversal);
         }
 
-        return link;
-    }
-
-    private String createLinkKeyIgnoringOrder(LocationInFocus locationA, LocationInFocus locationB) {
-        String pathA = locationA.toKey();
-        String pathB = locationB.toKey();
-
-        if (pathA.compareTo(pathB) > 0) {
-            pathA = locationB.getLocationPath();
-            pathB = locationA.getLocationPath();
-        }
-
-        return pathA + pathB;
+        return traversal;
     }
 
 
-    private class Link {
-
-        private final LocationInFocus locationA;
-        private final LocationInFocus locationB;
-        private int visitCounter;
-
-        Link(LocationInFocus locationA, LocationInFocus locationB) {
-            this.locationA = locationA;
-            this.locationB = locationB;
-            this.visitCounter = 0;
-        }
-
-        LocationInFocus getLocationA() {
-            return locationA;
-        }
-
-        LocationInFocus getLocationB() {
-            return locationB;
-        }
-
-        void visit() {
-            this.visitCounter++;
-        }
-
-        String toKey() {
-            return locationA.toKey() + "=>" + locationB.toKey();
-        }
-
-        int getTraversalCount() {
-            return visitCounter;
-        }
-    }
 
 }

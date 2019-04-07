@@ -254,7 +254,7 @@ class CircleResourceSpec extends Specification {
         CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
-        screenshotReferenceInputDto.setFileName("file placeName");
+        screenshotReferenceInputDto.setFileName("file boxName");
         screenshotReferenceInputDto.setFilePath("/some/path/to/file")
 
         when:

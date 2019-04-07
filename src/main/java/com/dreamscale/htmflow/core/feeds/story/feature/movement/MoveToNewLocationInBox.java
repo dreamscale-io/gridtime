@@ -1,19 +1,19 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 
 import java.time.LocalDateTime;
 
 public class MoveToNewLocationInBox extends Movement {
 
-    private final LocationInFocus location;
+    private final LocationInBox location;
 
-    public MoveToNewLocationInBox(LocalDateTime moment, LocationInFocus location) {
+    public MoveToNewLocationInBox(LocalDateTime moment, LocationInBox location) {
         super(moment);
         this.location = location;
     }
 
-    public LocationInFocus getLocation() {
+    public LocationInBox getLocation() {
         return location;
     }
 }

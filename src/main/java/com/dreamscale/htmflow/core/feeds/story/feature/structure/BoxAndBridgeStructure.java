@@ -10,9 +10,9 @@ public class BoxAndBridgeStructure {
     private List<Box> boxes = new ArrayList<>();
     private List<Bridge> bridges = new ArrayList<>();
 
-    public void createThoughtBox(String placeName, List<ThoughtBubble> thoughtBubbles) {
+    public void createThoughtBox(String boxName, List<ThoughtBubble> thoughtBubbles) {
 
-        Box box = new Box(placeName, thoughtBubbles);
+        Box box = new Box(boxName, thoughtBubbles);
         box.setRelativeSequence(relativeBoxSequence);
         boxes.add(box);
 
@@ -21,8 +21,8 @@ public class BoxAndBridgeStructure {
 
     public void createBridge(Bridge bridgeBetweenBoxes) {
 
-        LocationInFocus fromLocation = bridgeBetweenBoxes.getFromLocation();
-        LocationInFocus toLocation = bridgeBetweenBoxes.getToLocation();
+        LocationInBox fromLocation = bridgeBetweenBoxes.getFromLocation();
+        LocationInBox toLocation = bridgeBetweenBoxes.getToLocation();
 
         Box boxWithFromLocation = findBoxContaining(fromLocation);
         Box boxWithToLocation = findBoxContaining(toLocation);
@@ -42,13 +42,21 @@ public class BoxAndBridgeStructure {
         relativeBridgeSequence++;
     }
 
-    private void validateBoxFound(Box boxWithFromLocation, LocationInFocus location) {
+    public List<Box> getBoxes() {
+        return boxes;
+    }
+
+    public List<Bridge> getBridges() {
+        return bridges;
+    }
+
+    private void validateBoxFound(Box boxWithFromLocation, LocationInBox location) {
         if (boxWithFromLocation == null) {
             throw new RuntimeException("Logic error, box not found for location: "+location);
         }
     }
 
-    private Box findBoxContaining(LocationInFocus location) {
+    private Box findBoxContaining(LocationInBox location) {
         Box boxFound = null;
         for (Box box : boxes) {
             if (box.contains(location)) {

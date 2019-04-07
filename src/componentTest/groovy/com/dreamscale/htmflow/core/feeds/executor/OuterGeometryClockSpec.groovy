@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 import java.time.LocalDateTime
 
-class GeometryClockSpec extends Specification {
+class OuterGeometryClockSpec extends Specification {
 
     OuterGeometryClock geometryClock
 
@@ -26,6 +26,8 @@ class GeometryClockSpec extends Specification {
         assert coords.hoursIntoDay == 4
         assert coords.minuteBucketsIntoHour == 2
         assert coords.weeksIntoBlock == 1
+        assert coords.blocksIntoYear == 1
+
 
     }
 

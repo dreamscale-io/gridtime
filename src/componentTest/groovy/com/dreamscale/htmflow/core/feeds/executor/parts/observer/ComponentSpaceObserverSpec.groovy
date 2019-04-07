@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryTile(new OuterGeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryTile("@torchie/id", new OuterGeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create Location traversals inside a Place"() {

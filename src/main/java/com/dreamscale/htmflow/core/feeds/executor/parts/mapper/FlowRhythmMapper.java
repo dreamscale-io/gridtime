@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
 
 import java.time.LocalDateTime;
@@ -60,7 +60,7 @@ public class FlowRhythmMapper {
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
         RhythmLayerMapper modificationLayer = findOrCreateLayer(RhythmLayerType.MODIFICATION_ACTIVITY);
 
-        LocationInFocus location = getLastLocation();
+        LocationInBox location = getLastLocation();
 
         modificationLayer.addMovement(internalClock, new ModifyLocation(moment, location, modificationCount));
 
@@ -94,11 +94,11 @@ public class FlowRhythmMapper {
     }
 
 
-    private LocationInFocus getLastLocation() {
+    private LocationInBox getLastLocation() {
         RhythmLayerMapper locationLayer = findOrCreateLayer(RhythmLayerType.LOCATION_CHANGES);
         Movement movement = locationLayer.getLastMovement();
 
-        LocationInFocus location = null;
+        LocationInBox location = null;
         if (movement instanceof MoveToNewLocationInBox) {
             location = ((MoveToNewLocationInBox) movement).getLocation();
         }

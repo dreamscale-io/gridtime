@@ -1,12 +1,13 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
 
-public class LocationInFocus implements FlowFeature {
+public class LocationInBox extends FlowFeature {
 
-    private final FocalPoint mainFocus;
+    private final FocalPoint box;
     private final String locationPath;
     private final int locationIndex;
 
@@ -14,8 +15,8 @@ public class LocationInFocus implements FlowFeature {
     private Duration totalTimeInvestment;
     private int visitCounter;
 
-    public LocationInFocus(FocalPoint mainFocus, String locationPath, int locationIndex) {
-        this.mainFocus = mainFocus;
+    public LocationInBox(FocalPoint box, String locationPath, int locationIndex) {
+        this.box = box;
         this.locationPath = locationPath;
         this.totalTimeInvestment = Duration.ofSeconds(0);
         this.visitCounter = 0;
@@ -39,12 +40,12 @@ public class LocationInFocus implements FlowFeature {
         this.modificationCount += modificationCount;
     }
 
-    public String getMainFocusName() {
-        return mainFocus.getPlaceName();
+    public String getBoxName() {
+        return box.getBoxName();
     }
 
     public String toKey() {
-       return "["+ mainFocus.getPlaceName() + "]:"+locationPath;
+       return box.toKey() + ":" + StandardizedKeyMapper.createLocationKey(locationPath);
     }
 
     public Duration getTotalTimeInvestment() {
@@ -52,6 +53,6 @@ public class LocationInFocus implements FlowFeature {
     }
 
     public String toString() {
-        return "[Location]:" + locationPath;
+        return toKey();
     }
 }

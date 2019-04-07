@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TimeBandLayer implements FlowFeature {
+public class TimeBandLayer extends FlowFeature {
 
     private final LocalDateTime from;
     private final LocalDateTime to;

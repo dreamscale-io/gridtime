@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
-public class ProgressDetails implements Details {
+public class ProgressDetails extends Details {
 
     String type;
 

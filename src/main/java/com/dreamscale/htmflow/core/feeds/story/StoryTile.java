@@ -12,7 +12,7 @@ import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInFocus;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
 
@@ -22,7 +22,7 @@ import java.util.*;
 
 public class StoryTile {
 
-    private final OuterGeometryClock.Coords storyFrameCoordinates;
+    private final OuterGeometryClock.Coords tileCoordinates;
     private final ZoomLevel zoomLevel;
 
     private final InnerGeometryClock internalClock;
@@ -31,15 +31,18 @@ public class StoryTile {
     private final SpatialGeometryMapper spatialGeometryMapper;
     private final FlowRhythmMapper flowRhythmMapper;
     private final FlowBandMapper timeBandMapper;
+    private final String tileUri;
 
 
-    public StoryTile(OuterGeometryClock.Coords storyFrameCoordinates, ZoomLevel zoomLevel) {
-        this.storyFrameCoordinates = storyFrameCoordinates;
+    public StoryTile(String feedUri, OuterGeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
+        this.tileCoordinates = tileCoordinates;
         this.zoomLevel = zoomLevel;
 
+        this.tileUri = StandardizedKeyMapper.createTileUri(feedUri, zoomLevel, tileCoordinates);
+
         this.internalClock = new InnerGeometryClock(
-                storyFrameCoordinates.getClockTime(),
-                storyFrameCoordinates.panRight(zoomLevel).getClockTime());
+                tileCoordinates.getClockTime(),
+                tileCoordinates.panRight(zoomLevel).getClockTime());
 
         this.contextMapper = new FlowContextMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.spatialGeometryMapper = new SpatialGeometryMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
@@ -191,8 +194,8 @@ public class StoryTile {
 
     //////////// Extract all the various state for persistence ////////////
 
-    public OuterGeometryClock.Coords getStoryFrameCoordinates() {
-        return storyFrameCoordinates;
+    public OuterGeometryClock.Coords getTileCoordinates() {
+        return tileCoordinates;
     }
 
     public ZoomLevel getZoomLevel() {
@@ -208,10 +211,10 @@ public class StoryTile {
     }
 
     public FocalPoint getCurrentFocalPoint() {
-        return spatialGeometryMapper.getCurrentFocusPlace();
+        return spatialGeometryMapper.getCurrentFocusBox();
     }
 
-    public LocationInFocus getCurrentLocationInFocus() {
+    public LocationInBox getCurrentLocationInFocus() {
         return spatialGeometryMapper.getCurrentLocation();
     }
 
@@ -244,4 +247,7 @@ public class StoryTile {
     }
 
 
+    public String getTileUri() {
+        return tileUri;
+    }
 }
