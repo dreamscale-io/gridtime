@@ -14,8 +14,8 @@ import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
-import com.dreamscale.htmflow.core.domain.MasterAccountRepository
-import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.domain.member.MasterAccountRepository
+import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.htmflow.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,7 +1,8 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.ProjectDto;
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.journal.ProjectEntity;
+import com.dreamscale.htmflow.core.domain.journal.ProjectRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;

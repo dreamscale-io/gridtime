@@ -4,9 +4,9 @@ import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.organization.MemberWorkStatusDto
 import com.dreamscale.htmflow.api.team.TeamDto
 import com.dreamscale.htmflow.client.MemberStatusClient
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity
-import com.dreamscale.htmflow.core.domain.OrganizationEntity
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.service.TeamService
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired

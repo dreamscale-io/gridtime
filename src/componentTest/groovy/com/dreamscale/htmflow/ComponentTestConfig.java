@@ -3,7 +3,7 @@ package com.dreamscale.htmflow;
 import com.dreamscale.htmflow.client.*;
 import com.dreamscale.htmflow.core.CoreARandom;
 import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.core.service.JiraService;

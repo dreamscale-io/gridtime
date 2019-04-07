@@ -2,7 +2,12 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.project.TaskDto;
 import com.dreamscale.htmflow.api.project.TaskInputDto;
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.journal.ProjectEntity;
+import com.dreamscale.htmflow.core.domain.journal.ProjectRepository;
+import com.dreamscale.htmflow.core.domain.journal.TaskEntity;
+import com.dreamscale.htmflow.core.domain.journal.TaskRepository;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;

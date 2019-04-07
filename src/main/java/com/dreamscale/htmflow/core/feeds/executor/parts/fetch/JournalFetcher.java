@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.fetch;
 
-import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
-import com.dreamscale.htmflow.core.domain.JournalEntryRepository;
+import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
+import com.dreamscale.htmflow.core.domain.journal.JournalEntryRepository;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Bookmark;

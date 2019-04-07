@@ -1,7 +1,10 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.active.ActiveWorkStatusEntity;
+import com.dreamscale.htmflow.core.domain.active.ActiveWorkStatusRepository;
+import com.dreamscale.htmflow.core.domain.member.TeamMemberWorkStatusEntity;
+import com.dreamscale.htmflow.core.domain.member.TeamMemberWorkStatusRepository;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;

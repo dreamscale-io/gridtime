@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.resources;
 import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.security.RequestContext;
 import com.dreamscale.htmflow.core.service.CircleService;
 import com.dreamscale.htmflow.core.service.OrganizationService;

@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
-import com.dreamscale.htmflow.core.domain.json.LinkedMember;
+import com.dreamscale.htmflow.core.domain.member.json.LinkedMember;
 import lombok.Getter;
 
 import java.util.List;

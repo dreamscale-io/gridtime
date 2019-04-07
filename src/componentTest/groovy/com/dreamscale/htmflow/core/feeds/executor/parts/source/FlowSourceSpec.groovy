@@ -1,9 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.source
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.core.domain.IntentionEntity
-import com.dreamscale.htmflow.core.domain.ProjectEntity
-import com.dreamscale.htmflow.core.domain.TaskEntity
+import com.dreamscale.htmflow.core.domain.journal.IntentionEntity
+import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
+import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool

@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.service;
 
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.journal.*;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraTaskDto;
 import org.springframework.beans.factory.annotation.Autowired;

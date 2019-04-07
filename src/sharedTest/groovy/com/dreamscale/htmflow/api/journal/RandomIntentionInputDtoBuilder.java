@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.api.journal;
 
-import com.dreamscale.htmflow.core.domain.TaskEntity;
+import com.dreamscale.htmflow.core.domain.journal.TaskEntity;
 
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom;
 

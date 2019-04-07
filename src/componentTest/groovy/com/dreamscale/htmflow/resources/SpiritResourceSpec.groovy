@@ -9,10 +9,10 @@ import com.dreamscale.htmflow.api.spirit.TombstoneInputDto
 import com.dreamscale.htmflow.api.spirit.TorchieTombstoneDto
 import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.client.SpiritClient
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity
-import com.dreamscale.htmflow.core.domain.OrganizationEntity
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity
-import com.dreamscale.htmflow.core.domain.SpiritXPEntity
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
+import com.dreamscale.htmflow.core.domain.member.SpiritXPEntity
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification

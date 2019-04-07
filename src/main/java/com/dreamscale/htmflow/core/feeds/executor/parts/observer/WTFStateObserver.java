@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
-import com.dreamscale.htmflow.core.domain.CircleFeedMessageEntity;
+import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;

@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.api.batch.NewBatchEvent;
 import com.dreamscale.htmflow.api.batch.NewFlowBatch;
 import com.dreamscale.htmflow.api.event.EventType;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.domain.flow.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

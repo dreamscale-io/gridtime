@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.mapping.CPGBucketConfig;
 import com.dreamscale.htmflow.core.mapping.ProjectBuckets;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import com.dreamscale.htmflow.core.service.JiraSyncService;
-import com.dreamscale.htmflow.core.domain.ProjectRepository;
+import com.dreamscale.htmflow.core.domain.journal.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

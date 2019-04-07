@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.api.ResourcePaths;
 import com.dreamscale.htmflow.api.journal.*;
 import com.dreamscale.htmflow.api.organization.OrganizationDto;
 import com.dreamscale.htmflow.api.project.RecentTasksSummaryDto;
-import com.dreamscale.htmflow.core.domain.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DateTimeAPITranslator;
 import com.dreamscale.htmflow.core.security.RequestContext;

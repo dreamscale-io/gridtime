@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable;
 
-import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
+import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.feeds.common.FlowableEvent;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Bookmark;
 

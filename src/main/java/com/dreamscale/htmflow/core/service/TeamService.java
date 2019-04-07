@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.api.organization.*;
 import com.dreamscale.htmflow.api.spirit.XPSummaryDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.member.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;

@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.security;
 
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 

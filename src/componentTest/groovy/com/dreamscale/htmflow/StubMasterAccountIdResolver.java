@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow;
 
-import com.dreamscale.htmflow.core.domain.MasterAccountEntity;
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 
 import java.util.UUID;

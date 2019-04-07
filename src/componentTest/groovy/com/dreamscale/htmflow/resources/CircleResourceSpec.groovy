@@ -10,7 +10,9 @@ import com.dreamscale.htmflow.api.circle.CircleMessageType
 import com.dreamscale.htmflow.api.circle.ScreenshotReferenceInputDto
 import com.dreamscale.htmflow.api.event.NewSnippetEvent
 import com.dreamscale.htmflow.client.CircleClient
-import com.dreamscale.htmflow.core.domain.*
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification

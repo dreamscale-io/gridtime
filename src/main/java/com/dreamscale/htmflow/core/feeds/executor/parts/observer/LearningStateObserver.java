@@ -1,18 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
-import com.dreamscale.htmflow.core.domain.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ProgressDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.FeelsDetails;
 
 import java.util.List;
 

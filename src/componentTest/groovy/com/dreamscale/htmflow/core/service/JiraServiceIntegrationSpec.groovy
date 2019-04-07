@@ -3,8 +3,8 @@ package com.dreamscale.htmflow.core.service
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.project.TaskInputDto
 import com.dreamscale.htmflow.client.OrganizationClient
-import com.dreamscale.htmflow.core.domain.OrganizationEntity
-import com.dreamscale.htmflow.core.domain.OrganizationRepository
+import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
 import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraSearchResultPage

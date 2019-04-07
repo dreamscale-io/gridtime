@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer
 
-import com.dreamscale.htmflow.core.domain.JournalEntryEntity
-import com.dreamscale.htmflow.core.domain.ProjectEntity
-import com.dreamscale.htmflow.core.domain.TaskEntity
+import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity
+import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
+import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType

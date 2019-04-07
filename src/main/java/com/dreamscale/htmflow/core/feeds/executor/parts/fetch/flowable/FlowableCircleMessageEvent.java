@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable;
 
-import com.dreamscale.htmflow.core.domain.CircleFeedMessageEntity;
+import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.FlowableEvent;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Bookmark;
 

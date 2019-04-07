@@ -1,7 +1,9 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.spirit.*;
-import com.dreamscale.htmflow.core.domain.*;
+import com.dreamscale.htmflow.core.domain.active.ActiveSpiritLinkEntity;
+import com.dreamscale.htmflow.core.domain.active.ActiveSpiritLinkRepository;
+import com.dreamscale.htmflow.core.domain.member.*;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import lombok.Builder;
