@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -12,7 +11,7 @@ public class Box extends FlowFeature {
     private final String boxName;
     private final List<ThoughtBubble> thoughtBubbles;
 
-    private final List<BoxToBubbleLink> boxToBubbleLinks = new ArrayList<>();
+
     private int relativeSequence;
 
     public Box(String boxName, List<ThoughtBubble> thoughtBubbles) {
@@ -29,26 +28,9 @@ public class Box extends FlowFeature {
     public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInBox locationInBubble) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(locationInBubble);
 
-        BoxToBubbleLink boxToBubble = findOrCreateBoxToBubbleLink(bubbleFound);
-        boxToBubble.addBridgeToSet(bridgeBetweenBoxes);
-        boxToBubble.addConnectedLocationToSet(locationInBubble);
-    }
+        BridgeToBubbleLink boxToBubble = new BridgeToBubbleLink(bridgeBetweenBoxes, locationInBubble);
+        bubbleFound.addBoxToBubbleLink(boxToBubble);
 
-    private BoxToBubbleLink findOrCreateBoxToBubbleLink(ThoughtBubble bubble) {
-        BoxToBubbleLink boxToBubbleLinkFound = null;
-
-        for (BoxToBubbleLink bubbleLink : boxToBubbleLinks) {
-            if (bubbleLink.connectedTo(bubble)) {
-                boxToBubbleLinkFound = bubbleLink;
-                break;
-            }
-        }
-
-        if (boxToBubbleLinkFound == null) {
-            boxToBubbleLinkFound = new BoxToBubbleLink(bubble);
-        }
-
-        return boxToBubbleLinkFound;
     }
 
     private ThoughtBubble findBubbleContainingLocation(LocationInBox locationInBubble) {
@@ -76,5 +58,6 @@ public class Box extends FlowFeature {
     public void setRelativeSequence(int relativeBoxSequence) {
         this.relativeSequence = relativeBoxSequence;
     }
+
 
 }

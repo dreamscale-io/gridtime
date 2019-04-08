@@ -2,9 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.domain.uri.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.RadialStructure;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Traversal;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -164,6 +162,18 @@ public class URIMapper {
 
     }
 
+    public void populateBoxToBubbleLinkUri(String bubbleUri, BridgeToBubbleLink bridgeToBubbleLink) {
+
+        String relativePath = "/link/"+ bridgeToBubbleLink.getRelativeSequence() + bridgeToBubbleLink.getBridge().getRelativePath() + bridgeToBubbleLink.getConnectedLocation().getRelativePath();
+        String uri = bubbleUri + relativePath;
+
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_BRIDGE_LINK);
+        bridgeToBubbleLink.setUri(flowUri.getUri());
+        bridgeToBubbleLink.setId(flowUri.getId());
+        bridgeToBubbleLink.setRelativePath(relativePath);
+
+    }
+
     public void populateRingLocationUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation ringLocation) {
         populateLocationUri(projectId, boxUri, ringLocation.getLocation());
 
@@ -188,4 +198,6 @@ public class URIMapper {
         link.setId(flowUri.getId());
         link.setRelativePath(relativePath);
     }
+
+
 }

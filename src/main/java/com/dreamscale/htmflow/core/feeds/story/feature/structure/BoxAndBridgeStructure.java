@@ -66,6 +66,4 @@ public class BoxAndBridgeStructure {
         return boxFound;
     }
 
-
-
 }

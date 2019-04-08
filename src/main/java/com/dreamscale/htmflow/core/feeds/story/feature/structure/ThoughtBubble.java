@@ -2,13 +2,17 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ThoughtBubble extends FlowFeature {
 
+    private final List<BridgeToBubbleLink> bridgeToBubbleLinks = new ArrayList<>();
     private final RadialStructure radialStructure;
     private int relativeSequence;
     private String uri;
+
+    private int bridgeToBubbleSequence = 1;
 
     public ThoughtBubble(RadialStructure radialStructure) {
         this.radialStructure = radialStructure;
@@ -55,4 +59,13 @@ public class ThoughtBubble extends FlowFeature {
     }
 
 
+    public void addBoxToBubbleLink(BridgeToBubbleLink bridgeToBubbleLink) {
+        bridgeToBubbleLink.setRelativeSequence(bridgeToBubbleSequence);
+        this.bridgeToBubbleLinks.add(bridgeToBubbleLink);
+        bridgeToBubbleSequence++;
+    }
+
+    public List<BridgeToBubbleLink> getBridgeToBubbleLinks() {
+        return bridgeToBubbleLinks;
+    }
 }

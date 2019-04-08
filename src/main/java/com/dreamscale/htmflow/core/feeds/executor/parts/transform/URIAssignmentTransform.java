@@ -22,7 +22,22 @@ public class URIAssignmentTransform implements FlowTransform {
         UUID projectId = getLastOpenProjectId(storyTile);
         String tileUri = storyTile.getTileUri();
 
-        BoxAndBridgeStructure boxAndBridgeStructure = storyTile.getThoughtStructure();
+        populateUrisForBoxesAndBridges(projectId, tileUri, storyTile.getThoughtStructure());
+
+        //TODO next URI thing is the movements
+
+        //TODO populate URIs in the bands
+
+        //so if I go and put URIs on these things, they need to persist, right now I'm calling finish in the observers,
+        //at the story frame level, even though, I really only need to finish a layer, do a partial finish
+
+        //theres also a sense of "rewind" when we re-process these frames, and replay these rhythms
+
+        //all of these different objects in the different tracks of the different types
+
+    }
+
+    private void populateUrisForBoxesAndBridges(UUID projectId, String tileUri, BoxAndBridgeStructure boxAndBridgeStructure) {
         List<Box> boxes = boxAndBridgeStructure.getBoxes();
         List<Bridge> bridges = boxAndBridgeStructure.getBridges();
 
@@ -35,14 +50,6 @@ public class URIAssignmentTransform implements FlowTransform {
 
             mapUrisWithinBox(projectId, tileUri, box);
         }
-
-        //so if I go and put URIs on these things, they need to persist, right now I'm calling finish in the observers,
-        //at the story frame level, even though, I really only need to finish a layer, do a partial finish
-
-        //theres also a sense of "rewind" when we re-process these frames, and replay these rhythms
-
-        //all of these different objects in the different tracks of the different types
-
     }
 
     private void mapUrisWithinBox(UUID projectId, String tileUri, Box box) {
@@ -76,9 +83,20 @@ public class URIAssignmentTransform implements FlowTransform {
 
             populateLinkUris(projectId, boxUri, bubbleUri, bubble.getLinksFromEntrance());
             populateLinkUris(projectId, boxUri, bubbleUri, bubble.getLinksToExit());
+
+            populateBoxToBubbleLinkUris(bubble);
         }
 
-        //TODO bridges between boxes
+
+
+    }
+
+    private void populateBoxToBubbleLinkUris(ThoughtBubble bubble) {
+        List<BridgeToBubbleLink> bridgeToBubbleLinks = bubble.getBridgeToBubbleLinks();
+
+        for (BridgeToBubbleLink bridgeToBubbleLink : bridgeToBubbleLinks) {
+            uriMapper.populateBoxToBubbleLinkUri(bubble.getUri(), bridgeToBubbleLink);
+        }
     }
 
     private void populateLinkUris(UUID projectId, String boxUri, String bubbleUri, List<RadialStructure.Link> linksWithinRing) {
