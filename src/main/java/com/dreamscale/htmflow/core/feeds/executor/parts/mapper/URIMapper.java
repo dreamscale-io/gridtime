@@ -5,6 +5,8 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBandLayer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,11 @@ public class URIMapper {
     @Autowired
     UriWithinFlowRepository uriWithinFlowRepository;
 
-    public void populateBoxUri(UUID projectId, String boxName, FlowFeature box) {
+    public void populateBoxUri(UUID projectId, String boxName, Box box) {
 
         String boxKey = StandardizedKeyMapper.createBoxKey(boxName);
         String parentUri = "/project/" + projectId;
-        String relativePathPrefix = "/structure/box/";
+        String relativePathPrefix = "/box/";
 
         UriWithinProjectEntity boxObject = findOrCreateUriObject(projectId, UriObjectType.BOX, boxKey, parentUri, relativePathPrefix);
         box.setId(boxObject.getId());
@@ -42,15 +44,15 @@ public class URIMapper {
         location.setRelativePath(locationObject.getRelativePath());
     }
 
-    public void populateBridgeUri(UUID projectId, String bridgeKey, FlowFeature flowFeature) {
+    public void populateBridgeUri(UUID projectId, Bridge bridge) {
 
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/bridge/";
 
-        UriWithinProjectEntity bridgeObject = findOrCreateUriObject(projectId, UriObjectType.BRIDGE, bridgeKey, parentUri, relativePathPrefix);
-        flowFeature.setId(bridgeObject.getId());
-        flowFeature.setUri(bridgeObject.getUri());
-        flowFeature.setRelativePath(bridgeObject.getRelativePath());
+        UriWithinProjectEntity bridgeObject = findOrCreateUriObject(projectId, UriObjectType.BRIDGE, bridge.getBridgeKey(), parentUri, relativePathPrefix);
+        bridge.setId(bridgeObject.getId());
+        bridge.setUri(bridgeObject.getUri());
+        bridge.setRelativePath(bridgeObject.getRelativePath());
     }
 
     public void populateTraversalUri(UUID projectId, String boxUri, Traversal traversal) {
@@ -84,11 +86,11 @@ public class URIMapper {
         return uriObject;
     }
 
-    private UriWithinFlowEntity createFlowUri(String uri, String relativePath, FlowObjectType flowObjectType) {
+    private UriWithinFlowEntity createFlowUri(String uri, String relativePath, FlowUriObjectType flowUriObjectType) {
 
         UriWithinFlowEntity flowUri = new UriWithinFlowEntity();
         flowUri.setId(UUID.randomUUID());
-        flowUri.setObjectType(flowObjectType);
+        flowUri.setObjectType(flowUriObjectType);
         flowUri.setUri(uri);
         flowUri.setRelativePath(relativePath);
 
@@ -97,12 +99,12 @@ public class URIMapper {
         return flowUri;
     }
 
-    public String populateBubbleUri(String tileUri, String relativeBoxPath, int relativeSequence, FlowFeature bubble) {
+    public String populateBubbleUri(String frameUri, String relativeBoxPath, int relativeSequence, FlowFeature bubble) {
 
         String relativePath = "/bubble/"+relativeSequence;
-        String uri = tileUri + relativeBoxPath + relativePath;
+        String uri = frameUri + relativeBoxPath + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE);
         bubble.setUri(flowUri.getUri());
         bubble.setId(flowUri.getId());
         bubble.setRelativePath(relativePath);
@@ -112,15 +114,14 @@ public class URIMapper {
     }
 
 
-
     public void populateBubbleCenterUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation center) {
 
         populateLocationUri(projectId, boxUri, center.getLocation());
 
-        String relativePath = "/center"+center.getRelativePath();
+        String relativePath = "/center";
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_CENTER);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_CENTER);
         center.setUri(flowUri.getUri());
         center.setId(flowUri.getId());
         center.setRelativePath(relativePath);
@@ -130,10 +131,10 @@ public class URIMapper {
 
         populateLocationUri(projectId, boxUri, entrance.getLocation());
 
-        String relativePath = "/entrance"+entrance.getRelativePath();
+        String relativePath = "/entrance";
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_ENTRANCE);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_ENTRANCE);
         entrance.setUri(flowUri.getUri());
         entrance.setId(flowUri.getId());
         entrance.setRelativePath(relativePath);
@@ -142,10 +143,10 @@ public class URIMapper {
     public void populateBubbleExitUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation exit) {
         populateLocationUri(projectId, boxUri, exit.getLocation());
 
-        String relativePath = "/exit"+exit.getRelativePath();
+        String relativePath = "/exit";
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_EXIT);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_EXIT);
         exit.setUri(flowUri.getUri());
         exit.setId(flowUri.getId());
         exit.setRelativePath(relativePath);
@@ -157,19 +158,32 @@ public class URIMapper {
         String relativePath = "/ring/"+ring.getRingNumber();
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_RING);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_RING);
         ring.setUri(flowUri.getUri());
         ring.setId(flowUri.getId());
         ring.setRelativePath(relativePath);
 
     }
 
-    public String populateRhythmLayerUri(String tileUri, RhythmLayer layer ) {
+    public String populateRhythmLayerUri(String frameUri, RhythmLayer layer ) {
 
         String relativePath = "/rhythm/layer/"+layer.getLayerType().name();
-        String uri = tileUri + relativePath;
+        String uri = frameUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.RHYTHM_LAYER);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.RHYTHM_LAYER);
+        layer.setUri(flowUri.getUri());
+        layer.setId(flowUri.getId());
+        layer.setRelativePath(relativePath);
+
+        return layer.getUri();
+    }
+
+    public String populateBandLayerUri(String frameUri, TimeBandLayer layer ) {
+
+        String relativePath = "/timeband/layer/"+layer.getLayerType().name();
+        String uri = frameUri + relativePath;
+
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.TIMEBAND_LAYER);
         layer.setUri(flowUri.getUri());
         layer.setId(flowUri.getId());
         layer.setRelativePath(relativePath);
@@ -179,37 +193,48 @@ public class URIMapper {
 
     public void populateUriForMovement(String layerUri, Movement movement) {
 
-        String relativePath = "/movement/"+movement.getRelativeOffset()+"/beat/"+movement.getCoordinates().format()+
-                "/type/"+movement.getType().name() + movement.getReferenceObjectPath();
+        String relativePath = "/movement/"+movement.getRelativeOffset();
 
         String uri = layerUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, movement.getType().getFlowObjectType());
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, movement.getType().getFlowUriObjectType());
         movement.setUri(flowUri.getUri());
         movement.setId(flowUri.getId());
         movement.setRelativePath(relativePath);
 
     }
 
-    public void populateBoxToBubbleLinkUri(String bubbleUri, BridgeToBubbleLink bridgeToBubbleLink) {
+    public void populateUriForBand(String layerUri, TimeBand band) {
 
-        String relativePath = "/link/"+ bridgeToBubbleLink.getRelativeSequence() + bridgeToBubbleLink.getBridge().getRelativePath() + bridgeToBubbleLink.getConnectedLocation().getRelativePath();
+        String relativePath = "/band/"+band.getRelativeOffset();
+
+        String uri = layerUri + relativePath;
+
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.TIMEBAND);
+        band.setUri(flowUri.getUri());
+        band.setId(flowUri.getId());
+        band.setRelativePath(relativePath);
+    }
+
+    public void populateBridgeToBubbleUri(String bubbleUri, BridgeToBubble bridgeToBubble) {
+
+        String relativePath = "/bridge/"+ bridgeToBubble.getRelativeSequence();
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_BRIDGE_LINK);
-        bridgeToBubbleLink.setUri(flowUri.getUri());
-        bridgeToBubbleLink.setId(flowUri.getId());
-        bridgeToBubbleLink.setRelativePath(relativePath);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_BRIDGE_LINK);
+        bridgeToBubble.setUri(flowUri.getUri());
+        bridgeToBubble.setId(flowUri.getId());
+        bridgeToBubble.setRelativePath(relativePath);
 
     }
 
     public void populateRingLocationUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation ringLocation) {
         populateLocationUri(projectId, boxUri, ringLocation.getLocation());
 
-        String relativePath = ringLocation.getRingPath() + "/slot/"+ringLocation.getSlot() + ringLocation.getLocation().getRelativePath();
+        String relativePath = ringLocation.getRingPath() + "/slot/"+ringLocation.getSlot();
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_RING_LOCATION);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_RING_LOCATION);
         ringLocation.setUri(flowUri.getUri());
         ringLocation.setId(flowUri.getId());
         ringLocation.setRelativePath(relativePath);
@@ -222,7 +247,7 @@ public class URIMapper {
         String relativePath = traversalPath + "/link/from/"+link.getFrom().getRelativePath() + "/to/"+link.getTo().getRelativePath();
         String uri = bubbleUri + relativePath;
 
-        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.BUBBLE_RING_LINK);
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE_RING_LINK);
         link.setUri(flowUri.getUri());
         link.setId(flowUri.getId());
         link.setRelativePath(relativePath);

@@ -46,7 +46,7 @@ public class StandardizedKeyMapper {
         return "@circle/"+circleId;
     }
 
-    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, OuterGeometryClock.Coords tileCoordinates) {
+    public static String createFrameUri(String feedUri, ZoomLevel zoomLevel, OuterGeometryClock.Coords tileCoordinates) {
         return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatCoords();
     }
 

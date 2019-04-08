@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
+import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
@@ -9,14 +10,18 @@ import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FlowContextMapper {
 
 
+    private final InnerGeometryClock internalClock;
     private Map<ContextStructureLevel, ContextChangeEvent> currentContextMap = new HashMap<>();
     private Map<ContextStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
+    private List<ContextSummary> contextSummariesOverTime = new ArrayList<>();
 
     private final LocalDateTime from;
     private final LocalDateTime to;
@@ -26,6 +31,7 @@ public class FlowContextMapper {
     public FlowContextMapper(LocalDateTime from, LocalDateTime to) {
         this.from = from;
         this.to = to;
+        this.internalClock = new InnerGeometryClock(from, to);
     }
 
     public ContextChangeEvent getCurrentContext(ContextStructureLevel structureLevel) {
@@ -49,6 +55,10 @@ public class FlowContextMapper {
             movement = new ChangeContext(beginningEvent.getPosition(), beginningEvent);
 
             currentContextMap.put(structureLevel, beginningEvent);
+        }
+
+        if (beginningEvent.getStructureLevel().equals(ContextStructureLevel.INTENTION)) {
+            contextSummariesOverTime.add(getCurrentContext());
         }
         return movement;
     }
@@ -128,13 +138,36 @@ public class FlowContextMapper {
         //TODO is there a thing that needs doing here?  Sequencing?
     }
 
-    public ContextSummary getCurrentContextSummary() {
+    public ContextSummary getCurrentContext() {
         ContextSummary contextSummary = new ContextSummary();
         contextSummary.setProjectContext(getCurrentContext(ContextStructureLevel.PROJECT));
         contextSummary.setTaskContext(getCurrentContext(ContextStructureLevel.TASK));
         contextSummary.setIntentionContext(getCurrentContext(ContextStructureLevel.INTENTION));
 
+        LocalDateTime startTime = contextSummary.getPosition();
+        contextSummary.setCoordinates(internalClock.createCoords(startTime));
+
         return contextSummary;
+    }
+
+    public ContextSummary getContextOfMoment(LocalDateTime moment) {
+        ContextSummary contextOfMoment = null;
+
+        //iterate backwards, and find the first context summary that is before the moment
+        for (int i = contextSummariesOverTime.size() - 1 ; i >= 0; i--) {
+            ContextSummary contextSummary = contextSummariesOverTime.get(i);
+
+            if (contextSummary.getCoordinates().getClockTime().isBefore(moment)) {
+                contextOfMoment = contextSummary;
+                break;
+            }
+        }
+
+        if (contextOfMoment == null) {
+            contextOfMoment = getCurrentContext();
+        }
+
+        return contextOfMoment;
     }
 
     public static final class CarryOverSubContext {

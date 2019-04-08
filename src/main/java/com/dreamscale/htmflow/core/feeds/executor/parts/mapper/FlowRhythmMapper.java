@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
@@ -17,8 +18,6 @@ public class FlowRhythmMapper {
     private final LocalDateTime from;
     private final LocalDateTime to;
     private final InnerGeometryClock internalClock;
-
-    private InnerGeometryClock.Coords currentMoment;
 
     private Map<RhythmLayerType, RhythmLayerMapper> layerMap = new HashMap<>();
 
@@ -39,40 +38,36 @@ public class FlowRhythmMapper {
         return layer;
     }
 
-    public void addMovements(RhythmLayerType layerType, List<Movement> movementsToAdd) {
+    public void addMovements(RhythmLayerType layerType, ContextSummary context, List<Movement> movementsToAdd) {
         for (Movement movement : movementsToAdd) {
-            addMovement(layerType, movement);
+            addMovement(layerType, context,  movement);
         }
     }
 
-    public void addMovement(RhythmLayerType layerType, Movement movement) {
+    public void addMovement(RhythmLayerType layerType, ContextSummary context, Movement movement) {
         RhythmLayerMapper layer = findOrCreateLayer(layerType);
 
         if (movement != null) {
-            currentMoment = layer.addMovement(internalClock, movement);
+            layer.addMovement(internalClock, context, movement);
         }
     }
 
-    public InnerGeometryClock.Coords getCurrentMoment() {
-        return currentMoment;
-    }
-
-    public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
+    public void modifyCurrentLocation(LocalDateTime moment, ContextSummary context, int modificationCount) {
         RhythmLayerMapper modificationLayer = findOrCreateLayer(RhythmLayerType.MODIFICATION_ACTIVITY);
 
         LocationInBox location = getLastLocation();
 
-        modificationLayer.addMovement(internalClock, new ModifyLocation(moment, location, modificationCount));
+        modificationLayer.addMovement(internalClock, context, new ModifyLocation(moment, location, modificationCount));
 
     }
 
-    public void execute(LocalDateTime moment, ExecutionDetails executionDetails) {
+    public void executeThing(LocalDateTime moment, ContextSummary context, ExecutionDetails executionDetails) {
 
         RhythmLayerMapper executionLayer = layerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
 
         if (executionDetails.getDuration().getSeconds() > 60) {
             ExecuteThing startExecution = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.START_LONG_EXECUTION);
-            executionLayer.addMovement(internalClock, startExecution);
+            executionLayer.addMovement(internalClock, context, startExecution);
 
             LocalDateTime endTime = moment.plusSeconds(executionDetails.getDuration().getSeconds());
             ExecuteThing endExecution = new ExecuteThing(endTime, executionDetails, ExecuteThing.EventType.END_LONG_EXECUTION);
@@ -80,16 +75,15 @@ public class FlowRhythmMapper {
 
         } else {
             Movement executeThing = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.EXECUTE_EVENT);
-            executionLayer.addMovement(internalClock, executeThing);
+            executionLayer.addMovement(internalClock, context, executeThing);
         }
 
     }
 
-    public void shareAnIdea(LocalDateTime moment, IdeaDetails ideaDetails) {
+    public void shareMessage(LocalDateTime moment, ContextSummary context, IdeaDetails ideaDetails) {
 
-        RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_IDEA_EVENTS);
-
-        circleMessageLayer.addMovement(internalClock, new ShareAnIdea(moment, ideaDetails));
+        RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
+        circleMessageLayer.addMovement(internalClock, context, new ShareMessage(moment, ideaDetails));
 
     }
 
@@ -110,7 +104,7 @@ public class FlowRhythmMapper {
 
         for (RhythmLayerMapper layer : this.layerMap.values()) {
             Movement lastMovement = layer.getLastMovement();
-            subContext.addLassMovement(layer.getLayerType(), lastMovement);
+            subContext.addLastMovement(layer.getLayerType(), lastMovement);
 
             List<Movement> carryOverMovements = layer.getMovementsToCarryUntilWithinWindow();
             subContext.addCarryOverMovements(layer.getLayerType(), carryOverMovements);
@@ -143,7 +137,8 @@ public class FlowRhythmMapper {
                 LocalDateTime position = movement.getMoment();
 
                 if ((from.isBefore(position) || from.isEqual(position)) && to.isAfter(position)) {
-                    addMovement(layerType, movement);
+                    //TODO need some way to populate context for this... can we fix in the repair?
+                    addMovement(layerType, null, movement);
 
                 } else {
                     RhythmLayerMapper layerMapper = layerMap.get(layerType);
@@ -196,7 +191,7 @@ public class FlowRhythmMapper {
             subContext = mainContext.getSubContext(SUBCONTEXT_NAME);
         }
 
-        void addLassMovement(RhythmLayerType layerType, Movement movement) {
+        void addLastMovement(RhythmLayerType layerType, Movement movement) {
             String key = layerType.name() + ".last.movement";
             subContext.addKeyValue(key, movement);
         }

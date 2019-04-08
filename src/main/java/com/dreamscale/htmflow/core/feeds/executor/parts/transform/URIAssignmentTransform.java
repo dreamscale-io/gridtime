@@ -1,11 +1,13 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBandLayer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,55 +21,58 @@ public class URIAssignmentTransform implements FlowTransform {
     URIMapper uriMapper;
 
     @Override
-    public void transform(StoryTile storyTile) {
+    public void transform(StoryFrame storyFrame) {
 
-        UUID projectId = getLastOpenProjectId(storyTile);
-        String tileUri = storyTile.getTileUri();
+        UUID projectId = getLastOpenProjectId(storyFrame);
+        String frameUri = storyFrame.getFrameUri();
 
-        populateUrisForBoxesAndBridges(projectId, tileUri, storyTile.getThoughtStructure());
+        populateUrisForBoxesAndBridges(projectId, frameUri, storyFrame.getThoughtStructure());
 
-        List<RhythmLayer> rhythmLayers = storyTile.getRhythmLayers();
+        populateUrisForRhythmLayers(frameUri, storyFrame.getRhythmLayers());
 
-        for (RhythmLayer layer : rhythmLayers) {
-            List<Movement> movements = layer.getMovements();
-
-            String layerUri = uriMapper.populateRhythmLayerUri(tileUri, layer);
-
-            for (Movement movement : movements) {
-                uriMapper.populateUriForMovement(layerUri, movement);
-            }
-        }
-
-
-        //TODO next URI thing is the movements
-
-        //TODO populate URIs in the bands
-
-        //so if I go and put URIs on these things, they need to persist, right now I'm calling finish in the observers,
-        //at the story frame level, even though, I really only need to finish a layer, do a partial finish
-
-        //theres also a sense of "rewind" when we re-process these frames, and replay these rhythms
-
-        //all of these different objects in the different tracks of the different types
+        populateUrisForBandLayers(frameUri, storyFrame.getBandLayers());
 
     }
 
-    private void populateUrisForBoxesAndBridges(UUID projectId, String tileUri, BoxAndBridgeStructure boxAndBridgeStructure) {
+    private void populateUrisForRhythmLayers(String frameUri, List<RhythmLayer> rhythmLayers) {
+        for (RhythmLayer layer : rhythmLayers) {
+            String layerUri = uriMapper.populateRhythmLayerUri(frameUri, layer);
+
+            for (Movement movement : layer.getMovements()) {
+                uriMapper.populateUriForMovement(layerUri, movement);
+            }
+        }
+    }
+
+    private void populateUrisForBandLayers(String frameUri, List<TimeBandLayer> timeBandLayers) {
+        for (TimeBandLayer layer : timeBandLayers) {
+
+            String layerUri = uriMapper.populateBandLayerUri(frameUri, layer);
+
+
+            List<TimeBand> timeBands = layer.getTimeBands();
+            for (TimeBand band : timeBands) {
+                uriMapper.populateUriForBand(layerUri, band);
+            }
+        }
+    }
+
+    private void populateUrisForBoxesAndBridges(UUID projectId, String frameUri, BoxAndBridgeStructure boxAndBridgeStructure) {
         List<Box> boxes = boxAndBridgeStructure.getBoxes();
         List<Bridge> bridges = boxAndBridgeStructure.getBridges();
 
         for (Bridge bridge: bridges) {
-            uriMapper.populateBridgeUri(projectId, bridge.getBridgeKey(), bridge);
+            uriMapper.populateBridgeUri(projectId, bridge);
         }
 
         for (Box box: boxes) {
             uriMapper.populateBoxUri(projectId, box.getBoxName(), box);
 
-            mapUrisWithinBox(projectId, tileUri, box);
+            mapUrisWithinBox(projectId, frameUri, box);
         }
     }
 
-    private void mapUrisWithinBox(UUID projectId, String tileUri, Box box) {
+    private void mapUrisWithinBox(UUID projectId, String frameUri, Box box) {
 
         String boxRelativePath = box.getRelativePath();
         String boxUri = box.getUri();
@@ -75,7 +80,7 @@ public class URIAssignmentTransform implements FlowTransform {
         List<ThoughtBubble> bubbles = box.getThoughtBubbles();
 
         for (ThoughtBubble bubble : bubbles) {
-            String bubbleUri = uriMapper.populateBubbleUri(tileUri, boxRelativePath, bubble.getRelativeSequence(), bubble);
+            String bubbleUri = uriMapper.populateBubbleUri(frameUri, boxRelativePath, bubble.getRelativeSequence(), bubble);
 
             uriMapper.populateBubbleCenterUri(projectId, boxUri, bubbleUri, bubble.getCenter());
             uriMapper.populateBubbleEntranceUri(projectId, boxUri,  bubbleUri, bubble.getEntrance());
@@ -99,18 +104,18 @@ public class URIAssignmentTransform implements FlowTransform {
             populateLinkUris(projectId, boxUri, bubbleUri, bubble.getLinksFromEntrance());
             populateLinkUris(projectId, boxUri, bubbleUri, bubble.getLinksToExit());
 
-            populateBoxToBubbleLinkUris(bubble);
+            populateBridgeToBubbleUris(bubble);
         }
 
 
 
     }
 
-    private void populateBoxToBubbleLinkUris(ThoughtBubble bubble) {
-        List<BridgeToBubbleLink> bridgeToBubbleLinks = bubble.getBridgeToBubbleLinks();
+    private void populateBridgeToBubbleUris(ThoughtBubble bubble) {
+        List<BridgeToBubble> bridgeToBubbles = bubble.getBridgeToBubbles();
 
-        for (BridgeToBubbleLink bridgeToBubbleLink : bridgeToBubbleLinks) {
-            uriMapper.populateBoxToBubbleLinkUri(bubble.getUri(), bridgeToBubbleLink);
+        for (BridgeToBubble bridgeToBubble : bridgeToBubbles) {
+            uriMapper.populateBridgeToBubbleUri(bubble.getUri(), bridgeToBubble);
         }
     }
 
@@ -120,10 +125,10 @@ public class URIAssignmentTransform implements FlowTransform {
         }
     }
 
-    private UUID getLastOpenProjectId(StoryTile storyTile) {
+    private UUID getLastOpenProjectId(StoryFrame storyFrame) {
         UUID lastOpenProjectId = null;
 
-        ContextChangeEvent lastOpenProject = storyTile.getCurrentContext().getProjectContext();
+        ContextChangeEvent lastOpenProject = storyFrame.getCurrentContext().getProjectContext();
         if (lastOpenProject != null) {
             lastOpenProjectId = lastOpenProject.getReferenceId();
         }

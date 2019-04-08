@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.feeds.common;
 import com.dreamscale.htmflow.core.feeds.clock.ClockChangeListener;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -56,31 +56,31 @@ public class ZoomableFlow implements ClockChangeListener {
 
     }
 
-    public StoryTile getActiveStoryFrame() {
+    public StoryFrame getActiveStoryFrame() {
         return this.sharedFeaturePool.getActiveStoryFrame();
     }
 
-    public StoryTile zoomIn() {
+    public StoryFrame zoomIn() {
         zoomLevel = zoomLevel.zoomIn();
-        StoryTile storyTile =
+        StoryFrame storyFrame =
                 this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
 
-        this.activeFocus = storyTile.getTileCoordinates();
-        return storyTile;
+        this.activeFocus = storyFrame.getFrameCoordinates();
+        return storyFrame;
     }
 
-    public StoryTile zoomOut() {
+    public StoryFrame zoomOut() {
         zoomLevel = zoomLevel.zoomOut();
         return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
     }
 
-    public StoryTile panLeft() {
+    public StoryFrame panLeft() {
         activeFocus = activeFocus.panLeft(zoomLevel);
 
         return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
     }
 
-    public StoryTile panRight() {
+    public StoryFrame panRight() {
         activeFocus = activeFocus.panRight(zoomLevel);
 
         return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);

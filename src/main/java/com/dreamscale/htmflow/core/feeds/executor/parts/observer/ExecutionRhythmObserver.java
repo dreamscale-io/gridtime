@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
@@ -23,11 +23,11 @@ public class ExecutionRhythmObserver implements FlowObserver {
 
 
     @Override
-    public void see(StoryTile currentStoryTile, Window window) {
+    public void see(StoryFrame currentStoryFrame, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
-        Movement movement = currentStoryTile.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
+        Movement movement = currentStoryFrame.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
         boolean isRedAndWantingGreen = isRedAndWantingGreen(movement);
 
         for (Flowable flowable : flowables) {
@@ -54,13 +54,13 @@ public class ExecutionRhythmObserver implements FlowObserver {
                         isRedAndWantingGreen = false;
                     }
 
-                    currentStoryTile.execute(flowActivity.getStart(), executionDetails);
+                    currentStoryFrame.executeThing(flowActivity.getStart(), executionDetails);
                 }
 
             }
         }
 
-        currentStoryTile.finishAfterLoad();
+        currentStoryFrame.finishAfterLoad();
 
     }
 

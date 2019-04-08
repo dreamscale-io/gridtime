@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
 
@@ -17,7 +17,7 @@ import java.util.List;
 public class CircleMessageEventObserver implements FlowObserver {
 
     @Override
-    public void see(StoryTile currentStoryTile, Window window) {
+    public void see(StoryFrame currentStoryFrame, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -28,12 +28,12 @@ public class CircleMessageEventObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isScrapbookEvent(circleMessageType)) {
-                    currentStoryTile.shareAnIdea(circleMessage.getPosition(), createIdeaDeails(circleMessage));
+                    currentStoryFrame.shareMessage(circleMessage.getPosition(), createIdeaDeails(circleMessage));
                 }
 
             }
 
-            currentStoryTile.finishAfterLoad();
+            currentStoryFrame.finishAfterLoad();
 
         }
 

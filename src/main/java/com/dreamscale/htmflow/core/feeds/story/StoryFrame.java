@@ -12,17 +12,15 @@ import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.FocalPoint;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class StoryTile {
+public class StoryFrame {
 
-    private final OuterGeometryClock.Coords tileCoordinates;
+    private final OuterGeometryClock.Coords frameCoordinates;
     private final ZoomLevel zoomLevel;
 
     private final InnerGeometryClock internalClock;
@@ -31,18 +29,18 @@ public class StoryTile {
     private final SpatialGeometryMapper spatialGeometryMapper;
     private final FlowRhythmMapper flowRhythmMapper;
     private final FlowBandMapper timeBandMapper;
-    private final String tileUri;
+    private final String frameUri;
 
 
-    public StoryTile(String feedUri, OuterGeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
-        this.tileCoordinates = tileCoordinates;
+    public StoryFrame(String feedUri, OuterGeometryClock.Coords frameCoordinates, ZoomLevel zoomLevel) {
+        this.frameCoordinates = frameCoordinates;
         this.zoomLevel = zoomLevel;
 
-        this.tileUri = StandardizedKeyMapper.createTileUri(feedUri, zoomLevel, tileCoordinates);
+        this.frameUri = StandardizedKeyMapper.createFrameUri(feedUri, zoomLevel, frameCoordinates);
 
         this.internalClock = new InnerGeometryClock(
-                tileCoordinates.getClockTime(),
-                tileCoordinates.panRight(zoomLevel).getClockTime());
+                frameCoordinates.getClockTime(),
+                frameCoordinates.panRight(zoomLevel).getClockTime());
 
         this.contextMapper = new FlowContextMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.spatialGeometryMapper = new SpatialGeometryMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
@@ -57,7 +55,8 @@ public class StoryTile {
 
     public void beginContext(ContextChangeEvent contextBeginning) {
         Movement movement = contextMapper.beginContext(contextBeginning);
-        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
+        ContextSummary context = contextMapper.getContextOfMoment(contextBeginning.getPosition());
+        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, movement);
     }
 
     /**
@@ -66,7 +65,8 @@ public class StoryTile {
 
     public void endContext(ContextChangeEvent contextEnding) {
         Movement movement = contextMapper.endContext(contextEnding);
-        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
+        ContextSummary context = contextMapper.getContextOfMoment(contextEnding.getPosition());
+        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, movement);
     }
 
     /**
@@ -86,7 +86,9 @@ public class StoryTile {
     public void gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
 
         List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
-        flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, movements);
+
+        ContextSummary context = contextMapper.getContextOfMoment(moment);
+        flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, context, movements);
     }
 
     /**
@@ -97,9 +99,9 @@ public class StoryTile {
      */
 
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
-
+        ContextSummary context = contextMapper.getContextOfMoment(moment);
         spatialGeometryMapper.modifyCurrentLocation(modificationCount);
-        flowRhythmMapper.modifyCurrentLocation(moment, modificationCount);
+        flowRhythmMapper.modifyCurrentLocation(moment, context, modificationCount);
     }
 
 
@@ -110,14 +112,20 @@ public class StoryTile {
      * @param moment
      * @param executionDetails
      */
-    public void execute(LocalDateTime moment, ExecutionDetails executionDetails) {
-        flowRhythmMapper.execute(moment, executionDetails);
+    public void executeThing(LocalDateTime moment, ExecutionDetails executionDetails) {
+        ContextSummary context = contextMapper.getContextOfMoment(moment);
+        flowRhythmMapper.executeThing(moment, context, executionDetails);
     }
 
 
-
-    public void shareAnIdea(LocalDateTime moment, IdeaDetails ideaDetails) {
-        flowRhythmMapper.shareAnIdea(moment, ideaDetails);
+    /**
+     * Add an event for sharing an idea for solving a problem,
+     * @param moment
+     * @param ideaDetails
+     */
+    public void shareMessage(LocalDateTime moment, IdeaDetails ideaDetails) {
+        ContextSummary context = contextMapper.getContextOfMoment(moment);
+        flowRhythmMapper.shareMessage(moment, context, ideaDetails);
     }
 
     /**
@@ -166,18 +174,21 @@ public class StoryTile {
      *
      * This orchestration is handled by the StoryFrameSequence
      *
-     * @param previousStoryTile
+     * @param previousStoryFrame
      */
 
-    public void carryOverFrameContext(StoryTile previousStoryTile) {
-        CarryOverContext carryOverContext = previousStoryTile.getCarryOverContext();
+    public void carryOverFrameContext(StoryFrame previousStoryFrame) {
+        CarryOverContext carryOverContext = previousStoryFrame.getCarryOverContext();
 
         this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);
         this.timeBandMapper.initFromCarryOverContext(carryOverContext);
 
         Movement sideEffectMovement = this.contextMapper.initFromCarryOverContext(carryOverContext);
-        this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, sideEffectMovement);
+
+        ContextSummary context = this.contextMapper.getCurrentContext();
+
+        this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, sideEffectMovement);
     }
 
     public CarryOverContext getCarryOverContext() {
@@ -194,28 +205,12 @@ public class StoryTile {
 
     //////////// Extract all the various state for persistence ////////////
 
-    public OuterGeometryClock.Coords getTileCoordinates() {
-        return tileCoordinates;
+    public OuterGeometryClock.Coords getFrameCoordinates() {
+        return frameCoordinates;
     }
 
     public ZoomLevel getZoomLevel() {
         return zoomLevel;
-    }
-
-    public InnerGeometryClock.Coords getCurrentMoment() {
-        return this.flowRhythmMapper.getCurrentMoment();
-    }
-
-    public ContextSummary getCurrentContext() {
-        return this.contextMapper.getCurrentContextSummary();
-    }
-
-    public FocalPoint getCurrentFocalPoint() {
-        return spatialGeometryMapper.getCurrentFocus();
-    }
-
-    public LocationInBox getCurrentLocationInFocus() {
-        return spatialGeometryMapper.getCurrentLocation();
     }
 
     public BoxAndBridgeStructure getThoughtStructure() {
@@ -242,16 +237,20 @@ public class StoryTile {
         return timeBandMapper.getBandLayer(layerType);
     }
 
+    public List<TimeBandLayer> getBandLayers() {
+        return timeBandMapper.getBandLayers();
+    }
+
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
         return flowRhythmMapper.getLastMovement(rhythmLayerType);
     }
 
-    public TimeBand getLastBand(BandLayerType bandLayerType) {
-        return timeBandMapper.getLastBand(bandLayerType);
+    public String getFrameUri() {
+        return frameUri;
     }
 
 
-    public String getTileUri() {
-        return tileUri;
+    public ContextSummary getCurrentContext() {
+        return contextMapper.getCurrentContext();
     }
 }

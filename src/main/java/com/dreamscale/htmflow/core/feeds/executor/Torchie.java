@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
 import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 
 import java.util.UUID;
 
@@ -31,23 +31,23 @@ public class Torchie {
         return this.zoomableFlow.whatsNext();
     }
 
-    public StoryTile whereAmI() {
+    public StoryFrame whereAmI() {
         return this.zoomableFlow.getActiveStoryFrame();
     }
 
-    public StoryTile zoomIn() {
+    public StoryFrame zoomIn() {
         return this.zoomableFlow.zoomIn();
     }
 
-    public StoryTile zoomOut() {
+    public StoryFrame zoomOut() {
         return this.zoomableFlow.zoomOut();
     }
 
-    public StoryTile panLeft() {
+    public StoryFrame panLeft() {
         return this.zoomableFlow.panLeft();
     }
 
-    public StoryTile panRight() {
+    public StoryFrame panRight() {
         return this.zoomableFlow.panRight();
     }
 

@@ -10,7 +10,7 @@ import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
 
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ChangeContext
@@ -25,13 +25,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
-    StoryTile storyFrame
+    StoryFrame storyFrame
     OuterGeometryClock clock
 
     def setup() {
         clock = new OuterGeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryFrame("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create project & task switch events"() {
@@ -116,7 +116,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new OuterGeometryClock(time1);
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN);
+        storyFrame = new StoryFrame("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -131,7 +131,7 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(storyFrame, window)
 
-        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.MIN).panRight(ZoomLevel.MIN), ZoomLevel.MIN);
+        StoryFrame nextFrame = new StoryFrame("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.MIN).panRight(ZoomLevel.MIN), ZoomLevel.MIN);
         nextFrame.carryOverFrameContext(storyFrame);
         Window nextWindow = new Window(time3, time4)
 

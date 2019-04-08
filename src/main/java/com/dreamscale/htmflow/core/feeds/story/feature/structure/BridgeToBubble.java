@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-public class BridgeToBubbleLink extends FlowFeature {
+public class BridgeToBubble extends FlowFeature {
 
     private final Bridge bridge;
     private final LocationInBox connectedLocation;
     private int relativeSequence;
 
 
-    public BridgeToBubbleLink(Bridge bridge, LocationInBox connectedLocation) {
+    public BridgeToBubble(Bridge bridge, LocationInBox connectedLocation) {
         this.bridge = bridge;
         this.connectedLocation = connectedLocation;
     }

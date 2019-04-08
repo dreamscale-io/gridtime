@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
@@ -25,15 +26,20 @@ public class RhythmLayerMapper {
         this.layerType = layerType;
     }
 
-    public InnerGeometryClock.Coords addMovement(InnerGeometryClock internalClock, Movement movement) {
+    public void addMovement(InnerGeometryClock internalClock, ContextSummary context, Movement movement) {
         int nextSequence = relativeSequence.increment();
 
+        movement.setContext(context);
         movement.setCoordinates(internalClock.createCoords(movement.getMoment()));
         movement.setRelativeOffset(nextSequence);
 
         movementsOverTime.add(movement);
 
-        return movement.getCoordinates();
+    }
+
+    private boolean contextChanged(ContextSummary lastContext, ContextSummary context) {
+        return lastContext != null && context != null
+                && !lastContext.getPosition().equals(context.getPosition());
     }
 
     public void addMovementLater(Movement movement) {

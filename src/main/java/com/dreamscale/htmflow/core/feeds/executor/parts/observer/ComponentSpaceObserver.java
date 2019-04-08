@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
@@ -25,11 +25,11 @@ public class ComponentSpaceObserver implements FlowObserver {
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(StoryTile currentStoryTile, Window window) {
+    public void see(StoryFrame currentStoryFrame, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
-        UUID currentProjectId = getLastOpenProjectId(currentStoryTile);
+        UUID currentProjectId = getLastOpenProjectId(currentStoryFrame);
 
 
         for (Flowable flowable : flowables) {
@@ -37,39 +37,39 @@ public class ComponentSpaceObserver implements FlowObserver {
                 FlowActivityEntity flowActivity = (FlowActivityEntity)flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
-                    gotoLocation(currentStoryTile, currentProjectId, flowActivity);
+                    gotoLocation(currentStoryFrame, currentProjectId, flowActivity);
                 }
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Modification)) {
-                    modifyCurrentLocation(currentStoryTile, flowActivity);
+                    modifyCurrentLocation(currentStoryFrame, flowActivity);
                 }
             }
         }
 
-        currentStoryTile.finishAfterLoad();
+        currentStoryFrame.finishAfterLoad();
 
     }
 
-    private void gotoLocation(StoryTile currentStoryTile, UUID currentProjectId, FlowActivityEntity flowActivity) {
+    private void gotoLocation(StoryFrame currentStoryFrame, UUID currentProjectId, FlowActivityEntity flowActivity) {
 
         String locationPath = flowActivity.getMetadataValue(FlowActivityMetadataField.filePath);
         String component = componentLookupService.lookupComponent(currentProjectId, locationPath);
 
-        currentStoryTile.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
+        currentStoryFrame.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
 
     }
 
-    private void modifyCurrentLocation(StoryTile currentStoryTile, FlowActivityEntity flowActivity) {
+    private void modifyCurrentLocation(StoryFrame currentStoryFrame, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        currentStoryTile.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
+        currentStoryFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 
-    private UUID getLastOpenProjectId(StoryTile storyTile) {
+    private UUID getLastOpenProjectId(StoryFrame storyFrame) {
         UUID lastOpenProjectId = null;
 
-        ContextChangeEvent lastOpenProject = storyTile.getCurrentContext().getProjectContext();
+        ContextChangeEvent lastOpenProject = storyFrame.getCurrentContext().getProjectContext();
         if (lastOpenProject != null) {
             lastOpenProjectId = lastOpenProject.getReferenceId();
         }

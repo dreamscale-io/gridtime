@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ public class Movement extends FlowFeature {
     private int relativeOffset = 0;
 
     private InnerGeometryClock.Coords coords;
+    private ContextSummary context;
 
     public Movement(LocalDateTime moment, MovementType type, FlowFeature staticReferenceObject) {
         this.moment = moment;
@@ -51,5 +53,9 @@ public class Movement extends FlowFeature {
         }
 
         return path;
+    }
+
+    public void setContext(ContextSummary context) {
+        this.context = context;
     }
 }

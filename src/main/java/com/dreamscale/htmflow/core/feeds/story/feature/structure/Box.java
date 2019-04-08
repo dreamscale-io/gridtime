@@ -21,7 +21,7 @@ public class Box extends FlowFeature {
     public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInBox locationInBubble) {
         ThoughtBubble bubbleFound = findBubbleContainingLocation(locationInBubble);
 
-        BridgeToBubbleLink boxToBubble = new BridgeToBubbleLink(bridgeBetweenBoxes, locationInBubble);
+        BridgeToBubble boxToBubble = new BridgeToBubble(bridgeBetweenBoxes, locationInBubble);
         bubbleFound.addBoxToBubbleLink(boxToBubble);
 
     }

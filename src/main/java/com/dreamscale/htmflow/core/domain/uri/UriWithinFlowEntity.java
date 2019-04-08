@@ -18,7 +18,7 @@ public class UriWithinFlowEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    private FlowObjectType objectType;
+    private FlowUriObjectType objectType;
 
     private String objectKey;
 

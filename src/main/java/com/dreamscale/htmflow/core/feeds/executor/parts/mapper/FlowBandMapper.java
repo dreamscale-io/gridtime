@@ -82,8 +82,18 @@ public class FlowBandMapper {
     }
 
     public TimeBandLayer getBandLayer(BandLayerType layerType) {
-        return new TimeBandLayer(from, to, layerMap.get(layerType).getTimeBands());
+        return new TimeBandLayer(layerType, from, to, layerMap.get(layerType).getTimeBands());
     }
+
+    public List<TimeBandLayer> getBandLayers() {
+        List<TimeBandLayer> layers = new ArrayList<>();
+        for (BandLayerType layerType : layerMap.keySet()) {
+            layers.add(getBandLayer(layerType));
+        }
+
+        return layers;
+    }
+
 
     public Set<BandLayerType> getBandLayerTypes() {
         return layerMap.keySet();
@@ -103,6 +113,7 @@ public class FlowBandMapper {
         BandLayerMapper layer = layerMap.get(bandLayerType);
         layer.addRollingBandSample(moment, sample);
     }
+
 
 
     public static class CarryOverSubContext {

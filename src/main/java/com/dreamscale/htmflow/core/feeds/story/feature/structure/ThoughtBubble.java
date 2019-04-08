@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ThoughtBubble extends FlowFeature {
 
-    private final List<BridgeToBubbleLink> bridgeToBubbleLinks = new ArrayList<>();
+    private final List<BridgeToBubble> bridgeToBubbles = new ArrayList<>();
     private final RadialStructure radialStructure;
     private int relativeSequence;
     private String uri;
@@ -59,13 +59,13 @@ public class ThoughtBubble extends FlowFeature {
     }
 
 
-    public void addBoxToBubbleLink(BridgeToBubbleLink bridgeToBubbleLink) {
-        bridgeToBubbleLink.setRelativeSequence(bridgeToBubbleSequence);
-        this.bridgeToBubbleLinks.add(bridgeToBubbleLink);
+    public void addBoxToBubbleLink(BridgeToBubble bridgeToBubble) {
+        bridgeToBubble.setRelativeSequence(bridgeToBubbleSequence);
+        this.bridgeToBubbles.add(bridgeToBubble);
         bridgeToBubbleSequence++;
     }
 
-    public List<BridgeToBubbleLink> getBridgeToBubbleLinks() {
-        return bridgeToBubbleLinks;
+    public List<BridgeToBubble> getBridgeToBubbles() {
+        return bridgeToBubbles;
     }
 }
