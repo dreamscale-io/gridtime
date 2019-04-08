@@ -1,13 +1,33 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public interface ContextChangeEvent {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class ContextChangeEvent extends FlowFeature {
 
-    UUID getReferenceId();
-    LocalDateTime getPosition();
-    ContextStructureLevel getStructureLevel();
-    int getRelativeSequence();
-    void setRelativeSequence(int sequence);
+    private Type eventType;
+    private UUID referenceId;
+    private ContextStructureLevel structureLevel;
+    private String name;
+    private String description;
+    private LocalDateTime position;
+    private int relativeSequence;
+    private FinishStatus finishStatus;
+
+    public enum Type {
+        BEGINNING,
+        ENDING
+    }
+
+    public enum FinishStatus {
+        SUCCESS, ABORT
+    }
 }

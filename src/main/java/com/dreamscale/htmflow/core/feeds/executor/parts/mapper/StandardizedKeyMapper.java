@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box;
 
 import java.util.UUID;
 

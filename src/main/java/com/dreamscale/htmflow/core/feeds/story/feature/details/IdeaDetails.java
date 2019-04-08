@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class MessageDetails extends Details {
+public class IdeaDetails extends Details {
 
     private UUID messageFromTorchieId;
     private String messageFromName;

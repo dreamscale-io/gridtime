@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
@@ -55,7 +55,7 @@ public class StoryTile {
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void beginContext(ContextBeginning contextBeginning) {
+    public void beginContext(ContextChangeEvent contextBeginning) {
         Movement movement = contextMapper.beginContext(contextBeginning);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
@@ -64,7 +64,7 @@ public class StoryTile {
      * End an active context, such as project, task, or intention
      */
 
-    public void endContext(ContextEnding contextEnding) {
+    public void endContext(ContextChangeEvent contextEnding) {
         Movement movement = contextMapper.endContext(contextEnding);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
@@ -74,7 +74,7 @@ public class StoryTile {
      * this special ending needs to be carried over to the proper future frame, and dropped in the right place
      */
 
-    public void endContextLater(ContextEnding exitContextEvent) {
+    public void endContextLater(ContextChangeEvent exitContextEvent) {
         this.contextMapper.endContextWhenInWindow(exitContextEvent);
     }
 
@@ -116,8 +116,8 @@ public class StoryTile {
 
 
 
-    public void postMessage(LocalDateTime moment, MessageDetails messageDetails) {
-        flowRhythmMapper.postMessage(moment, messageDetails);
+    public void shareAnIdea(LocalDateTime moment, IdeaDetails ideaDetails) {
+        flowRhythmMapper.shareAnIdea(moment, ideaDetails);
     }
 
     /**
@@ -211,7 +211,7 @@ public class StoryTile {
     }
 
     public FocalPoint getCurrentFocalPoint() {
-        return spatialGeometryMapper.getCurrentFocusBox();
+        return spatialGeometryMapper.getCurrentFocus();
     }
 
     public LocationInBox getCurrentLocationInFocus() {
@@ -232,6 +232,10 @@ public class StoryTile {
 
     public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
         return flowRhythmMapper.getRhythmLayer(layerType);
+    }
+
+    public List<RhythmLayer> getRhythmLayers() {
+        return flowRhythmMapper.getRhythmLayers();
     }
 
     public TimeBandLayer getBandLayer(BandLayerType layerType) {

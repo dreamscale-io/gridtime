@@ -10,7 +10,7 @@ public class ExecuteThing extends Movement {
     private final EventType executeEventType;
 
     public ExecuteThing(LocalDateTime moment, ExecutionDetails executionDetails, EventType executeEventType) {
-        super(moment);
+        super(moment, MovementType.EXECUTE_THING, null);
         this.executionDetails = executionDetails;
         this.executeEventType = executeEventType;
     }

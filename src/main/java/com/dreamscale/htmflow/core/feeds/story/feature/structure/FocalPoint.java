@@ -2,33 +2,29 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.GravityBallOfThoughts;
 
 import java.time.Duration;
 import java.util.List;
 
 public class FocalPoint extends FlowFeature {
 
-    private String boxName;
+    private final Box box;
 
     private final GravityBallOfThoughts gravityBall;
 
     private LocationInBox currentLocation;
-    private List<ThoughtBubble> extractedThoughtBubbles;
-
 
     public FocalPoint(String boxName, String initialLocationPath) {
-        this.boxName = boxName;
+        this.box = new Box(boxName);
 
         this.gravityBall = new GravityBallOfThoughts(this);
         this.gravityBall.gotoLocationInSpace(initialLocationPath);
 
         this.currentLocation = gravityBall.getCurrentLocation();
-
     }
 
     public String getBoxName() {
-        return boxName;
+        return box.getBoxName();
     }
 
     public LocationInBox goToLocation(String locationPath, Duration timeInLocation) {
@@ -39,18 +35,6 @@ public class FocalPoint extends FlowFeature {
         currentLocation = location;
 
         return currentLocation;
-    }
-
-    public List<ThoughtBubble> getThoughtBubbles() {
-        if (extractedThoughtBubbles == null) {
-            this.extractedThoughtBubbles = gravityBall.extractThoughtBubbles();
-        }
-        return extractedThoughtBubbles;
-    }
-
-    private List<ThoughtBubble> extractThoughtBubbles() {
-        this.extractedThoughtBubbles = gravityBall.extractThoughtBubbles();
-        return this.extractedThoughtBubbles;
     }
 
     public LocationInBox getCurrentLocation() {
@@ -73,8 +57,17 @@ public class FocalPoint extends FlowFeature {
         return currentLocation;
     }
 
+    public void loadThoughtsIntoBox() {
+        box.setThoughtBubbles(gravityBall.extractThoughtBubbles());
+    }
+
     public String toKey() {
-        return StandardizedKeyMapper.createBoxKey(boxName);
+        return StandardizedKeyMapper.createBoxKey(getBoxName());
+    }
+
+
+    public Box getBox() {
+        return box;
     }
 
 

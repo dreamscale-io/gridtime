@@ -10,7 +10,7 @@ public class ModifyLocation extends Movement {
     private final int modificationCount;
 
     public ModifyLocation(LocalDateTime moment, LocationInBox location, int modificationCount) {
-        super(moment);
+        super(moment, MovementType.MODIFY_LOCATION, location);
         this.location = location;
         this.modificationCount = modificationCount;
     }

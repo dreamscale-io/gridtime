@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class CircleMessageEventObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isScrapbookEvent(circleMessageType)) {
-                    currentStoryTile.postMessage(circleMessage.getPosition(), createMessageContext(circleMessage));
+                    currentStoryTile.shareAnIdea(circleMessage.getPosition(), createIdeaDeails(circleMessage));
                 }
 
             }
@@ -39,22 +39,22 @@ public class CircleMessageEventObserver implements FlowObserver {
 
     }
 
-    private MessageDetails createMessageContext(CircleFeedMessageEntity circleMessage) {
-        MessageDetails scrapbookMessage = new MessageDetails();
+    private IdeaDetails createIdeaDeails(CircleFeedMessageEntity circleMessage) {
+        IdeaDetails ideaDetails = new IdeaDetails();
 
-        scrapbookMessage.setMessageFromTorchieId(circleMessage.getTorchieId());
-        scrapbookMessage.setMessageFromName(circleMessage.getFullName());
+        ideaDetails.setMessageFromTorchieId(circleMessage.getTorchieId());
+        ideaDetails.setMessageFromName(circleMessage.getFullName());
 
-        scrapbookMessage.setCircleId(circleMessage.getCircleId());
-        scrapbookMessage.setCircleName(circleMessage.getCircleName());
+        ideaDetails.setCircleId(circleMessage.getCircleId());
+        ideaDetails.setCircleName(circleMessage.getCircleName());
 
-        scrapbookMessage.setMessageId(circleMessage.getId());
-        scrapbookMessage.setMessageType(circleMessage.getMessageType());
-        scrapbookMessage.setMessage(circleMessage.getMessage());
-        scrapbookMessage.setFileName(circleMessage.getFileName());
-        scrapbookMessage.setFilePath(circleMessage.getFilePath());
-        scrapbookMessage.setSnippetSource(circleMessage.getSnippetSource());
-        return scrapbookMessage;
+        ideaDetails.setMessageId(circleMessage.getId());
+        ideaDetails.setMessageType(circleMessage.getMessageType());
+        ideaDetails.setMessage(circleMessage.getMessage());
+        ideaDetails.setFileName(circleMessage.getFileName());
+        ideaDetails.setFilePath(circleMessage.getFilePath());
+        ideaDetails.setSnippetSource(circleMessage.getSnippetSource());
+        return ideaDetails;
     }
 
     private boolean isScrapbookEvent(CircleMessageType circleMessageType) {

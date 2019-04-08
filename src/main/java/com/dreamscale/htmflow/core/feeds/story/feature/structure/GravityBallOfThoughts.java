@@ -1,6 +1,6 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
+package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 
 import java.time.Duration;
 import java.util.*;

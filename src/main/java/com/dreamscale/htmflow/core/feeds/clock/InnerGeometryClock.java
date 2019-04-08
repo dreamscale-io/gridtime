@@ -146,6 +146,9 @@ public class InnerGeometryClock {
             return createGeometryCoords(clockTime.plus(halfSize));
         }
 
+        public String format() {
+            return halfNotesIntoMeasure + "-"+quarterNotesIntoMeasure + "-"+beatsIntoMeasure;
+        }
     }
 
 }

@@ -2,7 +2,9 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginning;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,19 @@ public class URIAssignmentTransform implements FlowTransform {
         String tileUri = storyTile.getTileUri();
 
         populateUrisForBoxesAndBridges(projectId, tileUri, storyTile.getThoughtStructure());
+
+        List<RhythmLayer> rhythmLayers = storyTile.getRhythmLayers();
+
+        for (RhythmLayer layer : rhythmLayers) {
+            List<Movement> movements = layer.getMovements();
+
+            String layerUri = uriMapper.populateRhythmLayerUri(tileUri, layer);
+
+            for (Movement movement : movements) {
+                uriMapper.populateUriForMovement(layerUri, movement);
+            }
+        }
+
 
         //TODO next URI thing is the movements
 
@@ -108,7 +123,7 @@ public class URIAssignmentTransform implements FlowTransform {
     private UUID getLastOpenProjectId(StoryTile storyTile) {
         UUID lastOpenProjectId = null;
 
-        ContextBeginning lastOpenProject = storyTile.getCurrentContext().getProjectContext();
+        ContextChangeEvent lastOpenProject = storyTile.getCurrentContext().getProjectContext();
         if (lastOpenProject != null) {
             lastOpenProjectId = lastOpenProject.getReferenceId();
         }

@@ -9,7 +9,7 @@ public class ChangeContext extends Movement {
     private final ContextChangeEvent contextChangeEvent;
 
     public ChangeContext(LocalDateTime moment, ContextChangeEvent contextChangeEvent) {
-        super(moment);
+        super(moment, MovementType.CHANGE_CONTEXT, null);
         this.contextChangeEvent = contextChangeEvent;
     }
 
@@ -17,7 +17,7 @@ public class ChangeContext extends Movement {
         return contextChangeEvent;
     }
 
-    public static enum EventType {
+    public enum EventType {
         CONTEXT_BEGINNING,
         CONTEXT_ENDING,
     }

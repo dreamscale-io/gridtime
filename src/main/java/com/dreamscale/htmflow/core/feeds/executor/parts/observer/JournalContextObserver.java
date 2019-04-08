@@ -6,8 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginning;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEnding;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 
@@ -26,9 +25,9 @@ public class JournalContextObserver implements FlowObserver {
 
         ContextSummary contextSummary = currentStoryTile.getCurrentContext();
 
-        ContextBeginning lastOpenProject = contextSummary.getProjectContext();
-        ContextBeginning lastOpenTask = contextSummary.getTaskContext();
-        ContextBeginning lastOpenIntention = contextSummary.getIntentionContext();
+        ContextChangeEvent lastOpenProject = contextSummary.getProjectContext();
+        ContextChangeEvent lastOpenTask = contextSummary.getTaskContext();
+        ContextChangeEvent lastOpenIntention = contextSummary.getIntentionContext();
 
         for (Flowable flowable : flowables) {
             if (flowable instanceof FlowableJournalEntry) {
@@ -52,74 +51,78 @@ public class JournalContextObserver implements FlowObserver {
 
     }
 
-    private void createTaskStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextBeginning lastOpenTask) {
+    private void createTaskStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextChangeEvent lastOpenTask) {
         if (lastOpenTask == null || !lastOpenTask.getReferenceId().equals(journalEntry.getTaskId())) {
-            ContextBeginning taskBeginning = createTaskBeginning(journalEntry);
+            ContextChangeEvent taskBeginning = createTaskBeginning(journalEntry);
             currentStoryTile.beginContext(taskBeginning);
         }
     }
 
-    private void createProjectStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextBeginning lastOpenProject) {
+    private void createProjectStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextChangeEvent lastOpenProject) {
         if (lastOpenProject == null || !lastOpenProject.getReferenceId().equals(journalEntry.getProjectId())) {
-            ContextBeginning projectBeginning = createProjectBeginning(journalEntry);
+            ContextChangeEvent projectBeginning = createProjectBeginning(journalEntry);
             currentStoryTile.beginContext(projectBeginning);
         }
     }
 
-    private void createProjectDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextBeginning lastOpenProject) {
+    private void createProjectDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextChangeEvent lastOpenProject) {
         if (lastOpenProject != null && !lastOpenProject.getReferenceId().equals(journalEntry.getProjectId())) {
-            ContextEnding projectEnding = createProjectEnding(journalEntry, lastOpenProject);
+            ContextChangeEvent projectEnding = createProjectEnding(journalEntry, lastOpenProject);
             currentStoryTile.endContext(projectEnding);
         }
     }
 
-    private void createTaskDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextBeginning lastOpenTask) {
+    private void createTaskDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, ContextChangeEvent lastOpenTask) {
         if (lastOpenTask != null && !lastOpenTask.getReferenceId().equals(journalEntry.getTaskId())) {
-            ContextEnding taskEnding = createTaskEnding(journalEntry, lastOpenTask);
+            ContextChangeEvent taskEnding = createTaskEnding(journalEntry, lastOpenTask);
             currentStoryTile.endContext(taskEnding);
         }
     }
 
-    private ContextBeginning createProjectBeginning(JournalEntryEntity journalEntry) {
-        ContextBeginning projectBeginning = new ContextBeginning();
+    private ContextChangeEvent createProjectBeginning(JournalEntryEntity journalEntry) {
+        ContextChangeEvent projectBeginning = new ContextChangeEvent();
         projectBeginning.setReferenceId(journalEntry.getProjectId());
         projectBeginning.setStructureLevel(ContextStructureLevel.PROJECT);
         projectBeginning.setName(journalEntry.getProjectName());
         projectBeginning.setPosition(journalEntry.getPosition());
+        projectBeginning.setEventType(ContextChangeEvent.Type.BEGINNING);
 
         return projectBeginning;
     }
 
-    private ContextBeginning createTaskBeginning(JournalEntryEntity journalEntry) {
-        ContextBeginning taskBeginning = new ContextBeginning();
+    private ContextChangeEvent createTaskBeginning(JournalEntryEntity journalEntry) {
+        ContextChangeEvent taskBeginning = new ContextChangeEvent();
         taskBeginning.setReferenceId(journalEntry.getTaskId());
         taskBeginning.setStructureLevel(ContextStructureLevel.TASK);
         taskBeginning.setName(journalEntry.getTaskName());
         taskBeginning.setDescription(journalEntry.getTaskSummary());
         taskBeginning.setPosition(journalEntry.getPosition());
+        taskBeginning.setEventType(ContextChangeEvent.Type.BEGINNING);
 
         return taskBeginning;
     }
 
-    private ContextEnding createTaskEnding(JournalEntryEntity journalEntry, ContextBeginning lastTaskStart) {
-        ContextEnding taskEnding = new ContextEnding();
+    private ContextChangeEvent createTaskEnding(JournalEntryEntity journalEntry, ContextChangeEvent lastTaskStart) {
+        ContextChangeEvent taskEnding = new ContextChangeEvent();
         taskEnding.setReferenceId(lastTaskStart.getReferenceId());
         taskEnding.setStructureLevel(ContextStructureLevel.TASK);
         taskEnding.setName(lastTaskStart.getName());
         taskEnding.setDescription(lastTaskStart.getDescription());
         taskEnding.setPosition(journalEntry.getPosition());
-        taskEnding.setFinishStatus(ContextEnding.FinishStatus.SUCCESS);
+        taskEnding.setFinishStatus(ContextChangeEvent.FinishStatus.SUCCESS);
+        taskEnding.setEventType(ContextChangeEvent.Type.ENDING);
 
         return taskEnding;
     }
 
-    private ContextEnding createProjectEnding(JournalEntryEntity journalEntry, ContextBeginning lastOpenProject) {
-        ContextEnding projectEnding = new ContextEnding();
+    private ContextChangeEvent createProjectEnding(JournalEntryEntity journalEntry, ContextChangeEvent lastOpenProject) {
+        ContextChangeEvent projectEnding = new ContextChangeEvent();
         projectEnding.setReferenceId(lastOpenProject.getReferenceId());
         projectEnding.setStructureLevel(ContextStructureLevel.PROJECT);
         projectEnding.setName(lastOpenProject.getName());
         projectEnding.setPosition(journalEntry.getPosition());
-        projectEnding.setFinishStatus(ContextEnding.FinishStatus.SUCCESS);
+        projectEnding.setFinishStatus(ContextChangeEvent.FinishStatus.SUCCESS);
+        projectEnding.setEventType(ContextChangeEvent.Type.ENDING);
 
         return projectEnding;
     }
@@ -127,21 +130,23 @@ public class JournalContextObserver implements FlowObserver {
 
     private void createIntentionStartAndEnd(Window window, StoryTile storyTile, JournalEntryEntity journalEntry) {
 
-        ContextBeginning intentionStart = new ContextBeginning();
+        ContextChangeEvent intentionStart = new ContextChangeEvent();
         intentionStart.setReferenceId(journalEntry.getId());
         intentionStart.setStructureLevel(ContextStructureLevel.INTENTION);
         intentionStart.setDescription(journalEntry.getDescription());
         intentionStart.setPosition(journalEntry.getPosition());
+        intentionStart.setEventType(ContextChangeEvent.Type.BEGINNING);
 
         storyTile.beginContext(intentionStart);
 
         if (journalEntry.getFinishTime() != null) {
-            ContextEnding intentionEnd = new ContextEnding();
+            ContextChangeEvent intentionEnd = new ContextChangeEvent();
             intentionEnd.setReferenceId(journalEntry.getId());
             intentionEnd.setStructureLevel(ContextStructureLevel.INTENTION);
             intentionEnd.setFinishStatus(decodeFinishStatus(journalEntry.getFinishStatus()));
             intentionEnd.setDescription(journalEntry.getDescription());
             intentionEnd.setPosition(journalEntry.getFinishTime());
+            intentionEnd.setEventType(ContextChangeEvent.Type.ENDING);
 
             if (window.isWithin(journalEntry.getFinishTime())) {
                 storyTile.endContext(intentionEnd);
@@ -152,38 +157,39 @@ public class JournalContextObserver implements FlowObserver {
         }
     }
 
-    private void createIntentionDoneIfNotNull(StoryTile storyTile, JournalEntryEntity journalEntry, ContextBeginning lastIntentionStart) {
-        ContextEnding intentionEnd = null;
+    private void createIntentionDoneIfNotNull(StoryTile storyTile, JournalEntryEntity journalEntry, ContextChangeEvent lastIntentionStart) {
+        ContextChangeEvent intentionEnd = null;
 
         if (lastIntentionStart != null) {
-            intentionEnd = new ContextEnding();
+            intentionEnd = new ContextChangeEvent();
             intentionEnd.setReferenceId(lastIntentionStart.getReferenceId());
             intentionEnd.setStructureLevel(ContextStructureLevel.INTENTION);
-            intentionEnd.setFinishStatus(ContextEnding.FinishStatus.SUCCESS);
+            intentionEnd.setFinishStatus(ContextChangeEvent.FinishStatus.SUCCESS);
             intentionEnd.setDescription(lastIntentionStart.getDescription());
             intentionEnd.setPosition(journalEntry.getPosition());
+            intentionEnd.setEventType(ContextChangeEvent.Type.ENDING);
 
             storyTile.endContext(intentionEnd);
         }
 
     }
 
-    private ContextEnding.FinishStatus decodeFinishStatus(String journalFinishStatus) {
-        ContextEnding.FinishStatus songFinishStatus = null;
+    private ContextChangeEvent.FinishStatus decodeFinishStatus(String journalFinishStatus) {
+        ContextChangeEvent.FinishStatus contextFinishStatus = null;
 
         if (journalFinishStatus != null) {
             FinishStatus finishStatus = FinishStatus.valueOf(journalFinishStatus);
 
             switch (finishStatus) {
                 case done:
-                    songFinishStatus = ContextEnding.FinishStatus.SUCCESS;
+                    contextFinishStatus = ContextChangeEvent.FinishStatus.SUCCESS;
                     break;
                 case aborted:
-                    songFinishStatus = ContextEnding.FinishStatus.ABORT;
+                    contextFinishStatus = ContextChangeEvent.FinishStatus.ABORT;
                     break;
             }
         }
 
-        return songFinishStatus;
+        return contextFinishStatus;
     }
 }

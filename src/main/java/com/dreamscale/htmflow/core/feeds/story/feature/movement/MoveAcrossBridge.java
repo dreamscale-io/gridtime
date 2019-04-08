@@ -9,7 +9,7 @@ public class MoveAcrossBridge extends Movement {
     private final Bridge bridge;
 
     public MoveAcrossBridge(LocalDateTime moment, Bridge bridge) {
-        super(moment);
+        super(moment, MovementType.MOVE_ACROSS_BRIDGE, bridge);
         this.bridge = bridge;
     }
 

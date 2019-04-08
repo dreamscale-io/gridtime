@@ -9,20 +9,13 @@ import java.util.List;
 public class Box extends FlowFeature {
 
     private final String boxName;
-    private final List<ThoughtBubble> thoughtBubbles;
-
+    private List<ThoughtBubble> thoughtBubbles;
 
     private int relativeSequence;
 
-    public Box(String boxName, List<ThoughtBubble> thoughtBubbles) {
+    public Box(String boxName) {
         this.boxName = boxName;
-        this.thoughtBubbles = thoughtBubbles;
 
-        int sequence = 1;
-        for (ThoughtBubble bubble : thoughtBubbles) {
-            bubble.setRelativeSequence(sequence);
-            sequence++;
-        }
     }
 
     public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInBox locationInBubble) {
@@ -60,4 +53,7 @@ public class Box extends FlowFeature {
     }
 
 
+    public void setThoughtBubbles(List<ThoughtBubble> thoughtBubbles) {
+        this.thoughtBubbles = thoughtBubbles;
+    }
 }

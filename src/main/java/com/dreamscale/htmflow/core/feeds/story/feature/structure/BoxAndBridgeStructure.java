@@ -10,9 +10,8 @@ public class BoxAndBridgeStructure {
     private List<Box> boxes = new ArrayList<>();
     private List<Bridge> bridges = new ArrayList<>();
 
-    public void createThoughtBox(String boxName, List<ThoughtBubble> thoughtBubbles) {
+    public void addBoxOfThoughts(Box box) {
 
-        Box box = new Box(boxName, thoughtBubbles);
         box.setRelativeSequence(relativeBoxSequence);
         boxes.add(box);
 

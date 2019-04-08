@@ -2,6 +2,8 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.domain.uri.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +23,7 @@ public class URIMapper {
 
         String boxKey = StandardizedKeyMapper.createBoxKey(boxName);
         String parentUri = "/project/" + projectId;
-        String relativePathPrefix = "/box/";
+        String relativePathPrefix = "/structure/box/";
 
         UriWithinProjectEntity boxObject = findOrCreateUriObject(projectId, UriObjectType.BOX, boxKey, parentUri, relativePathPrefix);
         box.setId(boxObject.getId());
@@ -162,6 +164,33 @@ public class URIMapper {
 
     }
 
+    public String populateRhythmLayerUri(String tileUri, RhythmLayer layer ) {
+
+        String relativePath = "/rhythm/layer/"+layer.getLayerType().name();
+        String uri = tileUri + relativePath;
+
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowObjectType.RHYTHM_LAYER);
+        layer.setUri(flowUri.getUri());
+        layer.setId(flowUri.getId());
+        layer.setRelativePath(relativePath);
+
+        return layer.getUri();
+    }
+
+    public void populateUriForMovement(String layerUri, Movement movement) {
+
+        String relativePath = "/movement/"+movement.getRelativeOffset()+"/beat/"+movement.getCoordinates().format()+
+                "/type/"+movement.getType().name() + movement.getReferenceObjectPath();
+
+        String uri = layerUri + relativePath;
+
+        UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, movement.getType().getFlowObjectType());
+        movement.setUri(flowUri.getUri());
+        movement.setId(flowUri.getId());
+        movement.setRelativePath(relativePath);
+
+    }
+
     public void populateBoxToBubbleLinkUri(String bubbleUri, BridgeToBubbleLink bridgeToBubbleLink) {
 
         String relativePath = "/link/"+ bridgeToBubbleLink.getRelativeSequence() + bridgeToBubbleLink.getBridge().getRelativePath() + bridgeToBubbleLink.getConnectedLocation().getRelativePath();
@@ -198,6 +227,7 @@ public class URIMapper {
         link.setId(flowUri.getId());
         link.setRelativePath(relativePath);
     }
+
 
 
 }

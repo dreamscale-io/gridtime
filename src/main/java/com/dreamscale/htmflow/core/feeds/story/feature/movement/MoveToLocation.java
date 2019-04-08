@@ -4,12 +4,12 @@ import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 
 import java.time.LocalDateTime;
 
-public class MoveToNewLocationInBox extends Movement {
+public class MoveToLocation extends Movement {
 
     private final LocationInBox location;
 
-    public MoveToNewLocationInBox(LocalDateTime moment, LocationInBox location) {
-        super(moment);
+    public MoveToLocation(LocalDateTime moment, LocationInBox location) {
+        super(moment, MovementType.MOVE_TO_LOCATION, location);
         this.location = location;
     }
 

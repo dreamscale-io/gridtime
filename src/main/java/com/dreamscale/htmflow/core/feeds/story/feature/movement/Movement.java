@@ -7,13 +7,17 @@ import java.time.LocalDateTime;
 
 public class Movement extends FlowFeature {
 
+    private final MovementType type;
+    private final FlowFeature staticReferenceObject;
     private LocalDateTime moment;
     private int relativeOffset = 0;
 
     private InnerGeometryClock.Coords coords;
 
-    public Movement(LocalDateTime moment) {
+    public Movement(LocalDateTime moment, MovementType type, FlowFeature staticReferenceObject) {
         this.moment = moment;
+        this.type = type;
+        this.staticReferenceObject = staticReferenceObject;
     }
 
     public void setRelativeOffset(int nextSequence) {
@@ -34,5 +38,18 @@ public class Movement extends FlowFeature {
 
     public InnerGeometryClock.Coords getCoordinates() {
         return this.coords;
+    }
+
+    public MovementType getType() {
+        return type;
+    }
+
+    public String getReferenceObjectPath() {
+        String path = "";
+        if (staticReferenceObject != null) {
+            path = staticReferenceObject.getRelativePath();
+        }
+
+        return path;
     }
 }
