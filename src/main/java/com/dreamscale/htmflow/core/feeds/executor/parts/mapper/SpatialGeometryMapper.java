@@ -74,7 +74,7 @@ public class SpatialGeometryMapper {
 
     public CarryOverContext getCarryOverContext() {
         CarryOverSubContext subContext = new CarryOverSubContext();
-        subContext.setCurrentFocusBox(getCurrentFocus());
+        subContext.setCurrentBox(getCurrentFocus().getBox());
         subContext.setCurrentLocationInBox(getCurrentLocation());
 
         return subContext.toCarryOverContext();
@@ -82,16 +82,17 @@ public class SpatialGeometryMapper {
 
     public void initFromCarryOverContext(CarryOverContext carryOverContext) {
         CarryOverSubContext subContext = new CarryOverSubContext(carryOverContext);
-        FocalPoint thoughtBox = subContext.getCurrentFocusBox();
+        Box box = subContext.getCurrentBox();
+        LocationInBox location = subContext.getCurrentLocationInBox();
 
-        if (thoughtBox != null) {
-            currentFocus = new FocalPoint(thoughtBox.getBoxName(), thoughtBox.getCurrentLocation().getLocationPath());
+        if (box != null) {
+            currentFocus = new FocalPoint(box.getBoxName(), location.getLocationPath());
         }
     }
 
     private Movement gotoLocationAndCreateMovement(LocalDateTime moment, String locationPath, Duration timeInLocation) {
         LocationInBox location = currentFocus.goToLocation(locationPath, timeInLocation);
-        return new MoveToLocation(moment, location);
+        return new MoveToLocation(moment, location, currentFocus.getLastTraversal());
     }
 
 
@@ -102,7 +103,7 @@ public class SpatialGeometryMapper {
         LocationInBox fromLocation = fromBox.getCurrentLocation();
         LocationInBox exitLocation = fromBox.exit();
 
-        movements.add(new MoveToLocation(moment, exitLocation));
+        movements.add(new MoveToLocation(moment, exitLocation, fromBox.getLastTraversal()));
 
         LocationInBox enterLocation = toBox.enter();
         LocationInBox toLocation = toBox.goToLocation(toLocationPath, timeInLocation);
@@ -110,8 +111,8 @@ public class SpatialGeometryMapper {
         bridgeCrossed.visit();
 
         movements.add(new MoveAcrossBridge(moment, bridgeCrossed));
-        movements.add(new MoveToLocation(moment, enterLocation));
-        movements.add(new MoveToLocation(moment, toLocation));
+        movements.add(new MoveToLocation(moment, enterLocation, toBox.getLastTraversal()));
+        movements.add(new MoveToLocation(moment, toLocation, toBox.getLastTraversal()));
 
         currentFocus = toBox;
 
@@ -183,7 +184,7 @@ public class SpatialGeometryMapper {
             subContext = carryOverContext.getSubContext(SUBCONTEXT_NAME);
         }
 
-        void setCurrentFocusBox(FocalPoint box) {
+        void setCurrentBox(Box box) {
             subContext.addKeyValue(CURRENT_FOCUS_BOX, box);
         }
 
@@ -191,8 +192,8 @@ public class SpatialGeometryMapper {
             subContext.addKeyValue(CURRENT_FOCUS_LOCATION_IN_BOX, location);
         }
 
-        FocalPoint getCurrentFocusBox() {
-            return (FocalPoint) subContext.getValue(CURRENT_FOCUS_BOX);
+        Box getCurrentBox() {
+            return (Box) subContext.getValue(CURRENT_FOCUS_BOX);
         }
 
         LocationInBox getCurrentLocationInBox() {

@@ -25,11 +25,9 @@ public class ComponentSpaceObserver implements FlowObserver {
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryFrame storyFrame, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
-
-        UUID currentProjectId = getLastOpenProjectId(currentStoryFrame);
 
 
         for (Flowable flowable : flowables) {
@@ -37,44 +35,36 @@ public class ComponentSpaceObserver implements FlowObserver {
                 FlowActivityEntity flowActivity = (FlowActivityEntity)flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
-                    gotoLocation(currentStoryFrame, currentProjectId, flowActivity);
+                    gotoLocation(storyFrame, flowActivity);
                 }
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Modification)) {
-                    modifyCurrentLocation(currentStoryFrame, flowActivity);
+                    modifyCurrentLocation(storyFrame, flowActivity);
                 }
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        storyFrame.finishAfterLoad();
 
     }
 
-    private void gotoLocation(StoryFrame currentStoryFrame, UUID currentProjectId, FlowActivityEntity flowActivity) {
+    private void gotoLocation(StoryFrame storyFrame, FlowActivityEntity flowActivity) {
+
+        UUID projectId = storyFrame.getContextOfMoment(flowActivity.getStart()).getProjectId();
 
         String locationPath = flowActivity.getMetadataValue(FlowActivityMetadataField.filePath);
-        String component = componentLookupService.lookupComponent(currentProjectId, locationPath);
+        String component = componentLookupService.lookupComponent(projectId, locationPath);
 
-        currentStoryFrame.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
+        storyFrame.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
 
     }
 
-    private void modifyCurrentLocation(StoryFrame currentStoryFrame, FlowActivityEntity flowActivity) {
+    private void modifyCurrentLocation(StoryFrame storyFrame, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        currentStoryFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
+        storyFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 
-    private UUID getLastOpenProjectId(StoryFrame storyFrame) {
-        UUID lastOpenProjectId = null;
-
-        ContextChangeEvent lastOpenProject = storyFrame.getCurrentContext().getProjectContext();
-        if (lastOpenProject != null) {
-            lastOpenProjectId = lastOpenProject.getReferenceId();
-        }
-
-        return lastOpenProjectId;
-    }
 
 }

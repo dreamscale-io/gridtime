@@ -21,9 +21,10 @@ public class URIMapper {
     @Autowired
     UriWithinFlowRepository uriWithinFlowRepository;
 
-    public void populateBoxUri(UUID projectId, String boxName, Box box) {
+    public void populateBoxUri(UUID projectId, Box box) {
+        if (box.getUri() != null) return;
 
-        String boxKey = StandardizedKeyMapper.createBoxKey(boxName);
+        String boxKey = StandardizedKeyMapper.createBoxKey(box.getBoxName());
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/box/";
 
@@ -33,18 +34,21 @@ public class URIMapper {
         box.setRelativePath(boxObject.getRelativePath());
     }
 
-    public void populateLocationUri(UUID projectId, String boxUri, LocationInBox location) {
+    public void populateLocationUri(UUID projectId, LocationInBox location) {
+        if (location.getUri() != null) return;
 
         String locationKey = StandardizedKeyMapper.createLocationKey(location.getLocationPath());
+        String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/location/";
 
-        UriWithinProjectEntity locationObject = findOrCreateUriObject(projectId, UriObjectType.LOCATION, locationKey, boxUri, relativePathPrefix);
+        UriWithinProjectEntity locationObject = findOrCreateUriObject(projectId, UriObjectType.LOCATION, locationKey, parentUri, relativePathPrefix);
         location.setId(locationObject.getId());
         location.setUri(locationObject.getUri());
         location.setRelativePath(locationObject.getRelativePath());
     }
 
     public void populateBridgeUri(UUID projectId, Bridge bridge) {
+        if (bridge.getUri() != null) return;
 
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/bridge/";
@@ -55,12 +59,14 @@ public class URIMapper {
         bridge.setRelativePath(bridgeObject.getRelativePath());
     }
 
-    public void populateTraversalUri(UUID projectId, String boxUri, Traversal traversal) {
+    public void populateTraversalUri(UUID projectId, Traversal traversal) {
+        if (traversal.getUri() != null) return;
 
         String traversalKey = traversal.toKey();
+        String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/traversal/";
 
-        UriWithinProjectEntity traversalObject = findOrCreateUriObject(projectId, UriObjectType.TRAVERSAL, traversalKey, boxUri, relativePathPrefix);
+        UriWithinProjectEntity traversalObject = findOrCreateUriObject(projectId, UriObjectType.TRAVERSAL, traversalKey, parentUri, relativePathPrefix);
 
         traversal.setId(traversalObject.getId());
         traversal.setUri(traversalObject.getUri());
@@ -99,10 +105,10 @@ public class URIMapper {
         return flowUri;
     }
 
-    public String populateBubbleUri(String frameUri, String relativeBoxPath, int relativeSequence, FlowFeature bubble) {
+    public String populateBubbleUri(String frameUri, String boxUri, int relativeSequence, FlowFeature bubble) {
 
         String relativePath = "/bubble/"+relativeSequence;
-        String uri = frameUri + relativeBoxPath + relativePath;
+        String uri = frameUri + boxUri + relativePath;
 
         UriWithinFlowEntity flowUri = createFlowUri(uri, relativePath, FlowUriObjectType.BUBBLE);
         bubble.setUri(flowUri.getUri());
@@ -114,9 +120,7 @@ public class URIMapper {
     }
 
 
-    public void populateBubbleCenterUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation center) {
-
-        populateLocationUri(projectId, boxUri, center.getLocation());
+    public void populateBubbleCenterUri(String bubbleUri, RadialStructure.RingLocation center) {
 
         String relativePath = "/center";
         String uri = bubbleUri + relativePath;
@@ -127,9 +131,7 @@ public class URIMapper {
         center.setRelativePath(relativePath);
     }
 
-    public void populateBubbleEntranceUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation entrance) {
-
-        populateLocationUri(projectId, boxUri, entrance.getLocation());
+    public void populateBubbleEntranceUri(String bubbleUri, RadialStructure.RingLocation entrance) {
 
         String relativePath = "/entrance";
         String uri = bubbleUri + relativePath;
@@ -140,8 +142,7 @@ public class URIMapper {
         entrance.setRelativePath(relativePath);
     }
 
-    public void populateBubbleExitUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation exit) {
-        populateLocationUri(projectId, boxUri, exit.getLocation());
+    public void populateBubbleExitUri(String bubbleUri, RadialStructure.RingLocation exit) {
 
         String relativePath = "/exit";
         String uri = bubbleUri + relativePath;
@@ -228,8 +229,7 @@ public class URIMapper {
 
     }
 
-    public void populateRingLocationUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.RingLocation ringLocation) {
-        populateLocationUri(projectId, boxUri, ringLocation.getLocation());
+    public void populateRingLocationUri(String bubbleUri, RadialStructure.RingLocation ringLocation) {
 
         String relativePath = ringLocation.getRingPath() + "/slot/"+ringLocation.getSlot();
         String uri = bubbleUri + relativePath;
@@ -240,9 +240,7 @@ public class URIMapper {
         ringLocation.setRelativePath(relativePath);
     }
 
-    public void populateRingLinkUri(UUID projectId, String boxUri, String bubbleUri, RadialStructure.Link link) {
-        populateTraversalUri(projectId, boxUri, link.getTraversal());
-
+    public void populateRingLinkUri(String bubbleUri, RadialStructure.Link link) {
         String traversalPath = link.getTraversal().getRelativePath();
         String relativePath = traversalPath + "/link/from/"+link.getFrom().getRelativePath() + "/to/"+link.getTo().getRelativePath();
         String uri = bubbleUri + relativePath;

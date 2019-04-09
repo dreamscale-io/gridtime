@@ -23,6 +23,8 @@ public class GravityBallOfThoughts {
     private LinkedList<ThoughtParticle> thoughtTracer = new LinkedList<>();
 
     private LocationInBox currentLocation;
+    private Traversal lastTraversal;
+
     private int locationIndex = 1;
 
     private static final int TRACER_LENGTH = 5;
@@ -36,6 +38,10 @@ public class GravityBallOfThoughts {
 
     public GravityBallOfThoughts(FocalPoint box) {
         this.box = box;
+    }
+
+    public void initStartingLocation(String locationPath) {
+        currentLocation = findOrCreateLocation(locationPath);
     }
 
     public LocationInBox gotoLocationInSpace(String locationPath) {
@@ -95,6 +101,8 @@ public class GravityBallOfThoughts {
         ThoughtParticle particle = findOrCreateParticle(traversal);
 
         pushThoughtParticleOntoTracer(particle);
+
+        lastTraversal = traversal;
     }
 
     private void pushThoughtParticleOntoTracer(ThoughtParticle particle) {
@@ -491,6 +499,10 @@ public class GravityBallOfThoughts {
             thoughtParticleMap.put(particleKey, particle);
         }
         return particle;
+    }
+
+    public Traversal getLastTraversal() {
+        return lastTraversal;
     }
 
 

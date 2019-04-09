@@ -58,4 +58,8 @@ public class Movement extends FlowFeature {
     public void setContext(ContextSummary context) {
         this.context = context;
     }
+
+    public ContextSummary getContext() {
+        return context;
+    }
 }

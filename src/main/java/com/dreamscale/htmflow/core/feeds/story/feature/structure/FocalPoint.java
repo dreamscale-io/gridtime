@@ -4,9 +4,8 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMa
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
-import java.util.List;
 
-public class FocalPoint extends FlowFeature {
+public class FocalPoint {
 
     private final Box box;
 
@@ -18,7 +17,7 @@ public class FocalPoint extends FlowFeature {
         this.box = new Box(boxName);
 
         this.gravityBall = new GravityBallOfThoughts(this);
-        this.gravityBall.gotoLocationInSpace(initialLocationPath);
+        this.gravityBall.initStartingLocation(initialLocationPath);
 
         this.currentLocation = gravityBall.getCurrentLocation();
     }
@@ -71,4 +70,7 @@ public class FocalPoint extends FlowFeature {
     }
 
 
+    public Traversal getLastTraversal() {
+        return gravityBall.getLastTraversal();
+    }
 }

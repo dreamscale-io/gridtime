@@ -253,4 +253,8 @@ public class StoryFrame {
     public ContextSummary getCurrentContext() {
         return contextMapper.getCurrentContext();
     }
+
+    public ContextSummary getContextOfMoment(LocalDateTime moment) {
+        return contextMapper.getContextOfMoment(moment);
+    }
 }

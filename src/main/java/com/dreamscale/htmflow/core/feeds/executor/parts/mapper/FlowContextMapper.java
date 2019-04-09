@@ -10,10 +10,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FlowContextMapper {
 
@@ -169,6 +166,7 @@ public class FlowContextMapper {
 
         return contextOfMoment;
     }
+
 
     public static final class CarryOverSubContext {
 
