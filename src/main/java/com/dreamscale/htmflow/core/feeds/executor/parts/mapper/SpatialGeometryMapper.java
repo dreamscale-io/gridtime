@@ -185,19 +185,19 @@ public class SpatialGeometryMapper {
         }
 
         void setCurrentBox(Box box) {
-            subContext.addKeyValue(CURRENT_FOCUS_BOX, box);
+            subContext.saveFeature(CURRENT_FOCUS_BOX, box);
         }
 
         void setCurrentLocationInBox(LocationInBox location) {
-            subContext.addKeyValue(CURRENT_FOCUS_LOCATION_IN_BOX, location);
+            subContext.saveFeature(CURRENT_FOCUS_LOCATION_IN_BOX, location);
         }
 
         Box getCurrentBox() {
-            return (Box) subContext.getValue(CURRENT_FOCUS_BOX);
+            return (Box) subContext.getFeature(CURRENT_FOCUS_BOX);
         }
 
         LocationInBox getCurrentLocationInBox() {
-            return (LocationInBox) subContext.getValue(CURRENT_FOCUS_LOCATION_IN_BOX);
+            return (LocationInBox) subContext.getFeature(CURRENT_FOCUS_LOCATION_IN_BOX);
         }
 
         public CarryOverContext toCarryOverContext() {

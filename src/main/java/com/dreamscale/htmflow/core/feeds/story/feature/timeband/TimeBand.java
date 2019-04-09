@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.ProgressDetails;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -58,7 +57,15 @@ public class TimeBand extends FlowFeature {
         return end;
     }
 
+    public boolean contains(LocalDateTime moment) {
+        return (moment.isEqual(getStart()) || moment.isAfter(getStart())) && moment.isBefore(getEnd());
+    }
+
     public void setDetails(Details details) {
         this.details = details;
+    }
+
+    public Details getDetails() {
+        return details;
     }
 }

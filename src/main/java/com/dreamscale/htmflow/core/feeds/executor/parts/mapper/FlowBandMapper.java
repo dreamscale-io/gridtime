@@ -105,16 +105,18 @@ public class FlowBandMapper {
 
     public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatsPerBucket) {
         BandLayerMapper layer = layerMap.get(bandLayerType);
-        layer.configureRollingBands(beatsPerBucket);
+        layer.fillWithRollingAggregateBands(beatsPerBucket);
     }
 
     public void addRollingBandSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
-
         BandLayerMapper layer = layerMap.get(bandLayerType);
+
+        if (layer.isRollingBandLayerConfigured()) {
+            configureRollingBands(bandLayerType, BeatsPerBucket.QUARTER);
+        }
+
         layer.addRollingBandSample(moment, sample);
     }
-
-
 
     public static class CarryOverSubContext {
 
@@ -132,26 +134,26 @@ public class FlowBandMapper {
 
         void setActiveBandContext(BandLayerType layerType, Details details) {
             String key = layerType.name() + ".active.context";
-            subContext.addKeyValue(key, details);
+            subContext.saveDetails(key, details);
         }
 
         Details getActiveBandContext(BandLayerType layerType) {
             String key = layerType.name() + ".active.context";
-            return (Details) subContext.getValue(key);
+            return subContext.getDetails(key);
         }
 
         void setLastBand(BandLayerType layerType, TimeBand timeBand) {
             String key = layerType.name() + ".last.band";
-            subContext.addKeyValue(key, timeBand);
+            subContext.saveFeature(key, timeBand);
         }
 
         TimeBand getLastBand(BandLayerType layerType) {
             String key = layerType.name() + ".last.band";
-            return (TimeBand) subContext.getValue(key);
+            return (TimeBand) subContext.getFeature(key);
         }
 
         public Set<BandLayerType> getLayerTypes() {
-            Set<String> keys = subContext.keySet();
+            Set<String> keys = subContext.featureKeySet();
 
             Set<BandLayerType> layerTypes = new LinkedHashSet<>();
             for (String key : keys) {

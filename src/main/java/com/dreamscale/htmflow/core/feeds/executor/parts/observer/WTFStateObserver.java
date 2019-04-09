@@ -28,11 +28,11 @@ public class WTFStateObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isCircleOpening(circleMessageType)) {
-                    currentStoryFrame.startBand(BandLayerType.FRICTION_WTF, circleMessage.getPosition(), createCircleContext(circleMessage));
+                    currentStoryFrame.startWTF(circleMessage.getPosition(), createCircleContext(circleMessage));
                 }
 
                 if (isCircleEnding(circleMessageType)) {
-                    currentStoryFrame.clearBand(BandLayerType.FRICTION_WTF, circleMessage.getPosition());
+                    currentStoryFrame.clearWTF(circleMessage.getPosition());
                 }
 
             }

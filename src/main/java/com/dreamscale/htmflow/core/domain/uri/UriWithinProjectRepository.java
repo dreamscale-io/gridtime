@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface UriWithinProjectRepository extends CrudRepository<UriWithinProjectEntity, UUID> {
 
     UriWithinProjectEntity findByProjectIdAndObjectTypeAndObjectKey(UUID projectId, UriObjectType objectType, String objectKey);
+
+    UriWithinProjectEntity findByProjectIdAndUri(UUID projectId, String uri);
 }

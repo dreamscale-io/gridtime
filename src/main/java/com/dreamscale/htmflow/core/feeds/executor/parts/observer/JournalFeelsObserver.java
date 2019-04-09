@@ -27,9 +27,9 @@ public class JournalFeelsObserver implements FlowObserver {
 
                 Integer flameRating = journalEntry.getFlameRating();
                 if (flameRating != null && flameRating != 0) {
-                    currentStoryFrame.startBand(BandLayerType.FEELS, journalEntry.getPosition(), new FeelsDetails(flameRating));
+                    currentStoryFrame.startFeelsBand(journalEntry.getPosition(), new FeelsDetails(flameRating));
                 } else {
-                    currentStoryFrame.clearBand(BandLayerType.FEELS, journalEntry.getPosition());
+                    currentStoryFrame.clearFeelsBand(journalEntry.getPosition());
                 }
 
             }

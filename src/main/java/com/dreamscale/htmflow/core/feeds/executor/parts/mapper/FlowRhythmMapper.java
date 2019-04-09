@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -80,10 +80,10 @@ public class FlowRhythmMapper {
 
     }
 
-    public void shareMessage(LocalDateTime moment, ContextSummary context, IdeaDetails ideaDetails) {
+    public void shareMessage(LocalDateTime moment, ContextSummary context, Message message) {
 
         RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
-        circleMessageLayer.addMovement(internalClock, context, new ShareMessage(moment, ideaDetails));
+        circleMessageLayer.addMovement(internalClock, context, new PostCircleMessage(moment, message));
 
     }
 
@@ -193,16 +193,16 @@ public class FlowRhythmMapper {
 
         void addLastMovement(RhythmLayerType layerType, Movement movement) {
             String key = layerType.name() + ".last.movement";
-            subContext.addKeyValue(key, movement);
+            subContext.saveFeature(key, movement);
         }
 
         Movement getLastMovement(RhythmLayerType layerType) {
             String key = layerType.name() + ".last.movement";
-            return (Movement) subContext.getValue(key);
+            return (Movement) subContext.getFeature(key);
         }
 
         public Set<RhythmLayerType> getLayerTypes() {
-            Set<String> keys = subContext.keySet();
+            Set<String> keys = subContext.featureKeySet();
 
             Set<RhythmLayerType> layerTypes = new LinkedHashSet<>();
             for (String key : keys) {
@@ -224,12 +224,12 @@ public class FlowRhythmMapper {
 
         public void addCarryOverMovements(RhythmLayerType layerType, List<Movement> carryOverMovements) {
             String key = layerType.name() + ".carry.over.movements";
-            subContext.addKeyList(key, carryOverMovements);
+            subContext.saveFeatureList(key, carryOverMovements);
         }
 
         public List<? extends Movement> getCarryOverMovements(RhythmLayerType layerType) {
             String key = layerType.name() + ".carry.over.movements";
-            return (List<? extends Movement>) subContext.getKeyList(key);
+            return (List<? extends Movement>) subContext.getFeatureList(key);
         }
     }
 

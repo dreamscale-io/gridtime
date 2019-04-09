@@ -4,8 +4,9 @@ import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.RollingAggregateBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
 
 import java.time.LocalDateTime;
@@ -33,7 +34,8 @@ public class BandLayerMapper {
 
     public void startBand(LocalDateTime startBandPosition, Details details) {
         if (activeDetails != null) {
-            TimeBand band = new TimeBand(activeBandStart, startBandPosition, activeDetails);
+
+            TimeBand band = BandFactory.create(layerType, activeBandStart, startBandPosition, activeDetails);
             addTimeBand(band);
         }
 
@@ -43,7 +45,7 @@ public class BandLayerMapper {
 
     public void clearBand(LocalDateTime endBandPosition) {
         if (activeDetails != null) {
-            TimeBand band = new TimeBand(activeBandStart, endBandPosition, activeDetails);
+            TimeBand band = BandFactory.create(layerType, activeBandStart, endBandPosition, activeDetails);
             addTimeBand(band);
         }
 
@@ -54,7 +56,7 @@ public class BandLayerMapper {
 
     public void finish() {
         if (activeDetails != null) {
-            TimeBand band = new TimeBand(activeBandStart, internalClock.getToClockTime(), activeDetails);
+            TimeBand band = BandFactory.create(layerType, activeBandStart, internalClock.getToClockTime(), activeDetails);
             addTimeBand(band);
         }
 
@@ -65,6 +67,7 @@ public class BandLayerMapper {
                 RollingAggregateBand rollingBand = (RollingAggregateBand)band;
 
                 rollingBand.aggregateWithPastObservations(lastRollingAggregate);
+                rollingBand.evaluateThreshold();
 
                 lastRollingAggregate = rollingBand;
             }
@@ -115,7 +118,7 @@ public class BandLayerMapper {
     }
 
 
-    public void configureRollingBands(BeatsPerBucket beatSize) {
+    public void fillWithRollingAggregateBands(BeatsPerBucket beatSize) {
         isRollingBandLayer = true;
 
         int bandCount = BeatsPerBucket.BEAT.getBeatCount() / beatSize.getBeatCount();
@@ -125,7 +128,7 @@ public class BandLayerMapper {
         for (int i = 0; i < bandCount; i++) {
             InnerGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
 
-            RollingAggregateBand band = new RollingAggregateBand(startCoords.getClockTime(), endCoords.getClockTime());
+            RollingAggregateBand band = BandFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
             bandsInWindow.add(band);
 
             startCoords = endCoords;
@@ -142,5 +145,9 @@ public class BandLayerMapper {
             }
 
         }
+    }
+
+    public boolean isRollingBandLayerConfigured() {
+        return isRollingBandLayer;
     }
 }

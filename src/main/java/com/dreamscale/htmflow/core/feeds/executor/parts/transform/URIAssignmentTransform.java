@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
@@ -57,6 +56,9 @@ public class URIAssignmentTransform implements FlowTransform {
                     MoveAcrossBridge moveAcrossBridge = (MoveAcrossBridge)movement;
                     uriMapper.populateBridgeUri(moveAcrossBridge.getContext().getProjectId(), moveAcrossBridge.getBridge());
                     break;
+                case POST_CIRCLE_MESSAGE:
+                    PostCircleMessage postCircleMessage = (PostCircleMessage)movement;
+                    uriMapper.populateMessageUri(postCircleMessage.getContext().getProjectId(), postCircleMessage.getMessage());
             }
         }
     }

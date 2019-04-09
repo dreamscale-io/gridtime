@@ -9,7 +9,7 @@ public enum MovementType {
     MOVE_ACROSS_BRIDGE (FlowUriObjectType.MOVEMENT_ACROSS_BRIDGE),
     MOVE_TO_BOX(FlowUriObjectType.MOVEMENT_TO_BOX),
     MOVE_TO_LOCATION(FlowUriObjectType.MOVEMENT_TO_LOCATION),
-    SHARE_AN_IDEA(FlowUriObjectType.MOVEMENT_SHARE_MESSAGE);
+    POST_CIRCLE_MESSAGE(FlowUriObjectType.MOVEMENT_POST_MESSAGE);
 
     private final FlowUriObjectType flowUriObjectType;
 

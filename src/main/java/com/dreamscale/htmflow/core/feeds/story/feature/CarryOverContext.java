@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,8 @@ public class CarryOverContext {
 
     private String contextOwner;
 
-    private Map<String, FlowFeature> keyValueSerializablePairs = new LinkedHashMap<>();
+    private Map<String, FlowFeature> keyValueUriObjects = new LinkedHashMap<>();
+    private Map<String, Details> keyValueDetailObjects = new LinkedHashMap<>();
 
     private Map<String, CarryOverContext> subContextMap = new LinkedHashMap<>();
 
@@ -20,20 +23,31 @@ public class CarryOverContext {
         this.contextOwner = contextOwner;
     }
 
-    public void addKeyValue(String key, FlowFeature jsonSerializableFeature) {
-        keyValueSerializablePairs.put(key, jsonSerializableFeature);
+    public void saveFeature(String key, FlowFeature jsonSerializableFeature) {
+        keyValueUriObjects.put(key, jsonSerializableFeature);
     }
 
-    public void addKeyList(String key, List<? extends FlowFeature> jsonSerializableFeatureList) {
-        keyValueSerializablePairs.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
+    public void saveDetails(String key, Details jsonSerializableFeature) {
+        keyValueDetailObjects.put(key, jsonSerializableFeature);
     }
 
-    public FlowFeature getValue(String key) {
-        return keyValueSerializablePairs.get(key);
+    public void saveFeatureList(String key, List<? extends FlowFeature> jsonSerializableFeatureList) {
+        keyValueUriObjects.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
     }
 
-    public Set<String> keySet() {
-        return keyValueSerializablePairs.keySet();
+    public FlowFeature getFeature(String key) {
+        return keyValueUriObjects.get(key);
+    }
+
+    public Details getDetails(String key) {
+        return keyValueDetailObjects.get(key);
+    }
+
+    public Set<String> featureKeySet() {
+        return keyValueUriObjects.keySet();
+    }
+    public Set<String> detailsKeySet() {
+        return keyValueDetailObjects.keySet();
     }
 
     public CarryOverContext getSubContext(String subContextOwner) {
@@ -48,8 +62,8 @@ public class CarryOverContext {
         return contextOwner;
     }
 
-    public List<? extends FlowFeature> getKeyList(String key) {
-        ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) keyValueSerializablePairs.get(key);
+    public List<? extends FlowFeature> getFeatureList(String key) {
+        ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) keyValueUriObjects.get(key);
 
         return flowFeatures.getOriginalTypedList();
     }

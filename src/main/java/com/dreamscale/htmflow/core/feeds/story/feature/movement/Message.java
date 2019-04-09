@@ -1,12 +1,14 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.details;
+package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import lombok.Getter;
 
 import java.util.UUID;
 
 @Getter
-public class IdeaDetails extends Details {
+public class Message extends FlowFeature {
 
     private UUID messageFromTorchieId;
     private String messageFromName;

@@ -1,12 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
 import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
@@ -119,41 +116,72 @@ public class StoryFrame {
 
 
     /**
-     * Add an event for sharing an idea for solving a problem,
+     * Add an event for posting a message to the circle to help solve a problem
      * @param moment
-     * @param ideaDetails
+     * @param message
      */
-    public void shareMessage(LocalDateTime moment, IdeaDetails ideaDetails) {
+    public void postCircleMessage(LocalDateTime moment, Message message) {
         ContextSummary context = contextMapper.getContextOfMoment(moment);
-        flowRhythmMapper.shareMessage(moment, context, ideaDetails);
+        flowRhythmMapper.shareMessage(moment, context, message);
     }
 
     /**
-     * Start a time band at the position, that will continue for the duration, including carry over into
-     * subsequent frames until the band is cleared
-     * @param bandLayerType
+     * Starts a WTF friction band...
      * @param startBandPosition
-     * @param details
+     * @param circleDetails
      */
-    public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, Details details) {
-        timeBandMapper.startBand(bandLayerType, startBandPosition, details);
+    public void startWTF(LocalDateTime startBandPosition, CircleDetails circleDetails) {
+        timeBandMapper.startBand(BandLayerType.FRICTION_WTF, startBandPosition, circleDetails);
     }
 
     /**
-     * Clear the active time band in this layer, from the specified time onward, no bands will be generated
-     * @param bandLayerType
+     * Clears a WTF friction band...
+     */
+    public void clearWTF(LocalDateTime endBandPosition) {
+        timeBandMapper.clearBand(BandLayerType.FRICTION_WTF, endBandPosition);
+    }
+
+    /**
+     * An alternative set of authors is active for all subsequent data until cleared
+     * @param startBandPosition
+     * @param authorDetails
+     */
+    public void startAlternativeAuthorsBand(LocalDateTime startBandPosition, AuthorDetails authorDetails) {
+        timeBandMapper.startBand(BandLayerType.ALTERNATIVE_AUTHORS_SET, startBandPosition, authorDetails);
+    }
+
+    /**
+     * Clear out the alternative authors, and go back to default
      * @param endBandPosition
      */
-    public void clearBand(BandLayerType bandLayerType, LocalDateTime endBandPosition) {
-        timeBandMapper.clearBand(bandLayerType, endBandPosition);
+    public void clearAlternativeAuthorsBand(LocalDateTime endBandPosition) {
+        timeBandMapper.clearBand(BandLayerType.ALTERNATIVE_AUTHORS_SET, endBandPosition);
     }
 
-    public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatSize) {
-        timeBandMapper.configureRollingBands(bandLayerType, beatSize);
+    /**
+     * Activate the feels flame rating from this point forward until cleared or changed
+     * @param startBandPosition
+     * @param feelsDetails
+     */
+    public void startFeelsBand(LocalDateTime startBandPosition, FeelsDetails feelsDetails) {
+        timeBandMapper.startBand(BandLayerType.FEELS, startBandPosition, feelsDetails);
     }
 
-    public void addRollingSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
-        timeBandMapper.addRollingBandSample(bandLayerType, moment, sample);
+    /**
+     * Clear out the feels flame rating, and go back to default
+     * @param endBandPosition
+     */
+    public void clearFeelsBand(LocalDateTime endBandPosition) {
+        timeBandMapper.clearBand(BandLayerType.FEELS, endBandPosition);
+    }
+
+    /**
+     * Learning time vs Progress is determined by sampling the typing activity to identify when
+     * lots of navigating around and reading shifts to a state of modifying things.  Learning Friction is
+     * estimated by the amount of time it takes to shift into a regular cadence of typing
+     */
+    public void addTypingSampleToAssessLearningFriction(LocalDateTime moment, int modificationCount) {
+        timeBandMapper.addRollingBandSample(BandLayerType.FRICTION_LEARNING, moment, modificationCount);
     }
 
     /**

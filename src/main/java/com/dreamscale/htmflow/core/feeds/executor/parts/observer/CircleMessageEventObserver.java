@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.IdeaDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class CircleMessageEventObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isScrapbookEvent(circleMessageType)) {
-                    currentStoryFrame.shareMessage(circleMessage.getPosition(), createIdeaDeails(circleMessage));
+                    currentStoryFrame.postCircleMessage(circleMessage.getPosition(), createIdeaDeails(circleMessage));
                 }
 
             }
@@ -39,22 +39,22 @@ public class CircleMessageEventObserver implements FlowObserver {
 
     }
 
-    private IdeaDetails createIdeaDeails(CircleFeedMessageEntity circleMessage) {
-        IdeaDetails ideaDetails = new IdeaDetails();
+    private Message createIdeaDeails(CircleFeedMessageEntity circleMessage) {
+        Message message = new Message();
 
-        ideaDetails.setMessageFromTorchieId(circleMessage.getTorchieId());
-        ideaDetails.setMessageFromName(circleMessage.getFullName());
+        message.setMessageFromTorchieId(circleMessage.getTorchieId());
+        message.setMessageFromName(circleMessage.getFullName());
 
-        ideaDetails.setCircleId(circleMessage.getCircleId());
-        ideaDetails.setCircleName(circleMessage.getCircleName());
+        message.setCircleId(circleMessage.getCircleId());
+        message.setCircleName(circleMessage.getCircleName());
 
-        ideaDetails.setMessageId(circleMessage.getId());
-        ideaDetails.setMessageType(circleMessage.getMessageType());
-        ideaDetails.setMessage(circleMessage.getMessage());
-        ideaDetails.setFileName(circleMessage.getFileName());
-        ideaDetails.setFilePath(circleMessage.getFilePath());
-        ideaDetails.setSnippetSource(circleMessage.getSnippetSource());
-        return ideaDetails;
+        message.setMessageId(circleMessage.getId());
+        message.setMessageType(circleMessage.getMessageType());
+        message.setMessage(circleMessage.getMessage());
+        message.setFileName(circleMessage.getFileName());
+        message.setFilePath(circleMessage.getFilePath());
+        message.setSnippetSource(circleMessage.getSnippetSource());
+        return message;
     }
 
     private boolean isScrapbookEvent(CircleMessageType circleMessageType) {

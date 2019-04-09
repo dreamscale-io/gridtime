@@ -184,19 +184,19 @@ public class FlowContextMapper {
 
 
         void addContext(ContextStructureLevel structureLevel, ContextChangeEvent contextEvent) {
-            subContext.addKeyValue(structureLevel.name(), contextEvent);
+            subContext.saveFeature(structureLevel.name(), contextEvent);
         }
 
         void setContextToEndLater(ContextChangeEvent contextEnding) {
-            subContext.addKeyValue(CONTEXT_TO_END_LATER, contextEnding);
+            subContext.saveFeature(CONTEXT_TO_END_LATER, contextEnding);
         }
 
         ContextChangeEvent getContextToEndLater() {
-            return (ContextChangeEvent) subContext.getValue(CONTEXT_TO_END_LATER);
+            return (ContextChangeEvent) subContext.getFeature(CONTEXT_TO_END_LATER);
         }
 
         ContextChangeEvent getContextFor(ContextStructureLevel structureLevel) {
-            return (ContextChangeEvent) subContext.getValue(structureLevel.name());
+            return (ContextChangeEvent) subContext.getFeature(structureLevel.name());
         }
 
         int getSequenceFor(ContextStructureLevel structureLevel) {

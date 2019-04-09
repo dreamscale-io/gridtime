@@ -9,5 +9,5 @@ import java.util.UUID;
 public enum UriObjectType {
     BOX,
     LOCATION,
-    TRAVERSAL, BRIDGE
+    TRAVERSAL, CIRCLE_MESSAGE, BRIDGE
 }

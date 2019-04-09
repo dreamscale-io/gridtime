@@ -31,9 +31,9 @@ public class JournalAuthorObserver implements FlowObserver {
                 if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
                     List<LinkedMember> linkedMembers = journalEntry.getLinkedMembers();
 
-                    currentStoryFrame.startBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition(), new AuthorDetails(linkedMembers));
+                    currentStoryFrame.startAlternativeAuthorsBand(journalEntry.getPosition(), new AuthorDetails(linkedMembers));
                 } else {
-                    currentStoryFrame.clearBand(BandLayerType.PAIRING_AUTHORS, journalEntry.getPosition());
+                    currentStoryFrame.clearAlternativeAuthorsBand(journalEntry.getPosition());
                 }
             }
         }
