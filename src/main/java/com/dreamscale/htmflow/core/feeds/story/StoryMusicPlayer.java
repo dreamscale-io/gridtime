@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.FeelsBand;
@@ -14,6 +15,7 @@ public class StoryMusicPlayer {
     private final Metronome metronome;
     private final Scene scene;
     private StoryFrame frameToPlay;
+    private List<Snapshot> snapshots;
 
     public StoryMusicPlayer(LocalDateTime from, LocalDateTime to) {
         this.metronome = new Metronome(from, to);
@@ -35,7 +37,7 @@ public class StoryMusicPlayer {
 
     }
 
-    public List<Snapshot> play() {
+    public void play() {
         List<Snapshot> snapshots = new ArrayList<>();
 
         int beatsToPlay = metronome.getBeats();
@@ -45,6 +47,10 @@ public class StoryMusicPlayer {
             snapshots.add(scene.snapshot(tickCoords));
         }
 
+        this.snapshots = snapshots;
+    }
+
+    public List<Snapshot> getSnapshots() {
         return snapshots;
     }
 

@@ -10,6 +10,7 @@ import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
+import com.dreamscale.htmflow.core.feeds.story.music.Snapshot;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,7 +27,10 @@ public class StoryFrame {
     private final SpatialGeometryMapper spatialGeometryMapper;
     private final FlowRhythmMapper flowRhythmMapper;
     private final FlowBandMapper timeBandMapper;
+    private final StoryMusicPlayer storyPlayer;
+
     private final String frameUri;
+
 
 
     public StoryFrame(String feedUri, GeometryClock.Coords frameCoordinates, ZoomLevel zoomLevel) {
@@ -43,6 +47,7 @@ public class StoryFrame {
         this.spatialGeometryMapper = new SpatialGeometryMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.flowRhythmMapper = new FlowRhythmMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
         this.timeBandMapper = new FlowBandMapper(internalClock.getFromClockTime(), internalClock.getToClockTime());
+        this.storyPlayer = new StoryMusicPlayer(internalClock.getFromClockTime(), internalClock.getToClockTime());
 
     }
 
@@ -193,6 +198,15 @@ public class StoryFrame {
     }
 
     /**
+     * Once the entire scene is loaded, play all the frames, mix the content so that feels bleed over
+     * to locations, and snapshots are generated for each tick
+     */
+    public void play() {
+        storyPlayer.loadFrame(this);
+        storyPlayer.play();
+    }
+
+    /**
      * When a new frame is initialized by "panning right", forwarding one step into the future
      * The last context of the prior frame becomes the starting context of the new frame.
      *
@@ -273,6 +287,9 @@ public class StoryFrame {
         return frameUri;
     }
 
+    public List<Snapshot> getSnapshots() {
+        return storyPlayer.getSnapshots();
+    }
 
     public ContextSummary getCurrentContext() {
         return contextMapper.getCurrentContext();
@@ -281,4 +298,6 @@ public class StoryFrame {
     public ContextSummary getContextOfMoment(LocalDateTime moment) {
         return contextMapper.getContextOfMoment(moment);
     }
+
+
 }
