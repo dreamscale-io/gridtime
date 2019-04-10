@@ -17,7 +17,7 @@ public class BandFactory {
                 return new WTFFrictionBand(start, end, (CircleDetails) details);
             case FEELS:
                 return new FeelsBand(start, end, (FeelsDetails) details);
-            case ALTERNATIVE_AUTHORS_SET:
+            case PAIRING_AUTHORS:
                 return new AuthorBand(start, end, (AuthorDetails) details);
 
         }

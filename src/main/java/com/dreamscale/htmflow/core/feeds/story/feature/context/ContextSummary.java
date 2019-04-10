@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,7 @@ public class ContextSummary extends FlowFeature {
     private ContextChangeEvent taskContext;
     private ContextChangeEvent intentionContext;
 
-    private InnerGeometryClock.Coords coordinates;
+    private MusicGeometryClock.Coords coordinates;
 
     public LocalDateTime getPosition() {
         LocalDateTime position = null;

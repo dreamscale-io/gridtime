@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 
 import java.util.UUID;
 
@@ -46,7 +46,7 @@ public class StandardizedKeyMapper {
         return "@circle/"+circleId;
     }
 
-    public static String createFrameUri(String feedUri, ZoomLevel zoomLevel, OuterGeometryClock.Coords tileCoordinates) {
+    public static String createFrameUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords tileCoordinates) {
         return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatCoords();
     }
 

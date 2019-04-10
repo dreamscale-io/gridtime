@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.clock;
+package com.dreamscale.htmflow.core.feeds.story.music;
 
 public enum FractalBeat {
 

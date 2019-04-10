@@ -1,19 +1,20 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 
 import java.time.LocalDateTime;
 
-public class Movement extends FlowFeature {
+public class Movement extends FlowFeature implements Playable {
 
     private final MovementType type;
     private final FlowFeature staticReferenceObject;
     private LocalDateTime moment;
     private int relativeOffset = 0;
 
-    private InnerGeometryClock.Coords coords;
+    private MusicGeometryClock.Coords coords;
     private ContextSummary context;
 
     public Movement(LocalDateTime moment, MovementType type, FlowFeature staticReferenceObject) {
@@ -26,7 +27,7 @@ public class Movement extends FlowFeature {
         this.relativeOffset = nextSequence;
     }
 
-    public void setCoordinates(InnerGeometryClock.Coords coords) {
+    public void setCoordinates(MusicGeometryClock.Coords coords) {
         this.coords = coords;
     }
 
@@ -38,7 +39,7 @@ public class Movement extends FlowFeature {
         return relativeOffset;
     }
 
-    public InnerGeometryClock.Coords getCoordinates() {
+    public MusicGeometryClock.Coords getCoordinates() {
         return this.coords;
     }
 

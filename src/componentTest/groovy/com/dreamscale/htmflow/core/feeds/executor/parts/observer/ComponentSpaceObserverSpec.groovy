@@ -6,8 +6,8 @@ import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryFrame("@torchie/id", new OuterGeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryFrame("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create Location traversals inside a Place"() {

@@ -1,13 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class TimeBand extends FlowFeature {
+public class TimeBand extends FlowFeature implements Playable {
 
     private Details details;
     private LocalDateTime start;
@@ -15,8 +16,8 @@ public class TimeBand extends FlowFeature {
 
     private int relativeOffset = 0;
 
-    private InnerGeometryClock.Coords startCoords;
-    private InnerGeometryClock.Coords endCoords;
+    private MusicGeometryClock.Coords startCoords;
+    private MusicGeometryClock.Coords endCoords;
 
     public TimeBand(LocalDateTime start, LocalDateTime end, Details details) {
         this.start = start;
@@ -32,7 +33,7 @@ public class TimeBand extends FlowFeature {
         this.relativeOffset = nextSequence;
     }
 
-    public void initCoordinates(InnerGeometryClock clock) {
+    public void initCoordinates(MusicGeometryClock clock) {
 
         this.startCoords = clock.createCoords(start);
         this.endCoords = clock.createCoords(end);
@@ -46,7 +47,7 @@ public class TimeBand extends FlowFeature {
         return relativeOffset;
     }
 
-    public InnerGeometryClock.Coords getCoordinates() {
+    public MusicGeometryClock.Coords getCoordinates() {
         return this.startCoords;
     }
 

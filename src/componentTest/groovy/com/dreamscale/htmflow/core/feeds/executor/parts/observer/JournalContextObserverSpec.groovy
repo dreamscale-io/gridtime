@@ -5,8 +5,8 @@ import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
 
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
@@ -26,10 +26,10 @@ public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
     StoryFrame storyFrame
-    OuterGeometryClock clock
+    GeometryClock clock
 
     def setup() {
-        clock = new OuterGeometryClock(LocalDateTime.now())
+        clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
         storyFrame = new StoryFrame("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN)
     }
@@ -115,7 +115,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time3 = time2.plusMinutes(20);
         LocalDateTime time4 = time3.plusMinutes(20);
 
-        clock = new OuterGeometryClock(time1);
+        clock = new GeometryClock(time1);
         storyFrame = new StoryFrame("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN);
 
         ProjectEntity project = aRandom.projectEntity().build();

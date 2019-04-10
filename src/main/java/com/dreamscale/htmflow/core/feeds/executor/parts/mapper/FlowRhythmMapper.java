@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
@@ -17,7 +17,7 @@ public class FlowRhythmMapper {
 
     private final LocalDateTime from;
     private final LocalDateTime to;
-    private final InnerGeometryClock internalClock;
+    private final MusicGeometryClock internalClock;
 
     private Map<RhythmLayerType, RhythmLayerMapper> layerMap = new HashMap<>();
 
@@ -25,7 +25,7 @@ public class FlowRhythmMapper {
         this.from = from;
         this.to = to;
 
-        this.internalClock = new InnerGeometryClock(from, to);
+        this.internalClock = new MusicGeometryClock(from, to);
     }
 
 
@@ -50,15 +50,6 @@ public class FlowRhythmMapper {
         if (movement != null) {
             layer.addMovement(internalClock, context, movement);
         }
-    }
-
-    public void modifyCurrentLocation(LocalDateTime moment, ContextSummary context, int modificationCount) {
-        RhythmLayerMapper modificationLayer = findOrCreateLayer(RhythmLayerType.MODIFICATION_ACTIVITY);
-
-        LocationInBox location = getLastLocation();
-
-        modificationLayer.addMovement(internalClock, context, new ModifyLocation(moment, location, modificationCount));
-
     }
 
     public void executeThing(LocalDateTime moment, ContextSummary context, ExecutionDetails executionDetails) {

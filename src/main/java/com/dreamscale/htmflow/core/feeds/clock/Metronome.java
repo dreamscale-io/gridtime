@@ -1,7 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.clock;
 
 import com.dreamscale.htmflow.core.feeds.common.Flow;
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -14,28 +13,28 @@ import java.util.List;
 @Slf4j
 public class Metronome {
 
-    private OuterGeometryClock clock;
+    private GeometryClock clock;
 
-    private OuterGeometryClock.Coords fromClockPosition;
-    private OuterGeometryClock.Coords toClockPosition;
+    private GeometryClock.Coords fromClockPosition;
+    private GeometryClock.Coords toClockPosition;
 
     private final List<Flow> flowChain;
     private final List<ClockChangeListener> clockChangeListeners;
 
     public Metronome(LocalDateTime startTime) {
-        this.clock = new OuterGeometryClock(startTime);
+        this.clock = new GeometryClock(startTime);
         this.fromClockPosition = clock.getCoordinates();
 
         this.flowChain = new ArrayList<>();
         this.clockChangeListeners = new ArrayList<>();
     }
 
-    public OuterGeometryClock.Coords getActiveCoordinates() {
+    public GeometryClock.Coords getActiveCoordinates() {
         return fromClockPosition;
     }
 
     public void tick() {
-        OuterGeometryClock.Coords nextCoordinates = clock.tick();
+        GeometryClock.Coords nextCoordinates = clock.tick();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
@@ -82,11 +81,11 @@ public class Metronome {
         }
     }
 
-    public OuterGeometryClock.Coords getFromClockPosition() {
+    public GeometryClock.Coords getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public OuterGeometryClock.Coords getToClockPosition() {
+    public GeometryClock.Coords getToClockPosition() {
         return this.toClockPosition;
     }
 

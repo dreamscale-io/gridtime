@@ -5,9 +5,9 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure;
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
 
@@ -17,10 +17,10 @@ import java.util.*;
 
 public class StoryFrame {
 
-    private final OuterGeometryClock.Coords frameCoordinates;
+    private final GeometryClock.Coords frameCoordinates;
     private final ZoomLevel zoomLevel;
 
-    private final InnerGeometryClock internalClock;
+    private final MusicGeometryClock internalClock;
 
     private final FlowContextMapper contextMapper;
     private final SpatialGeometryMapper spatialGeometryMapper;
@@ -29,13 +29,13 @@ public class StoryFrame {
     private final String frameUri;
 
 
-    public StoryFrame(String feedUri, OuterGeometryClock.Coords frameCoordinates, ZoomLevel zoomLevel) {
+    public StoryFrame(String feedUri, GeometryClock.Coords frameCoordinates, ZoomLevel zoomLevel) {
         this.frameCoordinates = frameCoordinates;
         this.zoomLevel = zoomLevel;
 
         this.frameUri = StandardizedKeyMapper.createFrameUri(feedUri, zoomLevel, frameCoordinates);
 
-        this.internalClock = new InnerGeometryClock(
+        this.internalClock = new MusicGeometryClock(
                 frameCoordinates.getClockTime(),
                 frameCoordinates.panRight(zoomLevel).getClockTime());
 
@@ -90,15 +90,11 @@ public class StoryFrame {
 
     /**
      * Modification activity is aggregated by the SpatialGeometryMapper for each location,
-     * to get an overall idea of how much modification is happening,
-     * then the FlowRhythmMapper captures the rhythm of modification, the starts and stops,
-     * as a heuristic detection of experienced friction
+     * to get an overall idea of how much modification is happening
      */
 
-    public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
-        ContextSummary context = contextMapper.getContextOfMoment(moment);
+    public void modifyCurrentLocation(int modificationCount) {
         spatialGeometryMapper.modifyCurrentLocation(modificationCount);
-        flowRhythmMapper.modifyCurrentLocation(moment, context, modificationCount);
     }
 
 
@@ -147,7 +143,7 @@ public class StoryFrame {
      * @param authorDetails
      */
     public void startAlternativeAuthorsBand(LocalDateTime startBandPosition, AuthorDetails authorDetails) {
-        timeBandMapper.startBand(BandLayerType.ALTERNATIVE_AUTHORS_SET, startBandPosition, authorDetails);
+        timeBandMapper.startBand(BandLayerType.PAIRING_AUTHORS, startBandPosition, authorDetails);
     }
 
     /**
@@ -155,7 +151,7 @@ public class StoryFrame {
      * @param endBandPosition
      */
     public void clearAlternativeAuthorsBand(LocalDateTime endBandPosition) {
-        timeBandMapper.clearBand(BandLayerType.ALTERNATIVE_AUTHORS_SET, endBandPosition);
+        timeBandMapper.clearBand(BandLayerType.PAIRING_AUTHORS, endBandPosition);
     }
 
     /**
@@ -233,7 +229,7 @@ public class StoryFrame {
 
     //////////// Extract all the various state for persistence ////////////
 
-    public OuterGeometryClock.Coords getFrameCoordinates() {
+    public GeometryClock.Coords getFrameCoordinates() {
         return frameCoordinates;
     }
 

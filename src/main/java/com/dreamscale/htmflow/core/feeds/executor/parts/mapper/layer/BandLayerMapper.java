@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
-import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandFactory;
@@ -17,7 +17,7 @@ public class BandLayerMapper {
 
     private final BandLayerType layerType;
     private final RelativeSequence relativeSequence;
-    private final InnerGeometryClock internalClock;
+    private final MusicGeometryClock internalClock;
 
     private TimeBand carriedOverLastBand;
     private List<TimeBand> bandsInWindow = new ArrayList<>();
@@ -26,7 +26,7 @@ public class BandLayerMapper {
     private LocalDateTime activeBandStart;
     private boolean isRollingBandLayer = false;
 
-    public BandLayerMapper(InnerGeometryClock internalClock, BandLayerType layerType) {
+    public BandLayerMapper(MusicGeometryClock internalClock, BandLayerType layerType) {
         this.internalClock = internalClock;
         this.relativeSequence = new RelativeSequence(1);
         this.layerType = layerType;
@@ -123,10 +123,10 @@ public class BandLayerMapper {
 
         int bandCount = BeatsPerBucket.BEAT.getBeatCount() / beatSize.getBeatCount();
 
-        InnerGeometryClock.Coords startCoords = internalClock.getCoordinates();
+        MusicGeometryClock.Coords startCoords = internalClock.getCoordinates();
 
         for (int i = 0; i < bandCount; i++) {
-            InnerGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
+            MusicGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
 
             RollingAggregateBand band = BandFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
             bandsInWindow.add(band);

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.common;
+package com.dreamscale.htmflow.core.feeds.clock;
 
 public enum ZoomLevel {
 
@@ -18,7 +18,7 @@ public enum ZoomLevel {
         return zoomOut().bucketsToAggregate;
     }
 
-    ZoomLevel zoomIn() {
+    public ZoomLevel zoomIn() {
         switch (this) {
             case MIN:
                 return MIN;
@@ -36,7 +36,7 @@ public enum ZoomLevel {
         return MIN;
     }
 
-    ZoomLevel zoomOut() {
+    public ZoomLevel zoomOut() {
         switch (this) {
             case MIN:
                 return HOUR;

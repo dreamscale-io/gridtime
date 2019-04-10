@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.clock;
+package com.dreamscale.htmflow.core.feeds.story.music;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * will align with also align with absolute time, such that each beat is 1 minute, and a quarter note is 5 minutes.
  *
  */
-public class InnerGeometryClock {
+public class MusicGeometryClock {
 
     private final LocalDateTime fromClockTime;
     private final LocalDateTime toClockTime;
@@ -31,7 +31,7 @@ public class InnerGeometryClock {
 
     private Coords coords;
 
-    public InnerGeometryClock(LocalDateTime fromClockTime, LocalDateTime toClockTime) {
+    public MusicGeometryClock(LocalDateTime fromClockTime, LocalDateTime toClockTime) {
         this.fromClockTime = fromClockTime;
         this.toClockTime = toClockTime;
 
@@ -50,6 +50,11 @@ public class InnerGeometryClock {
         this.currentMoment = nextClockTime;
 
         return this.coords;
+    }
+
+    public void reset() {
+        currentMoment = fromClockTime;
+        coords = this.createCoords(currentMoment);
     }
 
     public Coords createCoords(LocalDateTime moment) {
@@ -81,6 +86,11 @@ public class InnerGeometryClock {
     public LocalDateTime getToClockTime() {
         return toClockTime;
     }
+
+    public int getBeats() {
+        return BeatsPerBucket.BEAT.getBeatCount();
+    }
+
 
     @AllArgsConstructor
     @Getter

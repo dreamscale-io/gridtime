@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
@@ -15,7 +15,7 @@ import java.util.*;
 public class FlowContextMapper {
 
 
-    private final InnerGeometryClock internalClock;
+    private final MusicGeometryClock internalClock;
     private Map<ContextStructureLevel, ContextChangeEvent> currentContextMap = new HashMap<>();
     private Map<ContextStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
     private List<ContextSummary> contextSummariesOverTime = new ArrayList<>();
@@ -28,7 +28,7 @@ public class FlowContextMapper {
     public FlowContextMapper(LocalDateTime from, LocalDateTime to) {
         this.from = from;
         this.to = to;
-        this.internalClock = new InnerGeometryClock(from, to);
+        this.internalClock = new MusicGeometryClock(from, to);
     }
 
     public ContextChangeEvent getCurrentContext(ContextStructureLevel structureLevel) {

@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.clock.BeatsPerBucket;
-import com.dreamscale.htmflow.core.feeds.clock.InnerGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
@@ -14,7 +14,7 @@ public class FlowBandMapper {
 
     private final LocalDateTime from;
     private final LocalDateTime to;
-    private final InnerGeometryClock internalClock;
+    private final MusicGeometryClock internalClock;
 
     private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
@@ -22,7 +22,7 @@ public class FlowBandMapper {
         this.from = from;
         this.to = to;
 
-        this.internalClock = new InnerGeometryClock(from, to);
+        this.internalClock = new MusicGeometryClock(from, to);
     }
 
 

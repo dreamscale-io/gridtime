@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.domain.journal.IntentionEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
@@ -36,7 +36,7 @@ class FlowSourceSpec extends Specification {
 
     def setup() {
         this.memberId = UUID.randomUUID();
-        this.featurePool = new SharedFeaturePool(memberId, new OuterGeometryClock(LocalDateTime.now()).getCoordinates());
+        this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates());
 
         FlowObserver flowObserverMock =
                 [see: { StoryFrame storyFrame, Window window -> this.latestWindow = window }] as FlowObserver

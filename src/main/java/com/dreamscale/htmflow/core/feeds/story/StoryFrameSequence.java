@@ -1,14 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.feeds.common.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 
 import java.util.LinkedList;
 
 public class StoryFrameSequence {
 
         private final ZoomLevel zoomLevel;
-        private final OuterGeometryClock.Coords activeStoryCoordinates;
+        private final GeometryClock.Coords activeStoryCoordinates;
         private final String feedUri;
 
 
@@ -16,7 +16,7 @@ public class StoryFrameSequence {
 
         StoryFrame activeStoryFrame;
 
-        public StoryFrameSequence(String feedUri, ZoomLevel zoomLevel, OuterGeometryClock.Coords storyCoordinates) {
+        public StoryFrameSequence(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
             this.feedUri = feedUri;
             this.zoomLevel = zoomLevel;
             this.activeStoryCoordinates = storyCoordinates;

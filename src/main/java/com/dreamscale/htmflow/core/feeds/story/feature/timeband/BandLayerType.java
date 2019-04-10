@@ -5,5 +5,5 @@ public enum BandLayerType {
     FRICTION_WTF,
     FRICTION_LEARNING,
     FEELS,
-    ALTERNATIVE_AUTHORS_SET
+    PAIRING_AUTHORS
 }

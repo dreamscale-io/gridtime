@@ -1,8 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.common;
 
 import com.dreamscale.htmflow.core.feeds.clock.ClockChangeListener;
-import com.dreamscale.htmflow.core.feeds.clock.OuterGeometryClock;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
+import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +18,7 @@ public class ZoomableFlow implements ClockChangeListener {
     private final LinkedList<Runnable> workToDo;
 
     private ZoomLevel zoomLevel;
-    private OuterGeometryClock.Coords activeFocus;
+    private GeometryClock.Coords activeFocus;
 
 
     public ZoomableFlow(Metronome metronome, UUID memberId, SharedFeaturePool sharedFeaturePool) {
