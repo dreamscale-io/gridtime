@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
+import groovy.xml.Namespace;
 
 import java.time.LocalDateTime;
 
@@ -56,6 +57,10 @@ public class Movement extends FlowFeature implements Playable {
         return path;
     }
 
+    public FlowFeature getReferenceObject() {
+        return staticReferenceObject;
+    }
+
     public void setContext(ContextSummary context) {
         this.context = context;
     }
@@ -63,4 +68,6 @@ public class Movement extends FlowFeature implements Playable {
     public ContextSummary getContext() {
         return context;
     }
+
+
 }

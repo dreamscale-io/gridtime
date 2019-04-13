@@ -11,7 +11,7 @@ public class Metronome {
 
     private MusicGeometryClock clock;
 
-    private final List<RhythmPlayer> playerChain;
+    private final List<Player> playerChain;
 
     public Metronome(LocalDateTime from, LocalDateTime to) {
         this.clock = new MusicGeometryClock(from, to);
@@ -22,21 +22,24 @@ public class Metronome {
         this.clock.reset();
     }
 
-    public MusicGeometryClock.Coords tick() {
+    public void tick() {
         MusicGeometryClock.Coords nextBeat = clock.tick();
 
-        for (RhythmPlayer player : playerChain) {
-            player.tick(nextBeat);
+        for (Player player : playerChain) {
+            player.play(nextBeat);
         }
 
-        return nextBeat;
     }
 
-    public void addPlayerToChain(RhythmPlayer rhythmPlayer) {
-        this.playerChain.add(rhythmPlayer);
+    public void addPlayerToChain(Player player) {
+        this.playerChain.add(player);
     }
 
     public int getBeats() {
         return clock.getBeats();
+    }
+
+    public MusicGeometryClock.Coords getCoords() {
+        return clock.getCoordinates();
     }
 }

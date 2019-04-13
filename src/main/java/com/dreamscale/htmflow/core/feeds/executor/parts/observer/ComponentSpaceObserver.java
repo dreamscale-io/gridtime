@@ -62,7 +62,7 @@ public class ComponentSpaceObserver implements FlowObserver {
     private void modifyCurrentLocation(StoryFrame storyFrame, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        storyFrame.modifyCurrentLocation( modificationCount);
+        storyFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 

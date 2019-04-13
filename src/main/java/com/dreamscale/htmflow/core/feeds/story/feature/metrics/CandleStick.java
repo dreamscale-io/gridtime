@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold;
+package com.dreamscale.htmflow.core.feeds.story.feature.metrics;
 
 import lombok.Getter;
 

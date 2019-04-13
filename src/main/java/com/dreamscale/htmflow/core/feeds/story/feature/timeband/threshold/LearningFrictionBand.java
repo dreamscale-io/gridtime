@@ -19,4 +19,8 @@ public class LearningFrictionBand extends RollingAggregateBand {
             this.thresholdExceeded = false;
         }
     }
+
+    public boolean isOverModifyThreshold() {
+        return thresholdExceeded;
+    }
 }

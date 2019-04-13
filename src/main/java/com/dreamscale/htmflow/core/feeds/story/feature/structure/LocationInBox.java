@@ -2,57 +2,55 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObject;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObjectMetrics;
 
 import java.time.Duration;
 
-public class LocationInBox extends FlowFeature {
+public class LocationInBox extends FlowFeature implements GridObject {
 
-    private final FocalPoint box;
+    private final FocalPoint focalPoint;
     private final String locationPath;
-    private final int locationIndex;
 
-    private int modificationCount;
-    private Duration totalTimeInvestment;
-    private int visitCounter;
+    private GridObjectMetrics gridObjectMetrics = new GridObjectMetrics();
 
-    public LocationInBox(FocalPoint box, String locationPath, int locationIndex) {
-        this.box = box;
+
+    public LocationInBox(FocalPoint focalPoint, String locationPath) {
+        this.focalPoint = focalPoint;
         this.locationPath = locationPath;
-        this.totalTimeInvestment = Duration.ofSeconds(0);
-        this.visitCounter = 0;
-        this.modificationCount = 0;
-        this.locationIndex = locationIndex;
     }
 
     public String getLocationPath() {
         return locationPath;
     }
 
-    public void visit() {
-        this.visitCounter++;
-    }
 
     public void spendTime(Duration additionalTime) {
-        this.totalTimeInvestment = totalTimeInvestment.plus(additionalTime);
+        gridObjectMetrics.addVelocitySample(additionalTime.getSeconds());
     }
 
     public void modify(int modificationCount) {
-        this.modificationCount += modificationCount;
+        gridObjectMetrics.addModificationSample(modificationCount);
     }
 
     public String getBoxName() {
-        return box.getBoxName();
+        return focalPoint.getBoxName();
     }
 
     public String toKey() {
-       return box.toKey() + ":" + StandardizedKeyMapper.createLocationKey(locationPath);
+       return focalPoint.toKey() + ":" + StandardizedKeyMapper.createLocationKey(locationPath);
     }
 
     public Duration getTotalTimeInvestment() {
-        return totalTimeInvestment;
+        return gridObjectMetrics.getTotalTimeInvestment();
     }
 
     public String toString() {
         return toKey();
+    }
+
+    @Override
+    public GridObjectMetrics getGridObjectMetrics() {
+        return gridObjectMetrics;
     }
 }

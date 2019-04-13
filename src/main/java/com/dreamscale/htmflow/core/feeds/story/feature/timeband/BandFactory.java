@@ -18,7 +18,7 @@ public class BandFactory {
             case FEELS:
                 return new FeelsBand(start, end, (FeelsDetails) details);
             case PAIRING_AUTHORS:
-                return new AuthorBand(start, end, (AuthorDetails) details);
+                return new AuthorsBand(start, end, (AuthorDetails) details);
 
         }
         return new TimeBand(start, end, details);

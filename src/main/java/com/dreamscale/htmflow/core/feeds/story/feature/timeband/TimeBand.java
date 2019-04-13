@@ -39,6 +39,14 @@ public class TimeBand extends FlowFeature implements Playable {
         this.endCoords = clock.createCoords(end);
     }
 
+    public MusicGeometryClock.Coords getStartCoords() {
+        return this.startCoords;
+    }
+
+    public MusicGeometryClock.Coords getEndCoords() {
+        return this.endCoords;
+    }
+
     public LocalDateTime getMoment() {
         return start;
     }

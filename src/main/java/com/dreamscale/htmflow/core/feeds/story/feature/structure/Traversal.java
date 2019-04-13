@@ -2,17 +2,21 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObject;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObjectMetrics;
 
-public class Traversal extends FlowFeature {
+import java.time.Duration;
+
+public class Traversal extends FlowFeature implements GridObject {
 
     private final LocationInBox locationA;
     private final LocationInBox locationB;
-    private int visitCounter;
+
+    private GridObjectMetrics gridObjectMetrics = new GridObjectMetrics();
 
     public Traversal(LocationInBox locationA, LocationInBox locationB) {
         this.locationA = locationA;
         this.locationB = locationB;
-        this.visitCounter = 0;
     }
 
     public LocationInBox getLocationA() {
@@ -23,15 +27,16 @@ public class Traversal extends FlowFeature {
         return locationB;
     }
 
-    public void visit() {
-        this.visitCounter++;
-    }
-
     public String toKey() {
         return StandardizedKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
     }
 
-    public int getTraversalCount() {
-        return visitCounter;
+    @Override
+    public GridObjectMetrics getGridObjectMetrics() {
+        return gridObjectMetrics;
+    }
+
+    public void spendTime(Duration timeInLocation) {
+        gridObjectMetrics.addVelocitySample(timeInLocation.getSeconds());
     }
 }

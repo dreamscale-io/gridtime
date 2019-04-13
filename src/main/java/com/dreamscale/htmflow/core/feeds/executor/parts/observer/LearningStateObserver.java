@@ -6,9 +6,6 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.CandleStick;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.LearningFrictionBand;
 
 import java.util.List;
 

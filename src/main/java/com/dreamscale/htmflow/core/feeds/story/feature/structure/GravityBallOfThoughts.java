@@ -17,15 +17,13 @@ public class GravityBallOfThoughts {
 
     private final Map<String, LocationInBox> locationMap = new HashMap<>();
     private final Map<String, Traversal> traversalMap = new HashMap<>();
-    private final FocalPoint box;
+    private final FocalPoint focalPoint;
 
     private Map<String, ThoughtParticle> thoughtParticleMap = new HashMap<>();
     private LinkedList<ThoughtParticle> thoughtTracer = new LinkedList<>();
 
     private LocationInBox currentLocation;
     private Traversal lastTraversal;
-
-    private int locationIndex = 1;
 
     private static final int TRACER_LENGTH = 5;
 
@@ -36,8 +34,8 @@ public class GravityBallOfThoughts {
     private LocationInBox entranceLocation;
 
 
-    public GravityBallOfThoughts(FocalPoint box) {
-        this.box = box;
+    public GravityBallOfThoughts(FocalPoint focalPoint) {
+        this.focalPoint = focalPoint;
     }
 
     public void initStartingLocation(String locationPath) {
@@ -49,7 +47,6 @@ public class GravityBallOfThoughts {
         LocationInBox fromLocation = currentLocation;
         LocationInBox toLocation = findOrCreateLocation(locationPath);
 
-        toLocation.visit();
         currentLocation = toLocation;
 
         addThoughtParticleForTraversal(fromLocation, toLocation);
@@ -73,7 +70,10 @@ public class GravityBallOfThoughts {
     }
 
     public void growHeavyWithFocus(Duration timeInLocation) {
+        focalPoint.getBox().spendTime(timeInLocation);
         currentLocation.spendTime(timeInLocation);
+        lastTraversal.spendTime(timeInLocation);
+
         thoughtTracer.get(0).addVelocitySample(timeInLocation);
 
         DecayingGrowthRate decayingGrowth = new DecayingGrowthRate(timeInLocation);
@@ -96,8 +96,6 @@ public class GravityBallOfThoughts {
     private void addThoughtParticleForTraversal(LocationInBox fromLocation, LocationInBox toLocation) {
 
         Traversal traversal = findOrCreateEdge(fromLocation, toLocation);
-        traversal.visit();
-
         ThoughtParticle particle = findOrCreateParticle(traversal);
 
         pushThoughtParticleOntoTracer(particle);
@@ -402,7 +400,7 @@ public class GravityBallOfThoughts {
     private LocationInBox findOrCreateLocation(String locationPath) {
         LocationInBox location = locationMap.get(locationPath);
         if (location == null) {
-            location = new LocationInBox(this.box, locationPath, locationIndex++);
+            location = new LocationInBox(this.focalPoint, locationPath);
             locationMap.put(locationPath, location);
         }
         return location;

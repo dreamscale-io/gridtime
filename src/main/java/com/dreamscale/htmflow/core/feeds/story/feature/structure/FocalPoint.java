@@ -41,6 +41,7 @@ public class FocalPoint {
     }
 
     public void modifyCurrentLocationInFocus(int modificationCount) {
+        box.modify(modificationCount);
         currentLocation.modify(modificationCount);
     }
 

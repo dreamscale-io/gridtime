@@ -132,7 +132,7 @@ public class RadialStructure {
         }
     }
 
-    private RingLocation findRingLocation(LocationInBox connectToLocation) {
+    public RingLocation findRingLocation(LocationInBox connectToLocation) {
         RingLocation ringLocation = null;
 
         for (Ring ring: rings) {
@@ -143,6 +143,19 @@ public class RadialStructure {
         }
 
         return ringLocation;
+    }
+
+    public Link findRingLink(Traversal traversal) {
+        Link ringLink = null;
+
+        for (Ring ring: rings) {
+            if (ring.containsTraversal(traversal)) {
+                ringLink = ring.getLinkForTraversal(traversal);
+                break;
+            }
+        }
+
+        return ringLink;
     }
 
     @Getter
@@ -267,6 +280,25 @@ public class RadialStructure {
             }
             return linksFromItem;
         }
+
+        public boolean containsTraversal(Traversal traversal) {
+            for (Link link : linksToInnerRing) {
+                if (link.contains(traversal)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public Link getLinkForTraversal(Traversal traversal) {
+            for (Link link : linksToInnerRing) {
+                if (link.contains(traversal)) {
+                    return link;
+                }
+            }
+            return null;
+        }
     }
 
     public static class RingLocation extends FlowFeature {
@@ -325,6 +357,10 @@ public class RadialStructure {
             this.traversal = traversal;
             this.focusWeight = focusWeight;
             this.velocity = velocity;
+        }
+
+        public boolean contains(Traversal traversal) {
+            return this.traversal == traversal;
         }
 
         public boolean contains(RingLocation item) {

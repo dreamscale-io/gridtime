@@ -22,6 +22,14 @@ public class ThoughtBubble extends FlowFeature {
         return radialStructure.contains(locationInBubble);
     }
 
+    public RadialStructure.RingLocation findRingLocation(LocationInBox locationInBox) {
+        return radialStructure.findRingLocation(locationInBox);
+    }
+
+    public RadialStructure.Link findRingTraversal(Traversal traversal) {
+        return radialStructure.findRingLink(traversal);
+    }
+
     public void setRelativeSequence(int sequence) {
         this.relativeSequence = sequence;
     }
@@ -67,5 +75,14 @@ public class ThoughtBubble extends FlowFeature {
 
     public List<BridgeToBubble> getBridgeToBubbles() {
         return bridgeToBubbles;
+    }
+
+    public BridgeToBubble findBridgeToBubbleLink(Bridge bridge) {
+        for (BridgeToBubble bridgeToBubble : bridgeToBubbles) {
+            if (bridgeToBubble.getBridge() == bridge) {
+                return bridgeToBubble;
+            }
+        }
+        return null;
     }
 }

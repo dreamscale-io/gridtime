@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBandLayer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RhythmPlayer {
+public class RhythmPlayer implements Player {
 
     private final List<? extends Playable> playables;
     private final PlayListener playListener;
@@ -26,7 +26,8 @@ public class RhythmPlayer {
         this.playListener = playListener;
     }
 
-    public void tick(MusicGeometryClock.Coords coords) {
+    @Override
+    public void play(MusicGeometryClock.Coords coords) {
         List<Playable> tickContents = new ArrayList<>();
 
         for (int i = index; i < playables.size(); i++) {

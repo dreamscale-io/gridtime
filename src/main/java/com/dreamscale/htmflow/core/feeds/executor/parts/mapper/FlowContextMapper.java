@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextReference;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
@@ -20,6 +21,8 @@ public class FlowContextMapper {
     private Map<ContextStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
     private List<ContextSummary> contextSummariesOverTime = new ArrayList<>();
 
+    private Map<UUID, ContextReference> contextReferenceMap = new HashMap<>();
+
     private final LocalDateTime from;
     private final LocalDateTime to;
 
@@ -37,6 +40,7 @@ public class FlowContextMapper {
 
     public Movement beginContext(ContextChangeEvent beginningEvent) {
         Movement movement = null;
+        lookupAndAttachToContextObject(beginningEvent);
 
         ContextChangeEvent currentContext = currentContextMap.get(beginningEvent.getStructureLevel());
 
@@ -60,7 +64,14 @@ public class FlowContextMapper {
         return movement;
     }
 
+    private void lookupAndAttachToContextObject(ContextChangeEvent event) {
+        ContextReference context = findOrCreateContext(event);
+        event.setContext(context);
+    }
+
     public Movement endContext(ContextChangeEvent endingEvent) {
+        lookupAndAttachToContextObject(endingEvent);
+
         Movement movement = null;
 
         ContextStructureLevel structureLevel = endingEvent.getStructureLevel();
@@ -76,6 +87,16 @@ public class FlowContextMapper {
 
     public void endContextWhenInWindow(ContextChangeEvent contextToEndLater) {
         this.contextToEndLater = contextToEndLater;
+    }
+
+    public ContextReference findOrCreateContext(ContextChangeEvent event) {
+        ContextReference context = this.contextReferenceMap.get(event.getReferenceId());
+        if (context == null) {
+            context = new ContextReference(event);
+            this.contextReferenceMap.put(event.getReferenceId(), context);
+        }
+        return context;
+
     }
 
     public Movement initFromCarryOverContext(CarryOverContext carryOverContext) {

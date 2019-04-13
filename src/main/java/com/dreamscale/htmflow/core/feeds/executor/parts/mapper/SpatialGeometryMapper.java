@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveAcrossBridge;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToBox;
@@ -28,9 +29,14 @@ public class SpatialGeometryMapper {
         this.to = to;
     }
 
-    public List<Movement> gotoLocation(LocalDateTime moment, String boxName, String locationPath, Duration timeInLocation) {
+    public List<Movement> gotoLocation(LocalDateTime moment, ContextSummary context,
+                                       String boxName, String locationPath, Duration timeInLocation) {
 
         List<Movement> movements = new ArrayList<>();
+
+        context.getProjectContext().getContext().spendTime(timeInLocation);
+        context.getTaskContext().getContext().spendTime(timeInLocation);
+        context.getIntentionContext().getContext().spendTime(timeInLocation);
 
         if (currentFocus == null) {
             FocalPoint placeInBox = findOrCreateFocalPoint(boxName, locationPath);
@@ -162,7 +168,11 @@ public class SpatialGeometryMapper {
     }
 
 
-    public void modifyCurrentLocation(int modificationCount) {
+    public void modifyCurrentLocation(ContextSummary context, int modificationCount) {
+        context.getProjectContext().getContext().modify(modificationCount);
+        context.getTaskContext().getContext().modify(modificationCount);
+        context.getIntentionContext().getContext().modify(modificationCount);
+
         if (currentFocus != null) {
             currentFocus.modifyCurrentLocationInFocus(modificationCount);
         }

@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
 import lombok.Getter;
 

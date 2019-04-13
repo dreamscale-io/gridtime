@@ -85,11 +85,11 @@ public class StoryFrame {
      * and movements through time, that can be played back like music
      */
 
-    public void gotoLocation(LocalDateTime moment, String placeName, String locationPath, Duration timeInLocation) {
-
-        List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, placeName, locationPath, timeInLocation);
+    public void gotoLocation(LocalDateTime moment, String boxName, String locationPath, Duration timeInLocation) {
 
         ContextSummary context = contextMapper.getContextOfMoment(moment);
+
+        List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, context, boxName, locationPath, timeInLocation);
         flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, context, movements);
     }
 
@@ -98,8 +98,10 @@ public class StoryFrame {
      * to get an overall idea of how much modification is happening
      */
 
-    public void modifyCurrentLocation(int modificationCount) {
-        spatialGeometryMapper.modifyCurrentLocation(modificationCount);
+    public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
+        ContextSummary context = contextMapper.getContextOfMoment(moment);
+
+        spatialGeometryMapper.modifyCurrentLocation(context, modificationCount);
     }
 
 

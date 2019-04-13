@@ -1,21 +1,26 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObject;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObjectMetrics;
 import lombok.Getter;
 
+import java.time.Duration;
 import java.util.List;
 
 @Getter
-public class Box extends FlowFeature {
+public class Box extends FlowFeature implements GridObject {
 
     private final String boxName;
     private List<ThoughtBubble> thoughtBubbles;
 
     private int relativeSequence;
 
+    private GridObjectMetrics gridObjectMetrics = new GridObjectMetrics();
+
+
     public Box(String boxName) {
         this.boxName = boxName;
-
     }
 
     public void linkToBridge(Bridge bridgeBetweenBoxes, LocationInBox locationInBubble) {
@@ -26,7 +31,7 @@ public class Box extends FlowFeature {
 
     }
 
-    private ThoughtBubble findBubbleContainingLocation(LocationInBox locationInBubble) {
+    public ThoughtBubble findBubbleContainingLocation(LocationInBox locationInBubble) {
         ThoughtBubble bubbleFound = null;
 
         for (ThoughtBubble bubble : thoughtBubbles) {
@@ -55,5 +60,19 @@ public class Box extends FlowFeature {
 
     public void setThoughtBubbles(List<ThoughtBubble> thoughtBubbles) {
         this.thoughtBubbles = thoughtBubbles;
+    }
+
+    @Override
+    public GridObjectMetrics getGridObjectMetrics() {
+        return gridObjectMetrics;
+    }
+
+
+    public void spendTime(Duration timeInLocation) {
+        gridObjectMetrics.addVelocitySample(timeInLocation.getSeconds());
+    }
+
+    public void modify(int modificationCount) {
+        gridObjectMetrics.addModificationSample(modificationCount);
     }
 }

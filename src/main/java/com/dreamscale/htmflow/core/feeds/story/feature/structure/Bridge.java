@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObject;
+import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObjectMetrics;
 import lombok.Getter;
 
 @Getter
-public class Bridge extends FlowFeature {
+public class Bridge extends FlowFeature implements GridObject {
 
     private final String bridgeKey;
 
@@ -15,6 +17,8 @@ public class Bridge extends FlowFeature {
 
     private int visitCount;
     private int relativeSequence;
+
+    private GridObjectMetrics gridObjectMetrics = new GridObjectMetrics();
 
     public Bridge(String bridgeKey, LocationInBox fromLocation, LocationInBox toLocation) {
         this.bridgeKey = bridgeKey;

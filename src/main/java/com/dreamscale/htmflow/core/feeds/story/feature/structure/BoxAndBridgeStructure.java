@@ -55,7 +55,7 @@ public class BoxAndBridgeStructure {
         }
     }
 
-    private Box findBoxContaining(LocationInBox location) {
+    public Box findBoxContaining(LocationInBox location) {
         Box boxFound = null;
         for (Box box : boxes) {
             if (box.contains(location)) {
@@ -64,5 +64,6 @@ public class BoxAndBridgeStructure {
         }
         return boxFound;
     }
+
 
 }

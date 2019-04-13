@@ -102,6 +102,14 @@ public class MusicGeometryClock {
         final int quarterNotesIntoMeasure;
         final int halfNotesIntoMeasure;
 
+        public boolean isBeforeOrEqual(Coords coords) {
+            return beatsIntoMeasure <= coords.beatsIntoMeasure;
+        }
+
+        public boolean isAfterOrEqual(Coords coords) {
+            return beatsIntoMeasure >= coords.beatsIntoMeasure;
+        }
+
         public Coords panLeft(BeatsPerBucket beatIncrementSize) {
 
                 switch (beatIncrementSize) {
@@ -159,6 +167,8 @@ public class MusicGeometryClock {
         public String format() {
             return halfNotesIntoMeasure + "-"+quarterNotesIntoMeasure + "-"+beatsIntoMeasure;
         }
+
+
     }
 
 }
