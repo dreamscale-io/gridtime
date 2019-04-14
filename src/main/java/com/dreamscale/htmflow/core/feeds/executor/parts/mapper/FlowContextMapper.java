@@ -1,14 +1,12 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextReference;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ChangeContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
-import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -17,40 +15,43 @@ public class FlowContextMapper {
 
 
     private final MusicGeometryClock internalClock;
-    private Map<ContextStructureLevel, ContextChangeEvent> currentContextMap = new HashMap<>();
-    private Map<ContextStructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
-    private List<ContextSummary> contextSummariesOverTime = new ArrayList<>();
-
-    private Map<UUID, ContextReference> contextReferenceMap = new HashMap<>();
-
+    private final FeatureFactory featureFactory;
     private final LocalDateTime from;
     private final LocalDateTime to;
 
-    private ContextChangeEvent contextToEndLater = null;
+    private Map<StructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
+    private Map<StructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
 
-    public FlowContextMapper(LocalDateTime from, LocalDateTime to) {
-        this.from = from;
-        this.to = to;
-        this.internalClock = new MusicGeometryClock(from, to);
+    private List<MomentOfContext> momentsOfContext = new ArrayList<>();
+
+    private ContextEndingEvent contextToEndLater = null;
+
+    public FlowContextMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock) {
+        this.featureFactory = featureFactory;
+        this.internalClock = internalClock;
+        this.from = internalClock.getFromClockTime();
+        this.to = internalClock.getToClockTime();
     }
 
-    public ContextChangeEvent getCurrentContext(ContextStructureLevel structureLevel) {
+    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
         return currentContextMap.get(structureLevel);
     }
 
-    public Movement beginContext(ContextChangeEvent beginningEvent) {
+    public Movement beginContext(ContextBeginningEvent beginningEvent) {
         Movement movement = null;
+
         lookupAndAttachToContextObject(beginningEvent);
 
-        ContextChangeEvent currentContext = currentContextMap.get(beginningEvent.getStructureLevel());
+        ContextBeginningEvent existingContextAtLevel = currentContextMap.get(beginningEvent.getStructureLevel());
 
-        if (currentContext == null) {
+        if (existingContextAtLevel == null) {
+
             this.currentContextMap.put(beginningEvent.getStructureLevel(), beginningEvent);
             movement = new ChangeContext(beginningEvent.getPosition(), beginningEvent);
         } else {
-            ContextStructureLevel structureLevel = beginningEvent.getStructureLevel();
+            StructureLevel structureLevel = beginningEvent.getStructureLevel();
             RelativeSequence sequence = findOrCreateSequence(structureLevel);
-            int nextSequence = sequence.increment();
+            int nextSequence = sequence.next();
             beginningEvent.setRelativeSequence(nextSequence);
 
             movement = new ChangeContext(beginningEvent.getPosition(), beginningEvent);
@@ -58,25 +59,25 @@ public class FlowContextMapper {
             currentContextMap.put(structureLevel, beginningEvent);
         }
 
-        if (beginningEvent.getStructureLevel().equals(ContextStructureLevel.INTENTION)) {
-            contextSummariesOverTime.add(getCurrentContext());
+        if (beginningEvent.getStructureLevel().equals(StructureLevel.INTENTION)) {
+            momentsOfContext.add(getCurrentContext());
         }
         return movement;
     }
 
     private void lookupAndAttachToContextObject(ContextChangeEvent event) {
-        ContextReference context = findOrCreateContext(event);
+        Context context = featureFactory.findOrCreateContext(event);
         event.setContext(context);
     }
 
-    public Movement endContext(ContextChangeEvent endingEvent) {
+    public Movement endContext(ContextEndingEvent endingEvent) {
         lookupAndAttachToContextObject(endingEvent);
 
         Movement movement = null;
 
-        ContextStructureLevel structureLevel = endingEvent.getStructureLevel();
+        StructureLevel structureLevel = endingEvent.getStructureLevel();
         RelativeSequence sequence = findOrCreateSequence(structureLevel);
-        int nextSequence = sequence.increment();
+        int nextSequence = sequence.next();
         endingEvent.setRelativeSequence(nextSequence);
 
         movement = new ChangeContext(endingEvent.getPosition(), endingEvent);
@@ -85,18 +86,8 @@ public class FlowContextMapper {
         return movement;
     }
 
-    public void endContextWhenInWindow(ContextChangeEvent contextToEndLater) {
+    public void endContextWhenInWindow(ContextEndingEvent contextToEndLater) {
         this.contextToEndLater = contextToEndLater;
-    }
-
-    public ContextReference findOrCreateContext(ContextChangeEvent event) {
-        ContextReference context = this.contextReferenceMap.get(event.getReferenceId());
-        if (context == null) {
-            context = new ContextReference(event);
-            this.contextReferenceMap.put(event.getReferenceId(), context);
-        }
-        return context;
-
     }
 
     public Movement initFromCarryOverContext(CarryOverContext carryOverContext) {
@@ -104,17 +95,19 @@ public class FlowContextMapper {
 
         Movement sideEffectMovement = null;
 
-        setStartingSequenceNumber(ContextStructureLevel.PROJECT, subContext.getSequenceFor(ContextStructureLevel.PROJECT));
-        setStartingSequenceNumber(ContextStructureLevel.TASK, subContext.getSequenceFor(ContextStructureLevel.TASK));
-        setStartingSequenceNumber(ContextStructureLevel.INTENTION, subContext.getSequenceFor(ContextStructureLevel.INTENTION));
+        setStartingSequenceNumber(StructureLevel.PROJECT, subContext.getSequenceFor(StructureLevel.PROJECT));
+        setStartingSequenceNumber(StructureLevel.TASK, subContext.getSequenceFor(StructureLevel.TASK));
+        setStartingSequenceNumber(StructureLevel.INTENTION, subContext.getSequenceFor(StructureLevel.INTENTION));
 
-        currentContextMap.put(ContextStructureLevel.PROJECT, subContext.getContextFor(ContextStructureLevel.PROJECT));
-        currentContextMap.put(ContextStructureLevel.TASK, subContext.getContextFor(ContextStructureLevel.TASK));
-        currentContextMap.put(ContextStructureLevel.INTENTION, subContext.getContextFor(ContextStructureLevel.INTENTION));
+        currentContextMap.put(StructureLevel.PROJECT, subContext.getContextFor(StructureLevel.PROJECT));
+        currentContextMap.put(StructureLevel.TASK, subContext.getContextFor(StructureLevel.TASK));
+        currentContextMap.put(StructureLevel.INTENTION, subContext.getContextFor(StructureLevel.INTENTION));
 
         if (subContext.getContextToEndLater() != null) {
-            ContextChangeEvent contextEnding = subContext.getContextToEndLater();
+            ContextEndingEvent contextEnding = subContext.getContextToEndLater();
             LocalDateTime endingPosition = contextEnding.getPosition();
+
+
 
             if ((from.isBefore(endingPosition) || from.isEqual(endingPosition)) && to.isAfter(endingPosition)) {
                 sideEffectMovement = endContext(contextEnding);
@@ -129,16 +122,16 @@ public class FlowContextMapper {
 
     public CarryOverContext getCarryOverContext() {
         CarryOverSubContext subContext = new CarryOverSubContext();
-        subContext.addContext(ContextStructureLevel.PROJECT, getCurrentContext(ContextStructureLevel.PROJECT));
-        subContext.addContext(ContextStructureLevel.TASK, getCurrentContext(ContextStructureLevel.TASK));
-        subContext.addContext(ContextStructureLevel.INTENTION, getCurrentContext(ContextStructureLevel.INTENTION));
+        subContext.addContext(StructureLevel.PROJECT, getCurrentContext(StructureLevel.PROJECT));
+        subContext.addContext(StructureLevel.TASK, getCurrentContext(StructureLevel.TASK));
+        subContext.addContext(StructureLevel.INTENTION, getCurrentContext(StructureLevel.INTENTION));
 
         subContext.setContextToEndLater(contextToEndLater);
 
         return subContext.toCarryOverContext();
     }
 
-    private RelativeSequence findOrCreateSequence(ContextStructureLevel structureLevel) {
+    private RelativeSequence findOrCreateSequence(StructureLevel structureLevel) {
         RelativeSequence relativeSequence = this.currentSequenceNumbers.get(structureLevel);
         if (relativeSequence == null) {
             relativeSequence = new RelativeSequence(1);
@@ -147,7 +140,7 @@ public class FlowContextMapper {
         return relativeSequence;
     }
 
-    private void setStartingSequenceNumber(ContextStructureLevel structureLevel, int startingSequence) {
+    private void setStartingSequenceNumber(StructureLevel structureLevel, int startingSequence) {
         RelativeSequence relativeSequence = findOrCreateSequence(structureLevel);
         relativeSequence.reset(startingSequence);
     }
@@ -156,27 +149,26 @@ public class FlowContextMapper {
         //TODO is there a thing that needs doing here?  Sequencing?
     }
 
-    public ContextSummary getCurrentContext() {
-        ContextSummary contextSummary = new ContextSummary();
-        contextSummary.setProjectContext(getCurrentContext(ContextStructureLevel.PROJECT));
-        contextSummary.setTaskContext(getCurrentContext(ContextStructureLevel.TASK));
-        contextSummary.setIntentionContext(getCurrentContext(ContextStructureLevel.INTENTION));
+    public MomentOfContext getCurrentContext() {
 
-        LocalDateTime startTime = contextSummary.getPosition();
-        contextSummary.setCoordinates(internalClock.createCoords(startTime));
+        ContextBeginningEvent projectContext = getCurrentContext(StructureLevel.PROJECT);
+        ContextBeginningEvent taskContext = getCurrentContext(StructureLevel.TASK);
+        ContextBeginningEvent intentionContext = getCurrentContext(StructureLevel.INTENTION);
 
-        return contextSummary;
+        MomentOfContext momentOfContext = new MomentOfContext(internalClock, projectContext, taskContext, intentionContext);
+
+        return momentOfContext;
     }
 
-    public ContextSummary getContextOfMoment(LocalDateTime moment) {
-        ContextSummary contextOfMoment = null;
+    public MomentOfContext getMomentOfContext(LocalDateTime moment) {
+        MomentOfContext contextOfMoment = null;
 
         //iterate backwards, and find the first context summary that is before the moment
-        for (int i = contextSummariesOverTime.size() - 1 ; i >= 0; i--) {
-            ContextSummary contextSummary = contextSummariesOverTime.get(i);
+        for (int i = momentsOfContext.size() - 1; i >= 0; i--) {
+            MomentOfContext momentOfContext = momentsOfContext.get(i);
 
-            if (contextSummary.getCoordinates().getClockTime().isBefore(moment)) {
-                contextOfMoment = contextSummary;
+            if (momentOfContext.getCoordinates().getClockTime().isBefore(moment)) {
+                contextOfMoment = momentOfContext;
                 break;
             }
         }
@@ -188,6 +180,9 @@ public class FlowContextMapper {
         return contextOfMoment;
     }
 
+    public List<MomentOfContext> getAllContexts() {
+        return momentsOfContext;
+    }
 
     public static final class CarryOverSubContext {
 
@@ -204,24 +199,24 @@ public class FlowContextMapper {
         }
 
 
-        void addContext(ContextStructureLevel structureLevel, ContextChangeEvent contextEvent) {
+        void addContext(StructureLevel structureLevel, ContextBeginningEvent contextEvent) {
             subContext.saveFeature(structureLevel.name(), contextEvent);
         }
 
-        void setContextToEndLater(ContextChangeEvent contextEnding) {
+        void setContextToEndLater(ContextEndingEvent contextEnding) {
             subContext.saveFeature(CONTEXT_TO_END_LATER, contextEnding);
         }
 
-        ContextChangeEvent getContextToEndLater() {
-            return (ContextChangeEvent) subContext.getFeature(CONTEXT_TO_END_LATER);
+        ContextEndingEvent getContextToEndLater() {
+            return (ContextEndingEvent) subContext.getFeature(CONTEXT_TO_END_LATER);
         }
 
-        ContextChangeEvent getContextFor(ContextStructureLevel structureLevel) {
-            return (ContextChangeEvent) subContext.getFeature(structureLevel.name());
+        ContextBeginningEvent getContextFor(StructureLevel structureLevel) {
+            return (ContextBeginningEvent) subContext.getFeature(structureLevel.name());
         }
 
-        int getSequenceFor(ContextStructureLevel structureLevel) {
-            ContextChangeEvent contextBeginning = getContextFor(structureLevel);
+        int getSequenceFor(StructureLevel structureLevel) {
+            ContextBeginningEvent contextBeginning = getContextFor(structureLevel);
             if (contextBeginning != null) {
                 return contextBeginning.getRelativeSequence() + 1;
             } else {

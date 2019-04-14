@@ -1,43 +1,48 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class RhythmLayerMapper {
 
     private final RhythmLayerType layerType;
-    private final RelativeSequence relativeSequence;
+    private final FeatureFactory featureFactory;
+    private final MusicGeometryClock internalClock;
+    private final RhythmLayer layer;
 
     private Movement carriedOverLastMovement;
-    private List<Movement> movementsOverTime = new ArrayList<>();
 
     private List<Movement> movementsToCarryUntilWithinWindow = new ArrayList<>();
 
 
-    public RhythmLayerMapper(RhythmLayerType layerType) {
-        this.relativeSequence = new RelativeSequence(1);
+    public RhythmLayerMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock, RhythmLayerType layerType) {
+        this.featureFactory = featureFactory;
         this.layerType = layerType;
+        this.internalClock = internalClock;
+        this.layer = featureFactory.createRhythmLayer(layerType);
     }
 
-    public void addMovement(MusicGeometryClock internalClock, ContextSummary context, Movement movement) {
-        int nextSequence = relativeSequence.increment();
+    public void addMovement(MomentOfContext context, Movement movement) {
 
         movement.setContext(context);
         movement.setCoordinates(internalClock.createCoords(movement.getMoment()));
-        movement.setRelativeOffset(nextSequence);
 
-        movementsOverTime.add(movement);
+        layer.add(movement);
 
     }
 
-    private boolean contextChanged(ContextSummary lastContext, ContextSummary context) {
+    private boolean contextChanged(MomentOfContext lastContext, MomentOfContext context) {
         return lastContext != null && context != null
                 && !lastContext.getPosition().equals(context.getPosition());
     }
@@ -50,43 +55,26 @@ public class RhythmLayerMapper {
         return movementsToCarryUntilWithinWindow;
     }
 
-    public void repairSortingAndSequenceNumbers() {
-        movementsOverTime.sort(new Comparator<Movement>() {
-            @Override
-            public int compare(Movement move1, Movement move2) {
-
-                int compare = move1.getMoment().compareTo(move2.getMoment());
-
-                if (compare == 0) {
-                    compare = Integer.compare(move1.getRelativeOffset(), (move2.getRelativeOffset()));
-                }
-
-                return compare;
-            }
-        });
-
-        //fix sequence numbers after resorting
-        int sequence = 1;
-        for (Movement movement : movementsOverTime) {
-            movement.setRelativeOffset(sequence);
-            sequence++;
-        }
-    }
 
     public RhythmLayerType getLayerType() {
         return layerType;
     }
 
-    public List<Movement> getMovements() {
-        return movementsOverTime;
+    public RhythmLayer getRhythmLayer() {
+        return layer;
+    }
+
+    public void initContext(Movement lastMovement) {
+        this.carriedOverLastMovement = lastMovement;
+    }
+
+
+    public void finish() {
+        layer.repairSortingAndSequenceNumbers();
     }
 
     public Movement getLastMovement() {
-        Movement lastMovement = null;
-
-        if (movementsOverTime.size() > 1) {
-            lastMovement = movementsOverTime.get(movementsOverTime.size() - 1);
-        }
+        Movement lastMovement = layer.getLastMovement();
 
         if (lastMovement == null) {
             lastMovement = carriedOverLastMovement;
@@ -94,10 +82,5 @@ public class RhythmLayerMapper {
 
         return lastMovement;
     }
-
-    public void initContext(Movement lastMovement) {
-        this.carriedOverLastMovement = lastMovement;
-    }
-
 
 }

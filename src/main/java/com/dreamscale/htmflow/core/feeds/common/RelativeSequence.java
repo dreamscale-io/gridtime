@@ -9,7 +9,7 @@ import lombok.Getter;
 public class RelativeSequence {
     private int relativeSequence;
 
-    public int increment() {
+    public int next() {
         relativeSequence++;
 
         return relativeSequence;

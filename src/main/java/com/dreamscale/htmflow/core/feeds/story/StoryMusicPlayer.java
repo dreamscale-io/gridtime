@@ -1,15 +1,17 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextStructureLevel;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.FeelsBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.LearningFrictionBand;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 import com.dreamscale.htmflow.core.feeds.story.music.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,16 +19,20 @@ public class StoryMusicPlayer {
 
     private final Metronome metronome;
     private final Scene scene;
-    private StoryFrame frameToPlay;
+    private final FeatureFactory featureFactory;
+    private final StoryGrid storyGrid;
+    private StoryTile frameToPlay;
     private List<Snapshot> snapshots;
 
-    public StoryMusicPlayer(LocalDateTime from, LocalDateTime to) {
-        this.metronome = new Metronome(from, to);
-        this.scene = new Scene();
+    public StoryMusicPlayer(FeatureFactory featureFactory, StoryGrid storyGrid, MusicGeometryClock internalClock) {
+        this.featureFactory = featureFactory;
+        this.storyGrid = storyGrid;
+        this.metronome = new Metronome(internalClock);
+        this.scene = new Scene(storyGrid);
     }
 
-    public void loadFrame(StoryFrame storyFrame) {
-        this.frameToPlay = storyFrame;
+    public void loadFrame(StoryTile storyTile) {
+        this.frameToPlay = storyTile;
 
         metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FEELS), new FeelsListener()));
         metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_WTF), new WTFListener()));
@@ -36,7 +42,6 @@ public class StoryMusicPlayer {
         metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES), new LocationListener()));
         metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES), new ContextChangeListener()));
         metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY), new ExecutionActivityListener()));
-
     }
 
     public void play() {
@@ -57,6 +62,7 @@ public class StoryMusicPlayer {
     public List<Snapshot> getSnapshots() {
         return snapshots;
     }
+
 
     private class FeelsListener implements PlayListener {
 
@@ -123,7 +129,7 @@ public class StoryMusicPlayer {
         @Override
         public void play(List<Playable> playables) {
 
-            BoxAndBridgeStructure structure = frameToPlay.getThoughtStructure();
+            BoxAndBridgeActivity structure = frameToPlay.getSpatialStructuredActivity();
 
             for (Playable playable : playables) {
                 if (playable instanceof MoveToBox) {
@@ -135,28 +141,17 @@ public class StoryMusicPlayer {
                     scene.pushActiveLocation(moveToLocation.getLocation());
                     scene.pushActiveTraversal(moveToLocation.getTraversal());
 
-                    Box box = structure.findBoxContaining(moveToLocation.getLocation());
-                    ThoughtBubble bubble = box.findBubbleContainingLocation(moveToLocation.getLocation());
-                    RadialStructure.RingLocation ringLocation = bubble.findRingLocation(moveToLocation.getLocation());
-                    RadialStructure.Link ringLink = bubble.findRingTraversal(moveToLocation.getTraversal());
+                    ThoughtBubble bubble = structure.findBubbleContaining(moveToLocation.getLocation());
+                    ThoughtBubble.RingLocation ringLocation = bubble.findRingLocation(moveToLocation.getLocation());
+                    ThoughtBubble.Link ringLink = bubble.findRingLink(moveToLocation.getTraversal());
 
-                    scene.pushUrisInScene(box.getUri(), bubble.getUri(), ringLocation.getUri(), ringLink.getUri());
+                    scene.pushUrisInScene(bubble.getUri(), ringLocation.getUri(), ringLink.getUri());
                 }
 
                 if (playable instanceof MoveAcrossBridge) {
                     Bridge bridge = ((MoveAcrossBridge) playable).getBridge();
                     scene.pushActiveBridge(bridge);
 
-                    Box fromBox = bridge.getFromBox();
-                    Box toBox = bridge.getToBox();
-
-                    ThoughtBubble fromBubble = fromBox.findBubbleContainingLocation(bridge.getFromLocation());
-                    ThoughtBubble toBubble = toBox.findBubbleContainingLocation(bridge.getToLocation());
-
-                    BridgeToBubble fromBridgeToBubble = fromBubble.findBridgeToBubbleLink(bridge);
-                    BridgeToBubble toBridgeToBubble = toBubble.findBridgeToBubbleLink(bridge);
-
-                    scene.pushUrisInScene(fromBridgeToBubble.getUri(), toBridgeToBubble.getUri());
                 }
 
             }
@@ -169,14 +164,14 @@ public class StoryMusicPlayer {
         public void play(List<Playable> playables) {
             for (Playable playable : playables) {
                 ContextChangeEvent contextChangeEvent = (ContextChangeEvent) playable;
-                if (contextChangeEvent.getEventType().equals(ContextChangeEvent.Type.BEGINNING)) {
-                    if (contextChangeEvent.getStructureLevel().equals(ContextStructureLevel.PROJECT)) {
+                if (contextChangeEvent instanceof ContextBeginningEvent) {
+                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.PROJECT)) {
                         scene.changeProjectContext(contextChangeEvent.getContext());
                     }
-                    if (contextChangeEvent.getStructureLevel().equals(ContextStructureLevel.TASK)) {
+                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.TASK)) {
                         scene.changeTaskContext(contextChangeEvent.getContext());
                     }
-                    if (contextChangeEvent.getStructureLevel().equals(ContextStructureLevel.INTENTION)) {
+                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.INTENTION)) {
                         scene.changeIntentionContext(contextChangeEvent.getContext());
                     }
                 }

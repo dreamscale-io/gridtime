@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story.music;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -104,6 +105,19 @@ public class MusicGeometryClock {
 
         public boolean isBeforeOrEqual(Coords coords) {
             return beatsIntoMeasure <= coords.beatsIntoMeasure;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Coords) {
+                return ((Coords)o).beatsIntoMeasure == beatsIntoMeasure;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.valueOf(beatsIntoMeasure).hashCode();
         }
 
         public boolean isAfterOrEqual(Coords coords) {

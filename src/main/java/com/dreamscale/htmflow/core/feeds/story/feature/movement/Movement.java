@@ -3,8 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
-import groovy.xml.Namespace;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +15,7 @@ public class Movement extends FlowFeature implements Playable {
     private int relativeOffset = 0;
 
     private MusicGeometryClock.Coords coords;
-    private ContextSummary context;
+    private MomentOfContext context;
 
     public Movement(LocalDateTime moment, MovementType type, FlowFeature staticReferenceObject) {
         this.moment = moment;
@@ -24,7 +23,7 @@ public class Movement extends FlowFeature implements Playable {
         this.staticReferenceObject = staticReferenceObject;
     }
 
-    public void setRelativeOffset(int nextSequence) {
+    public void setRelativeSequence(int nextSequence) {
         this.relativeOffset = nextSequence;
     }
 
@@ -36,7 +35,7 @@ public class Movement extends FlowFeature implements Playable {
         return moment;
     }
 
-    public int getRelativeOffset() {
+    public int getRelativeSequence() {
         return relativeOffset;
     }
 
@@ -61,11 +60,11 @@ public class Movement extends FlowFeature implements Playable {
         return staticReferenceObject;
     }
 
-    public void setContext(ContextSummary context) {
+    public void setContext(MomentOfContext context) {
         this.context = context;
     }
 
-    public ContextSummary getContext() {
+    public MomentOfContext getContext() {
         return context;
     }
 

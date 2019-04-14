@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame
+import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver
@@ -39,7 +39,7 @@ class FlowSourceSpec extends Specification {
         this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates());
 
         FlowObserver flowObserverMock =
-                [see: { StoryFrame storyFrame, Window window -> this.latestWindow = window }] as FlowObserver
+                [see: { StoryTile storyFrame, Window window -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)

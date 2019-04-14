@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
@@ -15,21 +16,22 @@ public class FlowBandMapper {
     private final LocalDateTime from;
     private final LocalDateTime to;
     private final MusicGeometryClock internalClock;
+    private final FeatureFactory featureFactory;
 
     private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
-    public FlowBandMapper(LocalDateTime from, LocalDateTime to) {
-        this.from = from;
-        this.to = to;
+    public FlowBandMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock) {
+        this.featureFactory = featureFactory;
+        this.internalClock = internalClock;
+        this.from = internalClock.getFromClockTime();
+        this.to = internalClock.getToClockTime();
 
-        this.internalClock = new MusicGeometryClock(from, to);
     }
-
 
     private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {
         BandLayerMapper layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new BandLayerMapper(internalClock, layerType);
+            layer = new BandLayerMapper(featureFactory, internalClock, layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
@@ -56,7 +58,7 @@ public class FlowBandMapper {
         for (BandLayerType layerType : layerTypes) {
             BandLayerMapper layer = findOrCreateLayer(layerType);
 
-            TimeBand lastBand = subContext.getLastBand(layerType);
+            Timeband lastBand = subContext.getLastBand(layerType);
             Details activeContext = subContext.getActiveBandContext(layerType);
             layer.initContext(lastBand, activeContext);
         }
@@ -81,12 +83,12 @@ public class FlowBandMapper {
         }
     }
 
-    public TimeBandLayer getBandLayer(BandLayerType layerType) {
-        return new TimeBandLayer(layerType, from, to, layerMap.get(layerType).getTimeBands());
+    public TimebandLayer getBandLayer(BandLayerType layerType) {
+        return layerMap.get(layerType).getLayer();
     }
 
-    public List<TimeBandLayer> getBandLayers() {
-        List<TimeBandLayer> layers = new ArrayList<>();
+    public List<TimebandLayer> getBandLayers() {
+        List<TimebandLayer> layers = new ArrayList<>();
         for (BandLayerType layerType : layerMap.keySet()) {
             layers.add(getBandLayer(layerType));
         }
@@ -99,7 +101,7 @@ public class FlowBandMapper {
         return layerMap.keySet();
     }
 
-    public TimeBand getLastBand(BandLayerType bandLayerType) {
+    public Timeband getLastBand(BandLayerType bandLayerType) {
         return this.layerMap.get(bandLayerType).getLastBand();
     }
 
@@ -117,6 +119,7 @@ public class FlowBandMapper {
 
         layer.addRollingBandSample(moment, sample);
     }
+
 
     public static class CarryOverSubContext {
 
@@ -142,14 +145,14 @@ public class FlowBandMapper {
             return subContext.getDetails(key);
         }
 
-        void setLastBand(BandLayerType layerType, TimeBand timeBand) {
+        void setLastBand(BandLayerType layerType, Timeband timeBand) {
             String key = layerType.name() + ".last.band";
             subContext.saveFeature(key, timeBand);
         }
 
-        TimeBand getLastBand(BandLayerType layerType) {
+        Timeband getLastBand(BandLayerType layerType) {
             String key = layerType.name() + ".last.band";
-            return (TimeBand) subContext.getFeature(key);
+            return (Timeband) subContext.getFeature(key);
         }
 
         public Set<BandLayerType> getLayerTypes() {

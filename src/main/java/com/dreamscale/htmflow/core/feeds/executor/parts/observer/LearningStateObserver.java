@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 public class LearningStateObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -28,13 +28,13 @@ public class LearningStateObserver implements FlowObserver {
 
                     int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-                    currentStoryFrame.addTypingSampleToAssessLearningFriction(flowActivity.getStart(), modificationCount);
+                    currentStoryTile.addTypingSampleToAssessLearningFriction(flowActivity.getStart(), modificationCount);
                 }
             }
         }
 
         //this rolls up all the aggregates, and evaluates thresholds
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
     }
 

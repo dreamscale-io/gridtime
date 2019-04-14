@@ -1,14 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-import com.dreamscale.htmflow.core.feeds.story.feature.metrics.CandleStick;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 
-public class RollingAggregateBand extends TimeBand {
+public class RollingAggregateBand extends Timeband {
 
 
     private final CandleStickDetails candleSticks;

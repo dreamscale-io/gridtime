@@ -4,9 +4,8 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +24,7 @@ public class ComponentSpaceObserver implements FlowObserver {
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(StoryFrame storyFrame, Window window) {
+    public void see(StoryTile storyTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -35,34 +34,34 @@ public class ComponentSpaceObserver implements FlowObserver {
                 FlowActivityEntity flowActivity = (FlowActivityEntity)flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
-                    gotoLocation(storyFrame, flowActivity);
+                    gotoLocation(storyTile, flowActivity);
                 }
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Modification)) {
-                    modifyCurrentLocation(storyFrame, flowActivity);
+                    modifyCurrentLocation(storyTile, flowActivity);
                 }
             }
         }
 
-        storyFrame.finishAfterLoad();
+        storyTile.finishAfterLoad();
 
     }
 
-    private void gotoLocation(StoryFrame storyFrame, FlowActivityEntity flowActivity) {
+    private void gotoLocation(StoryTile storyTile, FlowActivityEntity flowActivity) {
 
-        UUID projectId = storyFrame.getContextOfMoment(flowActivity.getStart()).getProjectId();
+        UUID projectId = storyTile.getContextOfMoment(flowActivity.getStart()).getProjectId();
 
         String locationPath = flowActivity.getMetadataValue(FlowActivityMetadataField.filePath);
         String component = componentLookupService.lookupComponent(projectId, locationPath);
 
-        storyFrame.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
+        storyTile.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
 
     }
 
-    private void modifyCurrentLocation(StoryFrame storyFrame, FlowActivityEntity flowActivity) {
+    private void modifyCurrentLocation(StoryTile storyTile, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        storyFrame.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
+        storyTile.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 

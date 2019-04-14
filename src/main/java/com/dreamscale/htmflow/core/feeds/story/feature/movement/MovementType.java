@@ -1,23 +1,23 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
-import com.dreamscale.htmflow.core.domain.uri.FlowUriObjectType;
+import com.dreamscale.htmflow.core.domain.uri.FlowObjectType;
 
 public enum MovementType {
-    CHANGE_CONTEXT (FlowUriObjectType.MOVEMENT_CHANGE_CONTEXT),
-    EXECUTE_THING (FlowUriObjectType.MOVEMENT_EXECUTE_THING),
-    MODIFY_LOCATION (FlowUriObjectType.MOVEMENT_MODIFY_LOCATION),
-    MOVE_ACROSS_BRIDGE (FlowUriObjectType.MOVEMENT_ACROSS_BRIDGE),
-    MOVE_TO_BOX(FlowUriObjectType.MOVEMENT_TO_BOX),
-    MOVE_TO_LOCATION(FlowUriObjectType.MOVEMENT_TO_LOCATION),
-    POST_CIRCLE_MESSAGE(FlowUriObjectType.MOVEMENT_POST_MESSAGE);
+    CHANGE_CONTEXT (FlowObjectType.MOVEMENT_CHANGE_CONTEXT),
+    EXECUTE_THING (FlowObjectType.MOVEMENT_EXECUTE_THING),
+    MODIFY_LOCATION (FlowObjectType.MOVEMENT_MODIFY_LOCATION),
+    MOVE_ACROSS_BRIDGE (FlowObjectType.MOVEMENT_ACROSS_BRIDGE),
+    MOVE_TO_BOX(FlowObjectType.MOVEMENT_TO_BOX),
+    MOVE_TO_LOCATION(FlowObjectType.MOVEMENT_TO_LOCATION),
+    POST_CIRCLE_MESSAGE(FlowObjectType.MOVEMENT_POST_MESSAGE);
 
-    private final FlowUriObjectType flowUriObjectType;
+    private final FlowObjectType flowObjectType;
 
-    MovementType(FlowUriObjectType flowUriObjectType) {
-        this.flowUriObjectType = flowUriObjectType;
+    MovementType(FlowObjectType flowObjectType) {
+        this.flowObjectType = flowObjectType;
     }
 
-    public FlowUriObjectType getFlowUriObjectType() {
+    public FlowObjectType getFlowObjectType() {
         return null;
     }
 }

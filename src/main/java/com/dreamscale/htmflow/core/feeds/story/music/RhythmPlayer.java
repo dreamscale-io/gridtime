@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBandLayer;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,9 @@ public class RhythmPlayer implements Player {
         this.playListener = playListener;
     }
 
-    public RhythmPlayer(TimeBandLayer timeBandLayer, PlayListener playListener) {
+    public RhythmPlayer(TimebandLayer timeBandLayer, PlayListener playListener) {
         this.index = 0;
-        this.playables = timeBandLayer.getTimeBands();
+        this.playables = timeBandLayer.getTimebands();
         this.playListener = playListener;
     }
 

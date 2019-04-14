@@ -1,20 +1,23 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextReference;
-import com.dreamscale.htmflow.core.feeds.story.feature.metrics.GridObject;
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Bridge;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Traversal;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 
 import java.util.*;
 
 public class Scene {
 
-    private ContextReference projectContext;
-    private ContextReference taskContext;
-    private ContextReference intentionContext;
+    private final StoryGrid storyGrid;
+
+    private Context projectContext;
+    private Context taskContext;
+    private Context intentionContext;
 
     private int activeFeels;
     private boolean isLearningFriction;
@@ -28,6 +31,10 @@ public class Scene {
     private LinkedList<ExecuteThing> activeExecutionEvents = new LinkedList<>();
 
     private Set<String> urisInFrame = new HashSet<>();
+
+    public Scene(StoryGrid storyGrid) {
+        this.storyGrid = storyGrid;
+    }
 
     public Snapshot snapshot(MusicGeometryClock.Coords coords) {
         compressIntoUrisAndMetrics();
@@ -77,17 +84,17 @@ public class Scene {
             urisInFrame.add(bridge.getUri());
         }
 
-
         saveMetrics(projectContext);
         saveMetrics(taskContext);
         saveMetrics(intentionContext);
     }
 
-    private void saveMetrics(GridObject flowObject) {
-        flowObject.getGridObjectMetrics().addFeelsSample(activeFeels);
-        flowObject.getGridObjectMetrics().addPairingSample(isPairing);
-        flowObject.getGridObjectMetrics().addLearningSample(isLearningFriction);
-        flowObject.getGridObjectMetrics().addWtfSample(isWTFFriction);
+    private void saveMetrics(FlowFeature flowFeature) {
+
+        storyGrid.getMetricsFor(flowFeature).addFeelsSample(activeFeels);
+        storyGrid.getMetricsFor(flowFeature).addPairingSample(isPairing);
+        storyGrid.getMetricsFor(flowFeature).addLearningSample(isLearningFriction);
+        storyGrid.getMetricsFor(flowFeature).addWtfSample(isWTFFriction);
     }
 
     private void removeAllButOne(LinkedList<?> activeItems) {
@@ -133,16 +140,16 @@ public class Scene {
         this.activeExecutionEvents.add(executeEvent);
     }
 
-    public void changeProjectContext(ContextReference contextReference) {
-        this.projectContext = contextReference;
+    public void changeProjectContext(Context context) {
+        this.projectContext = context;
     }
 
-    public void changeTaskContext(ContextReference contextReference) {
-        this.taskContext = contextReference;
+    public void changeTaskContext(Context context) {
+        this.taskContext = context;
     }
 
-    public void changeIntentionContext(ContextReference contextReference) {
-        this.intentionContext = contextReference;
+    public void changeIntentionContext(Context context) {
+        this.intentionContext = context;
     }
 
 

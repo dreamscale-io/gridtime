@@ -3,10 +3,11 @@ package com.dreamscale.htmflow.core.feeds.story.feature.details;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class ExecutionDetails extends FlowFeature {
 
-
+    private LocalDateTime position;
     private Duration duration;
     private String processName;
     private String executionTaskType;
@@ -87,6 +88,14 @@ public class ExecutionDetails extends FlowFeature {
 
     public Duration getDuration() {
         return this.duration;
+    }
+
+    public void setPosition(LocalDateTime position) {
+        this.position = position;
+    }
+
+    public LocalDateTime getPosition() {
+        return position;
     }
 
     private enum UnitTestType {

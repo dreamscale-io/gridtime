@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.sink;
 
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -8,7 +8,7 @@ public class SaveToPostgresSink implements SinkStrategy {
 
 
     @Override
-    public void save(StoryFrame storyFrame) {
+    public void save(StoryTile storyTile) {
         //alright, all of these objects, I need a strategy to serialize all this to JSON
         //all the URIs should be populated now
 

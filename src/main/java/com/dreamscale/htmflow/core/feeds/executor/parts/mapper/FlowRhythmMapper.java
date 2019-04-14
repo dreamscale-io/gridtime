@@ -1,8 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextSummary;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
@@ -15,69 +16,71 @@ import java.util.*;
 
 public class FlowRhythmMapper {
 
+    private final MusicGeometryClock internalClock;
+    private final FeatureFactory featureFactory;
     private final LocalDateTime from;
     private final LocalDateTime to;
-    private final MusicGeometryClock internalClock;
 
     private Map<RhythmLayerType, RhythmLayerMapper> layerMap = new HashMap<>();
 
-    public FlowRhythmMapper(LocalDateTime from, LocalDateTime to) {
-        this.from = from;
-        this.to = to;
-
-        this.internalClock = new MusicGeometryClock(from, to);
+    public FlowRhythmMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock) {
+        this.featureFactory = featureFactory;
+        this.internalClock = internalClock;
+        this.from = internalClock.getFromClockTime();
+        this.to = internalClock.getToClockTime();
     }
 
 
     private RhythmLayerMapper findOrCreateLayer(RhythmLayerType layerType) {
         RhythmLayerMapper layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new RhythmLayerMapper(layerType);
+            layer = new RhythmLayerMapper(featureFactory, internalClock, layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
     }
 
-    public void addMovements(RhythmLayerType layerType, ContextSummary context, List<Movement> movementsToAdd) {
+    public void addMovements(RhythmLayerType layerType, MomentOfContext context, List<Movement> movementsToAdd) {
         for (Movement movement : movementsToAdd) {
             addMovement(layerType, context,  movement);
         }
     }
 
-    public void addMovement(RhythmLayerType layerType, ContextSummary context, Movement movement) {
+    public void addMovement(RhythmLayerType layerType, MomentOfContext context, Movement movement) {
         RhythmLayerMapper layer = findOrCreateLayer(layerType);
 
         if (movement != null) {
-            layer.addMovement(internalClock, context, movement);
+            layer.addMovement(context, movement);
         }
     }
 
-    public void executeThing(LocalDateTime moment, ContextSummary context, ExecutionDetails executionDetails) {
+    public void executeThing(LocalDateTime moment, MomentOfContext context, ExecutionDetails executionDetails) {
 
         RhythmLayerMapper executionLayer = layerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
 
         if (executionDetails.getDuration().getSeconds() > 60) {
-            ExecuteThing startExecution = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.START_LONG_EXECUTION);
-            executionLayer.addMovement(internalClock, context, startExecution);
+            ExecuteThing startExecution = featureFactory.createExecuteThing(moment, executionDetails, ExecuteThing.EventType.START_LONG_EXECUTION);
+            executionLayer.addMovement(context, startExecution);
 
             LocalDateTime endTime = moment.plusSeconds(executionDetails.getDuration().getSeconds());
-            ExecuteThing endExecution = new ExecuteThing(endTime, executionDetails, ExecuteThing.EventType.END_LONG_EXECUTION);
+            ExecuteThing endExecution = featureFactory.createExecuteThing(endTime, executionDetails, ExecuteThing.EventType.END_LONG_EXECUTION);
             executionLayer.addMovementLater(endExecution);
 
         } else {
-            Movement executeThing = new ExecuteThing(moment, executionDetails, ExecuteThing.EventType.EXECUTE_EVENT);
-            executionLayer.addMovement(internalClock, context, executeThing);
+            Movement executeThing = featureFactory.createExecuteThing(moment, executionDetails, ExecuteThing.EventType.EXECUTE_EVENT);
+            executionLayer.addMovement(context, executeThing);
         }
-
     }
 
-    public void shareMessage(LocalDateTime moment, ContextSummary context, Message message) {
+    public void shareMessage(LocalDateTime moment, MomentOfContext context, Message message) {
 
         RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
-        circleMessageLayer.addMovement(internalClock, context, new PostCircleMessage(moment, message));
+
+        PostCircleMessage postCircleMessage = featureFactory.createPostCircleMessage(moment, message);
+
+        circleMessageLayer.addMovement(context, postCircleMessage);
 
     }
-
 
     private LocationInBox getLastLocation() {
         RhythmLayerMapper locationLayer = findOrCreateLayer(RhythmLayerType.LOCATION_CHANGES);
@@ -142,12 +145,12 @@ public class FlowRhythmMapper {
 
     public void finish() {
         for (RhythmLayerMapper layer: layerMap.values()) {
-            layer.repairSortingAndSequenceNumbers();
+            layer.finish();
         }
     }
 
     public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
-        return new RhythmLayer(layerType, from, to, layerMap.get(layerType).getMovements());
+        return layerMap.get(layerType).getRhythmLayer();
     }
 
     public Set<RhythmLayerType> getRhythmLayerTypes() {
@@ -157,6 +160,8 @@ public class FlowRhythmMapper {
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
         return this.layerMap.get(rhythmLayerType).getLastMovement();
     }
+
+
 
     public List<RhythmLayer> getRhythmLayers() {
         List<RhythmLayer> rhythmLayers = new ArrayList<>();

@@ -4,9 +4,8 @@ import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
 public class WTFStateObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -28,17 +27,17 @@ public class WTFStateObserver implements FlowObserver {
                 CircleMessageType circleMessageType = circleMessage.getMessageType();
 
                 if (isCircleOpening(circleMessageType)) {
-                    currentStoryFrame.startWTF(circleMessage.getPosition(), createCircleContext(circleMessage));
+                    currentStoryTile.startWTF(circleMessage.getPosition(), createCircleContext(circleMessage));
                 }
 
                 if (isCircleEnding(circleMessageType)) {
-                    currentStoryFrame.clearWTF(circleMessage.getPosition());
+                    currentStoryTile.clearWTF(circleMessage.getPosition());
                 }
 
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
     }
 
     private CircleDetails createCircleContext(CircleFeedMessageEntity circleFeedMessageEntity) {

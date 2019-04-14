@@ -4,10 +4,9 @@ import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.member.json.LinkedMember;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.AuthorDetails;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver {
 
     @Override
-    public void see(StoryFrame currentStoryFrame, Window window) {
+    public void see(StoryTile currentStoryTile, Window window) {
 
         List<Flowable> flowables = window.getFlowables();
 
@@ -31,14 +30,14 @@ public class JournalAuthorObserver implements FlowObserver {
                 if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
                     List<LinkedMember> linkedMembers = journalEntry.getLinkedMembers();
 
-                    currentStoryFrame.startAlternativeAuthorsBand(journalEntry.getPosition(), new AuthorDetails(linkedMembers));
+                    currentStoryTile.startAlternativeAuthorsBand(journalEntry.getPosition(), new AuthorDetails(linkedMembers));
                 } else {
-                    currentStoryFrame.clearAlternativeAuthorsBand(journalEntry.getPosition());
+                    currentStoryTile.clearAlternativeAuthorsBand(journalEntry.getPosition());
                 }
             }
         }
 
-        currentStoryFrame.finishAfterLoad();
+        currentStoryTile.finishAfterLoad();
 
 
     }

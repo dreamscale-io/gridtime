@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 public class BandFactory {
 
-    public static TimeBand create(BandLayerType bandLayerType, LocalDateTime start, LocalDateTime end, Details details) {
+    public static Timeband create(BandLayerType bandLayerType, LocalDateTime start, LocalDateTime end, Details details) {
         switch (bandLayerType) {
             case FRICTION_WTF:
                 return new WTFFrictionBand(start, end, (CircleDetails) details);
@@ -21,7 +21,7 @@ public class BandFactory {
                 return new AuthorsBand(start, end, (AuthorDetails) details);
 
         }
-        return new TimeBand(start, end, details);
+        return new Timeband(start, end, details);
     }
 
     public static RollingAggregateBand createRollingBand(BandLayerType bandLayerType, LocalDateTime start, LocalDateTime end) {

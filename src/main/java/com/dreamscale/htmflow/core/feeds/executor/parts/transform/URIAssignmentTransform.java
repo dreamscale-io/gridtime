@@ -1,11 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBandLayer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,26 +19,53 @@ public class URIAssignmentTransform implements FlowTransform {
     URIMapper uriMapper;
 
     @Override
-    public void transform(StoryFrame storyFrame) {
+    public void transform(StoryTile storyTile) {
 
-        String frameUri = storyFrame.getFrameUri();
+        populateStaticLocationUris(storyTile);
+        populateStaticMessageUris(storyTile);
 
-        populateStaticLocationUris(storyFrame);
+        populateStaticContextUris(storyTile);
 
-        populateUrisForBoxesAndBridges(frameUri, storyFrame.getThoughtStructure());
+        saveUrisForTemporalFeatures(storyTile);
 
-        populateUrisForRhythmLayers(frameUri, storyFrame.getRhythmLayers());
+    }
 
-        populateUrisForBandLayers(frameUri, storyFrame.getBandLayers());
+    private void saveUrisForTemporalFeatures(StoryTile storyTile) {
+        List<FlowFeature> features = storyTile.extractTemporalFeatures();
+
+        uriMapper.saveTemporalFeatureUris(features);
+    }
+
+    private void populateStaticContextUris(StoryTile storyTile) {
+        List<MomentOfContext> allContexts = storyTile.getAllContexts();
+
+        for (MomentOfContext momentOfContext : allContexts) {
+            Context projectContext = momentOfContext.getProjectContext();
+            Context taskContext = momentOfContext.getTaskContext();
+            Context intentionContext = momentOfContext.getTaskContext();
+
+            uriMapper.populateProjectContextUri(projectContext);
+            uriMapper.populateTaskContextUri(projectContext, taskContext);
+            uriMapper.populateIntentionContextUri(projectContext, taskContext, intentionContext);
+
+        }
+    }
+
+    private void populateStaticMessageUris(StoryTile storyTile) {
+        List<Movement> movements = storyTile.getRhythmLayer(RhythmLayerType.CIRCLE_MESSAGE_EVENTS).getMovements();
+
+        for (Movement movement : movements) {
+            PostCircleMessage messageEvent = (PostCircleMessage)movement;
+            UUID projectId = messageEvent.getContext().getProjectId();
+            uriMapper.populateMessageUri(projectId, messageEvent.getMessage());
+        }
 
     }
 
 
-    private void populateStaticLocationUris(StoryFrame storyFrame) {
-        //lookup the uris in the context of the rhythms,
-        // so we can take project context into account with the location lookups
+    private void populateStaticLocationUris(StoryTile storyTile) {
 
-        List<Movement> movements = storyFrame.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES).getMovements();
+        List<Movement> movements = storyTile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES).getMovements();
 
         for (Movement movement : movements) {
             switch (movement.getType()) {
@@ -56,94 +83,10 @@ public class URIAssignmentTransform implements FlowTransform {
                     MoveAcrossBridge moveAcrossBridge = (MoveAcrossBridge)movement;
                     uriMapper.populateBridgeUri(moveAcrossBridge.getContext().getProjectId(), moveAcrossBridge.getBridge());
                     break;
-                case POST_CIRCLE_MESSAGE:
-                    PostCircleMessage postCircleMessage = (PostCircleMessage)movement;
-                    uriMapper.populateMessageUri(postCircleMessage.getContext().getProjectId(), postCircleMessage.getMessage());
             }
         }
     }
 
-    private void populateUrisForRhythmLayers(String frameUri, List<RhythmLayer> rhythmLayers) {
-        for (RhythmLayer layer : rhythmLayers) {
-            String layerUri = uriMapper.populateRhythmLayerUri(frameUri, layer);
 
-            for (Movement movement : layer.getMovements()) {
-                uriMapper.populateUriForMovement(layerUri, movement);
-            }
-        }
-    }
-
-    private void populateUrisForBandLayers(String frameUri, List<TimeBandLayer> timeBandLayers) {
-        for (TimeBandLayer layer : timeBandLayers) {
-
-            String layerUri = uriMapper.populateBandLayerUri(frameUri, layer);
-
-
-            List<TimeBand> timeBands = layer.getTimeBands();
-            for (TimeBand band : timeBands) {
-                uriMapper.populateUriForBand(layerUri, band);
-            }
-        }
-    }
-
-    private void populateUrisForBoxesAndBridges(String frameUri, BoxAndBridgeStructure boxAndBridgeStructure) {
-        List<Box> boxes = boxAndBridgeStructure.getBoxes();
-
-        for (Box box: boxes) {
-            mapUrisWithinBox(frameUri, box);
-        }
-    }
-
-    private void mapUrisWithinBox(String frameUri, Box box) {
-
-        String boxUri = box.getUri();
-
-        List<ThoughtBubble> bubbles = box.getThoughtBubbles();
-
-        for (ThoughtBubble bubble : bubbles) {
-            String bubbleUri = uriMapper.populateBubbleUri(frameUri, boxUri, bubble.getRelativeSequence(), bubble);
-
-            uriMapper.populateBubbleCenterUri(bubbleUri, bubble.getCenter());
-            uriMapper.populateBubbleEntranceUri(bubbleUri, bubble.getEntrance());
-            uriMapper.populateBubbleExitUri(bubbleUri, bubble.getExit());
-
-            List<RadialStructure.Ring> rings = bubble.getRings();
-
-            for (RadialStructure.Ring ring : rings) {
-                uriMapper.populateRingUri(bubbleUri, ring);
-
-                List<RadialStructure.RingLocation> ringLocations = ring.getRingLocations();
-
-                for (RadialStructure.RingLocation ringLocation : ringLocations) {
-                    uriMapper.populateRingLocationUri(bubbleUri, ringLocation);
-                }
-
-                populateLinkUris(bubbleUri, ring.getLinksToInnerRing());
-                populateLinkUris(bubbleUri, ring.getLinksWithinRing());
-            }
-
-            populateLinkUris(bubbleUri, bubble.getLinksFromEntrance());
-            populateLinkUris(bubbleUri, bubble.getLinksToExit());
-
-            populateBridgeToBubbleUris(bubble);
-        }
-
-
-
-    }
-
-    private void populateBridgeToBubbleUris(ThoughtBubble bubble) {
-        List<BridgeToBubble> bridgeToBubbles = bubble.getBridgeToBubbles();
-
-        for (BridgeToBubble bridgeToBubble : bridgeToBubbles) {
-            uriMapper.populateBridgeToBubbleUri(bubble.getUri(), bridgeToBubble);
-        }
-    }
-
-    private void populateLinkUris(String bubbleUri, List<RadialStructure.Link> linksWithinRing) {
-        for (RadialStructure.Link link : linksWithinRing) {
-            uriMapper.populateRingLinkUri(bubbleUri, link);
-        }
-    }
 
 }

@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
@@ -7,35 +9,36 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimeBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BandLayerMapper {
 
     private final BandLayerType layerType;
-    private final RelativeSequence relativeSequence;
     private final MusicGeometryClock internalClock;
+    private final TimebandLayer layer;
+    private final FeatureFactory featureFactory;
 
-    private TimeBand carriedOverLastBand;
-    private List<TimeBand> bandsInWindow = new ArrayList<>();
+    private Timeband carriedOverLastBand;
 
     private Details activeDetails;
     private LocalDateTime activeBandStart;
     private boolean isRollingBandLayer = false;
 
-    public BandLayerMapper(MusicGeometryClock internalClock, BandLayerType layerType) {
+    public BandLayerMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock, BandLayerType layerType) {
+        this.featureFactory = featureFactory;
         this.internalClock = internalClock;
-        this.relativeSequence = new RelativeSequence(1);
         this.layerType = layerType;
+        this.layer = featureFactory.createTimebandLayer(layerType);
     }
 
     public void startBand(LocalDateTime startBandPosition, Details details) {
         if (activeDetails != null) {
 
-            TimeBand band = BandFactory.create(layerType, activeBandStart, startBandPosition, activeDetails);
+            Timeband band = featureFactory.createBand(layerType, activeBandStart, startBandPosition, activeDetails);
             addTimeBand(band);
         }
 
@@ -45,7 +48,7 @@ public class BandLayerMapper {
 
     public void clearBand(LocalDateTime endBandPosition) {
         if (activeDetails != null) {
-            TimeBand band = BandFactory.create(layerType, activeBandStart, endBandPosition, activeDetails);
+            Timeband band = featureFactory.createBand(layerType, activeBandStart, endBandPosition, activeDetails);
             addTimeBand(band);
         }
 
@@ -56,14 +59,14 @@ public class BandLayerMapper {
 
     public void finish() {
         if (activeDetails != null) {
-            TimeBand band = BandFactory.create(layerType, activeBandStart, internalClock.getToClockTime(), activeDetails);
+            Timeband band = featureFactory.createBand(layerType, activeBandStart, internalClock.getToClockTime(), activeDetails);
             addTimeBand(band);
         }
 
         if (isRollingBandLayer) {
             RollingAggregateBand lastRollingAggregate = (RollingAggregateBand)carriedOverLastBand;
 
-            for (TimeBand band : bandsInWindow) {
+            for (Timeband band : layer.getTimebands()) {
                 RollingAggregateBand rollingBand = (RollingAggregateBand)band;
 
                 rollingBand.aggregateWithPastObservations(lastRollingAggregate);
@@ -74,7 +77,7 @@ public class BandLayerMapper {
         }
     }
 
-    public void initContext(TimeBand lastBand, Details activeDetails) {
+    public void initContext(Timeband lastBand, Details activeDetails) {
         this.carriedOverLastBand = lastBand;
         this.activeDetails = activeDetails;
         this.activeBandStart = internalClock.getFromClockTime();
@@ -85,13 +88,10 @@ public class BandLayerMapper {
     }
 
 
-    private void addTimeBand(TimeBand timeBand) {
+    private void addTimeBand(Timeband timeBand) {
         timeBand.initCoordinates(internalClock);
 
-        int nextSequence = relativeSequence.increment();
-        timeBand.setRelativeOffset(nextSequence);
-
-        bandsInWindow.add(timeBand);
+        layer.add(timeBand);
     }
 
 
@@ -99,21 +99,11 @@ public class BandLayerMapper {
         return layerType;
     }
 
-    public List<TimeBand> getTimeBands() {
-        return bandsInWindow;
-    }
-
-    public TimeBand getLastBand() {
-        TimeBand lastBand = null;
-
-        if (bandsInWindow.size() > 1) {
-            lastBand = bandsInWindow.get(bandsInWindow.size() - 1);
-        }
-
+    public Timeband getLastBand() {
+        Timeband lastBand = layer.getLastBand();
         if (lastBand == null) {
             lastBand = carriedOverLastBand;
         }
-
         return lastBand;
     }
 
@@ -128,26 +118,22 @@ public class BandLayerMapper {
         for (int i = 0; i < bandCount; i++) {
             MusicGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
 
-            RollingAggregateBand band = BandFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
-            bandsInWindow.add(band);
+            RollingAggregateBand band = featureFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
+            layer.add(band);
 
             startCoords = endCoords;
         }
     }
 
-    public void addRollingBandSample(LocalDateTime moment, double sample) {
-        for (TimeBand band : bandsInWindow) {
-            RollingAggregateBand rollingBand = (RollingAggregateBand)band;
-
-            if (rollingBand.contains(moment)) {
-                rollingBand.addSample(sample);
-                break;
-            }
-
-        }
-    }
-
     public boolean isRollingBandLayerConfigured() {
         return isRollingBandLayer;
+    }
+
+    public TimebandLayer getLayer() {
+        return layer;
+    }
+
+    public void addRollingBandSample(LocalDateTime moment, double sample) {
+        layer.addRollingBandSample(moment, sample);
     }
 }

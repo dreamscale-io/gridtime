@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 
 import java.time.Duration;
 import java.util.*;
@@ -15,11 +16,12 @@ import java.util.*;
 
 public class GravityBallOfThoughts {
 
-    private final Map<String, LocationInBox> locationMap = new HashMap<>();
-    private final Map<String, Traversal> traversalMap = new HashMap<>();
-    private final FocalPoint focalPoint;
+    private final Box box;
+    private final FeatureFactory featureFactory;
+    private final StoryGrid storyGrid;
 
-    private Map<String, ThoughtParticle> thoughtParticleMap = new HashMap<>();
+    private Map<UUID, ThoughtParticle> thoughtParticleMap = new HashMap<>();
+
     private LinkedList<ThoughtParticle> thoughtTracer = new LinkedList<>();
 
     private LocationInBox currentLocation;
@@ -34,18 +36,20 @@ public class GravityBallOfThoughts {
     private LocationInBox entranceLocation;
 
 
-    public GravityBallOfThoughts(FocalPoint focalPoint) {
-        this.focalPoint = focalPoint;
+    public GravityBallOfThoughts(StoryGrid storyGrid, FeatureFactory featureFactory, Box box) {
+        this.storyGrid = storyGrid;
+        this.featureFactory = featureFactory;
+        this.box = box;
     }
 
     public void initStartingLocation(String locationPath) {
-        currentLocation = findOrCreateLocation(locationPath);
+        currentLocation = featureFactory.findOrCreateLocation(box.getBoxName(), locationPath);
     }
 
     public LocationInBox gotoLocationInSpace(String locationPath) {
 
         LocationInBox fromLocation = currentLocation;
-        LocationInBox toLocation = findOrCreateLocation(locationPath);
+        LocationInBox toLocation = featureFactory.findOrCreateLocation(box.getBoxName(), locationPath);
 
         currentLocation = toLocation;
 
@@ -64,22 +68,18 @@ public class GravityBallOfThoughts {
         return this.entranceLocation;
     }
 
-
     public LocationInBox getCurrentLocation() {
         return currentLocation;
     }
 
     public void growHeavyWithFocus(Duration timeInLocation) {
-        focalPoint.getBox().spendTime(timeInLocation);
-        currentLocation.spendTime(timeInLocation);
-        lastTraversal.spendTime(timeInLocation);
 
         thoughtTracer.get(0).addVelocitySample(timeInLocation);
 
         DecayingGrowthRate decayingGrowth = new DecayingGrowthRate(timeInLocation);
 
         //pushing a new thought particle on the tracer, also has a side-effect of decreasing the weight
-        //of ALL existing particles by 1 increment of decay, for any particles linked in the active tracer,
+        //of ALL existing particles by 1 next of decay, for any particles linked in the active tracer,
         //grow the particle weight
 
         for (ThoughtParticle existingParticle : thoughtParticleMap.values()) {
@@ -95,7 +95,7 @@ public class GravityBallOfThoughts {
 
     private void addThoughtParticleForTraversal(LocationInBox fromLocation, LocationInBox toLocation) {
 
-        Traversal traversal = findOrCreateEdge(fromLocation, toLocation);
+        Traversal traversal = featureFactory.findOrCreateTraversal(fromLocation, toLocation);
         ThoughtParticle particle = findOrCreateParticle(traversal);
 
         pushThoughtParticleOntoTracer(particle);
@@ -112,14 +112,14 @@ public class GravityBallOfThoughts {
 
     }
 
-    public List<ThoughtBubble> extractThoughtBubbles() {
+    public BoxActivity createBoxOfThoughtBubbles() {
+
+        BoxActivity boxActivity = featureFactory.createBoxActivity(this.box);
 
         List<ThoughtParticle> particlesByWeight = getNormalizedParticlesSortedByWeight();
 
         List<ThoughtParticle> enterExitTransitions = findEnterExitTransitions(particlesByWeight);
         particlesByWeight.removeAll(enterExitTransitions);
-
-        List<ThoughtBubble> thoughtBubbles = new ArrayList<>();
 
         //if I've got left over stuff after a loop, these are disconnected networks with alt-centers,
         // so make radial structures for each network
@@ -128,13 +128,14 @@ public class GravityBallOfThoughts {
 
         while (particlesByWeight.size() > 0) {
 
-            RadialStructure radialStructure = createRadialStructureAndRemoveParticlesUsed(particlesByWeight);
+            ThoughtBubble thoughtBubble = createRadialStructureAndRemoveParticlesUsed(boxActivity, particlesByWeight);
 
-            List<ThoughtParticle> particlesUsed = addEnterExitsToStructure(radialStructure, enterExitTransitions);
+            List<ThoughtParticle> particlesUsed = addEnterExitsToStructure(thoughtBubble, enterExitTransitions);
             enterExitTransitions.removeAll(particlesUsed);
             particlesByWeight.removeAll(particlesUsed);
 
-            thoughtBubbles.add(new ThoughtBubble(radialStructure));
+            featureFactory.assignAllRingUris(thoughtBubble);
+            boxActivity.addBubble(thoughtBubble);
 
             //we should deplete our particles, but just in case, make sure we don't loop forever
             if (lastParticlesRemaining == particlesByWeight.size()) {
@@ -144,11 +145,11 @@ public class GravityBallOfThoughts {
             }
         }
 
-        return thoughtBubbles;
+        return boxActivity;
 
     }
 
-    private List<ThoughtParticle> addEnterExitsToStructure(RadialStructure radialStructure, List<ThoughtParticle> enterExitTransitions) {
+    private List<ThoughtParticle> addEnterExitsToStructure(ThoughtBubble thoughtBubble, List<ThoughtParticle> enterExitTransitions) {
         List<ThoughtParticle> particlesToRemove = new ArrayList<>();
 
         for (ThoughtParticle enterExitParticle : enterExitTransitions) {
@@ -160,13 +161,13 @@ public class GravityBallOfThoughts {
             if (nonEnterExitLocation == null) {
                 //this is a useless exit to enter transition, just delete it
                 particlesToRemove.add(enterExitParticle);
-            } else if (radialStructure.contains(nonEnterExitLocation)) {
+            } else if (thoughtBubble.contains(nonEnterExitLocation)) {
                 LocationInBox enterExitLocation = getEnterExitNode(locationA, locationB);
 
                 if (enterExitLocation == entranceLocation) {
-                    radialStructure.addLinkFromEntrance(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    thoughtBubble.addLinkFromEntrance(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
                 } else if (enterExitLocation == exitLocation) {
-                    radialStructure.addLinkToExit(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    thoughtBubble.addLinkToExit(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
                 }
 
                 particlesToRemove.add(enterExitParticle);
@@ -196,20 +197,20 @@ public class GravityBallOfThoughts {
         return null;
     }
 
-    private RadialStructure createRadialStructureAndRemoveParticlesUsed(List<ThoughtParticle> particlesByWeight) {
-        RadialStructure radialStructure = new RadialStructure();
+    private ThoughtBubble createRadialStructureAndRemoveParticlesUsed(BoxActivity box, List<ThoughtParticle> particlesByWeight) {
+        ThoughtBubble thoughtBubble = featureFactory.createBubbleInsideBox(box);
 
         LocationInBox centerOfFocus = getCenterOfFocus(particlesByWeight);
-        radialStructure.placeCenter(centerOfFocus);
-        radialStructure.placeEntrance(entranceLocation);
-        radialStructure.placeExit(exitLocation);
+        thoughtBubble.placeCenter(centerOfFocus);
+        thoughtBubble.placeEntrance(entranceLocation);
+        thoughtBubble.placeExit(exitLocation);
 
         List<ThoughtParticle> firstRingParticles = findConnectedParticles(particlesByWeight, centerOfFocus);
-        List<LocationInBox> firstRingLocations = createFirstRing(radialStructure, firstRingParticles, centerOfFocus);
+        List<LocationInBox> firstRingLocations = createFirstRing(thoughtBubble, firstRingParticles, centerOfFocus);
         particlesByWeight.removeAll(firstRingParticles);
 
         List<ThoughtParticle> connectionsWithinFirstRing = findParticlesCompletelyWithinRing(particlesByWeight, firstRingLocations);
-        createMoreLinksInFirstRing(radialStructure, connectionsWithinFirstRing);
+        createMoreLinksInFirstRing(thoughtBubble, connectionsWithinFirstRing);
         particlesByWeight.removeAll(connectionsWithinFirstRing);
 
         List<LocationInBox> locationsInLastRing = firstRingLocations;
@@ -219,11 +220,11 @@ public class GravityBallOfThoughts {
 
         while (particlesByWeight.size() > 0 )  {
             List<ThoughtParticle> connectionsForNextRing = findConnectedParticles(particlesByWeight, locationsInLastRing);
-            List<LocationInBox> nextRingLocations = createNextRing(radialStructure, connectionsForNextRing, locationsInLastRing);
+            List<LocationInBox> nextRingLocations = createNextRing(thoughtBubble, connectionsForNextRing, locationsInLastRing);
             particlesByWeight.removeAll(connectionsForNextRing);
 
             List<ThoughtParticle> connectionsWithinNewRing = findParticlesCompletelyWithinRing(particlesByWeight, nextRingLocations);
-            createMoreLinksInHighestRing(radialStructure, connectionsWithinNewRing);
+            createMoreLinksInHighestRing(thoughtBubble, connectionsWithinNewRing);
             particlesByWeight.removeAll(connectionsWithinNewRing);
 
             locationsInLastRing = nextRingLocations;
@@ -234,7 +235,7 @@ public class GravityBallOfThoughts {
                 lastParticlesRemaining = particlesByWeight.size();
             }
         }
-        return radialStructure;
+        return thoughtBubble;
     }
 
     private List<ThoughtParticle> findEnterExitTransitions(List<ThoughtParticle> particlesByWeight) {
@@ -253,10 +254,10 @@ public class GravityBallOfThoughts {
         return enterExitTransitions;
     }
 
-    private List<LocationInBox> createNextRing(RadialStructure radialStructure,
+    private List<LocationInBox> createNextRing(ThoughtBubble thoughtBubble,
                                                List<ThoughtParticle> connectionsForNextRing,
                                                List<LocationInBox> locationsInLastRing) {
-        radialStructure.createNextRing();
+        thoughtBubble.createNextRing();
 
         for (ThoughtParticle connectedParticle : connectionsForNextRing) {
             Traversal traversal = connectedParticle.getLink();
@@ -266,15 +267,15 @@ public class GravityBallOfThoughts {
             LocationInBox locationToLinkTo = getSourceLocation(locationsInLastRing, locationA, locationB);
             LocationInBox locationToAdd = getConnectedLocation(locationsInLastRing, locationA, locationB);
 
-            radialStructure.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal,
+            thoughtBubble.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal,
                     connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
         }
 
-        return radialStructure.getLocationsInFirstRing();
+        return thoughtBubble.getLocationsInFirstRing();
     }
 
 
-    private void createMoreLinksInHighestRing(RadialStructure radialStructure,
+    private void createMoreLinksInHighestRing(ThoughtBubble thoughtBubble,
                                               List<ThoughtParticle> connectionsWithinHighestRing) {
 
         for (ThoughtParticle particle : connectionsWithinHighestRing) {
@@ -282,12 +283,12 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            radialStructure.addExtraLinkWithinHighestRing(locationA, locationB, traversal,
+            thoughtBubble.addExtraLinkWithinHighestRing(locationA, locationB, traversal,
                     particle.getFocusWeight(), particle.getVelocity());
         }
     }
 
-    private void createMoreLinksInFirstRing(RadialStructure radialStructure,
+    private void createMoreLinksInFirstRing(ThoughtBubble thoughtBubble,
                                             List<ThoughtParticle> connectionsWithinFirstRing) {
 
         for (ThoughtParticle particle : connectionsWithinFirstRing) {
@@ -295,13 +296,13 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            radialStructure.addExtraLinkWithinFirstRing(locationA, locationB, traversal,
+            thoughtBubble.addExtraLinkWithinFirstRing(locationA, locationB, traversal,
                     particle.getFocusWeight(), particle.getVelocity());
         }
     }
 
 
-    private List<LocationInBox> createFirstRing(RadialStructure radialStructure,
+    private List<LocationInBox> createFirstRing(ThoughtBubble thoughtBubble,
                                                 List<ThoughtParticle> firstRingParticles,
                                                 LocationInBox centerOfFocus) {
 
@@ -312,12 +313,12 @@ public class GravityBallOfThoughts {
 
             LocationInBox locationToAdd = getConnectedLocation(centerOfFocus, locationA, locationB);
 
-            radialStructure.addLocationToFirstRing(locationToAdd, traversal,
+            thoughtBubble.addLocationToFirstRing(locationToAdd, traversal,
                     connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
 
         }
 
-        return radialStructure.getLocationsInFirstRing();
+        return thoughtBubble.getLocationsInFirstRing();
     }
 
     private List<ThoughtParticle> findParticlesCompletelyWithinRing(List<ThoughtParticle> particlesByWeight,
@@ -397,14 +398,6 @@ public class GravityBallOfThoughts {
         return connectedParticles;
     }
 
-    private LocationInBox findOrCreateLocation(String locationPath) {
-        LocationInBox location = locationMap.get(locationPath);
-        if (location == null) {
-            location = new LocationInBox(this.focalPoint, locationPath);
-            locationMap.put(locationPath, location);
-        }
-        return location;
-    }
 
     private LocationInBox getCenterOfFocus(List<ThoughtParticle> particlesByWeight) {
 
@@ -415,8 +408,8 @@ public class GravityBallOfThoughts {
 
             Traversal link = heaviest.getLink();
 
-            Duration timeInLocationA = link.getLocationA().getTotalTimeInvestment();
-            Duration timeInLocationB = link.getLocationB().getTotalTimeInvestment();
+            Duration timeInLocationA = storyGrid.getMetricsFor(link.getLocationA()).getTotalTimeInvestment();
+            Duration timeInLocationB = storyGrid.getMetricsFor(link.getLocationB()).getTotalTimeInvestment();
 
             if (timeInLocationA.compareTo(timeInLocationB) > 0) {
                 center = link.getLocationA();
@@ -487,14 +480,13 @@ public class GravityBallOfThoughts {
         return min;
     }
 
-    private ThoughtParticle findOrCreateParticle(Traversal edge) {
+    private ThoughtParticle findOrCreateParticle(Traversal traversal) {
 
-        String particleKey = edge.toKey();
-        ThoughtParticle particle = thoughtParticleMap.get(particleKey);
+        ThoughtParticle particle = thoughtParticleMap.get(traversal.getId());
 
         if (particle == null) {
-            particle = new ThoughtParticle(edge);
-            thoughtParticleMap.put(particleKey, particle);
+            particle = new ThoughtParticle(traversal);
+            thoughtParticleMap.put(traversal.getId(), particle);
         }
         return particle;
     }
@@ -543,19 +535,19 @@ public class GravityBallOfThoughts {
         private double weight;
         private double normalizedWeight;
         private double velocityWeightedAvg;
-        private int velocitySampleCount;
+        private int traversalCount;
 
         private double normalizedVelocity;
 
         ThoughtParticle(Traversal link) {
             this.link = link;
             this.weight = 0;
-            velocitySampleCount = 0;
+            traversalCount = 0;
         }
 
         void addVelocitySample(Duration velocityOfTransition) {
-            velocityWeightedAvg = (( velocityWeightedAvg * velocitySampleCount ) + velocityOfTransition.getSeconds()) / (velocitySampleCount + 1);
-            velocitySampleCount++;
+            velocityWeightedAvg = (( velocityWeightedAvg * traversalCount) + velocityOfTransition.getSeconds()) / (traversalCount + 1);
+            traversalCount++;
         }
 
         void growHeavyWithFocus(DecayingGrowthRate decayingGrowthRate, Duration timeInLocation) {
@@ -605,19 +597,6 @@ public class GravityBallOfThoughts {
     }
 
 
-    private Traversal findOrCreateEdge(LocationInBox locationA, LocationInBox locationB) {
-
-        String traversalKey = StandardizedKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
-
-        Traversal traversal = traversalMap.get(traversalKey);
-
-        if (traversal == null) {
-            traversal = new Traversal(locationA, locationB);
-            traversalMap.put(traversalKey, traversal);
-        }
-
-        return traversal;
-    }
 
 
 

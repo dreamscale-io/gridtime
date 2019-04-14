@@ -1,9 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.StandardizedKeyMapper;
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 
 import java.time.Duration;
+import java.util.List;
 
 public class FocalPoint {
 
@@ -13,10 +15,10 @@ public class FocalPoint {
 
     private LocationInBox currentLocation;
 
-    public FocalPoint(String boxName, String initialLocationPath) {
-        this.box = new Box(boxName);
+    public FocalPoint(FeatureFactory featureFactory, StoryGrid storyGrid, Box box, String initialLocationPath) {
+        this.box = box;
 
-        this.gravityBall = new GravityBallOfThoughts(this);
+        this.gravityBall = new GravityBallOfThoughts(storyGrid, featureFactory, box);
         this.gravityBall.initStartingLocation(initialLocationPath);
 
         this.currentLocation = gravityBall.getCurrentLocation();
@@ -29,6 +31,8 @@ public class FocalPoint {
     public LocationInBox goToLocation(String locationPath, Duration timeInLocation) {
 
         LocationInBox location = gravityBall.gotoLocationInSpace(locationPath);
+
+
         gravityBall.growHeavyWithFocus(timeInLocation);
 
         currentLocation = location;
@@ -38,11 +42,6 @@ public class FocalPoint {
 
     public LocationInBox getCurrentLocation() {
         return currentLocation;
-    }
-
-    public void modifyCurrentLocationInFocus(int modificationCount) {
-        box.modify(modificationCount);
-        currentLocation.modify(modificationCount);
     }
 
     public LocationInBox exit() {
@@ -57,12 +56,13 @@ public class FocalPoint {
         return currentLocation;
     }
 
-    public void loadThoughtsIntoBox() {
-        box.setThoughtBubbles(gravityBall.extractThoughtBubbles());
+    public BoxActivity createBoxOfThoughtBubbles() {
+        return gravityBall.createBoxOfThoughtBubbles();
     }
 
+
     public String toKey() {
-        return StandardizedKeyMapper.createBoxKey(getBoxName());
+        return ObjectKeyMapper.createBoxKey(getBoxName());
     }
 
 
@@ -74,4 +74,6 @@ public class FocalPoint {
     public Traversal getLastTraversal() {
         return gravityBall.getLastTraversal();
     }
+
+
 }

@@ -13,8 +13,8 @@ public class Metronome {
 
     private final List<Player> playerChain;
 
-    public Metronome(LocalDateTime from, LocalDateTime to) {
-        this.clock = new MusicGeometryClock(from, to);
+    public Metronome(MusicGeometryClock internalClock) {
+        this.clock = internalClock;
         this.playerChain = new ArrayList<>();
     }
 

@@ -8,11 +8,11 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.StoryFrame
+import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeStructure
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeActivity
 import com.dreamscale.htmflow.core.service.ComponentLookupService
 import spock.lang.Specification
 
@@ -23,7 +23,7 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ComponentSpaceObserverSpec extends Specification {
 
     ComponentSpaceObserver componentSpaceObserver
-    StoryFrame storyFrame
+    StoryTile storyFrame
 
     def setup() {
         componentSpaceObserver = new ComponentSpaceObserver()
@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryFrame("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
     }
 
     def "should create Location traversals inside a Place"() {
@@ -55,7 +55,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         when:
         componentSpaceObserver.see(storyFrame, window)
-        BoxAndBridgeStructure boxAndBridgeStructure = storyFrame.getThoughtStructure();
+        BoxAndBridgeActivity boxAndBridgeStructure = storyFrame.getSpatialStructuredActivity();
 
         then:
         assert true
