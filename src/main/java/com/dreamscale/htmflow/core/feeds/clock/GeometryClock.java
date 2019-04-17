@@ -23,7 +23,7 @@ public class GeometryClock {
     }
 
     public Coords tick() {
-        int minutesToTick = ZoomLevel.MIN.buckets();
+        int minutesToTick = ZoomLevel.MIN_20.buckets();
         LocalDateTime nextClockTime = this.clockTime.plusMinutes(minutesToTick);
 
         this.coords = createGeometryCoords(nextClockTime);
@@ -38,8 +38,8 @@ public class GeometryClock {
 
     private static Coords createGeometryCoords(LocalDateTime nextClockTime) {
 
-        int minuteBucketsIntoHour = calcMinuteBuckets(nextClockTime);
-        int hoursIntoDay = nextClockTime.getHour();
+        int twentyMinuteSteps = calc20MinuteSteps(nextClockTime);
+        int fourHourSteps = calc4HourSteps(nextClockTime);
 
         int daysIntoWeek = calcWeekdayOffset(nextClockTime);
 
@@ -53,13 +53,17 @@ public class GeometryClock {
         int blocksIntoYear = calcBlocksIntoYear(weeksIntoYear);
 
         return new Coords(nextClockTime,
-                minuteBucketsIntoHour,
-                hoursIntoDay,
+                twentyMinuteSteps,
+                fourHourSteps,
                 daysIntoWeek,
                 weeksIntoYear,
                 weeksIntoBlock,
                 blocksIntoYear,
                 currentYear);
+    }
+
+    private static int calc4HourSteps(LocalDateTime nextClockTime) {
+        return Math.floorDiv(nextClockTime.getHour(), 4) + 1;
     }
 
     private static int calcBlocksIntoYear(int weeksIntoYear) {
@@ -121,8 +125,12 @@ public class GeometryClock {
         return dayOfWeek.getValue();
     }
 
-    private static int calcMinuteBuckets(LocalDateTime clock) {
-        return Math.floorDiv( clock.getMinute() , ZoomLevel.MIN.buckets() ) + 1;
+    private static int calc20MinuteSteps(LocalDateTime clock) {
+        int hoursInto4Hour = Math.floorMod(clock.getHour(), 4);
+        int completedHours = hoursInto4Hour * 3;
+        int current20Mins = Math.floorDiv( clock.getMinute() , 20);
+
+        return completedHours + current20Mins + 1;
     }
 
     @AllArgsConstructor
@@ -131,25 +139,25 @@ public class GeometryClock {
     public static class Coords {
 
         final LocalDateTime clockTime;
-        final int minuteBucketsIntoHour;
-        final int hoursIntoDay;
+        final int twentyMinuteSteps;
+        final int fourHourSteps;
         final int daysIntoWeek;
         final int weeksIntoYear;
         final int weeksIntoBlock;
-        final int blocksIntoYear;
-        final int currentYear;
+        final int block;
+        final int year;
 
         public String formatCoords() {
-            return currentYear + "-" + blocksIntoYear + "-" + weeksIntoBlock + "-" + daysIntoWeek + "-" + hoursIntoDay + "-" + minuteBucketsIntoHour;
+            return year + "-" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "-" + fourHourSteps + "-" + twentyMinuteSteps;
         }
 
         public Coords panLeft(ZoomLevel zoomLevel) {
 
                 switch (zoomLevel) {
-                    case MIN:
-                        return minusMinutes();
-                    case HOUR:
-                        return minusHour();
+                    case MIN_20:
+                        return minus20Minutes();
+                    case HOUR_4:
+                        return minus4Hour();
                     case DAY:
                         return minusDay();
                     case WEEK:
@@ -165,10 +173,10 @@ public class GeometryClock {
         public Coords panRight(ZoomLevel zoomLevel) {
 
             switch (zoomLevel) {
-                case MIN:
-                    return plusMinutes();
-                case HOUR:
-                    return plusHour();
+                case MIN_20:
+                    return plus20Minutes();
+                case HOUR_4:
+                    return plus4Hour();
                 case DAY:
                     return plusDay();
                 case WEEK:
@@ -183,12 +191,12 @@ public class GeometryClock {
 
         //pan left functions
 
-        public Coords minusMinutes() {
-            return GeometryClock.createGeometryCoords(clockTime.minusMinutes(ZoomLevel.MIN.buckets()));
+        public Coords minus20Minutes() {
+            return GeometryClock.createGeometryCoords(clockTime.minusMinutes(20));
         }
 
-        public Coords minusHour() {
-            return GeometryClock.createGeometryCoords(clockTime.minusHours(1));
+        public Coords minus4Hour() {
+            return GeometryClock.createGeometryCoords(clockTime.minusHours(4));
         }
 
         public Coords minusDay() {
@@ -209,12 +217,12 @@ public class GeometryClock {
 
         // pan right functions
 
-        public Coords plusMinutes() {
-            return GeometryClock.createGeometryCoords(clockTime.plusMinutes(ZoomLevel.MIN.buckets()));
+        public Coords plus20Minutes() {
+            return GeometryClock.createGeometryCoords(clockTime.plusMinutes(20));
         }
 
-        public Coords plusHour() {
-            return GeometryClock.createGeometryCoords(clockTime.plusHours(1));
+        public Coords plus4Hour() {
+            return GeometryClock.createGeometryCoords(clockTime.plusHours(4));
         }
 
         public Coords plusDay() {

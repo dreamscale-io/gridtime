@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.sink;
 
 import com.dreamscale.htmflow.core.feeds.common.Flow;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransform;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +30,9 @@ public class FlowSink implements Flow {
     @Override
     public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) throws InterruptedException {
 
+        for (SinkStrategy sink : sinkStrategies) {
+            sink.save(memberId, sharedFeaturePool.getActiveStoryTile());
+        }
     }
 
     private void addFlowSink(SinkStrategy sink) {

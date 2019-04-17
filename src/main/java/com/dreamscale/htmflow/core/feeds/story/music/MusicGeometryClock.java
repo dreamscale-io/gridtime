@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.feeds.story.music;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -53,6 +52,37 @@ public class MusicGeometryClock {
         return this.coords;
     }
 
+    public Coords panLeft(BeatsPerBucket beatIncrementSize) {
+        if (beatIncrementSize == BeatsPerBucket.BEAT) {
+            currentMoment = minusBeat();
+        }
+        if (beatIncrementSize == BeatsPerBucket.QUARTER) {
+            currentMoment = minusQuarter();
+        }
+        if (beatIncrementSize == BeatsPerBucket.HALF) {
+            currentMoment = minusHalf();
+        }
+        coords = createGeometryCoords(currentMoment);
+
+        return coords;
+    }
+
+    public Coords panRight(BeatsPerBucket beatIncrementSize) {
+        if (beatIncrementSize == BeatsPerBucket.BEAT) {
+            currentMoment = plusBeat();
+        }
+        if (beatIncrementSize == BeatsPerBucket.QUARTER) {
+            currentMoment = plusQuarter();
+        }
+        if (beatIncrementSize == BeatsPerBucket.HALF) {
+            currentMoment = plusHalf();
+        }
+        coords = createGeometryCoords(currentMoment);
+
+        return coords;
+    }
+
+
     public void reset() {
         currentMoment = fromClockTime;
         coords = this.createCoords(currentMoment);
@@ -75,6 +105,7 @@ public class MusicGeometryClock {
         int halfNotes = beats / BeatsPerBucket.HALF.getBeatCount();
 
         return new Coords(nextClockTime,
+                BeatsPerBucket.BEAT.getBeatCount(),
                 beats,
                 quarterNotes,
                 halfNotes);
@@ -93,95 +124,67 @@ public class MusicGeometryClock {
     }
 
 
+
+    //pan left functions
+
+    private LocalDateTime minusBeat() {
+        return currentMoment.minus(beatSize);
+    }
+
+    private LocalDateTime minusQuarter() {
+        return currentMoment.minus(quarterSize);
+    }
+
+    private LocalDateTime minusHalf() {
+        return currentMoment.minus(halfSize);
+    }
+
+    // pan right functions
+
+    private LocalDateTime plusBeat() {
+        return currentMoment.plus(beatSize);
+    }
+
+    private LocalDateTime plusQuarter() {
+        return currentMoment.plus(quarterSize);
+    }
+
+    private LocalDateTime plusHalf() {
+        return currentMoment.plus(halfSize);
+    }
+
+
     @AllArgsConstructor
     @Getter
     @ToString
-    public class Coords {
+    public static class Coords {
 
         final LocalDateTime clockTime;
-        final int beatsIntoMeasure;
-        final int quarterNotesIntoMeasure;
-        final int halfNotesIntoMeasure;
+        final int beatsPerMeasure;
+        final int beats;
+        final int quarters;
+        final int halves;
 
         public boolean isBeforeOrEqual(Coords coords) {
-            return beatsIntoMeasure <= coords.beatsIntoMeasure;
+            return beats <= coords.beats;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof Coords) {
-                return ((Coords)o).beatsIntoMeasure == beatsIntoMeasure;
+                return ((Coords)o).beats == beats;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Integer.valueOf(beatsIntoMeasure).hashCode();
+            return Integer.valueOf(beats).hashCode();
         }
 
         public boolean isAfterOrEqual(Coords coords) {
-            return beatsIntoMeasure >= coords.beatsIntoMeasure;
+            return beats >= coords.beats;
         }
-
-        public Coords panLeft(BeatsPerBucket beatIncrementSize) {
-
-                switch (beatIncrementSize) {
-                    case BEAT:
-                        return minusBeat();
-                    case QUARTER:
-                        return minusQuarter();
-                    case HALF:
-                        return minusHalf();
-                }
-                return this;
-        }
-
-        public Coords panRight(BeatsPerBucket beatIncrementSize) {
-
-            switch (beatIncrementSize) {
-                case BEAT:
-                    return plusBeat();
-                case QUARTER:
-                    return plusQuarter();
-                case HALF:
-                    return plusHalf();
-            }
-            return this;
-        }
-
-        //pan left functions
-
-        public Coords minusBeat() {
-            return createGeometryCoords(clockTime.minus(beatSize));
-        }
-
-        public Coords minusQuarter() {
-            return createGeometryCoords(clockTime.minus(quarterSize));
-        }
-
-        public Coords minusHalf() {
-            return createGeometryCoords(clockTime.minus(halfSize));
-        }
-
-        // pan right functions
-
-        public Coords plusBeat() {
-            return createGeometryCoords(clockTime.plus(beatSize));
-        }
-
-        public Coords plusQuarter() {
-            return createGeometryCoords(clockTime.plus(quarterSize));
-        }
-
-        public Coords plusHalf() {
-            return createGeometryCoords(clockTime.plus(halfSize));
-        }
-
-        public String format() {
-            return halfNotesIntoMeasure + "-"+quarterNotesIntoMeasure + "-"+beatsIntoMeasure;
-        }
-
 
     }
 

@@ -3,17 +3,18 @@ package com.dreamscale.htmflow.core.feeds.story;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.StoryTileModel;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
-import com.dreamscale.htmflow.core.feeds.story.music.Snapshot;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,18 +22,16 @@ import java.util.*;
 
 public class StoryTile {
 
+
+    private final String tileUri;
     private final GeometryClock.Coords tileCoordinates;
     private final ZoomLevel zoomLevel;
-
-    private final MusicGeometryClock internalClock;
 
     private final FlowContextMapper contextMapper;
     private final SpatialGeometryMapper spatialGeometryMapper;
     private final FlowRhythmMapper flowRhythmMapper;
     private final FlowBandMapper timeBandMapper;
     private final StoryMusicPlayer storyPlayer;
-
-    private final String tileUri;
 
     private final FeatureFactory featureFactory;
     private final StoryGrid storyGrid;
@@ -43,19 +42,22 @@ public class StoryTile {
         this.zoomLevel = zoomLevel;
         this.tileUri = URIMapper.createTileUri(feedUri, zoomLevel, tileCoordinates);
 
-        this.internalClock = new MusicGeometryClock(
+        MusicGeometryClock internalClock = new MusicGeometryClock(
                 tileCoordinates.getClockTime(),
                 tileCoordinates.panRight(zoomLevel).getClockTime());
 
         this.featureFactory = new FeatureFactory(tileUri);
-        this.storyGrid = new StoryGrid(internalClock);
+        this.storyGrid = new StoryGrid();
 
-        this.contextMapper = new FlowContextMapper(featureFactory, internalClock);
+        LocalDateTime from = internalClock.getFromClockTime();
+        LocalDateTime to = internalClock.getToClockTime();
+
+        this.contextMapper = new FlowContextMapper(featureFactory, from, to);
         this.spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, storyGrid);
-        this.flowRhythmMapper = new FlowRhythmMapper(featureFactory, internalClock);
-        this.timeBandMapper = new FlowBandMapper(featureFactory, internalClock);
+        this.flowRhythmMapper = new FlowRhythmMapper(featureFactory, from, to);
+        this.timeBandMapper = new FlowBandMapper(featureFactory, from, to);
 
-        this.storyPlayer = new StoryMusicPlayer(featureFactory, storyGrid, internalClock);
+        this.storyPlayer = new StoryMusicPlayer(storyGrid, from, to);
 
     }
 
@@ -261,6 +263,26 @@ public class StoryTile {
     }
 
     /**
+     * Extract a serializable form of the generated model, that can be compared with other tiles,
+     * and loaded into grids
+     */
+    public StoryTileModel extractStoryTileModel() {
+        StoryTileModel model = new StoryTileModel();
+        model.setTileUri(getTileUri());
+        model.setZoomLevel(getZoomLevel());
+        model.setTileCoordinates(getTileCoordinates());
+
+        model.setMomentsOfContext(getAllContexts());
+        model.setBandLayers(getBandLayers());
+        model.setRhythmLayers(getRhythmLayers());
+        model.setSpatialStructure(getSpatialStructure());
+        model.setStoryGridModel(getStoryGrid());
+        model.setCarryOverContext(getCarryOverContext());
+
+        return model;
+    }
+
+    /**
      * When a new frame is initialized by "panning right", forwarding one step into the future
      * The last context of the prior frame becomes the starting context of the new frame.
      *
@@ -305,7 +327,7 @@ public class StoryTile {
         return zoomLevel;
     }
 
-    public BoxAndBridgeActivity getSpatialStructuredActivity() {
+    public BoxAndBridgeActivity getSpatialStructure() {
         return spatialGeometryMapper.getSpatialStructuredActivity();
     }
 
@@ -341,12 +363,12 @@ public class StoryTile {
         return tileUri;
     }
 
-    public List<MomentOfContext> getAllContexts() {
-        return contextMapper.getAllContexts();
+    public StoryGridModel getStoryGrid() {
+        return storyGrid.extractStoryGridModel();
     }
 
-    public List<Snapshot> getSnapshots() {
-        return storyPlayer.getSnapshots();
+    public List<MomentOfContext> getAllContexts() {
+        return contextMapper.getAllContexts();
     }
 
     public MomentOfContext getCurrentContext() {

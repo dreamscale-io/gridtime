@@ -32,7 +32,7 @@ public class Torchie {
     }
 
     public StoryTile whereAmI() {
-        return this.zoomableFlow.getActiveStoryFrame();
+        return this.zoomableFlow.getActiveStoryTile();
     }
 
     public StoryTile zoomIn() {

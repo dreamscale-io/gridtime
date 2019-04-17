@@ -32,7 +32,7 @@ public class JournalContextObserverSpec extends Specification {
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20)
     }
 
     def "should create project & task switch events"() {
@@ -117,7 +117,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN);
+        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -132,7 +132,7 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(storyFrame, window)
 
-        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.MIN).panRight(ZoomLevel.MIN), ZoomLevel.MIN);
+        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.MIN_20).panRight(ZoomLevel.MIN_20), ZoomLevel.MIN_20);
         nextFrame.carryOverFrameContext(storyFrame);
         Window nextWindow = new Window(time3, time4)
 

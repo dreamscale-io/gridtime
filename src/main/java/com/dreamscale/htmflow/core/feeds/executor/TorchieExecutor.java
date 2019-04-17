@@ -91,7 +91,8 @@ public class TorchieExecutor {
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.CIRCLE_MESSAGE_OBSERVER)));
 
         metronome.addFlowToChain(new FlowTransformer(memberId, sharedFeaturePool,
-                flowTransformFactory.get(FlowTransformFactory.TransformType.URI_ASSIGNMENT_TRANSFORM)));
+                flowTransformFactory.get(FlowTransformFactory.TransformType.URI_ASSIGNMENT_TRANSFORM),
+                flowTransformFactory.get(FlowTransformFactory.TransformType.MUSIC_PLAYER_TRANSFORM)));
 
         metronome.addFlowToChain(new FlowSink(memberId, sharedFeaturePool,
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES)));

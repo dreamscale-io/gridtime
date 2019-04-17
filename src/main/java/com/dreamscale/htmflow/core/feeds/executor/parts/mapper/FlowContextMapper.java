@@ -13,11 +13,10 @@ import java.util.*;
 
 public class FlowContextMapper {
 
-
-    private final MusicGeometryClock internalClock;
     private final FeatureFactory featureFactory;
     private final LocalDateTime from;
     private final LocalDateTime to;
+    private final MusicGeometryClock internalClock;
 
     private Map<StructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
     private Map<StructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
@@ -26,11 +25,11 @@ public class FlowContextMapper {
 
     private ContextEndingEvent contextToEndLater = null;
 
-    public FlowContextMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock) {
+    public FlowContextMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
-        this.internalClock = internalClock;
-        this.from = internalClock.getFromClockTime();
-        this.to = internalClock.getToClockTime();
+        this.internalClock = new MusicGeometryClock(from, to);
+        this.from = from;
+        this.to = to;
     }
 
     public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {

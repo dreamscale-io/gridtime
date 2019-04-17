@@ -41,8 +41,8 @@ public class Metronome {
 
         tickForwardFlowChain();
 
-        if (fromClockPosition.hoursIntoDay != toClockPosition.hoursIntoDay) {
-            notifyClockTick(ZoomLevel.HOUR);
+        if (fromClockPosition.fourHourSteps != toClockPosition.fourHourSteps) {
+            notifyClockTick(ZoomLevel.HOUR_4);
         }
 
         if (fromClockPosition.daysIntoWeek != toClockPosition.daysIntoWeek) {
@@ -56,7 +56,7 @@ public class Metronome {
         if (fromClockPosition.weeksIntoBlock != toClockPosition.weeksIntoBlock) {
             notifyClockTick(ZoomLevel.BLOCK);
         }
-        if (fromClockPosition.currentYear != toClockPosition.currentYear) {
+        if (fromClockPosition.year != toClockPosition.year) {
             notifyClockTick(ZoomLevel.YEAR);
         }
     }

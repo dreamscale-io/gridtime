@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
-import com.dreamscale.htmflow.core.domain.uri.FlowObjectType;
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
@@ -279,7 +279,7 @@ public class FeatureFactory {
         center.setId(UUID.randomUUID());
         center.setRelativePath(relativePath);
         center.setUri(uri);
-        center.setFlowObjectType(FlowObjectType.BUBBLE_RING_CENTER);
+        center.setFlowObjectType(FlowObjectType.BUBBLE_CENTER);
 
         nestedTemporalFeatures.add(center);
 
@@ -293,7 +293,7 @@ public class FeatureFactory {
         entrance.setId(UUID.randomUUID());
         entrance.setRelativePath(relativePath);
         entrance.setUri(uri);
-        entrance.setFlowObjectType(FlowObjectType.BUBBLE_RING_ENTRANCE);
+        entrance.setFlowObjectType(FlowObjectType.BUBBLE_ENTRANCE);
 
         nestedTemporalFeatures.add(entrance);
     }
@@ -306,7 +306,7 @@ public class FeatureFactory {
         exit.setId(UUID.randomUUID());
         exit.setRelativePath(relativePath);
         exit.setUri(uri);
-        exit.setFlowObjectType(FlowObjectType.BUBBLE_RING_EXIT);
+        exit.setFlowObjectType(FlowObjectType.BUBBLE_EXIT);
 
         nestedTemporalFeatures.add(exit);
     }
@@ -449,6 +449,5 @@ public class FeatureFactory {
     public List<Bridge> getAllBridges() {
         return new ArrayList<>(bridgeMap.values());
     }
-
 
 }

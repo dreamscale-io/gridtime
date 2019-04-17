@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
-import com.dreamscale.htmflow.core.domain.uri.FlowObjectType;
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import lombok.Getter;
 import lombok.Setter;
 

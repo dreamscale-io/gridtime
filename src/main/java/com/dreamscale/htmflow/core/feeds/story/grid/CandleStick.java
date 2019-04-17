@@ -26,6 +26,8 @@ public class CandleStick {
     }
 
     public void combineAggregate(CandleStick candleStick) {
+        if (candleStick == null) return;
+
         if (sampleCount + candleStick.sampleCount == 0) {
             return; //don't divide by 0
         }

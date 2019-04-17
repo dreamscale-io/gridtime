@@ -1,33 +1,42 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.Snapshot;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class StoryGrid {
-
-    private final MusicGeometryClock clock;
 
     private Map<UUID, FeatureRow> featureRows = new HashMap<>();
     private Map<UUID, FeatureAggregateRow> aggregateRows = new HashMap<>();
 
     private Map<UUID, FeatureAggregate> aggregators = new HashMap<>();
 
+    private List<Snapshot> snapshots = new ArrayList<>();
 
-    public StoryGrid(MusicGeometryClock clock) {
-        this.clock = clock;
+    public StoryGrid() {
+    }
+
+    public StoryGrid(StoryGridModel storyGridModel) {
+        for (FeatureRow featureRow : storyGridModel.getFeatureRows()) {
+            featureRows.put(featureRow.getFeature().getId(), featureRow);
+        }
+
+        for (FeatureAggregateRow aggregateRow : storyGridModel.getAggregateRows()) {
+            aggregateRows.put(aggregateRow.getAggregate().getId(), aggregateRow);
+        }
+
+        for (FeatureAggregate aggregate : storyGridModel.getAggregates()) {
+            aggregators.put(aggregate.getId(), aggregate);
+        }
+
+        snapshots.addAll(storyGridModel.getSnapshots());
     }
 
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
-        return findOrCreateGridMetrics(feature, clock.getCoordinates());
+        return findOrCreateGridMetrics(feature);
     }
 
     public GridMetrics getMetricsFor(FlowFeature feature, MusicGeometryClock.Coords coords) {
@@ -57,6 +66,11 @@ public class StoryGrid {
         return aggregate;
     }
 
+    private GridMetrics findOrCreateGridMetrics(FlowFeature feature) {
+
+        FeatureRow row = findOrCreateRow(feature);
+        return row.findOrCreateMetrics();
+    }
 
     private GridMetrics findOrCreateGridMetrics(FlowFeature feature, MusicGeometryClock.Coords coords) {
 
@@ -77,4 +91,21 @@ public class StoryGrid {
         aggregateRows.put(parent.getId(), aggregateRow);
     }
 
+    public void addSnapshot(Snapshot snapshot) {
+        snapshot.setRelativeSequence(snapshots.size() + 1);
+        snapshots.add(snapshot);
+    }
+
+    public StoryGridModel extractStoryGridModel() {
+        for (FeatureAggregateRow aggregateRow : aggregateRows.values()) {
+            aggregateRow.refreshMetrics();
+        }
+
+        StoryGridModel storyGridModel = new StoryGridModel();
+        storyGridModel.setFeatureRows(new ArrayList<>(featureRows.values()));
+        storyGridModel.setAggregateRows(new ArrayList<>(aggregateRows.values()));
+        storyGridModel.setAggregates(new ArrayList<>(aggregators.values()));
+        storyGridModel.setSnapshots(snapshots);
+        return storyGridModel;
+    }
 }

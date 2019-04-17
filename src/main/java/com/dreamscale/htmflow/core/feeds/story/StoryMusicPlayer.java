@@ -12,6 +12,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.Learni
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 import com.dreamscale.htmflow.core.feeds.story.music.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,14 +20,10 @@ public class StoryMusicPlayer {
 
     private final Metronome metronome;
     private final Scene scene;
-    private final FeatureFactory featureFactory;
-    private final StoryGrid storyGrid;
     private StoryTile frameToPlay;
-    private List<Snapshot> snapshots;
 
-    public StoryMusicPlayer(FeatureFactory featureFactory, StoryGrid storyGrid, MusicGeometryClock internalClock) {
-        this.featureFactory = featureFactory;
-        this.storyGrid = storyGrid;
+    public StoryMusicPlayer(StoryGrid storyGrid, LocalDateTime from, LocalDateTime to) {
+        MusicGeometryClock internalClock = new MusicGeometryClock(from, to);
         this.metronome = new Metronome(internalClock);
         this.scene = new Scene(storyGrid);
     }
@@ -45,7 +42,6 @@ public class StoryMusicPlayer {
     }
 
     public void play() {
-        List<Snapshot> snapshots = new ArrayList<>();
 
         int beatsToPlay = metronome.getBeats();
 
@@ -53,14 +49,9 @@ public class StoryMusicPlayer {
             scene.panForwardTime();
             metronome.tick();
 
-            snapshots.add(scene.snapshot(metronome.getCoords()));
+            scene.snapshot(metronome.getCoords());
         }
 
-        this.snapshots = snapshots;
-    }
-
-    public List<Snapshot> getSnapshots() {
-        return snapshots;
     }
 
 
@@ -129,7 +120,7 @@ public class StoryMusicPlayer {
         @Override
         public void play(List<Playable> playables) {
 
-            BoxAndBridgeActivity structure = frameToPlay.getSpatialStructuredActivity();
+            BoxAndBridgeActivity structure = frameToPlay.getSpatialStructure();
 
             for (Playable playable : playables) {
                 if (playable instanceof MoveToBox) {

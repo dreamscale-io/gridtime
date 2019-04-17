@@ -44,3 +44,6 @@ databaseChangeLog:
 
   - include:
         file: db/v003/uri/create_uri_within_flow.sql
+
+  - include:
+        file: db/v003/uri/create_story_tile.sql

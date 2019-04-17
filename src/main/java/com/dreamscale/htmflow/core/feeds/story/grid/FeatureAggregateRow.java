@@ -1,11 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Getter
 public class FeatureAggregateRow extends FeatureRow {
 
     private final FeatureAggregate aggregate;
@@ -35,6 +38,14 @@ public class FeatureAggregateRow extends FeatureRow {
             }
         }
 
+        nullOutEmptyAggregateMetrics();
+    }
+
+    private void nullOutEmptyAggregateMetrics() {
+        Set<MusicGeometryClock.Coords> aggregateTimingKeys = getTimingKeys();
+        for (MusicGeometryClock.Coords timingKey : aggregateTimingKeys) {
+            findOrCreateMetrics(timingKey).nullOutEmptyMetrics();
+        }
     }
 
     private void resetAggregateMetrics() {

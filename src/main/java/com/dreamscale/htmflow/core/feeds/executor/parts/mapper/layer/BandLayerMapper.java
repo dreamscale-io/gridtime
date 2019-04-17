@@ -116,7 +116,7 @@ public class BandLayerMapper {
         MusicGeometryClock.Coords startCoords = internalClock.getCoordinates();
 
         for (int i = 0; i < bandCount; i++) {
-            MusicGeometryClock.Coords endCoords = startCoords.panRight(beatSize);
+            MusicGeometryClock.Coords endCoords = internalClock.panRight(beatSize);
 
             RollingAggregateBand band = featureFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
             layer.add(band);

@@ -20,11 +20,11 @@ public class FlowBandMapper {
 
     private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
-    public FlowBandMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock) {
+    public FlowBandMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
-        this.internalClock = internalClock;
-        this.from = internalClock.getFromClockTime();
-        this.to = internalClock.getToClockTime();
+        this.internalClock = new MusicGeometryClock(from, to);
+        this.from = from;
+        this.to = to;
 
     }
 

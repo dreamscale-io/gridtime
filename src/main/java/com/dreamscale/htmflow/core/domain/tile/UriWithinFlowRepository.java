@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.domain.uri;
+package com.dreamscale.htmflow.core.domain.tile;
 
 import org.springframework.data.repository.CrudRepository;
 

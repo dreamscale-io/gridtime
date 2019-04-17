@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.domain.uri;
+package com.dreamscale.htmflow.core.domain.tile;
 
 import lombok.*;
 
@@ -6,19 +6,22 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.UUID;
 
-@Entity(name = "uri_within_flow")
+@Entity(name = "uri_within_project")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UriWithinFlowEntity {
+public class UriWithinProjectEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    private FlowObjectType objectType;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID projectId;
+
+    private StaticObjectType objectType;
 
     private String objectKey;
 

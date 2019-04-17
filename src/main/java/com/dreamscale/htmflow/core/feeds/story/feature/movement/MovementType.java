@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
-import com.dreamscale.htmflow.core.domain.uri.FlowObjectType;
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 
 public enum MovementType {
     CHANGE_CONTEXT (FlowObjectType.MOVEMENT_CHANGE_CONTEXT),

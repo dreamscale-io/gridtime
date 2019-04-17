@@ -2,13 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 
 import com.dreamscale.htmflow.core.feeds.common.Flow;
-import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.Batch;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
-import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Bookmark;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,6 +22,9 @@ public class FlowTransformer implements Flow {
 
     public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) {
 
+        for (FlowTransform transform : flowTransforms) {
+            transform.transform(sharedFeaturePool.getActiveStoryTile());
+        }
     }
 
 

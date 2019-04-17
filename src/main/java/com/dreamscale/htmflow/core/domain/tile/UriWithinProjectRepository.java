@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.domain.uri;
+package com.dreamscale.htmflow.core.domain.tile;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface UriWithinProjectRepository extends CrudRepository<UriWithinProjectEntity, UUID> {
 
-    UriWithinProjectEntity findByProjectIdAndObjectTypeAndObjectKey(UUID projectId, UriObjectType objectType, String objectKey);
+    UriWithinProjectEntity findByProjectIdAndObjectTypeAndObjectKey(UUID projectId, StaticObjectType objectType, String objectKey);
 
     UriWithinProjectEntity findByProjectIdAndUri(UUID projectId, String uri);
 }

@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeatureAggregate {
+public class FeatureAggregate extends FlowFeature {
 
     private final FlowFeature container;
 

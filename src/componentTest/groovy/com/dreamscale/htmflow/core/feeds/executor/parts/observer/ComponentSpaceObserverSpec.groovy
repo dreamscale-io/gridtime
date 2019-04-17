@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN)
+        storyFrame = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN_20)
     }
 
     def "should create Location traversals inside a Place"() {
@@ -55,7 +55,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         when:
         componentSpaceObserver.see(storyFrame, window)
-        BoxAndBridgeActivity boxAndBridgeStructure = storyFrame.getSpatialStructuredActivity();
+        BoxAndBridgeActivity boxAndBridgeStructure = storyFrame.getSpatialStructure();
 
         then:
         assert true

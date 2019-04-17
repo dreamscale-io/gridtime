@@ -57,14 +57,14 @@ public class ZoomableFlow implements ClockChangeListener {
 
     }
 
-    public StoryTile getActiveStoryFrame() {
-        return this.sharedFeaturePool.getActiveStoryFrame();
+    public StoryTile getActiveStoryTile() {
+        return this.sharedFeaturePool.getActiveStoryTile();
     }
 
     public StoryTile zoomIn() {
         zoomLevel = zoomLevel.zoomIn();
         StoryTile storyTile =
-                this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
+                this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
 
         this.activeFocus = storyTile.getTileCoordinates();
         return storyTile;
@@ -72,19 +72,19 @@ public class ZoomableFlow implements ClockChangeListener {
 
     public StoryTile zoomOut() {
         zoomLevel = zoomLevel.zoomOut();
-        return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
+        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
     }
 
     public StoryTile panLeft() {
         activeFocus = activeFocus.panLeft(zoomLevel);
 
-        return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
+        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
     }
 
     public StoryTile panRight() {
         activeFocus = activeFocus.panRight(zoomLevel);
 
-        return this.sharedFeaturePool.getActiveStoryFrameAtZoomLevel(activeFocus, zoomLevel);
+        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
     }
 
 
@@ -102,7 +102,7 @@ public class ZoomableFlow implements ClockChangeListener {
         @Override
         public void run() {
 
-            this.sharedFeaturePool.nextFrame(zoomLevel);
+            this.sharedFeaturePool.nextTile(zoomLevel);
             //TODO run aggregation job
         }
     }
@@ -119,7 +119,7 @@ public class ZoomableFlow implements ClockChangeListener {
 
         @Override
         public void run() {
-            this.sharedFeaturePool.nextFrame(ZoomLevel.MIN);
+            this.sharedFeaturePool.nextTile(ZoomLevel.MIN_20);
             this.metronome.tick();
         }
     }

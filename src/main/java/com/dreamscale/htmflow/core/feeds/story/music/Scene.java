@@ -36,8 +36,8 @@ public class Scene {
         this.storyGrid = storyGrid;
     }
 
-    public Snapshot snapshot(MusicGeometryClock.Coords coords) {
-        compressIntoUrisAndMetrics();
+    public void snapshot(MusicGeometryClock.Coords coords) {
+        compressIntoUrisAndMetrics(coords);
 
         Snapshot snapshot = new Snapshot(coords);
         snapshot.setProjectContext(projectContext);
@@ -52,10 +52,12 @@ public class Scene {
 
         snapshot.setUrisInFrame(urisInFrame);
 
-        return snapshot;
+        storyGrid.addSnapshot(snapshot);
     }
 
     public void panForwardTime() {
+        urisInFrame.clear();
+
         removeAllButOne(activeBoxes);
         removeAllButOne(activeLocationsInBox);
         removeAllButOne(activeTraversals);
@@ -63,7 +65,7 @@ public class Scene {
         removeAllButOne(activeExecutionEvents);
     }
 
-    public void compressIntoUrisAndMetrics() {
+    public void compressIntoUrisAndMetrics(MusicGeometryClock.Coords coords) {
         for(Box box : activeBoxes) {
             saveMetrics(box);
             urisInFrame.add(box.getUri());

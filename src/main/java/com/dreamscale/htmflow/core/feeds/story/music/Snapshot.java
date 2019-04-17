@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box;
@@ -14,7 +15,8 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class Snapshot {
+public class Snapshot extends FlowFeature  {
+
     private final MusicGeometryClock.Coords coords;
 
     private Context projectContext;
@@ -28,6 +30,8 @@ public class Snapshot {
     private List<ExecuteThing> activeExecutionEvents;
 
     private Set<String> urisInFrame;
+
+    private int relativeSequence;
 
     public Snapshot(MusicGeometryClock.Coords coords) {
         this.coords = coords;
