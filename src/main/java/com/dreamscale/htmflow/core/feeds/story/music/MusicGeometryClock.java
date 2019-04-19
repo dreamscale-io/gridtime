@@ -99,14 +99,14 @@ public class MusicGeometryClock {
     private Coords createGeometryCoords(LocalDateTime nextClockTime) {
 
         long secondsIntoMeasure = Duration.between(this.fromClockTime, nextClockTime).getSeconds();
-        int beats = (int)(secondsIntoMeasure / beatSize.getSeconds());
+        int beatsIntoMeasure = (int)(secondsIntoMeasure / beatSize.getSeconds());
 
-        int quarterNotes = beats / BeatsPerBucket.QUARTER.getBeatCount();
-        int halfNotes = beats / BeatsPerBucket.HALF.getBeatCount();
+        int quarterNotes = beatsIntoMeasure / BeatsPerBucket.QUARTER.getBeatCount() + 1;
+        int halfNotes = beatsIntoMeasure / BeatsPerBucket.HALF.getBeatCount() + 1;
 
         return new Coords(nextClockTime,
                 BeatsPerBucket.BEAT.getBeatCount(),
-                beats,
+                beatsIntoMeasure + 1,
                 quarterNotes,
                 halfNotes);
     }
