@@ -1,21 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure
 
-import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
-import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import spock.lang.Specification
 
-import java.time.LocalDateTime;
+import spock.lang.Specification
 
 public class ThoughtBubbleSpec extends Specification {
 
     ThoughtBubble bubble
-    LocalDateTime clockStart
 
     def setup() {
         bubble = new ThoughtBubble();
-
-
     }
 
     def "ring locations should organize into radial structure"() {

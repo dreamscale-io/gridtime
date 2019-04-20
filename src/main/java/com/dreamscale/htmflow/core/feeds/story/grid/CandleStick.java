@@ -3,6 +3,8 @@ package com.dreamscale.htmflow.core.feeds.story.grid;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+
 @Getter
 @ToString
 public class CandleStick {
@@ -12,13 +14,22 @@ public class CandleStick {
     private double total;
     private double avg;
     private double stddev;
-    private double min;
-    private double max;
+    private double min = Integer.MAX_VALUE;
+    private double max = Integer.MIN_VALUE;
+
+    private ArrayList<Double> dataSamples = new ArrayList<>();
 
     public void addSample(double sample) {
         avg = ((avg * sampleCount) + sample) / (sampleCount + 1);
 
-        stddev = Math.sqrt(((Math.pow(stddev, 2) * sampleCount + Math.pow(sample - avg, 2)) / (sampleCount + 1)));
+        dataSamples.add(sample);
+
+        double squares = 0;
+        for (Double aSample : dataSamples) {
+            squares += Math.pow(aSample - avg, 2);
+        }
+
+        stddev = Math.sqrt(squares / (sampleCount+1) );
 
         min = Math.min(min, sample);
         max = Math.max(max, sample);
@@ -35,8 +46,14 @@ public class CandleStick {
         }
         avg = ((avg * sampleCount) + (candleStick.avg * candleStick.sampleCount)) / (sampleCount + candleStick.sampleCount);
 
-        stddev = Math.sqrt(((Math.pow(stddev, 2) * sampleCount) + (Math.pow(candleStick.stddev, 2) * candleStick.sampleCount))
-                / (sampleCount + candleStick.sampleCount));
+        dataSamples.addAll(candleStick.dataSamples);
+
+        double squares = 0;
+        for (Double aSample : dataSamples) {
+            squares += Math.pow(aSample - avg, 2);
+        }
+
+        stddev = Math.sqrt(squares / (sampleCount + candleStick.sampleCount) );
 
         min = Math.min(min, candleStick.min);
         max = Math.max(max, candleStick.max);

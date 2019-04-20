@@ -2,12 +2,15 @@ package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
+import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToBox
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 import spock.lang.Specification
 
 import java.time.Duration;
@@ -69,7 +72,7 @@ public class StoryTileSpec extends Specification {
         when:
         tile.gotoLocation(time1, "box", "/location/path/1", Duration.ofSeconds(60))
         tile.gotoLocation(time2, "box", "/location/path/2", Duration.ofSeconds(60))
-        tile.gotoLocation(time2, "box", "/location/path/1", Duration.ofSeconds(60))
+        tile.gotoLocation(time3, "box", "/location/path/1", Duration.ofSeconds(60))
 
         def layer = tile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES)
         def spatial = tile.getSpatialStructure()
@@ -90,7 +93,34 @@ public class StoryTileSpec extends Specification {
         assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllTraversals().size() == 1
 
         assert grid.featureRows.size() == 4
+        assert grid.aggregateRows.size() == 1
+    }
 
+    def "should modify existing location"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        LocalDateTime time2 = clockStart.plusMinutes(5);
+        LocalDateTime time3 = clockStart.plusMinutes(6);
+
+        ContextBeginningEvent startTask = new ContextBeginningEvent()
+        startTask.setPosition(time1)
+        startTask.setStructureLevel(StructureLevel.TASK)
+        startTask.setReferenceId(UUID.randomUUID())
+        startTask.setName("name");
+
+        when:
+        tile.beginContext(startTask)
+        tile.gotoLocation(time1, "box", "/location/path/1", Duration.ofSeconds(60))
+        tile.modifyCurrentLocation(time2, 55)
+        tile.modifyCurrentLocation(time3, 11)
+
+        def grid = tile.getStoryGrid();
+
+        then:
+        assert grid.featureRows.size() == 3;
+        assert grid.featureRows.get(0).allTimeBucket.getModificationCandle().sampleCount == 2;
+        assert grid.featureRows.get(1).allTimeBucket.getModificationCandle().sampleCount == 2;
+        assert grid.featureRows.get(2).allTimeBucket.getModificationCandle().sampleCount == 2;
 
     }
 }

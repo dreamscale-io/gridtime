@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.Getter;
 import lombok.ToString;
 
 import java.time.Duration;
 
+@Getter
 @ToString
 public class GridMetrics extends FlowFeature {
 
