@@ -1,9 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.ToString;
 
 import java.time.Duration;
 
+@ToString
 public class GridMetrics extends FlowFeature {
 
     private CandleStick velocityCandle;
@@ -13,6 +15,8 @@ public class GridMetrics extends FlowFeature {
     private CandleStick wtfCandle;
     private CandleStick pairingCandle;
     private CandleStick executionCandle;
+    private CandleStick focusWeightCandle;
+
 
     public void addVelocitySample(Duration duration) {
         if (velocityCandle == null) {
@@ -75,6 +79,14 @@ public class GridMetrics extends FlowFeature {
         }
     }
 
+    public void addFocusWeightSample(double focusWeight) {
+        if (focusWeightCandle == null) {
+            focusWeightCandle = new CandleStick();
+        }
+
+        focusWeightCandle.addSample(focusWeight);
+    }
+
     public Duration getTotalTimeInvestment() {
         return Duration.ofSeconds(Math.round(velocityCandle.getTotal()));
     }
@@ -122,4 +134,6 @@ public class GridMetrics extends FlowFeature {
         pairingCandle.combineAggregate(sourceMetrics.pairingCandle);
         executionCandle.combineAggregate(sourceMetrics.executionCandle);
     }
+
+
 }

@@ -26,6 +26,10 @@ public class FlowBandMapper {
         this.from = from;
         this.to = to;
 
+        //init all the layers
+        for (BandLayerType layerType : BandLayerType.values()) {
+            findOrCreateLayer(layerType);
+        }
     }
 
     private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {

@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.feeds.story.feature;
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.UUID;
 

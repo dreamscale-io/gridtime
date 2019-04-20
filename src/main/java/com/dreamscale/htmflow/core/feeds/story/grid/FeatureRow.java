@@ -4,12 +4,14 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 @Getter
+@ToString
 public class FeatureRow extends FlowFeature {
 
     private final FlowFeature feature;

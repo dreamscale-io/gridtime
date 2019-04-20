@@ -13,6 +13,8 @@ public class StoryGrid {
 
     private Map<UUID, FeatureAggregate> aggregators = new HashMap<>();
 
+    private transient GridMetrics theVoid = new GridMetrics();
+
     private List<Snapshot> snapshots = new ArrayList<>();
 
     public StoryGrid() {
@@ -36,11 +38,19 @@ public class StoryGrid {
 
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
-        return findOrCreateGridMetrics(feature);
+        if (feature != null) {
+            return findOrCreateGridMetrics(feature);
+        } else {
+            return theVoid;
+        }
     }
 
     public GridMetrics getMetricsFor(FlowFeature feature, MusicGeometryClock.Coords coords) {
-        return findOrCreateGridMetrics(feature, coords);
+        if (feature != null) {
+            return findOrCreateGridMetrics(feature, coords);
+        } else {
+            return theVoid;
+        }
     }
 
     private FeatureRow findOrCreateRow(FlowFeature feature) {
@@ -67,7 +77,6 @@ public class StoryGrid {
     }
 
     private GridMetrics findOrCreateGridMetrics(FlowFeature feature) {
-
         FeatureRow row = findOrCreateRow(feature);
         return row.findOrCreateMetrics();
     }
@@ -85,6 +94,7 @@ public class StoryGrid {
         FeatureAggregateRow aggregateRow = new FeatureAggregateRow(aggregate);
 
         for (FlowFeature child : children) {
+            System.out.println("child : "+child);
             aggregateRow.addSourceRow(featureRows.get(child.getId()));
         }
 

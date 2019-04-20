@@ -82,6 +82,7 @@ public class SpatialGeometryMapper {
         for (FocalPoint thought : orderedThoughtSequence) {
 
             BoxActivity boxActivity = thought.createBoxOfThoughtBubbles();
+            boxAndBridgeActivity.addBoxActivity(boxActivity);
 
             for (ThoughtBubble bubble : boxActivity.getThoughtBubbles()) {
                 storyGrid.createAggregateRow(bubble, bubble.getAllLocations());
@@ -150,6 +151,9 @@ public class SpatialGeometryMapper {
 
 
     public BoxAndBridgeActivity getSpatialStructuredActivity() {
+        if (extractedSpatialStructuredActivity == null) {
+            finish();
+        }
        return extractedSpatialStructuredActivity;
     }
 

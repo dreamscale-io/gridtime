@@ -1,8 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class CandleStick {
 
     private int sampleCount;

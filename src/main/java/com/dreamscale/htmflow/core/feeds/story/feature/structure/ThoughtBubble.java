@@ -27,42 +27,48 @@ public class ThoughtBubble extends FlowFeature {
     }
 
     public void placeCenter(LocationInBox centerOfFocus) {
-        this.center = new RingLocation(null, centerOfFocus);
+        if (centerOfFocus != null) {
+            this.center = new RingLocation(null, centerOfFocus);
+        }
     }
 
     public void placeEntrance(LocationInBox entrance) {
-        this.entrance = new RingLocation(null, entrance);
+        if (entrance != null) {
+            this.entrance = new RingLocation(null, entrance);
+        }
     }
 
     public void placeExit(LocationInBox exit) {
-        this.exit = new RingLocation(null, exit);
+        if (exit != null) {
+            this.exit = new RingLocation(null, exit);
+        }
     }
 
-    public void addLinkFromEntrance(LocationInBox connectToLocation, Traversal traversal, double focusWeight, double velocity) {
+    public void addLinkFromEntrance(LocationInBox connectToLocation, Traversal traversal) {
         if (entrance != null) {
             RingLocation connectToRingLocation = findRingLocation(connectToLocation);
 
-            Link link = new Link(entrance, connectToRingLocation, traversal, focusWeight, velocity);
+            Link link = new Link(entrance, connectToRingLocation, traversal);
             linksFromEntrance.add(link);
         }
     }
 
-    public void addLinkToExit(LocationInBox connectFromLocation, Traversal traversal, double focusWeight, double velocity) {
+    public void addLinkToExit(LocationInBox connectFromLocation, Traversal traversal) {
         if (exit != null) {
             RingLocation connectFromRingLocation = findRingLocation(connectFromLocation);
 
 
-            Link link = new Link(connectFromRingLocation, exit, traversal, focusWeight, velocity);
+            Link link = new Link(connectFromRingLocation, exit, traversal);
             linksToExit.add(link);
         }
     }
 
-    public void addLocationToFirstRing(LocationInBox connectToLocation, Traversal traversal, double focusWeight, double velocity) {
+    public void addLocationToFirstRing(LocationInBox connectToLocation, Traversal traversal) {
         Ring firstRing = rings.get(0);
 
         RingLocation connectToRingLocation = firstRing.addElement(connectToLocation);
 
-        Link link = new Link(center, connectToRingLocation, traversal, focusWeight, velocity);
+        Link link = new Link(center, connectToRingLocation, traversal);
         firstRing.addLinkToInnerRing(link);
     }
 
@@ -72,13 +78,13 @@ public class ThoughtBubble extends FlowFeature {
         return firstRing.getRawLocationsInsideRing();
     }
 
-    public void addExtraLinkWithinFirstRing(LocationInBox locationA, LocationInBox locationB, Traversal traversal, double focusWeight, double velocity) {
+    public void addExtraLinkWithinFirstRing(LocationInBox locationA, LocationInBox locationB, Traversal traversal) {
 
         Ring firstRing = rings.get(0);
         RingLocation ringLocationA = firstRing.getRingLocationForLocation(locationA);
         RingLocation ringLocationB = firstRing.getRingLocationForLocation(locationB);
 
-        Link link = new Link(ringLocationA, ringLocationB, traversal, focusWeight, velocity);
+        Link link = new Link(ringLocationA, ringLocationB, traversal);
 
         firstRing.addLinkWithinRing(link);
     }
@@ -88,24 +94,24 @@ public class ThoughtBubble extends FlowFeature {
         rings.add(activeRing);
     }
 
-    public void addLocationToHighestRing(LocationInBox locationToLinkTo, LocationInBox locationToAdd, Traversal traversal, double focusWeight, double velocity) {
+    public void addLocationToHighestRing(LocationInBox locationToLinkTo, LocationInBox locationToAdd, Traversal traversal) {
         Ring highestRing = rings.get(rings.size() - 1);
 
         RingLocation newRingLocation = highestRing.addElement(locationToAdd);
         RingLocation ringLocationToConnectTo = findRingLocation(locationToLinkTo);
 
-        Link link = new Link(ringLocationToConnectTo, newRingLocation, traversal, focusWeight, velocity);
+        Link link = new Link(ringLocationToConnectTo, newRingLocation, traversal);
         highestRing.addLinkToInnerRing(link);
     }
 
-    public void addExtraLinkWithinHighestRing(LocationInBox locationA, LocationInBox locationB, Traversal traversal, double focusWeight, double velocity) {
+    public void addExtraLinkWithinHighestRing(LocationInBox locationA, LocationInBox locationB, Traversal traversal) {
 
         Ring highestRing = rings.get(rings.size() - 1);
 
         RingLocation ringLocationA = highestRing.getRingLocationForLocation(locationA);
         RingLocation ringLocationB = highestRing.getRingLocationForLocation(locationB);
 
-        Link link = new Link(ringLocationA, ringLocationB, traversal, focusWeight, velocity);
+        Link link = new Link(ringLocationA, ringLocationB, traversal);
 
         highestRing.addLinkWithinRing(link);
     }
@@ -424,15 +430,11 @@ public class ThoughtBubble extends FlowFeature {
         private final Traversal traversal;
         private final RingLocation from;
         private final RingLocation to;
-        private final double focusWeight;
-        private final double velocity;
 
-        public Link(RingLocation from, RingLocation to, Traversal traversal, double focusWeight, double velocity) {
+        public Link(RingLocation from, RingLocation to, Traversal traversal) {
             this.from = from;
             this.to = to;
             this.traversal = traversal;
-            this.focusWeight = focusWeight;
-            this.velocity = velocity;
         }
 
         public boolean contains(Traversal traversal) {

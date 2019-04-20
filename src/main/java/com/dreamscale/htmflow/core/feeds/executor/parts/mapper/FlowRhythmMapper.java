@@ -28,6 +28,11 @@ public class FlowRhythmMapper {
         this.internalClock = new MusicGeometryClock(from, to);
         this.from = from;
         this.to = to;
+
+        //init all the layers
+        for (RhythmLayerType layerType : RhythmLayerType.values()) {
+            findOrCreateLayer(layerType);
+        }
     }
 
 

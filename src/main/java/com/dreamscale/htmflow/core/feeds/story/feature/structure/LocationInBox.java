@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LocationInBox extends FlowFeature  {
 
@@ -23,7 +24,7 @@ public class LocationInBox extends FlowFeature  {
     }
 
     public String toKey() {
-       return boxName + ":" + ObjectKeyMapper.createLocationKey(locationPath);
+       return ObjectKeyMapper.createBoxKey(boxName) + " " + ObjectKeyMapper.createLocationKey(locationPath);
     }
 
     public String toString() {

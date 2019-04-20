@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
@@ -33,6 +34,7 @@ public class BandLayerMapper {
         this.internalClock = internalClock;
         this.layerType = layerType;
         this.layer = featureFactory.createTimebandLayer(layerType);
+
     }
 
     public void startBand(LocalDateTime startBandPosition, Details details) {

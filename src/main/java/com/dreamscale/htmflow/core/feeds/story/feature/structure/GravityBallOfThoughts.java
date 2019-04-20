@@ -53,7 +53,9 @@ public class GravityBallOfThoughts {
 
         currentLocation = toLocation;
 
-        addThoughtParticleForTraversal(fromLocation, toLocation);
+        if (fromLocation != toLocation) {
+            addThoughtParticleForTraversal(fromLocation, toLocation);
+        }
 
         return toLocation;
     }
@@ -73,6 +75,7 @@ public class GravityBallOfThoughts {
     }
 
     public void growHeavyWithFocus(Duration timeInLocation) {
+        if (thoughtTracer.isEmpty()) return;
 
         thoughtTracer.get(0).addVelocitySample(timeInLocation);
 
@@ -135,6 +138,8 @@ public class GravityBallOfThoughts {
             particlesByWeight.removeAll(particlesUsed);
 
             featureFactory.assignAllRingUris(thoughtBubble);
+            thoughtBubble.finish();
+
             boxActivity.addBubble(thoughtBubble);
 
             //we should deplete our particles, but just in case, make sure we don't loop forever
@@ -164,10 +169,11 @@ public class GravityBallOfThoughts {
             } else if (thoughtBubble.contains(nonEnterExitLocation)) {
                 LocationInBox enterExitLocation = getEnterExitNode(locationA, locationB);
 
+                storyGrid.getMetricsFor(traversal).addFocusWeightSample(enterExitParticle.getFocusWeight());
                 if (enterExitLocation == entranceLocation) {
-                    thoughtBubble.addLinkFromEntrance(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    thoughtBubble.addLinkFromEntrance(nonEnterExitLocation, traversal);
                 } else if (enterExitLocation == exitLocation) {
-                    thoughtBubble.addLinkToExit(nonEnterExitLocation, traversal, enterExitParticle.getFocusWeight(), enterExitParticle.getVelocity());
+                    thoughtBubble.addLinkToExit(nonEnterExitLocation, traversal);
                 }
 
                 particlesToRemove.add(enterExitParticle);
@@ -267,8 +273,9 @@ public class GravityBallOfThoughts {
             LocationInBox locationToLinkTo = getSourceLocation(locationsInLastRing, locationA, locationB);
             LocationInBox locationToAdd = getConnectedLocation(locationsInLastRing, locationA, locationB);
 
-            thoughtBubble.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal,
-                    connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
+            storyGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
+
+            thoughtBubble.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal);
         }
 
         return thoughtBubble.getLocationsInFirstRing();
@@ -283,8 +290,9 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            thoughtBubble.addExtraLinkWithinHighestRing(locationA, locationB, traversal,
-                    particle.getFocusWeight(), particle.getVelocity());
+            storyGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
+
+            thoughtBubble.addExtraLinkWithinHighestRing(locationA, locationB, traversal);
         }
     }
 
@@ -296,8 +304,9 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            thoughtBubble.addExtraLinkWithinFirstRing(locationA, locationB, traversal,
-                    particle.getFocusWeight(), particle.getVelocity());
+            storyGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
+
+            thoughtBubble.addExtraLinkWithinFirstRing(locationA, locationB, traversal);
         }
     }
 
@@ -313,8 +322,9 @@ public class GravityBallOfThoughts {
 
             LocationInBox locationToAdd = getConnectedLocation(centerOfFocus, locationA, locationB);
 
-            thoughtBubble.addLocationToFirstRing(locationToAdd, traversal,
-                    connectedParticle.getFocusWeight(), connectedParticle.getVelocity());
+            storyGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
+
+            thoughtBubble.addLocationToFirstRing(locationToAdd, traversal);
 
         }
 

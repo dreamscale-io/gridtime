@@ -272,6 +272,7 @@ public class FeatureFactory {
 
 
     private void populateBubbleCenterUri(String bubbleUri, ThoughtBubble.RingLocation center) {
+        if (center == null) return;
 
         String relativePath = "/center";
         String uri = bubbleUri + relativePath;
@@ -286,6 +287,7 @@ public class FeatureFactory {
     }
 
     private void populateBubbleEntranceUri(String bubbleUri, ThoughtBubble.RingLocation entrance) {
+        if (entrance == null) return;
 
         String relativePath = "/entrance";
         String uri = bubbleUri + relativePath;
@@ -299,6 +301,7 @@ public class FeatureFactory {
     }
 
     private void populateBubbleExitUri(String bubbleUri, ThoughtBubble.RingLocation exit) {
+        if (exit == null) return;
 
         String relativePath = "/exit";
         String uri = bubbleUri + relativePath;

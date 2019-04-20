@@ -2,7 +2,9 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.ToString;
 
+@ToString
 public class Traversal extends FlowFeature {
 
     private final LocationInBox locationA;
