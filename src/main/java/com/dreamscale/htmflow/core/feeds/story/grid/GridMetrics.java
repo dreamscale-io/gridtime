@@ -10,48 +10,38 @@ import java.time.Duration;
 @ToString
 public class GridMetrics extends FlowFeature {
 
-    private CandleStick velocityCandle;
-    private CandleStick modificationCandle;
-    private CandleStick feelsCandle;
-    private CandleStick learningCandle;
-    private CandleStick wtfCandle;
-    private CandleStick pairingCandle;
-    private CandleStick executionCandle;
-    private CandleStick focusWeightCandle;
+    private CandleStick velocityCandle = new CandleStick();
+    private CandleStick modificationCandle = new CandleStick();
+    private CandleStick feelsCandle = new CandleStick();
+    private CandleStick learningCandle = new CandleStick();
+    private CandleStick wtfCandle = new CandleStick();
+    private CandleStick pairingCandle = new CandleStick();
+    private CandleStick executionCandle = new CandleStick();
+    private CandleStick executionCycleTimeCandle = new CandleStick();
+    private CandleStick focusWeightCandle = new CandleStick();
 
 
     public void addVelocitySample(Duration duration) {
-        if (velocityCandle == null) {
-            velocityCandle = new CandleStick();
-        }
         velocityCandle.addSample(duration.getSeconds());
     }
 
     public void addModificationSample(int modificationCount) {
-        if (modificationCandle == null) {
-            modificationCandle = new CandleStick();
-        }
         modificationCandle.addSample(modificationCount);
     }
 
     public void addExecutionSample(Duration executionTime) {
-        if (executionCandle == null) {
-            executionCandle = new CandleStick();
-        }
         executionCandle.addSample(executionTime.getSeconds());
     }
 
+    public void addExecutionCycleTimeSample(Duration durationBetweenExecution) {
+        executionCycleTimeCandle.addSample(durationBetweenExecution.getSeconds());
+    }
+
     public void addFeelsSample(int feels) {
-        if (feelsCandle == null) {
-            feelsCandle = new CandleStick();
-        }
         feelsCandle.addSample(feels);
     }
 
     public void addWtfSample(boolean isWTF) {
-        if (wtfCandle == null) {
-            wtfCandle = new CandleStick();
-        }
         if (isWTF) {
             wtfCandle.addSample(1);
         } else {
@@ -60,9 +50,6 @@ public class GridMetrics extends FlowFeature {
     }
 
     public void addLearningSample(boolean isLearning) {
-        if (learningCandle == null) {
-            learningCandle = new CandleStick();
-        }
         if (isLearning) {
             learningCandle.addSample(1);
         } else {
@@ -71,9 +58,6 @@ public class GridMetrics extends FlowFeature {
     }
 
     public void addPairingSample(boolean isPairing) {
-        if (pairingCandle == null) {
-            pairingCandle = new CandleStick();
-        }
         if (isPairing) {
             pairingCandle.addSample(1);
         } else {
@@ -82,10 +66,6 @@ public class GridMetrics extends FlowFeature {
     }
 
     public void addFocusWeightSample(double focusWeight) {
-        if (focusWeightCandle == null) {
-            focusWeightCandle = new CandleStick();
-        }
-
         focusWeightCandle.addSample(focusWeight);
     }
 
@@ -101,6 +81,9 @@ public class GridMetrics extends FlowFeature {
         wtfCandle = new CandleStick();
         pairingCandle = new CandleStick();
         executionCandle = new CandleStick();
+        focusWeightCandle = new CandleStick();
+        executionCycleTimeCandle = new CandleStick();
+
     }
 
     public void nullOutEmptyMetrics() {
@@ -125,6 +108,13 @@ public class GridMetrics extends FlowFeature {
         if (executionCandle.getSampleCount() == 0) {
             executionCandle = null;
         }
+        if (focusWeightCandle.getSampleCount() == 0) {
+            focusWeightCandle = null;
+        }
+
+        if (executionCycleTimeCandle.getSampleCount() == 0) {
+            executionCycleTimeCandle = null;
+        }
     }
 
     public void combineWith(GridMetrics sourceMetrics) {
@@ -135,6 +125,8 @@ public class GridMetrics extends FlowFeature {
         wtfCandle.combineAggregate(sourceMetrics.wtfCandle);
         pairingCandle.combineAggregate(sourceMetrics.pairingCandle);
         executionCandle.combineAggregate(sourceMetrics.executionCandle);
+        executionCycleTimeCandle.combineAggregate(sourceMetrics.executionCycleTimeCandle);
+        focusWeightCandle.combineAggregate(sourceMetrics.focusWeightCandle);
     }
 
 

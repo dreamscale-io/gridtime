@@ -19,7 +19,7 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver {
 
     @Override
-    public void see(StoryTile currentStoryTile, Window window) {
+    public void see(Window window, StoryTile currentStoryTile) {
 
         List<Flowable> flowables = window.getFlowables();
 

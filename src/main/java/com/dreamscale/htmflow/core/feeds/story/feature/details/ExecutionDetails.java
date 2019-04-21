@@ -1,10 +1,14 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+@Getter
+@ToString
 public class ExecutionDetails extends FlowFeature {
 
     private LocalDateTime position;
@@ -17,6 +21,9 @@ public class ExecutionDetails extends FlowFeature {
     private boolean isFirstRed;
     private boolean isEndOfReds;
     private boolean isRedAndWantingGreen;
+
+    private Duration durationSinceLastExecution;
+    private Duration durationUntilNextExecution;
 
     public void setDuration(Duration duration) {
         this.duration = duration;
@@ -41,7 +48,7 @@ public class ExecutionDetails extends FlowFeature {
 
     public boolean isRed() {
         boolean isRed = false;
-        if (isUnitTest && exitCode > 0) {
+        if (isUnitTest && exitCode != 0) {
             isRed = true;
         }
         return isRed;
@@ -96,6 +103,18 @@ public class ExecutionDetails extends FlowFeature {
 
     public LocalDateTime getPosition() {
         return position;
+    }
+
+    public void setDurationSinceLastExecution(Duration durationSinceLastExec) {
+        this.durationSinceLastExecution = durationSinceLastExec;
+    }
+
+    public void setDurationUntilNextExecution(Duration durationUntilNextExecution) {
+        this.durationUntilNextExecution = durationUntilNextExecution;
+    }
+
+    public Duration getDurationUntilNextExecution() {
+        return durationUntilNextExecution;
     }
 
     private enum UnitTestType {

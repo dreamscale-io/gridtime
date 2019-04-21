@@ -23,7 +23,7 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ComponentSpaceObserverSpec extends Specification {
 
     ComponentSpaceObserver componentSpaceObserver
-    StoryTile storyFrame
+    StoryTile storyTile
 
     def setup() {
         componentSpaceObserver = new ComponentSpaceObserver()
@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyFrame = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN_20)
+        storyTile = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.MIN_20)
     }
 
     def "should create Location traversals inside a Place"() {
@@ -54,8 +54,8 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(storyFrame, window)
-        BoxAndBridgeActivity boxAndBridgeStructure = storyFrame.getSpatialStructure();
+        componentSpaceObserver.see(window, storyTile)
+        BoxAndBridgeActivity boxAndBridgeStructure = storyTile.getSpatialStructure();
 
         then:
         assert true

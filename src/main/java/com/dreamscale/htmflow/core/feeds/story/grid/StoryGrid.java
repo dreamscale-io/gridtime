@@ -94,7 +94,6 @@ public class StoryGrid {
         FeatureAggregateRow aggregateRow = new FeatureAggregateRow(aggregate);
 
         for (FlowFeature child : children) {
-            System.out.println("child : "+child);
             aggregateRow.addSourceRow(featureRows.get(child.getId()));
         }
 

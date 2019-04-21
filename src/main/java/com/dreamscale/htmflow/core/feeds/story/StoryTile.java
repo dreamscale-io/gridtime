@@ -159,6 +159,14 @@ public class StoryTile {
         storyGrid.getMetricsFor(context.getTaskContext()).addExecutionSample(executionDetails.getDuration());
         storyGrid.getMetricsFor(context.getIntentionContext()).addExecutionSample(executionDetails.getDuration());
 
+        if (executionDetails.isRedAndWantingGreen()) {
+            storyGrid.getMetricsFor(currentBox).addExecutionCycleTimeSample(executionDetails.getDurationUntilNextExecution());
+
+            storyGrid.getMetricsFor(context.getProjectContext()).addExecutionSample(executionDetails.getDuration());
+            storyGrid.getMetricsFor(context.getTaskContext()).addExecutionSample(executionDetails.getDuration());
+            storyGrid.getMetricsFor(context.getIntentionContext()).addExecutionSample(executionDetails.getDuration());
+        }
+
     }
 
 

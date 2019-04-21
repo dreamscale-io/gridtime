@@ -24,7 +24,7 @@ public class ComponentSpaceObserver implements FlowObserver {
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(StoryTile storyTile, Window window) {
+    public void see(Window window, StoryTile storyTile) {
 
         List<Flowable> flowables = window.getFlowables();
 

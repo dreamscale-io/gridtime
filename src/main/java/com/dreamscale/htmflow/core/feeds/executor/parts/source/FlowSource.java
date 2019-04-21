@@ -64,7 +64,7 @@ public class FlowSource implements Flow {
 
     private void observeFlowables(Window window) {
         for (FlowObserver observer : flowObservers) {
-            observer.see(sharedFeaturePool.getActiveStoryTile(), window);
+            observer.see(window, sharedFeaturePool.getActiveStoryTile());
         }
     }
 

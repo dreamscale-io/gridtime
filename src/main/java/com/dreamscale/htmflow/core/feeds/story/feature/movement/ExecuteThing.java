@@ -1,9 +1,13 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
+@Getter
+@ToString
 public class ExecuteThing extends Movement {
 
     private final ExecutionDetails executionDetails;

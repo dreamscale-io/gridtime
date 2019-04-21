@@ -5,5 +5,5 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
 
 public interface FlowObserver {
 
-    void see(StoryTile storyTile, Window window);
+    void see(Window window, StoryTile storyTile);
 }

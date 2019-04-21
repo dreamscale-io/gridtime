@@ -26,13 +26,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
-    StoryTile storyFrame
+    StoryTile storyTile
     GeometryClock clock
 
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20)
+        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20)
     }
 
     def "should create project & task switch events"() {
@@ -55,8 +55,8 @@ public class JournalContextObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        journalContextObserver.see(storyFrame, window)
-        List<ContextEndingEvent> contextEvents = toContextEventList(storyFrame.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements());
+        journalContextObserver.see(window, storyTile)
+        List<ContextEndingEvent> contextEvents = toContextEventList(storyTile.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements());
 
         then:
         assert contextEvents != null
@@ -117,7 +117,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        storyFrame = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20);
+        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -130,14 +130,14 @@ public class JournalContextObserverSpec extends Specification {
         Window window = new Window(time1, time2)
         window.addAll(flowables);
 
-        journalContextObserver.see(storyFrame, window)
+        journalContextObserver.see(window, storyTile)
 
         StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.MIN_20).panRight(ZoomLevel.MIN_20), ZoomLevel.MIN_20);
-        nextFrame.carryOverFrameContext(storyFrame);
+        nextFrame.carryOverFrameContext(storyTile);
         Window nextWindow = new Window(time3, time4)
 
         when:
-        journalContextObserver.see(nextFrame, nextWindow)
+        journalContextObserver.see(nextWindow, nextFrame)
         List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements());
         then:
         assert contextEvents != null

@@ -24,7 +24,7 @@ class FlowSourceSpec extends Specification {
     @Autowired
     JournalFetcher journalFetcher
 
-    @Autowired
+   @Autowired
     FileActivityFetcher fileActivityFetcher
 
     UUID memberId
@@ -39,7 +39,7 @@ class FlowSourceSpec extends Specification {
         this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates());
 
         FlowObserver flowObserverMock =
-                [see: { StoryTile storyFrame, Window window -> this.latestWindow = window }] as FlowObserver
+                [see: { Window window, StoryTile storyFrame -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)
