@@ -36,9 +36,6 @@ public class FeatureFactory {
     private List<FlowFeature> temporalFeatures = new ArrayList<>();
     private List<FlowFeature> nestedTemporalFeatures = new ArrayList<>();
 
-    private Map<RhythmLayerType, RhythmLayer> rhythmLayerMap = new HashMap<>();
-    private Map<BandLayerType, TimebandLayer> bandLayerMap = new HashMap<>();
-
     public FeatureFactory(String tileUri) {
         this.tileUri = tileUri;
     }
@@ -99,7 +96,7 @@ public class FeatureFactory {
         layer.setUri(tileUri + layer.getRelativePath());
         layer.setFlowObjectType(FlowObjectType.RHYTHM_LAYER);
 
-        rhythmLayerMap.put(layerType, layer);
+        temporalFeatures.add(layer);
 
         return layer;
     }
@@ -113,21 +110,15 @@ public class FeatureFactory {
         layer.setUri(tileUri + layer.getRelativePath());
         layer.setFlowObjectType(FlowObjectType.TIMEBAND_LAYER);
 
-        bandLayerMap.put(layerType, layer);
+        temporalFeatures.add(layer);
 
         return layer;
     }
 
     public ExecuteThing createExecuteThing(LocalDateTime moment, ExecutionDetails executionDetails, ExecuteThing.EventType eventType) {
-        RhythmLayer layer = rhythmLayerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
 
         ExecuteThing executeThing = new ExecuteThing(moment, executionDetails, eventType);
         executeThing.setId(UUID.randomUUID());
-        executeThing.setRelativeSequence(sequence.next());
-        executeThing.setRelativePath("/movement/" + executeThing.getRelativeSequence());
-        executeThing.setUri(layer.getUri() + executeThing.getRelativePath());
         executeThing.setFlowObjectType(FlowObjectType.MOVEMENT_EXECUTE_THING);
 
         temporalFeatures.add(executeThing);
@@ -136,15 +127,9 @@ public class FeatureFactory {
     }
 
     public PostCircleMessage createPostCircleMessage(LocalDateTime moment, Message message) {
-        RhythmLayer layer = rhythmLayerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
 
         PostCircleMessage circleMessage = new PostCircleMessage(moment, message);
         circleMessage.setId(UUID.randomUUID());
-        circleMessage.setRelativeSequence(sequence.next());
-        circleMessage.setRelativePath("/movement/" + circleMessage.getRelativeSequence());
-        circleMessage.setUri(layer.getUri() + circleMessage.getRelativePath());
         circleMessage.setFlowObjectType(FlowObjectType.MOVEMENT_POST_MESSAGE);
 
         temporalFeatures.add(circleMessage);
@@ -153,15 +138,9 @@ public class FeatureFactory {
     }
 
     public Movement createMoveToBox(LocalDateTime moment, Box box) {
-        RhythmLayer layer = rhythmLayerMap.get(RhythmLayerType.LOCATION_CHANGES);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
 
         MoveToBox moveToBox = new MoveToBox(moment, box);
         moveToBox.setId(UUID.randomUUID());
-        moveToBox.setRelativeSequence(sequence.next());
-        moveToBox.setRelativePath("/movement/" + moveToBox.getRelativeSequence());
-        moveToBox.setUri(layer.getUri() + moveToBox.getRelativePath());
         moveToBox.setFlowObjectType(FlowObjectType.MOVEMENT_TO_BOX);
 
         temporalFeatures.add(moveToBox);
@@ -169,15 +148,9 @@ public class FeatureFactory {
     }
 
     public Movement createMoveToLocation(LocalDateTime moment, LocationInBox location, Traversal lastTraversal) {
-        RhythmLayer layer = rhythmLayerMap.get(RhythmLayerType.LOCATION_CHANGES);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
 
         MoveToLocation moveToLocation = new MoveToLocation(moment, location, lastTraversal);
         moveToLocation.setId(UUID.randomUUID());
-        moveToLocation.setRelativeSequence(sequence.next());
-        moveToLocation.setRelativePath("/movement/" + moveToLocation.getRelativeSequence());
-        moveToLocation.setUri(layer.getUri() + moveToLocation.getRelativePath());
         moveToLocation.setFlowObjectType(FlowObjectType.MOVEMENT_TO_LOCATION);
 
         temporalFeatures.add(moveToLocation);
@@ -186,15 +159,8 @@ public class FeatureFactory {
     }
 
     public Movement createMoveAcrossBridge(LocalDateTime moment, Bridge bridgeCrossed) {
-        RhythmLayer layer = rhythmLayerMap.get(RhythmLayerType.LOCATION_CHANGES);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
-
         MoveAcrossBridge moveAcrossBridge = new MoveAcrossBridge(moment, bridgeCrossed);
         moveAcrossBridge.setId(UUID.randomUUID());
-        moveAcrossBridge.setRelativeSequence(sequence.next());
-        moveAcrossBridge.setRelativePath("/movement/" + moveAcrossBridge.getRelativeSequence());
-        moveAcrossBridge.setUri(layer.getUri() + moveAcrossBridge.getRelativePath());
         moveAcrossBridge.setFlowObjectType(FlowObjectType.MOVEMENT_ACROSS_BRIDGE);
 
         temporalFeatures.add(moveAcrossBridge);
@@ -203,16 +169,8 @@ public class FeatureFactory {
     }
 
     public Timeband createBand(BandLayerType layerType, LocalDateTime start, LocalDateTime end, Details details) {
-        TimebandLayer layer = bandLayerMap.get(layerType);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
-
         Timeband band = BandFactory.create(layerType, start, end, details);
-
         band.setId(UUID.randomUUID());
-        band.setRelativeSequence(sequence.next());
-        band.setRelativePath("/band/" + band.getRelativeSequence());
-        band.setUri(layer.getUri() + band.getRelativePath());
         band.setFlowObjectType(FlowObjectType.TIMEBAND);
 
         temporalFeatures.add(band);
@@ -221,18 +179,10 @@ public class FeatureFactory {
     }
 
     public RollingAggregateBand createRollingBand(BandLayerType layerType, LocalDateTime start, LocalDateTime end) {
-
-        TimebandLayer layer = bandLayerMap.get(layerType);
-
-        RelativeSequence sequence = findOrCreateRelativeSequence(layer.getId());
-
         RollingAggregateBand band = BandFactory.createRollingBand(layerType, start, end);
-
         band.setId(UUID.randomUUID());
-        band.setRelativeSequence(sequence.next());
-        band.setRelativePath("/band/" + band.getRelativeSequence());
-        band.setUri(layer.getUri() + band.getRelativePath());
         band.setFlowObjectType(FlowObjectType.ROLLING_TIMEBAND);
+
         temporalFeatures.add(band);
         return band;
     }
@@ -343,8 +293,7 @@ public class FeatureFactory {
     }
 
     private void populateRingLinkUri(String bubbleUri, ThoughtBubble.Link link) {
-        String traversalPath = link.getTraversal().getRelativePath();
-        String relativePath = traversalPath + "/link/from/" + link.getFrom().getRelativePath() + "/to/" + link.getTo().getRelativePath();
+        String relativePath = "/link/from" + link.getFrom().getRelativePath() + "/to" + link.getTo().getRelativePath();
         String uri = bubbleUri + relativePath;
 
         link.setUri(uri);
@@ -416,10 +365,11 @@ public class FeatureFactory {
     }
 
     public LocationInBox findOrCreateLocation(String boxName, String locationPath) {
-        LocationInBox location = locationMap.get(locationPath);
+        String key = ObjectKeyMapper.createBoxLocationKey(boxName, locationPath);
+        LocationInBox location = locationMap.get(key);
         if (location == null) {
             location = new LocationInBox(boxName, locationPath);
-            locationMap.put(locationPath, location);
+            locationMap.put(key, location);
         }
         return location;
     }

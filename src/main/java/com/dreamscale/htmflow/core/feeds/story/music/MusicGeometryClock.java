@@ -161,29 +161,29 @@ public class MusicGeometryClock {
 
         final LocalDateTime clockTime;
         final int beatsPerMeasure;
-        final int beats;
-        final int quarters;
-        final int halves;
+        final int beat;
+        final int quarter;
+        final int half;
 
         public boolean isBeforeOrEqual(Coords coords) {
-            return beats <= coords.beats;
+            return beat <= coords.beat;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof Coords) {
-                return ((Coords)o).beats == beats;
+                return ((Coords)o).beat == beat;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Integer.valueOf(beats).hashCode();
+            return Integer.valueOf(beat).hashCode();
         }
 
         public boolean isAfterOrEqual(Coords coords) {
-            return beats >= coords.beats;
+            return beat >= coords.beat;
         }
 
     }

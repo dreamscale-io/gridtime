@@ -24,7 +24,7 @@ public class LocationInBox extends FlowFeature  {
     }
 
     public String toKey() {
-       return ObjectKeyMapper.createBoxKey(boxName) + " " + ObjectKeyMapper.createLocationKey(locationPath);
+       return ObjectKeyMapper.createBoxLocationKey(boxName, locationPath);
     }
 
     public String toString() {

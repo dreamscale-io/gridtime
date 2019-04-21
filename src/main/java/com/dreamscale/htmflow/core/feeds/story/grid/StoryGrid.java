@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.music.Snapshot;
+import com.dreamscale.htmflow.core.feeds.story.music.Column;
 
 import java.util.*;
 
@@ -15,26 +15,8 @@ public class StoryGrid {
 
     private transient GridMetrics theVoid = new GridMetrics();
 
-    private List<Snapshot> snapshots = new ArrayList<>();
+    private List<Column> columns = new ArrayList<>();
 
-    public StoryGrid() {
-    }
-
-    public StoryGrid(StoryGridModel storyGridModel) {
-        for (FeatureRow featureRow : storyGridModel.getFeatureRows()) {
-            featureRows.put(featureRow.getFeature().getId(), featureRow);
-        }
-
-        for (FeatureAggregateRow aggregateRow : storyGridModel.getAggregateRows()) {
-            aggregateRows.put(aggregateRow.getAggregate().getId(), aggregateRow);
-        }
-
-        for (FeatureAggregate aggregate : storyGridModel.getAggregates()) {
-            aggregators.put(aggregate.getId(), aggregate);
-        }
-
-        snapshots.addAll(storyGridModel.getSnapshots());
-    }
 
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
@@ -78,13 +60,20 @@ public class StoryGrid {
 
     private GridMetrics findOrCreateGridMetrics(FlowFeature feature) {
         FeatureRow row = findOrCreateRow(feature);
-        return row.findOrCreateMetrics();
+        return row.getAllTimeBucket();
     }
 
     private GridMetrics findOrCreateGridMetrics(FlowFeature feature, MusicGeometryClock.Coords coords) {
 
         FeatureRow row = findOrCreateRow(feature);
         return row.findOrCreateMetrics(coords);
+    }
+
+    public GridMetrics getAggregateMetricsFor(FlowFeature feature, MusicGeometryClock.Coords coords) {
+        FeatureAggregateRow aggregateRow = aggregateRows.get(feature.getId());
+        aggregateRow.refreshMetrics();
+
+        return aggregateRow.findOrCreateMetrics(coords);
     }
 
     public void createAggregateRow(FlowFeature parent, List<? extends FlowFeature> children) {
@@ -94,27 +83,46 @@ public class StoryGrid {
         FeatureAggregateRow aggregateRow = new FeatureAggregateRow(aggregate);
 
         for (FlowFeature child : children) {
-            aggregateRow.addSourceRow(featureRows.get(child.getId()));
+            FeatureRow row = featureRows.get(child.getId());
+            if (row != null) {
+                aggregateRow.addSourceRow(row);
+            }
         }
 
         aggregateRows.put(parent.getId(), aggregateRow);
     }
 
-    public void addSnapshot(Snapshot snapshot) {
-        snapshot.setRelativeSequence(snapshots.size() + 1);
-        snapshots.add(snapshot);
+    public void addColumn(Column column) {
+        column.setRelativeSequence(columns.size() + 1);
+        columns.add(column);
     }
 
+    /**
+     * Note: This is dependent on URI Mappings already being run, if no URIs are present,
+     * UUIDs will be used for URI
+     * @return
+     */
     public StoryGridModel extractStoryGridModel() {
-        for (FeatureAggregateRow aggregateRow : aggregateRows.values()) {
-            aggregateRow.refreshMetrics();
+        StoryGridModel storyGridModel = new StoryGridModel();
+
+        for (FeatureRow row : featureRows.values()) {
+            FlowFeature feature = row.getFeature();
+            GridMetrics metrics = row.getAllTimeBucket();
+
+            storyGridModel.addActivityForStructure(feature, metrics);
         }
 
-        StoryGridModel storyGridModel = new StoryGridModel();
-        storyGridModel.setFeatureRows(new ArrayList<>(featureRows.values()));
-        storyGridModel.setAggregateRows(new ArrayList<>(aggregateRows.values()));
-        storyGridModel.setAggregates(new ArrayList<>(aggregators.values()));
-        storyGridModel.setSnapshots(snapshots);
+        for (FeatureAggregateRow aggregateRow : aggregateRows.values()) {
+            aggregateRow.refreshMetrics();
+
+            FlowFeature feature = aggregateRow.getFeature();
+            GridMetrics metrics = aggregateRow.getAllTimeBucket();
+
+            storyGridModel.addActivityForStructure(feature, metrics);
+        }
+
+        storyGridModel.setColumns(columns);
         return storyGridModel;
     }
+
 }

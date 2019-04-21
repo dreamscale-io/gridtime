@@ -7,11 +7,8 @@ import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
-import com.dreamscale.htmflow.core.feeds.story.grid.FeatureAggregate;
-import com.dreamscale.htmflow.core.feeds.story.grid.FeatureAggregateRow;
-import com.dreamscale.htmflow.core.feeds.story.grid.FeatureRow;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.music.Snapshot;
+import com.dreamscale.htmflow.core.feeds.story.music.Column;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -218,42 +215,12 @@ public class URIMapper {
 
         features.add(storyGrid);
 
-        List<FeatureRow> featureRows = storyGrid.getFeatureRows();
+        for (Column column : storyGrid.getColumns()) {
+            column.setRelativePath("/column/"+ column.getRelativeSequence());
+            column.setUri(storyGrid.getUri() + column.getRelativePath());
+            column.setFlowObjectType(FlowObjectType.STORY_GRID_COLUMN);
 
-        for (FeatureRow featureRow : featureRows) {
-            featureRow.setRelativePath("/row/"+featureRow.getFeature().getRelativePath());
-            featureRow.setUri(storyGrid.getUri() + featureRow.getRelativePath());
-            featureRow.setFlowObjectType(FlowObjectType.STORY_GRID_ROW);
-
-            features.add(featureRow);
-        }
-
-        List<FeatureAggregate> aggregates = storyGrid.getAggregates();
-
-        for (FeatureAggregate aggregate : aggregates) {
-            aggregate.setRelativePath("/aggregate/"+aggregate.getContainer().getRelativePath());
-            aggregate.setUri(storyGrid.getUri() + aggregate.getRelativePath());
-            aggregate.setFlowObjectType(FlowObjectType.STORY_GRID_AGGREGATE);
-
-            features.add(aggregate);
-        }
-
-        List<FeatureAggregateRow> aggregateRows = storyGrid.getAggregateRows();
-
-        for (FeatureAggregateRow aggregateRow : aggregateRows) {
-            aggregateRow.setRelativePath("/row/"+aggregateRow.getAggregate().getRelativePath());
-            aggregateRow.setUri(storyGrid.getUri() + aggregateRow.getRelativePath());
-            aggregateRow.setFlowObjectType(FlowObjectType.STORY_GRID_AGGREGATE_ROW);
-
-            features.add(aggregateRow);
-        }
-
-        for (Snapshot snapshot : storyGrid.getSnapshots()) {
-            snapshot.setRelativePath("/snapshot/"+snapshot.getRelativeSequence());
-            snapshot.setUri(storyGrid.getUri() + snapshot.getRelativePath());
-            snapshot.setFlowObjectType(FlowObjectType.STORY_GRID_SNAPSHOT);
-
-            features.add(snapshot);
+            features.add(column);
         }
 
         saveTemporalFeatureUris(features);

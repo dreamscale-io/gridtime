@@ -15,12 +15,10 @@ public class FocalPoint {
 
     private LocationInBox currentLocation;
 
-    public FocalPoint(FeatureFactory featureFactory, StoryGrid storyGrid, Box box, String initialLocationPath) {
+    public FocalPoint(FeatureFactory featureFactory, StoryGrid storyGrid, Box box) {
         this.box = box;
 
         this.gravityBall = new GravityBallOfThoughts(storyGrid, featureFactory, box);
-        this.gravityBall.initStartingLocation(initialLocationPath);
-
         this.currentLocation = gravityBall.getCurrentLocation();
     }
 
@@ -28,10 +26,14 @@ public class FocalPoint {
         return box.getBoxName();
     }
 
+    public void initLocation(LocationInBox lastLocationInBox) {
+        gravityBall.initLocation(lastLocationInBox);
+        this.currentLocation = gravityBall.getCurrentLocation();
+    }
+
     public LocationInBox goToLocation(String locationPath, Duration timeInLocation) {
 
         LocationInBox location = gravityBall.gotoLocationInSpace(locationPath);
-
 
         gravityBall.growHeavyWithFocus(timeInLocation);
 
@@ -46,7 +48,6 @@ public class FocalPoint {
 
     public LocationInBox exit() {
         currentLocation = gravityBall.gotoExit();
-
         return currentLocation;
     }
 
@@ -74,6 +75,7 @@ public class FocalPoint {
     public Traversal getLastTraversal() {
         return gravityBall.getLastTraversal();
     }
+
 
 
 }

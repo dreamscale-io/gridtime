@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
@@ -29,8 +30,11 @@ public class Timeband extends FlowFeature implements Playable {
         return Duration.between(start, end);
     }
 
-    public void setRelativeSequence(int nextSequence) {
-        this.relativeSequence = nextSequence;
+    public void initRelativeSequence(TimebandLayer layer, int nextSequence) {
+        relativeSequence = nextSequence;
+
+        setRelativePath("/band/"+nextSequence);
+        setUri(layer.getUri() + getRelativePath());
     }
 
     public void initCoordinates(MusicGeometryClock clock) {

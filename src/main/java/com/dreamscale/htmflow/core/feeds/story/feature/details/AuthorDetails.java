@@ -1,16 +1,22 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
-import com.dreamscale.htmflow.core.domain.member.json.LinkedMember;
+import com.dreamscale.htmflow.core.domain.member.json.Member;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class AuthorDetails extends Details {
 
-    private List<LinkedMember> pairedAuthors;
+    private List<Member> authors;
 
-    public AuthorDetails(List<LinkedMember> pairedAuthors) {
-        this.pairedAuthors = pairedAuthors;
+    public AuthorDetails(Member author) {
+        this.authors = new ArrayList<>();
+        this.authors.add(author);
+    }
+
+    public AuthorDetails(List<Member> authors) {
+        this.authors = authors;
     }
 }

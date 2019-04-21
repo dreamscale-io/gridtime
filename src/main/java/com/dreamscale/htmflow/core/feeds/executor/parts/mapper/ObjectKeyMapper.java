@@ -16,6 +16,10 @@ public class ObjectKeyMapper {
         return "[Location]:"+ standardizePath(locationPath);
     }
 
+    public static String createBoxLocationKey(String boxPath, String locationPath) {
+        return "[Location]:"+ standardizePath(locationPath) +" in box "+boxPath;
+    }
+
     public static String createLocationTraversalKey(String fromLocationKey, String toLocationKey) {
         String locationA = fromLocationKey;
         String locationB = toLocationKey;

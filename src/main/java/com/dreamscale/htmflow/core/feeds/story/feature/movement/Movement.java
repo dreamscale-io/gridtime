@@ -12,7 +12,7 @@ public class Movement extends FlowFeature implements Playable {
     private final MovementType type;
     private final FlowFeature staticReferenceObject;
     private LocalDateTime moment;
-    private int relativeOffset = 0;
+    private int relativeSequence = 0;
 
     private MusicGeometryClock.Coords coords;
     private MomentOfContext context;
@@ -23,8 +23,11 @@ public class Movement extends FlowFeature implements Playable {
         this.staticReferenceObject = staticReferenceObject;
     }
 
-    public void setRelativeSequence(int nextSequence) {
-        this.relativeOffset = nextSequence;
+    public void initRelativeSequence(RhythmLayer layer, int nextSequence) {
+        relativeSequence = nextSequence;
+
+        setRelativePath("/movement/"+nextSequence);
+        setUri(layer.getUri() + getRelativePath());
     }
 
     public void setCoordinates(MusicGeometryClock.Coords coords) {
@@ -36,7 +39,7 @@ public class Movement extends FlowFeature implements Playable {
     }
 
     public int getRelativeSequence() {
-        return relativeOffset;
+        return relativeSequence;
     }
 
     public MusicGeometryClock.Coords getCoordinates() {

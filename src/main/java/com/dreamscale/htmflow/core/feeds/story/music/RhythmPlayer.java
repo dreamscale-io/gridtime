@@ -20,11 +20,6 @@ public class RhythmPlayer implements Player {
         this.playListener = playListener;
     }
 
-    public RhythmPlayer(TimebandLayer timeBandLayer, PlayListener playListener) {
-        this.index = 0;
-        this.playables = timeBandLayer.getTimebands();
-        this.playListener = playListener;
-    }
 
     @Override
     public void play(MusicGeometryClock.Coords coords) {

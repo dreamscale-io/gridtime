@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.domain.journal;
 
-import com.dreamscale.htmflow.core.domain.member.json.LinkedMember;
-import com.dreamscale.htmflow.core.domain.member.json.LinkedMemberList;
+import com.dreamscale.htmflow.core.domain.member.json.Member;
+import com.dreamscale.htmflow.core.domain.member.json.PairingMemberList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -56,15 +56,15 @@ public class JournalEntryEntity {
 
     private String linkedMembers;
 
-    public List<LinkedMember> getLinkedMembers() {
-        List<LinkedMember> members = null;
+    public List<Member> getLinkedMembers() {
+        List<Member> members = null;
 
         if (linkedMembers != null) {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            LinkedMemberList memberList = null;
+            PairingMemberList memberList = null;
             try {
-                memberList = objectMapper.readValue(linkedMembers, LinkedMemberList.class);
+                memberList = objectMapper.readValue(linkedMembers, PairingMemberList.class);
                 if (memberList != null) {
                     members = memberList.getMemberList();
                 }

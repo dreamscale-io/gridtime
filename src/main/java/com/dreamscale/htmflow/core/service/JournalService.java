@@ -6,8 +6,8 @@ import com.dreamscale.htmflow.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.htmflow.api.spirit.SpiritLinkDto;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.domain.journal.*;
-import com.dreamscale.htmflow.core.domain.member.json.LinkedMember;
-import com.dreamscale.htmflow.core.domain.member.json.LinkedMemberList;
+import com.dreamscale.htmflow.core.domain.member.json.Member;
+import com.dreamscale.htmflow.core.domain.member.json.PairingMemberList;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
@@ -114,20 +114,20 @@ public class JournalService {
     }
 
     private String translateLinkedMembersToJson(UUID orientFromMember, ActiveLinksNetworkDto activeLinksNetwork)  {
-        List<LinkedMember> members = new ArrayList<>();
+        List<Member> members = new ArrayList<>();
 
         for (SpiritLinkDto spiritLink : activeLinksNetwork.getSpiritLinks()) {
             if (!spiritLink.getFriendSpiritId().equals(orientFromMember)) {
-                members.add(new LinkedMember(spiritLink.getFriendSpiritId().toString(), spiritLink.getName()));
+                members.add(new Member(spiritLink.getFriendSpiritId().toString(), spiritLink.getName()));
             }
         }
         if (!orientFromMember.equals(activeLinksNetwork.getMyId())) {
-            members.add(new LinkedMember(activeLinksNetwork.getMyId().toString(), activeLinksNetwork.getMyName()));
+            members.add(new Member(activeLinksNetwork.getMyId().toString(), activeLinksNetwork.getMyName()));
         }
 
         String json = null;
         try {
-            json = jsonMapper.writeValueAsString(new LinkedMemberList(members));
+            json = jsonMapper.writeValueAsString(new PairingMemberList(members));
         } catch (JsonProcessingException e) {
             log.error("Unable to serialize JSON: "+members);
         }

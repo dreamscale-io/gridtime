@@ -2,18 +2,17 @@ package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails
+import com.dreamscale.htmflow.core.feeds.story.feature.details.FeelsDetails
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToBox
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand
+import com.dreamscale.htmflow.core.feeds.story.music.Column;
 import spock.lang.Specification
 
 import java.time.Duration;
@@ -78,9 +77,10 @@ public class StoryTileSpec extends Specification {
         tile.gotoLocation(time2, "box", "/location/path/2", Duration.ofSeconds(60))
         tile.gotoLocation(time3, "box", "/location/path/1", Duration.ofSeconds(60))
 
+
         def layer = tile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES)
         def spatial = tile.getSpatialStructure()
-        def grid = tile.getStoryGrid();
+        def grid = tile.getStoryGrid()
 
         then:
         assert layer.movements.size() == 4
@@ -93,11 +93,11 @@ public class StoryTileSpec extends Specification {
 
         assert spatial.getBoxActivities().size() == 1
         assert spatial.getBoxActivities().get(0).thoughtBubbles.size() == 1
-        assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllLocations().size() == 2
-        assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllTraversals().size() == 1
+        assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllLocations().size() == 3
+        assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllTraversals().size() == 2
 
-        assert grid.featureRows.size() == 4
-        assert grid.aggregateRows.size() == 1
+        assert grid.getBoxesVisited().size() == 1
+        assert grid.getLocationsVisited().size() == 2
     }
 
     def "should modify existing location"() {
@@ -119,12 +119,11 @@ public class StoryTileSpec extends Specification {
         tile.modifyCurrentLocation(time3, 11)
 
         def grid = tile.getStoryGrid();
+        def locations = grid.getLocationsVisited();
 
         then:
-        assert grid.featureRows.size() == 3;
-        assert grid.featureRows.get(0).allTimeBucket.getModificationCandle().sampleCount == 2;
-        assert grid.featureRows.get(1).allTimeBucket.getModificationCandle().sampleCount == 2;
-        assert grid.featureRows.get(2).allTimeBucket.getModificationCandle().sampleCount == 2;
+        assert locations.size() == 1;
+        assert grid.getFeatureMetrics(locations.get(0)).getMetrics().getModificationCandle().sampleCount == 2;
 
     }
 
@@ -195,7 +194,7 @@ public class StoryTileSpec extends Specification {
 
         then:
         assert layer.timebands.size() == 4
-        
+
         assert layer.timebands.get(0).start == clockStart
         assert layer.timebands.get(0).end == clockStart.plusMinutes(5)
         assert ((RollingAggregateBand)layer.timebands.get(0)).aggregateCandleStick.sampleCount == 3;
@@ -203,6 +202,45 @@ public class StoryTileSpec extends Specification {
         assert layer.timebands.get(1).start == clockStart.plusMinutes(5)
         assert layer.timebands.get(1).end == clockStart.plusMinutes(10)
         assert ((RollingAggregateBand)layer.timebands.get(1)).aggregateCandleStick.sampleCount == 2;
+
+    }
+
+    def "should generate snapshots when playing frames"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        LocalDateTime time2 = clockStart.plusMinutes(6);
+        LocalDateTime time3 = clockStart.plusMinutes(11);
+        LocalDateTime time4 = clockStart.plusMinutes(16);
+
+        CircleDetails circleDetails = new CircleDetails(UUID.randomUUID(), "circle");
+
+        when:
+        tile.gotoLocation(time1, "box", "/a/path", Duration.ofSeconds(15))
+        tile.gotoLocation(time1, "box", "/a/path2", Duration.ofSeconds(15))
+        tile.gotoLocation(time1, "box2", "/a/path3", Duration.ofSeconds(15))
+
+
+        tile.startWTF(time1, circleDetails)
+        tile.clearWTF(time3)
+
+        tile.addTypingSampleToAssessLearningFriction(time2, 340)
+        tile.addTypingSampleToAssessLearningFriction(time3, 55)
+
+        tile.startFeelsBand(time1, new FeelsDetails(3))
+        tile.startFeelsBand(time1, new FeelsDetails(1))
+        tile.clearFeelsBand(time2)
+
+        tile.startFeelsBand(time3, new FeelsDetails(-4))
+
+        tile.play();
+        def storyGrid = tile.getStoryGrid();
+        List<Column> columns = storyGrid.columns;
+
+        then:
+        assert columns.size() == 20
+        assert columns.get(3).getBoxesVisited().size() == 2
+        assert columns.get(3).getLocationsVisited().size() == 5
+
 
     }
 }

@@ -40,10 +40,13 @@ public class GravityBallOfThoughts {
         this.storyGrid = storyGrid;
         this.featureFactory = featureFactory;
         this.box = box;
+
+        this.entranceLocation = featureFactory.findOrCreateLocation(box.getBoxName(), ENTRANCE_OF_BOX);
+        this.currentLocation = entranceLocation;
     }
 
-    public void initStartingLocation(String locationPath) {
-        currentLocation = featureFactory.findOrCreateLocation(box.getBoxName(), locationPath);
+    public void initLocation(LocationInBox lastLocationInBox) {
+        this.currentLocation = lastLocationInBox;
     }
 
     public LocationInBox gotoLocationInSpace(String locationPath) {
@@ -124,7 +127,20 @@ public class GravityBallOfThoughts {
         List<ThoughtParticle> enterExitTransitions = findEnterExitTransitions(particlesByWeight);
         particlesByWeight.removeAll(enterExitTransitions);
 
-        //if I've got left over stuff after a loop, these are disconnected networks with alt-centers,
+        if (particlesByWeight.size() == 0 && enterExitTransitions.size() > 0) {
+            //in this case, we only have enter/exits, make a thought bubble with what we've got
+
+            ThoughtBubble thoughtBubble = createBubbleOutOfEnterExitNodes(boxActivity, enterExitTransitions);
+            addEnterExitsToStructure(thoughtBubble, enterExitTransitions);
+
+            featureFactory.assignAllRingUris(thoughtBubble);
+            thoughtBubble.finish();
+
+            boxActivity.addBubble(thoughtBubble);
+        }
+
+
+        //if I've got left over stuff after first loop, these are disconnected networks with alt-centers,
         // so make radial structures for each network
 
         int lastParticlesRemaining = particlesByWeight.size();
@@ -202,6 +218,20 @@ public class GravityBallOfThoughts {
         }
         return null;
     }
+
+    private ThoughtBubble createBubbleOutOfEnterExitNodes(BoxActivity box, List<ThoughtParticle> enterExitParticles) {
+        ThoughtBubble thoughtBubble = featureFactory.createBubbleInsideBox(box);
+
+        LocationInBox centerOfFocus = getCenterOfFocusWithinEnterExits(enterExitParticles);
+
+        thoughtBubble.placeCenter(centerOfFocus);
+        thoughtBubble.placeEntrance(entranceLocation);
+        thoughtBubble.placeExit(exitLocation);
+
+        return thoughtBubble;
+    }
+
+
 
     private ThoughtBubble createRadialStructureAndRemoveParticlesUsed(BoxActivity box, List<ThoughtParticle> particlesByWeight) {
         ThoughtBubble thoughtBubble = featureFactory.createBubbleInsideBox(box);
@@ -431,6 +461,18 @@ public class GravityBallOfThoughts {
         return center;
     }
 
+    private LocationInBox getCenterOfFocusWithinEnterExits(List<ThoughtParticle> enterExitParticles) {
+        LocationInBox center = null;
+
+        if (enterExitParticles.size() > 0) {
+            Traversal link = enterExitParticles.get(0).getLink();
+
+            center = getNonEnterExitNode(link.getLocationA(), link.getLocationB());
+        }
+
+        return center;
+    }
+
 
     private List<ThoughtParticle> getNormalizedParticlesSortedByWeight() {
         List<ThoughtParticle> particles = new ArrayList<>(thoughtParticleMap.values());
@@ -504,6 +546,8 @@ public class GravityBallOfThoughts {
     public Traversal getLastTraversal() {
         return lastTraversal;
     }
+
+
 
 
     private class DecayingGrowthRate {

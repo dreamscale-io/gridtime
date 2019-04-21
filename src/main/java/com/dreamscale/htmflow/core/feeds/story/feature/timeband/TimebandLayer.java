@@ -25,6 +25,7 @@ public class TimebandLayer extends FlowFeature {
     }
 
     public void add(Timeband timeBand) {
+        timeBand.initRelativeSequence(this, timebands.size() + 1);
         this.timebands.add(timeBand);
     }
 

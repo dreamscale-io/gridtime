@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.music
 
-import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
+
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -41,85 +41,85 @@ class MusicGeometryClockSpec extends Specification {
 
 
         then:
-        assert coords1.beats == 1;
-        assert coords1.quarters == 1;
-        assert coords1.halves == 1;
+        assert coords1.beat == 1;
+        assert coords1.quarter == 1;
+        assert coords1.half == 1;
 
-        assert coords2.beats == 2;
-        assert coords2.quarters == 1;
-        assert coords2.halves == 1;
+        assert coords2.beat == 2;
+        assert coords2.quarter == 1;
+        assert coords2.half == 1;
 
-        assert coords3.beats == 3;
-        assert coords3.quarters == 1;
-        assert coords3.halves == 1;
+        assert coords3.beat == 3;
+        assert coords3.quarter == 1;
+        assert coords3.half == 1;
 
-        assert coords4.beats == 4;
-        assert coords4.quarters == 1;
-        assert coords4.halves == 1;
+        assert coords4.beat == 4;
+        assert coords4.quarter == 1;
+        assert coords4.half == 1;
 
-        assert coords5.beats == 5;
-        assert coords5.quarters == 1;
-        assert coords5.halves == 1;
+        assert coords5.beat == 5;
+        assert coords5.quarter == 1;
+        assert coords5.half == 1;
 
-        assert coords6.beats == 6;
-        assert coords6.quarters == 2;
-        assert coords6.halves == 1;
+        assert coords6.beat == 6;
+        assert coords6.quarter == 2;
+        assert coords6.half == 1;
 
-        assert coords7.beats == 7;
-        assert coords7.quarters == 2;
-        assert coords7.halves == 1;
+        assert coords7.beat == 7;
+        assert coords7.quarter == 2;
+        assert coords7.half == 1;
 
-        assert coords8.beats == 8;
-        assert coords8.quarters == 2;
-        assert coords8.halves == 1;
+        assert coords8.beat == 8;
+        assert coords8.quarter == 2;
+        assert coords8.half == 1;
 
-        assert coords9.beats == 9;
-        assert coords9.quarters == 2;
-        assert coords9.halves == 1;
+        assert coords9.beat == 9;
+        assert coords9.quarter == 2;
+        assert coords9.half == 1;
 
-        assert coords10.beats == 10;
-        assert coords10.quarters == 2;
-        assert coords10.halves == 1;
+        assert coords10.beat == 10;
+        assert coords10.quarter == 2;
+        assert coords10.half == 1;
 
-        assert coords11.beats == 11;
-        assert coords11.quarters == 3;
-        assert coords11.halves == 2;
+        assert coords11.beat == 11;
+        assert coords11.quarter == 3;
+        assert coords11.half == 2;
 
-        assert coords12.beats == 12;
-        assert coords12.quarters == 3;
-        assert coords12.halves == 2;
+        assert coords12.beat == 12;
+        assert coords12.quarter == 3;
+        assert coords12.half == 2;
 
-        assert coords13.beats == 13;
-        assert coords13.quarters == 3;
-        assert coords13.halves == 2;
+        assert coords13.beat == 13;
+        assert coords13.quarter == 3;
+        assert coords13.half == 2;
 
-        assert coords14.beats == 14;
-        assert coords14.quarters == 3;
-        assert coords14.halves == 2;
+        assert coords14.beat == 14;
+        assert coords14.quarter == 3;
+        assert coords14.half == 2;
 
-        assert coords15.beats == 15;
-        assert coords15.quarters == 3;
-        assert coords15.halves == 2;
+        assert coords15.beat == 15;
+        assert coords15.quarter == 3;
+        assert coords15.half == 2;
 
-        assert coords16.beats == 16;
-        assert coords16.quarters == 4;
-        assert coords16.halves == 2;
+        assert coords16.beat == 16;
+        assert coords16.quarter == 4;
+        assert coords16.half == 2;
 
-        assert coords17.beats == 17;
-        assert coords17.quarters == 4;
-        assert coords17.halves == 2;
+        assert coords17.beat == 17;
+        assert coords17.quarter == 4;
+        assert coords17.half == 2;
 
-        assert coords18.beats == 18;
-        assert coords18.quarters == 4;
-        assert coords18.halves == 2;
+        assert coords18.beat == 18;
+        assert coords18.quarter == 4;
+        assert coords18.half == 2;
 
-        assert coords19.beats == 19;
-        assert coords19.quarters == 4;
-        assert coords19.halves == 2;
+        assert coords19.beat == 19;
+        assert coords19.quarter == 4;
+        assert coords19.half == 2;
 
-        assert coords20.beats == 20;
-        assert coords20.quarters == 4;
-        assert coords20.halves == 2;
+        assert coords20.beat == 20;
+        assert coords20.quarter == 4;
+        assert coords20.half == 2;
     }
 
 
@@ -137,21 +137,21 @@ class MusicGeometryClockSpec extends Specification {
         MusicGeometryClock.Coords coords4 = musicGeometryClock.panRight(BeatsPerBucket.QUARTER)
 
         then:
-        assert coords1.beats == 1;
-        assert coords1.quarters == 1;
-        assert coords1.halves == 1;
+        assert coords1.beat == 1;
+        assert coords1.quarter == 1;
+        assert coords1.half == 1;
 
-        assert coords2.beats == 6;
-        assert coords2.quarters == 2;
-        assert coords2.halves == 1;
+        assert coords2.beat == 6;
+        assert coords2.quarter == 2;
+        assert coords2.half == 1;
 
-        assert coords3.beats == 11;
-        assert coords3.quarters == 3;
-        assert coords3.halves == 2;
+        assert coords3.beat == 11;
+        assert coords3.quarter == 3;
+        assert coords3.half == 2;
 
-        assert coords4.beats == 16;
-        assert coords4.quarters == 4;
-        assert coords4.halves == 2;
+        assert coords4.beat == 16;
+        assert coords4.quarter == 4;
+        assert coords4.half == 2;
     }
 
 

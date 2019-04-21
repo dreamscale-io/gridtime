@@ -9,7 +9,6 @@ public class FlowObserverFactory {
     private final JournalContextObserver journalContextObserver;
     private final JournalFeelsObserver journalFeelsObserver;
     private final ExecutionRhythmObserver executionRhythmObserver;
-    private final JournalAuthorObserver journalAuthorObserver;
     private final WTFStateObserver wtfStateObserver;
     private final LearningStateObserver learningStateObserver;
     private final CircleMessageEventObserver circleMessageEventObserver;
@@ -18,10 +17,12 @@ public class FlowObserverFactory {
     @Autowired
     private ComponentSpaceObserver componentSpaceObserver;
 
+    @Autowired
+    private JournalAuthorObserver journalAuthorObserver;
+
     FlowObserverFactory() {
         this.journalContextObserver = new JournalContextObserver();
         this.journalFeelsObserver = new JournalFeelsObserver();
-        this.journalAuthorObserver = new JournalAuthorObserver();
         this.executionRhythmObserver = new ExecutionRhythmObserver();
         this.wtfStateObserver = new WTFStateObserver();
         this.learningStateObserver = new LearningStateObserver();

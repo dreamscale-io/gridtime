@@ -1,12 +1,12 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
+import com.dreamscale.htmflow.core.domain.member.json.Member;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Bridge;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.Traversal;
+import com.dreamscale.htmflow.core.feeds.story.feature.movement.PostCircleMessage;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.dreamscale.htmflow.core.feeds.story.grid.GridMetrics;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 
 import java.util.*;
@@ -19,6 +19,8 @@ public class Scene {
     private Context taskContext;
     private Context intentionContext;
 
+    private List<Member> activeAuthors;
+
     private int activeFeels;
     private boolean isLearningFriction;
     private boolean isWTFFriction;
@@ -28,75 +30,114 @@ public class Scene {
     private LinkedList<LocationInBox> activeLocationsInBox = new LinkedList<>();
     private LinkedList<Traversal> activeTraversals = new LinkedList<>();
     private LinkedList<Bridge> activeBridges = new LinkedList<>();
-    private LinkedList<ExecuteThing> activeExecutionEvents = new LinkedList<>();
+    private LinkedList<ThoughtBubble> activeBubbles = new LinkedList<>();
+    private LinkedList<ThoughtBubble.RingLocation> activeRingLocations = new LinkedList<>();
+    private LinkedList<ThoughtBubble.Link> activeRingLinks = new LinkedList<>();
 
-    private Set<String> urisInFrame = new HashSet<>();
+    private LinkedList<ExecuteThing> activeExecutionContexts = new LinkedList<>();
+    private LinkedList<PostCircleMessage> activeCircleMessageContexts = new LinkedList<>();
+
+
 
     public Scene(StoryGrid storyGrid) {
         this.storyGrid = storyGrid;
     }
 
     public void snapshot(MusicGeometryClock.Coords coords) {
-        compressIntoUrisAndMetrics(coords);
+        correlateMetricsWithinFrame(coords);
 
-        Snapshot snapshot = new Snapshot(coords);
-        snapshot.setProjectContext(projectContext);
-        snapshot.setTaskContext(taskContext);
-        snapshot.setIntentionContext(intentionContext);
+        Column column = new Column(coords);
+        column.setProjectContext(projectContext);
+        column.setTaskContext(taskContext);
+        column.setIntentionContext(intentionContext);
+        column.setActiveAuthors(activeAuthors);
 
-        snapshot.setActiveBoxes(activeBoxes);
-        snapshot.setActiveLocationsInBox(activeLocationsInBox);
-        snapshot.setActiveTraversals(activeTraversals);
-        snapshot.setActiveBridges(activeBridges);
-        snapshot.setActiveExecutionEvents(activeExecutionEvents);
+        //static structures
 
-        snapshot.setUrisInFrame(urisInFrame);
+        addStructureActivityMetrics(column, activeBoxes, coords);
+        addStructureActivityMetrics(column, activeLocationsInBox, coords);
+        addStructureActivityMetrics(column, activeTraversals, coords);
+        addStructureActivityMetrics(column, activeBridges, coords);
 
-        storyGrid.addSnapshot(snapshot);
+        addAggregateActivityMetrics(column, activeBubbles, coords);
+
+        addRingLocationAliases(column, activeRingLocations);
+        addRingLinkAliases(column, activeRingLinks);
+
+        //temporal structures
+
+        column.addExecutionContexts(activeExecutionContexts);
+        column.addMessageContexts(activeCircleMessageContexts);
+
+        storyGrid.addColumn(column);
     }
 
-    public void panForwardTime() {
-        urisInFrame.clear();
+    private void addRingLocationAliases(Column column, LinkedList<ThoughtBubble.RingLocation> activeRingLocations) {
+        for (ThoughtBubble.RingLocation ringLocation : activeRingLocations) {
+            column.addAliasForStructure(ringLocation.getUri(), ringLocation.getLocation().getUri());
+        }
+    }
 
+    private void addRingLinkAliases(Column column, LinkedList<ThoughtBubble.Link> activeRingLinks) {
+        for (ThoughtBubble.Link ringLink : activeRingLinks) {
+            column.addAliasForStructure(ringLink.getUri(), ringLink.getTraversal().getUri());
+        }
+    }
+
+    private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, MusicGeometryClock.Coords coords) {
+        for (FlowFeature feature : features) {
+            GridMetrics metrics = storyGrid.getAggregateMetricsFor(feature, coords);
+            column.addActivityForStructure(feature, metrics);
+        }
+    }
+
+    private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, MusicGeometryClock.Coords coords) {
+        for (FlowFeature feature : features) {
+            column.addActivityForStructure(feature, storyGrid.getMetricsFor(feature, coords));
+        }
+    }
+
+
+    public void panForwardTime() {
         removeAllButOne(activeBoxes);
         removeAllButOne(activeLocationsInBox);
         removeAllButOne(activeTraversals);
         removeAllButOne(activeBridges);
-        removeAllButOne(activeExecutionEvents);
+        removeAllButOne(activeExecutionContexts);
+        removeAllButOne(activeCircleMessageContexts);
+        removeAllButOne(activeBubbles);
+        removeAllButOne(activeRingLocations);
+        removeAllButOne(activeRingLinks);
     }
 
-    public void compressIntoUrisAndMetrics(MusicGeometryClock.Coords coords) {
+    public void correlateMetricsWithinFrame(MusicGeometryClock.Coords coords) {
         for(Box box : activeBoxes) {
-            saveMetrics(box);
-            urisInFrame.add(box.getUri());
+            saveMetrics(box, coords);
         }
 
         for(LocationInBox location : activeLocationsInBox) {
-            saveMetrics(location);
-            urisInFrame.add(location.getUri());
+            saveMetrics(location, coords);
         }
 
         for(Traversal traversal : activeTraversals) {
-            saveMetrics(traversal);
-            urisInFrame.add(traversal.getUri());
+            saveMetrics(traversal, coords);
         }
 
         for(Bridge bridge : activeBridges) {
-            saveMetrics(bridge);
-            urisInFrame.add(bridge.getUri());
+            saveMetrics(bridge, coords);
         }
 
-        saveMetrics(projectContext);
-        saveMetrics(taskContext);
-        saveMetrics(intentionContext);
+        saveMetrics(projectContext, coords);
+        saveMetrics(taskContext, coords);
+        saveMetrics(intentionContext, coords);
     }
 
-    private void saveMetrics(FlowFeature flowFeature) {
+    private void saveMetrics(FlowFeature flowFeature, MusicGeometryClock.Coords coords) {
 
-        storyGrid.getMetricsFor(flowFeature).addFeelsSample(activeFeels);
-        storyGrid.getMetricsFor(flowFeature).addPairingSample(isPairing);
-        storyGrid.getMetricsFor(flowFeature).addLearningSample(isLearningFriction);
-        storyGrid.getMetricsFor(flowFeature).addWtfSample(isWTFFriction);
+        storyGrid.getMetricsFor(flowFeature, coords).addFeelsSample(activeFeels);
+        storyGrid.getMetricsFor(flowFeature, coords).addPairingSample(isPairing);
+        storyGrid.getMetricsFor(flowFeature, coords).addLearningSample(isLearningFriction);
+        storyGrid.getMetricsFor(flowFeature, coords).addWtfSample(isWTFFriction);
     }
 
     private void removeAllButOne(LinkedList<?> activeItems) {
@@ -138,8 +179,32 @@ public class Scene {
         this.activeBridges.push(bridge);
     }
 
+    public void pushActiveBubble(ThoughtBubble bubble) {
+        this.activeBubbles.push(bubble);
+    }
+
+    public void pushActiveRingLocation(ThoughtBubble.RingLocation ringLocation) {
+        this.activeRingLocations.push(ringLocation);
+    }
+
+    public void pushActiveRingLink(ThoughtBubble.Link ringLink) {
+        if (ringLink == null) {
+            System.out.println("hello!");
+        }
+
+        this.activeRingLinks.push(ringLink);
+    }
+
     public void pushExecuteEvent(ExecuteThing executeEvent) {
-        this.activeExecutionEvents.add(executeEvent);
+        this.activeExecutionContexts.add(executeEvent);
+    }
+
+    public void pushCircleMessageEvent(PostCircleMessage circleMessageEvent) {
+        this.activeCircleMessageContexts.add(circleMessageEvent);
+    }
+
+    public void changeActiveAuthors(List<Member> authors) {
+        this.activeAuthors = authors;
     }
 
     public void changeProjectContext(Context context) {
@@ -154,10 +219,6 @@ public class Scene {
         this.intentionContext = context;
     }
 
-
-    public void pushUrisInScene(String ... uris) {
-        this.urisInFrame.addAll(Arrays.asList(uris));
-    }
 
 
 }

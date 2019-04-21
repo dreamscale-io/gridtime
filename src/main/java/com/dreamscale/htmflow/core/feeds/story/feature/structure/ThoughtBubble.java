@@ -118,7 +118,9 @@ public class ThoughtBubble extends FlowFeature {
 
     public boolean contains(LocationInBox location) {
         boolean locationFound = false;
-        if (center != null && center.location == location) {
+        if ((center != null && center.getLocation() == location) ||
+            (entrance != null && entrance.getLocation() == location) ||
+            (exit != null && exit.getLocation() == location)) {
             locationFound = true;
         } else {
             for (Ring ring: rings) {
@@ -217,6 +219,13 @@ public class ThoughtBubble extends FlowFeature {
         for (Ring ring: rings) {
             allTraversals.addAll(ring.getRawTraversals());
         }
+        for (Link link : linksFromEntrance) {
+            allTraversals.add(link.getTraversal());
+        }
+        for (Link link : linksToExit) {
+            allTraversals.add(link.getTraversal());
+        }
+
         return allTraversals;
     }
 

@@ -2,8 +2,10 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class Bridge extends FlowFeature {
 
     private final String bridgeKey;

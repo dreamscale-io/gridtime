@@ -20,25 +20,49 @@ public class GridMetrics extends FlowFeature {
     private CandleStick executionCycleTimeCandle = new CandleStick();
     private CandleStick focusWeightCandle = new CandleStick();
 
+    private GridMetrics cascadeToParent;
+
+    public GridMetrics(GridMetrics cascadeToParent) {
+        this.cascadeToParent = cascadeToParent;
+    }
+
+    public GridMetrics() {
+        //no cascade
+    }
 
     public void addVelocitySample(Duration duration) {
         velocityCandle.addSample(duration.getSeconds());
+        if (cascadeToParent != null) {
+            cascadeToParent.addVelocitySample(duration);
+        }
     }
 
     public void addModificationSample(int modificationCount) {
         modificationCandle.addSample(modificationCount);
+        if (cascadeToParent != null) {
+            cascadeToParent.addModificationSample(modificationCount);
+        }
     }
 
     public void addExecutionSample(Duration executionTime) {
         executionCandle.addSample(executionTime.getSeconds());
+        if (cascadeToParent != null) {
+            cascadeToParent.addExecutionSample(executionTime);
+        }
     }
 
     public void addExecutionCycleTimeSample(Duration durationBetweenExecution) {
         executionCycleTimeCandle.addSample(durationBetweenExecution.getSeconds());
+        if (cascadeToParent != null) {
+            cascadeToParent.addExecutionCycleTimeSample(durationBetweenExecution);
+        }
     }
 
     public void addFeelsSample(int feels) {
         feelsCandle.addSample(feels);
+        if (cascadeToParent != null) {
+            cascadeToParent.addFeelsSample(feels);
+        }
     }
 
     public void addWtfSample(boolean isWTF) {
@@ -46,6 +70,9 @@ public class GridMetrics extends FlowFeature {
             wtfCandle.addSample(1);
         } else {
             wtfCandle.addSample(0);
+        }
+        if (cascadeToParent != null) {
+            cascadeToParent.addWtfSample(isWTF);
         }
     }
 
@@ -55,6 +82,9 @@ public class GridMetrics extends FlowFeature {
         } else {
             learningCandle.addSample(0);
         }
+        if (cascadeToParent != null) {
+            cascadeToParent.addLearningSample(isLearning);
+        }
     }
 
     public void addPairingSample(boolean isPairing) {
@@ -63,10 +93,16 @@ public class GridMetrics extends FlowFeature {
         } else {
             pairingCandle.addSample(0);
         }
+        if (cascadeToParent != null) {
+            cascadeToParent.addPairingSample(isPairing);
+        }
     }
 
     public void addFocusWeightSample(double focusWeight) {
         focusWeightCandle.addSample(focusWeight);
+        if (cascadeToParent != null) {
+            cascadeToParent.addFocusWeightSample(focusWeight);
+        }
     }
 
     public Duration getTotalTimeInvestment() {
@@ -83,7 +119,6 @@ public class GridMetrics extends FlowFeature {
         executionCandle = new CandleStick();
         focusWeightCandle = new CandleStick();
         executionCycleTimeCandle = new CandleStick();
-
     }
 
     public void nullOutEmptyMetrics() {

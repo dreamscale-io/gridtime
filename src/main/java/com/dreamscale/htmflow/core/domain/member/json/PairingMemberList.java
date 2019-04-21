@@ -3,9 +3,11 @@ package com.dreamscale.htmflow.core.domain.member.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
-public class LinkedMember {
-    String memberId;
-    String memberName;
+public class PairingMemberList {
+
+    List<Member> memberList;
 }

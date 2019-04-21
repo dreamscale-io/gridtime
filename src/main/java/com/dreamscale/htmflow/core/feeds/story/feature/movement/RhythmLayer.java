@@ -23,6 +23,7 @@ public class RhythmLayer extends FlowFeature {
     }
 
     public void add(Movement movement) {
+        movement.initRelativeSequence(this, movements.size() + 1);
         this.movements.add(movement);
     }
 
@@ -44,7 +45,7 @@ public class RhythmLayer extends FlowFeature {
         //fix sequence numbers after resorting
         int sequence = 1;
         for (Movement movement : movements) {
-            movement.setRelativeSequence(sequence);
+            movement.initRelativeSequence(this, sequence);
             sequence++;
         }
     }

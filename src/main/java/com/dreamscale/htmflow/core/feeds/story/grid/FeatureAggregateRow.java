@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import lombok.Getter;
 
