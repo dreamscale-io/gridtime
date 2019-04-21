@@ -17,15 +17,15 @@ public class CandleStick {
     private double min = Integer.MAX_VALUE;
     private double max = Integer.MIN_VALUE;
 
-    private ArrayList<Double> dataSamples = new ArrayList<>();
+    private ArrayList<Double> data = new ArrayList<>();
 
     public void addSample(double sample) {
         avg = ((avg * sampleCount) + sample) / (sampleCount + 1);
 
-        dataSamples.add(sample);
+        data.add(sample);
 
         double squares = 0;
-        for (Double aSample : dataSamples) {
+        for (Double aSample : data) {
             squares += Math.pow(aSample - avg, 2);
         }
 
@@ -46,10 +46,10 @@ public class CandleStick {
         }
         avg = ((avg * sampleCount) + (candleStick.avg * candleStick.sampleCount)) / (sampleCount + candleStick.sampleCount);
 
-        dataSamples.addAll(candleStick.dataSamples);
+        data.addAll(candleStick.data);
 
         double squares = 0;
-        for (Double aSample : dataSamples) {
+        for (Double aSample : data) {
             squares += Math.pow(aSample - avg, 2);
         }
 

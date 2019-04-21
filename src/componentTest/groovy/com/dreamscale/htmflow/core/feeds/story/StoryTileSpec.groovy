@@ -6,11 +6,14 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
+import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToBox
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Box
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
+import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType
+import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
 import spock.lang.Specification
 
 import java.time.Duration;
@@ -20,10 +23,11 @@ public class StoryTileSpec extends Specification {
 
     StoryTile tile
     LocalDateTime clockStart
+    GeometryClock geometryClock
 
     def setup() {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
-        def geometryClock = new GeometryClock(clockStart)
+        geometryClock = new GeometryClock(clockStart)
 
         tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.MIN_20)
     }
@@ -121,6 +125,84 @@ public class StoryTileSpec extends Specification {
         assert grid.featureRows.get(0).allTimeBucket.getModificationCandle().sampleCount == 2;
         assert grid.featureRows.get(1).allTimeBucket.getModificationCandle().sampleCount == 2;
         assert grid.featureRows.get(2).allTimeBucket.getModificationCandle().sampleCount == 2;
+
+    }
+
+    def "should start and clear bands"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        LocalDateTime time2 = clockStart.plusMinutes(5);
+
+        CircleDetails circleDetails = new CircleDetails(UUID.randomUUID(), "circle");
+
+        when:
+        tile.startWTF(time1, circleDetails)
+        tile.clearWTF(time2)
+        tile.finishAfterLoad();
+
+        def layer = tile.getBandLayer(BandLayerType.FRICTION_WTF)
+
+        then:
+        assert layer.timebands.size() == 1
+        assert layer.timebands.get(0).start == time1
+        assert layer.timebands.get(0).end == time2
+    }
+
+    def "should create carry over bands out of intervals"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        LocalDateTime time2 = clockStart.plusMinutes(5);
+
+        CircleDetails circleDetails = new CircleDetails(UUID.randomUUID(), "circle");
+
+        when:
+        tile.startWTF(time1, circleDetails)
+        tile.finishAfterLoad()
+
+        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.MIN_20), ZoomLevel.MIN_20);
+
+        nextTile.carryOverFrameContext(tile);
+        nextTile.finishAfterLoad();
+
+        def layer = tile.getBandLayer(BandLayerType.FRICTION_WTF)
+        def nextTileLayer = nextTile.getBandLayer(BandLayerType.FRICTION_WTF)
+
+        then:
+        assert layer.timebands.size() == 1
+        assert layer.timebands.get(0).start == time1
+        assert layer.timebands.get(0).end == clockStart.plusMinutes(20)
+
+        assert nextTileLayer.timebands.size() == 1
+        assert nextTileLayer.timebands.get(0).start == clockStart.plusMinutes(20)
+        assert nextTileLayer.timebands.get(0).end == clockStart.plusMinutes(40)
+
+    }
+
+    def "should create rolling bands"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        LocalDateTime time2 = clockStart.plusMinutes(9);
+
+        when:
+        tile.addTypingSampleToAssessLearningFriction(time1, 55)
+        tile.addTypingSampleToAssessLearningFriction(time1, 52)
+        tile.addTypingSampleToAssessLearningFriction(time1, 30)
+
+        tile.addTypingSampleToAssessLearningFriction(time2, 55)
+        tile.addTypingSampleToAssessLearningFriction(time2, 52)
+
+        def layer = tile.getBandLayer(BandLayerType.FRICTION_LEARNING)
+
+        then:
+        assert layer.timebands.size() == 4
+        
+        assert layer.timebands.get(0).start == clockStart
+        assert layer.timebands.get(0).end == clockStart.plusMinutes(5)
+        assert ((RollingAggregateBand)layer.timebands.get(0)).aggregateCandleStick.sampleCount == 3;
+
+        assert layer.timebands.get(1).start == clockStart.plusMinutes(5)
+        assert layer.timebands.get(1).end == clockStart.plusMinutes(10)
+        assert ((RollingAggregateBand)layer.timebands.get(1)).aggregateCandleStick.sampleCount == 2;
 
     }
 }

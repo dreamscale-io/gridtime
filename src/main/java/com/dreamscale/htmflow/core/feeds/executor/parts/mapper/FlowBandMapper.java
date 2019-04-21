@@ -117,7 +117,7 @@ public class FlowBandMapper {
     public void addRollingBandSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
         BandLayerMapper layer = layerMap.get(bandLayerType);
 
-        if (layer.isRollingBandLayerConfigured()) {
+        if (!layer.isRollingBandLayerConfigured()) {
             configureRollingBands(bandLayerType, BeatsPerBucket.QUARTER);
         }
 
