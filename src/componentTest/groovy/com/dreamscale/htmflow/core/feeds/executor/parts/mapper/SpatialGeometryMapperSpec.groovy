@@ -54,4 +54,82 @@ class SpatialGeometryMapperSpec extends Specification {
 
     }
 
+    def "should make multiple bubbles rings based on hops"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+        when:
+
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(1000))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/B", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/C", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/D", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/E", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/F", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/E", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/G", Duration.ofSeconds(20))
+
+
+        def spatial = spatialGeometryMapper.getSpatialStructuredActivity()
+
+        then:
+
+        //starts in entrance, then must exit to get to box2
+
+        //A is center, then everything is 1 hop away, except F & G are in ring 2
+
+        spatial.getBoxActivities().get(0).thoughtBubbles.size() == 1;
+
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getCenter().getLocation().locationPath == "/location/A"
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().size() == 2
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().get(0).getRingLocations().size() == 4
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().get(1).getRingLocations().size() == 2
+
+    }
+
+    def "should make multiple bubbles when network is broken"() {
+        given:
+        LocalDateTime time1 = clockStart.plusMinutes(4);
+
+        when:
+
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/B", Duration.ofSeconds(2000))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/B", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box2", "/location/ZZZ", Duration.ofSeconds(20))
+
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/A", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/C", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box2", "/location/ZZZ", Duration.ofSeconds(20))
+
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/E", Duration.ofSeconds(2000))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/F", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/E", Duration.ofSeconds(20))
+        spatialGeometryMapper.gotoLocation(time1, "box", "/location/G", Duration.ofSeconds(20))
+
+
+        def spatial = spatialGeometryMapper.getSpatialStructuredActivity()
+
+        then:
+
+        //so location A & B & C, are part of same network, but E/F are disconnected
+
+        //A is center, then everything is 1 hop away, except F & G are in ring 2
+
+        spatial.getBoxActivities().get(0).thoughtBubbles.size() == 2;
+
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getCenter().getLocation().locationPath == "/location/B"
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().size() == 2
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().get(0).getRingLocations().size() == 1
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getRings().get(1).getRingLocations().size() == 1
+
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(1).getCenter().getLocation().locationPath == "/location/E"
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(1).getRings().size() == 1
+        spatial.getBoxActivities().get(0).thoughtBubbles.get(1).getRings().get(0).getRingLocations().size() == 2
+
+    }
+
 }

@@ -56,11 +56,16 @@ public class GravityBallOfThoughts {
 
         currentLocation = toLocation;
 
-        if (fromLocation != toLocation) {
+        if (fromLocation != toLocation && isNotBothEnterExit(fromLocation, toLocation)) {
             addThoughtParticleForTraversal(fromLocation, toLocation);
         }
 
         return toLocation;
+    }
+
+    private boolean isNotBothEnterExit(LocationInBox fromLocation, LocationInBox toLocation) {
+        return !((fromLocation == entranceLocation || fromLocation == exitLocation)
+                && (toLocation == entranceLocation || toLocation == exitLocation));
     }
 
     public LocationInBox gotoExit() {
@@ -82,20 +87,12 @@ public class GravityBallOfThoughts {
 
         thoughtTracer.get(0).addVelocitySample(timeInLocation);
 
-        DecayingGrowthRate decayingGrowth = new DecayingGrowthRate(timeInLocation);
-
-        //pushing a new thought particle on the tracer, also has a side-effect of decreasing the weight
-        //of ALL existing particles by 1 next of decay, for any particles linked in the active tracer,
-        //grow the particle weight
-
-        for (ThoughtParticle existingParticle : thoughtParticleMap.values()) {
-            existingParticle.decayWithFocusElsewhere(decayingGrowth);
-        }
+        DecayingGrowthRate growthRate = new DecayingGrowthRate(timeInLocation);
 
         for (ThoughtParticle particle : thoughtTracer) {
-            particle.growHeavyWithFocus(decayingGrowth, timeInLocation);
+            particle.growHeavyWithFocus(growthRate, timeInLocation);
 
-            decayingGrowth.decay();
+            growthRate.decay();
         }
     }
 
@@ -123,20 +120,13 @@ public class GravityBallOfThoughts {
         BoxActivity boxActivity = featureFactory.createBoxActivity(this.box);
 
         List<ThoughtParticle> particlesByWeight = getNormalizedParticlesSortedByWeight();
-
         List<ThoughtParticle> enterExitTransitions = findEnterExitTransitions(particlesByWeight);
-        particlesByWeight.removeAll(enterExitTransitions);
 
-        if (particlesByWeight.size() == 0 && enterExitTransitions.size() > 0) {
-            //in this case, we only have enter/exits, make a thought bubble with what we've got
+        if (particlesByWeight.size() > 0) {
+            ThoughtBubble bubble = featureFactory.createBubbleInsideBox(boxActivity);
 
-            ThoughtBubble thoughtBubble = createBubbleOutOfEnterExitNodes(boxActivity, enterExitTransitions);
-            addEnterExitsToStructure(thoughtBubble, enterExitTransitions);
-
-            featureFactory.assignAllRingUris(thoughtBubble);
-            thoughtBubble.finish();
-
-            boxActivity.addBubble(thoughtBubble);
+            populateBubbleAndRemoveParticlesUsed(bubble, particlesByWeight, enterExitTransitions);
+            boxActivity.addBubble(bubble);
         }
 
 
@@ -147,16 +137,9 @@ public class GravityBallOfThoughts {
 
         while (particlesByWeight.size() > 0) {
 
-            ThoughtBubble thoughtBubble = createRadialStructureAndRemoveParticlesUsed(boxActivity, particlesByWeight);
-
-            List<ThoughtParticle> particlesUsed = addEnterExitsToStructure(thoughtBubble, enterExitTransitions);
-            enterExitTransitions.removeAll(particlesUsed);
-            particlesByWeight.removeAll(particlesUsed);
-
-            featureFactory.assignAllRingUris(thoughtBubble);
-            thoughtBubble.finish();
-
-            boxActivity.addBubble(thoughtBubble);
+            ThoughtBubble bubble = featureFactory.createBubbleInsideBox(boxActivity);
+            populateBubbleAndRemoveParticlesUsed(bubble, particlesByWeight, enterExitTransitions);
+            boxActivity.addBubble(bubble);
 
             //we should deplete our particles, but just in case, make sure we don't loop forever
             if (lastParticlesRemaining == particlesByWeight.size()) {
@@ -170,7 +153,55 @@ public class GravityBallOfThoughts {
 
     }
 
-    private List<ThoughtParticle> addEnterExitsToStructure(ThoughtBubble thoughtBubble, List<ThoughtParticle> enterExitTransitions) {
+    private void populateBubbleAndRemoveParticlesUsed(ThoughtBubble bubble, List<ThoughtParticle> particlesByWeight, List<ThoughtParticle> enterExitTransitions) {
+        LocationInBox center = getCenterOfFocus(particlesByWeight);
+        bubble.placeCenter(center);
+        bubble.placeEntrance(entranceLocation);
+        bubble.placeExit(exitLocation);
+
+        //particlesByWeight.removeAll(enterExitTransitions);
+
+        List<ThoughtParticle> firstRingParticles = findConnectedParticles(particlesByWeight, center);
+        List<LocationInBox> firstRingLocations = createFirstRing(bubble, firstRingParticles, center);
+        particlesByWeight.removeAll(firstRingParticles);
+
+        List<ThoughtParticle> connectionsWithinFirstRing = findParticlesCompletelyWithinRing(particlesByWeight, firstRingLocations);
+        createMoreLinksInFirstRing(bubble, connectionsWithinFirstRing);
+        particlesByWeight.removeAll(connectionsWithinFirstRing);
+
+        List<LocationInBox> locationsInLastRing = firstRingLocations;
+        int lastParticlesRemaining = particlesByWeight.size();
+
+        //add rings until remaining particles are disconnected
+
+        while (particlesByWeight.size() > 0 )  {
+            List<ThoughtParticle> connectionsForNextRing = findConnectedParticles(particlesByWeight, locationsInLastRing);
+
+            if (connectionsForNextRing.size() > 0) {
+                List<LocationInBox> nextRingLocations = createNextRing(bubble, connectionsForNextRing, locationsInLastRing);
+                particlesByWeight.removeAll(connectionsForNextRing);
+
+                List<ThoughtParticle> connectionsWithinNewRing = findParticlesCompletelyWithinRing(particlesByWeight, nextRingLocations);
+                createMoreLinksInHighestRing(bubble, connectionsWithinNewRing);
+                particlesByWeight.removeAll(connectionsWithinNewRing);
+
+                locationsInLastRing = nextRingLocations;
+            }
+
+            if (lastParticlesRemaining == particlesByWeight.size()) {
+                break;
+            } else {
+                lastParticlesRemaining = particlesByWeight.size();
+            }
+        }
+
+        addEnterExitsToStructureAndRemoveParticlesUsed(bubble, particlesByWeight, enterExitTransitions);
+
+        featureFactory.assignAllRingUris(bubble);
+        bubble.finish();
+    }
+
+    private void addEnterExitsToStructureAndRemoveParticlesUsed(ThoughtBubble thoughtBubble, List<ThoughtParticle> particlesByWeight, List<ThoughtParticle> enterExitTransitions) {
         List<ThoughtParticle> particlesToRemove = new ArrayList<>();
 
         for (ThoughtParticle enterExitParticle : enterExitTransitions) {
@@ -195,7 +226,10 @@ public class GravityBallOfThoughts {
                 particlesToRemove.add(enterExitParticle);
             }
         }
-        return particlesToRemove;
+
+        particlesByWeight.removeAll(particlesToRemove);
+        enterExitTransitions.removeAll(particlesToRemove);
+
     }
 
     private LocationInBox getEnterExitNode(LocationInBox locationA, LocationInBox locationB) {
@@ -219,75 +253,24 @@ public class GravityBallOfThoughts {
         return null;
     }
 
-    private ThoughtBubble createBubbleOutOfEnterExitNodes(BoxActivity box, List<ThoughtParticle> enterExitParticles) {
-        ThoughtBubble thoughtBubble = featureFactory.createBubbleInsideBox(box);
-
-        LocationInBox centerOfFocus = getCenterOfFocusWithinEnterExits(enterExitParticles);
-
-        thoughtBubble.placeCenter(centerOfFocus);
-        thoughtBubble.placeEntrance(entranceLocation);
-        thoughtBubble.placeExit(exitLocation);
-
-        return thoughtBubble;
-    }
-
-
-
-    private ThoughtBubble createRadialStructureAndRemoveParticlesUsed(BoxActivity box, List<ThoughtParticle> particlesByWeight) {
-        ThoughtBubble thoughtBubble = featureFactory.createBubbleInsideBox(box);
-
-        LocationInBox centerOfFocus = getCenterOfFocus(particlesByWeight);
-        thoughtBubble.placeCenter(centerOfFocus);
-        thoughtBubble.placeEntrance(entranceLocation);
-        thoughtBubble.placeExit(exitLocation);
-
-        List<ThoughtParticle> firstRingParticles = findConnectedParticles(particlesByWeight, centerOfFocus);
-        List<LocationInBox> firstRingLocations = createFirstRing(thoughtBubble, firstRingParticles, centerOfFocus);
-        particlesByWeight.removeAll(firstRingParticles);
-
-        List<ThoughtParticle> connectionsWithinFirstRing = findParticlesCompletelyWithinRing(particlesByWeight, firstRingLocations);
-        createMoreLinksInFirstRing(thoughtBubble, connectionsWithinFirstRing);
-        particlesByWeight.removeAll(connectionsWithinFirstRing);
-
-        List<LocationInBox> locationsInLastRing = firstRingLocations;
-        int lastParticlesRemaining = particlesByWeight.size();
-
-        //add rings until remaining particles are disconnected
-
-        while (particlesByWeight.size() > 0 )  {
-            List<ThoughtParticle> connectionsForNextRing = findConnectedParticles(particlesByWeight, locationsInLastRing);
-            List<LocationInBox> nextRingLocations = createNextRing(thoughtBubble, connectionsForNextRing, locationsInLastRing);
-            particlesByWeight.removeAll(connectionsForNextRing);
-
-            List<ThoughtParticle> connectionsWithinNewRing = findParticlesCompletelyWithinRing(particlesByWeight, nextRingLocations);
-            createMoreLinksInHighestRing(thoughtBubble, connectionsWithinNewRing);
-            particlesByWeight.removeAll(connectionsWithinNewRing);
-
-            locationsInLastRing = nextRingLocations;
-
-            if (lastParticlesRemaining == particlesByWeight.size()) {
-                break;
-            } else {
-                lastParticlesRemaining = particlesByWeight.size();
-            }
-        }
-        return thoughtBubble;
-    }
 
     private List<ThoughtParticle> findEnterExitTransitions(List<ThoughtParticle> particlesByWeight) {
         List<ThoughtParticle> enterExitTransitions = new ArrayList<>();
         for (ThoughtParticle particle : particlesByWeight) {
-            Traversal link = particle.getLink();
-            LocationInBox locationA = link.getLocationA();
-            LocationInBox locationB = link.getLocationB();
-
-            if (locationA == entranceLocation || locationB == entranceLocation ||
-                    locationA == exitLocation || locationB == exitLocation) {
+            if (isEnterExitTransition(particle.getLink())) {
                 enterExitTransitions.add(particle);
             }
         }
 
         return enterExitTransitions;
+    }
+
+    private boolean isEnterExitTransition(Traversal traversal) {
+        LocationInBox locationA = traversal.getLocationA();
+        LocationInBox locationB = traversal.getLocationB();
+
+        return (locationA == entranceLocation || locationB == entranceLocation ||
+                locationA == exitLocation || locationB == exitLocation);
     }
 
     private List<LocationInBox> createNextRing(ThoughtBubble thoughtBubble,
@@ -308,7 +291,7 @@ public class GravityBallOfThoughts {
             thoughtBubble.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal);
         }
 
-        return thoughtBubble.getLocationsInFirstRing();
+        return thoughtBubble.getActiveRing().getRawLocationsInsideRing();
     }
 
 
@@ -411,11 +394,13 @@ public class GravityBallOfThoughts {
         List<ThoughtParticle> connectedParticles = new ArrayList<>();
 
         for (ThoughtParticle particle : particlesByWeight) {
-            LocationInBox locationA = particle.getLink().getLocationA();
-            LocationInBox locationB = particle.getLink().getLocationB();
+            if (!isEnterExitTransition(particle.getLink())) {
+                LocationInBox locationA = particle.getLink().getLocationA();
+                LocationInBox locationB = particle.getLink().getLocationB();
 
-            if (lastRingLocations.contains(locationA) || lastRingLocations.contains(locationB)) {
-                connectedParticles.add(particle);
+                if (lastRingLocations.contains(locationA) || lastRingLocations.contains(locationB)) {
+                    connectedParticles.add(particle);
+                }
             }
         }
 
@@ -427,11 +412,13 @@ public class GravityBallOfThoughts {
         List<ThoughtParticle> connectedParticles = new ArrayList<>();
 
         for (ThoughtParticle particle : particlesByWeight) {
-            LocationInBox locationA = particle.getLink().getLocationA();
-            LocationInBox locationB = particle.getLink().getLocationB();
+            if (!isEnterExitTransition(particle.getLink())) {
+                LocationInBox locationA = particle.getLink().getLocationA();
+                LocationInBox locationB = particle.getLink().getLocationB();
 
-            if ((centerOfFocus == locationA || centerOfFocus == locationB)) {
-                connectedParticles.add(particle);
+                if ((centerOfFocus == locationA || centerOfFocus == locationB)) {
+                    connectedParticles.add(particle);
+                }
             }
         }
 
@@ -448,26 +435,18 @@ public class GravityBallOfThoughts {
 
             Traversal link = heaviest.getLink();
 
-            Duration timeInLocationA = storyGrid.getMetricsFor(link.getLocationA()).getTotalTimeInvestment();
-            Duration timeInLocationB = storyGrid.getMetricsFor(link.getLocationB()).getTotalTimeInvestment();
-
-            if (timeInLocationA.compareTo(timeInLocationB) > 0) {
-                center = link.getLocationA();
+            if (isEnterExitTransition(link)) {
+                center = getNonEnterExitNode(link.getLocationA(), link.getLocationB());
             } else {
-                center = link.getLocationB();
+                Duration timeInLocationA = storyGrid.getMetricsFor(link.getLocationA()).getTotalTimeInvestment();
+                Duration timeInLocationB = storyGrid.getMetricsFor(link.getLocationB()).getTotalTimeInvestment();
+
+                if (timeInLocationA.compareTo(timeInLocationB) > 0) {
+                    center = link.getLocationA();
+                } else {
+                    center = link.getLocationB();
+                }
             }
-        }
-
-        return center;
-    }
-
-    private LocationInBox getCenterOfFocusWithinEnterExits(List<ThoughtParticle> enterExitParticles) {
-        LocationInBox center = null;
-
-        if (enterExitParticles.size() > 0) {
-            Traversal link = enterExitParticles.get(0).getLink();
-
-            center = getNonEnterExitNode(link.getLocationA(), link.getLocationB());
         }
 
         return center;
@@ -548,12 +527,9 @@ public class GravityBallOfThoughts {
     }
 
 
-
-
     private class DecayingGrowthRate {
         private final long scaleRelativeToTime;
         double growthRate = 1;
-        double decayRate = 1;
         int risingDenominator = 1;
 
         DecayingGrowthRate(Duration scaleRelativeToTime) {
@@ -564,7 +540,6 @@ public class GravityBallOfThoughts {
             risingDenominator++;
 
             this.growthRate = 1.0 / risingDenominator;
-            this.decayRate = 1.0 / risingDenominator;
         }
 
         double calculateGrowthFor(double timeInSeconds) {
@@ -575,20 +550,13 @@ public class GravityBallOfThoughts {
             }
         }
 
-        public double calculateDecayFor(double timeInSeconds) {
-            if (scaleRelativeToTime >= 0) {
-                return decayRate * ((1.0 * timeInSeconds) / scaleRelativeToTime);
-            } else {
-                return 0;
-            }
-        }
     }
 
     private class ThoughtParticle implements Comparable<ThoughtParticle> {
         private final Traversal link;
         private double weight;
         private double normalizedWeight;
-        private double velocityWeightedAvg;
+        private double totalVelocity;
         private int traversalCount;
 
         private double normalizedVelocity;
@@ -600,17 +568,17 @@ public class GravityBallOfThoughts {
         }
 
         void addVelocitySample(Duration velocityOfTransition) {
-            velocityWeightedAvg = (( velocityWeightedAvg * traversalCount) + velocityOfTransition.getSeconds()) / (traversalCount + 1);
+            totalVelocity += velocityOfTransition.getSeconds();
             traversalCount++;
         }
 
-        void growHeavyWithFocus(DecayingGrowthRate decayingGrowthRate, Duration timeInLocation) {
-            this.weight += Math.sqrt(timeInLocation.getSeconds()) * decayingGrowthRate.calculateGrowthFor(velocityWeightedAvg);
+        void growHeavyWithFocus(DecayingGrowthRate growthRate, Duration timeInLocation) {
+            this.weight += Math.sqrt(timeInLocation.getSeconds()) * growthRate.calculateGrowthFor(totalVelocity);
         }
 
 
-        void decayWithFocusElsewhere(DecayingGrowthRate decayingGrowth) {
-            weight -= Math.sqrt(weight) * decayingGrowth.calculateDecayFor(velocityWeightedAvg);
+        void decayWithFocusElsewhere() {
+            weight -= Math.sqrt(weight);
         }
 
         void normalizeWeight(double minWeight, double maxWeight) {
@@ -621,7 +589,7 @@ public class GravityBallOfThoughts {
 
         void normalizeVelocity(double minVelocity, double maxVelocity) {
             if ((maxVelocity - minVelocity) > 0) {
-                normalizedVelocity = (this.velocityWeightedAvg - minVelocity) / (maxVelocity - minVelocity);
+                normalizedVelocity = (this.totalVelocity - minVelocity) / (maxVelocity - minVelocity);
             }
         }
 
@@ -645,7 +613,7 @@ public class GravityBallOfThoughts {
             if (normalizedVelocity > 0) {
                 return normalizedVelocity;
             }
-            return velocityWeightedAvg;
+            return totalVelocity;
         }
 
     }
