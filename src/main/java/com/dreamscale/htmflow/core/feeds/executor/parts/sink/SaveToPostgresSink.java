@@ -33,16 +33,18 @@ public class SaveToPostgresSink implements SinkStrategy {
         storyTileEntity.setUri(storyTileModel.getTileUri());
         storyTileEntity.setZoomLevel(storyTileModel.getZoomLevel().name());
 
-        GeometryClock.Coords coordinates = storyTileModel.getTileCoordinates();
+        GeometryClock.StoryCoords coordinates = storyTileModel.getTileCoordinates();
 
         storyTileEntity.setClockPosition(coordinates.getClockTime());
+        //storyTileEntity.setDreamtime(coordinates.formatDreamtime());
+
         storyTileEntity.setYear(coordinates.getYear());
         storyTileEntity.setBlock(coordinates.getBlock());
         storyTileEntity.setWeeksIntoBlock(coordinates.getWeeksIntoBlock());
         storyTileEntity.setWeeksIntoYear(coordinates.getWeeksIntoYear());
         storyTileEntity.setDaysIntoWeek(coordinates.getDaysIntoWeek());
-        storyTileEntity.setFourHourSteps(coordinates.getFourHourSteps());
-        storyTileEntity.setTwentyMinuteSteps(coordinates.getTwentyMinuteSteps());
+        storyTileEntity.setFourHourSteps(coordinates.getFours());
+        storyTileEntity.setTwentyMinuteSteps(coordinates.getTwenties());
 
         storyTileEntity.setJsonTile(storyTileAsJson);
 

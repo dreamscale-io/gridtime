@@ -24,7 +24,7 @@ public class StoryTile {
 
 
     private final String tileUri;
-    private final GeometryClock.Coords tileCoordinates;
+    private final GeometryClock.StoryCoords tileCoordinates;
     private final ZoomLevel zoomLevel;
 
     private final FlowContextMapper contextMapper;
@@ -38,7 +38,7 @@ public class StoryTile {
     private final MusicGeometryClock internalClock;
 
 
-    public StoryTile(String feedUri, GeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
+    public StoryTile(String feedUri, GeometryClock.StoryCoords tileCoordinates, ZoomLevel zoomLevel) {
         this.tileCoordinates = tileCoordinates;
         this.zoomLevel = zoomLevel;
         this.tileUri = URIMapper.createTileUri(feedUri, zoomLevel, tileCoordinates);
@@ -335,7 +335,7 @@ public class StoryTile {
 
     //////////// Extract all the various state for persistence ////////////
 
-    public GeometryClock.Coords getTileCoordinates() {
+    public GeometryClock.StoryCoords getTileCoordinates() {
         return tileCoordinates;
     }
 

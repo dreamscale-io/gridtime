@@ -28,7 +28,7 @@ public class StoryTileSpec extends Specification {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         geometryClock = new GeometryClock(clockStart)
 
-        tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.MIN_20)
+        tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.TWENTY_MINS)
     }
 
     def "should start and end context"() {
@@ -158,7 +158,7 @@ public class StoryTileSpec extends Specification {
         tile.startWTF(time1, circleDetails)
         tile.finishAfterLoad()
 
-        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.MIN_20), ZoomLevel.MIN_20);
+        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTY_MINS), ZoomLevel.TWENTY_MINS);
 
         nextTile.carryOverFrameContext(tile);
         nextTile.finishAfterLoad();

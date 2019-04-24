@@ -25,7 +25,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         executionRhythmObserver = new ExecutionRhythmObserver()
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.MIN_20)
+        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTY_MINS)
     }
 
     def "should create execution activity with red/green cycles"() {

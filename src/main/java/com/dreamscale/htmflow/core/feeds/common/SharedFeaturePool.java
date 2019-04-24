@@ -17,23 +17,23 @@ public class SharedFeaturePool {
     private final HashMap<ZoomLevel, StoryTileSequence> storySequenceByZoomLevel;
 
     private ZoomLevel activeZoomLevel;
-    private GeometryClock.Coords activeJobCoordinates;
-    private GeometryClock.Coords activeFocusCoordinates;
+    private GeometryClock.StoryCoords activeJobCoordinates;
+    private GeometryClock.StoryCoords activeFocusCoordinates;
 
 
-    public SharedFeaturePool(UUID torchieId, GeometryClock.Coords startingCoordinates) {
+    public SharedFeaturePool(UUID torchieId, GeometryClock.StoryCoords startingCoordinates) {
 
         this.feedUri = URIMapper.createTorchieFeedUri(torchieId);
 
         this.storySequenceByZoomLevel = new HashMap<>();
-        this.storySequenceByZoomLevel.put(ZoomLevel.MIN_20, new StoryTileSequence(feedUri, ZoomLevel.MIN_20, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.HOUR_4, new StoryTileSequence(feedUri, ZoomLevel.HOUR_4, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.DAY, new StoryTileSequence(feedUri, ZoomLevel.DAY, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.WEEK, new StoryTileSequence(feedUri, ZoomLevel.WEEK, startingCoordinates));
-        this.storySequenceByZoomLevel.put(ZoomLevel.BLOCK, new StoryTileSequence(feedUri, ZoomLevel.BLOCK, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.TWENTY_MINS, new StoryTileSequence(feedUri, ZoomLevel.TWENTY_MINS, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.FOUR_HOURS, new StoryTileSequence(feedUri, ZoomLevel.FOUR_HOURS, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.DAYS, new StoryTileSequence(feedUri, ZoomLevel.DAYS, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.WEEKS, new StoryTileSequence(feedUri, ZoomLevel.WEEKS, startingCoordinates));
+        this.storySequenceByZoomLevel.put(ZoomLevel.BLOCKS, new StoryTileSequence(feedUri, ZoomLevel.BLOCKS, startingCoordinates));
         this.storySequenceByZoomLevel.put(ZoomLevel.YEAR, new StoryTileSequence(feedUri, ZoomLevel.YEAR, startingCoordinates));
 
-        this.activeZoomLevel = ZoomLevel.MIN_20;
+        this.activeZoomLevel = ZoomLevel.TWENTY_MINS;
 
     }
 
@@ -52,7 +52,7 @@ public class SharedFeaturePool {
 
     //TODO this will need to load data for active coordinates, and trigger "work to do" as needed to fill in details
 
-    public StoryTile getActiveStoryTileAtZoomLevel(GeometryClock.Coords activeFocus, ZoomLevel zoomLevel) {
+    public StoryTile getActiveStoryTileAtZoomLevel(GeometryClock.StoryCoords activeFocus, ZoomLevel zoomLevel) {
         this.activeFocusCoordinates = activeFocus;
         return storySequenceByZoomLevel.get(zoomLevel).getActiveStoryTile();
     }

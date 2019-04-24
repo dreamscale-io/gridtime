@@ -14,52 +14,53 @@ public class GeometryClock {
 
     private LocalDateTime clockTime;
 
-    private Coords coords;
+    private StoryCoords coords;
 
 
     public GeometryClock(LocalDateTime clockTime) {
         this.clockTime = clockTime;
-        this.coords = createGeometryCoords(clockTime);
+        this.coords = createStoryCoords(clockTime);
     }
 
-    public Coords tick() {
-        int minutesToTick = ZoomLevel.MIN_20.buckets();
+    public StoryCoords tick() {
+        int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
         LocalDateTime nextClockTime = this.clockTime.plusMinutes(minutesToTick);
 
-        this.coords = createGeometryCoords(nextClockTime);
+        this.coords = createStoryCoords(nextClockTime);
         this.clockTime = nextClockTime;
 
         return this.coords;
     }
 
-    public Coords getCoordinates() {
+    public StoryCoords getCoordinates() {
         return coords;
     }
 
-    private static Coords createGeometryCoords(LocalDateTime nextClockTime) {
+    private static StoryCoords createStoryCoords(LocalDateTime nextClockTime) {
 
-        int twentyMinuteSteps = calc20MinuteSteps(nextClockTime);
-        int fourHourSteps = calc4HourSteps(nextClockTime);
+        int fours = calc4HourSteps(nextClockTime);
+        int twenties = calc20MinuteSteps(nextClockTime);
 
         int daysIntoWeek = calcWeekdayOffset(nextClockTime);
 
         int firstMondayOffset = calcFirstMondayOfYear(nextClockTime);
 
         int weeksIntoYear = calcWeekOfYear(firstMondayOffset, nextClockTime);
-        int currentYear = calcAdjustedYear(firstMondayOffset, nextClockTime);
+        int year = calcAdjustedYear(firstMondayOffset, nextClockTime);
 
         int weeksIntoBlock = calcWeeksIntoBlock(weeksIntoYear);
 
-        int blocksIntoYear = calcBlocksIntoYear(weeksIntoYear);
+        int block = calcBlocksIntoYear(weeksIntoYear);
 
-        return new Coords(nextClockTime,
-                twentyMinuteSteps,
-                fourHourSteps,
-                daysIntoWeek,
-                weeksIntoYear,
+        return new StoryCoords(nextClockTime,
+                year,
+                block,
                 weeksIntoBlock,
-                blocksIntoYear,
-                currentYear);
+                weeksIntoYear,
+                daysIntoWeek,
+                fours,
+                twenties
+                );
     }
 
     private static int calc4HourSteps(LocalDateTime nextClockTime) {
@@ -67,12 +68,12 @@ public class GeometryClock {
     }
 
     private static int calcBlocksIntoYear(int weeksIntoYear) {
-        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCK.buckets()) + 1;
+        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCKS.buckets()) + 1;
     }
 
     private static int calcWeeksIntoBlock(int weeksIntoYear) {
 
-        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK.buckets());
+        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCKS.buckets());
     }
 
     private static int calcAdjustedYear(int firstMondayOffset, LocalDateTime clock) {
@@ -103,7 +104,7 @@ public class GeometryClock {
             weekNumber = findLastWeekOfPriorYear(clock);
         } else {
             weekNumber = Math.floorDiv((dayNumber - firstMondayOffset),
-                    ZoomLevel.WEEK.buckets());
+                    ZoomLevel.WEEKS.buckets());
         }
 
         return weekNumber + 1;
@@ -116,7 +117,7 @@ public class GeometryClock {
         LocalDate endOfPriorYear = LocalDate.of(clock.getYear() - 1, 12, 31);
 
         return Math.floorDiv((endOfPriorYear.getDayOfYear() - firstMondayOfPriorYear.getDayOfYear()),
-                ZoomLevel.WEEK.buckets());
+                ZoomLevel.WEEKS.buckets());
 
     }
 
@@ -136,33 +137,35 @@ public class GeometryClock {
     @AllArgsConstructor
     @Getter
     @ToString
-    public static class Coords {
+    public static class StoryCoords {
 
         final LocalDateTime clockTime;
-        final int twentyMinuteSteps;
-        final int fourHourSteps;
-        final int daysIntoWeek;
-        final int weeksIntoYear;
-        final int weeksIntoBlock;
-        final int block;
         final int year;
+        final int block;
+        final int weeksIntoBlock;
+        final int weeksIntoYear;
+        final int daysIntoWeek;
+        final int fours;
+        final int twenties;
 
-        public String formatCoords() {
-            return year + "-" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "-" + fourHourSteps + "-" + twentyMinuteSteps;
+
+
+        public String formatDreamtime() {
+            return year + "-BW" + block + "-" + weeksIntoBlock + "." + daysIntoWeek + "-T" + fours + "-" + twenties;
         }
 
-        public Coords panLeft(ZoomLevel zoomLevel) {
+        public StoryCoords panLeft(ZoomLevel zoomLevel) {
 
                 switch (zoomLevel) {
-                    case MIN_20:
+                    case TWENTY_MINS:
                         return minus20Minutes();
-                    case HOUR_4:
+                    case FOUR_HOURS:
                         return minus4Hour();
-                    case DAY:
+                    case DAYS:
                         return minusDay();
-                    case WEEK:
+                    case WEEKS:
                         return minusWeek();
-                    case BLOCK:
+                    case BLOCKS:
                         return minusBlock();
                     case YEAR:
                         return minusYear();
@@ -170,18 +173,18 @@ public class GeometryClock {
                 return this;
         }
 
-        public Coords panRight(ZoomLevel zoomLevel) {
+        public StoryCoords panRight(ZoomLevel zoomLevel) {
 
             switch (zoomLevel) {
-                case MIN_20:
+                case TWENTY_MINS:
                     return plus20Minutes();
-                case HOUR_4:
+                case FOUR_HOURS:
                     return plus4Hour();
-                case DAY:
+                case DAYS:
                     return plusDay();
-                case WEEK:
+                case WEEKS:
                     return plusWeek();
-                case BLOCK:
+                case BLOCKS:
                     return plusBlock();
                 case YEAR:
                     return plusYear();
@@ -191,54 +194,54 @@ public class GeometryClock {
 
         //pan left functions
 
-        public Coords minus20Minutes() {
-            return GeometryClock.createGeometryCoords(clockTime.minusMinutes(20));
+        public StoryCoords minus20Minutes() {
+            return GeometryClock.createStoryCoords(clockTime.minusMinutes(20));
         }
 
-        public Coords minus4Hour() {
-            return GeometryClock.createGeometryCoords(clockTime.minusHours(4));
+        public StoryCoords minus4Hour() {
+            return GeometryClock.createStoryCoords(clockTime.minusHours(4));
         }
 
-        public Coords minusDay() {
-            return GeometryClock.createGeometryCoords(clockTime.minusDays(1));
+        public StoryCoords minusDay() {
+            return GeometryClock.createStoryCoords(clockTime.minusDays(1));
         }
 
-        public Coords minusWeek() {
-            return GeometryClock.createGeometryCoords(clockTime.minusWeeks(1));
+        public StoryCoords minusWeek() {
+            return GeometryClock.createStoryCoords(clockTime.minusWeeks(1));
         }
 
-        public Coords minusBlock() {
-            return GeometryClock.createGeometryCoords(clockTime.minusWeeks(ZoomLevel.BLOCK.buckets()));
+        public StoryCoords minusBlock() {
+            return GeometryClock.createStoryCoords(clockTime.minusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
-        public Coords minusYear() {
-            return GeometryClock.createGeometryCoords(clockTime.minusYears(1));
+        public StoryCoords minusYear() {
+            return GeometryClock.createStoryCoords(clockTime.minusYears(1));
         }
 
         // pan right functions
 
-        public Coords plus20Minutes() {
-            return GeometryClock.createGeometryCoords(clockTime.plusMinutes(20));
+        public StoryCoords plus20Minutes() {
+            return GeometryClock.createStoryCoords(clockTime.plusMinutes(20));
         }
 
-        public Coords plus4Hour() {
-            return GeometryClock.createGeometryCoords(clockTime.plusHours(4));
+        public StoryCoords plus4Hour() {
+            return GeometryClock.createStoryCoords(clockTime.plusHours(4));
         }
 
-        public Coords plusDay() {
-            return GeometryClock.createGeometryCoords(clockTime.plusDays(1));
+        public StoryCoords plusDay() {
+            return GeometryClock.createStoryCoords(clockTime.plusDays(1));
         }
 
-        public Coords plusWeek() {
-            return GeometryClock.createGeometryCoords(clockTime.plusWeeks(1));
+        public StoryCoords plusWeek() {
+            return GeometryClock.createStoryCoords(clockTime.plusWeeks(1));
         }
 
-        public Coords plusBlock() {
-            return GeometryClock.createGeometryCoords(clockTime.plusWeeks(ZoomLevel.BLOCK.buckets()));
+        public StoryCoords plusBlock() {
+            return GeometryClock.createStoryCoords(clockTime.plusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
-        public Coords plusYear() {
-            return GeometryClock.createGeometryCoords(clockTime.plusYears(1));
+        public StoryCoords plusYear() {
+            return GeometryClock.createStoryCoords(clockTime.plusYears(1));
         }
 
 

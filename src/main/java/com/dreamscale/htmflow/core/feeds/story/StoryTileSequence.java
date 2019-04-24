@@ -8,7 +8,7 @@ import java.util.LinkedList;
 public class StoryTileSequence {
 
         private final ZoomLevel zoomLevel;
-        private final GeometryClock.Coords activeStoryCoordinates;
+        private final GeometryClock.StoryCoords activeStoryCoordinates;
         private final String feedUri;
 
 
@@ -16,7 +16,7 @@ public class StoryTileSequence {
 
         StoryTile activeStoryTile;
 
-        public StoryTileSequence(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
+        public StoryTileSequence(String feedUri, ZoomLevel zoomLevel, GeometryClock.StoryCoords storyCoordinates) {
             this.feedUri = feedUri;
             this.zoomLevel = zoomLevel;
             this.activeStoryCoordinates = storyCoordinates;

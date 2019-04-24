@@ -18,7 +18,7 @@ public class ZoomableFlow implements ClockChangeListener {
     private final LinkedList<Runnable> workToDo;
 
     private ZoomLevel zoomLevel;
-    private GeometryClock.Coords activeFocus;
+    private GeometryClock.StoryCoords activeFocus;
 
 
     public ZoomableFlow(Metronome metronome, UUID memberId, SharedFeaturePool sharedFeaturePool) {
@@ -119,7 +119,7 @@ public class ZoomableFlow implements ClockChangeListener {
 
         @Override
         public void run() {
-            this.sharedFeaturePool.nextTile(ZoomLevel.MIN_20);
+            this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
             this.metronome.tick();
         }
     }

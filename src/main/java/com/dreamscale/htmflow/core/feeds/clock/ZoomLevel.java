@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.clock;
 
 public enum ZoomLevel {
 
-    MIN_20(20), HOUR_4(12), DAY(6), WEEK(7), BLOCK(16), YEAR(4);
+    TWENTY_MINS(20), FOUR_HOURS(12), DAYS(6), WEEKS(7), BLOCKS(6), YEAR(9);
 
     private final int bucketsToAggregate;
 
@@ -20,33 +20,33 @@ public enum ZoomLevel {
 
     public ZoomLevel zoomIn() {
         switch (this) {
-            case MIN_20:
-                return MIN_20;
-            case HOUR_4:
-                return MIN_20;
-            case DAY:
-                return HOUR_4;
-            case WEEK:
-                return DAY;
-            case BLOCK:
-                return WEEK;
+            case TWENTY_MINS:
+                return TWENTY_MINS;
+            case FOUR_HOURS:
+                return TWENTY_MINS;
+            case DAYS:
+                return FOUR_HOURS;
+            case WEEKS:
+                return DAYS;
+            case BLOCKS:
+                return WEEKS;
             case YEAR:
-                return BLOCK;
+                return BLOCKS;
         }
-        return MIN_20;
+        return TWENTY_MINS;
     }
 
     public ZoomLevel zoomOut() {
         switch (this) {
-            case MIN_20:
-                return HOUR_4;
-            case HOUR_4:
-                return DAY;
-            case DAY:
-                return WEEK;
-            case WEEK:
-                return BLOCK;
-            case BLOCK:
+            case TWENTY_MINS:
+                return FOUR_HOURS;
+            case FOUR_HOURS:
+                return DAYS;
+            case DAYS:
+                return WEEKS;
+            case WEEKS:
+                return BLOCKS;
+            case BLOCKS:
                 return YEAR;
             case YEAR:
                 return YEAR;

@@ -16,15 +16,15 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        GeometryClock.StoryCoords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null
         assert coords.year == 2019
         assert coords.daysIntoWeek == 1
         assert coords.weeksIntoYear == 1
-        assert coords.fourHourSteps == 1
-        assert coords.twentyMinuteSteps == 8
+        assert coords.fours == 1
+        assert coords.twenties == 8
         assert coords.weeksIntoBlock == 1
         assert coords.block == 1
 
@@ -36,15 +36,15 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        GeometryClock.StoryCoords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null
         assert coords.year == 2019
         assert coords.daysIntoWeek == 1
         assert coords.weeksIntoYear == 1
-        assert coords.fourHourSteps == 6
-        assert coords.twentyMinuteSteps == 12
+        assert coords.fours == 6
+        assert coords.twenties == 12
         assert coords.weeksIntoBlock == 1
         assert coords.block == 1
 
@@ -58,7 +58,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        GeometryClock.StoryCoords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null
@@ -74,7 +74,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getCoordinates();
+        GeometryClock.StoryCoords coords = geometryClock.getCoordinates();
 
         then:
         assert coords != null

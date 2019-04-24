@@ -249,8 +249,8 @@ public class URIMapper {
         return "@circle/"+circleId;
     }
 
-    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords tileCoordinates) {
-        return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatCoords();
+    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.StoryCoords tileCoordinates) {
+        return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatDreamtime();
     }
 
 

@@ -15,8 +15,8 @@ public class Metronome {
 
     private GeometryClock clock;
 
-    private GeometryClock.Coords fromClockPosition;
-    private GeometryClock.Coords toClockPosition;
+    private GeometryClock.StoryCoords fromClockPosition;
+    private GeometryClock.StoryCoords toClockPosition;
 
     private final List<Flow> flowChain;
     private final List<ClockChangeListener> clockChangeListeners;
@@ -29,32 +29,32 @@ public class Metronome {
         this.clockChangeListeners = new ArrayList<>();
     }
 
-    public GeometryClock.Coords getActiveCoordinates() {
+    public GeometryClock.StoryCoords getActiveCoordinates() {
         return fromClockPosition;
     }
 
     public void tick() {
-        GeometryClock.Coords nextCoordinates = clock.tick();
+        GeometryClock.StoryCoords nextCoordinates = clock.tick();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
 
         tickForwardFlowChain();
 
-        if (fromClockPosition.fourHourSteps != toClockPosition.fourHourSteps) {
-            notifyClockTick(ZoomLevel.HOUR_4);
+        if (fromClockPosition.fours != toClockPosition.fours) {
+            notifyClockTick(ZoomLevel.FOUR_HOURS);
         }
 
         if (fromClockPosition.daysIntoWeek != toClockPosition.daysIntoWeek) {
-            notifyClockTick(ZoomLevel.DAY);
-        }
-
-        if (fromClockPosition.weeksIntoYear != toClockPosition.weeksIntoYear) {
-            notifyClockTick(ZoomLevel.WEEK);
+            notifyClockTick(ZoomLevel.DAYS);
         }
 
         if (fromClockPosition.weeksIntoBlock != toClockPosition.weeksIntoBlock) {
-            notifyClockTick(ZoomLevel.BLOCK);
+            notifyClockTick(ZoomLevel.WEEKS);
+        }
+
+        if (fromClockPosition.block != toClockPosition.block) {
+            notifyClockTick(ZoomLevel.BLOCKS);
         }
         if (fromClockPosition.year != toClockPosition.year) {
             notifyClockTick(ZoomLevel.YEAR);
@@ -81,11 +81,11 @@ public class Metronome {
         }
     }
 
-    public GeometryClock.Coords getFromClockPosition() {
+    public GeometryClock.StoryCoords getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public GeometryClock.Coords getToClockPosition() {
+    public GeometryClock.StoryCoords getToClockPosition() {
         return this.toClockPosition;
     }
 
