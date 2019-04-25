@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircleKeyDto {
+public class CircleKeysDto {
 
     UUID circleId;
     private String hypercoreFeedId;

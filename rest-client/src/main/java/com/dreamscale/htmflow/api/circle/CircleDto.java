@@ -25,8 +25,6 @@ public class CircleDto {
 
     List<CircleMemberDto> members;
 
-    String publicKey;
-
     Long durationInSeconds;
     Boolean onShelf;
 }

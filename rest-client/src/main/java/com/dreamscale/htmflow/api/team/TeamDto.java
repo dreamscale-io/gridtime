@@ -16,4 +16,9 @@ public class TeamDto {
     private UUID organizationId;
     private UUID id;
     private String name;
+
+    private String hypercoreFeedId;
+    private String hypercorePublicKey;
+    private String hypercoreSecretKey;
+
 }
