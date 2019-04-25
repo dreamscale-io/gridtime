@@ -27,7 +27,7 @@ public class ComponentTestConfig extends BaseTestConfig {
     JacksonFeignBuilder jacksonFeignBuilder;
 
     @Bean
-        DetachedMockFactory detachedMockFactory() {
+    DetachedMockFactory detachedMockFactory() {
         return new DetachedMockFactory();
     }
 

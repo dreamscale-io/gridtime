@@ -118,6 +118,11 @@ public class CircleService {
         circleEntity.setOrganizationId(organizationId);
         circleEntity.setOnShelf(false);
 
+        HypercoreKeysDto keys = hypercoreService.createNewFeed();
+        circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+        circleEntity.setHypercorePublicKey(keys.getKey());
+        circleEntity.setHypercoreSecretKey(keys.getSecretKey());
+
         circleRepository.save(circleEntity);
 
         CircleMemberEntity circleMemberEntity = new CircleMemberEntity();
