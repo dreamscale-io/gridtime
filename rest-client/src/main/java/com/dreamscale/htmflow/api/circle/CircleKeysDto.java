@@ -13,6 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CircleKeyDto {
 
-    UUID id;
-    String privateKey;
+    UUID circleId;
+    private String hypercoreFeedId;
+    private String hypercorePublicKey;
+    private String hypercoreSecretKey;
 }

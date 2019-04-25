@@ -12,22 +12,23 @@ import com.dreamscale.htmflow.core.domain.journal.JournalEntryRepository;
 import com.dreamscale.htmflow.core.domain.member.MemberNameEntity;
 import com.dreamscale.htmflow.core.domain.member.MemberNameRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
+import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
-import org.dreamscale.exception.InternalServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -63,6 +64,12 @@ public class CircleService {
     @Autowired
     TimeService timeService;
 
+    @Autowired
+    HypercoreService hypercoreService;
+
+    @Autowired
+    TeamService teamService;
+
     SillyNameGenerator sillyNameGenerator;
 
     @Autowired
@@ -88,7 +95,7 @@ public class CircleService {
         List<CircleEntity> circleEntities = circleRepository.findAllOpenCirclesForOrganization(organizationId);
         List<CircleDto> circles = circleMapper.toApiList(circleEntities);
 
-        for (CircleDto circle: circles) {
+        for (CircleDto circle : circles) {
             circle.setDurationInSeconds(calculateEffectiveDuration(circle));
         }
         return circles;
@@ -110,8 +117,6 @@ public class CircleService {
         circleEntity.setProblemDescription(problemStatement);
         circleEntity.setOrganizationId(organizationId);
         circleEntity.setOnShelf(false);
-
-        configurePublicPrivateKeyPairs(circleEntity);
 
         circleRepository.save(circleEntity);
 
@@ -341,29 +346,6 @@ public class CircleService {
         return circleMemberDto;
     }
 
-    private void configurePublicPrivateKeyPairs(CircleEntity circleEntity) {
-
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
-
-            // Initialize KeyPairGenerator.
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(1024, random);
-
-            // Generate Key Pairs, a private key and a public key.
-            KeyPair keyPair = keyGen.generateKeyPair();
-            PrivateKey privateKey = keyPair.getPrivate();
-            PublicKey publicKey = keyPair.getPublic();
-
-            Base64.Encoder encoder = Base64.getEncoder();
-
-            circleEntity.setPublicKey(encoder.encodeToString(publicKey.getEncoded()));
-            circleEntity.setPrivateKey(encoder.encodeToString(privateKey.getEncoded()));
-        } catch (Exception ex) {
-            log.error("Unable to generate public/private keypairs", ex);
-            throw new InternalServerException(ValidationErrorCodes.FAILED_PUBLICKEY_GENERATION, "Unable to generate public/private keypairs");
-        }
-    }
 
     public FeedMessageDto postChatMessageToCircleFeed(UUID organizationId, UUID spiritId, UUID circleId, String chatMessage) {
 
@@ -392,7 +374,7 @@ public class CircleService {
         circleMessageEntity.setPosition(timeService.now());
 
         circleMessageEntity.setCircleId(circleId);
-        circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Added screenshot for "+screenshotReferenceInputDto.getFileName());
+        circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Added screenshot for " + screenshotReferenceInputDto.getFileName());
         circleMessageEntity.setMetadataField(CircleMessageEntity.FILE_NAME_FIELD, screenshotReferenceInputDto.getFileName());
         circleMessageEntity.setMetadataField(CircleMessageEntity.FILEPATH_FIELD, screenshotReferenceInputDto.getFilePath());
         circleMessageEntity.setMessageType(CircleMessageType.SCREENSHOT);
@@ -453,7 +435,7 @@ public class CircleService {
             startTimer = circleDto.getLastResumeTime();
         }
 
-        long seconds = startTimer.until( timeService.now(), ChronoUnit.SECONDS);
+        long seconds = startTimer.until(timeService.now(), ChronoUnit.SECONDS);
         seconds += circleDto.getDurationInSeconds();
 
         return seconds;
@@ -473,7 +455,7 @@ public class CircleService {
             circleMessageEntity.setPosition(timeService.now());
 
             circleMessageEntity.setCircleId(activeCircleId);
-            circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Added snippet from "+snippetEvent.getSource());
+            circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, "Added snippet from " + snippetEvent.getSource());
             circleMessageEntity.setMetadataField(CircleMessageEntity.SNIPPET_SOURCE_FIELD, snippetEvent.getSource());
             circleMessageEntity.setMetadataField(CircleMessageEntity.SNIPPET_FIELD, snippetEvent.getSnippet());
             circleMessageEntity.setMessageType(CircleMessageType.SNIPPET);
@@ -512,17 +494,47 @@ public class CircleService {
     }
 
 
-    public CircleKeyDto retrieveKey(UUID organizationId, UUID torchieId, UUID circleId) {
-        CircleKeyDto circleKeyDto = null;
-        CircleEntity circleEntity = circleRepository.findByOwnerMemberIdAndId(torchieId, circleId);
+    public CircleKeysDto retrieveKeys(UUID organizationId, UUID invokingMemberId, UUID circleId) {
+        CircleKeysDto circleKeysDto = null;
+
+        //make sure member is on team of the owner
+        CircleEntity circleEntity = circleRepository.findOne(circleId);
+
         if (circleEntity != null) {
-            circleKeyDto = new CircleKeyDto();
-            circleKeyDto.setPrivateKey(circleEntity.getPrivateKey());
+            validateMemberIsOnTeamOfCircleOwner(organizationId, invokingMemberId, circleEntity);
+
+            circleKeysDto = new CircleKeysDto();
+            circleKeysDto.setCircleId(circleId);
+
+            if (circleEntity.getHypercoreFeedId() == null) {
+                HypercoreKeysDto keys = hypercoreService.createNewFeed();
+                circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+                circleEntity.setHypercorePublicKey(keys.getKey());
+                circleEntity.setHypercoreSecretKey(keys.getSecretKey());
+
+                circleRepository.save(circleEntity);
+            }
+
+            circleKeysDto.setHypercoreFeedId(circleEntity.getHypercoreFeedId());
+            circleKeysDto.setHypercorePublicKey(circleEntity.getHypercorePublicKey());
+            circleKeysDto.setHypercoreSecretKey(circleEntity.getHypercoreSecretKey());
+
         } else {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCLE_KEY, "Unable to retrieve circle key");
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCLE_KEY, "Unable to retrieve circle keys");
         }
 
-        return circleKeyDto;
+        return circleKeysDto;
+    }
+
+    private void validateMemberIsOnTeamOfCircleOwner(UUID organizationId, UUID invokingMemberId, CircleEntity circleEntity) {
+        UUID circleOrgId = circleEntity.getOrganizationId();
+        UUID ownerMemberId = circleEntity.getOwnerMemberId();
+
+        if (!circleOrgId.equals(organizationId)) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Member organization is different than Circle organization");
+        }
+
+        teamService.validateMembersOnSameTeam(organizationId, ownerMemberId, invokingMemberId);
     }
 
 

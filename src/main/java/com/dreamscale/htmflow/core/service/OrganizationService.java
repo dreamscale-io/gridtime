@@ -42,8 +42,6 @@ public class OrganizationService {
     @Autowired
     private ActiveAccountStatusRepository activeAccountStatusRepository;
 
-    @Autowired
-    private MemberStatusRepository memberStatusRepository;
 
     @Autowired
     private JiraService jiraService;

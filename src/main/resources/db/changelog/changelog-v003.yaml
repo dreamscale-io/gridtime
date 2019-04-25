@@ -47,3 +47,9 @@ databaseChangeLog:
 
   - include:
         file: db/v003/uri/create_story_tile.sql
+
+  - include:
+        file: db/v003/hypercore/alter_team_add_hypercore_feed_key.sql
+
+  - include:
+        file: db/v003/hypercore/alter_circle_add_hypercore_feed_key.sql

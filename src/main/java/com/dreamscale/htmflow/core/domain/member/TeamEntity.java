@@ -23,5 +23,8 @@ public class TeamEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
+    private String hypercoreFeedId;
+    private String hypercorePublicKey;
+    private String hypercoreSecretKey;
 
 }

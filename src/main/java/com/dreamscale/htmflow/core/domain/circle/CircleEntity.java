@@ -29,9 +29,6 @@ public class CircleEntity {
 
     private String problemDescription;
 
-    private String publicKey;
-    private String privateKey;
-
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -42,6 +39,8 @@ public class CircleEntity {
 
     private Long durationInSeconds;
 
-
+    private String hypercoreFeedId;
+    private String hypercorePublicKey;
+    private String hypercoreSecretKey;
 
 }

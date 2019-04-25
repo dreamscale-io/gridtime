@@ -4,8 +4,10 @@ import com.dreamscale.htmflow.client.*;
 import com.dreamscale.htmflow.core.CoreARandom;
 import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
+import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreConnection;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
+import com.dreamscale.htmflow.core.service.HypercoreService;
 import com.dreamscale.htmflow.core.service.JiraService;
 import com.dreamscale.htmflow.core.service.TimeService;
 import org.dreamscale.feign.JacksonFeignBuilder;
@@ -40,6 +42,13 @@ public class ComponentTestConfig extends BaseTestConfig {
     public TimeService mockTimeService() {
         return detachedMockFactory().Mock(TimeService.class);
     }
+
+    @Bean
+    @Primary
+    public HypercoreService mockHypercoreService() {
+       return detachedMockFactory().Mock(HypercoreService.class);
+    }
+
 
     @Bean
     JournalClient journalClient() {
@@ -87,6 +96,10 @@ public class ComponentTestConfig extends BaseTestConfig {
     SpiritClient spiritClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, SpiritClient.class);
     }
+
+    @Bean
+    TeamClient teamClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamClient.class); }
+
 
     @Bean
     FlowClient unauthenticatedFlowClient() {

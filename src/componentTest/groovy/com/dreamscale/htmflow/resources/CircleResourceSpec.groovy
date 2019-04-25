@@ -3,16 +3,20 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.circle.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
-import com.dreamscale.htmflow.api.circle.CircleKeyDto
+import com.dreamscale.htmflow.api.circle.CircleKeysDto
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.circle.FeedMessageDto
 import com.dreamscale.htmflow.api.circle.CircleMessageType
 import com.dreamscale.htmflow.api.circle.ScreenshotReferenceInputDto
 import com.dreamscale.htmflow.api.event.NewSnippetEvent
+import com.dreamscale.htmflow.api.team.TeamDto
 import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
+import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto
+import com.dreamscale.htmflow.core.service.HypercoreService
+import com.dreamscale.htmflow.core.service.TeamService
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -31,10 +35,23 @@ class CircleResourceSpec extends Specification {
     MasterAccountEntity testUser
 
     @Autowired
+    TeamService teamService
+
+    @Autowired
     TimeService mockTimeService
+
+    @Autowired
+    HypercoreService mockHypercoreService
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
+
+        Map<String, String> keys = new HashMap<>();
+        keys.put("discoveryKey", "key1")
+        keys.put("key", "key2")
+        keys.put("secretKey", "key3")
+
+        mockHypercoreService.createNewFeed() >> new HypercoreKeysDto(keys)
     }
 
     def "should create a circle"() {
@@ -54,7 +71,6 @@ class CircleResourceSpec extends Specification {
         assert circle != null
         assert circle.circleName != null
         assert circle.problemDescription != null
-        assert circle.getPublicKey() != null
 
         assert circle.members != null
         assert circle.members.size() == 1
@@ -102,12 +118,16 @@ class CircleResourceSpec extends Specification {
         assert activeCircle.id == circle1.id
     }
 
-    def "should return circle key"() {
+    def "should return circle key when members on same team"() {
         given:
 
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         testUser.setId(member.getMasterAccountId())
+
+        TeamDto team = teamService.createTeam(org.id, "myTeam")
+        teamService.addMembersToTeam(org.id, team.id, Arrays.asList(member.id))
 
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -115,11 +135,13 @@ class CircleResourceSpec extends Specification {
         CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
-        CircleKeyDto circleKeyDto = circleClient.getCircleKey(circle1.id.toString())
+        CircleKeysDto circleKeyDto = circleClient.getCircleKeys(circle1.id.toString())
 
         then:
         assert circleKeyDto != null
-        assert circleKeyDto.privateKey != null
+        assert circleKeyDto.hypercoreFeedId != null
+        assert circleKeyDto.hypercorePublicKey != null
+        assert circleKeyDto.hypercoreSecretKey != null
     }
 
 

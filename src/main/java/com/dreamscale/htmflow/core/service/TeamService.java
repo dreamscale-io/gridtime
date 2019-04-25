@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
 import com.dreamscale.htmflow.core.domain.member.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
+import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import org.dreamscale.exception.BadRequestException;
@@ -26,6 +27,9 @@ public class TeamService {
 
     @Autowired
     private ActiveStatusService wtfService;
+
+    @Autowired
+    private HypercoreService hypercoreService;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -132,6 +136,14 @@ public class TeamService {
         return teamEntity;
     }
 
+    public void validateMembersOnSameTeam(UUID organizationId, UUID teamMember1, UUID teamMember2) {
+        List<TeamEntity> teams = teamRepository.findTeamsContainingBothMembers(organizationId, teamMember1, teamMember2);
+
+        if (teams.size() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TEAM, "Members not on same team");
+        }
+    }
+
     private OrganizationEntity validateOrganization(UUID orgId) {
         OrganizationEntity orgEntity = organizationRepository.findById(orgId);
 
@@ -145,6 +157,27 @@ public class TeamService {
     public List<TeamDto> getTeams(UUID orgId) {
         List<TeamEntity> teamEntityList = teamRepository.findByOrganizationId(orgId);
         return teamOutputMapper.toApiList(teamEntityList);
+    }
+
+    public TeamDto getMyPrimaryTeam(UUID orgId, UUID memberId) {
+        List<TeamEntity> teamEntities = teamRepository.findMyTeamsByOrgMembership(orgId, memberId);
+
+        TeamDto teamDto = null;
+        if (teamEntities.size() > 0) {
+            TeamEntity teamEntity = teamEntities.get(0);
+
+            if (teamEntity.getHypercoreFeedId() == null) {
+                HypercoreKeysDto keys = hypercoreService.createNewFeed();
+                teamEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+                teamEntity.setHypercorePublicKey(keys.getKey());
+                teamEntity.setHypercoreSecretKey(keys.getSecretKey());
+
+                teamRepository.save(teamEntity);
+            }
+
+            teamDto = teamOutputMapper.toApi(teamEntity);
+        }
+        return teamDto;
     }
 
     public List<TeamDto> getMyTeams(UUID orgId, UUID masterAccountId) {
@@ -256,6 +289,7 @@ public class TeamService {
 
         return teamMembers;
     }
+
 
 
 }

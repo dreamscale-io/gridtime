@@ -28,4 +28,17 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
             "and om.id =(:memberId) ")
     List<TeamEntity> findMyTeamsByOrgMembership(@Param("orgId") UUID orgId, @Param("memberId") UUID memberId);
 
+
+    @Query(nativeQuery = true, value = "select t.* from team t where exists ( " +
+            "select 1 from team_member tm1, team_member tm2 " +
+            "where tm1.team_id = tm2.team_id " +
+            "and tm1.member_id = (:member1) "+
+            "and tm2.member_id = (:member2) "+
+            "and tm1.organization_id = (:orgId) "+
+            "and tm2.organization_id = (:orgId) "+
+            "and tm1.team_id = t.id "+
+            "and tm2.team_id = t.id )")
+    List<TeamEntity> findTeamsContainingBothMembers(@Param("orgId") UUID orgId, @Param("member1") UUID member1,
+                                                    @Param("member2") UUID member2 );
+
 }
