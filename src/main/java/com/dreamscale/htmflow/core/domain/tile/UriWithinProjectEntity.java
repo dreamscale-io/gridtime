@@ -21,7 +21,7 @@ public class UriWithinProjectEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID projectId;
 
-    private StaticObjectType objectType;
+    private String objectType;
 
     private String objectKey;
 

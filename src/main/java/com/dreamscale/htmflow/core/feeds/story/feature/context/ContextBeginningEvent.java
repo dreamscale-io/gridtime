@@ -8,15 +8,24 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @ToString
 public class ContextBeginningEvent extends FlowFeature implements ContextChangeEvent {
 
     private LocalDateTime position;
     private int relativeSequence;
 
-    private Context context = new Context();
+    private Context context;
+
+    public ContextBeginningEvent() {
+        context = new Context();
+    }
+
+    public ContextBeginningEvent(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
+        this.position = position;
+        this.context = new Context();
+        context.setStructureLevel(structureLevel);
+        context.setId(referenceId);
+    }
 
     public void setReferenceId(UUID id) {
         context.setId(id);

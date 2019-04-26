@@ -142,12 +142,12 @@ public class URIMapper {
 
     private UriWithinProjectEntity findOrCreateUriObject(UUID projectId, StaticObjectType objectType, String objectKey, String parentUri, String relativePathPrefix) {
 
-        UriWithinProjectEntity uriObject = uriWithinProjectRepository.findByProjectIdAndObjectTypeAndObjectKey(projectId, objectType, objectKey);
+        UriWithinProjectEntity uriObject = uriWithinProjectRepository.findByProjectIdAndObjectTypeAndObjectKey(projectId, objectType.name(), objectKey);
         if (uriObject == null) {
             uriObject = new UriWithinProjectEntity();
             uriObject.setId(UUID.randomUUID());
             uriObject.setProjectId(projectId);
-            uriObject.setObjectType(objectType);
+            uriObject.setObjectType(objectType.name());
             uriObject.setObjectKey(objectKey);
             uriObject.setUri(parentUri + relativePathPrefix + uriObject.getId());
             uriObject.setRelativePath(relativePathPrefix + uriObject.getId());
@@ -166,7 +166,7 @@ public class URIMapper {
             uriObject = new UriWithinProjectEntity();
             uriObject.setId(UUID.randomUUID());
             uriObject.setProjectId(projectId);
-            uriObject.setObjectType(objectType);
+            uriObject.setObjectType(objectType.name());
             uriObject.setObjectKey(uri);
             uriObject.setUri(uri);
             uriObject.setRelativePath(relativePath);
@@ -186,7 +186,7 @@ public class URIMapper {
             uriObject = new UriWithinProjectEntity();
             uriObject.setId(fixedId);
             uriObject.setProjectId(projectId);
-            uriObject.setObjectType(objectType);
+            uriObject.setObjectType(objectType.name());
             uriObject.setObjectKey(uri);
             uriObject.setUri(uri);
             uriObject.setRelativePath(relativePath);
@@ -230,7 +230,7 @@ public class URIMapper {
 
         UriWithinFlowEntity flowUri = new UriWithinFlowEntity();
         flowUri.setId(UUID.randomUUID());
-        flowUri.setObjectType(flowObjectType);
+        flowUri.setObjectType(flowObjectType.name());
         flowUri.setUri(uri);
         flowUri.setRelativePath(relativePath);
 

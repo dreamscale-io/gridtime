@@ -53,3 +53,9 @@ databaseChangeLog:
 
   - include:
         file: db/v003/hypercore/alter_circle_add_hypercore_feed_key.sql
+
+  - include:
+        file: db/v003/uri/alter_uri_within_project_rename_relative_path.sql
+
+  - include:
+        file: db/v003/uri/alter_uri_within_flow_rename_relative_path.sql
