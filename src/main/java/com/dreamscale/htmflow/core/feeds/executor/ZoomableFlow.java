@@ -1,9 +1,10 @@
-package com.dreamscale.htmflow.core.feeds.common;
+package com.dreamscale.htmflow.core.feeds.executor;
 
 import com.dreamscale.htmflow.core.feeds.clock.ClockChangeListener;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import lombok.extern.slf4j.Slf4j;
 

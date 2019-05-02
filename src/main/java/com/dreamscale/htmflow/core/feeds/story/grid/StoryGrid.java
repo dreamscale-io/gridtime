@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.music.Column;
 
 import java.util.*;
 
@@ -13,11 +12,10 @@ public class StoryGrid {
 
     private Map<UUID, FeatureAggregate> aggregators = new HashMap<>();
 
-    private transient GridMetrics theVoid = new GridMetrics();
-
     private List<Column> columns = new ArrayList<>();
 
-
+    private transient GridMetrics theVoid = new GridMetrics();
+    private StoryGridModel extractedStoryGridModel;
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
         if (feature != null) {
@@ -97,12 +95,75 @@ public class StoryGrid {
         columns.add(column);
     }
 
+    public void summarize() {
+
+        StoryGridModel storyGridModel = createStoryGridModel();
+
+        StoryGridSummary summary = new StoryGridSummary();
+
+        summary.setBoxesVisited(storyGridModel.getBoxesVisited().size());
+        summary.setLocationsVisited(storyGridModel.getLocationsVisited().size());
+        summary.setTraversalsVisited(storyGridModel.getTraversalsVisited().size());
+        summary.setBridgesVisited(storyGridModel.getBridgesVisited().size());
+        summary.setBubblesVisited(storyGridModel.getBubblesVisited().size());
+
+        double totalFeels = 0;
+        double totalLearning = 0;
+        double totalTroubleshooting = 0;
+        double totalPairing = 0;
+
+        Set<String> experimentUris = new LinkedHashSet<>();
+        Set<String> messageUris = new LinkedHashSet<>();
+
+        for (Column column : columns) {
+            totalFeels += column.getFeels();
+            totalLearning += toIntFlag(column.isLearning());
+            totalTroubleshooting += toIntFlag(column.isTroubleshooting());
+            totalPairing += toIntFlag(column.isPairing());
+
+            experimentUris.addAll(column.getExperimentContextUris());
+            messageUris.addAll(column.getMessageContextUris());
+        }
+
+        summary.setAvgMood(totalFeels / columns.size());
+        summary.setPercentLearning(totalLearning / columns.size());
+        summary.setPercentTroubleshooting(totalTroubleshooting / columns.size());
+        summary.setPercentProgress(1 - summary.getPercentLearning() - summary.getPercentTroubleshooting());
+
+        summary.setPercentPairing(totalPairing / columns.size());
+        summary.setTotalExperiments(experimentUris.size());
+        summary.setTotalMessages(messageUris.size());
+
+        storyGridModel.setSummary(summary);
+        storyGridModel.setColumns(columns);
+
+        extractedStoryGridModel = storyGridModel;
+    }
+
+
+
+    private int toIntFlag(boolean flag) {
+        if (flag) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public StoryGridModel getStoryGridModel() {
+        if (extractedStoryGridModel == null) {
+            summarize();
+        }
+
+        return extractedStoryGridModel;
+    }
+
     /**
      * Note: This is dependent on URI Mappings already being run, if no URIs are present,
      * UUIDs will be used for URI
-     * @return
      */
-    public StoryGridModel extractStoryGridModel() {
+    private StoryGridModel createStoryGridModel() {
+
         StoryGridModel storyGridModel = new StoryGridModel();
 
         for (FeatureRow row : featureRows.values()) {
@@ -121,7 +182,6 @@ public class StoryGrid {
             storyGridModel.addActivityForStructure(feature, metrics);
         }
 
-        storyGridModel.setColumns(columns);
         return storyGridModel;
     }
 

@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
-import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.JournalFetcher

@@ -1,5 +1,6 @@
-package com.dreamscale.htmflow.core.feeds.story;
+package com.dreamscale.htmflow.core.feeds.story.music;
 
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
@@ -51,7 +52,7 @@ public class StoryMusicPlayer {
 
             scene.snapshot(metronome.getCoords());
         }
-
+        scene.finish();
     }
 
 
@@ -68,7 +69,7 @@ public class StoryMusicPlayer {
                 for (Playable playable : playables) {
                     total += ((FeelsBand) playable).getFeels();
                 }
-                return total / playables.size();
+                return Math.floorDiv(total , playables.size());
             } else {
                 return 0;
             }

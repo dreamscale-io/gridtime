@@ -13,6 +13,8 @@ import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.member.SpiritXPEntity
+import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto
+import com.dreamscale.htmflow.core.service.HypercoreService
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -36,8 +38,18 @@ class SpiritResourceSpec extends Specification {
     @Autowired
     TimeService mockTimeService
 
+    @Autowired
+    HypercoreService mockHypercoreService
+
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
+
+        Map<String, String> keys = new HashMap<>();
+        keys.put("discoveryKey", "key1")
+        keys.put("key", "key2")
+        keys.put("secretKey", "key3")
+
+        mockHypercoreService.createNewFeed() >> new HypercoreKeysDto(keys)
     }
 
     def "should get the xp for the Torchie spirit"() {

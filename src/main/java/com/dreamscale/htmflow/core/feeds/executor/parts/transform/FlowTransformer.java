@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
 
 import com.dreamscale.htmflow.core.feeds.common.Flow;
-import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 
 import java.time.LocalDateTime;
 import java.util.*;

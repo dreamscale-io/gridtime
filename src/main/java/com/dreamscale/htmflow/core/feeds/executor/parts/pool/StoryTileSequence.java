@@ -1,7 +1,8 @@
-package com.dreamscale.htmflow.core.feeds.story;
+package com.dreamscale.htmflow.core.feeds.executor.parts.pool;
 
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 
 import java.util.LinkedList;
 

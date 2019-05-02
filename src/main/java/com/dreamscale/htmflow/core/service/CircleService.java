@@ -119,9 +119,11 @@ public class CircleService {
         circleEntity.setOnShelf(false);
 
         HypercoreKeysDto keys = hypercoreService.createNewFeed();
-        circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-        circleEntity.setHypercorePublicKey(keys.getKey());
-        circleEntity.setHypercoreSecretKey(keys.getSecretKey());
+        if (keys != null) {
+            circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+            circleEntity.setHypercorePublicKey(keys.getKey());
+            circleEntity.setHypercoreSecretKey(keys.getSecretKey());
+        }
 
         circleRepository.save(circleEntity);
 
@@ -401,6 +403,19 @@ public class CircleService {
         CircleDto circleDto = null;
 
         CircleEntity circleEntity = circleRepository.findOne(circleId);
+
+        if (circleEntity.getHypercoreFeedId() == null) {
+            HypercoreKeysDto keys = hypercoreService.createNewFeed();
+            if (keys != null) {
+                circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+                circleEntity.setHypercorePublicKey(keys.getKey());
+                circleEntity.setHypercoreSecretKey(keys.getSecretKey());
+
+                circleRepository.save(circleEntity);
+            }
+        }
+
+
         circleDto = circleMapper.toApi(circleEntity);
         circleDto.setDurationInSeconds(calculateEffectiveDuration(circleDto));
 

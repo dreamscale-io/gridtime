@@ -23,7 +23,7 @@ public class ExecuteThing extends Movement {
         return executionDetails;
     }
 
-    public static enum EventType {
+    public enum EventType {
         START_LONG_EXECUTION,
         END_LONG_EXECUTION,
         EXECUTE_EVENT

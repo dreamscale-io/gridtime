@@ -15,6 +15,7 @@ import com.dreamscale.htmflow.core.hooks.jira.JiraConnectionFactory;
 import com.dreamscale.htmflow.core.hooks.jira.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
+import org.dreamscale.exception.WebApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,9 +33,17 @@ public class HypercoreService {
 
     public HypercoreKeysDto createNewFeed() {
         HypercoreConnection connection = hypercoreConnectionFactory.connect();
-        HypercoreDto core = connection.create();
 
-        return core.getResponse();
+        HypercoreKeysDto keys = null;
+
+        try {
+            HypercoreDto core = connection.create();
+            keys = core.getResponse();
+        } catch (WebApplicationException ex) {
+            log.error("Unable to connect to hypercore server", ex);
+        }
+
+        return keys;
     }
 
 }

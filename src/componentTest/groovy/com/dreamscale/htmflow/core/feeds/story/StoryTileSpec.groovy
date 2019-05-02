@@ -12,7 +12,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand
-import com.dreamscale.htmflow.core.feeds.story.music.Column;
+import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import spock.lang.Specification
 
 import java.time.Duration;

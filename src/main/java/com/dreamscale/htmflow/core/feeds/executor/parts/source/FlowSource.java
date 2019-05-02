@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.source;
 
 import com.dreamscale.htmflow.core.feeds.common.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.Batch;
-import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
 

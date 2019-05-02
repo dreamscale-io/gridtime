@@ -1,9 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.feature.StoryTileModel;
+import com.dreamscale.htmflow.core.feeds.story.feature.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
@@ -15,6 +12,7 @@ import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
+import com.dreamscale.htmflow.core.feeds.story.music.StoryMusicPlayer;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -204,7 +202,7 @@ public class StoryTile {
     }
 
     /**
-     * An alternative set of authors is active for all subsequent data until cleared
+     * An alternative set of authors is active for all subsequent data until changed
      * @param startBandPosition
      * @param authorDetails
      */
@@ -212,13 +210,6 @@ public class StoryTile {
         timeBandMapper.startBand(BandLayerType.AUTHORS, startBandPosition, authorDetails);
     }
 
-    /**
-     * Clear out the alternative authors, and go back to default
-     * @param endBandPosition
-     */
-    public void clearAlternativeAuthorsBand(LocalDateTime endBandPosition) {
-        timeBandMapper.clearBand(BandLayerType.AUTHORS, endBandPosition);
-    }
 
     /**
      * Activate the feels flame rating from this point forward until cleared or changed
@@ -296,6 +287,21 @@ public class StoryTile {
         model.setCarryOverContext(getCarryOverContext());
 
         return model;
+    }
+
+    /**
+     * Extract a serializable form of the generated model, that can be compared with other tiles,
+     * and loaded into grids
+     */
+    public StoryTileSummary extractStoryTileSummary() {
+        StoryTileSummary summary = new StoryTileSummary();
+        summary.setTileSummaryUri(getTileUri() + "/summary");
+        summary.setZoomLevel(getZoomLevel());
+        summary.setTileCoordinates(getTileCoordinates());
+
+        summary.setStoryGridSummary(getStoryGrid().getSummary());
+
+        return summary;
     }
 
     /**
@@ -380,8 +386,9 @@ public class StoryTile {
     }
 
     public StoryGridModel getStoryGrid() {
-        return storyGrid.extractStoryGridModel();
+        return storyGrid.getStoryGridModel();
     }
+
 
     public List<MomentOfContext> getAllContexts() {
         return contextMapper.getAllContexts();

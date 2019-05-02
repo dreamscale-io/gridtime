@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.music.Column;
+import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

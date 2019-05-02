@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.util.*;
 
 @Getter
-public class StructuresVisitedMap  {
+public class StructuredMetricsMap {
 
     private List<String> boxesVisited = new ArrayList<>();
     private List<String> locationsVisited = new ArrayList<>();

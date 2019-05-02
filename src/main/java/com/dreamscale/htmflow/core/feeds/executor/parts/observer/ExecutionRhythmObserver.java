@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Translates the raw execution activity into a set of rhythms within the StoryFrame,
+ * Translates the raw execution activity into a set of rhythms within the StoryTile,
  * looking for patterns of red test failure, then iterate, iterate, iterate, and finally getting to test pass
  * as a series of "execution cycles" that indicate dynamics of friction
  */
@@ -47,6 +47,13 @@ public class ExecutionRhythmObserver implements FlowObserver {
             }
         }
 
+        processExecutionEvents(window, storyTile, executionEventDetails);
+
+        storyTile.finishAfterLoad();
+
+    }
+
+    private void processExecutionEvents(Window window, StoryTile storyTile, List<ExecutionDetails> executionEventDetails) {
         Movement movement = storyTile.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
         boolean isRedAndWantingGreen = isRedAndWantingGreen(movement);
         LocalDateTime lastPosition = getLastPosition(movement, window);
@@ -63,17 +70,14 @@ public class ExecutionRhythmObserver implements FlowObserver {
             executionDetails.setIsRedAndWantingGreen(isRedAndWantingGreen);
 
             Duration durationSinceLastExec = Duration.between(lastPosition, executionDetails.getPosition());
-            Duration durationUntilNextExec = Duration.between(executionDetails.getPosition(), getNextPosition(executionEventDetails, i, window));
+            Duration durationUntilNextExec = Duration.between(executionDetails.getPosition(),
+                    getNextPosition(executionEventDetails, i, window));
 
             executionDetails.setDurationSinceLastExecution(durationSinceLastExec);
             executionDetails.setDurationUntilNextExecution(durationUntilNextExec);
 
             storyTile.executeThing(executionDetails.getPosition(), executionDetails);
         }
-
-
-        storyTile.finishAfterLoad();
-
     }
 
     private LocalDateTime getNextPosition(List<ExecutionDetails> executionEventDetails, int i, Window window) {

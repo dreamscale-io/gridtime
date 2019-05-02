@@ -4,7 +4,8 @@ import com.dreamscale.htmflow.core.domain.tile.StoryTileEntity;
 import com.dreamscale.htmflow.core.domain.tile.StoryTileRepository;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.feature.StoryTileModel;
+import com.dreamscale.htmflow.core.feeds.story.StoryTileModel;
+import com.dreamscale.htmflow.core.feeds.story.StoryTileSummary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,10 @@ public class SaveToPostgresSink implements SinkStrategy {
     public void save(UUID torchieId, StoryTile storyTile) {
 
         StoryTileModel storyTileModel = storyTile.extractStoryTileModel();
+        StoryTileSummary storyTileSummary = storyTile.extractStoryTileSummary();
 
         String storyTileAsJson = toJson(storyTileModel);
+        String summaryAsJson = toJson(storyTileSummary);
 
         StoryTileEntity storyTileEntity = new StoryTileEntity();
         storyTileEntity.setId(UUID.randomUUID());
@@ -54,7 +57,7 @@ public class SaveToPostgresSink implements SinkStrategy {
     }
 
 
-    public String toJson(StoryTileModel model) {
+    public String toJson(Object model) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(model);

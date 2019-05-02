@@ -168,11 +168,13 @@ public class TeamService {
 
             if (teamEntity.getHypercoreFeedId() == null) {
                 HypercoreKeysDto keys = hypercoreService.createNewFeed();
-                teamEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-                teamEntity.setHypercorePublicKey(keys.getKey());
-                teamEntity.setHypercoreSecretKey(keys.getSecretKey());
+                if (keys != null) {
+                    teamEntity.setHypercoreFeedId(keys.getDiscoveryKey());
+                    teamEntity.setHypercorePublicKey(keys.getKey());
+                    teamEntity.setHypercoreSecretKey(keys.getSecretKey());
 
-                teamRepository.save(teamEntity);
+                    teamRepository.save(teamEntity);
+                }
             }
 
             teamDto = teamOutputMapper.toApi(teamEntity);

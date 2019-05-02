@@ -1,8 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
-import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
-import com.dreamscale.htmflow.core.feeds.common.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategyFactory;

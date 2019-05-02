@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
-import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 
 import java.util.UUID;

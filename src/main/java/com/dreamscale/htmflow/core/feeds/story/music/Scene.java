@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.PostCircleMessage;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import com.dreamscale.htmflow.core.feeds.story.grid.GridMetrics;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
 
@@ -34,8 +35,8 @@ public class Scene {
     private LinkedList<ThoughtBubble.RingLocation> activeRingLocations = new LinkedList<>();
     private LinkedList<ThoughtBubble.Link> activeRingLinks = new LinkedList<>();
 
-    private LinkedList<ExecuteThing> activeExecutionContexts = new LinkedList<>();
-    private LinkedList<PostCircleMessage> activeCircleMessageContexts = new LinkedList<>();
+    private LinkedList<ExecuteThing> activeExperimentContexts = new LinkedList<>();
+    private LinkedList<PostCircleMessage> activeMessageContexts = new LinkedList<>();
 
 
 
@@ -52,6 +53,13 @@ public class Scene {
         column.setIntentionContext(intentionContext);
         column.setActiveAuthors(activeAuthors);
 
+        column.setFeels(activeFeels);
+
+        column.setTroubleshooting(isWTFFriction);
+        column.setLearning(isNotWTFAndIsLearning());
+        column.setProgress(isNotWTFAndIsNotLearning());
+        column.setPairing(isPairing);
+
         //static structures
 
         addStructureActivityMetrics(column, activeBoxes, coords);
@@ -66,10 +74,33 @@ public class Scene {
 
         //temporal structures
 
-        column.addExecutionContexts(activeExecutionContexts);
-        column.addMessageContexts(activeCircleMessageContexts);
+        column.addExperimentContexts(extractUris(activeExperimentContexts));
+        column.addMessageContexts(extractUris(activeMessageContexts));
 
         storyGrid.addColumn(column);
+    }
+
+    private boolean isNotWTFAndIsLearning() {
+        if (isWTFFriction) {
+            return false;
+        }
+        return isLearningFriction;
+    }
+
+    private boolean isNotWTFAndIsNotLearning() {
+        return !isWTFFriction && !isLearningFriction;
+    }
+
+    private List<String> extractUris(List<? extends FlowFeature> features) {
+        List<String> uris = new ArrayList<>();
+        for (FlowFeature feature : features) {
+            uris.add(feature.getUri());
+        }
+        return uris;
+    }
+
+    public void finish() {
+        storyGrid.summarize();
     }
 
     private void addRingLocationAliases(Column column, LinkedList<ThoughtBubble.RingLocation> activeRingLocations) {
@@ -97,17 +128,17 @@ public class Scene {
         }
     }
 
-
     public void panForwardTime() {
         removeAllButOne(activeBoxes);
         removeAllButOne(activeLocationsInBox);
         removeAllButOne(activeTraversals);
         removeAllButOne(activeBridges);
-        removeAllButOne(activeExecutionContexts);
-        removeAllButOne(activeCircleMessageContexts);
         removeAllButOne(activeBubbles);
         removeAllButOne(activeRingLocations);
         removeAllButOne(activeRingLinks);
+
+        removeAllButOne(activeExperimentContexts);
+        removeAllButOne(activeMessageContexts);
     }
 
     public void correlateMetricsWithinFrame(MusicGeometryClock.Coords coords) {
@@ -196,11 +227,11 @@ public class Scene {
     }
 
     public void pushExecuteEvent(ExecuteThing executeEvent) {
-        this.activeExecutionContexts.add(executeEvent);
+        this.activeExperimentContexts.add(executeEvent);
     }
 
     public void pushCircleMessageEvent(PostCircleMessage circleMessageEvent) {
-        this.activeCircleMessageContexts.add(circleMessageEvent);
+        this.activeMessageContexts.add(circleMessageEvent);
     }
 
     public void changeActiveAuthors(List<Member> authors) {

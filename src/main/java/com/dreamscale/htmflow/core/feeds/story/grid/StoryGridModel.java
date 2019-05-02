@@ -1,48 +1,50 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.music.Column;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
 public class StoryGridModel extends FlowFeature {
 
-    private StructuresVisitedMap structuresVisitedMap = new StructuresVisitedMap();
+    private StructuredMetricsMap structuredMetricsMap = new StructuredMetricsMap();
 
     private List<Column> columns;
-
+    private StoryGridSummary summary;
 
     public void addActivityForStructure(FlowFeature feature, GridMetrics metrics) {
-        structuresVisitedMap.addActivityForStructure(feature,  metrics);
+        structuredMetricsMap.addActivityForStructure(feature,  metrics);
     }
 
     public List<String> getBoxesVisited() {
-        return structuresVisitedMap.getBoxesVisited();
+        return structuredMetricsMap.getBoxesVisited();
     }
 
     public List<String> getLocationsVisited() {
-        return structuresVisitedMap.getLocationsVisited();
+        return structuredMetricsMap.getLocationsVisited();
     }
 
     public List<String> getTraversalsVisited() {
-        return structuresVisitedMap.getTraversalsVisited();
+        return structuredMetricsMap.getTraversalsVisited();
     }
 
     public List<String> getBridgesVisited() {
-        return structuresVisitedMap.getBridgesVisited();
+        return structuredMetricsMap.getBridgesVisited();
     }
 
     public List<String> getBubblesVisited() {
-        return structuresVisitedMap.getBubblesVisited();
+        return structuredMetricsMap.getBubblesVisited();
     }
 
     public FeatureMetrics getFeatureMetrics(String uri) {
-        return structuresVisitedMap.getFeatureMetrics(uri);
+        return structuredMetricsMap.getFeatureMetrics(uri);
+    }
+
+    public FeatureMetrics getFeatureMetricsForColumn(String uri, int columnIndex) {
+        return columns.get(columnIndex).getFeatureMetrics(uri);
     }
 
 }

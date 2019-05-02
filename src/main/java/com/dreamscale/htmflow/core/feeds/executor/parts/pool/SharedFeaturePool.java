@@ -1,10 +1,9 @@
-package com.dreamscale.htmflow.core.feeds.common;
+package com.dreamscale.htmflow.core.feeds.executor.parts.pool;
 
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.StoryTileSequence;
 
 import java.util.HashMap;
 import java.util.UUID;
