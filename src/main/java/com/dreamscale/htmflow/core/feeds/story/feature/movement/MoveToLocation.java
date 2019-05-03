@@ -1,26 +1,34 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.Traversal;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@ToString
 public class MoveToLocation extends Movement {
 
-    private final LocationInBox location;
-    private final Traversal traversal;
+    private LocationInBox location;
+
+    @JsonIgnore
+    private Traversal traversal;
 
     public MoveToLocation(LocalDateTime moment, LocationInBox location, Traversal traversal) {
-        super(moment, MovementType.MOVE_TO_LOCATION, location);
+        super(moment, FlowObjectType.MOVEMENT_TO_LOCATION);
         this.location = location;
         this.traversal = traversal;
     }
 
-    public LocationInBox getLocation() {
-        return location;
+    public MoveToLocation() {
+        super(FlowObjectType.MOVEMENT_TO_LOCATION);
     }
 
-    public Traversal getTraversal() {
-        return traversal;
-    }
 }

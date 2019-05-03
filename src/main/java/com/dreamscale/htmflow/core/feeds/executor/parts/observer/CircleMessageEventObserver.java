@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 
 import java.util.List;
 
@@ -39,22 +39,22 @@ public class CircleMessageEventObserver implements FlowObserver {
 
     }
 
-    private Message createIdeaDeails(CircleFeedMessageEntity circleMessage) {
-        Message message = new Message();
+    private MessageDetails createIdeaDeails(CircleFeedMessageEntity circleMessage) {
+        MessageDetails messageDetails = new MessageDetails();
 
-        message.setMessageFromTorchieId(circleMessage.getTorchieId());
-        message.setMessageFromName(circleMessage.getFullName());
+        messageDetails.setMessageFromTorchieId(circleMessage.getTorchieId());
+        messageDetails.setMessageFromName(circleMessage.getFullName());
 
-        message.setCircleId(circleMessage.getCircleId());
-        message.setCircleName(circleMessage.getCircleName());
+        messageDetails.setCircleId(circleMessage.getCircleId());
+        messageDetails.setCircleName(circleMessage.getCircleName());
 
-        message.setMessageId(circleMessage.getId());
-        message.setMessageType(circleMessage.getMessageType());
-        message.setMessage(circleMessage.getMessage());
-        message.setFileName(circleMessage.getFileName());
-        message.setFilePath(circleMessage.getFilePath());
-        message.setSnippetSource(circleMessage.getSnippetSource());
-        return message;
+        messageDetails.setMessageId(circleMessage.getId());
+        messageDetails.setMessageType(circleMessage.getMessageType());
+        messageDetails.setMessage(circleMessage.getMessage());
+        messageDetails.setFileName(circleMessage.getFileName());
+        messageDetails.setFilePath(circleMessage.getFilePath());
+        messageDetails.setSnippetSource(circleMessage.getSnippetSource());
+        return messageDetails;
     }
 
     private boolean isScrapbookEvent(CircleMessageType circleMessageType) {

@@ -49,7 +49,7 @@ class URIAssignmentTransformSpec extends Specification {
         uriAssignmentTransform.transform(storyTile);
 
         then:
-        LocationInBox locationFromTile = (LocationInBox) storyTile.getLastMovement(RhythmLayerType.LOCATION_CHANGES).referenceObject
+        LocationInBox locationFromTile = (LocationInBox) storyTile.getLastMovement(RhythmLayerType.LOCATION_CHANGES).location
         assert locationFromTile != null
         assert locationFromTile.getUri() == locationPreSaved.getUri()
     }

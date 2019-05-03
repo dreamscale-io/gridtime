@@ -1,13 +1,20 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Getter
+@Setter
+@ToString
 public class ThoughtBubble extends FlowFeature {
     private RingLocation center;
     private RingLocation entrance;
@@ -21,6 +28,7 @@ public class ThoughtBubble extends FlowFeature {
     private int relativeSequence;
 
     public ThoughtBubble() {
+        super(FlowObjectType.BUBBLE);
         Ring firstRing = new Ring(1);
         rings.add(firstRing);
         activeRing = firstRing;
@@ -28,19 +36,19 @@ public class ThoughtBubble extends FlowFeature {
 
     public void placeCenter(LocationInBox centerOfFocus) {
         if (centerOfFocus != null) {
-            this.center = new RingLocation(null, centerOfFocus);
+            this.center = new RingLocation(centerOfFocus);
         }
     }
 
     public void placeEntrance(LocationInBox entrance) {
         if (entrance != null) {
-            this.entrance = new RingLocation(null, entrance);
+            this.entrance = new RingLocation(entrance);
         }
     }
 
     public void placeExit(LocationInBox exit) {
         if (exit != null) {
-            this.exit = new RingLocation(null, exit);
+            this.exit = new RingLocation(exit);
         }
     }
 
@@ -72,7 +80,7 @@ public class ThoughtBubble extends FlowFeature {
         firstRing.addLinkToInnerRing(link);
     }
 
-
+    @JsonIgnore
     public List<LocationInBox> getLocationsInFirstRing() {
         Ring firstRing = rings.get(0);
         return firstRing.getRawLocationsInsideRing();
@@ -176,7 +184,7 @@ public class ThoughtBubble extends FlowFeature {
 
         for (Ring ring: rings) {
             if (ring.containsTraversal(traversal)) {
-                ringLink = ring.getLinkForTraversal(traversal);
+                ringLink = ring.findLinkForTraversal(traversal);
                 break;
             }
         }
@@ -202,6 +210,7 @@ public class ThoughtBubble extends FlowFeature {
         return ringLink;
     }
 
+    @JsonIgnore
     public List<LocationInBox> getAllLocations() {
         List<LocationInBox> allLocations = new ArrayList<>();
         for (Ring ring: rings) {
@@ -214,6 +223,7 @@ public class ThoughtBubble extends FlowFeature {
         return allLocations;
     }
 
+    @JsonIgnore
     public List<Traversal> getAllTraversals() {
         List<Traversal> allTraversals = new ArrayList<>();
         for (Ring ring: rings) {
@@ -235,34 +245,32 @@ public class ThoughtBubble extends FlowFeature {
 
 
     @Getter
+    @Setter
+    @ToString
     public static class Ring extends FlowFeature {
 
-        private final int ringNumber;
-        List<LocationInBox> locationsInsideRing = new ArrayList<>();
+        private int ringNumber;
         List<RingLocation> ringLocations = new ArrayList<>();
 
         List<Link> linksToInnerRing = new ArrayList<>();
         List<Link> linksWithinRing = new ArrayList<>();
 
-        RadialClock radialClock;
-
         public Ring(int ringNumber) {
+            this();
             this.ringNumber = ringNumber;
         }
 
+        public Ring() {
+            super(FlowObjectType.BUBBLE_RING);
+        }
         public RingLocation addElement(LocationInBox location) {
-            RingLocation ringLocation = new RingLocation(this, location);
+            RingLocation ringLocation = new RingLocation(location);
 
-            locationsInsideRing.add(location);
             ringLocations.add(ringLocation);
 
             return ringLocation;
         }
 
-        RingLocation getRingLocationForLocation(LocationInBox location) {
-            int index = locationsInsideRing.indexOf(location);
-            return ringLocations.get(index);
-        }
 
         public void addLinkToInnerRing(Link link) {
             this.linksToInnerRing.add(link);
@@ -272,25 +280,53 @@ public class ThoughtBubble extends FlowFeature {
             this.linksWithinRing.add(link);
         }
 
+        @JsonIgnore
         public List<LocationInBox> getRawLocationsInsideRing() {
-            return locationsInsideRing;
+            List<LocationInBox> locations = new ArrayList<>();
+            for (RingLocation ringLocation : ringLocations) {
+                locations.add(ringLocation.getLocation());
+            }
+
+            return locations;
         }
 
-        public List<RingLocation> getRingLocations() {
-            return ringLocations;
+        @JsonIgnore
+        RingLocation getRingLocationForLocation(LocationInBox location) {
+            RingLocation locationFound = null;
+
+            for (RingLocation ringLocation : ringLocations) {
+                if (ringLocation.getLocation() == location) {
+                    locationFound = ringLocation;
+                    break;
+                }
+            }
+
+            return locationFound;
+        }
+
+        @JsonIgnore
+        public List<Traversal> getRawTraversals() {
+            List<Traversal> traversals = new ArrayList<>();
+            for (Link link : linksToInnerRing) {
+                traversals.add(link.getTraversal());
+            }
+            for (Link link : linksWithinRing) {
+                traversals.add(link.getTraversal());
+            }
+            return traversals;
         }
 
         public boolean contains(LocationInBox location) {
-            return locationsInsideRing.contains(location);
+            return getRingLocationForLocation(location) != null;
         }
 
         void finish() {
-            this.radialClock = new RadialClock(ringLocations.size());
+            RadialClock radialClock = new RadialClock(ringLocations.size());
 
             RingLocation [] radialSlots = new RingLocation[ringLocations.size()];
 
             for (RingLocation item : ringLocations) {
-                List<Link> preferredLocationLinks = getPreferredLocations(item);
+                List<Link> preferredLocationLinks = determinePreferredLocations(item);
 
                 List<Double> preferredAngles = new ArrayList<>();
 
@@ -347,7 +383,7 @@ public class ThoughtBubble extends FlowFeature {
             item.setAngle(radialClock.getAngleOfSlot(slotNumber));
         }
 
-        private List<Link> getPreferredLocations(RingLocation item) {
+        private List<Link> determinePreferredLocations(RingLocation item) {
             List<Link> linksFromItem = new ArrayList<>();
             for (Link link : linksToInnerRing) {
                 if (link.contains(item)) {
@@ -367,7 +403,7 @@ public class ThoughtBubble extends FlowFeature {
             return false;
         }
 
-        public Link getLinkForTraversal(Traversal traversal) {
+        public Link findLinkForTraversal(Traversal traversal) {
             for (Link link : linksToInnerRing) {
                 if (link.contains(traversal)) {
                     return link;
@@ -376,56 +412,25 @@ public class ThoughtBubble extends FlowFeature {
             return null;
         }
 
-        public List<Traversal> getRawTraversals() {
-            List<Traversal> traversals = new ArrayList<>();
-            for (Link link : linksToInnerRing) {
-                traversals.add(link.getTraversal());
-            }
-            for (Link link : linksWithinRing) {
-                traversals.add(link.getTraversal());
-            }
-            return traversals;
-        }
+
     }
 
+    @Getter
+    @Setter
+    @ToString
     public static class RingLocation extends FlowFeature {
 
-        private final LocationInBox location;
-        private final Ring parentRing;
+        private LocationInBox location;
         private int slot = 0;
         private double angle = 0;
 
-        public RingLocation(Ring ring, LocationInBox location) {
-            this.parentRing = ring;
+        public RingLocation(LocationInBox location) {
+            this();
             this.location = location;
         }
 
-        public String getRingPath() {
-            if (parentRing != null) {
-                return parentRing.getRelativePath();
-            } else {
-                return "";
-            }
-        }
-
-        public int getSlot() {
-            return slot;
-        }
-
-        public void setSlot(int slot) {
-            this.slot = slot;
-        }
-
-        public double getAngle() {
-            return angle;
-        }
-
-        public void setAngle(double angle) {
-            this.angle = angle;
-        }
-
-        public LocationInBox getLocation() {
-            return location;
+        public RingLocation() {
+            super(FlowObjectType.BUBBLE_RING_LOCATION);
         }
 
         public boolean contains(LocationInBox location) {
@@ -434,16 +439,23 @@ public class ThoughtBubble extends FlowFeature {
     }
 
     @Getter
+    @Setter
+    @ToString
     public static class Link extends FlowFeature {
 
-        private final Traversal traversal;
-        private final RingLocation from;
-        private final RingLocation to;
+        private Traversal traversal;
+        private RingLocation from;
+        private RingLocation to;
 
         public Link(RingLocation from, RingLocation to, Traversal traversal) {
+            this();
             this.from = from;
             this.to = to;
             this.traversal = traversal;
+        }
+
+        public Link() {
+            super(FlowObjectType.BUBBLE_RING_LINK);
         }
 
         public boolean contains(Traversal traversal) {

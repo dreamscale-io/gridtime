@@ -2,14 +2,18 @@ package com.dreamscale.htmflow.core.feeds.story.feature.details;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+
 @Getter
+@Setter
 @ToString
-public class ExecutionDetails extends FlowFeature {
+public class ExecutionDetails extends Details {
 
     private LocalDateTime position;
     private Duration duration;
@@ -25,12 +29,15 @@ public class ExecutionDetails extends FlowFeature {
     private Duration durationSinceLastExecution;
     private Duration durationUntilNextExecution;
 
-    public void setDuration(Duration duration) {
+
+    public ExecutionDetails(LocalDateTime moment, Duration duration) {
+        this();
+        this.position = moment;
         this.duration = duration;
     }
 
-    public void setProcessName(String processName) {
-        this.processName = processName;
+    public ExecutionDetails() {
+        super(DetailsType.EXECUTION);
     }
 
     public void setExecutionTaskType(String executionTaskType) {
@@ -38,13 +45,8 @@ public class ExecutionDetails extends FlowFeature {
         this.isUnitTest = evalIsUnitTest();
     }
 
-    public void setExitCode(int exitCode) {
-        this.exitCode = exitCode;
-    }
-
-    public void setIsDebug(boolean isDebug) {
-        this.isDebug = isDebug;
-    }
+    public void setRed(boolean red) {}
+    public void setGreen(boolean green) {}
 
     public boolean isRed() {
         boolean isRed = false;
@@ -83,38 +85,6 @@ public class ExecutionDetails extends FlowFeature {
 
     public boolean isUnitTest() {
         return isUnitTest;
-    }
-
-    public boolean isRedAndWantingGreen() {
-        return isRedAndWantingGreen;
-    }
-
-    public void setIsRedAndWantingGreen(boolean isRedAndWantingGreen) {
-        this.isRedAndWantingGreen = isRedAndWantingGreen;
-    }
-
-    public Duration getDuration() {
-        return this.duration;
-    }
-
-    public void setPosition(LocalDateTime position) {
-        this.position = position;
-    }
-
-    public LocalDateTime getPosition() {
-        return position;
-    }
-
-    public void setDurationSinceLastExecution(Duration durationSinceLastExec) {
-        this.durationSinceLastExecution = durationSinceLastExec;
-    }
-
-    public void setDurationUntilNextExecution(Duration durationUntilNextExecution) {
-        this.durationUntilNextExecution = durationUntilNextExecution;
-    }
-
-    public Duration getDurationUntilNextExecution() {
-        return durationUntilNextExecution;
     }
 
     private enum UnitTestType {

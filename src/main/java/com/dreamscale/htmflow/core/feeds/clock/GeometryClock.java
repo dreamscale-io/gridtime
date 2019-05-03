@@ -145,13 +145,13 @@ public class GeometryClock {
         final int weeksIntoBlock;
         final int weeksIntoYear;
         final int daysIntoWeek;
-        final int fours;
+        final int fourhours;
         final int twenties;
 
 
 
-        public String formatDreamtime() {
-            return year + "-BW" + block + "-" + weeksIntoBlock + "." + daysIntoWeek + "-T" + fours + "-" + twenties;
+        public String formatDreamTime() {
+            return year + "-BW" + block + "-" + weeksIntoBlock + "." + daysIntoWeek + "-FT" + fourhours + "-" + twenties;
         }
 
         public StoryCoords panLeft(ZoomLevel zoomLevel) {

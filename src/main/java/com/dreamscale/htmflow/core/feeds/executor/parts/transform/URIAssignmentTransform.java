@@ -22,7 +22,6 @@ public class URIAssignmentTransform implements FlowTransform {
     public void transform(StoryTile storyTile) {
 
         populateStaticLocationUris(storyTile);
-        populateStaticMessageUris(storyTile);
 
         populateStaticContextUris(storyTile);
 
@@ -51,37 +50,29 @@ public class URIAssignmentTransform implements FlowTransform {
         }
     }
 
-    private void populateStaticMessageUris(StoryTile storyTile) {
-        List<Movement> movements = storyTile.getRhythmLayer(RhythmLayerType.CIRCLE_MESSAGE_EVENTS).getMovements();
-
-        for (Movement movement : movements) {
-            PostCircleMessage messageEvent = (PostCircleMessage)movement;
-            UUID projectId = messageEvent.getContext().getProjectId();
-            uriMapper.populateMessageUri(projectId, messageEvent.getMessage());
-        }
-
-    }
-
 
     private void populateStaticLocationUris(StoryTile storyTile) {
 
         List<Movement> movements = storyTile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES).getMovements();
 
         for (Movement movement : movements) {
-            switch (movement.getType()) {
-                case MOVE_TO_LOCATION:
+
+            MomentOfContext momentOfContext = storyTile.getContextOfMoment(movement.getMoment());
+
+            switch (movement.getFlowObjectType()) {
+                case MOVEMENT_TO_LOCATION:
                     MoveToLocation moveToLocation = (MoveToLocation)movement;
-                    UUID projectId = moveToLocation.getContext().getProjectId();
+                    UUID projectId = momentOfContext.getProjectId();
                     uriMapper.populateLocationUri(projectId, moveToLocation.getLocation());
                     uriMapper.populateTraversalUri(projectId, moveToLocation.getTraversal());
                     break;
-                case MOVE_TO_BOX:
+                case MOVEMENT_TO_BOX:
                     MoveToBox moveToBox = (MoveToBox)movement;
-                    uriMapper.populateBoxUri(moveToBox.getContext().getProjectId(), moveToBox.getBox());
+                    uriMapper.populateBoxUri(momentOfContext.getProjectId(), moveToBox.getBox());
                     break;
-                case MOVE_ACROSS_BRIDGE:
+                case MOVEMENT_ACROSS_BRIDGE:
                     MoveAcrossBridge moveAcrossBridge = (MoveAcrossBridge)movement;
-                    uriMapper.populateBridgeUri(moveAcrossBridge.getContext().getProjectId(), moveAcrossBridge.getBridge());
+                    uriMapper.populateBridgeUri(momentOfContext.getProjectId(), moveAcrossBridge.getBridge());
                     break;
             }
         }

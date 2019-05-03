@@ -12,11 +12,17 @@ public class AuthorDetails extends Details {
     private List<Member> authors;
 
     public AuthorDetails(Member author) {
+        this();
         this.authors = new ArrayList<>();
         this.authors.add(author);
     }
 
     public AuthorDetails(List<Member> authors) {
+        this();
         this.authors = authors;
+    }
+
+    public AuthorDetails() {
+        super(DetailsType.AUTHOR);
     }
 }

@@ -166,7 +166,7 @@ public class FlowContextMapper {
         for (int i = momentsOfContext.size() - 1; i >= 0; i--) {
             MomentOfContext momentOfContext = momentsOfContext.get(i);
 
-            if (momentOfContext.getCoordinates().getClockTime().isBefore(moment)) {
+            if (momentOfContext.getPosition().isBefore(moment)) {
                 contextOfMoment = momentOfContext;
                 break;
             }

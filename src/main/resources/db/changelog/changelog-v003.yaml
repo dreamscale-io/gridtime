@@ -59,3 +59,13 @@ databaseChangeLog:
 
   - include:
         file: db/v003/uri/alter_uri_within_flow_rename_relative_path.sql
+
+  - include:
+        file: db/v003/uri/alter_story_tile_add_json_tile_summary.sql
+
+  - include:
+        file: db/v003/uri/create_story_grid_summary.sql
+
+  - include:
+        file: db/v003/uri/create_story_grid_metrics.sql
+

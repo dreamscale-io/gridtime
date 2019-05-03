@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.*;
 
@@ -8,8 +9,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @ToString
 public class ContextEndingEvent extends FlowFeature implements ContextChangeEvent {
 
@@ -17,7 +16,23 @@ public class ContextEndingEvent extends FlowFeature implements ContextChangeEven
     private int relativeSequence;
     private FinishStatus finishStatus;
 
-    private Context context = new Context();
+    private Context context;
+
+    public ContextEndingEvent() {
+        super(FlowObjectType.CONTEXT_ENDING_EVENT);
+
+        context = new Context();
+    }
+
+    public ContextEndingEvent(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
+        super(FlowObjectType.CONTEXT_ENDING_EVENT);
+
+        this.position = position;
+        this.context = new Context();
+        context.setStructureLevel(structureLevel);
+        context.setId(referenceId);
+    }
+
 
     @Override
     public StructureLevel getStructureLevel() {

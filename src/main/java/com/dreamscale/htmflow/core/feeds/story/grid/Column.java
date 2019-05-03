@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.domain.member.json.Member;
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
@@ -16,7 +17,7 @@ import java.util.*;
 @Setter
 public class Column extends FlowFeature {
 
-    private final MusicGeometryClock.Coords coords;
+    private MusicGeometryClock.Coords coords;
 
     private Context projectContext;
     private Context taskContext;
@@ -41,7 +42,12 @@ public class Column extends FlowFeature {
 
 
     public Column(MusicGeometryClock.Coords coords) {
+        this();
         this.coords = coords;
+    }
+
+    public Column() {
+        super(FlowObjectType.STORY_GRID_COLUMN);
     }
 
     public void addActivityForStructure(FlowFeature feature, GridMetrics metrics) {

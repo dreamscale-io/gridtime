@@ -36,14 +36,14 @@ public class StoryTileSpec extends Specification {
         ContextBeginningEvent startTask = new ContextBeginningEvent()
         startTask.setPosition(clockStart.plusMinutes(4))
         startTask.setStructureLevel(StructureLevel.TASK)
-        startTask.setReferenceId(UUID.randomUUID())
+        startTask.setContextId(UUID.randomUUID())
         startTask.setName("name");
 
         ContextEndingEvent endTask = new ContextEndingEvent()
         endTask.setPosition(clockStart.plusMinutes(6))
         endTask.setStructureLevel(StructureLevel.TASK)
         endTask.setName("name");
-        endTask.setReferenceId(startTask.getReferenceId())
+        endTask.setReferenceId(startTask.getContextId())
 
         when:
         tile.beginContext(startTask)
@@ -89,7 +89,7 @@ public class StoryTileSpec extends Specification {
         assert layer.movements.get(2) instanceof MoveToLocation
         assert layer.movements.get(3) instanceof MoveToLocation
 
-        assert layer.movements.get(1).referenceObject == layer.movements.get(3).referenceObject
+        assert layer.movements.get(1).location == layer.movements.get(3).location
 
         assert spatial.getBoxActivities().size() == 1
         assert spatial.getBoxActivities().get(0).thoughtBubbles.size() == 1
@@ -109,7 +109,7 @@ public class StoryTileSpec extends Specification {
         ContextBeginningEvent startTask = new ContextBeginningEvent()
         startTask.setPosition(time1)
         startTask.setStructureLevel(StructureLevel.TASK)
-        startTask.setReferenceId(UUID.randomUUID())
+        startTask.setContextId(UUID.randomUUID())
         startTask.setName("name");
 
         when:

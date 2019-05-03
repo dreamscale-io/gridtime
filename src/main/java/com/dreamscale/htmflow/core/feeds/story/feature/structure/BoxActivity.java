@@ -1,13 +1,15 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
+@ToString
 public class BoxActivity extends FlowFeature {
 
     private Box box;
@@ -15,7 +17,12 @@ public class BoxActivity extends FlowFeature {
     private int relativeSequence;
 
     public BoxActivity(Box box) {
+        this();
         this.box = box;
+    }
+
+    public BoxActivity() {
+        super(FlowObjectType.BOX_ACTIVITY);
     }
 
     public void addBubble(ThoughtBubble bubble) {
@@ -42,10 +49,6 @@ public class BoxActivity extends FlowFeature {
         } else {
             return false;
         }
-    }
-
-    public void setRelativeSequence(int relativeSequence) {
-        this.relativeSequence = relativeSequence;
     }
 
 

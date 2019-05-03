@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,18 +19,22 @@ public class ContextBeginningEvent extends FlowFeature implements ContextChangeE
     private Context context;
 
     public ContextBeginningEvent() {
+        super(FlowObjectType.CONTEXT_BEGINNING_EVENT);
+
         context = new Context();
     }
 
     public ContextBeginningEvent(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
+        super(FlowObjectType.CONTEXT_BEGINNING_EVENT);
+
         this.position = position;
         this.context = new Context();
         context.setStructureLevel(structureLevel);
-        context.setId(referenceId);
+        context.setObjectId(referenceId);
     }
 
-    public void setReferenceId(UUID id) {
-        context.setId(id);
+    public void setContextId(UUID id) {
+        context.setObjectId(id);
     }
 
     public void setStructureLevel(StructureLevel structureLevel) {
@@ -39,23 +45,29 @@ public class ContextBeginningEvent extends FlowFeature implements ContextChangeE
         context.setDescription(description);
     }
 
+    public void setName(String name) {
+        context.setName(name);
+    }
+
+    @JsonIgnore
     public StructureLevel getStructureLevel() {
         return context.getStructureLevel();
     }
 
-    public UUID getReferenceId() {
-        return context.getId();
+    @JsonIgnore
+    public UUID getContextId() {
+        return context.getObjectId();
     }
 
+    @JsonIgnore
     public String getName() {
         return context.getName();
     }
 
+    @JsonIgnore
     public String getDescription() {
         return context.getDescription();
     }
 
-    public void setName(String name) {
-        context.setName(name);
-    }
+
 }

@@ -79,7 +79,7 @@ public class JournalContextObserver implements FlowObserver {
 
     private ContextBeginningEvent createProjectBeginning(JournalEntryEntity journalEntry) {
         ContextBeginningEvent projectBeginning = new ContextBeginningEvent();
-        projectBeginning.setReferenceId(journalEntry.getProjectId());
+        projectBeginning.setContextId(journalEntry.getProjectId());
         projectBeginning.setStructureLevel(StructureLevel.PROJECT);
         projectBeginning.setName(journalEntry.getProjectName());
         projectBeginning.setPosition(journalEntry.getPosition());
@@ -89,7 +89,7 @@ public class JournalContextObserver implements FlowObserver {
 
     private ContextBeginningEvent createTaskBeginning(JournalEntryEntity journalEntry) {
         ContextBeginningEvent taskBeginning = new ContextBeginningEvent();
-        taskBeginning.setReferenceId(journalEntry.getTaskId());
+        taskBeginning.setContextId(journalEntry.getTaskId());
         taskBeginning.setStructureLevel(StructureLevel.TASK);
         taskBeginning.setName(journalEntry.getTaskName());
         taskBeginning.setDescription(journalEntry.getTaskSummary());
@@ -125,7 +125,7 @@ public class JournalContextObserver implements FlowObserver {
     private void createIntentionStartAndEnd(Window window, StoryTile storyTile, JournalEntryEntity journalEntry) {
 
         ContextBeginningEvent intentionStart = new ContextBeginningEvent();
-        intentionStart.setReferenceId(journalEntry.getId());
+        intentionStart.setContextId(journalEntry.getId());
         intentionStart.setStructureLevel(StructureLevel.INTENTION);
         intentionStart.setDescription(journalEntry.getDescription());
         intentionStart.setPosition(journalEntry.getPosition());

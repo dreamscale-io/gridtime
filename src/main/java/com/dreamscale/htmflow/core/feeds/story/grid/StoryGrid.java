@@ -125,16 +125,19 @@ public class StoryGrid {
             messageUris.addAll(column.getMessageContextUris());
         }
 
-        summary.setAvgMood(totalFeels / columns.size());
-        summary.setPercentLearning(totalLearning / columns.size());
-        summary.setPercentTroubleshooting(totalTroubleshooting / columns.size());
+        if (columns.size() > 0) {
+            summary.setAvgMood(totalFeels / columns.size());
+            summary.setPercentLearning(totalLearning / columns.size());
+            summary.setPercentTroubleshooting(totalTroubleshooting / columns.size());
+            summary.setPercentPairing(totalPairing / columns.size());
+        }
+
         summary.setPercentProgress(1 - summary.getPercentLearning() - summary.getPercentTroubleshooting());
 
-        summary.setPercentPairing(totalPairing / columns.size());
         summary.setTotalExperiments(experimentUris.size());
         summary.setTotalMessages(messageUris.size());
 
-        storyGridModel.setSummary(summary);
+        storyGridModel.setStoryGridSummary(summary);
         storyGridModel.setColumns(columns);
 
         extractedStoryGridModel = storyGridModel;
@@ -169,6 +172,7 @@ public class StoryGrid {
         for (FeatureRow row : featureRows.values()) {
             FlowFeature feature = row.getFeature();
             GridMetrics metrics = row.getAllTimeBucket();
+
 
             storyGridModel.addActivityForStructure(feature, metrics);
         }

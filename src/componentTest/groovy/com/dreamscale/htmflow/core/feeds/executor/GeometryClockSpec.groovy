@@ -23,7 +23,7 @@ class GeometryClockSpec extends Specification {
         assert coords.year == 2019
         assert coords.daysIntoWeek == 1
         assert coords.weeksIntoYear == 1
-        assert coords.fours == 1
+        assert coords.fourhours == 1
         assert coords.twenties == 8
         assert coords.weeksIntoBlock == 1
         assert coords.block == 1
@@ -43,7 +43,7 @@ class GeometryClockSpec extends Specification {
         assert coords.year == 2019
         assert coords.daysIntoWeek == 1
         assert coords.weeksIntoYear == 1
-        assert coords.fours == 6
+        assert coords.fourhours == 6
         assert coords.twenties == 12
         assert coords.weeksIntoBlock == 1
         assert coords.block == 1

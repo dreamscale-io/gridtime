@@ -1,6 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.DetailsType;
 import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
 import lombok.Getter;
@@ -11,12 +13,17 @@ import java.util.LinkedList;
 public class RollingAggregateBand extends Timeband {
 
 
-    private final CandleStickDetails candleSticks;
+    private CandleStickDetails candleSticks;
 
     public RollingAggregateBand(LocalDateTime start, LocalDateTime end) {
         super(start, end, new CandleStickDetails());
+        setFlowObjectType(FlowObjectType.ROLLING_TIMEBAND);
 
         this.candleSticks = (CandleStickDetails) super.getDetails();
+    }
+
+    public RollingAggregateBand() {
+        setFlowObjectType(FlowObjectType.ROLLING_TIMEBAND);
     }
 
     /*
@@ -60,6 +67,10 @@ public class RollingAggregateBand extends Timeband {
         private CandleStick withinWindowCandleStick = new CandleStick();
         private CandleStick aggregateCandleStick = new CandleStick();
         private LinkedList<CandleStick> pastCandleSticks = new LinkedList<>(); //newest stick in the front, oldest in the back
+
+        public CandleStickDetails() {
+            super(DetailsType.ROLLING_CANDLES);
+        }
 
         LinkedList<CandleStick> getRolledPastCandlesMinusOldest() {
             LinkedList<CandleStick> pastCandles = new LinkedList<>(pastCandleSticks);

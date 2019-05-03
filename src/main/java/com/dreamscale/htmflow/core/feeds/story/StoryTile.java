@@ -66,9 +66,8 @@ public class StoryTile {
 
     public void beginContext(ContextBeginningEvent contextBeginning) {
         Movement movement = contextMapper.beginContext(contextBeginning);
-        MomentOfContext context = contextMapper.getMomentOfContext(contextBeginning.getPosition());
 
-        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, movement);
+        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
 
     /**
@@ -77,8 +76,7 @@ public class StoryTile {
 
     public void endContext(ContextEndingEvent contextEnding) {
         Movement movement = contextMapper.endContext(contextEnding);
-        MomentOfContext context = contextMapper.getMomentOfContext(contextEnding.getPosition());
-        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, movement);
+        flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
 
     /**
@@ -97,10 +95,9 @@ public class StoryTile {
 
     public void gotoLocation(LocalDateTime moment, String boxName, String locationPath, Duration timeInLocation) {
 
-        MomentOfContext context = contextMapper.getMomentOfContext(moment);
         List<Movement> movements = spatialGeometryMapper.gotoLocation(moment, boxName, locationPath, timeInLocation);
 
-        flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, context, movements);
+        flowRhythmMapper.addMovements(RhythmLayerType.LOCATION_CHANGES, movements);
 
         Box currentBox = spatialGeometryMapper.getCurrentBox();
         LocationInBox currentLocation = spatialGeometryMapper.getCurrentLocation();
@@ -117,6 +114,7 @@ public class StoryTile {
             storyGrid.getMetricsFor(recentBridgeCrossed, coords).addVelocitySample(timeInLocation);
         }
 
+        MomentOfContext context = contextMapper.getMomentOfContext(moment);
         storyGrid.getMetricsFor(context.getProjectContext(), coords).addVelocitySample(timeInLocation);
         storyGrid.getMetricsFor(context.getTaskContext(), coords).addVelocitySample(timeInLocation);
         storyGrid.getMetricsFor(context.getIntentionContext(), coords).addVelocitySample(timeInLocation);
@@ -128,8 +126,6 @@ public class StoryTile {
 
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
 
-        MomentOfContext context = contextMapper.getMomentOfContext(moment);
-
         Box currentBox = spatialGeometryMapper.getCurrentBox();
         LocationInBox currentLocation = spatialGeometryMapper.getCurrentLocation();
 
@@ -137,6 +133,8 @@ public class StoryTile {
 
         storyGrid.getMetricsFor(currentBox, coords).addModificationSample(modificationCount);
         storyGrid.getMetricsFor(currentLocation, coords).addModificationSample(modificationCount);
+
+        MomentOfContext context = contextMapper.getMomentOfContext(moment);
 
         storyGrid.getMetricsFor(context.getProjectContext(), coords).addModificationSample(modificationCount);
         storyGrid.getMetricsFor(context.getTaskContext(), coords).addModificationSample(modificationCount);
@@ -153,7 +151,7 @@ public class StoryTile {
     public void executeThing(LocalDateTime moment, ExecutionDetails executionDetails) {
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
 
-        flowRhythmMapper.executeThing(moment, context, executionDetails);
+        flowRhythmMapper.executeThing(moment, executionDetails);
 
         MusicGeometryClock.Coords coords = internalClock.createCoords(moment);
 
@@ -178,11 +176,11 @@ public class StoryTile {
     /**
      * Add an event for posting a message to the circle to help solve a problem
      * @param moment
-     * @param message
+     * @param messageDetails
      */
-    public void postCircleMessage(LocalDateTime moment, Message message) {
+    public void postCircleMessage(LocalDateTime moment, MessageDetails messageDetails) {
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
-        flowRhythmMapper.shareMessage(moment, context, message);
+        flowRhythmMapper.shareMessage(moment, messageDetails);
     }
 
     /**
@@ -256,7 +254,6 @@ public class StoryTile {
     public void play() {
         storyPlayer.loadFrame(this);
         storyPlayer.play();
-
     }
 
     /**
@@ -289,20 +286,6 @@ public class StoryTile {
         return model;
     }
 
-    /**
-     * Extract a serializable form of the generated model, that can be compared with other tiles,
-     * and loaded into grids
-     */
-    public StoryTileSummary extractStoryTileSummary() {
-        StoryTileSummary summary = new StoryTileSummary();
-        summary.setTileSummaryUri(getTileUri() + "/summary");
-        summary.setZoomLevel(getZoomLevel());
-        summary.setTileCoordinates(getTileCoordinates());
-
-        summary.setStoryGridSummary(getStoryGrid().getSummary());
-
-        return summary;
-    }
 
     /**
      * When a new frame is initialized by "panning right", forwarding one step into the future
@@ -324,7 +307,7 @@ public class StoryTile {
 
         MomentOfContext context = this.contextMapper.getCurrentContext();
 
-        this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, context, sideEffectMovement);
+        this.flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, sideEffectMovement);
     }
 
     public CarryOverContext getCarryOverContext() {

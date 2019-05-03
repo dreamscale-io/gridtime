@@ -1,21 +1,30 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 @Getter
+@Setter
 public class RhythmLayer extends FlowFeature {
 
-    private final RhythmLayerType layerType;
+    private RhythmLayerType layerType;
     List<Movement> movements;
 
     public RhythmLayer(RhythmLayerType layerType) {
+        this();
         this.layerType = layerType;
         this.movements = new ArrayList<>();
+    }
+
+    public RhythmLayer() {
+        super(FlowObjectType.RHYTHM_LAYER);
     }
 
     public List<Movement> getMovements() {
@@ -50,6 +59,7 @@ public class RhythmLayer extends FlowFeature {
         }
     }
 
+    @JsonIgnore
     public Movement getLastMovement() {
         Movement lastMovement = null;
 

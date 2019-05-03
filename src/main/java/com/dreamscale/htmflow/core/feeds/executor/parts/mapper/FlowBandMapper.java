@@ -26,10 +26,6 @@ public class FlowBandMapper {
         this.from = from;
         this.to = to;
 
-        //init all the layers
-        for (BandLayerType layerType : BandLayerType.values()) {
-            findOrCreateLayer(layerType);
-        }
     }
 
     private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {
@@ -70,13 +66,13 @@ public class FlowBandMapper {
     }
 
     public void startBand(BandLayerType bandLayerType, LocalDateTime startBandPosition, Details details) {
-        BandLayerMapper layer = layerMap.get(bandLayerType);
+        BandLayerMapper layer = findOrCreateLayer(bandLayerType);
 
         layer.startBand(startBandPosition, details);
     }
 
     public void clearBand(BandLayerType bandLayerType, LocalDateTime endBandPosition) {
-        BandLayerMapper layer = layerMap.get(bandLayerType);
+        BandLayerMapper layer = findOrCreateLayer(bandLayerType);
 
         layer.clearBand(endBandPosition);
     }
@@ -88,7 +84,7 @@ public class FlowBandMapper {
     }
 
     public TimebandLayer getBandLayer(BandLayerType layerType) {
-        return layerMap.get(layerType).getLayer();
+        return findOrCreateLayer(layerType).getLayer();
     }
 
     public List<TimebandLayer> getBandLayers() {
@@ -110,12 +106,12 @@ public class FlowBandMapper {
     }
 
     public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatsPerBucket) {
-        BandLayerMapper layer = layerMap.get(bandLayerType);
+        BandLayerMapper layer = findOrCreateLayer(bandLayerType);
         layer.fillWithRollingAggregateBands(beatsPerBucket);
     }
 
     public void addRollingBandSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
-        BandLayerMapper layer = layerMap.get(bandLayerType);
+        BandLayerMapper layer = findOrCreateLayer(bandLayerType);
 
         if (!layer.isRollingBandLayerConfigured()) {
             configureRollingBands(bandLayerType, BeatsPerBucket.QUARTER);

@@ -1,19 +1,28 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+@Getter
+@Setter
+@ToString
 public class ChangeContext extends Movement {
 
-    private final ContextChangeEvent contextChangeEvent;
-    private final EventType eventType;
+    private Context changingContext;
+    private EventType eventType;
 
     public ChangeContext(LocalDateTime moment, ContextChangeEvent contextChangeEvent) {
-        super(moment, MovementType.CHANGE_CONTEXT, null);
-        this.contextChangeEvent = contextChangeEvent;
+        super(moment, FlowObjectType.MOVEMENT_CHANGE_CONTEXT);
+
+        this.changingContext = contextChangeEvent.getContext();
 
         if (contextChangeEvent instanceof ContextBeginningEvent) {
             eventType = EventType.CONTEXT_BEGINNING;
@@ -22,8 +31,28 @@ public class ChangeContext extends Movement {
         }
     }
 
-    public ContextChangeEvent getEvent() {
-        return contextChangeEvent;
+    public ChangeContext() {
+        super(FlowObjectType.MOVEMENT_CHANGE_CONTEXT);
+    }
+
+    @JsonIgnore
+    public StructureLevel getStructureLevel() {
+        return changingContext.getStructureLevel();
+    }
+
+    @JsonIgnore
+    public UUID getObjectId() {
+        return changingContext.getObjectId();
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return changingContext.getName();
+    }
+
+    @JsonIgnore
+    public String getDescription() {
+        return changingContext.getDescription();
     }
 
     public enum EventType {

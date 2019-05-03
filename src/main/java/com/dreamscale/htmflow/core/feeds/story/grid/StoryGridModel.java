@@ -1,19 +1,27 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 public class StoryGridModel extends FlowFeature {
 
+    private StoryGridSummary storyGridSummary;
+
     private StructuredMetricsMap structuredMetricsMap = new StructuredMetricsMap();
 
     private List<Column> columns;
-    private StoryGridSummary summary;
+
+    public StoryGridModel() {
+        super(FlowObjectType.STORY_GRID);
+    }
 
     public void addActivityForStructure(FlowFeature feature, GridMetrics metrics) {
         structuredMetricsMap.addActivityForStructure(feature,  metrics);
@@ -47,4 +55,8 @@ public class StoryGridModel extends FlowFeature {
         return columns.get(columnIndex).getFeatureMetrics(uri);
     }
 
+    @JsonIgnore
+    public Set<String> getAllFeaturesVisited() {
+        return structuredMetricsMap.getAllFeaturesVisited();
+    }
 }

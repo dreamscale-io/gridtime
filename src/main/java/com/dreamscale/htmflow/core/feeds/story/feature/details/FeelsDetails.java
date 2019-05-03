@@ -8,9 +8,12 @@ public class FeelsDetails extends Details {
     private Integer flameRating;
 
     public FeelsDetails(Integer flameRating) {
-
+        this();
         this.flameRating = flameRating;
     }
 
+    public FeelsDetails() {
+        super(DetailsType.FEELS);
+    }
 
 }

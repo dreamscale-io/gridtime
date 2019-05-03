@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 import java.util.*;
@@ -60,5 +61,8 @@ public class StructuredMetricsMap {
         }
     }
 
-
+    @JsonIgnore
+    public Set<String> getAllFeaturesVisited() {
+        return activityMetricsMap.keySet();
+    }
 }

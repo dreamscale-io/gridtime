@@ -139,6 +139,8 @@ public class GravityBallOfThoughts {
 
             ThoughtBubble bubble = featureFactory.createBubbleInsideBox(boxActivity);
             populateBubbleAndRemoveParticlesUsed(bubble, particlesByWeight, enterExitTransitions);
+
+
             boxActivity.addBubble(bubble);
 
             //we should deplete our particles, but just in case, make sure we don't loop forever
@@ -196,9 +198,9 @@ public class GravityBallOfThoughts {
         }
 
         addEnterExitsToStructureAndRemoveParticlesUsed(bubble, particlesByWeight, enterExitTransitions);
+        bubble.finish();
 
         featureFactory.assignAllRingUris(bubble);
-        bubble.finish();
     }
 
     private void addEnterExitsToStructureAndRemoveParticlesUsed(ThoughtBubble thoughtBubble, List<ThoughtParticle> particlesByWeight, List<ThoughtParticle> enterExitTransitions) {

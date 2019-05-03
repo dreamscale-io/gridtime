@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer
 
-
+import com.dreamscale.htmflow.api.event.EventType
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
@@ -8,8 +8,8 @@ import com.dreamscale.htmflow.core.domain.flow.FinishStatus
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
+import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
@@ -56,55 +56,55 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(window, storyTile)
-        List<ContextEndingEvent> contextEvents = toContextEventList(storyTile.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements());
+        List<ChangeContext> contextEvents = storyTile.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements();
 
         then:
         assert contextEvents != null
         assert contextEvents.size() == 9
-        assert contextEvents.get(0).structureLevel == StructureLevel.PROJECT
-        assert contextEvents.get(0).getReferenceId() == project.id
-        assert contextEvents.get(0).position == time1
-        assert contextEvents.get(0) instanceof ContextBeginningEvent
+        assert contextEvents.get(0).getStructureLevel() == StructureLevel.PROJECT
+        assert contextEvents.get(0).getObjectId() == project.id
+        assert contextEvents.get(0).getMoment() == time1
+        assert contextEvents.get(0).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
 
-        assert contextEvents.get(1).structureLevel == StructureLevel.TASK
-        assert contextEvents.get(1).getReferenceId() == task1.id
-        assert contextEvents.get(1).position == time1
-        assert contextEvents.get(1) instanceof ContextBeginningEvent
+        assert contextEvents.get(1).getStructureLevel() == StructureLevel.TASK
+        assert contextEvents.get(1).getObjectId() == task1.id
+        assert contextEvents.get(1).getMoment() == time1
+        assert contextEvents.get(1).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
 
-        assert contextEvents.get(2).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(2).getReferenceId() == journalEntry1.get().id
-        assert contextEvents.get(2).position == time1
-        assert contextEvents.get(2) instanceof ContextBeginningEvent
+        assert contextEvents.get(2).getStructureLevel() == StructureLevel.INTENTION
+        assert contextEvents.get(2).getObjectId() == journalEntry1.get().id
+        assert contextEvents.get(2).getMoment() == time1
+        assert contextEvents.get(2).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
 
-        assert contextEvents.get(3).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(3).getReferenceId() == journalEntry1.get().id
-        assert contextEvents.get(3).position == time2
-        assert contextEvents.get(3) instanceof ContextEndingEvent
+        assert contextEvents.get(3).getStructureLevel() == StructureLevel.INTENTION
+        assert contextEvents.get(3).getObjectId() == journalEntry1.get().id
+        assert contextEvents.get(3).getMoment() == time2
+        assert contextEvents.get(3).getEventType() == ChangeContext.EventType.CONTEXT_ENDING
 
-        assert contextEvents.get(4).structureLevel == StructureLevel.TASK
-        assert contextEvents.get(4).getReferenceId() == task1.id
-        assert contextEvents.get(4).position == time2
-        assert contextEvents.get(4) instanceof ContextEndingEvent
+        assert contextEvents.get(4).getStructureLevel() == StructureLevel.TASK
+        assert contextEvents.get(4).getObjectId() == task1.id
+        assert contextEvents.get(4).getMoment() == time2
+        assert contextEvents.get(4).getEventType() == ChangeContext.EventType.CONTEXT_ENDING
 
-        assert contextEvents.get(5).structureLevel == StructureLevel.TASK
-        assert contextEvents.get(5).getReferenceId() == task2.id
-        assert contextEvents.get(5).position == time2
-        assert contextEvents.get(5) instanceof ContextBeginningEvent
+        assert contextEvents.get(5).getStructureLevel() == StructureLevel.TASK
+        assert contextEvents.get(5).getObjectId() == task2.id
+        assert contextEvents.get(5).getMoment() == time2
+        assert contextEvents.get(5).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
 
-        assert contextEvents.get(6).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(6).getReferenceId() == journalEntry2.get().id
-        assert contextEvents.get(6).position == time2
-        assert contextEvents.get(6) instanceof ContextBeginningEvent
+        assert contextEvents.get(6).getStructureLevel() == StructureLevel.INTENTION
+        assert contextEvents.get(6).getObjectId() == journalEntry2.get().id
+        assert contextEvents.get(6).getMoment() == time2
+        assert contextEvents.get(6).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
 
-        assert contextEvents.get(7).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(7).getReferenceId() == journalEntry2.get().id
-        assert contextEvents.get(7).position == time3
-        assert contextEvents.get(7) instanceof ContextEndingEvent
+        assert contextEvents.get(7).getStructureLevel() == StructureLevel.INTENTION
+        assert contextEvents.get(7).getObjectId() == journalEntry2.get().id
+        assert contextEvents.get(7).getMoment() == time3
+        assert contextEvents.get(7).getEventType() == ChangeContext.EventType.CONTEXT_ENDING
 
-        assert contextEvents.get(8).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(8).getReferenceId() == journalEntry3.get().id
-        assert contextEvents.get(8).position == time3
-        assert contextEvents.get(8) instanceof ContextBeginningEvent
+        assert contextEvents.get(8).getStructureLevel() == StructureLevel.INTENTION
+        assert contextEvents.get(8).getObjectId() == journalEntry3.get().id
+        assert contextEvents.get(8).getMoment() == time3
+        assert contextEvents.get(8).getEventType() == ChangeContext.EventType.CONTEXT_BEGINNING
     }
 
 
@@ -138,24 +138,17 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(nextWindow, nextFrame)
-        List<ContextChangeEvent> contextEvents = toContextEventList(nextFrame.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements());
+        List<Movement> contextEvents = nextFrame.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements();
         then:
         assert contextEvents != null
         assert contextEvents.size() == 1
-        assert contextEvents.get(0).structureLevel == StructureLevel.INTENTION
-        assert contextEvents.get(0).referenceId == journalEntry1.get().id
-        assert contextEvents.get(0).position == time3
-        assert contextEvents.get(0) instanceof ContextEndingEvent
 
-    }
+        Context context = ((ChangeContext)contextEvents.get(0)).getChangingContext();
 
-    private List<ContextChangeEvent> toContextEventList(List<Movement> movements) {
+        assert context.structureLevel == StructureLevel.INTENTION
+        assert context.objectId == journalEntry1.get().id
+        assert contextEvents.get(0).moment == time3
 
-        List<ContextChangeEvent> contextEvents = new ArrayList<>();
-        for (Movement movementEvent : movements) {
-            contextEvents.add(((ChangeContext)movementEvent).getEvent() as ContextChangeEvent);
-        }
-        contextEvents
     }
 
 

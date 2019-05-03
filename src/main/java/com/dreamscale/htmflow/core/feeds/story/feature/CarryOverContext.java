@@ -1,15 +1,18 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
+import lombok.*;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A bag of properties that can be carried over from frame to frame
  */
+
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class CarryOverContext {
 
     private String contextOwner;
@@ -32,7 +35,9 @@ public class CarryOverContext {
     }
 
     public void saveFeatureList(String key, List<? extends FlowFeature> jsonSerializableFeatureList) {
-        keyValueUriObjects.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
+        if (jsonSerializableFeatureList.size() > 0) {
+            keyValueUriObjects.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
+        }
     }
 
     public FlowFeature getFeature(String key) {
@@ -65,18 +70,12 @@ public class CarryOverContext {
     public List<? extends FlowFeature> getFeatureList(String key) {
         ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) keyValueUriObjects.get(key);
 
-        return flowFeatures.getOriginalTypedList();
-    }
-
-    private class ListOfFlowFeatures extends FlowFeature {
-        private final List<? extends FlowFeature> featureList;
-
-        ListOfFlowFeatures(List<? extends FlowFeature> featureList) {
-            this.featureList = featureList;
+        if (flowFeatures != null) {
+            return flowFeatures.getOriginalTypedList();
+        } else {
+            return new ArrayList<>();
         }
 
-        public List<? extends FlowFeature> getOriginalTypedList() {
-            return featureList;
-        }
     }
+
 }

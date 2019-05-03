@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.Column;
@@ -32,7 +32,7 @@ public class URIMapper {
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/box/";
 
-        UriWithinProjectEntity boxObject = findOrCreateUriObject(projectId, StaticObjectType.BOX, boxKey, parentUri, relativePathPrefix);
+        UriWithinProjectEntity boxObject = findOrCreateUriObject(projectId, FlowObjectType.BOX, boxKey, parentUri, relativePathPrefix);
         box.setId(boxObject.getId());
         box.setUri(boxObject.getUri());
         box.setRelativePath(boxObject.getRelativePath());
@@ -45,7 +45,7 @@ public class URIMapper {
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/location/";
 
-        UriWithinProjectEntity locationObject = findOrCreateUriObject(projectId, StaticObjectType.LOCATION, locationKey, parentUri, relativePathPrefix);
+        UriWithinProjectEntity locationObject = findOrCreateUriObject(projectId, FlowObjectType.LOCATION, locationKey, parentUri, relativePathPrefix);
         location.setId(locationObject.getId());
         location.setUri(locationObject.getUri());
         location.setRelativePath(locationObject.getRelativePath());
@@ -57,7 +57,7 @@ public class URIMapper {
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/bridge/";
 
-        UriWithinProjectEntity bridgeObject = findOrCreateUriObject(projectId, StaticObjectType.BRIDGE, bridge.getBridgeKey(), parentUri, relativePathPrefix);
+        UriWithinProjectEntity bridgeObject = findOrCreateUriObject(projectId, FlowObjectType.BRIDGE, bridge.getBridgeKey(), parentUri, relativePathPrefix);
         bridge.setId(bridgeObject.getId());
         bridge.setUri(bridgeObject.getUri());
         bridge.setRelativePath(bridgeObject.getRelativePath());
@@ -70,26 +70,13 @@ public class URIMapper {
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/traversal/";
 
-        UriWithinProjectEntity traversalObject = findOrCreateUriObject(projectId, StaticObjectType.TRAVERSAL, traversalKey, parentUri, relativePathPrefix);
+        UriWithinProjectEntity traversalObject = findOrCreateUriObject(projectId, FlowObjectType.TRAVERSAL, traversalKey, parentUri, relativePathPrefix);
 
         traversal.setId(traversalObject.getId());
         traversal.setUri(traversalObject.getUri());
         traversal.setRelativePath(traversalObject.getRelativePath());
     }
 
-    public void populateMessageUri(UUID projectId, Message message) {
-        if (message.getUri() != null) return;
-
-        String parentUri = "/project/" + projectId + "/circle/" + message.getCircleId();
-        String relativePath = "/message/" + message.getMessageId();
-
-        UriWithinProjectEntity traversalObject = findOrCreateUriObject(projectId, StaticObjectType.CIRCLE_MESSAGE, parentUri, relativePath);
-
-        message.setId(traversalObject.getId());
-        message.setUri(traversalObject.getUri());
-        message.setRelativePath(traversalObject.getRelativePath());
-
-    }
 
     public void populateProjectContextUri(Context projectContext) {
         if (projectContext == null || projectContext.getUri() != null) return;
@@ -98,12 +85,11 @@ public class URIMapper {
 
         String relativePath = "/project/" + projectId;
 
-        UriWithinProjectEntity projectObject = findOrCreateUriObjectWithFixedId(projectId, StaticObjectType.PROJECT_CONTEXT, projectId, "", relativePath);
+        UriWithinProjectEntity projectObject = findOrCreateUriObjectWithFixedId(projectId, FlowObjectType.CONTEXT, projectId, "", relativePath);
 
         projectContext.setId(projectObject.getId());
         projectContext.setUri(projectObject.getUri());
         projectContext.setRelativePath(projectObject.getRelativePath());
-
     }
 
     public void populateTaskContextUri(Context projectContext, Context taskContext) {
@@ -115,7 +101,7 @@ public class URIMapper {
         String parentUri = projectContext.getUri();
         String relativePath = "/task/" + taskId;
 
-        UriWithinProjectEntity taskObject = findOrCreateUriObjectWithFixedId(projectId, StaticObjectType.TASK_CONTEXT, taskId, parentUri, relativePath);
+        UriWithinProjectEntity taskObject = findOrCreateUriObjectWithFixedId(projectId, FlowObjectType.CONTEXT, taskId, parentUri, relativePath);
 
         projectContext.setId(taskObject.getId());
         projectContext.setUri(taskObject.getUri());
@@ -133,14 +119,14 @@ public class URIMapper {
         String parentUri = taskContext.getUri();
         String relativePath = "/intention/" + intentionId;
 
-        UriWithinProjectEntity intentionObject = findOrCreateUriObjectWithFixedId(projectId, StaticObjectType.INTENTION_CONTEXT, intentionId, parentUri, relativePath);
+        UriWithinProjectEntity intentionObject = findOrCreateUriObjectWithFixedId(projectId, FlowObjectType.CONTEXT, intentionId, parentUri, relativePath);
 
         projectContext.setId(intentionObject.getId());
         projectContext.setUri(intentionObject.getUri());
         projectContext.setRelativePath(intentionObject.getRelativePath());
     }
 
-    private UriWithinProjectEntity findOrCreateUriObject(UUID projectId, StaticObjectType objectType, String objectKey, String parentUri, String relativePathPrefix) {
+    private UriWithinProjectEntity findOrCreateUriObject(UUID projectId, FlowObjectType objectType, String objectKey, String parentUri, String relativePathPrefix) {
 
         UriWithinProjectEntity uriObject = uriWithinProjectRepository.findByProjectIdAndObjectTypeAndObjectKey(projectId, objectType.name(), objectKey);
         if (uriObject == null) {
@@ -158,7 +144,7 @@ public class URIMapper {
         return uriObject;
     }
 
-    private UriWithinProjectEntity findOrCreateUriObject(UUID projectId, StaticObjectType objectType, String parentUri, String relativePath) {
+    private UriWithinProjectEntity findOrCreateUriObject(UUID projectId, FlowObjectType objectType, String parentUri, String relativePath) {
         String uri = parentUri + relativePath;
 
         UriWithinProjectEntity uriObject = uriWithinProjectRepository.findByProjectIdAndUri(projectId, uri);
@@ -177,7 +163,7 @@ public class URIMapper {
         return uriObject;
     }
 
-    private UriWithinProjectEntity findOrCreateUriObjectWithFixedId(UUID projectId, StaticObjectType objectType, UUID fixedId, String parentUri, String relativePath) {
+    private UriWithinProjectEntity findOrCreateUriObjectWithFixedId(UUID projectId, FlowObjectType objectType, UUID fixedId, String parentUri, String relativePath) {
 
         String uri = parentUri + relativePath;
 
@@ -210,7 +196,6 @@ public class URIMapper {
         List<FlowFeature> features = new ArrayList<>();
 
         storyGrid.setRelativePath("/grid");
-        storyGrid.setFlowObjectType(FlowObjectType.STORY_GRID);
         storyGrid.setUri(tileUri + storyGrid.getRelativePath());
 
         features.add(storyGrid);
@@ -218,7 +203,6 @@ public class URIMapper {
         for (Column column : storyGrid.getColumns()) {
             column.setRelativePath("/column/"+ column.getRelativeSequence());
             column.setUri(storyGrid.getUri() + column.getRelativePath());
-            column.setFlowObjectType(FlowObjectType.STORY_GRID_COLUMN);
 
             features.add(column);
         }
@@ -242,15 +226,15 @@ public class URIMapper {
 
 
     public static String createTorchieFeedUri(UUID torchieId) {
-        return "@torchie/"+torchieId;
+        return "/torchie/"+torchieId;
     }
 
     public static String createCircleFeedUri(UUID circleId) {
-        return "@circle/"+circleId;
+        return "/circle/"+circleId;
     }
 
     public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.StoryCoords tileCoordinates) {
-        return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatDreamtime();
+        return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatDreamTime();
     }
 
 

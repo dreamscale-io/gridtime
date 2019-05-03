@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
@@ -30,4 +31,8 @@ public class StoryTileModel extends FlowFeature {
     private StoryGridModel storyGridModel;
 
     private CarryOverContext carryOverContext;
+
+    public StoryTileModel() {
+        super(FlowObjectType.STORY_TILE);
+    }
 }

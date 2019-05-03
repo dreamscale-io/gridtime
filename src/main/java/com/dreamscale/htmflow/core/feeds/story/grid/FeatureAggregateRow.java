@@ -37,15 +37,8 @@ public class FeatureAggregateRow extends FeatureRow {
             }
         }
 
-        nullOutEmptyAggregateMetrics();
     }
 
-    private void nullOutEmptyAggregateMetrics() {
-        Set<MusicGeometryClock.Coords> aggregateTimingKeys = getTimingKeys();
-        for (MusicGeometryClock.Coords timingKey : aggregateTimingKeys) {
-            findOrCreateMetrics(timingKey).nullOutEmptyMetrics();
-        }
-    }
 
     private void resetAggregateMetrics() {
         Set<MusicGeometryClock.Coords> aggregateTimingKeys = getTimingKeys();

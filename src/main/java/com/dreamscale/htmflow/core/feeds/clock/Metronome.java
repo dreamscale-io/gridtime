@@ -41,7 +41,7 @@ public class Metronome {
 
         tickForwardFlowChain();
 
-        if (fromClockPosition.fours != toClockPosition.fours) {
+        if (fromClockPosition.fourhours != toClockPosition.fourhours) {
             notifyClockTick(ZoomLevel.FOUR_HOURS);
         }
 

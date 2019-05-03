@@ -33,18 +33,12 @@ public class RhythmLayerMapper {
         this.layer = featureFactory.createRhythmLayer(layerType);
     }
 
-    public void addMovement(MomentOfContext context, Movement movement) {
+    public void addMovement(Movement movement) {
 
-        movement.setContext(context);
         movement.setCoordinates(internalClock.createCoords(movement.getMoment()));
 
         layer.add(movement);
 
-    }
-
-    private boolean contextChanged(MomentOfContext lastContext, MomentOfContext context) {
-        return lastContext != null && context != null
-                && !lastContext.getPosition().equals(context.getPosition());
     }
 
     public void addMovementLater(Movement movement) {

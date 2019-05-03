@@ -39,7 +39,7 @@ public class SpatialGeometryMapper {
         if (currentFocus == null) {
             FocalPoint placeInBox = findOrCreateFocalPoint(boxName);
             currentFocus = placeInBox;
-            movements.add(featureFactory.createMoveToBox(moment, placeInBox.getBox()));
+            movements.add(new MoveToBox(moment, placeInBox.getBox()));
 
             Movement movement = gotoLocationAndCreateMovement(moment, locationPath, timeInLocation);
             movements.add(movement);

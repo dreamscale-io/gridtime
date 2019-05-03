@@ -1,23 +1,29 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@NoArgsConstructor
 @Getter
 @Setter
-public class MomentOfContext extends FlowFeature {
+@ToString
+public class MomentOfContext {
+
 
     private Context projectContext;
     private Context taskContext;
     private Context intentionContext;
 
-    private final LocalDateTime position;
-
+    private LocalDateTime position;
     private MusicGeometryClock.Coords coordinates;
 
     public MomentOfContext(MusicGeometryClock internalClock, ContextBeginningEvent projectEvent,
@@ -36,8 +42,9 @@ public class MomentOfContext extends FlowFeature {
             this.intentionContext = intentionEvent.getContext();
         }
 
-        position = determinePosition(projectEvent, taskEvent, intentionEvent);
+        LocalDateTime position = determinePosition(projectEvent, taskEvent, intentionEvent);
         if (position != null) {
+            this.position = position;
             coordinates = internalClock.createCoords(position);
         }
     }
@@ -56,6 +63,7 @@ public class MomentOfContext extends FlowFeature {
         return position;
     }
 
+    @JsonIgnore
     public UUID getProjectId() {
         UUID projectId = null;
         if (projectContext != null) {

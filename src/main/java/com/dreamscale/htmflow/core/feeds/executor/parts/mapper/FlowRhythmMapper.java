@@ -1,10 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.Message;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -28,11 +28,6 @@ public class FlowRhythmMapper {
         this.internalClock = new MusicGeometryClock(from, to);
         this.from = from;
         this.to = to;
-
-        //init all the layers
-        for (RhythmLayerType layerType : RhythmLayerType.values()) {
-            findOrCreateLayer(layerType);
-        }
     }
 
 
@@ -45,27 +40,27 @@ public class FlowRhythmMapper {
         return layer;
     }
 
-    public void addMovements(RhythmLayerType layerType, MomentOfContext context, List<Movement> movementsToAdd) {
+    public void addMovements(RhythmLayerType layerType, List<Movement> movementsToAdd) {
         for (Movement movement : movementsToAdd) {
-            addMovement(layerType, context,  movement);
+            addMovement(layerType, movement);
         }
     }
 
-    public void addMovement(RhythmLayerType layerType, MomentOfContext context, Movement movement) {
+    public void addMovement(RhythmLayerType layerType, Movement movement) {
         RhythmLayerMapper layer = findOrCreateLayer(layerType);
 
         if (movement != null) {
-            layer.addMovement(context, movement);
+            layer.addMovement(movement);
         }
     }
 
-    public void executeThing(LocalDateTime moment, MomentOfContext context, ExecutionDetails executionDetails) {
+    public void executeThing(LocalDateTime moment, ExecutionDetails executionDetails) {
 
-        RhythmLayerMapper executionLayer = layerMap.get(RhythmLayerType.EXECUTION_ACTIVITY);
+        RhythmLayerMapper executionLayer = findOrCreateLayer(RhythmLayerType.EXECUTION_ACTIVITY);
 
         if (executionDetails.getDuration().getSeconds() > 60) {
             ExecuteThing startExecution = featureFactory.createExecuteThing(moment, executionDetails, ExecuteThing.EventType.START_LONG_EXECUTION);
-            executionLayer.addMovement(context, startExecution);
+            executionLayer.addMovement(startExecution);
 
             LocalDateTime endTime = moment.plusSeconds(executionDetails.getDuration().getSeconds());
             ExecuteThing endExecution = featureFactory.createExecuteThing(endTime, executionDetails, ExecuteThing.EventType.END_LONG_EXECUTION);
@@ -73,17 +68,17 @@ public class FlowRhythmMapper {
 
         } else {
             Movement executeThing = featureFactory.createExecuteThing(moment, executionDetails, ExecuteThing.EventType.EXECUTE_EVENT);
-            executionLayer.addMovement(context, executeThing);
+            executionLayer.addMovement(executeThing);
         }
     }
 
-    public void shareMessage(LocalDateTime moment, MomentOfContext context, Message message) {
+    public void shareMessage(LocalDateTime moment, MessageDetails messageDetails) {
 
         RhythmLayerMapper circleMessageLayer = layerMap.get(RhythmLayerType.CIRCLE_MESSAGE_EVENTS);
 
-        PostCircleMessage postCircleMessage = featureFactory.createPostCircleMessage(moment, message);
+        PostCircleMessage postCircleMessage = featureFactory.createPostCircleMessage(moment, messageDetails);
 
-        circleMessageLayer.addMovement(context, postCircleMessage);
+        circleMessageLayer.addMovement(postCircleMessage);
 
     }
 
@@ -137,7 +132,7 @@ public class FlowRhythmMapper {
 
                 if ((from.isBefore(position) || from.isEqual(position)) && to.isAfter(position)) {
                     //TODO need some way to populate context for this... can we fix in the repair?
-                    addMovement(layerType, null, movement);
+                    addMovement(layerType, movement);
 
                 } else {
                     RhythmLayerMapper layerMapper = layerMap.get(layerType);
@@ -155,7 +150,7 @@ public class FlowRhythmMapper {
     }
 
     public RhythmLayer getRhythmLayer(RhythmLayerType layerType) {
-        return layerMap.get(layerType).getRhythmLayer();
+        return findOrCreateLayer(layerType).getRhythmLayer();
     }
 
     public Set<RhythmLayerType> getRhythmLayerTypes() {
@@ -163,7 +158,7 @@ public class FlowRhythmMapper {
     }
 
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
-        return this.layerMap.get(rhythmLayerType).getLastMovement();
+        return findOrCreateLayer(rhythmLayerType).getLastMovement();
     }
 
 

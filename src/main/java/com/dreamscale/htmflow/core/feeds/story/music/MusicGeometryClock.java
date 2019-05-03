@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -101,14 +102,14 @@ public class MusicGeometryClock {
         long secondsIntoMeasure = Duration.between(this.fromClockTime, nextClockTime).getSeconds();
         int beatsIntoMeasure = (int)(secondsIntoMeasure / beatSize.getSeconds());
 
-        int quarterNotes = beatsIntoMeasure / BeatsPerBucket.QUARTER.getBeatCount() + 1;
-        int halfNotes = beatsIntoMeasure / BeatsPerBucket.HALF.getBeatCount() + 1;
+        int floorBeats = beatsIntoMeasure + 1;
+        if (secondsIntoMeasure == 20 * beatSize.getSeconds()) {
+            floorBeats = 20;
+        }
 
-        return new Coords(nextClockTime,
-                BeatsPerBucket.BEAT.getBeatCount(),
-                beatsIntoMeasure + 1,
-                quarterNotes,
-                halfNotes);
+        return new Coords(nextClockTime, secondsIntoMeasure,
+                floorBeats,
+                BeatsPerBucket.BEAT.getBeatCount());
     }
 
     public LocalDateTime getFromClockTime() {
@@ -159,11 +160,12 @@ public class MusicGeometryClock {
     @ToString
     public static class Coords {
 
+        @JsonIgnore
         final LocalDateTime clockTime;
-        final int beatsPerMeasure;
+
+        final long secondsIntoMeasure;
         final int beat;
-        final int quarter;
-        final int half;
+        final int beatsPerMeasure;
 
         public boolean isBeforeOrEqual(Coords coords) {
             return beat <= coords.beat;
@@ -176,6 +178,17 @@ public class MusicGeometryClock {
             }
             return false;
         }
+
+        @JsonIgnore
+        public int getQuarter() {
+            return (beat - 1) / (beatsPerMeasure / 4) + 1;
+        }
+
+        @JsonIgnore
+        public int getHalf() {
+            return (beat - 1) / (beatsPerMeasure / 2) + 1;
+        }
+
 
         @Override
         public int hashCode() {

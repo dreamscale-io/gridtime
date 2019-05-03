@@ -26,6 +26,8 @@ public class StoryTileEntity {
     private String zoomLevel;
     private LocalDateTime clockPosition;
 
+    private String dreamTime;
+
     private int year;
     private int block;
     private int weeksIntoBlock;
@@ -35,4 +37,5 @@ public class StoryTileEntity {
     private int twentyMinuteSteps;
 
     private String jsonTile;
+    private String jsonTileSummary;
 }

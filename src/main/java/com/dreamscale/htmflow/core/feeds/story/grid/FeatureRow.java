@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Getter
 @ToString
-public class FeatureRow extends FlowFeature {
+public class FeatureRow {
 
     private final FlowFeature feature;
 
@@ -36,5 +36,6 @@ public class FeatureRow extends FlowFeature {
     public Set<MusicGeometryClock.Coords> getTimingKeys() {
         return gridMetricsPerTimeBucket.keySet();
     }
+
 
 }

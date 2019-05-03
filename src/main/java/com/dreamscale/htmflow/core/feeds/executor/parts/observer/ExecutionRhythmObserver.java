@@ -14,7 +14,6 @@ import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class ExecutionRhythmObserver implements FlowObserver {
             } else if (executionDetails.isGreen()) {
                 isRedAndWantingGreen = false;
             }
-            executionDetails.setIsRedAndWantingGreen(isRedAndWantingGreen);
+            executionDetails.setRedAndWantingGreen(isRedAndWantingGreen);
 
             Duration durationSinceLastExec = Duration.between(lastPosition, executionDetails.getPosition());
             Duration durationUntilNextExec = Duration.between(executionDetails.getPosition(),
@@ -103,7 +102,7 @@ public class ExecutionRhythmObserver implements FlowObserver {
         boolean isRedAndWantingGreen = false;
 
         if (movement != null) {
-            ExecutionDetails executionDetails = ((ExecuteThing) movement).getDetails();
+            ExecutionDetails executionDetails = ((ExecuteThing) movement).getExecutionDetails();
             isRedAndWantingGreen = executionDetails.isRedAndWantingGreen();
         }
         return isRedAndWantingGreen;
@@ -122,7 +121,7 @@ public class ExecutionRhythmObserver implements FlowObserver {
         executionDetails.setProcessName(processName);
         executionDetails.setExecutionTaskType(executionTaskType);
         executionDetails.setExitCode(exitCode);
-        executionDetails.setIsDebug(isDebug);
+        executionDetails.setDebug(isDebug);
 
         return executionDetails;
     }

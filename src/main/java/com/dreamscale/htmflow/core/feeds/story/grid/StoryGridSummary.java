@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class StoryGridSummary extends FlowFeature {
+public class StoryGridSummary {
 
     private double avgMood;
 

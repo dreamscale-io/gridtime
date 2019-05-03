@@ -1,18 +1,27 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.movement;
 
+import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@ToString
 public class PostCircleMessage extends Movement {
 
+    private MessageDetails messageDetails;
 
-    private final Message message;
-
-    public PostCircleMessage(LocalDateTime moment, Message message) {
-        super(moment, MovementType.POST_CIRCLE_MESSAGE, message);
-        this.message = message;
+    public PostCircleMessage(LocalDateTime moment, MessageDetails messageDetails) {
+        super(moment, FlowObjectType.MOVEMENT_POST_MESSAGE);
+        this.messageDetails = messageDetails;
     }
 
-    public Message getMessage() {
-        return message;
+    public PostCircleMessage() {
+        super(FlowObjectType.MOVEMENT_POST_MESSAGE);
     }
 }

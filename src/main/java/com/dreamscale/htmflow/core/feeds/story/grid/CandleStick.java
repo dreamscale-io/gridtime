@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -17,6 +18,7 @@ public class CandleStick {
     private double min = Integer.MAX_VALUE;
     private double max = Integer.MIN_VALUE;
 
+    @JsonIgnore
     private ArrayList<Double> data = new ArrayList<>();
 
     public void addSample(double sample) {
