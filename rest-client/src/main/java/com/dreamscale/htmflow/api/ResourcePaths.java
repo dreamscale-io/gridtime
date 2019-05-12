@@ -13,7 +13,7 @@ public class ResourcePaths {
     public static final String PAIN_PATH = "/pain";
     public static final String JOY_PATH = "/joy";
 
-    public static final String JOB_PATH = "/job";
+    public static final String FEED_PATH = "/feed";
     public static final String UPDATE_PATH = "/update";
     public static final String ACTIVITY_PATH = "/activity";
 
@@ -38,8 +38,14 @@ public class ResourcePaths {
     public static final String MEMBER_PATH = "/member";
     public static final String INVITATION_PATH = "/invitation";
     public static final String TEAM_PATH = "/team";
+    public static final String TORCHIE_PATH = "/torchie";
 
     public static final String FLOW_PATH = "/flow";
+    public static final String START_PATH = "/start";
+    public static final String INPUT_PATH = "/input";
+    public static final String STREAM_PATH = "/stream";
+    public static final String JOB_PATH = "/job";
+
     public static final String BATCH_PATH = "/batch";
     public static final String AUTH_PING_PATH = "/authPing";
 
@@ -74,7 +80,6 @@ public class ResourcePaths {
 
     public static final String ACTIVE_PATH = "/active";
 
-    public static final String FEED_PATH = "/feed";
     public static final String SCREENSHOT_PATH = "/screenshot";
     public static final String SNIPPET_PATH = "/snippet";
     public static final String CHAT_PATH = "/chat";

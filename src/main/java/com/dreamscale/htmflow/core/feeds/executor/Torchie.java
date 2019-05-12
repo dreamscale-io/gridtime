@@ -1,22 +1,57 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
+import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
+import com.dreamscale.htmflow.core.feeds.clock.Metronome;
+import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
+import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
+import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
+import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategy;
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.FlowSource;
+import com.dreamscale.htmflow.core.feeds.executor.parts.transform.TransformStrategy;
+import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformer;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Torchie {
 
-    private final UUID memberId;
+    private final UUID torchieId;
+
+    private final Metronome metronome;
+    private final SharedFeaturePool sharedFeaturePool;
+
     private final ZoomableFlow zoomableFlow;
 
-    public Torchie(UUID memberId, ZoomableFlow zoomableFlow) {
-        this.memberId = memberId;
-        this.zoomableFlow = zoomableFlow;
+    private TorchieJobStatus jobStatus;
+
+    public Torchie(UUID torchidId, LocalDateTime startingPosition) {
+        this.torchieId = torchidId;
+
+        this.metronome = new Metronome(startingPosition);
+        this.sharedFeaturePool = new SharedFeaturePool(torchidId, metronome.getActiveCoordinates());
+        this.jobStatus = new TorchieJobStatus(torchidId, metronome.getActiveCoordinates().formatDreamTime());
+
+        this.zoomableFlow = new ZoomableFlow(torchidId, metronome, sharedFeaturePool);
+
     }
 
+    void addFlowSourceToChain(FetchStrategy fetchStrategy, FlowObserver... observers) {
+        metronome.addFlowToChain(new FlowSource(torchieId, sharedFeaturePool,fetchStrategy, observers));
+    }
 
-    public UUID getMemberId() {
-        return memberId;
+    void addFlowTransformerToChain(TransformStrategy... transforms) {
+        metronome.addFlowToChain(new FlowTransformer(torchieId, sharedFeaturePool, transforms));
+    }
+
+    void addFlowSinkToChain(SinkStrategy... sinks) {
+        metronome.addFlowToChain(new FlowSink(torchieId, sharedFeaturePool, sinks));
+    }
+
+    public UUID getTorchieId() {
+        return torchieId;
     }
 
     /**
@@ -54,4 +89,11 @@ public class Torchie {
         this.zoomableFlow.wrapUpAndBookmark();
     }
 
+    public TorchieJobStatus getJobStatus() {
+        return jobStatus;
+    }
+
+    public boolean isCaughtUp() {
+        return !this.metronome.canTick();
+    }
 }

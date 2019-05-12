@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class URIAssignmentTransform implements FlowTransform {
+public class URIAssignmentTransform implements TransformStrategy {
 
     @Autowired
     URIMapper uriMapper;

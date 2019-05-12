@@ -20,7 +20,7 @@ import java.util.List;
 public class StoryTileModel extends FlowFeature {
 
     private String tileUri;
-    private GeometryClock.StoryCoords tileCoordinates;
+    private GeometryClock.Coords tileCoordinates;
     private ZoomLevel zoomLevel;
 
     private List<MomentOfContext> momentsOfContext;

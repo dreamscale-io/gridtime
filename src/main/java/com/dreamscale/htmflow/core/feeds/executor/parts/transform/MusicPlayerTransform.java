@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MusicPlayerTransform implements FlowTransform {
+public class MusicPlayerTransform implements TransformStrategy {
 
     @Autowired
     URIMapper uriMapper;

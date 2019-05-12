@@ -12,6 +12,10 @@ import feign.RequestLine;
 })
 public interface FlowClient {
 
+//    @RequestLine("POST " + ResourcePaths.FLOW_PATH + ResourcePaths.JOB_PATH + ResourcePaths.TEAM_PATH +  )
+//    void addBatch(NewFlowBatch batch);
+//
+
     @RequestLine("POST " + ResourcePaths.FLOW_PATH + ResourcePaths.BATCH_PATH)
     void addBatch(NewFlowBatch batch);
 

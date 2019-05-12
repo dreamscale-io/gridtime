@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.DataTest
 import com.dreamscale.htmflow.api.activity.NewEditorActivity
 import com.dreamscale.htmflow.api.batch.NewFlowBatch
 import com.dreamscale.htmflow.api.event.NewSnippetEvent

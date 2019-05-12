@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.executor;
+package com.dreamscale.htmflow.core.feeds.common;
 
 import com.dreamscale.htmflow.core.feeds.clock.ClockChangeListener;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
@@ -14,32 +14,39 @@ import java.util.*;
 public class ZoomableFlow implements ClockChangeListener {
 
     private final Metronome metronome;
-    private final UUID memberId;
+    private final UUID torchieId;
     private final SharedFeaturePool sharedFeaturePool;
+
     private final LinkedList<Runnable> workToDo;
 
+    private Runnable activeWorkItem;
+    private Runnable failedWorkItem;
+
+    private int failRetryCount = 0;
+    private static final int MAX_RETRIES = 3;
+
     private ZoomLevel zoomLevel;
-    private GeometryClock.StoryCoords activeFocus;
+    private GeometryClock.Coords activeFocus;
 
 
-    public ZoomableFlow(Metronome metronome, UUID memberId, SharedFeaturePool sharedFeaturePool) {
+    public ZoomableFlow(UUID torchieId, Metronome metronome, SharedFeaturePool sharedFeaturePool) {
+        this.torchieId = torchieId;
         this.metronome = metronome;
-        this.memberId = memberId;
         this.sharedFeaturePool = sharedFeaturePool;
         this.workToDo = new LinkedList<>();
 
         this.metronome.notifyClockTick(this);
     }
 
-    public UUID getMemberId() {
-        return this.memberId;
+    public UUID getTorchieId() {
+        return this.torchieId;
     }
 
     /**
      * One tick of progress, creating a set of work to do
      */
     public void tick() {
-        if (workToDo.size() == 0) {
+        if (workToDo.size() == 0 && metronome.canTick()) {
             workToDo.add(new MetronomeTick(sharedFeaturePool, metronome));
         }
     }
@@ -50,7 +57,37 @@ public class ZoomableFlow implements ClockChangeListener {
     }
 
     public Runnable whatsNext() {
-        return workToDo.removeFirst();
+        Runnable nextWorkItem = null;
+
+        //short-circuit if we're already busy processing something
+        if (activeWorkItem != null) return null;
+
+        //first, retry any failures
+
+        if (failedWorkItem != null && failRetryCount < MAX_RETRIES) {
+            failRetryCount++;
+            activeWorkItem = failedWorkItem;
+            failedWorkItem = null;
+
+            nextWorkItem = activeWorkItem;
+        } else if (failedWorkItem != null){
+            log.error("Unable to process failure, moving onward...");
+            failedWorkItem = null;
+            failRetryCount = 0;
+        }
+
+        //next, tick onward to process next frame
+
+        if (workToDo.size() == 0) {
+            tick();
+        }
+
+        if (workToDo.size() > 0) {
+            activeWorkItem = workToDo.removeFirst();
+            nextWorkItem = activeWorkItem;
+        }
+
+        return nextWorkItem;
     }
 
 
@@ -104,6 +141,8 @@ public class ZoomableFlow implements ClockChangeListener {
         public void run() {
 
             this.sharedFeaturePool.nextTile(zoomLevel);
+
+            activeWorkItem = null;
             //TODO run aggregation job
         }
     }
@@ -120,8 +159,20 @@ public class ZoomableFlow implements ClockChangeListener {
 
         @Override
         public void run() {
-            this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
-            this.metronome.tick();
+            try {
+                log.info("Running tick: "+metronome.getActiveCoordinates().formatDreamTime());
+
+                this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
+                this.metronome.tick();
+
+                log.info("Completing tick: "+metronome.getActiveCoordinates().formatDreamTime());
+            } catch (Exception ex) {
+                log.error("Exception while processing metronome tick", ex);
+
+                failedWorkItem = this;
+            }
+
+            activeWorkItem = null;
         }
     }
 }

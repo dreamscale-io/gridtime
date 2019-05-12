@@ -5,7 +5,6 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.Column;
@@ -233,7 +232,7 @@ public class URIMapper {
         return "/circle/"+circleId;
     }
 
-    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.StoryCoords tileCoordinates) {
+    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords tileCoordinates) {
         return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatDreamTime();
     }
 

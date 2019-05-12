@@ -14,7 +14,7 @@ public class GeometryClock {
 
     private LocalDateTime clockTime;
 
-    private StoryCoords coords;
+    private Coords coords;
 
 
     public GeometryClock(LocalDateTime clockTime) {
@@ -22,7 +22,7 @@ public class GeometryClock {
         this.coords = createStoryCoords(clockTime);
     }
 
-    public StoryCoords tick() {
+    public Coords tick() {
         int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
         LocalDateTime nextClockTime = this.clockTime.plusMinutes(minutesToTick);
 
@@ -32,11 +32,16 @@ public class GeometryClock {
         return this.coords;
     }
 
-    public StoryCoords getCoordinates() {
+    public LocalDateTime getNextTickTime() {
+        int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
+        return this.clockTime.plusMinutes(minutesToTick);
+    }
+
+    public Coords getCoordinates() {
         return coords;
     }
 
-    private static StoryCoords createStoryCoords(LocalDateTime nextClockTime) {
+    private static Coords createStoryCoords(LocalDateTime nextClockTime) {
 
         int fours = calc4HourSteps(nextClockTime);
         int twenties = calc20MinuteSteps(nextClockTime);
@@ -52,7 +57,7 @@ public class GeometryClock {
 
         int block = calcBlocksIntoYear(weeksIntoYear);
 
-        return new StoryCoords(nextClockTime,
+        return new Coords(nextClockTime,
                 year,
                 block,
                 weeksIntoBlock,
@@ -137,7 +142,7 @@ public class GeometryClock {
     @AllArgsConstructor
     @Getter
     @ToString
-    public static class StoryCoords {
+    public static class Coords {
 
         final LocalDateTime clockTime;
         final int year;
@@ -151,10 +156,10 @@ public class GeometryClock {
 
 
         public String formatDreamTime() {
-            return year + "-BW" + block + "-" + weeksIntoBlock + "." + daysIntoWeek + "-FT" + fourhours + "-" + twenties;
+            return year + "_BW" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "_TT" + fourhours + ":" + twenties;
         }
 
-        public StoryCoords panLeft(ZoomLevel zoomLevel) {
+        public Coords panLeft(ZoomLevel zoomLevel) {
 
                 switch (zoomLevel) {
                     case TWENTY_MINS:
@@ -173,7 +178,7 @@ public class GeometryClock {
                 return this;
         }
 
-        public StoryCoords panRight(ZoomLevel zoomLevel) {
+        public Coords panRight(ZoomLevel zoomLevel) {
 
             switch (zoomLevel) {
                 case TWENTY_MINS:
@@ -194,53 +199,53 @@ public class GeometryClock {
 
         //pan left functions
 
-        public StoryCoords minus20Minutes() {
+        public Coords minus20Minutes() {
             return GeometryClock.createStoryCoords(clockTime.minusMinutes(20));
         }
 
-        public StoryCoords minus4Hour() {
+        public Coords minus4Hour() {
             return GeometryClock.createStoryCoords(clockTime.minusHours(4));
         }
 
-        public StoryCoords minusDay() {
+        public Coords minusDay() {
             return GeometryClock.createStoryCoords(clockTime.minusDays(1));
         }
 
-        public StoryCoords minusWeek() {
+        public Coords minusWeek() {
             return GeometryClock.createStoryCoords(clockTime.minusWeeks(1));
         }
 
-        public StoryCoords minusBlock() {
+        public Coords minusBlock() {
             return GeometryClock.createStoryCoords(clockTime.minusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
-        public StoryCoords minusYear() {
+        public Coords minusYear() {
             return GeometryClock.createStoryCoords(clockTime.minusYears(1));
         }
 
         // pan right functions
 
-        public StoryCoords plus20Minutes() {
+        public Coords plus20Minutes() {
             return GeometryClock.createStoryCoords(clockTime.plusMinutes(20));
         }
 
-        public StoryCoords plus4Hour() {
+        public Coords plus4Hour() {
             return GeometryClock.createStoryCoords(clockTime.plusHours(4));
         }
 
-        public StoryCoords plusDay() {
+        public Coords plusDay() {
             return GeometryClock.createStoryCoords(clockTime.plusDays(1));
         }
 
-        public StoryCoords plusWeek() {
+        public Coords plusWeek() {
             return GeometryClock.createStoryCoords(clockTime.plusWeeks(1));
         }
 
-        public StoryCoords plusBlock() {
+        public Coords plusBlock() {
             return GeometryClock.createStoryCoords(clockTime.plusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
-        public StoryCoords plusYear() {
+        public Coords plusYear() {
             return GeometryClock.createStoryCoords(clockTime.plusYears(1));
         }
 

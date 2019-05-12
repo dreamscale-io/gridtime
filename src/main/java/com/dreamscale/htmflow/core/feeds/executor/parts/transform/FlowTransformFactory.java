@@ -12,7 +12,7 @@ public class FlowTransformFactory {
     @Autowired
     private MusicPlayerTransform musicPlayerTransform;
 
-    public FlowTransform get(TransformType transformType) {
+    public TransformStrategy get(TransformType transformType) {
         switch (transformType) {
             case URI_ASSIGNMENT_TRANSFORM:
                 return uriAssignmentTransformer;

@@ -4,7 +4,6 @@ import com.dreamscale.htmflow.client.*;
 import com.dreamscale.htmflow.core.CoreARandom;
 import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
-import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreConnection;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import com.dreamscale.htmflow.core.service.HypercoreService;
@@ -100,6 +99,10 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     TeamClient teamClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamClient.class); }
 
+    @Bean
+    TorchieJobClient flowJobClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, TorchieJobClient.class);
+    }
 
     @Bean
     FlowClient unauthenticatedFlowClient() {

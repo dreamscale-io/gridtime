@@ -42,6 +42,9 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         List<StoryGridMetricsEntity> storyGridEntities = createStoryGridMetricEntities(torchieId, storyTileEntity.getId(), storyTileModel.getStoryGridModel());
         storyGridMetricsRepository.save(storyGridEntities);
+
+        log.debug("Saved tile: "+storyTileEntity.getUri());
+
     }
 
     private StoryGridSummaryEntity createStoryGridSummaryEntity(UUID torchieId, UUID tileId, StoryGridSummary storyGridSummary) {
@@ -111,7 +114,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         storyTileEntity.setUri(storyTileModel.getTileUri());
         storyTileEntity.setZoomLevel(storyTileModel.getZoomLevel().name());
 
-        GeometryClock.StoryCoords coordinates = storyTileModel.getTileCoordinates();
+        GeometryClock.Coords coordinates = storyTileModel.getTileCoordinates();
 
         storyTileEntity.setClockPosition(coordinates.getClockTime());
         storyTileEntity.setDreamTime(coordinates.formatDreamTime());

@@ -16,11 +16,11 @@ public class SharedFeaturePool {
     private final HashMap<ZoomLevel, StoryTileSequence> storySequenceByZoomLevel;
 
     private ZoomLevel activeZoomLevel;
-    private GeometryClock.StoryCoords activeJobCoordinates;
-    private GeometryClock.StoryCoords activeFocusCoordinates;
+    private GeometryClock.Coords activeJobCoordinates;
+    private GeometryClock.Coords activeFocusCoordinates;
 
 
-    public SharedFeaturePool(UUID torchieId, GeometryClock.StoryCoords startingCoordinates) {
+    public SharedFeaturePool(UUID torchieId, GeometryClock.Coords startingCoordinates) {
 
         this.feedUri = URIMapper.createTorchieFeedUri(torchieId);
 
@@ -51,7 +51,7 @@ public class SharedFeaturePool {
 
     //TODO this will need to load data for active coordinates, and trigger "work to do" as needed to fill in details
 
-    public StoryTile getActiveStoryTileAtZoomLevel(GeometryClock.StoryCoords activeFocus, ZoomLevel zoomLevel) {
+    public StoryTile getActiveStoryTileAtZoomLevel(GeometryClock.Coords activeFocus, ZoomLevel zoomLevel) {
         this.activeFocusCoordinates = activeFocus;
         return storySequenceByZoomLevel.get(zoomLevel).getActiveStoryTile();
     }

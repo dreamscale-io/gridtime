@@ -15,8 +15,8 @@ public class Metronome {
 
     private GeometryClock clock;
 
-    private GeometryClock.StoryCoords fromClockPosition;
-    private GeometryClock.StoryCoords toClockPosition;
+    private GeometryClock.Coords fromClockPosition;
+    private GeometryClock.Coords toClockPosition;
 
     private final List<Flow> flowChain;
     private final List<ClockChangeListener> clockChangeListeners;
@@ -24,17 +24,18 @@ public class Metronome {
     public Metronome(LocalDateTime startTime) {
         this.clock = new GeometryClock(startTime);
         this.fromClockPosition = clock.getCoordinates();
+        this.toClockPosition = clock.getCoordinates();
 
         this.flowChain = new ArrayList<>();
         this.clockChangeListeners = new ArrayList<>();
     }
 
-    public GeometryClock.StoryCoords getActiveCoordinates() {
+    public GeometryClock.Coords getActiveCoordinates() {
         return fromClockPosition;
     }
 
     public void tick() {
-        GeometryClock.StoryCoords nextCoordinates = clock.tick();
+        GeometryClock.Coords nextCoordinates = clock.tick();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
@@ -61,6 +62,10 @@ public class Metronome {
         }
     }
 
+    public boolean canTick() {
+        return clock.getNextTickTime().isBefore(LocalDateTime.now());
+    }
+
     private void tickForwardFlowChain() {
         for (Flow flow : flowChain) {
             try {
@@ -81,11 +86,11 @@ public class Metronome {
         }
     }
 
-    public GeometryClock.StoryCoords getFromClockPosition() {
+    public GeometryClock.Coords getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public GeometryClock.StoryCoords getToClockPosition() {
+    public GeometryClock.Coords getToClockPosition() {
         return this.toClockPosition;
     }
 
@@ -97,5 +102,6 @@ public class Metronome {
     public void notifyClockTick(ClockChangeListener clockChangeListener) {
         this.clockChangeListeners.add(clockChangeListener);
     }
+
 
 }

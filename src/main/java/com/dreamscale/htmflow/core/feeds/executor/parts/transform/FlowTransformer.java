@@ -10,19 +10,19 @@ import java.util.*;
 public class FlowTransformer implements Flow {
 
     private final UUID memberId;
-    private final List<FlowTransform> flowTransforms;
+    private final List<TransformStrategy> transformStrategies;
     private final SharedFeaturePool sharedFeaturePool;
 
 
-    public FlowTransformer(UUID memberId, SharedFeaturePool sharedFeaturePool, FlowTransform... transforms) {
+    public FlowTransformer(UUID memberId, SharedFeaturePool sharedFeaturePool, TransformStrategy... transforms) {
         this.memberId = memberId;
         this.sharedFeaturePool = sharedFeaturePool;
-        this.flowTransforms = Arrays.asList(transforms);
+        this.transformStrategies = Arrays.asList(transforms);
     }
 
     public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) {
 
-        for (FlowTransform transform : flowTransforms) {
+        for (TransformStrategy transform : transformStrategies) {
             transform.transform(sharedFeaturePool.getActiveStoryTile());
         }
     }
