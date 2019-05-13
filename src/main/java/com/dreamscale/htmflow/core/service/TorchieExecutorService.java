@@ -1,6 +1,9 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
+import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkEntity;
+import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkRepository;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.executor.Torchie;
 import com.dreamscale.htmflow.core.feeds.executor.TorchieFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,9 @@ public class TorchieExecutorService {
 
     @Autowired
     private TorchieFactory torchieFactory;
+
+    @Autowired
+    private TorchieBookmarkRepository torchieBookmarkRepository;
 
     @Autowired
     private TimeService timeService;
@@ -76,13 +82,11 @@ public class TorchieExecutorService {
 
         while (isJobRunning) {
             int workToDoThisIteration = 0;
-            boolean areAllTorchiesCaughtUp = false;
 
             //run a wave of filling the job queue, only if there's not existing blocked jobs
             if (executorPool.getQueue().size() == 0) {
 
-                areAllTorchiesCaughtUp = true;
-                for (Torchie torchie : activeTorchiePool.values()) {
+                for (Torchie torchie : getActiveTorchies()) {
 
                     Runnable runnableJob = torchie.whatsNext();
 
@@ -92,7 +96,9 @@ public class TorchieExecutorService {
                         executorPool.submit(runnableJob);
                     }
 
-                    areAllTorchiesCaughtUp &= torchie.isCaughtUp();
+                    if (torchie.isDone()) {
+                        removeTorchieFromJobPool(torchie);
+                    }
                 }
             }
 
@@ -101,12 +107,17 @@ public class TorchieExecutorService {
                 Thread.sleep(LOOK_FOR_MORE_WORK_DELAY);
             }
 
-            if (areAllTorchiesCaughtUp) {
+            if (activeTorchiePool.size() == 0) {
                 isJobRunning = false;
             }
 
         }
     }
+
+    private List<Torchie> getActiveTorchies() {
+        return new ArrayList<>(activeTorchiePool.values());
+    }
+
 
     public void stopAllTorchies() {
         this.isJobRunning = false;
@@ -131,11 +142,24 @@ public class TorchieExecutorService {
         this.activeTorchiePool.put(torchie.getTorchieId(), torchie);
     }
 
-    private LocalDateTime determineStartingPositionForMemberFeed(UUID memberId) {
-        //TODO this should first check saved processing output to determine starting bookmark
-        //but default to activation date
-        return accountService.getActivationDateForMember(memberId);
+    private void removeTorchieFromJobPool(Torchie torchie) {
+        this.activeTorchiePool.remove(torchie.getTorchieId());
     }
+
+
+    private LocalDateTime determineStartingPositionForMemberFeed(UUID memberId) {
+        LocalDateTime startingPosition = null;
+
+        TorchieBookmarkEntity torchieBookmark = torchieBookmarkRepository.findByTorchieId(memberId);
+        if (torchieBookmark != null) {
+           startingPosition = torchieBookmark.getMetronomeCursor();
+        } else {
+            LocalDateTime activationDate = accountService.getActivationDateForMember(memberId);
+            startingPosition = GeometryClock.roundDownToNearestTwenty(activationDate);
+        }
+        return startingPosition;
+    }
+
 
     private LocalDateTime determineStartingPositionForTeamFeed(UUID teamId) {
         //TODO this should first check saved processing output to determine starting bookmark

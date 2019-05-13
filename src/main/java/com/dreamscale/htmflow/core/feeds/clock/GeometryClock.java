@@ -22,6 +22,15 @@ public class GeometryClock {
         this.coords = createStoryCoords(clockTime);
     }
 
+    public static LocalDateTime roundDownToNearestTwenty(LocalDateTime middleOfNowhereTime) {
+        int minutes = middleOfNowhereTime.getMinute();
+
+        int twenties = Math.floorDiv(minutes, 20);
+
+        LocalDateTime roundedTime = middleOfNowhereTime.withMinute(twenties * 20);
+        return roundedTime.withSecond(0).withNano(0);
+    }
+
     public Coords tick() {
         int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
         LocalDateTime nextClockTime = this.clockTime.plusMinutes(minutesToTick);

@@ -69,3 +69,8 @@ databaseChangeLog:
   - include:
         file: db/v003/uri/create_story_grid_metrics.sql
 
+  - include:
+        file: db/v003/uri/create_torchie_bookmark.sql
+
+  - include:
+        file: db/v003/uri/recreate_torchie_bookmark.sql

@@ -8,44 +8,31 @@ import java.util.LinkedList;
 
 public class StoryTileSequence {
 
-        private final ZoomLevel zoomLevel;
-        private final GeometryClock.Coords activeStoryCoordinates;
-        private final String feedUri;
+    private final String feedUri;
+    private final ZoomLevel zoomLevel;
+    private GeometryClock.Coords activeStoryCoordinates;
 
+    private StoryTile activeStoryTile;
 
-    LinkedList<StoryTile> storyTiles;
+    public StoryTileSequence(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
+        this.feedUri = feedUri;
+        this.zoomLevel = zoomLevel;
+        this.activeStoryCoordinates = storyCoordinates;
+        this.activeStoryTile = new StoryTile(feedUri, storyCoordinates, zoomLevel);
 
-        StoryTile activeStoryTile;
+    }
 
-        public StoryTileSequence(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
-            this.feedUri = feedUri;
-            this.zoomLevel = zoomLevel;
-            this.activeStoryCoordinates = storyCoordinates;
-            this.activeStoryTile = new StoryTile(feedUri, storyCoordinates, zoomLevel);
+    public void nextFrame() {
+        this.activeStoryCoordinates = activeStoryCoordinates.panRight(zoomLevel);
 
-            this.storyTiles = new LinkedList<>();
-            this.storyTiles.add(activeStoryTile);
-        }
+        StoryTile nextFrame = new StoryTile(feedUri, activeStoryCoordinates, zoomLevel);
 
-        public void nextFrame() {
-            StoryTile nextFrame = new StoryTile(feedUri, activeStoryCoordinates.panRight(zoomLevel), zoomLevel);
+        nextFrame.carryOverFrameContext(this.activeStoryTile);
+        this.activeStoryTile = nextFrame;
 
-            nextFrame.carryOverFrameContext(this.activeStoryTile);
-            this.storyTiles.add(nextFrame);
-            this.activeStoryTile = nextFrame;
+    }
 
-            pruneFramesNotNeededForAggregate();
-        }
-
-        private void pruneFramesNotNeededForAggregate() {
-            int numberToKeep = zoomLevel.getNumberToKeepForParent();
-
-            if (storyTiles.size() > numberToKeep) {
-                storyTiles.removeFirst();
-            }
-        }
-
-        public StoryTile getActiveStoryTile() {
-            return this.activeStoryTile;
-        }
+    public StoryTile getActiveStoryTile() {
+        return this.activeStoryTile;
+    }
 }

@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public interface SinkStrategy {
 
-    void save(UUID memberId, StoryTile storyTile);
+    void save(UUID torchieId, StoryTile storyTile);
 
 }

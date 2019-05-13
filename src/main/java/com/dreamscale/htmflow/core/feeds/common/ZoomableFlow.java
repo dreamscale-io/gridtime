@@ -162,8 +162,8 @@ public class ZoomableFlow implements ClockChangeListener {
             try {
                 log.info("Running tick: "+metronome.getActiveCoordinates().formatDreamTime());
 
-                this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
                 this.metronome.tick();
+                this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
 
                 log.info("Completing tick: "+metronome.getActiveCoordinates().formatDreamTime());
             } catch (Exception ex) {

@@ -72,7 +72,8 @@ public class TorchieFactory {
         //save off the data in the tiles to permanent stores
 
         torchie.addFlowSinkToChain(
-                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES));
+                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES),
+                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
 
         return torchie;
 

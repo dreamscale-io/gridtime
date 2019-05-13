@@ -93,7 +93,9 @@ public class Torchie {
         return jobStatus;
     }
 
-    public boolean isCaughtUp() {
+    public boolean isDone() {
+        //depending on the job type, agents can boot up and die,
+        // based on whatever conditions are relevant to the type of job
         return !this.metronome.canTick();
     }
 }

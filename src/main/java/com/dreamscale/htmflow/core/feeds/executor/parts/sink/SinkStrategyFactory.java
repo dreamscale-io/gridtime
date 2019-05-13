@@ -9,17 +9,21 @@ public class SinkStrategyFactory {
     @Autowired
     SaveToPostgresSink saveToPostgresSink;
 
+    @Autowired
+    SaveBookmarkSink saveBookmarkSink;
 
     public SinkStrategy get(SinkType strategyType) {
         switch (strategyType) {
             case SAVE_TO_POSTGRES:
                 return saveToPostgresSink;
+            case SAVE_BOOKMARK:
+                return saveBookmarkSink;
         }
         return null;
     }
 
     public enum SinkType {
         SAVE_TO_POSTGRES,
-        SAVE_TO_NEO4J;
+        SAVE_BOOKMARK;
     }
 }
