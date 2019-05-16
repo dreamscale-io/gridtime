@@ -96,8 +96,8 @@ public class StoryTileSpec extends Specification {
         assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllLocations().size() == 3
         assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllTraversals().size() == 2
 
-        assert grid.getBoxesVisited().size() == 1
-        assert grid.getLocationsVisited().size() == 2
+        assert grid.getAllBoxesVisited().size() == 1
+        assert grid.getAllLocationsVisited().size() == 2
     }
 
     def "should modify existing location"() {
@@ -119,7 +119,7 @@ public class StoryTileSpec extends Specification {
         tile.modifyCurrentLocation(time3, 11)
 
         def grid = tile.getStoryGrid();
-        def locations = grid.getLocationsVisited();
+        def locations = grid.getAllLocationsVisited();
 
         then:
         assert locations.size() == 1;
@@ -237,9 +237,9 @@ public class StoryTileSpec extends Specification {
         List<Column> columns = storyGrid.columns;
 
         then:
-        assert columns.size() == 20
-        assert columns.get(3).getBoxesVisited().size() == 2
-        assert columns.get(3).getLocationsVisited().size() == 5
+        assert columns.size() == 4
+        assert columns.get(0).getBoxesVisited().size() == 2
+        assert columns.get(0).getLocationsVisited().size() == 5
 
 
     }

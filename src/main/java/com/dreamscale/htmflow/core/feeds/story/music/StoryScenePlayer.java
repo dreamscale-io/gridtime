@@ -11,48 +11,45 @@ import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.FeelsBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.LearningFrictionBand;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
-import com.dreamscale.htmflow.core.feeds.story.music.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public class StoryMusicPlayer {
+public class StoryScenePlayer {
 
-    private final Metronome metronome;
+    private final MetronomePlayer metronomePlayer;
     private final Scene scene;
     private StoryTile frameToPlay;
 
-    public StoryMusicPlayer(StoryGrid storyGrid, LocalDateTime from, LocalDateTime to) {
-        MusicGeometryClock internalClock = new MusicGeometryClock(from, to);
-        this.metronome = new Metronome(internalClock);
+    public StoryScenePlayer(StoryGrid storyGrid) {
+
+        this.metronomePlayer = storyGrid.createPlayer();
         this.scene = new Scene(storyGrid);
     }
 
     public void loadFrame(StoryTile storyTile) {
         this.frameToPlay = storyTile;
 
-        metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FEELS), new FeelsListener()));
-        metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_WTF), new WTFListener()));
-        metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_LEARNING), new LearningListener()));
-        metronome.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.AUTHORS), new AuthorsListener()));
+        metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FEELS), new FeelsListener()));
+        metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_WTF), new WTFListener()));
+        metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_LEARNING), new LearningListener()));
+        metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.AUTHORS), new AuthorsListener()));
 
-        metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES), new LocationListener()));
-        metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES), new ContextChangeListener()));
-        metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY), new ExecutionActivityListener()));
-        metronome.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.CIRCLE_MESSAGE_EVENTS), new CircleMessageActivityListener()));
+        metronomePlayer.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES), new LocationListener()));
+        metronomePlayer.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES), new ContextChangeListener()));
+        metronomePlayer.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY), new ExecutionActivityListener()));
+        metronomePlayer.addPlayerToChain(new RhythmPlayer(frameToPlay.getRhythmLayer(RhythmLayerType.CIRCLE_MESSAGE_EVENTS), new CircleMessageActivityListener()));
     }
 
     public void play() {
 
-        int beatsToPlay = metronome.getBeats();
+        int ticksToPlay = metronomePlayer.getNumberOfTicks();
 
-        for (int i = 0; i < beatsToPlay; i++) {
+        for (int i = 0; i < ticksToPlay; i++) {
             scene.panForwardTime();
-            metronome.tick();
+            metronomePlayer.tick();
 
-            scene.snapshot(metronome.getCoords());
+            scene.snapshot(metronomePlayer.getCurrentBeat());
         }
-        scene.finish();
     }
 
 

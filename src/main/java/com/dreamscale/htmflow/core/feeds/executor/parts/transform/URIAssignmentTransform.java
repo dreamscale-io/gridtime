@@ -25,15 +25,15 @@ public class URIAssignmentTransform implements TransformStrategy {
 
         populateStaticContextUris(storyTile);
 
-        saveUrisForTemporalFeatures(storyTile);
+        //saveUrisForTemporalFeatures(storyTile);
 
     }
 
-    private void saveUrisForTemporalFeatures(StoryTile storyTile) {
-        List<FlowFeature> features = storyTile.extractTemporalFeatures();
-
-        uriMapper.saveTemporalFeatureUris(features);
-    }
+//    private void saveUrisForTemporalFeatures(StoryTile storyTile) {
+//        List<FlowFeature> features = storyTile.extractTemporalFeatures();
+//
+//        uriMapper.saveTemporalFeatureUris(features);
+//    }
 
     private void populateStaticContextUris(StoryTile storyTile) {
         List<MomentOfContext> allContexts = storyTile.getAllContexts();

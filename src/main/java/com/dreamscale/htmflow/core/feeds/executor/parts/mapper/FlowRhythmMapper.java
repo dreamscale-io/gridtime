@@ -2,9 +2,8 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -16,7 +15,7 @@ import java.util.*;
 
 public class FlowRhythmMapper {
 
-    private final MusicGeometryClock internalClock;
+    private final MusicClock musicClock;
     private final FeatureFactory featureFactory;
     private final LocalDateTime from;
     private final LocalDateTime to;
@@ -25,7 +24,7 @@ public class FlowRhythmMapper {
 
     public FlowRhythmMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
-        this.internalClock = new MusicGeometryClock(from, to);
+        this.musicClock = new MusicClock(from, to);
         this.from = from;
         this.to = to;
     }
@@ -34,7 +33,7 @@ public class FlowRhythmMapper {
     private RhythmLayerMapper findOrCreateLayer(RhythmLayerType layerType) {
         RhythmLayerMapper layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new RhythmLayerMapper(featureFactory, internalClock, layerType);
+            layer = new RhythmLayerMapper(featureFactory, musicClock, layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
@@ -158,6 +157,8 @@ public class FlowRhythmMapper {
     }
 
     public Movement getLastMovement(RhythmLayerType rhythmLayerType) {
+
+
         return findOrCreateLayer(rhythmLayerType).getLastMovement();
     }
 
@@ -166,8 +167,10 @@ public class FlowRhythmMapper {
     public List<RhythmLayer> getRhythmLayers() {
         List<RhythmLayer> rhythmLayers = new ArrayList<>();
 
-        for (RhythmLayerType layerType : layerMap.keySet()) {
-            rhythmLayers.add(getRhythmLayer(layerType));
+        for (RhythmLayerMapper layerMapper : layerMap.values()) {
+            if (!layerMapper.isEmpty()) {
+                rhythmLayers.add(layerMapper.getRhythmLayer());
+            }
         }
         return rhythmLayers;
     }

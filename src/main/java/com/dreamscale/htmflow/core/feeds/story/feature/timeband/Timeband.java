@@ -1,8 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
@@ -23,8 +22,8 @@ public class Timeband extends FlowFeature implements Playable {
 
     private int relativeSequence = 0;
 
-    private MusicGeometryClock.Coords startCoords;
-    private MusicGeometryClock.Coords endCoords;
+    private MusicClock.Beat startBeat;
+    private MusicClock.Beat endBeat;
 
     public Timeband(LocalDateTime start, LocalDateTime end, Details details) {
         this();
@@ -49,10 +48,10 @@ public class Timeband extends FlowFeature implements Playable {
         setUri(layer.getUri() + getRelativePath());
     }
 
-    public void initCoordinates(MusicGeometryClock clock) {
+    public void initCoordinates(MusicClock clock) {
 
-        this.startCoords = clock.createCoords(start);
-        this.endCoords = clock.createCoords(end);
+        this.startBeat = clock.createBeat(start);
+        this.endBeat = clock.createBeat(end);
     }
 
     @JsonIgnore
@@ -61,8 +60,8 @@ public class Timeband extends FlowFeature implements Playable {
     }
 
     @JsonIgnore
-    public MusicGeometryClock.Coords getCoordinates() {
-        return this.startCoords;
+    public MusicClock.Beat getCoordinates() {
+        return this.startBeat;
     }
 
     public boolean contains(LocalDateTime moment) {

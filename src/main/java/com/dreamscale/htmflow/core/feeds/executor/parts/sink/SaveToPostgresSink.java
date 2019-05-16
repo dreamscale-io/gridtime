@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.feeds.story.StoryTileModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridSummary;
+import com.dreamscale.htmflow.core.feeds.story.grid.StoryTileSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,34 +37,37 @@ public class SaveToPostgresSink implements SinkStrategy {
         StoryTileEntity storyTileEntity = createStoryTileEntity(torchieId, storyTileModel);
         storyTileRepository.save(storyTileEntity);
 
-        StoryGridSummaryEntity summaryEntity = createStoryGridSummaryEntity(torchieId, storyTileEntity.getId(), storyTileModel.getStoryGridModel().getStoryGridSummary());
+        log.debug(storyTileEntity.getJsonTile());
+
+        StoryGridSummaryEntity summaryEntity = createStoryGridSummaryEntity(torchieId, storyTileEntity.getId(), storyTileModel.getStoryTileSummary());
         storyGridSummaryRepository.save(summaryEntity);
 
-        List<StoryGridMetricsEntity> storyGridEntities = createStoryGridMetricEntities(torchieId, storyTileEntity.getId(), storyTileModel.getStoryGridModel());
+        List<StoryGridMetricsEntity> storyGridEntities = createStoryGridMetricEntities(torchieId, storyTileEntity.getId(), storyTileModel.getStoryGrid());
         storyGridMetricsRepository.save(storyGridEntities);
 
         log.debug("Saved tile: "+storyTileEntity.getUri());
 
+
     }
 
-    private StoryGridSummaryEntity createStoryGridSummaryEntity(UUID torchieId, UUID tileId, StoryGridSummary storyGridSummary) {
+    private StoryGridSummaryEntity createStoryGridSummaryEntity(UUID torchieId, UUID tileId, StoryTileSummary storyTileSummary) {
 
         StoryGridSummaryEntity summaryEntity = new StoryGridSummaryEntity();
         summaryEntity.setId(UUID.randomUUID());
         summaryEntity.setTorchieId(torchieId);
         summaryEntity.setTileId(tileId);
 
-        summaryEntity.setAverageMood(storyGridSummary.getAvgMood());
-        summaryEntity.setPercentLearning(storyGridSummary.getPercentLearning());
-        summaryEntity.setPercentProgress(storyGridSummary.getPercentProgress());
-        summaryEntity.setPercentTroubleshooting(storyGridSummary.getPercentTroubleshooting());
-        summaryEntity.setPercentPairing(storyGridSummary.getPercentPairing());
+        summaryEntity.setAverageMood(storyTileSummary.getAvgMood());
+        summaryEntity.setPercentLearning(storyTileSummary.getPercentLearning());
+        summaryEntity.setPercentProgress(storyTileSummary.getPercentProgress());
+        summaryEntity.setPercentTroubleshooting(storyTileSummary.getPercentTroubleshooting());
+        summaryEntity.setPercentPairing(storyTileSummary.getPercentPairing());
 
-        summaryEntity.setBoxesVisited(storyGridSummary.getBoxesVisited());
-        summaryEntity.setLocationsVisited(storyGridSummary.getLocationsVisited());
-        summaryEntity.setBridgesVisited(storyGridSummary.getBridgesVisited());
-        summaryEntity.setTraversalsVisited(storyGridSummary.getTraversalsVisited());
-        summaryEntity.setBubblesVisited(storyGridSummary.getBubblesVisited());
+        summaryEntity.setBoxesVisited(storyTileSummary.getBoxesVisited());
+        summaryEntity.setLocationsVisited(storyTileSummary.getLocationsVisited());
+        summaryEntity.setBridgesVisited(storyTileSummary.getBridgesVisited());
+        summaryEntity.setTraversalsVisited(storyTileSummary.getTraversalsVisited());
+        summaryEntity.setBubblesVisited(storyTileSummary.getBubblesVisited());
 
         return summaryEntity;
     }
@@ -76,7 +79,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         Set<String> uris = storyGridModel.getAllFeaturesVisited();
 
         for (String uri : uris) {
-            FeatureMetrics metrics = storyGridModel.getFeatureMetrics(uri);
+            FeatureMetrics metrics = storyGridModel.getFeatureMetricTotals().getFeatureMetrics(uri);
 
             Map<CandleType, CandleStick> candleMap = metrics.getMetrics().getCandleMap();
 
@@ -129,7 +132,7 @@ public class SaveToPostgresSink implements SinkStrategy {
 
 
         String storyTileAsJson = JSONTransformer.toJson(storyTileModel);
-        String summaryAsJson = JSONTransformer.toJson(storyTileModel.getStoryGridModel().getStoryGridSummary());
+        String summaryAsJson = JSONTransformer.toJson(storyTileModel.getStoryTileSummary());
 
         storyTileEntity.setJsonTile(storyTileAsJson);
         storyTileEntity.setJsonTileSummary(summaryAsJson);

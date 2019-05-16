@@ -1,16 +1,11 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
-import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +13,7 @@ public class RhythmLayerMapper {
 
     private final RhythmLayerType layerType;
     private final FeatureFactory featureFactory;
-    private final MusicGeometryClock internalClock;
+    private final MusicClock musicClock;
     private final RhythmLayer layer;
 
     private Movement carriedOverLastMovement;
@@ -26,16 +21,16 @@ public class RhythmLayerMapper {
     private List<Movement> movementsToCarryUntilWithinWindow = new ArrayList<>();
 
 
-    public RhythmLayerMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock, RhythmLayerType layerType) {
+    public RhythmLayerMapper(FeatureFactory featureFactory, MusicClock musicClock, RhythmLayerType layerType) {
         this.featureFactory = featureFactory;
         this.layerType = layerType;
-        this.internalClock = internalClock;
+        this.musicClock = musicClock;
         this.layer = featureFactory.createRhythmLayer(layerType);
     }
 
     public void addMovement(Movement movement) {
 
-        movement.setCoordinates(internalClock.createCoords(movement.getMoment()));
+        movement.setCoordinates(musicClock.createBeat(movement.getMoment()));
 
         layer.add(movement);
 
@@ -77,4 +72,7 @@ public class RhythmLayerMapper {
         return lastMovement;
     }
 
+    public boolean isEmpty() {
+        return layer.getMovements().size() == 0;
+    }
 }

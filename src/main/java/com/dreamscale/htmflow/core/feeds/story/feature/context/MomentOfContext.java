@@ -1,8 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.context;
 
-import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,9 +22,9 @@ public class MomentOfContext {
     private Context intentionContext;
 
     private LocalDateTime position;
-    private MusicGeometryClock.Coords coordinates;
+    private MusicClock.Beat coordinates;
 
-    public MomentOfContext(MusicGeometryClock internalClock, ContextBeginningEvent projectEvent,
+    public MomentOfContext(MusicClock internalClock, ContextBeginningEvent projectEvent,
                            ContextBeginningEvent taskEvent,
                            ContextBeginningEvent intentionEvent) {
 
@@ -45,7 +43,7 @@ public class MomentOfContext {
         LocalDateTime position = determinePosition(projectEvent, taskEvent, intentionEvent);
         if (position != null) {
             this.position = position;
-            coordinates = internalClock.createCoords(position);
+            coordinates = internalClock.createBeat(position);
         }
     }
 

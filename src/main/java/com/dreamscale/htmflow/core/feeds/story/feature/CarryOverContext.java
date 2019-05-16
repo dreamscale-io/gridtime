@@ -17,8 +17,8 @@ public class CarryOverContext {
 
     private String contextOwner;
 
-    private Map<String, FlowFeature> keyValueUriObjects = new LinkedHashMap<>();
-    private Map<String, Details> keyValueDetailObjects = new LinkedHashMap<>();
+    private Map<String, FlowFeature> savedFeatureObjects = new LinkedHashMap<>();
+    private Map<String, Details> savedDetailObjects = new LinkedHashMap<>();
 
     private Map<String, CarryOverContext> subContextMap = new LinkedHashMap<>();
 
@@ -27,48 +27,59 @@ public class CarryOverContext {
     }
 
     public void saveFeature(String key, FlowFeature jsonSerializableFeature) {
-        keyValueUriObjects.put(key, jsonSerializableFeature);
+        if (jsonSerializableFeature != null) {
+            savedFeatureObjects.put(key, jsonSerializableFeature);
+        }
     }
 
     public void saveDetails(String key, Details jsonSerializableFeature) {
-        keyValueDetailObjects.put(key, jsonSerializableFeature);
+        if (jsonSerializableFeature != null) {
+            savedDetailObjects.put(key, jsonSerializableFeature);
+        }
     }
 
     public void saveFeatureList(String key, List<? extends FlowFeature> jsonSerializableFeatureList) {
         if (jsonSerializableFeatureList.size() > 0) {
-            keyValueUriObjects.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
+            savedFeatureObjects.put(key, new ListOfFlowFeatures(jsonSerializableFeatureList));
         }
     }
 
     public FlowFeature getFeature(String key) {
-        return keyValueUriObjects.get(key);
+        return savedFeatureObjects.get(key);
     }
 
     public Details getDetails(String key) {
-        return keyValueDetailObjects.get(key);
+        return savedDetailObjects.get(key);
     }
 
     public Set<String> featureKeySet() {
-        return keyValueUriObjects.keySet();
+        return savedFeatureObjects.keySet();
     }
     public Set<String> detailsKeySet() {
-        return keyValueDetailObjects.keySet();
+        return savedDetailObjects.keySet();
     }
 
     public CarryOverContext getSubContext(String subContextOwner) {
-        return subContextMap.get(subContextOwner);
+        CarryOverContext subContext = subContextMap.get(subContextOwner);
+        if (subContext == null) {
+            subContext = new CarryOverContext(subContextOwner);
+        }
+        return subContext;
     }
 
     public void addSubContext(CarryOverContext carryOverContext) {
-        subContextMap.put(carryOverContext.getContextOwner(), carryOverContext);
+        if (carryOverContext.isNotEmpty()) {
+            subContextMap.put(carryOverContext.getContextOwner(), carryOverContext);
+        }
     }
 
-    private String getContextOwner() {
-        return contextOwner;
+    private boolean isNotEmpty() {
+        return savedDetailObjects.size() > 0 || savedFeatureObjects.size() > 0;
     }
+
 
     public List<? extends FlowFeature> getFeatureList(String key) {
-        ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) keyValueUriObjects.get(key);
+        ListOfFlowFeatures flowFeatures = (ListOfFlowFeatures) savedFeatureObjects.get(key);
 
         if (flowFeatures != null) {
             return flowFeatures.getOriginalTypedList();

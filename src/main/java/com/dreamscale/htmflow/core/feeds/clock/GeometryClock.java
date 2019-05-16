@@ -165,7 +165,7 @@ public class GeometryClock {
 
 
         public String formatDreamTime() {
-            return year + "_BW" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "_TT" + fourhours + ":" + twenties;
+            return year + "_BWD" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "_FT" + fourhours + "-" + twenties;
         }
 
         public Coords panLeft(ZoomLevel zoomLevel) {

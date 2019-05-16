@@ -25,9 +25,6 @@ class TorchieSpec extends Specification {
     @Autowired
     TorchieFactory torchieFactory
 
-    GeometryClock geometryClock
-
-
     UUID torchieId
     LocalDateTime clockStart
 
@@ -36,8 +33,7 @@ class TorchieSpec extends Specification {
         torchieId = UUID.randomUUID();
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
 
-        Metronome metronome = new Metronome(clockStart);
-        Torchie torchie = torchieFactory.wireUpMemberTorchie(metronome, torchieId)
+        Torchie torchie = torchieFactory.wireUpMemberTorchie(torchieId, clockStart)
 
         LocalDateTime time1_0 = aRandom.localDateTime()
         LocalDateTime time2_0 = time1_0.plusMinutes(20);

@@ -57,6 +57,6 @@ class TorchieJobResourceSpec extends Specification {
         then:
         assert jobStatuses.size() == 1
     }
-
+    
 
 }

@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid
+import com.dreamscale.htmflow.core.feeds.story.music.BeatSize
 import spock.lang.Specification
 
 import java.time.Duration
@@ -21,7 +22,7 @@ class SpatialGeometryMapperSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         FeatureFactory featureFactory = new FeatureFactory("/tile/id")
-        StoryGrid storyGrid = new StoryGrid()
+        StoryGrid storyGrid = new StoryGrid(BeatSize.QUARTER, clockStart, clockStart.plusMinutes(20))
         spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, storyGrid)
     }
 

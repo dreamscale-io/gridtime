@@ -1,11 +1,15 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
+import com.dreamscale.htmflow.core.feeds.story.music.MetronomePlayer;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class StoryGrid {
+
 
     private Map<UUID, FeatureRow> featureRows = new HashMap<>();
     private Map<UUID, FeatureAggregateRow> aggregateRows = new HashMap<>();
@@ -13,9 +17,23 @@ public class StoryGrid {
     private Map<UUID, FeatureAggregate> aggregators = new HashMap<>();
 
     private List<Column> columns = new ArrayList<>();
+    private final BeatSize timeBucketSize;
+    private final LocalDateTime from;
+    private final LocalDateTime to;
 
     private transient GridMetrics theVoid = new GridMetrics();
     private StoryGridModel extractedStoryGridModel;
+
+    public StoryGrid(BeatSize timeBucketSize, LocalDateTime from, LocalDateTime to) {
+        this.timeBucketSize = timeBucketSize;
+        this.from = from;
+        this.to = to;
+    }
+
+    public MetronomePlayer createPlayer() {
+        MusicClock clock = new MusicClock(from, to);
+        return new MetronomePlayer(clock, timeBucketSize);
+    }
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
         if (feature != null) {
@@ -25,12 +43,32 @@ public class StoryGrid {
         }
     }
 
-    public GridMetrics getMetricsFor(FlowFeature feature, MusicGeometryClock.Coords coords) {
+    public GridMetrics getMetricsFor(FlowFeature feature, MusicClock.Beat beat) {
         if (feature != null) {
-            return findOrCreateGridMetrics(feature, coords);
+            return findOrCreateGridMetrics(feature, toBucketCoords(beat));
         } else {
             return theVoid;
         }
+    }
+
+
+    public GridMetrics getAggregateMetricsFor(FlowFeature feature, MusicClock.Beat beat) {
+        FeatureAggregateRow aggregateRow = aggregateRows.get(feature.getId());
+        aggregateRow.refreshMetrics();
+
+        return aggregateRow.findOrCreateMetrics(toBucketCoords(beat));
+    }
+
+    private MusicClock.Beat toBucketCoords(MusicClock.Beat originalBeat) {
+        switch (timeBucketSize) {
+            case BEAT:
+                return originalBeat;
+            case QUARTER:
+                return originalBeat.toQuarter();
+            case HALF:
+                return originalBeat.toHalf();
+        }
+        return originalBeat;
     }
 
     private FeatureRow findOrCreateRow(FlowFeature feature) {
@@ -61,18 +99,12 @@ public class StoryGrid {
         return row.getAllTimeBucket();
     }
 
-    private GridMetrics findOrCreateGridMetrics(FlowFeature feature, MusicGeometryClock.Coords coords) {
+    private GridMetrics findOrCreateGridMetrics(FlowFeature feature, MusicClock.Beat beat) {
 
         FeatureRow row = findOrCreateRow(feature);
-        return row.findOrCreateMetrics(coords);
+        return row.findOrCreateMetrics(beat);
     }
 
-    public GridMetrics getAggregateMetricsFor(FlowFeature feature, MusicGeometryClock.Coords coords) {
-        FeatureAggregateRow aggregateRow = aggregateRows.get(feature.getId());
-        aggregateRow.refreshMetrics();
-
-        return aggregateRow.findOrCreateMetrics(coords);
-    }
 
     public void createAggregateRow(FlowFeature parent, List<? extends FlowFeature> children) {
         FeatureAggregate aggregate = findOrCreateAggregate(parent);
@@ -95,67 +127,10 @@ public class StoryGrid {
         columns.add(column);
     }
 
-    public void summarize() {
-
-        StoryGridModel storyGridModel = createStoryGridModel();
-
-        StoryGridSummary summary = new StoryGridSummary();
-
-        summary.setBoxesVisited(storyGridModel.getBoxesVisited().size());
-        summary.setLocationsVisited(storyGridModel.getLocationsVisited().size());
-        summary.setTraversalsVisited(storyGridModel.getTraversalsVisited().size());
-        summary.setBridgesVisited(storyGridModel.getBridgesVisited().size());
-        summary.setBubblesVisited(storyGridModel.getBubblesVisited().size());
-
-        double totalFeels = 0;
-        double totalLearning = 0;
-        double totalTroubleshooting = 0;
-        double totalPairing = 0;
-
-        Set<String> experimentUris = new LinkedHashSet<>();
-        Set<String> messageUris = new LinkedHashSet<>();
-
-        for (Column column : columns) {
-            totalFeels += column.getFeels();
-            totalLearning += toIntFlag(column.isLearning());
-            totalTroubleshooting += toIntFlag(column.isTroubleshooting());
-            totalPairing += toIntFlag(column.isPairing());
-
-            experimentUris.addAll(column.getExperimentContextUris());
-            messageUris.addAll(column.getMessageContextUris());
-        }
-
-        if (columns.size() > 0) {
-            summary.setAvgMood(totalFeels / columns.size());
-            summary.setPercentLearning(totalLearning / columns.size());
-            summary.setPercentTroubleshooting(totalTroubleshooting / columns.size());
-            summary.setPercentPairing(totalPairing / columns.size());
-        }
-
-        summary.setPercentProgress(1 - summary.getPercentLearning() - summary.getPercentTroubleshooting());
-
-        summary.setTotalExperiments(experimentUris.size());
-        summary.setTotalMessages(messageUris.size());
-
-        storyGridModel.setStoryGridSummary(summary);
-        storyGridModel.setColumns(columns);
-
-        extractedStoryGridModel = storyGridModel;
-    }
-
-
-
-    private int toIntFlag(boolean flag) {
-        if (flag) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
 
     public StoryGridModel getStoryGridModel() {
         if (extractedStoryGridModel == null) {
-            summarize();
+            extractedStoryGridModel = createStoryGridModel();
         }
 
         return extractedStoryGridModel;
@@ -174,7 +149,7 @@ public class StoryGrid {
             GridMetrics metrics = row.getAllTimeBucket();
 
 
-            storyGridModel.addActivityForStructure(feature, metrics);
+            storyGridModel.addMetricTotalsForFeature(feature, metrics);
         }
 
         for (FeatureAggregateRow aggregateRow : aggregateRows.values()) {
@@ -183,8 +158,11 @@ public class StoryGrid {
             FlowFeature feature = aggregateRow.getFeature();
             GridMetrics metrics = aggregateRow.getAllTimeBucket();
 
-            storyGridModel.addActivityForStructure(feature, metrics);
+            storyGridModel.addMetricTotalsForFeature(feature, metrics);
         }
+        storyGridModel.setColumns(columns);
+
+
 
         return storyGridModel;
     }

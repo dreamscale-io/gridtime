@@ -10,29 +10,31 @@ public class BandPlayer implements Player {
 
     private final List<Timeband> playables;
     private final PlayListener playListener;
-
+    private int index;
 
 
     public BandPlayer(TimebandLayer timeBandLayer, PlayListener playListener) {
         this.playables = timeBandLayer.getTimebands();
         this.playListener = playListener;
+        this.index = 0;
     }
 
     @Override
-    public void play(MusicGeometryClock.Coords coords) {
-        List<Playable> tickContents = new ArrayList<>();
+    public void play(MusicClock.Beat withinBeat) {
+        List<Playable> beatContents = new ArrayList<>();
 
-        for (int i = 0; i < playables.size(); i++) {
+        for (int i = index; i < playables.size(); i++) {
             Timeband band = playables.get(i);
 
-            if (band.getStartCoords().isBeforeOrEqual(coords) && band.getEndCoords().isAfterOrEqual(coords)) {
-                tickContents.add(band);
+            if (band.getStartBeat().isWithin(withinBeat)) {
+                beatContents.add(band);
+                index++;
             } else {
                 break;
             }
         }
 
-       playListener.play(tickContents);
+       playListener.play(beatContents);
     }
 
 }

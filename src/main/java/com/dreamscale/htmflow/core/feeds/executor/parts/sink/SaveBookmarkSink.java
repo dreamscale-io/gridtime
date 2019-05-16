@@ -1,14 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.sink;
 
 import com.dreamscale.htmflow.core.domain.tile.*;
-import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.StoryTileModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
-import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

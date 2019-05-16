@@ -44,10 +44,10 @@ public class Scene {
         this.storyGrid = storyGrid;
     }
 
-    public void snapshot(MusicGeometryClock.Coords coords) {
-        correlateMetricsWithinFrame(coords);
+    public void snapshot(MusicClock.Beat beat) {
+        correlateMetricsWithinFrame(beat);
 
-        Column column = new Column(coords);
+        Column column = new Column(beat);
         column.setProjectContext(projectContext);
         column.setTaskContext(taskContext);
         column.setIntentionContext(intentionContext);
@@ -62,12 +62,12 @@ public class Scene {
 
         //static structures
 
-        addStructureActivityMetrics(column, activeBoxes, coords);
-        addStructureActivityMetrics(column, activeLocationsInBox, coords);
-        addStructureActivityMetrics(column, activeTraversals, coords);
-        addStructureActivityMetrics(column, activeBridges, coords);
+        addStructureActivityMetrics(column, activeBoxes, beat);
+        addStructureActivityMetrics(column, activeLocationsInBox, beat);
+        addStructureActivityMetrics(column, activeTraversals, beat);
+        addStructureActivityMetrics(column, activeBridges, beat);
 
-        addAggregateActivityMetrics(column, activeBubbles, coords);
+        addAggregateActivityMetrics(column, activeBubbles, beat);
 
         addRingLocationAliases(column, activeRingLocations);
         addRingLinkAliases(column, activeRingLinks);
@@ -99,10 +99,6 @@ public class Scene {
         return uris;
     }
 
-    public void finish() {
-        storyGrid.summarize();
-    }
-
     private void addRingLocationAliases(Column column, LinkedList<ThoughtBubble.RingLocation> activeRingLocations) {
         for (ThoughtBubble.RingLocation ringLocation : activeRingLocations) {
             column.addAliasForStructure(ringLocation.getUri(), ringLocation.getLocation().getUri());
@@ -115,16 +111,16 @@ public class Scene {
         }
     }
 
-    private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, MusicGeometryClock.Coords coords) {
+    private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
         for (FlowFeature feature : features) {
-            GridMetrics metrics = storyGrid.getAggregateMetricsFor(feature, coords);
+            GridMetrics metrics = storyGrid.getAggregateMetricsFor(feature, beat);
             column.addActivityForStructure(feature, metrics);
         }
     }
 
-    private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, MusicGeometryClock.Coords coords) {
+    private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
         for (FlowFeature feature : features) {
-            column.addActivityForStructure(feature, storyGrid.getMetricsFor(feature, coords));
+            column.addActivityForStructure(feature, storyGrid.getMetricsFor(feature, beat));
         }
     }
 
@@ -141,34 +137,34 @@ public class Scene {
         removeAllButOne(activeMessageContexts);
     }
 
-    public void correlateMetricsWithinFrame(MusicGeometryClock.Coords coords) {
+    public void correlateMetricsWithinFrame(MusicClock.Beat beat) {
         for(Box box : activeBoxes) {
-            saveMetrics(box, coords);
+            saveMetrics(box, beat);
         }
 
         for(LocationInBox location : activeLocationsInBox) {
-            saveMetrics(location, coords);
+            saveMetrics(location, beat);
         }
 
         for(Traversal traversal : activeTraversals) {
-            saveMetrics(traversal, coords);
+            saveMetrics(traversal, beat);
         }
 
         for(Bridge bridge : activeBridges) {
-            saveMetrics(bridge, coords);
+            saveMetrics(bridge, beat);
         }
 
-        saveMetrics(projectContext, coords);
-        saveMetrics(taskContext, coords);
-        saveMetrics(intentionContext, coords);
+        saveMetrics(projectContext, beat);
+        saveMetrics(taskContext, beat);
+        saveMetrics(intentionContext, beat);
     }
 
-    private void saveMetrics(FlowFeature flowFeature, MusicGeometryClock.Coords coords) {
+    private void saveMetrics(FlowFeature flowFeature, MusicClock.Beat beat) {
 
-        storyGrid.getMetricsFor(flowFeature, coords).addFeelsSample(activeFeels);
-        storyGrid.getMetricsFor(flowFeature, coords).addPairingSample(isPairing);
-        storyGrid.getMetricsFor(flowFeature, coords).addLearningSample(isLearningFriction);
-        storyGrid.getMetricsFor(flowFeature, coords).addWtfSample(isWTFFriction);
+        storyGrid.getMetricsFor(flowFeature, beat).addFeelsSample(activeFeels);
+        storyGrid.getMetricsFor(flowFeature, beat).addPairingSample(isPairing);
+        storyGrid.getMetricsFor(flowFeature, beat).addLearningSample(isLearningFriction);
+        storyGrid.getMetricsFor(flowFeature, beat).addWtfSample(isWTFFriction);
     }
 
     private void removeAllButOne(LinkedList<?> activeItems) {

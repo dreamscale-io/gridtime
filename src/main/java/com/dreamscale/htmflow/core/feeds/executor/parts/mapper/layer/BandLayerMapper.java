@@ -1,25 +1,20 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
-import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
-import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
+import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class BandLayerMapper {
 
     private final BandLayerType layerType;
-    private final MusicGeometryClock internalClock;
+    private final MusicClock musicClock;
     private final TimebandLayer layer;
     private final FeatureFactory featureFactory;
 
@@ -29,9 +24,9 @@ public class BandLayerMapper {
     private LocalDateTime activeBandStart;
     private boolean isRollingBandLayer = false;
 
-    public BandLayerMapper(FeatureFactory featureFactory, MusicGeometryClock internalClock, BandLayerType layerType) {
+    public BandLayerMapper(FeatureFactory featureFactory, MusicClock musicClock, BandLayerType layerType) {
         this.featureFactory = featureFactory;
-        this.internalClock = internalClock;
+        this.musicClock = musicClock;
         this.layerType = layerType;
         this.layer = featureFactory.createTimebandLayer(layerType);
 
@@ -61,7 +56,7 @@ public class BandLayerMapper {
 
     public void finish() {
         if (activeDetails != null) {
-            Timeband band = featureFactory.createBand(layerType, activeBandStart, internalClock.getToClockTime(), activeDetails);
+            Timeband band = featureFactory.createBand(layerType, activeBandStart, musicClock.getToClockTime(), activeDetails);
             addTimeBand(band);
         }
 
@@ -82,7 +77,7 @@ public class BandLayerMapper {
     public void initContext(Timeband lastBand, Details activeDetails) {
         this.carriedOverLastBand = lastBand;
         this.activeDetails = activeDetails;
-        this.activeBandStart = internalClock.getFromClockTime();
+        this.activeBandStart = musicClock.getFromClockTime();
     }
 
     public Details getActiveDetails() {
@@ -91,7 +86,7 @@ public class BandLayerMapper {
 
 
     private void addTimeBand(Timeband timeBand) {
-        timeBand.initCoordinates(internalClock);
+        timeBand.initCoordinates(musicClock);
 
         layer.add(timeBand);
     }
@@ -110,22 +105,22 @@ public class BandLayerMapper {
     }
 
 
-    public void fillWithRollingAggregateBands(BeatsPerBucket beatSize) {
+    public void fillWithRollingAggregateBands(BeatSize beatSize) {
         isRollingBandLayer = true;
 
-        int bandCount = BeatsPerBucket.BEAT.getBeatCount() / beatSize.getBeatCount();
+        int bandCount = BeatSize.BEAT.getBeatCount() / beatSize.getBeatCount();
 
-        MusicGeometryClock.Coords startCoords = internalClock.getCoordinates();
+        MusicClock.Beat startBeat = musicClock.getCurrentBeat();
 
         for (int i = 0; i < bandCount; i++) {
-            MusicGeometryClock.Coords endCoords = internalClock.panRight(beatSize);
+            MusicClock.Beat endBeat = musicClock.next(beatSize);
 
-            RollingAggregateBand band = featureFactory.createRollingBand(layerType, startCoords.getClockTime(), endCoords.getClockTime());
-            band.initCoordinates(internalClock);
+            RollingAggregateBand band = featureFactory.createRollingBand(layerType, startBeat.getClockTime(), endBeat.getClockTime());
+            band.initCoordinates(musicClock);
 
             layer.add(band);
 
-            startCoords = endCoords;
+            startBeat = endBeat;
         }
     }
 
@@ -139,5 +134,9 @@ public class BandLayerMapper {
 
     public void addRollingBandSample(LocalDateTime moment, double sample) {
         layer.addRollingBandSample(moment, sample);
+    }
+
+    public boolean isEmpty() {
+        return layer.getTimebands().size() == 0;
     }
 }

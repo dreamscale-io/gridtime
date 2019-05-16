@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.music.BeatsPerBucket;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
@@ -15,14 +15,14 @@ public class FlowBandMapper {
 
     private final LocalDateTime from;
     private final LocalDateTime to;
-    private final MusicGeometryClock internalClock;
+    private final MusicClock musicClock;
     private final FeatureFactory featureFactory;
 
     private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
     public FlowBandMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
-        this.internalClock = new MusicGeometryClock(from, to);
+        this.musicClock = new MusicClock(from, to);
         this.from = from;
         this.to = to;
 
@@ -31,7 +31,7 @@ public class FlowBandMapper {
     private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {
         BandLayerMapper layer = this.layerMap.get(layerType);
         if (layer == null) {
-            layer = new BandLayerMapper(featureFactory, internalClock, layerType);
+            layer = new BandLayerMapper(featureFactory, musicClock, layerType);
             this.layerMap.put(layerType, layer);
         }
         return layer;
@@ -89,8 +89,13 @@ public class FlowBandMapper {
 
     public List<TimebandLayer> getBandLayers() {
         List<TimebandLayer> layers = new ArrayList<>();
-        for (BandLayerType layerType : layerMap.keySet()) {
-            layers.add(getBandLayer(layerType));
+        for (BandLayerMapper layerMapper : layerMap.values()) {
+            if (!layerMapper.isEmpty()) {
+                layers.add(layerMapper.getLayer());
+            }
+
+
+
         }
 
         return layers;
@@ -105,16 +110,16 @@ public class FlowBandMapper {
         return this.layerMap.get(bandLayerType).getLastBand();
     }
 
-    public void configureRollingBands(BandLayerType bandLayerType, BeatsPerBucket beatsPerBucket) {
+    public void configureRollingBands(BandLayerType bandLayerType, BeatSize beatSize) {
         BandLayerMapper layer = findOrCreateLayer(bandLayerType);
-        layer.fillWithRollingAggregateBands(beatsPerBucket);
+        layer.fillWithRollingAggregateBands(beatSize);
     }
 
     public void addRollingBandSample(BandLayerType bandLayerType, LocalDateTime moment, double sample) {
         BandLayerMapper layer = findOrCreateLayer(bandLayerType);
 
         if (!layer.isRollingBandLayerConfigured()) {
-            configureRollingBands(bandLayerType, BeatsPerBucket.QUARTER);
+            configureRollingBands(bandLayerType, BeatSize.QUARTER);
         }
 
         layer.addRollingBandSample(moment, sample);

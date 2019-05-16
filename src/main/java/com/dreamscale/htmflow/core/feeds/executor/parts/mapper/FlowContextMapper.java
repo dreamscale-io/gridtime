@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ChangeContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -16,7 +16,7 @@ public class FlowContextMapper {
     private final FeatureFactory featureFactory;
     private final LocalDateTime from;
     private final LocalDateTime to;
-    private final MusicGeometryClock internalClock;
+    private final MusicClock musicClock;
 
     private Map<StructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
     private Map<StructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
@@ -27,7 +27,7 @@ public class FlowContextMapper {
 
     public FlowContextMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
-        this.internalClock = new MusicGeometryClock(from, to);
+        this.musicClock = new MusicClock(from, to);
         this.from = from;
         this.to = to;
     }
@@ -154,7 +154,7 @@ public class FlowContextMapper {
         ContextBeginningEvent taskContext = getCurrentContext(StructureLevel.TASK);
         ContextBeginningEvent intentionContext = getCurrentContext(StructureLevel.INTENTION);
 
-        MomentOfContext momentOfContext = new MomentOfContext(internalClock, projectContext, taskContext, intentionContext);
+        MomentOfContext momentOfContext = new MomentOfContext(musicClock, projectContext, taskContext, intentionContext);
 
         return momentOfContext;
     }

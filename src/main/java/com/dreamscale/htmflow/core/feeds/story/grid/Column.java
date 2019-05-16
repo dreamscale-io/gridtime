@@ -4,10 +4,8 @@ import com.dreamscale.htmflow.core.domain.member.json.Member;
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
-import com.dreamscale.htmflow.core.feeds.story.grid.GridMetrics;
-import com.dreamscale.htmflow.core.feeds.story.grid.StructuredMetricsMap;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicGeometryClock;
+import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +15,7 @@ import java.util.*;
 @Setter
 public class Column extends FlowFeature {
 
-    private MusicGeometryClock.Coords coords;
+    private MusicClock.Beat beat;
 
     private Context projectContext;
     private Context taskContext;
@@ -33,65 +31,74 @@ public class Column extends FlowFeature {
 
     private List<Member> activeAuthors;
 
-    private StructuredMetricsMap structuredMetricsMap = new StructuredMetricsMap();
-
-    private List<String> experimentContextUris = new ArrayList<>();
-    private List<String> messageContextUris = new ArrayList<>();
+    private FeatureMetricsMap featureMetricsMap = new FeatureMetricsMap();
 
     private int relativeSequence;
 
 
-    public Column(MusicGeometryClock.Coords coords) {
+    public Column(MusicClock.Beat beat) {
         this();
-        this.coords = coords;
+        this.beat = beat;
     }
 
     public Column() {
         super(FlowObjectType.STORY_GRID_COLUMN);
     }
 
+    @JsonIgnore
+    public List<String> getBoxesVisited() {
+        return featureMetricsMap.getBoxesVisited();
+    }
+    @JsonIgnore
+    public List<String> getLocationsVisited() {
+        return featureMetricsMap.getLocationsVisited();
+    }
+    @JsonIgnore
+    public List<String> getTraversalsVisited() {
+        return featureMetricsMap.getTraversalsVisited();
+    }
+    @JsonIgnore
+    public List<String> getBridgesVisited() {
+        return featureMetricsMap.getBridgesVisited();
+    }
+    @JsonIgnore
+    public List<String> getBubblesVisited() {
+        return featureMetricsMap.getBubblesVisited();
+    }
+    @JsonIgnore
+    public FeatureMetrics getFeatureMetrics(String uri) {
+        return featureMetricsMap.getFeatureMetrics(uri);
+    }
+
+    @JsonIgnore
+    public List<String> getExperimentContextUris() {
+        return featureMetricsMap.getExperimentUris();
+    }
+    @JsonIgnore
+    public List<String> getMessageContextUris() {
+        return featureMetricsMap.getMessageUris();
+    }
+
     public void addActivityForStructure(FlowFeature feature, GridMetrics metrics) {
-        structuredMetricsMap.addActivityForStructure(feature,  metrics);
+        featureMetricsMap.addMetricsForFeature(feature,  metrics);
     }
 
     public void addAliasForStructure(String uriFrom, String uriTo) {
-        structuredMetricsMap.addAliasForStructure(uriFrom,  uriTo);
-    }
-
-    public List<String> getBoxesVisited() {
-        return structuredMetricsMap.getBoxesVisited();
-    }
-
-    public List<String> getLocationsVisited() {
-        return structuredMetricsMap.getLocationsVisited();
-    }
-
-    public List<String> getTraversalsVisited() {
-        return structuredMetricsMap.getTraversalsVisited();
-    }
-
-    public List<String> getBridgesVisited() {
-        return structuredMetricsMap.getBridgesVisited();
-    }
-
-    public List<String> getBubblesVisited() {
-        return structuredMetricsMap.getBubblesVisited();
-    }
-
-    public FeatureMetrics getFeatureMetrics(String uri) {
-        return structuredMetricsMap.getFeatureMetrics(uri);
+        featureMetricsMap.addAliasForFeature(uriFrom,  uriTo);
     }
 
     public void addExperimentContexts(List<String> experimentUris) {
-        this.experimentContextUris.addAll(experimentUris);
+        featureMetricsMap.addExperiment(experimentUris);
     }
 
     public void addMessageContexts(List<String> messageUris) {
-        this.messageContextUris.addAll(messageUris);
+        featureMetricsMap.addMessage(messageUris);
     }
 
     public void setActiveAuthors(List<Member> activeAuthors) {
         this.activeAuthors = activeAuthors;
     }
+
+
 
 }
