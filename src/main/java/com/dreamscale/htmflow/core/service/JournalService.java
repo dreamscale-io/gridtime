@@ -101,6 +101,17 @@ public class JournalService {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
+    public LocalDateTime getDateOfFirstIntention(UUID memberId) {
+        LocalDateTime dateOfIntention = null;
+
+        JournalEntryEntity firstEntry = journalEntryRepository.findFirstIntentionByMemberId(memberId);
+        if (firstEntry != null) {
+            dateOfIntention = firstEntry.getPosition();
+        }
+
+        return dateOfIntention;
+    }
+
     private void createJournalLinks(IntentionEntity myIntention, UUID memberId, ActiveLinksNetworkDto activeLinksNetwork)  {
 
         JournalLinkEventEntity journalLinkEntity = new JournalLinkEventEntity();
@@ -330,5 +341,6 @@ public class JournalService {
 
         return recentJournalDto;
     }
+
 
 }

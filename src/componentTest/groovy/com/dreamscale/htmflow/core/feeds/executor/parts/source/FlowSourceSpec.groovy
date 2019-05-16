@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
+import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader
 import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FileActivityFetcher
@@ -27,6 +28,9 @@ class FlowSourceSpec extends Specification {
    @Autowired
     FileActivityFetcher fileActivityFetcher
 
+    @Autowired
+    TileLoader tileLoader
+
     UUID memberId
     SharedFeaturePool featurePool
     FlowSource journalFlowSource
@@ -36,7 +40,7 @@ class FlowSourceSpec extends Specification {
 
     def setup() {
         this.memberId = UUID.randomUUID();
-        this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates());
+        this.featurePool = new SharedFeaturePool(memberId, new GeometryClock(LocalDateTime.now()).getCoordinates(), tileLoader);
 
         FlowObserver flowObserverMock =
                 [see: { Window window, StoryTile storyFrame -> this.latestWindow = window }] as FlowObserver

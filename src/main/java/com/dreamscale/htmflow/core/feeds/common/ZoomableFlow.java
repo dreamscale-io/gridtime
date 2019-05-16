@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -160,7 +161,10 @@ public class ZoomableFlow implements ClockChangeListener {
         @Override
         public void run() {
             try {
-                log.info("Running tick: "+metronome.getActiveCoordinates().formatDreamTime());
+                LocalDateTime tileTime = metronome.getActiveCoordinates().getClockTime();
+                String dreamTime = metronome.getActiveCoordinates().formatDreamTime();
+
+                log.info("Running tick: "+tileTime + " : "+dreamTime);
 
                 this.metronome.tick();
                 this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);

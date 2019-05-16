@@ -296,11 +296,9 @@ public class StoryTile {
      *
      * This orchestration is handled by the StoryFrameSequence
      *
-     * @param previousStoryTile
      */
 
-    public void carryOverFrameContext(StoryTile previousStoryTile) {
-        CarryOverContext carryOverContext = previousStoryTile.getCarryOverContext();
+    public void carryOverFrameContext(CarryOverContext carryOverContext) {
 
         this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);

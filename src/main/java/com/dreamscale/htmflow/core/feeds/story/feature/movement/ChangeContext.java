@@ -46,11 +46,6 @@ public class ChangeContext extends Movement {
     }
 
     @JsonIgnore
-    public String getName() {
-        return changingContext.getName();
-    }
-
-    @JsonIgnore
     public String getDescription() {
         return changingContext.getDescription();
     }

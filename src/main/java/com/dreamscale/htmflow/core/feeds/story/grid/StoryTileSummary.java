@@ -4,12 +4,14 @@ import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeActivity;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
 import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.LinkedHashSet;
@@ -18,7 +20,12 @@ import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class StoryTileSummary {
+
+    private Context lastProject;
+    private Context lastTask;
+    private Context lastIntention;
 
     private double avgMood;
 
@@ -39,6 +46,9 @@ public class StoryTileSummary {
 
 
     public StoryTileSummary(StoryGridModel storyGrid) {
+
+        configureContexts(storyGrid.getLastColumn());
+
 
         setBoxesVisited(storyGrid.getFeatureMetricTotals().getBoxesVisited().size());
         setLocationsVisited(storyGrid.getFeatureMetricTotals().getLocationsVisited().size());
@@ -79,6 +89,17 @@ public class StoryTileSummary {
         setTotalMessages(messageUris.size());
     }
 
+    private void configureContexts(Column lastColumn) {
+        if (lastColumn != null) {
+            setLastProject(lastColumn.getProjectContext());
+            setLastTask(lastColumn.getTaskContext());
+            setLastIntention(lastColumn.getIntentionContext());
+        }
+    }
+
+    public String toString() {
+        return lastProject + ":" + lastTask;
+    }
 
     private int toIntFlag(boolean flag) {
         if (flag) {

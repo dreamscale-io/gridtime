@@ -133,7 +133,7 @@ public class JournalContextObserverSpec extends Specification {
         journalContextObserver.see(window, storyTile)
 
         StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.TWENTY_MINS).panRight(ZoomLevel.TWENTY_MINS), ZoomLevel.TWENTY_MINS);
-        nextFrame.carryOverFrameContext(storyTile);
+        nextFrame.carryOverFrameContext(storyTile.getCarryOverContext());
         Window nextWindow = new Window(time3, time4)
 
         when:

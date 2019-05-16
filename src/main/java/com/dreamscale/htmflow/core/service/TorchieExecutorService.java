@@ -3,16 +3,19 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkEntity;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkRepository;
+import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.executor.Torchie;
 import com.dreamscale.htmflow.core.feeds.executor.TorchieFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,7 +34,7 @@ public class TorchieExecutorService {
     private TimeService timeService;
 
     @Autowired
-    private AccountService accountService;
+    private JournalService journalService;
 
     private ThreadPoolExecutor executorPool;
 
@@ -55,10 +58,15 @@ public class TorchieExecutorService {
         if (!activeTorchiePool.containsKey(memberId)) {
             LocalDateTime startingPosition = determineStartingPositionForMemberFeed(memberId);
 
-            Torchie torchie = torchieFactory.wireUpMemberTorchie(memberId, startingPosition);
-            addTorchieToJobPool(torchie);
+            if (startingPosition != null) {
+                Torchie torchie = torchieFactory.wireUpMemberTorchie(memberId, startingPosition);
+                addTorchieToJobPool(torchie);
 
-            status = torchie.getJobStatus();
+                status = torchie.getJobStatus();
+            } else {
+                log.error("Unable to start Torchie for until first intention created, memberId: "+memberId);
+            }
+
         } else {
             status = activeTorchiePool.get(memberId).getJobStatus();
         }
@@ -77,7 +85,7 @@ public class TorchieExecutorService {
     }
 
 
-    public void runAllTorchies() throws InterruptedException {
+    public void runAllTorchies() throws InterruptedException, ExecutionException {
         isJobRunning = true;
 
         while (isJobRunning) {
@@ -86,26 +94,29 @@ public class TorchieExecutorService {
             //run a wave of filling the job queue, only if there's not existing blocked jobs
             if (executorPool.getQueue().size() == 0) {
 
+                List<Future<?>> futures = new ArrayList<>();
                 for (Torchie torchie : getActiveTorchies()) {
 
                     Runnable runnableJob = torchie.whatsNext();
 
                     if (runnableJob != null) {
                         workToDoThisIteration++;
-                        log.info("Submitting job: " + torchie.getTorchieId());
-                        executorPool.submit(runnableJob);
+                        futures.add(executorPool.submit(runnableJob));
                     }
 
                     if (torchie.isDone()) {
                         removeTorchieFromJobPool(torchie);
                     }
                 }
+                for (Future future : futures) {
+                    future.get();
+                }
             }
 
-            if (workToDoThisIteration == 0) {
-                log.info("Sleeping..." + executorPool.getActiveCount());
-                Thread.sleep(LOOK_FOR_MORE_WORK_DELAY);
-            }
+//            if (workToDoThisIteration == 0) {
+//                log.info("Sleeping..." + executorPool.getActiveCount());
+//                Thread.sleep(LOOK_FOR_MORE_WORK_DELAY);
+//            }
 
             if (activeTorchiePool.size() == 0) {
                 isJobRunning = false;
@@ -154,9 +165,12 @@ public class TorchieExecutorService {
         if (torchieBookmark != null) {
            startingPosition = torchieBookmark.getMetronomeCursor();
         } else {
-            LocalDateTime activationDate = accountService.getActivationDateForMember(memberId);
-            startingPosition = GeometryClock.roundDownToNearestTwenty(activationDate);
+            LocalDateTime dateOfFirstIntention = journalService.getDateOfFirstIntention(memberId);
+            if (dateOfFirstIntention != null) {
+                startingPosition = GeometryClock.roundDownToNearestTwenty(dateOfFirstIntention);
+            }
         }
+
         return startingPosition;
     }
 

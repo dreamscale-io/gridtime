@@ -57,7 +57,7 @@ public class TimebandLayer extends FlowFeature {
     public Timeband getLastBand() {
         Timeband lastBand = null;
 
-        if (timebands.size() > 1) {
+        if (timebands.size() > 0) {
             lastBand = timebands.get(timebands.size() - 1);
         }
 

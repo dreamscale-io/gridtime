@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
+import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformFactory;
@@ -25,9 +26,12 @@ public class TorchieFactory {
     @Autowired
     private SinkStrategyFactory sinkStrategyFactory;
 
+    @Autowired
+    private TileLoader tileLoader;
+
     public Torchie wireUpTeamTorchie(UUID teamId, LocalDateTime startingPosition) {
 
-        Torchie torchie = new Torchie(teamId, startingPosition);
+        Torchie torchie = new Torchie(teamId, startingPosition, tileLoader);
 
         //tile source
         //tile transform is aggregation of a window
@@ -39,7 +43,7 @@ public class TorchieFactory {
 
     public Torchie wireUpMemberTorchie(UUID memberId, LocalDateTime startingPosition) {
 
-        Torchie torchie = new Torchie(memberId, startingPosition);
+        Torchie torchie = new Torchie(memberId, startingPosition, tileLoader);
 
         //stream data into the tiles
 

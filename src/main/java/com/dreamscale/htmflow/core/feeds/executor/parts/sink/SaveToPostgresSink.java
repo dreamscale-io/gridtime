@@ -30,14 +30,23 @@ public class SaveToPostgresSink implements SinkStrategy {
     @Override
     public void save(UUID torchieId, StoryTile storyTile) {
 
+        //alright so first thing, I want to know what project, task, intention, this tile should be contributed toward
+        //these should carry over from tile to tile... let's get that working first.
+
+        //I'm going to add these to the tile summary level, for the most part, they will be consistent
+
+
         storyTile.finishAfterLoad();
 
         StoryTileModel storyTileModel = storyTile.extractStoryTileModel();
 
+        log.debug(storyTileModel.getStoryTileSummary().toString());
+
         StoryTileEntity storyTileEntity = createStoryTileEntity(torchieId, storyTileModel);
         storyTileRepository.save(storyTileEntity);
 
-        log.debug(storyTileEntity.getJsonTile());
+        //make sure doesn't explode
+        StoryTileModel model = JSONTransformer.fromJson(storyTileEntity.getJsonTile(), StoryTileModel.class);
 
         StoryGridSummaryEntity summaryEntity = createStoryGridSummaryEntity(torchieId, storyTileEntity.getId(), storyTileModel.getStoryTileSummary());
         storyGridSummaryRepository.save(summaryEntity);

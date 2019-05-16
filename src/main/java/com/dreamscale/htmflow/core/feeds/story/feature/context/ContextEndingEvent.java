@@ -53,10 +53,6 @@ public class ContextEndingEvent extends FlowFeature implements ContextChangeEven
         context.setDescription(description);
     }
 
-    public void setName(String name) {
-        context.setName(name);
-    }
-
     public enum FinishStatus {
         SUCCESS, ABORT
     }

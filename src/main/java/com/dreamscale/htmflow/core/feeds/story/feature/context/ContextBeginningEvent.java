@@ -45,10 +45,6 @@ public class ContextBeginningEvent extends FlowFeature implements ContextChangeE
         context.setDescription(description);
     }
 
-    public void setName(String name) {
-        context.setName(name);
-    }
-
     @JsonIgnore
     public StructureLevel getStructureLevel() {
         return context.getStructureLevel();
@@ -57,11 +53,6 @@ public class ContextBeginningEvent extends FlowFeature implements ContextChangeE
     @JsonIgnore
     public UUID getContextId() {
         return context.getObjectId();
-    }
-
-    @JsonIgnore
-    public String getName() {
-        return context.getName();
     }
 
     @JsonIgnore

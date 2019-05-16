@@ -63,7 +63,7 @@ public class RhythmLayer extends FlowFeature {
     public Movement getLastMovement() {
         Movement lastMovement = null;
 
-        if (movements.size() > 1) {
+        if (movements.size() > 0) {
             lastMovement = movements.get(movements.size() - 1);
         }
 

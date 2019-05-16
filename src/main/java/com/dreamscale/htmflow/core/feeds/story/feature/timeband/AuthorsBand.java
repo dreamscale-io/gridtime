@@ -11,20 +11,17 @@ import java.util.List;
 @NoArgsConstructor
 public class AuthorsBand extends Timeband {
 
-    private AuthorDetails details;
-
     public AuthorsBand(LocalDateTime start, LocalDateTime end, AuthorDetails authorDetails) {
         super(start, end, authorDetails);
-        this.details = authorDetails;
     }
 
     @JsonIgnore
     public int getAuthorCount() {
-        return details.getAuthors().size();
+        return ((AuthorDetails)getDetails()).getAuthors().size();
     }
 
     @JsonIgnore
     public List<Member> getAuthors() {
-        return details.getAuthors();
+        return ((AuthorDetails)getDetails()).getAuthors();
     }
 }

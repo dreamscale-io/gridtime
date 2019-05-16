@@ -54,9 +54,10 @@ class TorchieJobResourceSpec extends Specification {
         List<TorchieJobStatus> jobStatuses = torchieExecutorService.getAllJobStatus();
         print jobStatuses
 
+        //
         then:
         assert jobStatuses.size() == 1
     }
-    
+
 
 }

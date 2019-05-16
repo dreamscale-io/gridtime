@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.DetailsType;
 import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -13,25 +14,27 @@ import java.util.LinkedList;
 public class RollingAggregateBand extends Timeband {
 
 
-    private CandleStickDetails candleSticks;
-
     public RollingAggregateBand(LocalDateTime start, LocalDateTime end) {
         super(start, end, new CandleStickDetails());
         setFlowObjectType(FlowObjectType.ROLLING_TIMEBAND);
 
-        this.candleSticks = (CandleStickDetails) super.getDetails();
     }
 
     public RollingAggregateBand() {
         setFlowObjectType(FlowObjectType.ROLLING_TIMEBAND);
     }
 
+    @JsonIgnore
+    private CandleStickDetails getCandleSticks() {
+        return (CandleStickDetails) super.getDetails();
+    }
+
     /*
      * Add direct samples that fall within this time bucket
      */
     public void addSample(double sample) {
-        candleSticks.getWithinWindowCandleStick().addSample(sample);
-        candleSticks.getAggregateCandleStick().addSample(sample);
+        getCandleSticks().getWithinWindowCandleStick().addSample(sample);
+        getCandleSticks().getAggregateCandleStick().addSample(sample);
     }
 
     /**
@@ -42,19 +45,21 @@ public class RollingAggregateBand extends Timeband {
         LinkedList<CandleStick> priorSticks = rollingAggregateBand.getRolledPastCandlesMinusOldest();
         priorSticks.push(rollingAggregateBand.getWithinWindowCandleStick());
 
-        candleSticks.aggregateWithPastObservations(priorSticks);
+        getCandleSticks().aggregateWithPastObservations(priorSticks);
     }
 
     private LinkedList<CandleStick> getRolledPastCandlesMinusOldest() {
-        return candleSticks.getRolledPastCandlesMinusOldest();
+        return getCandleSticks().getRolledPastCandlesMinusOldest();
     }
 
+    @JsonIgnore
     public CandleStick getWithinWindowCandleStick() {
-        return candleSticks.getWithinWindowCandleStick();
+        return getCandleSticks().getWithinWindowCandleStick();
     }
 
+    @JsonIgnore
     public CandleStick getAggregateCandleStick() {
-        return candleSticks.getAggregateCandleStick();
+        return getCandleSticks().getAggregateCandleStick();
     }
 
     public void evaluateThreshold() {
@@ -62,7 +67,7 @@ public class RollingAggregateBand extends Timeband {
     }
 
     @Getter
-    private static class CandleStickDetails extends Details {
+    public static class CandleStickDetails extends Details {
 
         private CandleStick withinWindowCandleStick = new CandleStick();
         private CandleStick aggregateCandleStick = new CandleStick();

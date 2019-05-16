@@ -1,20 +1,21 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.details.FeelsDetails;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 public class FeelsBand extends Timeband {
-
-    private final FeelsDetails feelsDetails;
 
     public FeelsBand(LocalDateTime start, LocalDateTime end, FeelsDetails feelsDetails) {
         super(start, end, feelsDetails);
-        this.feelsDetails = feelsDetails;
     }
 
+    @JsonIgnore
     public int getFeels() {
-        return feelsDetails.getFlameRating();
+        return ((FeelsDetails)getDetails()).getFlameRating();
     }
 
 }

@@ -81,7 +81,7 @@ public class JournalContextObserver implements FlowObserver {
         ContextBeginningEvent projectBeginning = new ContextBeginningEvent();
         projectBeginning.setContextId(journalEntry.getProjectId());
         projectBeginning.setStructureLevel(StructureLevel.PROJECT);
-        projectBeginning.setName(journalEntry.getProjectName());
+        projectBeginning.setDescription(journalEntry.getProjectName());
         projectBeginning.setPosition(journalEntry.getPosition());
 
         return projectBeginning;
@@ -91,8 +91,7 @@ public class JournalContextObserver implements FlowObserver {
         ContextBeginningEvent taskBeginning = new ContextBeginningEvent();
         taskBeginning.setContextId(journalEntry.getTaskId());
         taskBeginning.setStructureLevel(StructureLevel.TASK);
-        taskBeginning.setName(journalEntry.getTaskName());
-        taskBeginning.setDescription(journalEntry.getTaskSummary());
+        taskBeginning.setDescription(journalEntry.getTaskName());
         taskBeginning.setPosition(journalEntry.getPosition());
 
         return taskBeginning;
@@ -102,7 +101,6 @@ public class JournalContextObserver implements FlowObserver {
         ContextEndingEvent taskEnding = new ContextEndingEvent();
         taskEnding.setReferenceId(lastTaskStart.getId());
         taskEnding.setStructureLevel(StructureLevel.TASK);
-        taskEnding.setName(lastTaskStart.getName());
         taskEnding.setDescription(lastTaskStart.getDescription());
         taskEnding.setPosition(journalEntry.getPosition());
         taskEnding.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
@@ -114,7 +112,7 @@ public class JournalContextObserver implements FlowObserver {
         ContextEndingEvent projectEnding = new ContextEndingEvent();
         projectEnding.setReferenceId(lastOpenProject.getId());
         projectEnding.setStructureLevel(StructureLevel.PROJECT);
-        projectEnding.setName(lastOpenProject.getName());
+        projectEnding.setDescription(lastOpenProject.getDescription());
         projectEnding.setPosition(journalEntry.getPosition());
         projectEnding.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
 

@@ -91,7 +91,7 @@ public class CircleService {
         sillyNameGenerator = new SillyNameGenerator();
     }
 
-    public List<CircleDto> getAllOpenCircles(UUID organizationId, UUID spiritId) {
+    public List<CircleDto> getAllOpenCircles(UUID organizationId, UUID torchieId) {
         List<CircleEntity> circleEntities = circleRepository.findAllOpenCirclesForOrganization(organizationId);
         List<CircleDto> circles = circleMapper.toApiList(circleEntities);
 
@@ -101,18 +101,18 @@ public class CircleService {
         return circles;
     }
 
-    public List<CircleDto> getAllDoItLaterCircles(UUID organizationId, UUID spiritId) {
-        List<CircleEntity> circleEntities = circleRepository.findAllDoItLaterCircles(organizationId, spiritId);
+    public List<CircleDto> getAllDoItLaterCircles(UUID organizationId, UUID torchieId) {
+        List<CircleEntity> circleEntities = circleRepository.findAllDoItLaterCircles(organizationId, torchieId);
         return circleMapper.toApiList(circleEntities);
 
     }
 
-    public CircleDto createNewAdhocCircle(UUID organizationId, UUID spiritId, String problemStatement) {
+    public CircleDto createNewAdhocCircle(UUID organizationId, UUID torchieId, String problemStatement) {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
         circleEntity.setCircleName(sillyNameGenerator.random());
         circleEntity.setStartTime(timeService.now());
-        circleEntity.setOwnerMemberId(spiritId);
+        circleEntity.setOwnerMemberId(torchieId);
         circleEntity.setDurationInSeconds(0L);
         circleEntity.setProblemDescription(problemStatement);
         circleEntity.setOrganizationId(organizationId);
@@ -130,17 +130,17 @@ public class CircleService {
         CircleMemberEntity circleMemberEntity = new CircleMemberEntity();
         circleMemberEntity.setId(UUID.randomUUID());
         circleMemberEntity.setCircleId(circleEntity.getId());
-        circleMemberEntity.setTorchieId(spiritId);
+        circleMemberEntity.setTorchieId(torchieId);
 
         circleMemberRepository.save(circleMemberEntity);
 
-        CircleContextEntity circleContextEntity = createCircleContextEntity(organizationId, spiritId, circleEntity);
+        CircleContextEntity circleContextEntity = createCircleContextEntity(organizationId, torchieId, circleEntity);
         circleContextRepository.save(circleContextEntity);
 
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setTorchieId(spiritId);
+        circleMessageEntity.setTorchieId(torchieId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_START);
         circleMessageEntity.setMetadataField(CircleMessageEntity.MESSAGE_FIELD, problemStatement);
         circleMessageEntity.setPosition(timeService.now());
@@ -150,10 +150,10 @@ public class CircleService {
         CircleDto circleDto = circleMapper.toApi(circleEntity);
 
         List<CircleMemberDto> memberDtos = new ArrayList<>();
-        memberDtos.add(createCircleMember(spiritId));
+        memberDtos.add(createCircleMember(torchieId));
         circleDto.setMembers(memberDtos);
 
-        activeStatusService.pushWTFStatus(organizationId, spiritId, circleDto.getId(), problemStatement);
+        activeStatusService.pushWTFStatus(organizationId, torchieId, circleDto.getId(), problemStatement);
 
         return circleDto;
     }

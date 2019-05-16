@@ -37,12 +37,12 @@ public class StoryTileSpec extends Specification {
         startTask.setPosition(clockStart.plusMinutes(4))
         startTask.setStructureLevel(StructureLevel.TASK)
         startTask.setContextId(UUID.randomUUID())
-        startTask.setName("name");
+        startTask.setDescription("name");
 
         ContextEndingEvent endTask = new ContextEndingEvent()
         endTask.setPosition(clockStart.plusMinutes(6))
         endTask.setStructureLevel(StructureLevel.TASK)
-        endTask.setName("name");
+        endTask.setDescription("name");
         endTask.setReferenceId(startTask.getContextId())
 
         when:
@@ -53,7 +53,7 @@ public class StoryTileSpec extends Specification {
         def afterEndContext = tile.getCurrentContext()
 
         then:
-        assert afterStartContext.taskContext.name == "name"
+        assert afterStartContext.taskContext.description == "name"
         assert afterStartContext.projectContext == null;
         assert afterStartContext.intentionContext == null
         assert afterStartContext.position == clockStart.plusMinutes(4)
@@ -96,8 +96,8 @@ public class StoryTileSpec extends Specification {
         assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllLocations().size() == 3
         assert spatial.getBoxActivities().get(0).thoughtBubbles.get(0).getAllTraversals().size() == 2
 
-        assert grid.getAllBoxesVisited().size() == 1
-        assert grid.getAllLocationsVisited().size() == 2
+        assert grid.featureMetricTotals.getBoxesVisited().size() == 1
+        assert grid.featureMetricTotals.getLocationsVisited().size() == 2
     }
 
     def "should modify existing location"() {
@@ -110,7 +110,7 @@ public class StoryTileSpec extends Specification {
         startTask.setPosition(time1)
         startTask.setStructureLevel(StructureLevel.TASK)
         startTask.setContextId(UUID.randomUUID())
-        startTask.setName("name");
+        startTask.setDescription("name");
 
         when:
         tile.beginContext(startTask)
@@ -119,11 +119,11 @@ public class StoryTileSpec extends Specification {
         tile.modifyCurrentLocation(time3, 11)
 
         def grid = tile.getStoryGrid();
-        def locations = grid.getAllLocationsVisited();
+        def locations = grid.featureMetricTotals.getLocationsVisited();
 
         then:
         assert locations.size() == 1;
-        assert grid.getFeatureMetrics(locations.get(0)).getMetrics().getModificationCandle().sampleCount == 2;
+        assert grid.getMetricTotals(locations.get(0)).getMetrics().getModificationCandle().sampleCount == 2;
 
     }
 
@@ -160,7 +160,7 @@ public class StoryTileSpec extends Specification {
 
         StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTY_MINS), ZoomLevel.TWENTY_MINS);
 
-        nextTile.carryOverFrameContext(tile);
+        nextTile.carryOverFrameContext(tile.getCarryOverContext());
         nextTile.finishAfterLoad();
 
         def layer = tile.getBandLayer(BandLayerType.FRICTION_WTF)

@@ -8,21 +8,18 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@ToString
 public class Context extends FlowFeature  {
 
     private StructureLevel structureLevel;
-    private String name;
     private String description;
 
     public Context() {
        super(FlowObjectType.CONTEXT);
     }
 
-    public Context(StructureLevel structureLevel, String name, String description) {
+    public Context(StructureLevel structureLevel, String description) {
         super(FlowObjectType.CONTEXT);
         this.structureLevel = structureLevel;
-        this.name = name;
         this.description = description;
     }
 
@@ -32,5 +29,9 @@ public class Context extends FlowFeature  {
 
     public UUID getObjectId() {
         return getId();
+    }
+
+    public String toString() {
+        return structureLevel.name() + ":"+description;
     }
 }

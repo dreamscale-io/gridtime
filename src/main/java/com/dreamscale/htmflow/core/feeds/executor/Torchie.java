@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
@@ -27,11 +28,11 @@ public class Torchie {
 
     private TorchieJobStatus jobStatus;
 
-    public Torchie(UUID torchidId, LocalDateTime startingPosition) {
+    public Torchie(UUID torchidId, LocalDateTime startingPosition, TileLoader tileLoader) {
         this.torchieId = torchidId;
 
         this.metronome = new Metronome(startingPosition);
-        this.sharedFeaturePool = new SharedFeaturePool(torchidId, metronome.getActiveCoordinates());
+        this.sharedFeaturePool = new SharedFeaturePool(torchidId, metronome.getActiveCoordinates(), tileLoader);
         this.jobStatus = new TorchieJobStatus(torchidId, metronome.getActiveCoordinates().formatDreamTime());
 
         this.zoomableFlow = new ZoomableFlow(torchidId, metronome, sharedFeaturePool);
@@ -98,4 +99,6 @@ public class Torchie {
         // based on whatever conditions are relevant to the type of job
         return !this.metronome.canTick();
     }
+
+
 }

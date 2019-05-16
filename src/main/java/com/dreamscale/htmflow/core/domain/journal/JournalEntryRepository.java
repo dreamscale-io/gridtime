@@ -18,6 +18,13 @@ public interface JournalEntryRepository extends CrudRepository<JournalEntryEntit
 
     @Query(nativeQuery = true, value = "select * from journal_entry_view " +
             "where member_id=(:memberId) " +
+            "order by position limit 1")
+    JournalEntryEntity findFirstIntentionByMemberId(@Param("memberId") UUID memberId);
+
+
+
+    @Query(nativeQuery = true, value = "select * from journal_entry_view " +
+            "where member_id=(:memberId) " +
             "and position < (:beforeDate) " +
             "order by position desc limit (:limit)")
     List<JournalEntryEntity> findByMemberIdBeforeDateWithLimit(@Param("memberId") UUID memberId,

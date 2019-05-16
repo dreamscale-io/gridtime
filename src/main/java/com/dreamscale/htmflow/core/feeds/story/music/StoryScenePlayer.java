@@ -66,7 +66,7 @@ public class StoryScenePlayer {
                 for (Playable playable : playables) {
                     total += ((FeelsBand) playable).getFeels();
                 }
-                return Math.floorDiv(total , playables.size());
+                return Math.floorDiv(total, playables.size());
             } else {
                 return 0;
             }
@@ -162,18 +162,17 @@ public class StoryScenePlayer {
         @Override
         public void play(List<Playable> playables) {
             for (Playable playable : playables) {
-                ContextChangeEvent contextChangeEvent = (ContextChangeEvent) playable;
-                if (contextChangeEvent instanceof ContextBeginningEvent) {
-                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.PROJECT)) {
-                        scene.changeProjectContext(contextChangeEvent.getContext());
-                    }
-                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.TASK)) {
-                        scene.changeTaskContext(contextChangeEvent.getContext());
-                    }
-                    if (contextChangeEvent.getStructureLevel().equals(StructureLevel.INTENTION)) {
-                        scene.changeIntentionContext(contextChangeEvent.getContext());
-                    }
+                ChangeContext changeContext = (ChangeContext) playable;
+                if (changeContext.getStructureLevel().equals(StructureLevel.PROJECT)) {
+                    scene.changeProjectContext(changeContext.getChangingContext());
                 }
+                if (changeContext.getStructureLevel().equals(StructureLevel.TASK)) {
+                    scene.changeTaskContext(changeContext.getChangingContext());
+                }
+                if (changeContext.getStructureLevel().equals(StructureLevel.INTENTION)) {
+                    scene.changeIntentionContext(changeContext.getChangingContext());
+                }
+
             }
 
         }

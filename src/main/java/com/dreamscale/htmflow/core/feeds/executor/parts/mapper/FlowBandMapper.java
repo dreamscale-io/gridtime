@@ -93,9 +93,6 @@ public class FlowBandMapper {
             if (!layerMapper.isEmpty()) {
                 layers.add(layerMapper.getLayer());
             }
-
-
-
         }
 
         return layers;

@@ -25,6 +25,18 @@ public class StoryGridModel extends FlowFeature {
         featureMetricTotals.addMetricsForFeature(feature,  metrics);
     }
 
+    @JsonIgnore
+    public FeatureMetrics getMetricTotals(String uri) {
+        return featureMetricTotals.getFeatureMetrics(uri);
+    }
+
+    @JsonIgnore
+    public Column getLastColumn() {
+        if (columns != null && columns.size() > 0) {
+            return columns.get(columns.size() - 1);
+        }
+        return null;
+    }
 
     @JsonIgnore
     public Set<String> getAllFeaturesVisited() {
