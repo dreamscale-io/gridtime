@@ -11,21 +11,21 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class ContextBeginningEvent extends FlowFeature implements ContextChangeEvent {
+public class MusicalSequenceBeginning extends FlowFeature implements ContextChangeEvent {
 
     private LocalDateTime position;
     private int relativeSequence;
 
     private Context context;
 
-    public ContextBeginningEvent() {
-        super(FlowObjectType.CONTEXT_BEGINNING_EVENT);
+    public MusicalSequenceBeginning() {
+        super(FlowObjectType.MUSIC_BEGINNING_EVENT);
 
         context = new Context();
     }
 
-    public ContextBeginningEvent(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
-        super(FlowObjectType.CONTEXT_BEGINNING_EVENT);
+    public MusicalSequenceBeginning(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
+        super(FlowObjectType.MUSIC_BEGINNING_EVENT);
 
         this.position = position;
         this.context = new Context();

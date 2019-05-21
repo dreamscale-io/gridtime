@@ -53,25 +53,28 @@ public class TorchieExecutorService {
 
     public TorchieJobStatus startMemberTorchie(UUID memberId) {
 
-        TorchieJobStatus status = null;
+        Torchie torchie = findOrCreateMemberTorchie(memberId);
+        addTorchieToJobPool(torchie);
+
+        return torchie.getJobStatus();
+    }
+
+    public Torchie findOrCreateMemberTorchie(UUID memberId) {
+        Torchie torchie = null;
 
         if (!activeTorchiePool.containsKey(memberId)) {
             LocalDateTime startingPosition = determineStartingPositionForMemberFeed(memberId);
 
             if (startingPosition != null) {
-                Torchie torchie = torchieFactory.wireUpMemberTorchie(memberId, startingPosition);
-                addTorchieToJobPool(torchie);
-
-                status = torchie.getJobStatus();
+                torchie = torchieFactory.wireUpMemberTorchie(memberId, startingPosition);
             } else {
                 log.error("Unable to start Torchie for until first intention created, memberId: "+memberId);
             }
 
         } else {
-            status = activeTorchiePool.get(memberId).getJobStatus();
+            torchie = activeTorchiePool.get(memberId);
         }
-
-        return status;
+        return torchie;
     }
 
     public TorchieJobStatus startTeamTorchie(UUID teamId) {
@@ -190,4 +193,6 @@ public class TorchieExecutorService {
         }
         return jobStatuses;
     }
+
+
 }

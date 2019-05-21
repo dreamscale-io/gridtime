@@ -100,35 +100,12 @@ public class ZoomableFlow implements ClockChangeListener {
         return this.sharedFeaturePool.getActiveStoryTile();
     }
 
-    public StoryTile zoomIn() {
-        zoomLevel = zoomLevel.zoomIn();
-        StoryTile storyTile =
-                this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
-
-        this.activeFocus = storyTile.getTileCoordinates();
-        return storyTile;
-    }
-
-    public StoryTile zoomOut() {
-        zoomLevel = zoomLevel.zoomOut();
-        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
-    }
-
-    public StoryTile panLeft() {
-        activeFocus = activeFocus.panLeft(zoomLevel);
-
-        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
-    }
-
-    public StoryTile panRight() {
-        activeFocus = activeFocus.panRight(zoomLevel);
-
-        return this.sharedFeaturePool.getActiveStoryTileAtZoomLevel(activeFocus, zoomLevel);
+    public StoryTile getLastStoryTile() {
+        return this.sharedFeaturePool.getLastStoryTile();
     }
 
 
     private class AggregateToZoomLevel implements Runnable {
-
 
         private final SharedFeaturePool sharedFeaturePool;
         private final ZoomLevel zoomLevel;
@@ -141,10 +118,9 @@ public class ZoomableFlow implements ClockChangeListener {
         @Override
         public void run() {
 
-            this.sharedFeaturePool.nextTile(zoomLevel);
+            //TODO run aggregation job
 
             activeWorkItem = null;
-            //TODO run aggregation job
         }
     }
 
@@ -167,7 +143,7 @@ public class ZoomableFlow implements ClockChangeListener {
                 log.info("Running tick: "+tileTime + " : "+dreamTime);
 
                 this.metronome.tick();
-                this.sharedFeaturePool.nextTile(ZoomLevel.TWENTY_MINS);
+                this.sharedFeaturePool.nextTile();
 
             } catch (Exception ex) {
                 log.error("Exception while processing metronome tick", ex);

@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
 import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
+import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.TileUri;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
@@ -28,15 +30,32 @@ public class Torchie {
 
     private TorchieJobStatus jobStatus;
 
-    public Torchie(UUID torchidId, LocalDateTime startingPosition, TileLoader tileLoader) {
-        this.torchieId = torchidId;
+    public Torchie(UUID torchieId, LocalDateTime startingPosition, TileLoader tileLoader) {
+        this.torchieId = torchieId;
 
         this.metronome = new Metronome(startingPosition);
-        this.sharedFeaturePool = new SharedFeaturePool(torchidId, metronome.getActiveCoordinates(), tileLoader);
-        this.jobStatus = new TorchieJobStatus(torchidId, metronome.getActiveCoordinates().formatDreamTime());
+        this.sharedFeaturePool = new SharedFeaturePool(torchieId, metronome.getActiveCoordinates(), tileLoader);
+        this.jobStatus = new TorchieJobStatus(torchieId, metronome.getActiveCoordinates().formatDreamTime());
 
-        this.zoomableFlow = new ZoomableFlow(torchidId, metronome, sharedFeaturePool);
+        this.zoomableFlow = new ZoomableFlow(torchieId, metronome, sharedFeaturePool);
+    }
 
+    public StoryTile runTile(String tileUri) {
+        TileUri.SourceCoordinates coords = TileUri.extractCoordinatesFromUri(tileUri);
+
+        moveFeedPosition(coords.getTileCoordinates().getClockTime());
+
+        tick();
+        whatsNext().run();
+
+        return whereAmI();
+    }
+
+    private void moveFeedPosition(LocalDateTime middleOfNowhereTime) {
+        LocalDateTime tileBeginningTime = GeometryClock.roundDownToNearestTwenty(middleOfNowhereTime);
+        metronome.movePosition(tileBeginningTime);
+
+        sharedFeaturePool.movePosition(metronome.getActiveCoordinates());
     }
 
     void addFlowSourceToChain(FetchStrategy fetchStrategy, FlowObserver... observers) {
@@ -67,24 +86,9 @@ public class Torchie {
     }
 
     public StoryTile whereAmI() {
-        return this.zoomableFlow.getActiveStoryTile();
+        return this.zoomableFlow.getLastStoryTile();
     }
 
-    public StoryTile zoomIn() {
-        return this.zoomableFlow.zoomIn();
-    }
-
-    public StoryTile zoomOut() {
-        return this.zoomableFlow.zoomOut();
-    }
-
-    public StoryTile panLeft() {
-        return this.zoomableFlow.panLeft();
-    }
-
-    public StoryTile panRight() {
-        return this.zoomableFlow.panRight();
-    }
 
     public void wrapUpAndBookmark() {
         this.zoomableFlow.wrapUpAndBookmark();
@@ -99,6 +103,7 @@ public class Torchie {
         // based on whatever conditions are relevant to the type of job
         return !this.metronome.canTick();
     }
+
 
 
 }

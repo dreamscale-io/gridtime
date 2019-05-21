@@ -34,6 +34,13 @@ public class Metronome {
         return fromClockPosition;
     }
 
+    public void movePosition(LocalDateTime tileBeginningTime) {
+        this.clock = new GeometryClock(tileBeginningTime);
+        this.fromClockPosition = clock.getCoordinates();
+        this.toClockPosition = clock.getCoordinates();
+    }
+
+
     public void tick() {
         GeometryClock.Coords nextCoordinates = clock.tick();
 
@@ -42,8 +49,8 @@ public class Metronome {
 
         tickForwardFlowChain();
 
-        if (fromClockPosition.fourhours != toClockPosition.fourhours) {
-            notifyClockTick(ZoomLevel.FOUR_HOURS);
+        if (fromClockPosition.twelves != toClockPosition.twelves) {
+            notifyClockTick(ZoomLevel.TWELVE_TWENTIES);
         }
 
         if (fromClockPosition.daysIntoWeek != toClockPosition.daysIntoWeek) {
@@ -102,6 +109,7 @@ public class Metronome {
     public void notifyClockTick(ClockChangeListener clockChangeListener) {
         this.clockChangeListeners.add(clockChangeListener);
     }
+
 
 
 }

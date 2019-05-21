@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class StoryGrid {
+public class TileGrid {
 
 
     private Map<UUID, FeatureRow> featureRows = new HashMap<>();
@@ -22,9 +22,9 @@ public class StoryGrid {
     private final LocalDateTime to;
 
     private transient GridMetrics theVoid = new GridMetrics();
-    private StoryGridModel extractedStoryGridModel;
+    private TileGridModel extractedTileGridModel;
 
-    public StoryGrid(BeatSize timeBucketSize, LocalDateTime from, LocalDateTime to) {
+    public TileGrid(BeatSize timeBucketSize, LocalDateTime from, LocalDateTime to) {
         this.timeBucketSize = timeBucketSize;
         this.from = from;
         this.to = to;
@@ -128,28 +128,28 @@ public class StoryGrid {
     }
 
 
-    public StoryGridModel getStoryGridModel() {
-        if (extractedStoryGridModel == null) {
-            extractedStoryGridModel = createStoryGridModel();
+    public TileGridModel getStoryGridModel() {
+        if (extractedTileGridModel == null) {
+            extractedTileGridModel = createStoryGridModel();
         }
 
-        return extractedStoryGridModel;
+        return extractedTileGridModel;
     }
 
     /**
      * Note: This is dependent on URI Mappings already being run, if no URIs are present,
      * UUIDs will be used for URI
      */
-    private StoryGridModel createStoryGridModel() {
+    private TileGridModel createStoryGridModel() {
 
-        StoryGridModel storyGridModel = new StoryGridModel();
+        TileGridModel tileGridModel = new TileGridModel();
 
         for (FeatureRow row : featureRows.values()) {
             FlowFeature feature = row.getFeature();
             GridMetrics metrics = row.getAllTimeBucket();
 
 
-            storyGridModel.addMetricTotalsForFeature(feature, metrics);
+            tileGridModel.addMetricTotalsForFeature(feature, metrics);
         }
 
         for (FeatureAggregateRow aggregateRow : aggregateRows.values()) {
@@ -158,13 +158,13 @@ public class StoryGrid {
             FlowFeature feature = aggregateRow.getFeature();
             GridMetrics metrics = aggregateRow.getAllTimeBucket();
 
-            storyGridModel.addMetricTotalsForFeature(feature, metrics);
+            tileGridModel.addMetricTotalsForFeature(feature, metrics);
         }
-        storyGridModel.setColumns(columns);
+        tileGridModel.setColumns(columns);
 
 
 
-        return storyGridModel;
+        return tileGridModel;
     }
 
 }

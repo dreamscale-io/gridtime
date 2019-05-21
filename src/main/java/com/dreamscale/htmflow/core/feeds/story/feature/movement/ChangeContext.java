@@ -4,7 +4,6 @@ import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -24,7 +23,7 @@ public class ChangeContext extends Movement {
 
         this.changingContext = contextChangeEvent.getContext();
 
-        if (contextChangeEvent instanceof ContextBeginningEvent) {
+        if (contextChangeEvent instanceof MusicalSequenceBeginning) {
             eventType = EventType.CONTEXT_BEGINNING;
         } else {
             eventType = EventType.CONTEXT_ENDING;

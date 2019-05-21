@@ -1,21 +1,13 @@
-package com.dreamscale.htmflow.core.feeds.story.grid;
+package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
-import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
-import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeActivity;
-import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
+import com.dreamscale.htmflow.core.feeds.story.grid.Column;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -45,16 +37,16 @@ public class StoryTileSummary {
     private int totalMessages;
 
 
-    public StoryTileSummary(StoryGridModel storyGrid) {
+    public StoryTileSummary(TileGridModel tileGrid) {
 
-        configureContexts(storyGrid.getLastColumn());
+        configureContexts(tileGrid.getLastColumn());
 
 
-        setBoxesVisited(storyGrid.getFeatureMetricTotals().getBoxesVisited().size());
-        setLocationsVisited(storyGrid.getFeatureMetricTotals().getLocationsVisited().size());
-        setTraversalsVisited(storyGrid.getFeatureMetricTotals().getTraversalsVisited().size());
-        setBridgesVisited(storyGrid.getFeatureMetricTotals().getBridgesVisited().size());
-        setBubblesVisited(storyGrid.getFeatureMetricTotals().getBubblesVisited().size());
+        setBoxesVisited(tileGrid.getFeatureMetricTotals().getBoxesVisited().size());
+        setLocationsVisited(tileGrid.getFeatureMetricTotals().getLocationsVisited().size());
+        setTraversalsVisited(tileGrid.getFeatureMetricTotals().getTraversalsVisited().size());
+        setBridgesVisited(tileGrid.getFeatureMetricTotals().getBridgesVisited().size());
+        setBubblesVisited(tileGrid.getFeatureMetricTotals().getBubblesVisited().size());
 
         double totalFeels = 0;
         double totalLearning = 0;
@@ -64,7 +56,7 @@ public class StoryTileSummary {
         Set<String> experimentUris = new LinkedHashSet<>();
         Set<String> messageUris = new LinkedHashSet<>();
 
-        for (Column column : storyGrid.getColumns()) {
+        for (Column column : tileGrid.getColumns()) {
             totalFeels += column.getFeels();
             totalLearning += toIntFlag(column.isLearning());
             totalTroubleshooting += toIntFlag(column.isTroubleshooting());
@@ -74,7 +66,7 @@ public class StoryTileSummary {
             messageUris.addAll(column.getMessageContextUris());
         }
 
-        int columnCount = storyGrid.getColumns().size();
+        int columnCount = tileGrid.getColumns().size();
 
         if (columnCount > 0) {
             setAvgMood(totalFeels / columnCount);

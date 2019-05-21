@@ -2,12 +2,10 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveAcrossBridge;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToLocation;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.MoveToBox;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -16,7 +14,7 @@ import java.util.*;
 public class SpatialGeometryMapper {
 
     private final FeatureFactory featureFactory;
-    private final StoryGrid storyGrid;
+    private final TileGrid tileGrid;
 
     private Map<String, FocalPoint> focalPointMap = new HashMap<>();
     private List<FocalPoint> orderedThoughtSequence = new ArrayList<>();
@@ -25,9 +23,9 @@ public class SpatialGeometryMapper {
     private BoxAndBridgeActivity extractedSpatialStructuredActivity;
     private Bridge recentBridgeCrossed;
 
-    public SpatialGeometryMapper(FeatureFactory featureFactory, StoryGrid storyGrid) {
+    public SpatialGeometryMapper(FeatureFactory featureFactory, TileGrid tileGrid) {
         this.featureFactory = featureFactory;
-        this.storyGrid = storyGrid;
+        this.tileGrid = tileGrid;
     }
 
     public List<Movement> gotoLocation(LocalDateTime moment,
@@ -68,7 +66,7 @@ public class SpatialGeometryMapper {
         if (focalPoint == null) {
             Box box = featureFactory.findOrCreateBox(boxName);
 
-            focalPoint = new FocalPoint(featureFactory, storyGrid, box);
+            focalPoint = new FocalPoint(featureFactory, tileGrid, box);
             this.focalPointMap.put(focalPoint.getBoxName(), focalPoint);
             this.orderedThoughtSequence.add(focalPoint);
         }
@@ -85,7 +83,7 @@ public class SpatialGeometryMapper {
             boxAndBridgeActivity.addBoxActivity(boxActivity);
 
             for (ThoughtBubble bubble : boxActivity.getThoughtBubbles()) {
-                storyGrid.createAggregateRow(bubble, bubble.getAllLocations());
+                tileGrid.createAggregateRow(bubble, bubble.getAllLocations());
             }
         }
 

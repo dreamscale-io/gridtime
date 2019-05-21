@@ -1,10 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.domain.tile.StaticObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceEnding;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.AuthorsBand;
@@ -15,9 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.UUID;
 
@@ -39,8 +36,8 @@ import java.util.UUID;
         @JsonSubTypes.Type(value = ExecuteThing.class, name = FlowFeature.EXECUTE_THING),
         @JsonSubTypes.Type(value = ChangeContext.class, name = FlowFeature.CHANGE_CONTEXT),
         @JsonSubTypes.Type(value = PostCircleMessage.class, name = FlowFeature.POST_CIRCLE_MESSAGE),
-        @JsonSubTypes.Type(value = ContextBeginningEvent.class, name = FlowFeature.CONTEXT_BEGINNING_EVENT),
-        @JsonSubTypes.Type(value = ContextEndingEvent.class, name = FlowFeature.CONTEXT_ENDING_EVENT),
+        @JsonSubTypes.Type(value = MusicalSequenceBeginning.class, name = FlowFeature.CONTEXT_BEGINNING_EVENT),
+        @JsonSubTypes.Type(value = MusicalSequenceEnding.class, name = FlowFeature.CONTEXT_ENDING_EVENT),
         @JsonSubTypes.Type(value = AuthorsBand.class, name = FlowFeature.AUTHORS_BAND),
         @JsonSubTypes.Type(value = FeelsBand.class, name = FlowFeature.FEELS_BAND),
         @JsonSubTypes.Type(value = WTFFrictionBand.class, name = FlowFeature.WTF_FRICTION_BAND),

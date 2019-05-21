@@ -3,10 +3,12 @@ package com.dreamscale.htmflow.core.feeds.clock;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.util.AntPathMatcher;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
@@ -19,7 +21,7 @@ public class GeometryClock {
 
     public GeometryClock(LocalDateTime clockTime) {
         this.clockTime = clockTime;
-        this.coords = createStoryCoords(clockTime);
+        this.coords = createCoords(clockTime);
     }
 
     public static LocalDateTime roundDownToNearestTwenty(LocalDateTime middleOfNowhereTime) {
@@ -32,17 +34,17 @@ public class GeometryClock {
     }
 
     public Coords tick() {
-        int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
+        int minutesToTick = ZoomLevel.TWENTIES.buckets();
         LocalDateTime nextClockTime = this.clockTime.plusMinutes(minutesToTick);
 
-        this.coords = createStoryCoords(nextClockTime);
+        this.coords = createCoords(nextClockTime);
         this.clockTime = nextClockTime;
 
         return this.coords;
     }
 
     public LocalDateTime getNextTickTime() {
-        int minutesToTick = ZoomLevel.TWENTY_MINS.buckets();
+        int minutesToTick = ZoomLevel.TWENTIES.buckets();
         return this.clockTime.plusMinutes(minutesToTick);
     }
 
@@ -50,9 +52,9 @@ public class GeometryClock {
         return coords;
     }
 
-    private static Coords createStoryCoords(LocalDateTime nextClockTime) {
+    public static Coords createCoords(LocalDateTime nextClockTime) {
 
-        int fours = calc4HourSteps(nextClockTime);
+        int twelveTwenties = calc4HourSteps(nextClockTime);
         int twenties = calc20MinuteSteps(nextClockTime);
 
         int daysIntoWeek = calcWeekdayOffset(nextClockTime);
@@ -72,7 +74,7 @@ public class GeometryClock {
                 weeksIntoBlock,
                 weeksIntoYear,
                 daysIntoWeek,
-                fours,
+                twelveTwenties,
                 twenties
                 );
     }
@@ -159,21 +161,55 @@ public class GeometryClock {
         final int weeksIntoBlock;
         final int weeksIntoYear;
         final int daysIntoWeek;
-        final int fourhours;
+        final int twelves;
         final int twenties;
 
+        public static Coords fromDreamTime(String dreamtime) {
+            AntPathMatcher pathMatcher = new AntPathMatcher();
+
+            Map<String, String> variables = pathMatcher.extractUriTemplateVariables("{year}_BWD{block}-{weeksIntoBlock}-{daysIntoWeek}_TT{twelves}-{twenties}", dreamtime);
+            System.out.println(variables);
+
+            int year = Integer.valueOf(variables.get("year"));
+            int block = Integer.valueOf(variables.get("block"));
+            int weeksIntoBlock = Integer.valueOf(variables.get("weeksIntoBlock"));
+            int daysIntoWeek = Integer.valueOf(variables.get("daysIntoWeek"));
+            int twelves = Integer.valueOf(variables.get("twelves"));
+            int twenties = Integer.valueOf(variables.get("twenties"));
+
+            LocalDate sameYear = LocalDate.of(year, 1, 1);
+            LocalDate firstMondayOfSameYear = sameYear.with(firstInMonth(DayOfWeek.MONDAY));
+
+            int firstDayOfYear = firstMondayOfSameYear.getDayOfYear();
+
+            int blockDayTotal = (block - 1) * ZoomLevel.BLOCKS.buckets() * ZoomLevel.WEEKS.buckets();
+            int weekDayTotal = (weeksIntoBlock - 1) * ZoomLevel.WEEKS.buckets();
+            int dayIntoYear = firstDayOfYear + blockDayTotal + weekDayTotal + (daysIntoWeek - 1);
+
+            int partialTwelves = Math.floorDiv(twenties - 1 , 3);
+            int remainderInHour = Math.floorMod(twenties - 1, 3);
+            int hoursIntoDay = (twelves - 1) * 4 + partialTwelves;
+
+            int minutesIntoHour = remainderInHour * 20;
+
+            LocalDateTime translatedTime = LocalDateTime.of(year, 1, 1, hoursIntoDay, minutesIntoHour);
+            translatedTime = translatedTime.withDayOfYear(dayIntoYear);
+
+            return new Coords(translatedTime, year, block, weeksIntoBlock, block * 6 + weeksIntoBlock,
+                    daysIntoWeek, twelves, twenties);
+        }
 
 
         public String formatDreamTime() {
-            return year + "_BWD" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "_FT" + fourhours + "-" + twenties;
+            return year + "_BWD" + block + "-" + weeksIntoBlock + "-" + daysIntoWeek + "_TT" + twelves + "-" + twenties;
         }
 
         public Coords panLeft(ZoomLevel zoomLevel) {
 
                 switch (zoomLevel) {
-                    case TWENTY_MINS:
+                    case TWENTIES:
                         return minus20Minutes();
-                    case FOUR_HOURS:
+                    case TWELVE_TWENTIES:
                         return minus4Hour();
                     case DAYS:
                         return minusDay();
@@ -190,9 +226,9 @@ public class GeometryClock {
         public Coords panRight(ZoomLevel zoomLevel) {
 
             switch (zoomLevel) {
-                case TWENTY_MINS:
+                case TWENTIES:
                     return plus20Minutes();
-                case FOUR_HOURS:
+                case TWELVE_TWENTIES:
                     return plus4Hour();
                 case DAYS:
                     return plusDay();
@@ -209,53 +245,53 @@ public class GeometryClock {
         //pan left functions
 
         public Coords minus20Minutes() {
-            return GeometryClock.createStoryCoords(clockTime.minusMinutes(20));
+            return GeometryClock.createCoords(clockTime.minusMinutes(20));
         }
 
         public Coords minus4Hour() {
-            return GeometryClock.createStoryCoords(clockTime.minusHours(4));
+            return GeometryClock.createCoords(clockTime.minusHours(4));
         }
 
         public Coords minusDay() {
-            return GeometryClock.createStoryCoords(clockTime.minusDays(1));
+            return GeometryClock.createCoords(clockTime.minusDays(1));
         }
 
         public Coords minusWeek() {
-            return GeometryClock.createStoryCoords(clockTime.minusWeeks(1));
+            return GeometryClock.createCoords(clockTime.minusWeeks(1));
         }
 
         public Coords minusBlock() {
-            return GeometryClock.createStoryCoords(clockTime.minusWeeks(ZoomLevel.BLOCKS.buckets()));
+            return GeometryClock.createCoords(clockTime.minusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
         public Coords minusYear() {
-            return GeometryClock.createStoryCoords(clockTime.minusYears(1));
+            return GeometryClock.createCoords(clockTime.minusYears(1));
         }
 
         // pan right functions
 
         public Coords plus20Minutes() {
-            return GeometryClock.createStoryCoords(clockTime.plusMinutes(20));
+            return GeometryClock.createCoords(clockTime.plusMinutes(20));
         }
 
         public Coords plus4Hour() {
-            return GeometryClock.createStoryCoords(clockTime.plusHours(4));
+            return GeometryClock.createCoords(clockTime.plusHours(4));
         }
 
         public Coords plusDay() {
-            return GeometryClock.createStoryCoords(clockTime.plusDays(1));
+            return GeometryClock.createCoords(clockTime.plusDays(1));
         }
 
         public Coords plusWeek() {
-            return GeometryClock.createStoryCoords(clockTime.plusWeeks(1));
+            return GeometryClock.createCoords(clockTime.plusWeeks(1));
         }
 
         public Coords plusBlock() {
-            return GeometryClock.createStoryCoords(clockTime.plusWeeks(ZoomLevel.BLOCKS.buckets()));
+            return GeometryClock.createCoords(clockTime.plusWeeks(ZoomLevel.BLOCKS.buckets()));
         }
 
         public Coords plusYear() {
-            return GeometryClock.createStoryCoords(clockTime.plusYears(1));
+            return GeometryClock.createCoords(clockTime.plusYears(1));
         }
 
 

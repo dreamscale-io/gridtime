@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer
 
-import com.dreamscale.htmflow.api.event.EventType
+
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
@@ -9,8 +9,6 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
@@ -32,7 +30,7 @@ public class JournalContextObserverSpec extends Specification {
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTY_MINS)
+        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES)
     }
 
     def "should create project & task switch events"() {
@@ -117,7 +115,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTY_MINS);
+        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -132,8 +130,8 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(window, storyTile)
 
-        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.TWENTY_MINS).panRight(ZoomLevel.TWENTY_MINS), ZoomLevel.TWENTY_MINS);
-        nextFrame.carryOverFrameContext(storyTile.getCarryOverContext());
+        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.TWENTIES).panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
+        nextFrame.carryOverTileContext(storyTile.getCarryOverContext());
         Window nextWindow = new Window(time3, time4)
 
         when:

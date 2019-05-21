@@ -8,13 +8,13 @@ import com.dreamscale.htmflow.core.feeds.story.feature.movement.PostCircleMessag
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import com.dreamscale.htmflow.core.feeds.story.grid.GridMetrics;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
 import java.util.*;
 
 public class Scene {
 
-    private final StoryGrid storyGrid;
+    private final TileGrid tileGrid;
 
     private Context projectContext;
     private Context taskContext;
@@ -40,8 +40,8 @@ public class Scene {
 
 
 
-    public Scene(StoryGrid storyGrid) {
-        this.storyGrid = storyGrid;
+    public Scene(TileGrid tileGrid) {
+        this.tileGrid = tileGrid;
     }
 
     public void snapshot(MusicClock.Beat beat) {
@@ -77,7 +77,7 @@ public class Scene {
         column.addExperimentContexts(extractUris(activeExperimentContexts));
         column.addMessageContexts(extractUris(activeMessageContexts));
 
-        storyGrid.addColumn(column);
+        tileGrid.addColumn(column);
     }
 
     private boolean isNotWTFAndIsLearning() {
@@ -113,14 +113,14 @@ public class Scene {
 
     private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
         for (FlowFeature feature : features) {
-            GridMetrics metrics = storyGrid.getAggregateMetricsFor(feature, beat);
+            GridMetrics metrics = tileGrid.getAggregateMetricsFor(feature, beat);
             column.addActivityForStructure(feature, metrics);
         }
     }
 
     private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
         for (FlowFeature feature : features) {
-            column.addActivityForStructure(feature, storyGrid.getMetricsFor(feature, beat));
+            column.addActivityForStructure(feature, tileGrid.getMetricsFor(feature, beat));
         }
     }
 
@@ -161,10 +161,10 @@ public class Scene {
 
     private void saveMetrics(FlowFeature flowFeature, MusicClock.Beat beat) {
 
-        storyGrid.getMetricsFor(flowFeature, beat).addFeelsSample(activeFeels);
-        storyGrid.getMetricsFor(flowFeature, beat).addPairingSample(isPairing);
-        storyGrid.getMetricsFor(flowFeature, beat).addLearningSample(isLearningFriction);
-        storyGrid.getMetricsFor(flowFeature, beat).addWtfSample(isWTFFriction);
+        tileGrid.getMetricsFor(flowFeature, beat).addFeelsSample(activeFeels);
+        tileGrid.getMetricsFor(flowFeature, beat).addPairingSample(isPairing);
+        tileGrid.getMetricsFor(flowFeature, beat).addLearningSample(isLearningFriction);
+        tileGrid.getMetricsFor(flowFeature, beat).addWtfSample(isWTFFriction);
     }
 
     private void removeAllButOne(LinkedList<?> activeItems) {

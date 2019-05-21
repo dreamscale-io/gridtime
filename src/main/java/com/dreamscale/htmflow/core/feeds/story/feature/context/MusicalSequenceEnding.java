@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class ContextEndingEvent extends FlowFeature implements ContextChangeEvent {
+public class MusicalSequenceEnding extends FlowFeature implements ContextChangeEvent {
 
     private LocalDateTime position;
     private int relativeSequence;
@@ -18,14 +18,14 @@ public class ContextEndingEvent extends FlowFeature implements ContextChangeEven
 
     private Context context;
 
-    public ContextEndingEvent() {
-        super(FlowObjectType.CONTEXT_ENDING_EVENT);
+    public MusicalSequenceEnding() {
+        super(FlowObjectType.MUSIC_ENDING_EVENT);
 
         context = new Context();
     }
 
-    public ContextEndingEvent(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
-        super(FlowObjectType.CONTEXT_ENDING_EVENT);
+    public MusicalSequenceEnding(LocalDateTime position, StructureLevel structureLevel, UUID referenceId) {
+        super(FlowObjectType.MUSIC_ENDING_EVENT);
 
         this.position = position;
         this.context = new Context();

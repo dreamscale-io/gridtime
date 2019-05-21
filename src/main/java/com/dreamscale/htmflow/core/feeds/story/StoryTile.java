@@ -5,16 +5,15 @@ import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryTileSummary;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
 import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
-import com.dreamscale.htmflow.core.feeds.story.music.StoryScenePlayer;
+import com.dreamscale.htmflow.core.feeds.story.music.TileGridPlayer;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -33,14 +32,14 @@ public class StoryTile {
     private final FlowBandMapper timeBandMapper;
 
     private final FeatureFactory featureFactory;
-    private final StoryGrid storyGrid;
+    private final TileGrid tileGrid;
     private final MusicClock musicClock;
 
 
     public StoryTile(String feedUri, GeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
         this.tileCoordinates = tileCoordinates;
         this.zoomLevel = zoomLevel;
-        this.tileUri = URIMapper.createTileUri(feedUri, zoomLevel, tileCoordinates);
+        this.tileUri = TileUri.createTileUri(feedUri, zoomLevel, tileCoordinates);
 
         musicClock = new MusicClock(
                 tileCoordinates.getClockTime(),
@@ -51,10 +50,10 @@ public class StoryTile {
         LocalDateTime from = musicClock.getFromClockTime();
         LocalDateTime to = musicClock.getToClockTime();
 
-        this.storyGrid = new StoryGrid(BeatSize.QUARTER, from, to);
+        this.tileGrid = new TileGrid(BeatSize.QUARTER, from, to);
 
         this.contextMapper = new FlowContextMapper(featureFactory, from, to);
-        this.spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, storyGrid);
+        this.spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, tileGrid);
         this.flowRhythmMapper = new FlowRhythmMapper(featureFactory, from, to);
         this.timeBandMapper = new FlowBandMapper(featureFactory, from, to);
 
@@ -64,7 +63,7 @@ public class StoryTile {
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void beginContext(ContextBeginningEvent contextBeginning) {
+    public void beginContext(MusicalSequenceBeginning contextBeginning) {
         Movement movement = contextMapper.beginContext(contextBeginning);
 
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
@@ -74,7 +73,7 @@ public class StoryTile {
      * End an active context, such as project, task, or intention
      */
 
-    public void endContext(ContextEndingEvent contextEnding) {
+    public void endContext(MusicalSequenceEnding contextEnding) {
         Movement movement = contextMapper.endContext(contextEnding);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
@@ -84,7 +83,7 @@ public class StoryTile {
      * this special ending needs to be carried over to the proper future frame, and dropped in the right place
      */
 
-    public void endContextLater(ContextEndingEvent exitContextEvent) {
+    public void endContextLater(MusicalSequenceEnding exitContextEvent) {
         this.contextMapper.endContextWhenInWindow(exitContextEvent);
     }
 
@@ -106,18 +105,18 @@ public class StoryTile {
 
         MusicClock.Beat beat = musicClock.createBeat(moment);
 
-        storyGrid.getMetricsFor(currentBox, beat).addVelocitySample(timeInLocation);
-        storyGrid.getMetricsFor(currentLocation, beat).addVelocitySample(timeInLocation);
-        storyGrid.getMetricsFor(lastTraversal, beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(currentBox, beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(currentLocation, beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(lastTraversal, beat).addVelocitySample(timeInLocation);
 
         if (recentBridgeCrossed != null) {
-            storyGrid.getMetricsFor(recentBridgeCrossed, beat).addVelocitySample(timeInLocation);
+            tileGrid.getMetricsFor(recentBridgeCrossed, beat).addVelocitySample(timeInLocation);
         }
 
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
-        storyGrid.getMetricsFor(context.getProjectContext(), beat).addVelocitySample(timeInLocation);
-        storyGrid.getMetricsFor(context.getTaskContext(), beat).addVelocitySample(timeInLocation);
-        storyGrid.getMetricsFor(context.getIntentionContext(), beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getProjectContext(), beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getTaskContext(), beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addVelocitySample(timeInLocation);
     }
 
     /**
@@ -131,14 +130,14 @@ public class StoryTile {
 
         MusicClock.Beat beat = musicClock.createBeat(moment);
 
-        storyGrid.getMetricsFor(currentBox, beat).addModificationSample(modificationCount);
-        storyGrid.getMetricsFor(currentLocation, beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(currentBox, beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(currentLocation, beat).addModificationSample(modificationCount);
 
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
 
-        storyGrid.getMetricsFor(context.getProjectContext(), beat).addModificationSample(modificationCount);
-        storyGrid.getMetricsFor(context.getTaskContext(), beat).addModificationSample(modificationCount);
-        storyGrid.getMetricsFor(context.getIntentionContext(), beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getProjectContext(), beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getTaskContext(), beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addModificationSample(modificationCount);
     }
 
     /**
@@ -156,18 +155,18 @@ public class StoryTile {
         MusicClock.Beat beat = musicClock.createBeat(moment);
 
         Box currentBox = spatialGeometryMapper.getCurrentBox();
-        storyGrid.getMetricsFor(currentBox, beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(currentBox, beat).addExecutionSample(executionDetails.getDuration());
 
-        storyGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
-        storyGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
-        storyGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
 
         if (executionDetails.isRedAndWantingGreen()) {
-            storyGrid.getMetricsFor(currentBox, beat).addExecutionCycleTimeSample(executionDetails.getDurationUntilNextExecution());
+            tileGrid.getMetricsFor(currentBox, beat).addExecutionCycleTimeSample(executionDetails.getDurationUntilNextExecution());
 
-            storyGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
-            storyGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
-            storyGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
         }
 
     }
@@ -252,7 +251,7 @@ public class StoryTile {
      * to locations, and snapshots are generated for each tick
      */
     public void play() {
-        StoryScenePlayer storyPlayer = new StoryScenePlayer(storyGrid);
+        TileGridPlayer storyPlayer = new TileGridPlayer(tileGrid);
 
         storyPlayer.loadFrame(this);
         storyPlayer.play();
@@ -283,7 +282,7 @@ public class StoryTile {
         model.setRhythmLayers(getRhythmLayers());
         model.setSpatialStructure(getSpatialStructure());
         model.setStoryTileSummary(getStoryTileSummary());
-        model.setStoryGrid(getStoryGrid());
+        model.setStoryGrid(getTileGrid());
         model.setCarryOverContext(getCarryOverContext());
 
         return model;
@@ -298,7 +297,7 @@ public class StoryTile {
      *
      */
 
-    public void carryOverFrameContext(CarryOverContext carryOverContext) {
+    public void carryOverTileContext(CarryOverContext carryOverContext) {
 
         this.spatialGeometryMapper.initFromCarryOverContext(carryOverContext);
         this.flowRhythmMapper.initFromCarryOverContext(carryOverContext);
@@ -367,12 +366,12 @@ public class StoryTile {
         return tileUri;
     }
 
-    public StoryGridModel getStoryGrid() {
-        return storyGrid.getStoryGridModel();
+    public TileGridModel getTileGrid() {
+        return tileGrid.getStoryGridModel();
     }
 
     public StoryTileSummary getStoryTileSummary() {
-        return new StoryTileSummary(storyGrid.getStoryGridModel());
+        return new StoryTileSummary(tileGrid.getStoryGridModel());
     }
 
     public List<MomentOfContext> getAllContexts() {
@@ -388,6 +387,7 @@ public class StoryTile {
     }
 
 
-
-
+    public MomentOfContext getInitialContext() {
+        return contextMapper.getInitialContext();
+    }
 }

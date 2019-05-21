@@ -5,8 +5,7 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
-import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox
@@ -30,7 +29,7 @@ class URIAssignmentTransformSpec extends Specification {
 
     def setup() {
         clockStart = LocalDateTime.now();
-        storyTile = new StoryTile("@torchie/id", new GeometryClock(clockStart).getCoordinates(), ZoomLevel.TWENTY_MINS)
+        storyTile = new StoryTile("@torchie/id", new GeometryClock(clockStart).getCoordinates(), ZoomLevel.TWENTIES)
     }
 
     def "transform should reuse existing location URI if already in DB"() {
@@ -40,7 +39,7 @@ class URIAssignmentTransformSpec extends Specification {
         uriMapper.populateLocationUri(projectId, locationPreSaved);
 
 
-        ContextBeginningEvent projectStart = new ContextBeginningEvent(clockStart, StructureLevel.PROJECT, projectId);
+        MusicalSequenceBeginning projectStart = new MusicalSequenceBeginning(clockStart, StructureLevel.PROJECT, projectId);
 
         storyTile.beginContext(projectStart)
         storyTile.gotoLocation(clockStart, "box", "/a/path", Duration.ofSeconds(20))

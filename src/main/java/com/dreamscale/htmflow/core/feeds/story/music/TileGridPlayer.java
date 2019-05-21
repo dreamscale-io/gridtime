@@ -1,8 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
 import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent;
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
@@ -10,24 +9,31 @@ import com.dreamscale.htmflow.core.feeds.story.feature.timeband.AuthorsBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.FeelsBand;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.LearningFrictionBand;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
 import java.util.List;
 
-public class StoryScenePlayer {
+public class TileGridPlayer {
 
     private final MetronomePlayer metronomePlayer;
     private final Scene scene;
     private StoryTile frameToPlay;
 
-    public StoryScenePlayer(StoryGrid storyGrid) {
+    public TileGridPlayer(TileGrid tileGrid) {
 
-        this.metronomePlayer = storyGrid.createPlayer();
-        this.scene = new Scene(storyGrid);
+        this.metronomePlayer = tileGrid.createPlayer();
+        this.scene = new Scene(tileGrid);
     }
 
     public void loadFrame(StoryTile storyTile) {
         this.frameToPlay = storyTile;
+
+        MomentOfContext initialContext = storyTile.getInitialContext();
+        if (initialContext != null) {
+            scene.changeProjectContext(initialContext.getProjectContext());
+            scene.changeTaskContext(initialContext.getTaskContext());
+            scene.changeIntentionContext(initialContext.getIntentionContext());
+        }
 
         metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FEELS), new FeelsListener()));
         metronomePlayer.addPlayerToChain(new BandPlayer(frameToPlay.getBandLayer(BandLayerType.FRICTION_WTF), new WTFListener()));
@@ -50,6 +56,7 @@ public class StoryScenePlayer {
 
             scene.snapshot(metronomePlayer.getCurrentBeat());
         }
+
     }
 
 

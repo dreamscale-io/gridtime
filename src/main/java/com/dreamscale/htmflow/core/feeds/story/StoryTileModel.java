@@ -9,8 +9,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.BoxAndBridgeActivity;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryTileSummary;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,7 +29,7 @@ public class StoryTileModel extends FlowFeature {
     private BoxAndBridgeActivity spatialStructure;
 
     private StoryTileSummary storyTileSummary;
-    private StoryGridModel storyGrid;
+    private TileGridModel storyGrid;
 
     private CarryOverContext carryOverContext;
 

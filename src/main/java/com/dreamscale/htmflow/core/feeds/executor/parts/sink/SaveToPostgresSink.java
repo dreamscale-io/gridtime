@@ -6,8 +6,8 @@ import com.dreamscale.htmflow.core.feeds.story.StoryTile;
 import com.dreamscale.htmflow.core.feeds.story.StoryTileModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryTileSummary;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
+import com.dreamscale.htmflow.core.feeds.story.StoryTileSummary;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -81,14 +81,14 @@ public class SaveToPostgresSink implements SinkStrategy {
         return summaryEntity;
     }
 
-    private List<StoryGridMetricsEntity> createStoryGridMetricEntities(UUID torchieId, UUID tileId, StoryGridModel storyGridModel) {
+    private List<StoryGridMetricsEntity> createStoryGridMetricEntities(UUID torchieId, UUID tileId, TileGridModel tileGridModel) {
 
         List<StoryGridMetricsEntity> gridMetrics = new ArrayList<>();
 
-        Set<String> uris = storyGridModel.getAllFeaturesVisited();
+        Set<String> uris = tileGridModel.getAllFeaturesVisited();
 
         for (String uri : uris) {
-            FeatureMetrics metrics = storyGridModel.getFeatureMetricTotals().getFeatureMetrics(uri);
+            FeatureMetrics metrics = tileGridModel.getFeatureMetricTotals().getFeatureMetrics(uri);
 
             Map<CandleType, CandleStick> candleMap = metrics.getMetrics().getCandleMap();
 
@@ -136,7 +136,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         storyTileEntity.setWeeksIntoBlock(coordinates.getWeeksIntoBlock());
         storyTileEntity.setWeeksIntoYear(coordinates.getWeeksIntoYear());
         storyTileEntity.setDaysIntoWeek(coordinates.getDaysIntoWeek());
-        storyTileEntity.setFourHourSteps(coordinates.getFourhours());
+        storyTileEntity.setFourHourSteps(coordinates.getTwelves());
         storyTileEntity.setTwentyMinuteSteps(coordinates.getTwenties());
 
 

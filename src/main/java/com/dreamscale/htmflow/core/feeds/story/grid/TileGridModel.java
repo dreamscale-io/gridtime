@@ -11,13 +11,13 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class StoryGridModel extends FlowFeature {
+public class TileGridModel extends FlowFeature {
 
     private FeatureMetricsMap featureMetricTotals = new FeatureMetricsMap();
 
     private List<Column> columns;
 
-    public StoryGridModel() {
+    public TileGridModel() {
         super(FlowObjectType.STORY_GRID);
     }
 

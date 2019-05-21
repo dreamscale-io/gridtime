@@ -24,9 +24,9 @@ public class MomentOfContext {
     private LocalDateTime position;
     private MusicClock.Beat coordinates;
 
-    public MomentOfContext(MusicClock internalClock, ContextBeginningEvent projectEvent,
-                           ContextBeginningEvent taskEvent,
-                           ContextBeginningEvent intentionEvent) {
+    public MomentOfContext(MusicClock internalClock, MusicalSequenceBeginning projectEvent,
+                           MusicalSequenceBeginning taskEvent,
+                           MusicalSequenceBeginning intentionEvent) {
 
         if (projectEvent != null) {
             this.projectContext = projectEvent.getContext();
@@ -47,9 +47,9 @@ public class MomentOfContext {
         }
     }
 
-    private LocalDateTime determinePosition(ContextBeginningEvent projectEvent,
-                                           ContextBeginningEvent taskEvent,
-                                           ContextBeginningEvent intentionEvent) {
+    private LocalDateTime determinePosition(MusicalSequenceBeginning projectEvent,
+                                            MusicalSequenceBeginning taskEvent,
+                                            MusicalSequenceBeginning intentionEvent) {
         LocalDateTime position = null;
         if (intentionEvent != null) {
             position = intentionEvent.getPosition();

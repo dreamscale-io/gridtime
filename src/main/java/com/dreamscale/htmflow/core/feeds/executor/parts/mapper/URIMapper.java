@@ -1,12 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.domain.tile.*;
-import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
-import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGridModel;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -190,7 +188,7 @@ public class URIMapper {
         }
     }
 
-    public void populateAndSaveStoryGridUris(String tileUri, StoryGridModel storyGrid) {
+    public void populateAndSaveStoryGridUris(String tileUri, TileGridModel storyGrid) {
 
         List<FlowFeature> features = new ArrayList<>();
 
@@ -223,18 +221,6 @@ public class URIMapper {
     }
 
 
-
-    public static String createTorchieFeedUri(UUID torchieId) {
-        return "/torchie/"+torchieId;
-    }
-
-    public static String createCircleFeedUri(UUID circleId) {
-        return "/circle/"+circleId;
-    }
-
-    public static String createTileUri(String feedUri, ZoomLevel zoomLevel, GeometryClock.Coords tileCoordinates) {
-        return feedUri + "/zoom/"+zoomLevel.name()+"/tile/"+tileCoordinates.formatDreamTime();
-    }
 
 
 

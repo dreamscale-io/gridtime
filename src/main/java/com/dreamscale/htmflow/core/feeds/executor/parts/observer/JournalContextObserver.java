@@ -51,34 +51,34 @@ public class JournalContextObserver implements FlowObserver {
 
     private void createTaskStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenTask) {
         if (lastOpenTask == null || !lastOpenTask.getId().equals(journalEntry.getTaskId())) {
-            ContextBeginningEvent taskBeginning = createTaskBeginning(journalEntry);
+            MusicalSequenceBeginning taskBeginning = createTaskBeginning(journalEntry);
             currentStoryTile.beginContext(taskBeginning);
         }
     }
 
     private void createProjectStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenProject) {
         if (lastOpenProject == null || !lastOpenProject.getId().equals(journalEntry.getProjectId())) {
-            ContextBeginningEvent projectBeginning = createProjectBeginning(journalEntry);
+            MusicalSequenceBeginning projectBeginning = createProjectBeginning(journalEntry);
             currentStoryTile.beginContext(projectBeginning);
         }
     }
 
     private void createProjectDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenProject) {
         if (lastOpenProject != null && !lastOpenProject.getId().equals(journalEntry.getProjectId())) {
-            ContextEndingEvent projectEnding = createProjectEnding(journalEntry, lastOpenProject);
+            MusicalSequenceEnding projectEnding = createProjectEnding(journalEntry, lastOpenProject);
             currentStoryTile.endContext(projectEnding);
         }
     }
 
     private void createTaskDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenTask) {
         if (lastOpenTask != null && !lastOpenTask.getId().equals(journalEntry.getTaskId())) {
-            ContextEndingEvent taskEnding = createTaskEnding(journalEntry, lastOpenTask);
+            MusicalSequenceEnding taskEnding = createTaskEnding(journalEntry, lastOpenTask);
             currentStoryTile.endContext(taskEnding);
         }
     }
 
-    private ContextBeginningEvent createProjectBeginning(JournalEntryEntity journalEntry) {
-        ContextBeginningEvent projectBeginning = new ContextBeginningEvent();
+    private MusicalSequenceBeginning createProjectBeginning(JournalEntryEntity journalEntry) {
+        MusicalSequenceBeginning projectBeginning = new MusicalSequenceBeginning();
         projectBeginning.setContextId(journalEntry.getProjectId());
         projectBeginning.setStructureLevel(StructureLevel.PROJECT);
         projectBeginning.setDescription(journalEntry.getProjectName());
@@ -87,8 +87,8 @@ public class JournalContextObserver implements FlowObserver {
         return projectBeginning;
     }
 
-    private ContextBeginningEvent createTaskBeginning(JournalEntryEntity journalEntry) {
-        ContextBeginningEvent taskBeginning = new ContextBeginningEvent();
+    private MusicalSequenceBeginning createTaskBeginning(JournalEntryEntity journalEntry) {
+        MusicalSequenceBeginning taskBeginning = new MusicalSequenceBeginning();
         taskBeginning.setContextId(journalEntry.getTaskId());
         taskBeginning.setStructureLevel(StructureLevel.TASK);
         taskBeginning.setDescription(journalEntry.getTaskName());
@@ -97,24 +97,24 @@ public class JournalContextObserver implements FlowObserver {
         return taskBeginning;
     }
 
-    private ContextEndingEvent createTaskEnding(JournalEntryEntity journalEntry, Context lastTaskStart) {
-        ContextEndingEvent taskEnding = new ContextEndingEvent();
+    private MusicalSequenceEnding createTaskEnding(JournalEntryEntity journalEntry, Context lastTaskStart) {
+        MusicalSequenceEnding taskEnding = new MusicalSequenceEnding();
         taskEnding.setReferenceId(lastTaskStart.getId());
         taskEnding.setStructureLevel(StructureLevel.TASK);
         taskEnding.setDescription(lastTaskStart.getDescription());
         taskEnding.setPosition(journalEntry.getPosition());
-        taskEnding.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
+        taskEnding.setFinishStatus(MusicalSequenceEnding.FinishStatus.SUCCESS);
 
         return taskEnding;
     }
 
-    private ContextEndingEvent createProjectEnding(JournalEntryEntity journalEntry, Context lastOpenProject) {
-        ContextEndingEvent projectEnding = new ContextEndingEvent();
+    private MusicalSequenceEnding createProjectEnding(JournalEntryEntity journalEntry, Context lastOpenProject) {
+        MusicalSequenceEnding projectEnding = new MusicalSequenceEnding();
         projectEnding.setReferenceId(lastOpenProject.getId());
         projectEnding.setStructureLevel(StructureLevel.PROJECT);
         projectEnding.setDescription(lastOpenProject.getDescription());
         projectEnding.setPosition(journalEntry.getPosition());
-        projectEnding.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
+        projectEnding.setFinishStatus(MusicalSequenceEnding.FinishStatus.SUCCESS);
 
         return projectEnding;
     }
@@ -122,7 +122,7 @@ public class JournalContextObserver implements FlowObserver {
 
     private void createIntentionStartAndEnd(Window window, StoryTile storyTile, JournalEntryEntity journalEntry) {
 
-        ContextBeginningEvent intentionStart = new ContextBeginningEvent();
+        MusicalSequenceBeginning intentionStart = new MusicalSequenceBeginning();
         intentionStart.setContextId(journalEntry.getId());
         intentionStart.setStructureLevel(StructureLevel.INTENTION);
         intentionStart.setDescription(journalEntry.getDescription());
@@ -131,7 +131,7 @@ public class JournalContextObserver implements FlowObserver {
         storyTile.beginContext(intentionStart);
 
         if (journalEntry.getFinishTime() != null) {
-            ContextEndingEvent intentionEnd = new ContextEndingEvent();
+            MusicalSequenceEnding intentionEnd = new MusicalSequenceEnding();
             intentionEnd.setReferenceId(journalEntry.getId());
             intentionEnd.setStructureLevel(StructureLevel.INTENTION);
             intentionEnd.setFinishStatus(decodeFinishStatus(journalEntry.getFinishStatus()));
@@ -148,13 +148,13 @@ public class JournalContextObserver implements FlowObserver {
     }
 
     private void createIntentionDoneIfNotNull(StoryTile storyTile, JournalEntryEntity journalEntry, Context lastIntentionStart) {
-        ContextEndingEvent intentionEnd = null;
+        MusicalSequenceEnding intentionEnd = null;
 
         if (lastIntentionStart != null) {
-            intentionEnd = new ContextEndingEvent();
+            intentionEnd = new MusicalSequenceEnding();
             intentionEnd.setReferenceId(lastIntentionStart.getId());
             intentionEnd.setStructureLevel(StructureLevel.INTENTION);
-            intentionEnd.setFinishStatus(ContextEndingEvent.FinishStatus.SUCCESS);
+            intentionEnd.setFinishStatus(MusicalSequenceEnding.FinishStatus.SUCCESS);
             intentionEnd.setDescription(lastIntentionStart.getDescription());
             intentionEnd.setPosition(journalEntry.getPosition());
 
@@ -163,18 +163,18 @@ public class JournalContextObserver implements FlowObserver {
 
     }
 
-    private ContextEndingEvent.FinishStatus decodeFinishStatus(String journalFinishStatus) {
-        ContextEndingEvent.FinishStatus contextFinishStatus = null;
+    private MusicalSequenceEnding.FinishStatus decodeFinishStatus(String journalFinishStatus) {
+        MusicalSequenceEnding.FinishStatus contextFinishStatus = null;
 
         if (journalFinishStatus != null) {
             FinishStatus finishStatus = FinishStatus.valueOf(journalFinishStatus);
 
             switch (finishStatus) {
                 case done:
-                    contextFinishStatus = ContextEndingEvent.FinishStatus.SUCCESS;
+                    contextFinishStatus = MusicalSequenceEnding.FinishStatus.SUCCESS;
                     break;
                 case aborted:
-                    contextFinishStatus = ContextEndingEvent.FinishStatus.ABORT;
+                    contextFinishStatus = MusicalSequenceEnding.FinishStatus.ABORT;
                     break;
             }
         }

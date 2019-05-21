@@ -2,10 +2,9 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
 import java.time.Duration;
-import java.util.List;
 
 public class FocalPoint {
 
@@ -15,10 +14,10 @@ public class FocalPoint {
 
     private LocationInBox currentLocation;
 
-    public FocalPoint(FeatureFactory featureFactory, StoryGrid storyGrid, Box box) {
+    public FocalPoint(FeatureFactory featureFactory, TileGrid tileGrid, Box box) {
         this.box = box;
 
-        this.gravityBall = new GravityBallOfThoughts(storyGrid, featureFactory, box);
+        this.gravityBall = new GravityBallOfThoughts(tileGrid, featureFactory, box);
         this.currentLocation = gravityBall.getCurrentLocation();
     }
 

@@ -18,12 +18,14 @@ public class FlowContextMapper {
     private final LocalDateTime to;
     private final MusicClock musicClock;
 
-    private Map<StructureLevel, ContextBeginningEvent> currentContextMap = new HashMap<>();
+    private Map<StructureLevel, MusicalSequenceBeginning> currentContextMap = new HashMap<>();
     private Map<StructureLevel, RelativeSequence> currentSequenceNumbers = new HashMap<>();
 
+    private MomentOfContext initialContext;
     private List<MomentOfContext> momentsOfContext = new ArrayList<>();
 
-    private ContextEndingEvent contextToEndLater = null;
+    private MusicalSequenceEnding contextToEndLater = null;
+
 
     public FlowContextMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
         this.featureFactory = featureFactory;
@@ -32,16 +34,16 @@ public class FlowContextMapper {
         this.to = to;
     }
 
-    public ContextBeginningEvent getCurrentContext(StructureLevel structureLevel) {
+    public MusicalSequenceBeginning getCurrentContext(StructureLevel structureLevel) {
         return currentContextMap.get(structureLevel);
     }
 
-    public Movement beginContext(ContextBeginningEvent beginningEvent) {
+    public Movement beginContext(MusicalSequenceBeginning beginningEvent) {
         Movement movement = null;
 
         lookupAndAttachToContextObject(beginningEvent);
 
-        ContextBeginningEvent existingContextAtLevel = currentContextMap.get(beginningEvent.getStructureLevel());
+        MusicalSequenceBeginning existingContextAtLevel = currentContextMap.get(beginningEvent.getStructureLevel());
 
         if (existingContextAtLevel == null) {
 
@@ -69,7 +71,7 @@ public class FlowContextMapper {
         event.setContext(context);
     }
 
-    public Movement endContext(ContextEndingEvent endingEvent) {
+    public Movement endContext(MusicalSequenceEnding endingEvent) {
         lookupAndAttachToContextObject(endingEvent);
 
         Movement movement = null;
@@ -85,7 +87,7 @@ public class FlowContextMapper {
         return movement;
     }
 
-    public void endContextWhenInWindow(ContextEndingEvent contextToEndLater) {
+    public void endContextWhenInWindow(MusicalSequenceEnding contextToEndLater) {
         this.contextToEndLater = contextToEndLater;
     }
 
@@ -103,10 +105,8 @@ public class FlowContextMapper {
         currentContextMap.put(StructureLevel.INTENTION, subContext.getContextFor(StructureLevel.INTENTION));
 
         if (subContext.getContextToEndLater() != null) {
-            ContextEndingEvent contextEnding = subContext.getContextToEndLater();
+            MusicalSequenceEnding contextEnding = subContext.getContextToEndLater();
             LocalDateTime endingPosition = contextEnding.getPosition();
-
-
 
             if ((from.isBefore(endingPosition) || from.isEqual(endingPosition)) && to.isAfter(endingPosition)) {
                 sideEffectMovement = endContext(contextEnding);
@@ -115,6 +115,8 @@ public class FlowContextMapper {
                 contextToEndLater = contextEnding;
             }
         }
+
+        initialContext = getCurrentContext();
 
         return sideEffectMovement;
     }
@@ -148,11 +150,16 @@ public class FlowContextMapper {
         //TODO is there a thing that needs doing here?  Sequencing?
     }
 
+
+    public MomentOfContext getInitialContext() {
+        return initialContext;
+    }
+
     public MomentOfContext getCurrentContext() {
 
-        ContextBeginningEvent projectContext = getCurrentContext(StructureLevel.PROJECT);
-        ContextBeginningEvent taskContext = getCurrentContext(StructureLevel.TASK);
-        ContextBeginningEvent intentionContext = getCurrentContext(StructureLevel.INTENTION);
+        MusicalSequenceBeginning projectContext = getCurrentContext(StructureLevel.PROJECT);
+        MusicalSequenceBeginning taskContext = getCurrentContext(StructureLevel.TASK);
+        MusicalSequenceBeginning intentionContext = getCurrentContext(StructureLevel.INTENTION);
 
         MomentOfContext momentOfContext = new MomentOfContext(musicClock, projectContext, taskContext, intentionContext);
 
@@ -198,24 +205,24 @@ public class FlowContextMapper {
         }
 
 
-        void addContext(StructureLevel structureLevel, ContextBeginningEvent contextEvent) {
+        void addContext(StructureLevel structureLevel, MusicalSequenceBeginning contextEvent) {
             subContext.saveFeature(structureLevel.name(), contextEvent);
         }
 
-        void setContextToEndLater(ContextEndingEvent contextEnding) {
+        void setContextToEndLater(MusicalSequenceEnding contextEnding) {
             subContext.saveFeature(CONTEXT_TO_END_LATER, contextEnding);
         }
 
-        ContextEndingEvent getContextToEndLater() {
-            return (ContextEndingEvent) subContext.getFeature(CONTEXT_TO_END_LATER);
+        MusicalSequenceEnding getContextToEndLater() {
+            return (MusicalSequenceEnding) subContext.getFeature(CONTEXT_TO_END_LATER);
         }
 
-        ContextBeginningEvent getContextFor(StructureLevel structureLevel) {
-            return (ContextBeginningEvent) subContext.getFeature(structureLevel.name());
+        MusicalSequenceBeginning getContextFor(StructureLevel structureLevel) {
+            return (MusicalSequenceBeginning) subContext.getFeature(structureLevel.name());
         }
 
         int getSequenceFor(StructureLevel structureLevel) {
-            ContextBeginningEvent contextBeginning = getContextFor(structureLevel);
+            MusicalSequenceBeginning contextBeginning = getContextFor(structureLevel);
             if (contextBeginning != null) {
                 return contextBeginning.getRelativeSequence() + 1;
             } else {

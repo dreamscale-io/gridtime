@@ -11,7 +11,7 @@ import com.dreamscale.htmflow.core.domain.tile.StoryGridSummaryRepository
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.story.StoryTile
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.details.AuthorDetails
 import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails
@@ -47,7 +47,7 @@ class SaveToPostgresSinkSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         torchieId = UUID.randomUUID();
-        tile = new StoryTile("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTY_MINS)
+        tile = new StoryTile("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTIES)
 
     }
 
@@ -58,7 +58,7 @@ class SaveToPostgresSinkSpec extends Specification {
         LocalDateTime time2 = clockStart.plusMinutes(5);
         LocalDateTime time3 = clockStart.plusMinutes(6);
 
-        tile.beginContext(new ContextBeginningEvent(time1, StructureLevel.INTENTION, UUID.randomUUID()))
+        tile.beginContext(new MusicalSequenceBeginning(time1, StructureLevel.INTENTION, UUID.randomUUID()))
         tile.startAuthorsBand(time1, new AuthorDetails(new Member("id", "My Name")))
 
         tile.gotoLocation(time1, "box", "/location/path/1", Duration.ofSeconds(22))

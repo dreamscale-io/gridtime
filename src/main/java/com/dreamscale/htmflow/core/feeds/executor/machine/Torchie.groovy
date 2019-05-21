@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.machine
 
+import com.dreamscale.htmflow.core.feeds.story.StoryTile
+
 class Torchie {
 
     boolean isAlive;
@@ -46,7 +48,10 @@ class Torchie {
 
     }
 
-    /**
+    StoryTile runTile(String tileUri) {
+        null
+    }
+/**
      * This is the main game loop
      */
     private class Life implements Runnable {

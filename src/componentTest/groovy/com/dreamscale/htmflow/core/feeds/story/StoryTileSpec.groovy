@@ -2,8 +2,8 @@ package com.dreamscale.htmflow.core.feeds.story;
 
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextBeginningEvent
-import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextEndingEvent
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning
+import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceEnding
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.feeds.story.feature.details.FeelsDetails
@@ -28,18 +28,18 @@ public class StoryTileSpec extends Specification {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         geometryClock = new GeometryClock(clockStart)
 
-        tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.TWENTY_MINS)
+        tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.TWENTIES)
     }
 
     def "should start and end context"() {
         given:
-        ContextBeginningEvent startTask = new ContextBeginningEvent()
+        MusicalSequenceBeginning startTask = new MusicalSequenceBeginning()
         startTask.setPosition(clockStart.plusMinutes(4))
         startTask.setStructureLevel(StructureLevel.TASK)
         startTask.setContextId(UUID.randomUUID())
         startTask.setDescription("name");
 
-        ContextEndingEvent endTask = new ContextEndingEvent()
+        MusicalSequenceEnding endTask = new MusicalSequenceEnding()
         endTask.setPosition(clockStart.plusMinutes(6))
         endTask.setStructureLevel(StructureLevel.TASK)
         endTask.setDescription("name");
@@ -80,7 +80,7 @@ public class StoryTileSpec extends Specification {
 
         def layer = tile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES)
         def spatial = tile.getSpatialStructure()
-        def grid = tile.getStoryGrid()
+        def grid = tile.getTileGrid()
 
         then:
         assert layer.movements.size() == 4
@@ -106,7 +106,7 @@ public class StoryTileSpec extends Specification {
         LocalDateTime time2 = clockStart.plusMinutes(5);
         LocalDateTime time3 = clockStart.plusMinutes(6);
 
-        ContextBeginningEvent startTask = new ContextBeginningEvent()
+        MusicalSequenceBeginning startTask = new MusicalSequenceBeginning()
         startTask.setPosition(time1)
         startTask.setStructureLevel(StructureLevel.TASK)
         startTask.setContextId(UUID.randomUUID())
@@ -118,7 +118,7 @@ public class StoryTileSpec extends Specification {
         tile.modifyCurrentLocation(time2, 55)
         tile.modifyCurrentLocation(time3, 11)
 
-        def grid = tile.getStoryGrid();
+        def grid = tile.getTileGrid();
         def locations = grid.featureMetricTotals.getLocationsVisited();
 
         then:
@@ -158,9 +158,9 @@ public class StoryTileSpec extends Specification {
         tile.startWTF(time1, circleDetails)
         tile.finishAfterLoad()
 
-        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTY_MINS), ZoomLevel.TWENTY_MINS);
+        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
 
-        nextTile.carryOverFrameContext(tile.getCarryOverContext());
+        nextTile.carryOverTileContext(tile.getCarryOverContext());
         nextTile.finishAfterLoad();
 
         def layer = tile.getBandLayer(BandLayerType.FRICTION_WTF)
@@ -233,7 +233,7 @@ public class StoryTileSpec extends Specification {
         tile.startFeelsBand(time3, new FeelsDetails(-4))
 
         tile.play();
-        def storyGrid = tile.getStoryGrid();
+        def storyGrid = tile.getTileGrid();
         List<Column> columns = storyGrid.columns;
 
         then:

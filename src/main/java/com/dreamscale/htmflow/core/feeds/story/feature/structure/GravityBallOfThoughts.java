@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.grid.StoryGrid;
+import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
 import java.time.Duration;
 import java.util.*;
@@ -18,7 +18,7 @@ public class GravityBallOfThoughts {
 
     private final Box box;
     private final FeatureFactory featureFactory;
-    private final StoryGrid storyGrid;
+    private final TileGrid tileGrid;
 
     private Map<UUID, ThoughtParticle> thoughtParticleMap = new HashMap<>();
 
@@ -36,8 +36,8 @@ public class GravityBallOfThoughts {
     private LocationInBox entranceLocation;
 
 
-    public GravityBallOfThoughts(StoryGrid storyGrid, FeatureFactory featureFactory, Box box) {
-        this.storyGrid = storyGrid;
+    public GravityBallOfThoughts(TileGrid tileGrid, FeatureFactory featureFactory, Box box) {
+        this.tileGrid = tileGrid;
         this.featureFactory = featureFactory;
         this.box = box;
 
@@ -218,7 +218,7 @@ public class GravityBallOfThoughts {
             } else if (thoughtBubble.contains(nonEnterExitLocation)) {
                 LocationInBox enterExitLocation = getEnterExitNode(locationA, locationB);
 
-                storyGrid.getMetricsFor(traversal).addFocusWeightSample(enterExitParticle.getFocusWeight());
+                tileGrid.getMetricsFor(traversal).addFocusWeightSample(enterExitParticle.getFocusWeight());
                 if (enterExitLocation == entranceLocation) {
                     thoughtBubble.addLinkFromEntrance(nonEnterExitLocation, traversal);
                 } else if (enterExitLocation == exitLocation) {
@@ -288,7 +288,7 @@ public class GravityBallOfThoughts {
             LocationInBox locationToLinkTo = getSourceLocation(locationsInLastRing, locationA, locationB);
             LocationInBox locationToAdd = getConnectedLocation(locationsInLastRing, locationA, locationB);
 
-            storyGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
+            tileGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
 
             thoughtBubble.addLocationToHighestRing(locationToLinkTo, locationToAdd, traversal);
         }
@@ -305,7 +305,7 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            storyGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
+            tileGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
 
             thoughtBubble.addExtraLinkWithinHighestRing(locationA, locationB, traversal);
         }
@@ -319,7 +319,7 @@ public class GravityBallOfThoughts {
             LocationInBox locationA = traversal.getLocationA();
             LocationInBox locationB = traversal.getLocationB();
 
-            storyGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
+            tileGrid.getMetricsFor(traversal).addFocusWeightSample(particle.getFocusWeight());
 
             thoughtBubble.addExtraLinkWithinFirstRing(locationA, locationB, traversal);
         }
@@ -337,7 +337,7 @@ public class GravityBallOfThoughts {
 
             LocationInBox locationToAdd = getConnectedLocation(centerOfFocus, locationA, locationB);
 
-            storyGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
+            tileGrid.getMetricsFor(traversal).addFocusWeightSample(connectedParticle.getFocusWeight());
 
             thoughtBubble.addLocationToFirstRing(locationToAdd, traversal);
 
@@ -440,8 +440,8 @@ public class GravityBallOfThoughts {
             if (isEnterExitTransition(link)) {
                 center = getNonEnterExitNode(link.getLocationA(), link.getLocationB());
             } else {
-                Duration timeInLocationA = storyGrid.getMetricsFor(link.getLocationA()).getTotalTimeInvestment();
-                Duration timeInLocationB = storyGrid.getMetricsFor(link.getLocationB()).getTotalTimeInvestment();
+                Duration timeInLocationA = tileGrid.getMetricsFor(link.getLocationA()).getTotalTimeInvestment();
+                Duration timeInLocationB = tileGrid.getMetricsFor(link.getLocationB()).getTotalTimeInvestment();
 
                 if (timeInLocationA.compareTo(timeInLocationB) > 0) {
                     center = link.getLocationA();
