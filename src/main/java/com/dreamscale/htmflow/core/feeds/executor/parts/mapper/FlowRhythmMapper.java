@@ -1,14 +1,13 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
-import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
-import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
+import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
+import com.dreamscale.htmflow.core.feeds.story.feature.details.MessageDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.LocationInBox;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -17,16 +16,12 @@ public class FlowRhythmMapper {
 
     private final MusicClock musicClock;
     private final FeatureFactory featureFactory;
-    private final LocalDateTime from;
-    private final LocalDateTime to;
 
     private Map<RhythmLayerType, RhythmLayerMapper> layerMap = new HashMap<>();
 
-    public FlowRhythmMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
+    public FlowRhythmMapper(FeatureFactory featureFactory, MusicClock musicClock) {
         this.featureFactory = featureFactory;
-        this.musicClock = new MusicClock(from, to);
-        this.from = from;
-        this.to = to;
+        this.musicClock = musicClock;
     }
 
 
@@ -128,6 +123,9 @@ public class FlowRhythmMapper {
             for (Movement movement : carryOverMovements) {
 
                 LocalDateTime position = movement.getMoment();
+
+                LocalDateTime from = musicClock.getFromClockTime();
+                LocalDateTime to = musicClock.getToClockTime();
 
                 if ((from.isBefore(position) || from.isEqual(position)) && to.isAfter(position)) {
                     //TODO need some way to populate context for this... can we fix in the repair?

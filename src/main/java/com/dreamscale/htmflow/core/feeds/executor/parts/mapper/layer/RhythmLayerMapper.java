@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayer;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType;
 
@@ -30,7 +30,7 @@ public class RhythmLayerMapper {
 
     public void addMovement(Movement movement) {
 
-        movement.setCoordinates(musicClock.createBeat(movement.getMoment()));
+        movement.setCoordinates(musicClock.getClosestBeat(movement.getMoment()));
 
         layer.add(movement);
 

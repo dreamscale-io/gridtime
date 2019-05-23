@@ -1,7 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.timeband;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.music.Playable;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
@@ -22,8 +23,8 @@ public class Timeband extends FlowFeature implements Playable {
 
     private int relativeSequence = 0;
 
-    private MusicClock.Beat startBeat;
-    private MusicClock.Beat endBeat;
+    private ClockBeat startClockBeat;
+    private ClockBeat endClockBeat;
 
     public Timeband(LocalDateTime start, LocalDateTime end, Details details) {
         this();
@@ -50,8 +51,8 @@ public class Timeband extends FlowFeature implements Playable {
 
     public void initCoordinates(MusicClock clock) {
 
-        this.startBeat = clock.createBeat(start);
-        this.endBeat = clock.createBeat(end);
+        this.startClockBeat = clock.getClosestBeat(start);
+        this.endClockBeat = clock.getClosestBeat(end);
     }
 
     @JsonIgnore
@@ -60,8 +61,8 @@ public class Timeband extends FlowFeature implements Playable {
     }
 
     @JsonIgnore
-    public MusicClock.Beat getCoordinates() {
-        return this.startBeat;
+    public ClockBeat getCoordinates() {
+        return this.startClockBeat;
     }
 
     public boolean contains(LocalDateTime moment) {

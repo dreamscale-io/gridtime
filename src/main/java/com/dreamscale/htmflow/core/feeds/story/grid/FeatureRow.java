@@ -1,7 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -16,23 +17,23 @@ public class FeatureRow {
     private final FlowFeature feature;
 
     private GridMetrics allTimeBucket = new GridMetrics();
-    private Map<MusicClock.Beat, GridMetrics> gridMetricsPerTimeBucket = new HashMap<>();
+    private Map<ClockBeat, GridMetrics> gridMetricsPerTimeBucket = new HashMap<>();
 
     public FeatureRow(FlowFeature feature) {
         this.feature = feature;
     }
 
 
-    public GridMetrics findOrCreateMetrics(MusicClock.Beat beat) {
-        GridMetrics gridMetrics = gridMetricsPerTimeBucket.get(beat);
+    public GridMetrics findOrCreateMetrics(ClockBeat clockBeat) {
+        GridMetrics gridMetrics = gridMetricsPerTimeBucket.get(clockBeat);
         if (gridMetrics == null) {
             gridMetrics = new GridMetrics(allTimeBucket);
-            gridMetricsPerTimeBucket.put(beat, gridMetrics);
+            gridMetricsPerTimeBucket.put(clockBeat, gridMetrics);
         }
         return gridMetrics;
     }
 
-    public Set<MusicClock.Beat> getTimingKeys() {
+    public Set<ClockBeat> getTimingKeys() {
         return gridMetricsPerTimeBucket.keySet();
     }
 

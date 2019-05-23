@@ -2,9 +2,9 @@ package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.RadialClock;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 

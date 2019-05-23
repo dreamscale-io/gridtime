@@ -2,6 +2,8 @@ package com.dreamscale.htmflow.core.feeds.story.music;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.Timeband;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +22,13 @@ public class BandPlayer implements Player {
     }
 
     @Override
-    public void play(MusicClock.Beat withinBeat) {
+    public void play(ClockBeat withinClockBeat) {
         List<Playable> beatContents = new ArrayList<>();
 
         for (int i = index; i < playables.size(); i++) {
             Timeband band = playables.get(i);
 
-            if (band.getStartBeat().isWithin(withinBeat)) {
+            if (band.getStartClockBeat().isWithin(withinClockBeat)) {
                 beatContents.add(band);
                 index++;
             } else {

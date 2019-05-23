@@ -9,6 +9,8 @@ import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.Column;
 import com.dreamscale.htmflow.core.feeds.story.grid.GridMetrics;
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 
 import java.util.*;
 
@@ -44,10 +46,10 @@ public class Scene {
         this.tileGrid = tileGrid;
     }
 
-    public void snapshot(MusicClock.Beat beat) {
-        correlateMetricsWithinFrame(beat);
+    public void snapshot(ClockBeat clockBeat) {
+        correlateMetricsWithinFrame(clockBeat);
 
-        Column column = new Column(beat);
+        Column column = new Column(clockBeat);
         column.setProjectContext(projectContext);
         column.setTaskContext(taskContext);
         column.setIntentionContext(intentionContext);
@@ -62,12 +64,12 @@ public class Scene {
 
         //static structures
 
-        addStructureActivityMetrics(column, activeBoxes, beat);
-        addStructureActivityMetrics(column, activeLocationsInBox, beat);
-        addStructureActivityMetrics(column, activeTraversals, beat);
-        addStructureActivityMetrics(column, activeBridges, beat);
+        addStructureActivityMetrics(column, activeBoxes, clockBeat);
+        addStructureActivityMetrics(column, activeLocationsInBox, clockBeat);
+        addStructureActivityMetrics(column, activeTraversals, clockBeat);
+        addStructureActivityMetrics(column, activeBridges, clockBeat);
 
-        addAggregateActivityMetrics(column, activeBubbles, beat);
+        addAggregateActivityMetrics(column, activeBubbles, clockBeat);
 
         addRingLocationAliases(column, activeRingLocations);
         addRingLinkAliases(column, activeRingLinks);
@@ -111,16 +113,16 @@ public class Scene {
         }
     }
 
-    private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
+    private void addAggregateActivityMetrics(Column column, List<? extends FlowFeature> features, ClockBeat clockBeat) {
         for (FlowFeature feature : features) {
-            GridMetrics metrics = tileGrid.getAggregateMetricsFor(feature, beat);
+            GridMetrics metrics = tileGrid.getAggregateMetricsFor(feature, clockBeat);
             column.addActivityForStructure(feature, metrics);
         }
     }
 
-    private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, MusicClock.Beat beat) {
+    private void addStructureActivityMetrics(Column column, List<? extends FlowFeature> features, ClockBeat clockBeat) {
         for (FlowFeature feature : features) {
-            column.addActivityForStructure(feature, tileGrid.getMetricsFor(feature, beat));
+            column.addActivityForStructure(feature, tileGrid.getMetricsFor(feature, clockBeat));
         }
     }
 
@@ -137,34 +139,34 @@ public class Scene {
         removeAllButOne(activeMessageContexts);
     }
 
-    public void correlateMetricsWithinFrame(MusicClock.Beat beat) {
+    public void correlateMetricsWithinFrame(ClockBeat clockBeat) {
         for(Box box : activeBoxes) {
-            saveMetrics(box, beat);
+            saveMetrics(box, clockBeat);
         }
 
         for(LocationInBox location : activeLocationsInBox) {
-            saveMetrics(location, beat);
+            saveMetrics(location, clockBeat);
         }
 
         for(Traversal traversal : activeTraversals) {
-            saveMetrics(traversal, beat);
+            saveMetrics(traversal, clockBeat);
         }
 
         for(Bridge bridge : activeBridges) {
-            saveMetrics(bridge, beat);
+            saveMetrics(bridge, clockBeat);
         }
 
-        saveMetrics(projectContext, beat);
-        saveMetrics(taskContext, beat);
-        saveMetrics(intentionContext, beat);
+        saveMetrics(projectContext, clockBeat);
+        saveMetrics(taskContext, clockBeat);
+        saveMetrics(intentionContext, clockBeat);
     }
 
-    private void saveMetrics(FlowFeature flowFeature, MusicClock.Beat beat) {
+    private void saveMetrics(FlowFeature flowFeature, ClockBeat clockBeat) {
 
-        tileGrid.getMetricsFor(flowFeature, beat).addFeelsSample(activeFeels);
-        tileGrid.getMetricsFor(flowFeature, beat).addPairingSample(isPairing);
-        tileGrid.getMetricsFor(flowFeature, beat).addLearningSample(isLearningFriction);
-        tileGrid.getMetricsFor(flowFeature, beat).addWtfSample(isWTFFriction);
+        tileGrid.getMetricsFor(flowFeature, clockBeat).addFeelsSample(activeFeels);
+        tileGrid.getMetricsFor(flowFeature, clockBeat).addPairingSample(isPairing);
+        tileGrid.getMetricsFor(flowFeature, clockBeat).addLearningSample(isLearningFriction);
+        tileGrid.getMetricsFor(flowFeature, clockBeat).addWtfSample(isWTFFriction);
     }
 
     private void removeAllButOne(LinkedList<?> activeItems) {

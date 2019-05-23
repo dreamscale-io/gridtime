@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
@@ -13,19 +13,14 @@ import java.util.*;
 
 public class FlowBandMapper {
 
-    private final LocalDateTime from;
-    private final LocalDateTime to;
     private final MusicClock musicClock;
     private final FeatureFactory featureFactory;
 
     private Map<BandLayerType, BandLayerMapper> layerMap = new HashMap<>();
 
-    public FlowBandMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
+    public FlowBandMapper(FeatureFactory featureFactory, MusicClock musicClock) {
         this.featureFactory = featureFactory;
-        this.musicClock = new MusicClock(from, to);
-        this.from = from;
-        this.to = to;
-
+        this.musicClock = musicClock;
     }
 
     private BandLayerMapper findOrCreateLayer(BandLayerType layerType) {

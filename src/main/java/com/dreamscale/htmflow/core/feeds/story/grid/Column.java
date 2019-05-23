@@ -4,7 +4,8 @@ import com.dreamscale.htmflow.core.domain.member.json.Member;
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,7 @@ import java.util.*;
 @Setter
 public class Column extends FlowFeature {
 
-    private MusicClock.Beat beat;
+    private ClockBeat clockBeat;
 
     private Context projectContext;
     private Context taskContext;
@@ -36,9 +37,9 @@ public class Column extends FlowFeature {
     private int relativeSequence;
 
 
-    public Column(MusicClock.Beat beat) {
+    public Column(ClockBeat clockBeat) {
         this();
-        this.beat = beat;
+        this.clockBeat = clockBeat;
     }
 
     public Column() {

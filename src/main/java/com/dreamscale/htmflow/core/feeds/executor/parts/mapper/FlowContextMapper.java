@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ChangeContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -14,8 +14,6 @@ import java.util.*;
 public class FlowContextMapper {
 
     private final FeatureFactory featureFactory;
-    private final LocalDateTime from;
-    private final LocalDateTime to;
     private final MusicClock musicClock;
 
     private Map<StructureLevel, MusicalSequenceBeginning> currentContextMap = new HashMap<>();
@@ -27,11 +25,9 @@ public class FlowContextMapper {
     private MusicalSequenceEnding contextToEndLater = null;
 
 
-    public FlowContextMapper(FeatureFactory featureFactory, LocalDateTime from, LocalDateTime to) {
+    public FlowContextMapper(FeatureFactory featureFactory, MusicClock musicClock) {
         this.featureFactory = featureFactory;
-        this.musicClock = new MusicClock(from, to);
-        this.from = from;
-        this.to = to;
+        this.musicClock = musicClock;
     }
 
     public MusicalSequenceBeginning getCurrentContext(StructureLevel structureLevel) {
@@ -107,6 +103,9 @@ public class FlowContextMapper {
         if (subContext.getContextToEndLater() != null) {
             MusicalSequenceEnding contextEnding = subContext.getContextToEndLater();
             LocalDateTime endingPosition = contextEnding.getPosition();
+
+            LocalDateTime from = musicClock.getFromClockTime();
+            LocalDateTime to = musicClock.getToClockTime();
 
             if ((from.isBefore(endingPosition) || from.isEqual(endingPosition)) && to.isAfter(endingPosition)) {
                 sideEffectMovement = endContext(contextEnding);

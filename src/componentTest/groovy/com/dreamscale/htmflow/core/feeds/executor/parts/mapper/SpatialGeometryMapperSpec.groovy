@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock
 import spock.lang.Specification
 
 import java.time.Duration
@@ -18,9 +19,10 @@ class SpatialGeometryMapperSpec extends Specification {
     def setup() {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         geometryClock = new GeometryClock(clockStart)
+        MusicClock musicClock = new MusicClock(clockStart, clockStart.plusMinutes(20), 20);
 
         FeatureFactory featureFactory = new FeatureFactory("/tile/id")
-        TileGrid storyGrid = new TileGrid(BeatSize.QUARTER, clockStart, clockStart.plusMinutes(20))
+        TileGrid storyGrid = new TileGrid(musicClock, BeatSize.QUARTER)
         spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, storyGrid)
     }
 

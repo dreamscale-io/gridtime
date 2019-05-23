@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -8,16 +10,14 @@ import java.util.List;
 @Slf4j
 public class MetronomePlayer {
 
-    private final BeatSize beatSize;
     private MusicClock musicClock;
 
     private final List<Player> playerChain;
-    private MusicClock.Beat currentBeat;
+    private ClockBeat currentClockBeat;
 
 
-    public MetronomePlayer(MusicClock musicClock, BeatSize beatSize) {
+    public MetronomePlayer(MusicClock musicClock) {
         this.musicClock = musicClock;
-        this.beatSize = beatSize;
         this.playerChain = new ArrayList<>();
     }
 
@@ -26,13 +26,13 @@ public class MetronomePlayer {
     }
 
     public void tick() {
-        this.currentBeat = musicClock.getCurrentBeat().toBeatSize(beatSize);
+        this.currentClockBeat = musicClock.getCurrentBeat();
 
         for (Player player : playerChain) {
-            player.play(currentBeat);
+            player.play(currentClockBeat);
         }
 
-        musicClock.next(beatSize);
+        musicClock.next();
     }
 
     public void addPlayerToChain(Player player) {
@@ -40,10 +40,10 @@ public class MetronomePlayer {
     }
 
     public int getNumberOfTicks() {
-        return musicClock.getBeats() / beatSize.getBeatCount();
+        return musicClock.getBeats();
     }
 
-    public MusicClock.Beat getCurrentBeat() {
-        return currentBeat;
+    public ClockBeat getCurrentClockBeat() {
+        return currentClockBeat;
     }
 }

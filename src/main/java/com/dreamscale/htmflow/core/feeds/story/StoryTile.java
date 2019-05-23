@@ -8,7 +8,8 @@ import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -41,21 +42,22 @@ public class StoryTile {
         this.zoomLevel = zoomLevel;
         this.tileUri = TileUri.createTileUri(feedUri, zoomLevel, tileCoordinates);
 
-        musicClock = new MusicClock(
-                tileCoordinates.getClockTime(),
-                tileCoordinates.panRight(zoomLevel).getClockTime());
+        LocalDateTime from = tileCoordinates.getClockTime();
+        LocalDateTime to = tileCoordinates.panRight(zoomLevel).getClockTime();
 
         this.featureFactory = new FeatureFactory(tileUri);
+        this.musicClock = new MusicClock(from, to, 20);
 
-        LocalDateTime from = musicClock.getFromClockTime();
-        LocalDateTime to = musicClock.getToClockTime();
+        this.contextMapper = new FlowContextMapper(featureFactory, musicClock);
+        this.flowRhythmMapper = new FlowRhythmMapper(featureFactory, musicClock);
+        this.timeBandMapper = new FlowBandMapper(featureFactory, musicClock);
 
-        this.tileGrid = new TileGrid(BeatSize.QUARTER, from, to);
 
-        this.contextMapper = new FlowContextMapper(featureFactory, from, to);
+        this.tileGrid = new TileGrid(musicClock, BeatSize.QUARTER);
+
+
         this.spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, tileGrid);
-        this.flowRhythmMapper = new FlowRhythmMapper(featureFactory, from, to);
-        this.timeBandMapper = new FlowBandMapper(featureFactory, from, to);
+
 
     }
 
@@ -103,20 +105,20 @@ public class StoryTile {
         Traversal lastTraversal = spatialGeometryMapper.getLastTraversal();
         Bridge recentBridgeCrossed = spatialGeometryMapper.getRecentBridgeCrossed();
 
-        MusicClock.Beat beat = musicClock.createBeat(moment);
+        ClockBeat clockBeat = musicClock.getClosestBeat(moment);
 
-        tileGrid.getMetricsFor(currentBox, beat).addVelocitySample(timeInLocation);
-        tileGrid.getMetricsFor(currentLocation, beat).addVelocitySample(timeInLocation);
-        tileGrid.getMetricsFor(lastTraversal, beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(currentBox, clockBeat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(currentLocation, clockBeat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(lastTraversal, clockBeat).addVelocitySample(timeInLocation);
 
         if (recentBridgeCrossed != null) {
-            tileGrid.getMetricsFor(recentBridgeCrossed, beat).addVelocitySample(timeInLocation);
+            tileGrid.getMetricsFor(recentBridgeCrossed, clockBeat).addVelocitySample(timeInLocation);
         }
 
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
-        tileGrid.getMetricsFor(context.getProjectContext(), beat).addVelocitySample(timeInLocation);
-        tileGrid.getMetricsFor(context.getTaskContext(), beat).addVelocitySample(timeInLocation);
-        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getProjectContext(), clockBeat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getTaskContext(), clockBeat).addVelocitySample(timeInLocation);
+        tileGrid.getMetricsFor(context.getIntentionContext(), clockBeat).addVelocitySample(timeInLocation);
     }
 
     /**
@@ -128,16 +130,16 @@ public class StoryTile {
         Box currentBox = spatialGeometryMapper.getCurrentBox();
         LocationInBox currentLocation = spatialGeometryMapper.getCurrentLocation();
 
-        MusicClock.Beat beat = musicClock.createBeat(moment);
+        ClockBeat clockBeat = musicClock.getClosestBeat(moment);
 
-        tileGrid.getMetricsFor(currentBox, beat).addModificationSample(modificationCount);
-        tileGrid.getMetricsFor(currentLocation, beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(currentBox, clockBeat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(currentLocation, clockBeat).addModificationSample(modificationCount);
 
         MomentOfContext context = contextMapper.getMomentOfContext(moment);
 
-        tileGrid.getMetricsFor(context.getProjectContext(), beat).addModificationSample(modificationCount);
-        tileGrid.getMetricsFor(context.getTaskContext(), beat).addModificationSample(modificationCount);
-        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getProjectContext(), clockBeat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getTaskContext(), clockBeat).addModificationSample(modificationCount);
+        tileGrid.getMetricsFor(context.getIntentionContext(), clockBeat).addModificationSample(modificationCount);
     }
 
     /**
@@ -152,21 +154,21 @@ public class StoryTile {
 
         flowRhythmMapper.executeThing(moment, executionDetails);
 
-        MusicClock.Beat beat = musicClock.createBeat(moment);
+        ClockBeat clockBeat = musicClock.getClosestBeat(moment);
 
         Box currentBox = spatialGeometryMapper.getCurrentBox();
-        tileGrid.getMetricsFor(currentBox, beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(currentBox, clockBeat).addExecutionSample(executionDetails.getDuration());
 
-        tileGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
-        tileGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
-        tileGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getProjectContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getTaskContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
+        tileGrid.getMetricsFor(context.getIntentionContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
 
         if (executionDetails.isRedAndWantingGreen()) {
-            tileGrid.getMetricsFor(currentBox, beat).addExecutionCycleTimeSample(executionDetails.getDurationUntilNextExecution());
+            tileGrid.getMetricsFor(currentBox, clockBeat).addExecutionCycleTimeSample(executionDetails.getDurationUntilNextExecution());
 
-            tileGrid.getMetricsFor(context.getProjectContext(), beat).addExecutionSample(executionDetails.getDuration());
-            tileGrid.getMetricsFor(context.getTaskContext(), beat).addExecutionSample(executionDetails.getDuration());
-            tileGrid.getMetricsFor(context.getIntentionContext(), beat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getProjectContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getTaskContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
+            tileGrid.getMetricsFor(context.getIntentionContext(), clockBeat).addExecutionSample(executionDetails.getDuration());
         }
 
     }

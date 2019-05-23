@@ -54,7 +54,7 @@ public class TileGridPlayer {
             scene.panForwardTime();
             metronomePlayer.tick();
 
-            scene.snapshot(metronomePlayer.getCurrentBeat());
+            scene.snapshot(metronomePlayer.getCurrentClockBeat());
         }
 
     }

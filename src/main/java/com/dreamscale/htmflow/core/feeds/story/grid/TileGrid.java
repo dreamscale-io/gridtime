@@ -3,13 +3,13 @@ package com.dreamscale.htmflow.core.feeds.story.grid;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
 import com.dreamscale.htmflow.core.feeds.story.music.MetronomePlayer;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class TileGrid {
-
 
     private Map<UUID, FeatureRow> featureRows = new HashMap<>();
     private Map<UUID, FeatureAggregateRow> aggregateRows = new HashMap<>();
@@ -17,22 +17,20 @@ public class TileGrid {
     private Map<UUID, FeatureAggregate> aggregators = new HashMap<>();
 
     private List<Column> columns = new ArrayList<>();
-    private final BeatSize timeBucketSize;
-    private final LocalDateTime from;
-    private final LocalDateTime to;
+    private final BeatSize gridBucketSize;
+
+    private final MusicClock musicClock;
 
     private transient GridMetrics theVoid = new GridMetrics();
     private TileGridModel extractedTileGridModel;
 
-    public TileGrid(BeatSize timeBucketSize, LocalDateTime from, LocalDateTime to) {
-        this.timeBucketSize = timeBucketSize;
-        this.from = from;
-        this.to = to;
+    public TileGrid(MusicClock musicClock, BeatSize gridBucketSize) {
+        this.gridBucketSize = gridBucketSize;
+        this.musicClock = toClockSize(musicClock, gridBucketSize);
     }
 
     public MetronomePlayer createPlayer() {
-        MusicClock clock = new MusicClock(from, to);
-        return new MetronomePlayer(clock, timeBucketSize);
+        return new MetronomePlayer(musicClock);
     }
 
     public GridMetrics getMetricsFor(FlowFeature feature) {
@@ -43,32 +41,43 @@ public class TileGrid {
         }
     }
 
-    public GridMetrics getMetricsFor(FlowFeature feature, MusicClock.Beat beat) {
+    public GridMetrics getMetricsFor(FlowFeature feature, ClockBeat clockBeat) {
         if (feature != null) {
-            return findOrCreateGridMetrics(feature, toBucketCoords(beat));
+            return findOrCreateGridMetrics(feature, toBucketCoords(clockBeat));
         } else {
             return theVoid;
         }
     }
 
 
-    public GridMetrics getAggregateMetricsFor(FlowFeature feature, MusicClock.Beat beat) {
+    public GridMetrics getAggregateMetricsFor(FlowFeature feature, ClockBeat clockBeat) {
         FeatureAggregateRow aggregateRow = aggregateRows.get(feature.getId());
         aggregateRow.refreshMetrics();
 
-        return aggregateRow.findOrCreateMetrics(toBucketCoords(beat));
+        return aggregateRow.findOrCreateMetrics(toBucketCoords(clockBeat));
     }
 
-    private MusicClock.Beat toBucketCoords(MusicClock.Beat originalBeat) {
-        switch (timeBucketSize) {
-            case BEAT:
-                return originalBeat;
-            case QUARTER:
-                return originalBeat.toQuarter();
-            case HALF:
-                return originalBeat.toHalf();
+    private ClockBeat toBucketCoords(ClockBeat originalClockBeat) {
+        if (originalClockBeat != null) {
+            switch (gridBucketSize) {
+                case BEAT:
+                    return originalClockBeat;
+                case QUARTER:
+                    return originalClockBeat.toQuarter();
+            }
         }
-        return originalBeat;
+        return originalClockBeat;
+    }
+
+    private MusicClock toClockSize(MusicClock musicClock, BeatSize gridBucketSize) {
+            switch (gridBucketSize) {
+                case BEAT:
+                    return musicClock;
+                case QUARTER:
+                    return musicClock.toQuartersClock();
+            }
+
+        return musicClock;
     }
 
     private FeatureRow findOrCreateRow(FlowFeature feature) {
@@ -99,10 +108,10 @@ public class TileGrid {
         return row.getAllTimeBucket();
     }
 
-    private GridMetrics findOrCreateGridMetrics(FlowFeature feature, MusicClock.Beat beat) {
+    private GridMetrics findOrCreateGridMetrics(FlowFeature feature, ClockBeat clockBeat) {
 
         FeatureRow row = findOrCreateRow(feature);
-        return row.findOrCreateMetrics(beat);
+        return row.findOrCreateMetrics(clockBeat);
     }
 
 
@@ -167,4 +176,21 @@ public class TileGrid {
         return tileGridModel;
     }
 
+    public List<Column> getColumns() {
+        return columns;
+    }
+
+    public List<FeatureRow> getRows() {
+        ArrayList<FeatureRow> rows = new ArrayList<>(featureRows.values());
+
+        rows.sort(new Comparator<FeatureRow>() {
+            @Override
+            public int compare(FeatureRow o1, FeatureRow o2) {
+                return o1.getFeature().getRelativePath().compareTo(o2.getFeature().getRelativePath());
+            }
+        });
+
+        return rows;
+
+    }
 }

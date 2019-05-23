@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.grid;
 
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -27,9 +28,9 @@ public class FeatureAggregateRow extends FeatureRow {
         resetAggregateMetrics();
 
         for (FeatureRow sourceRow: sourceRows) {
-            Set<MusicClock.Beat> timingKeys = sourceRow.getTimingKeys();
+            Set<ClockBeat> timingKeys = sourceRow.getTimingKeys();
 
-            for (MusicClock.Beat timingKey : timingKeys) {
+            for (ClockBeat timingKey : timingKeys) {
                 GridMetrics sourceMetrics = sourceRow.findOrCreateMetrics(timingKey);
                 GridMetrics aggregateMetrics = findOrCreateMetrics(timingKey);
 
@@ -41,8 +42,8 @@ public class FeatureAggregateRow extends FeatureRow {
 
 
     private void resetAggregateMetrics() {
-        Set<MusicClock.Beat> aggregateTimingKeys = getTimingKeys();
-        for (MusicClock.Beat timingKey : aggregateTimingKeys) {
+        Set<ClockBeat> aggregateTimingKeys = getTimingKeys();
+        for (ClockBeat timingKey : aggregateTimingKeys) {
             findOrCreateMetrics(timingKey).resetMetrics();
         }
     }

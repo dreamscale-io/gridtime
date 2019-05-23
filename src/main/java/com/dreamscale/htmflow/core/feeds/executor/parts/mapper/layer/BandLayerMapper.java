@@ -3,7 +3,8 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
-import com.dreamscale.htmflow.core.feeds.story.music.MusicClock;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.ClockBeat;
+import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.BandLayerType;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.threshold.RollingAggregateBand;
@@ -110,17 +111,17 @@ public class BandLayerMapper {
 
         int bandCount = BeatSize.BEAT.getBeatCount() / beatSize.getBeatCount();
 
-        MusicClock.Beat startBeat = musicClock.getCurrentBeat();
+        ClockBeat startClockBeat = musicClock.getCurrentBeat();
 
         for (int i = 0; i < bandCount; i++) {
-            MusicClock.Beat endBeat = musicClock.next(beatSize);
+            ClockBeat endClockBeat = musicClock.next(beatSize);
 
-            RollingAggregateBand band = featureFactory.createRollingBand(layerType, startBeat.getClockTime(), endBeat.getClockTime());
+            RollingAggregateBand band = featureFactory.createRollingBand(layerType, startClockBeat.getClockTime(), endClockBeat.getClockTime());
             band.initCoordinates(musicClock);
 
             layer.add(band);
 
-            startBeat = endBeat;
+            startClockBeat = endClockBeat;
         }
     }
 
