@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 
 public class StoryTileSpec extends Specification {
 
-    StoryTile tile
+    TileBuilder tile
     LocalDateTime clockStart
     GeometryClock geometryClock
 
@@ -28,7 +28,7 @@ public class StoryTileSpec extends Specification {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         geometryClock = new GeometryClock(clockStart)
 
-        tile = new StoryTile("@torchie/id", geometryClock.coordinates, ZoomLevel.TWENTIES)
+        tile = new TileBuilder("@torchie/id", geometryClock.coordinates, ZoomLevel.TWENTIES)
     }
 
     def "should start and end context"() {
@@ -158,7 +158,7 @@ public class StoryTileSpec extends Specification {
         tile.startWTF(time1, circleDetails)
         tile.finishAfterLoad()
 
-        StoryTile nextTile = new StoryTile("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
+        TileBuilder nextTile = new TileBuilder("next", geometryClock.coordinates.panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
 
         nextTile.carryOverTileContext(tile.getCarryOverContext());
         nextTile.finishAfterLoad();

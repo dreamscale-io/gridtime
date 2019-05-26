@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
+import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.pool.FeatureCache;
 import com.dreamscale.htmflow.core.feeds.story.feature.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.structure.*;
@@ -13,14 +15,14 @@ import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.*;
+import com.dreamscale.htmflow.core.feeds.story.mapper.*;
 import com.dreamscale.htmflow.core.feeds.story.music.TileGridPlayer;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class StoryTile {
+public class TileBuilder {
 
 
     private final String tileUri;
@@ -37,7 +39,7 @@ public class StoryTile {
     private final MusicClock musicClock;
 
 
-    public StoryTile(String feedUri, GeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
+    public TileBuilder(String feedUri, GeometryClock.Coords tileCoordinates, ZoomLevel zoomLevel) {
         this.tileCoordinates = tileCoordinates;
         this.zoomLevel = zoomLevel;
         this.tileUri = TileUri.createTileUri(feedUri, zoomLevel, tileCoordinates);
@@ -58,8 +60,10 @@ public class StoryTile {
 
         this.spatialGeometryMapper = new SpatialGeometryMapper(featureFactory, tileGrid);
 
-
     }
+
+
+
 
     /**
      * Change the active context, such as starting project, task, or intention
@@ -76,6 +80,8 @@ public class StoryTile {
      */
 
     public void endContext(MusicalSequenceEnding contextEnding) {
+
+
         Movement movement = contextMapper.endContext(contextEnding);
         flowRhythmMapper.addMovement(RhythmLayerType.CONTEXT_CHANGES, movement);
     }
@@ -391,5 +397,13 @@ public class StoryTile {
 
     public MomentOfContext getInitialContext() {
         return contextMapper.getInitialContext();
+    }
+
+    public LocalDateTime getStart() {
+        return musicClock.getFromClockTime();
+    }
+
+    public LocalDateTime getEnd() {
+        return musicClock.getToClockTime();
     }
 }

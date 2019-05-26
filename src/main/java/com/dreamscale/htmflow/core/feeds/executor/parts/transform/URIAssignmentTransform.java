@@ -1,8 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
+import com.dreamscale.htmflow.core.feeds.story.mapper.URIMapper;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -19,11 +18,11 @@ public class URIAssignmentTransform implements TransformStrategy {
     URIMapper uriMapper;
 
     @Override
-    public void transform(StoryTile storyTile) {
+    public void transform(TileBuilder tileBuilder) {
 
-        populateStaticLocationUris(storyTile);
+        populateStaticLocationUris(tileBuilder);
 
-        populateStaticContextUris(storyTile);
+        populateStaticContextUris(tileBuilder);
 
         //saveUrisForTemporalFeatures(storyTile);
 
@@ -35,8 +34,8 @@ public class URIAssignmentTransform implements TransformStrategy {
 //        uriMapper.saveTemporalFeatureUris(features);
 //    }
 
-    private void populateStaticContextUris(StoryTile storyTile) {
-        List<MomentOfContext> allContexts = storyTile.getAllContexts();
+    private void populateStaticContextUris(TileBuilder tileBuilder) {
+        List<MomentOfContext> allContexts = tileBuilder.getAllContexts();
 
         for (MomentOfContext momentOfContext : allContexts) {
             Context projectContext = momentOfContext.getProjectContext();
@@ -51,13 +50,13 @@ public class URIAssignmentTransform implements TransformStrategy {
     }
 
 
-    private void populateStaticLocationUris(StoryTile storyTile) {
+    private void populateStaticLocationUris(TileBuilder tileBuilder) {
 
-        List<Movement> movements = storyTile.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES).getMovements();
+        List<Movement> movements = tileBuilder.getRhythmLayer(RhythmLayerType.LOCATION_CHANGES).getMovements();
 
         for (Movement movement : movements) {
 
-            MomentOfContext momentOfContext = storyTile.getContextOfMoment(movement.getMoment());
+            MomentOfContext momentOfContext = tileBuilder.getContextOfMoment(movement.getMoment());
 
             switch (movement.getFlowObjectType()) {
                 case MOVEMENT_TO_LOCATION:

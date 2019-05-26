@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.RhythmLayerType
 import spock.lang.Specification
@@ -19,13 +19,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ExecutionRhythmObserverSpec extends Specification {
 
     ExecutionRhythmObserver executionRhythmObserver
-    StoryTile storyTile
+    TileBuilder storyTile
     GeometryClock clock
 
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         executionRhythmObserver = new ExecutionRhythmObserver()
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES)
+        storyTile = new TileBuilder("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES)
     }
 
     def "should create red/green cycles from execution activity"() {
@@ -46,7 +46,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        executionRhythmObserver.see(window, storyTile)
+        executionRhythmObserver.seeInto(window, storyTile)
         def movements = storyTile.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY).getMovements();
 
         then:

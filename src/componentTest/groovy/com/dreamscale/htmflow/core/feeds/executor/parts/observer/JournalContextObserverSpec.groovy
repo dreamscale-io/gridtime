@@ -9,7 +9,7 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ChangeContext
@@ -24,13 +24,13 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class JournalContextObserverSpec extends Specification {
 
     JournalContextObserver journalContextObserver
-    StoryTile storyTile
+    TileBuilder storyTile
     GeometryClock clock
 
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES)
+        storyTile = new TileBuilder("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES)
     }
 
     def "should create project & task switch events"() {
@@ -53,7 +53,7 @@ public class JournalContextObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        journalContextObserver.see(window, storyTile)
+        journalContextObserver.seeInto(window, storyTile)
         List<ChangeContext> contextEvents = storyTile.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements();
 
         then:
@@ -115,7 +115,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        storyTile = new StoryTile("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES);
+        storyTile = new TileBuilder("@torchie/id", clock.getCoordinates(), ZoomLevel.TWENTIES);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -128,14 +128,14 @@ public class JournalContextObserverSpec extends Specification {
         Window window = new Window(time1, time2)
         window.addAll(flowables);
 
-        journalContextObserver.see(window, storyTile)
+        journalContextObserver.seeInto(window, storyTile)
 
-        StoryTile nextFrame = new StoryTile("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.TWENTIES).panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
+        TileBuilder nextFrame = new TileBuilder("@torchie/id", clock.getCoordinates().panRight(ZoomLevel.TWENTIES).panRight(ZoomLevel.TWENTIES), ZoomLevel.TWENTIES);
         nextFrame.carryOverTileContext(storyTile.getCarryOverContext());
         Window nextWindow = new Window(time3, time4)
 
         when:
-        journalContextObserver.see(nextWindow, nextFrame)
+        journalContextObserver.seeInto(nextWindow, nextFrame)
         List<Movement> contextEvents = nextFrame.getRhythmLayer(RhythmLayerType.CONTEXT_CHANGES).getMovements();
         then:
         assert contextEvents != null

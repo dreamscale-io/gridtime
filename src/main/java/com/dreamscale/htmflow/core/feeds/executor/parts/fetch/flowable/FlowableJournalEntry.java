@@ -20,9 +20,10 @@ public class FlowableJournalEntry extends FlowableEvent {
     }
 
     @Override
-    public Object get() {
-        return journalEntry;
+    public <T> T get() {
+        return (T)journalEntry;
     }
+
 
     @Override
     public LocalDateTime getPosition() {

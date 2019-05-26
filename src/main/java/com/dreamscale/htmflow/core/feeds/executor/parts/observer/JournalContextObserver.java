@@ -1,79 +1,74 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 
-import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
-import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.*;
 
 import java.util.List;
 
 /**
- * Identifies the beginning of tasks and intentions as the beginning and ending of songs,
- * at two levels of story abstraction
+ * Identifies the beginning of tasks and intentions as the beginning and ending of musical sequences
  */
-public class JournalContextObserver implements FlowObserver {
+public class JournalContextObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void see(Window window, StoryTile currentStoryTile) {
+    public void seeInto(List<FlowableJournalEntry> flowables, TileBuilder tileBuilder) {
 
-        List<Flowable> flowables = window.getFlowables();
 
-        MomentOfContext momentOfContext = currentStoryTile.getCurrentContext();
+        MomentOfContext momentOfContext = tileBuilder.getCurrentContext();
 
         Context lastOpenProject = momentOfContext.getProjectContext();
         Context lastOpenTask = momentOfContext.getTaskContext();
         Context lastOpenIntention = momentOfContext.getIntentionContext();
 
-        for (Flowable flowable : flowables) {
-            if (flowable instanceof FlowableJournalEntry) {
-                JournalEntryEntity journalEntry = ((JournalEntryEntity) flowable.get());
+        for (FlowableJournalEntry flowable : flowables) {
+                JournalEntryEntity journalEntry = flowable.get();
 
-                createIntentionDoneIfNotNull(currentStoryTile, journalEntry, lastOpenIntention);
-                createTaskDoneIfSwitched(currentStoryTile, journalEntry, lastOpenTask);
-                createProjectDoneIfSwitched(currentStoryTile, journalEntry, lastOpenProject);
+                createIntentionDoneIfNotNull(tileBuilder, journalEntry, lastOpenIntention);
+                createTaskDoneIfSwitched(tileBuilder, journalEntry, lastOpenTask);
+                createProjectDoneIfSwitched(tileBuilder, journalEntry, lastOpenProject);
 
-                createProjectStartIfSwitched(currentStoryTile, journalEntry, lastOpenProject);
-                createTaskStartIfSwitched(currentStoryTile, journalEntry, lastOpenTask);
-                createIntentionStartAndEnd(window, currentStoryTile, journalEntry);
+                createProjectStartIfSwitched(tileBuilder, journalEntry, lastOpenProject);
+                createTaskStartIfSwitched(tileBuilder, journalEntry, lastOpenTask);
+                createIntentionStartAndEnd(tileBuilder, journalEntry);
 
-                momentOfContext = currentStoryTile.getCurrentContext();
+                momentOfContext = tileBuilder.getCurrentContext();
 
                 lastOpenProject = momentOfContext.getProjectContext();
                 lastOpenTask = momentOfContext.getTaskContext();
                 lastOpenIntention = momentOfContext.getIntentionContext();
-            }
+
         }
 
     }
 
-    private void createTaskStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenTask) {
+    private void createTaskStartIfSwitched(TileBuilder currentTileBuilder, JournalEntryEntity journalEntry, Context lastOpenTask) {
         if (lastOpenTask == null || !lastOpenTask.getId().equals(journalEntry.getTaskId())) {
             MusicalSequenceBeginning taskBeginning = createTaskBeginning(journalEntry);
-            currentStoryTile.beginContext(taskBeginning);
+            currentTileBuilder.beginContext(taskBeginning);
         }
     }
 
-    private void createProjectStartIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenProject) {
+    private void createProjectStartIfSwitched(TileBuilder currentTileBuilder, JournalEntryEntity journalEntry, Context lastOpenProject) {
         if (lastOpenProject == null || !lastOpenProject.getId().equals(journalEntry.getProjectId())) {
             MusicalSequenceBeginning projectBeginning = createProjectBeginning(journalEntry);
-            currentStoryTile.beginContext(projectBeginning);
+            currentTileBuilder.beginContext(projectBeginning);
         }
     }
 
-    private void createProjectDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenProject) {
+    private void createProjectDoneIfSwitched(TileBuilder currentTileBuilder, JournalEntryEntity journalEntry, Context lastOpenProject) {
         if (lastOpenProject != null && !lastOpenProject.getId().equals(journalEntry.getProjectId())) {
             MusicalSequenceEnding projectEnding = createProjectEnding(journalEntry, lastOpenProject);
-            currentStoryTile.endContext(projectEnding);
+            currentTileBuilder.endContext(projectEnding);
         }
     }
 
-    private void createTaskDoneIfSwitched(StoryTile currentStoryTile, JournalEntryEntity journalEntry, Context lastOpenTask) {
+    private void createTaskDoneIfSwitched(TileBuilder currentTileBuilder, JournalEntryEntity journalEntry, Context lastOpenTask) {
         if (lastOpenTask != null && !lastOpenTask.getId().equals(journalEntry.getTaskId())) {
             MusicalSequenceEnding taskEnding = createTaskEnding(journalEntry, lastOpenTask);
-            currentStoryTile.endContext(taskEnding);
+            currentTileBuilder.endContext(taskEnding);
         }
     }
 
@@ -120,7 +115,7 @@ public class JournalContextObserver implements FlowObserver {
     }
 
 
-    private void createIntentionStartAndEnd(Window window, StoryTile storyTile, JournalEntryEntity journalEntry) {
+    private void createIntentionStartAndEnd(TileBuilder tileBuilder, JournalEntryEntity journalEntry) {
 
         MusicalSequenceBeginning intentionStart = new MusicalSequenceBeginning();
         intentionStart.setContextId(journalEntry.getId());
@@ -128,7 +123,7 @@ public class JournalContextObserver implements FlowObserver {
         intentionStart.setDescription(journalEntry.getDescription());
         intentionStart.setPosition(journalEntry.getPosition());
 
-        storyTile.beginContext(intentionStart);
+        tileBuilder.beginContext(intentionStart);
 
         if (journalEntry.getFinishTime() != null) {
             MusicalSequenceEnding intentionEnd = new MusicalSequenceEnding();
@@ -138,16 +133,18 @@ public class JournalContextObserver implements FlowObserver {
             intentionEnd.setDescription(journalEntry.getDescription());
             intentionEnd.setPosition(journalEntry.getFinishTime());
 
-            if (window.isWithin(journalEntry.getFinishTime())) {
-                storyTile.endContext(intentionEnd);
-            } else {
-                storyTile.endContextLater(intentionEnd);
-            }
+            tileBuilder.endContext(intentionEnd);
+
+//            if (storyTile.isWithin(journalEntry.getFinishTime())) {
+//                storyTile.endContext(intentionEnd);
+//            } else {
+//                storyTile.endContextLater(intentionEnd);
+//            }
 
         }
     }
 
-    private void createIntentionDoneIfNotNull(StoryTile storyTile, JournalEntryEntity journalEntry, Context lastIntentionStart) {
+    private void createIntentionDoneIfNotNull(TileBuilder tileBuilder, JournalEntryEntity journalEntry, Context lastIntentionStart) {
         MusicalSequenceEnding intentionEnd = null;
 
         if (lastIntentionStart != null) {
@@ -158,7 +155,7 @@ public class JournalContextObserver implements FlowObserver {
             intentionEnd.setDescription(lastIntentionStart.getDescription());
             intentionEnd.setPosition(journalEntry.getPosition());
 
-            storyTile.endContext(intentionEnd);
+            tileBuilder.endContext(intentionEnd);
         }
 
     }

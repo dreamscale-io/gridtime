@@ -1,6 +1,6 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
+package com.dreamscale.htmflow.core.feeds.story.mapper;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.RhythmLayerMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.layer.RhythmLayerMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;

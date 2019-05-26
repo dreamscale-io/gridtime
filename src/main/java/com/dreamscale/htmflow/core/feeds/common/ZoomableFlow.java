@@ -4,8 +4,8 @@ import com.dreamscale.htmflow.core.feeds.clock.ClockChangeListener;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.pool.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -96,11 +96,11 @@ public class ZoomableFlow implements ClockChangeListener {
 
     }
 
-    public StoryTile getActiveStoryTile() {
+    public TileBuilder getActiveStoryTile() {
         return this.sharedFeaturePool.getActiveStoryTile();
     }
 
-    public StoryTile getLastStoryTile() {
+    public TileBuilder getLastStoryTile() {
         return this.sharedFeaturePool.getLastStoryTile();
     }
 

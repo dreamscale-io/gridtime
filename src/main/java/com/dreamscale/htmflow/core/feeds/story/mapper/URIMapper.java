@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
+package com.dreamscale.htmflow.core.feeds.story.mapper;
 
 import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
@@ -25,7 +25,7 @@ public class URIMapper {
     public void populateBoxUri(UUID projectId, Box box) {
         if (box.getUri() != null) return;
 
-        String boxKey = ObjectKeyMapper.createBoxKey(box.getBoxName());
+        String boxKey = SearchKeyMapper.createBoxKey(box.getBoxName());
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/box/";
 
@@ -38,7 +38,7 @@ public class URIMapper {
     public void populateLocationUri(UUID projectId, LocationInBox location) {
         if (location.getUri() != null) return;
 
-        String locationKey = ObjectKeyMapper.createLocationKey(location.getLocationPath());
+        String locationKey = SearchKeyMapper.createLocationSearchKey(location.getLocationPath());
         String parentUri = "/project/" + projectId;
         String relativePathPrefix = "/location/";
 

@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 
 public interface TransformStrategy {
 
-    void transform(StoryTile storyTile);
+    void transform(TileBuilder tileBuilder);
 }

@@ -5,16 +5,17 @@ import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.Metronome;
 import com.dreamscale.htmflow.core.feeds.common.ZoomableFlow;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.TileUri;
+import com.dreamscale.htmflow.core.feeds.pool.FeatureCache;
+import com.dreamscale.htmflow.core.feeds.pool.TileLoader;
+import com.dreamscale.htmflow.core.feeds.story.mapper.TileUri;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
-import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategy;
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.FlowSource;
 import com.dreamscale.htmflow.core.feeds.executor.parts.transform.TransformStrategy;
 import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformer;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,17 +31,17 @@ public class Torchie {
 
     private TorchieJobStatus jobStatus;
 
-    public Torchie(UUID torchieId, LocalDateTime startingPosition, TileLoader tileLoader) {
+    public Torchie(UUID torchieId, LocalDateTime startingPosition, TileLoader tileLoader, FeatureCache featureCache) {
         this.torchieId = torchieId;
 
         this.metronome = new Metronome(startingPosition);
-        this.sharedFeaturePool = new SharedFeaturePool(torchieId, metronome.getActiveCoordinates(), tileLoader);
+        this.sharedFeaturePool = new SharedFeaturePool(torchieId, metronome.getActiveCoordinates(), tileLoader, featureCache);
         this.jobStatus = new TorchieJobStatus(torchieId, metronome.getActiveCoordinates().formatDreamTime());
 
         this.zoomableFlow = new ZoomableFlow(torchieId, metronome, sharedFeaturePool);
     }
 
-    public StoryTile runTile(String tileUri) {
+    public TileBuilder runTile(String tileUri) {
         TileUri.SourceCoordinates coords = TileUri.extractCoordinatesFromUri(tileUri);
 
         moveFeedPosition(coords.getTileCoordinates().getClockTime());
@@ -85,7 +86,7 @@ public class Torchie {
         return this.zoomableFlow.whatsNext();
     }
 
-    public StoryTile whereAmI() {
+    public TileBuilder whereAmI() {
         return this.zoomableFlow.getLastStoryTile();
     }
 

@@ -5,8 +5,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.ExecutionDetails;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.ExecuteThing;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.Movement;
@@ -23,19 +22,17 @@ import java.util.List;
  * as a series of "execution cycles" that indicate dynamics of friction
  */
 
-public class ExecutionRhythmObserver implements FlowObserver {
+public class ExecutionRhythmObserver implements FlowObserver<FlowableFlowActivity> {
 
 
     @Override
-    public void see(Window window, StoryTile storyTile) {
-
-        List<Flowable> flowables = window.getFlowables();
+    public void seeInto(List<FlowableFlowActivity> flowables, TileBuilder tileBuilder) {
 
         List<ExecutionDetails> executionEventDetails = new ArrayList<>();
 
         for (Flowable flowable : flowables) {
             if (flowable instanceof FlowableFlowActivity) {
-                FlowActivityEntity flowActivity = (FlowActivityEntity) flowable.get();
+                FlowActivityEntity flowActivity = flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Execution)) {
                     ExecutionDetails executionDetails = createExecutionContext(flowActivity);
@@ -46,16 +43,16 @@ public class ExecutionRhythmObserver implements FlowObserver {
             }
         }
 
-        processExecutionEvents(window, storyTile, executionEventDetails);
+        processExecutionEvents(tileBuilder, executionEventDetails);
 
-        storyTile.finishAfterLoad();
+        tileBuilder.finishAfterLoad();
 
     }
 
-    private void processExecutionEvents(Window window, StoryTile storyTile, List<ExecutionDetails> executionEventDetails) {
-        Movement movement = storyTile.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
+    private void processExecutionEvents(TileBuilder tileBuilder, List<ExecutionDetails> executionEventDetails) {
+        Movement movement = tileBuilder.getLastMovement(RhythmLayerType.EXECUTION_ACTIVITY);
         boolean isRedAndWantingGreen = isRedAndWantingGreen(movement);
-        LocalDateTime lastPosition = getLastPosition(movement, window);
+        LocalDateTime lastPosition = getLastPosition(movement, tileBuilder.getStart());
 
         for (int i = 0; i < executionEventDetails.size(); i++) {
 
@@ -70,17 +67,17 @@ public class ExecutionRhythmObserver implements FlowObserver {
 
             Duration durationSinceLastExec = Duration.between(lastPosition, executionDetails.getPosition());
             Duration durationUntilNextExec = Duration.between(executionDetails.getPosition(),
-                    getNextPosition(executionEventDetails, i, window));
+                    getNextPosition(executionEventDetails, i, tileBuilder.getEnd()));
 
             executionDetails.setDurationSinceLastExecution(durationSinceLastExec);
             executionDetails.setDurationUntilNextExecution(durationUntilNextExec);
 
-            storyTile.executeThing(executionDetails.getPosition(), executionDetails);
+            tileBuilder.executeThing(executionDetails.getPosition(), executionDetails);
         }
     }
 
-    private LocalDateTime getNextPosition(List<ExecutionDetails> executionEventDetails, int i, Window window) {
-        LocalDateTime nextPosition = window.getEnd();
+    private LocalDateTime getNextPosition(List<ExecutionDetails> executionEventDetails, int i, LocalDateTime tileEnd) {
+        LocalDateTime nextPosition = tileEnd;
 
         if (i + 1 < executionEventDetails.size()) {
             ExecutionDetails nextDetails = executionEventDetails.get(i + 1);
@@ -90,11 +87,11 @@ public class ExecutionRhythmObserver implements FlowObserver {
         return nextPosition;
     }
 
-    private LocalDateTime getLastPosition(Movement movement, Window window) {
+    private LocalDateTime getLastPosition(Movement movement, LocalDateTime tileStart) {
         if (movement != null) {
             return movement.getMoment();
         } else {
-            return window.getStart();
+            return tileStart;
         }
     }
 

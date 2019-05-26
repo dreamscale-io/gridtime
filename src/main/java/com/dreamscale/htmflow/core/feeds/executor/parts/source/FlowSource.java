@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.source;
 
 import com.dreamscale.htmflow.core.feeds.common.*;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.Batch;
-import com.dreamscale.htmflow.core.feeds.executor.parts.pool.SharedFeaturePool;
+import com.dreamscale.htmflow.core.feeds.pool.SharedFeaturePool;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategy;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserver;
 
@@ -64,7 +64,8 @@ public class FlowSource implements Flow {
 
     private void observeFlowables(Window window) {
         for (FlowObserver observer : flowObservers) {
-            observer.see(window, sharedFeaturePool.getActiveStoryTile());
+
+            observer.seeInto(window.getFlowables(), sharedFeaturePool.getActiveStoryTile());
         }
     }
 

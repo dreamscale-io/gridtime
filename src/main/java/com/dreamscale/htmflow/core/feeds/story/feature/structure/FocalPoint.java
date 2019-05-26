@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.SearchKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGrid;
 
@@ -62,7 +62,7 @@ public class FocalPoint {
 
 
     public String toKey() {
-        return ObjectKeyMapper.createBoxKey(getBoxName());
+        return SearchKeyMapper.createBoxKey(getBoxName());
     }
 
 

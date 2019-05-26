@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.sink;
 
 import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.StoryTileModel;
 import com.dreamscale.htmflow.core.feeds.story.grid.CandleStick;
 import com.dreamscale.htmflow.core.feeds.story.grid.FeatureMetrics;
@@ -28,7 +28,7 @@ public class SaveToPostgresSink implements SinkStrategy {
     StoryGridMetricsRepository storyGridMetricsRepository;
 
     @Override
-    public void save(UUID torchieId, StoryTile storyTile) {
+    public void save(UUID torchieId, TileBuilder tileBuilder) {
 
         //alright so first thing, I want to know what project, task, intention, this tile should be contributed toward
         //these should carry over from tile to tile... let's get that working first.
@@ -36,9 +36,9 @@ public class SaveToPostgresSink implements SinkStrategy {
         //I'm going to add these to the tile summary level, for the most part, they will be consistent
 
 
-        storyTile.finishAfterLoad();
+        tileBuilder.finishAfterLoad();
 
-        StoryTileModel storyTileModel = storyTile.extractStoryTileModel();
+        StoryTileModel storyTileModel = tileBuilder.extractStoryTileModel();
 
         log.debug(storyTileModel.getStoryTileSummary().toString());
 

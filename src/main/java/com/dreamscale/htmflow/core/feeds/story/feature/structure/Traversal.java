@@ -1,10 +1,10 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
+import com.dreamscale.htmflow.core.feeds.pool.GridFeature;
+import com.dreamscale.htmflow.core.feeds.story.mapper.SearchKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -37,6 +37,6 @@ public class Traversal extends FlowFeature {
     }
 
     public String toKey() {
-        return ObjectKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
+        return SearchKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
     }
 }

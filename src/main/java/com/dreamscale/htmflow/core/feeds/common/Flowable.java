@@ -8,7 +8,7 @@ public interface Flowable {
 
     Bookmark getBookmark();
 
-    Object get();
+    <T> T get();
 
     boolean hasTimeInWindow(LocalDateTime fromClockPosition, LocalDateTime toClockPosition);
 

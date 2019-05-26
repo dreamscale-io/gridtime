@@ -1,10 +1,9 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.pool;
+package com.dreamscale.htmflow.core.feeds.pool;
 
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock;
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.TileUri;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.mapper.TileUri;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 
 import java.util.UUID;
@@ -20,17 +19,19 @@ public class SharedFeaturePool {
 
     private final TileLoader tileLoader;
     private final UUID torchieId;
+    private final FeatureCache featureCache;
 
     private ZoomLevel activeZoomLevel;
     private final StoryTileSequence activeTileSequence;
 
 
-    public SharedFeaturePool(UUID torchieId, GeometryClock.Coords startingCoordinates, TileLoader tileLoader) {
+    public SharedFeaturePool(UUID torchieId, GeometryClock.Coords startingCoordinates, TileLoader tileLoader, FeatureCache featureCache) {
 
         this.torchieId = torchieId;
         this.feedUri = TileUri.createTorchieFeedUri(torchieId);
 
         this.tileLoader = tileLoader;
+        this.featureCache = featureCache;
 
         this.activeZoomLevel = ZoomLevel.TWENTIES;
         this.activeTileSequence = new StoryTileSequence(activeZoomLevel, startingCoordinates);
@@ -42,8 +43,8 @@ public class SharedFeaturePool {
     }
 
 
-    public StoryTile getActiveStoryTile() {
-        return activeTileSequence.getActiveStoryTile();
+    public TileBuilder getActiveStoryTile() {
+        return activeTileSequence.getActiveTileBuilder();
     }
 
     public ZoomLevel getActiveZoomLevel() {
@@ -54,8 +55,8 @@ public class SharedFeaturePool {
         activeTileSequence.nextTile();
     }
 
-    public StoryTile getLastStoryTile() {
-        return activeTileSequence.getLastStoryTile();
+    public TileBuilder getLastStoryTile() {
+        return activeTileSequence.getLastTileBuilder();
     }
 
 
@@ -64,49 +65,49 @@ public class SharedFeaturePool {
         private final ZoomLevel zoomLevel;
         private GeometryClock.Coords activeStoryCoordinates;
 
-        private StoryTile activeStoryTile;
-        private StoryTile lastStoryTile;
+        private TileBuilder activeTileBuilder;
+        private TileBuilder lastTileBuilder;
 
         StoryTileSequence(ZoomLevel zoomLevel, GeometryClock.Coords storyCoordinates) {
             this.zoomLevel = zoomLevel;
             this.activeStoryCoordinates = storyCoordinates;
-            this.activeStoryTile = new StoryTile(feedUri, storyCoordinates, zoomLevel);
+            this.activeTileBuilder = new TileBuilder(feedUri, storyCoordinates, zoomLevel);
 
             CarryOverContext context = tileLoader.getContextOfPreviousTile(torchieId, storyCoordinates, zoomLevel);
             if (context != null) {
-                activeStoryTile.carryOverTileContext(context);
+                activeTileBuilder.carryOverTileContext(context);
             }
         }
 
         public void movePosition(GeometryClock.Coords storyCoordinates) {
             this.activeStoryCoordinates = storyCoordinates;
-            this.activeStoryTile = new StoryTile(feedUri, storyCoordinates, zoomLevel);
+            this.activeTileBuilder = new TileBuilder(feedUri, storyCoordinates, zoomLevel);
 
             CarryOverContext context = tileLoader.getContextOfPreviousTile(torchieId, storyCoordinates, zoomLevel);
             if (context != null) {
-                activeStoryTile.carryOverTileContext(context);
+                activeTileBuilder.carryOverTileContext(context);
             }
         }
 
         void nextTile() {
-            lastStoryTile = activeStoryTile;
+            lastTileBuilder = activeTileBuilder;
 
             this.activeStoryCoordinates = activeStoryCoordinates.panRight(zoomLevel);
 
-            StoryTile nextTile = new StoryTile(feedUri, activeStoryCoordinates, zoomLevel);
+            TileBuilder nextTile = new TileBuilder(feedUri, activeStoryCoordinates, zoomLevel);
 
-            nextTile.carryOverTileContext(this.activeStoryTile.getCarryOverContext());
-            this.activeStoryTile = nextTile;
+            nextTile.carryOverTileContext(this.activeTileBuilder.getCarryOverContext());
+            this.activeTileBuilder = nextTile;
 
         }
 
-        StoryTile getActiveStoryTile() {
-            return this.activeStoryTile;
+        TileBuilder getActiveTileBuilder() {
+            return this.activeTileBuilder;
         }
 
 
-        public StoryTile getLastStoryTile() {
-            return lastStoryTile;
+        public TileBuilder getLastTileBuilder() {
+            return lastTileBuilder;
         }
     }
 

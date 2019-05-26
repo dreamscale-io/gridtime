@@ -20,8 +20,8 @@ public class FlowableCircleMessageEvent extends FlowableEvent {
     }
 
     @Override
-    public Object get() {
-        return circleFeedMessageEntity;
+    public <T> T get() {
+        return (T)circleFeedMessageEntity;
     }
 
     @Override

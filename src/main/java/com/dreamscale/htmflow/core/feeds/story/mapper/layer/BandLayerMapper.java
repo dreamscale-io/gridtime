@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer;
+package com.dreamscale.htmflow.core.feeds.story.mapper.layer;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.TimebandLayer;

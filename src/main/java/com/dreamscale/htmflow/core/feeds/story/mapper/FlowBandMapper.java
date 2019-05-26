@@ -1,11 +1,11 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.mapper;
+package com.dreamscale.htmflow.core.feeds.story.mapper;
 
 import com.dreamscale.htmflow.core.feeds.story.feature.FeatureFactory;
 import com.dreamscale.htmflow.core.feeds.story.music.BeatSize;
 import com.dreamscale.htmflow.core.feeds.story.music.clock.MusicClock;
 import com.dreamscale.htmflow.core.feeds.story.feature.CarryOverContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.timeband.*;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.layer.BandLayerMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.layer.BandLayerMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
 
 import java.time.LocalDateTime;

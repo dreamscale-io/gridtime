@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.music;
 
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MomentOfContext;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel;
 import com.dreamscale.htmflow.core.feeds.story.feature.movement.*;
@@ -17,7 +17,7 @@ public class TileGridPlayer {
 
     private final MetronomePlayer metronomePlayer;
     private final Scene scene;
-    private StoryTile frameToPlay;
+    private TileBuilder frameToPlay;
 
     public TileGridPlayer(TileGrid tileGrid) {
 
@@ -25,10 +25,10 @@ public class TileGridPlayer {
         this.scene = new Scene(tileGrid);
     }
 
-    public void loadFrame(StoryTile storyTile) {
-        this.frameToPlay = storyTile;
+    public void loadFrame(TileBuilder tileBuilder) {
+        this.frameToPlay = tileBuilder;
 
-        MomentOfContext initialContext = storyTile.getInitialContext();
+        MomentOfContext initialContext = tileBuilder.getInitialContext();
         if (initialContext != null) {
             scene.changeProjectContext(initialContext.getProjectContext());
             scene.changeTaskContext(initialContext.getTaskContext());

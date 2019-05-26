@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.executor.parts.transform;
 
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.URIMapper;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
+import com.dreamscale.htmflow.core.feeds.story.mapper.URIMapper;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.grid.TileGridModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ public class MusicPlayerTransform implements TransformStrategy {
     URIMapper uriMapper;
 
     @Override
-    public void transform(StoryTile storyTile) {
-        storyTile.play();
+    public void transform(TileBuilder tileBuilder) {
+        tileBuilder.play();
 
-        TileGridModel storyGrid = storyTile.getTileGrid();
+        TileGridModel storyGrid = tileBuilder.getTileGrid();
 
-        uriMapper.populateAndSaveStoryGridUris(storyTile.getTileUri(), storyGrid);
+        uriMapper.populateAndSaveStoryGridUris(tileBuilder.getTileUri(), storyGrid);
 
     }
 

@@ -4,7 +4,7 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.sink
 import com.dreamscale.htmflow.core.domain.member.json.Member
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 import com.dreamscale.htmflow.core.feeds.story.StoryTileModel
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 class JSONTransformerSpec extends Specification {
 
     UUID torchieId
-    StoryTile tile
+    TileBuilder tile
     LocalDateTime clockStart
     GeometryClock geometryClock
 
@@ -28,7 +28,7 @@ class JSONTransformerSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         torchieId = UUID.randomUUID();
-        tile = new StoryTile("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTIES)
+        tile = new TileBuilder("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTIES)
 
     }
 

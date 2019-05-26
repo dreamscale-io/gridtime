@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.feeds.executor.parts.fetch;
+package com.dreamscale.htmflow.core.feeds.pool;
 
 import com.dreamscale.htmflow.core.domain.tile.StoryTileEntity;
 import com.dreamscale.htmflow.core.domain.tile.StoryTileRepository;

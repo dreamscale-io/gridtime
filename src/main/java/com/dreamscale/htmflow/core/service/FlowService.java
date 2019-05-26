@@ -39,7 +39,7 @@ public class FlowService {
     @Autowired
     RecentActivityService recentActivityService;
 
-    //okay, next thing I need to do, is wire in a component lookup service, that will get used on batch processing
+    //okay, next thing I need to do, is wire in a component resolve service, that will get used on batch processing
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
 
@@ -80,7 +80,7 @@ public class FlowService {
 
     }
 
-    //wire up component lookup service, that will use the configuration based on the project
+    //wire up component resolve service, that will use the configuration based on the project
     //and look up the component for that, caching all the things for that project, or returning a default
 
     private String lookupComponent(UUID projectId, NewEditorActivity editorActivity) {

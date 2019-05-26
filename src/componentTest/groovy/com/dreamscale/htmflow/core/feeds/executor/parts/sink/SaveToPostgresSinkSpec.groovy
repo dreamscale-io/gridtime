@@ -10,7 +10,7 @@ import com.dreamscale.htmflow.core.domain.tile.StoryGridSummaryEntity
 import com.dreamscale.htmflow.core.domain.tile.StoryGridSummaryRepository
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 import com.dreamscale.htmflow.core.feeds.story.feature.context.MusicalSequenceBeginning
 import com.dreamscale.htmflow.core.feeds.story.feature.context.StructureLevel
 import com.dreamscale.htmflow.core.feeds.story.feature.details.AuthorDetails
@@ -38,7 +38,7 @@ class SaveToPostgresSinkSpec extends Specification {
     StoryGridSummaryRepository storyTileSummaryRepository;
 
     UUID torchieId
-    StoryTile tile
+    TileBuilder tile
     LocalDateTime clockStart
     GeometryClock geometryClock
 
@@ -47,7 +47,7 @@ class SaveToPostgresSinkSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         torchieId = UUID.randomUUID();
-        tile = new StoryTile("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTIES)
+        tile = new TileBuilder("/torchie/"+torchieId, geometryClock.coordinates, ZoomLevel.TWENTIES)
 
     }
 

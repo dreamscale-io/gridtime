@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
+import com.dreamscale.htmflow.core.feeds.pool.GridFeature;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

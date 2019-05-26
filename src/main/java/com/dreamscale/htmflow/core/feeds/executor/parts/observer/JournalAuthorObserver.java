@@ -6,8 +6,7 @@ import com.dreamscale.htmflow.core.domain.member.MemberNameRepository;
 import com.dreamscale.htmflow.core.domain.member.json.Member;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.AuthorDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,41 +20,37 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class JournalAuthorObserver implements FlowObserver {
+public class JournalAuthorObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Autowired
     MemberNameRepository memberNameRepository;
 
     @Override
-    public void see(Window window, StoryTile currentStoryTile) {
-
-        List<Flowable> flowables = window.getFlowables();
+    public void seeInto(List<FlowableJournalEntry> flowables, TileBuilder tileBuilder) {
 
         Member me = lookupMe(flowables);
 
         for (Flowable flowable : flowables) {
-            if (flowable instanceof FlowableJournalEntry) {
-                JournalEntryEntity journalEntry = ((JournalEntryEntity) flowable.get());
+            JournalEntryEntity journalEntry = (flowable.get());
 
-                if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
-                    List<Member> linkedMembers = journalEntry.getLinkedMembers();
+            if (journalEntry.getLinked() != null && journalEntry.getLinked()) {
+                List<Member> linkedMembers = journalEntry.getLinkedMembers();
 
-                    currentStoryTile.startAuthorsBand(journalEntry.getPosition(), new AuthorDetails(linkedMembers));
-                } else {
-                    currentStoryTile.startAuthorsBand(journalEntry.getPosition(), new AuthorDetails(me));
-                }
+                tileBuilder.startAuthorsBand(journalEntry.getPosition(), new AuthorDetails(linkedMembers));
+            } else {
+                tileBuilder.startAuthorsBand(journalEntry.getPosition(), new AuthorDetails(me));
             }
         }
 
-        currentStoryTile.finishAfterLoad();
+        tileBuilder.finishAfterLoad();
 
     }
 
-    private Member lookupMe(List<Flowable> flowables) {
+    private Member lookupMe(List<? extends Flowable> flowables) {
         Member me = null;
 
         if (flowables.size() > 0) {
-            JournalEntryEntity journalEntry = ((JournalEntryEntity) flowables.get(0).get());
+            JournalEntryEntity journalEntry = (flowables.get(0).get());
             MemberNameEntity memberNameEntity = memberNameRepository.findByTorchieId(journalEntry.getMemberId());
 
             me = new Member(memberNameEntity.getTorchieId().toString(), memberNameEntity.getFullName());

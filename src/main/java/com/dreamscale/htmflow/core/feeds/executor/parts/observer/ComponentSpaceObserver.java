@@ -3,9 +3,8 @@ package com.dreamscale.htmflow.core.feeds.executor.parts.observer;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
-import com.dreamscale.htmflow.core.feeds.common.Flowable;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.service.ComponentLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,50 +17,47 @@ import java.util.UUID;
  * by counting traversals from location to location to estimate a heuristic for organizing "gravity"
  */
 @Component
-public class ComponentSpaceObserver implements FlowObserver {
+public class ComponentSpaceObserver implements FlowObserver<FlowableFlowActivity> {
 
     @Autowired
     ComponentLookupService componentLookupService;
 
     @Override
-    public void see(Window window, StoryTile storyTile) {
-
-        List<Flowable> flowables = window.getFlowables();
+    public void seeInto(List<FlowableFlowActivity> flowables, TileBuilder tileBuilder) {
 
 
-        for (Flowable flowable : flowables) {
-            if (flowable instanceof FlowActivityEntity) {
-                FlowActivityEntity flowActivity = (FlowActivityEntity)flowable.get();
+        for (FlowableFlowActivity flowable : flowables) {
+                FlowActivityEntity flowActivity = flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {
-                    gotoLocation(storyTile, flowActivity);
+                    gotoLocation(tileBuilder, flowActivity);
                 }
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Modification)) {
-                    modifyCurrentLocation(storyTile, flowActivity);
+                    modifyCurrentLocation(tileBuilder, flowActivity);
                 }
-            }
+
         }
 
-        storyTile.finishAfterLoad();
+        tileBuilder.finishAfterLoad();
 
     }
 
-    private void gotoLocation(StoryTile storyTile, FlowActivityEntity flowActivity) {
+    private void gotoLocation(TileBuilder tileBuilder, FlowActivityEntity flowActivity) {
 
-        UUID projectId = storyTile.getContextOfMoment(flowActivity.getStart()).getProjectId();
+        UUID projectId = tileBuilder.getContextOfMoment(flowActivity.getStart()).getProjectId();
 
         String locationPath = flowActivity.getMetadataValue(FlowActivityMetadataField.filePath);
         String component = componentLookupService.lookupComponent(projectId, locationPath);
 
-        storyTile.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
+        tileBuilder.gotoLocation(flowActivity.getStart(), component, locationPath, flowActivity.getDuration());
 
     }
 
-    private void modifyCurrentLocation(StoryTile storyTile, FlowActivityEntity flowActivity) {
+    private void modifyCurrentLocation(TileBuilder tileBuilder, FlowActivityEntity flowActivity) {
         int modificationCount = Integer.valueOf(flowActivity.getMetadataValue(FlowActivityMetadataField.modificationCount));
 
-        storyTile.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
+        tileBuilder.modifyCurrentLocation(flowActivity.getStart(), modificationCount);
 
     }
 

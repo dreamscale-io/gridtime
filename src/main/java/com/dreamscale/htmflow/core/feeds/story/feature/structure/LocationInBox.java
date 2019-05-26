@@ -1,19 +1,16 @@
 package com.dreamscale.htmflow.core.feeds.story.feature.structure;
 
 import com.dreamscale.htmflow.core.domain.tile.FlowObjectType;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.FlowFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.SearchKeyMapper;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.UUID;
 
 @Getter
 @Setter
-public class LocationInBox extends FlowFeature  {
+public class LocationInBox extends FlowFeature {
 
     private String boxName;
     private String locationPath;
@@ -37,7 +34,7 @@ public class LocationInBox extends FlowFeature  {
     }
 
     public String toKey() {
-       return ObjectKeyMapper.createBoxLocationKey(boxName, locationPath);
+       return SearchKeyMapper.createLocationSearchKey(boxName, locationPath);
     }
 
     public String toString() {

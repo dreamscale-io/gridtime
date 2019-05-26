@@ -1,6 +1,9 @@
 package com.dreamscale.htmflow.core.service;
 
+import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.torchie.TorchieJobStatus;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkEntity;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
@@ -34,6 +37,12 @@ public class TorchieExecutorService {
     private TimeService timeService;
 
     @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private OrganizationMemberRepository memberRepository;
+
+    @Autowired
     private JournalService journalService;
 
     private ThreadPoolExecutor executorPool;
@@ -52,21 +61,23 @@ public class TorchieExecutorService {
     }
 
     public TorchieJobStatus startMemberTorchie(UUID memberId) {
+        OrganizationMemberEntity member = memberRepository.findById(memberId);
 
-        Torchie torchie = findOrCreateMemberTorchie(memberId);
+        Torchie torchie = findOrCreateMemberTorchie(member.getOrganizationId(), memberId);
         addTorchieToJobPool(torchie);
 
         return torchie.getJobStatus();
     }
 
-    public Torchie findOrCreateMemberTorchie(UUID memberId) {
+    public Torchie findOrCreateMemberTorchie(UUID organizationId, UUID memberId) {
         Torchie torchie = null;
 
         if (!activeTorchiePool.containsKey(memberId)) {
             LocalDateTime startingPosition = determineStartingPositionForMemberFeed(memberId);
+            UUID teamId = determineTeam(organizationId, memberId);
 
             if (startingPosition != null) {
-                torchie = torchieFactory.wireUpMemberTorchie(memberId, startingPosition);
+                torchie = torchieFactory.wireUpMemberTorchie(teamId, memberId, startingPosition);
             } else {
                 log.error("Unable to start Torchie for until first intention created, memberId: "+memberId);
             }
@@ -75,6 +86,13 @@ public class TorchieExecutorService {
             torchie = activeTorchiePool.get(memberId);
         }
         return torchie;
+    }
+
+    private UUID determineTeam(UUID organizationId, UUID memberId) {
+
+        TeamDto team = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        return team.getId();
     }
 
     public TorchieJobStatus startTeamTorchie(UUID teamId) {

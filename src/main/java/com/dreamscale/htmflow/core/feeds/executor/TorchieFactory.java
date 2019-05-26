@@ -1,7 +1,9 @@
 package com.dreamscale.htmflow.core.feeds.executor;
 
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.FetchStrategyFactory;
-import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.TileLoader;
+import com.dreamscale.htmflow.core.feeds.pool.FeatureCache;
+import com.dreamscale.htmflow.core.feeds.pool.FeatureLookupService;
+import com.dreamscale.htmflow.core.feeds.pool.TileLoader;
 import com.dreamscale.htmflow.core.feeds.executor.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.feeds.executor.parts.transform.FlowTransformFactory;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -29,9 +33,15 @@ public class TorchieFactory {
     @Autowired
     private TileLoader tileLoader;
 
-    public Torchie wireUpTeamTorchie(UUID teamId, LocalDateTime startingPosition) {
+    @Autowired
+    private FeatureLookupService featureLookupService;
 
-        Torchie torchie = new Torchie(teamId, startingPosition, tileLoader);
+    private Map<UUID, FeatureCache> teamCacheMap = new HashMap<>();
+
+    public Torchie wireUpTeamTorchie(UUID teamId, LocalDateTime startingPosition) {
+        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+
+        Torchie torchie = new Torchie(teamId, startingPosition, tileLoader, featureCache);
 
         //tile source
         //tile transform is aggregation of a window
@@ -41,9 +51,22 @@ public class TorchieFactory {
         return torchie;
     }
 
-    public Torchie wireUpMemberTorchie(UUID memberId, LocalDateTime startingPosition) {
+    private FeatureCache findOrCreateFeatureCache(UUID teamId) {
+        FeatureCache featureCache = teamCacheMap.get(teamId);
+        if (featureCache == null) {
+            featureCache = new FeatureCache(teamId, featureLookupService);
+            teamCacheMap.put(teamId, featureCache);
+        }
+        return featureCache;
+    }
 
-        Torchie torchie = new Torchie(memberId, startingPosition, tileLoader);
+    //
+
+
+    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
+        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+
+        Torchie torchie = new Torchie(memberId, startingPosition, tileLoader, featureCache);
 
         //stream data into the tiles
 

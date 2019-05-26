@@ -8,7 +8,9 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
 import com.dreamscale.htmflow.core.feeds.clock.GeometryClock
 import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.pool.FeatureCache
+import com.dreamscale.htmflow.core.feeds.pool.FeatureLookupService
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window
@@ -23,17 +25,22 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ComponentSpaceObserverSpec extends Specification {
 
     ComponentSpaceObserver componentSpaceObserver
-    StoryTile storyTile
+    TileBuilder storyTile
 
     def setup() {
         componentSpaceObserver = new ComponentSpaceObserver()
+
 
         ComponentLookupService componentLookupServiceMock =
                 [lookupComponent: { UUID projectId, String filePath -> return "mainFocus" }] as ComponentLookupService
 
         componentSpaceObserver.componentLookupService = componentLookupServiceMock;
 
-        storyTile = new StoryTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.TWENTIES)
+        //TODO write mock feature cache
+
+        FeatureCache featureCache = new FeatureCache(UUID.randomUUID(), new FeatureLookupService());
+
+        storyTile = new TileBuilder("@torchie/id", new GeometryClock(LocalDateTime.now()).getCoordinates(), ZoomLevel.TWENTIES)
     }
 
     def "should create Location traversals inside a Place"() {
@@ -54,7 +61,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(window, storyTile)
+        componentSpaceObserver.seeInto(window, storyTile)
         BoxAndBridgeActivity boxAndBridgeStructure = storyTile.getSpatialStructure();
 
         then:
@@ -65,7 +72,7 @@ public class ComponentSpaceObserverSpec extends Specification {
     //TODO need to reprocess frames on dirty
     //TODO locations should include movements over time
     //TODO component spaces should include bridges
-    //TODO locations should be mapped to lookup tables
+    //TODO locations should be mapped to resolve tables
     //story frames abstract out, once I have the saving and persistance in mainFocus
 
 

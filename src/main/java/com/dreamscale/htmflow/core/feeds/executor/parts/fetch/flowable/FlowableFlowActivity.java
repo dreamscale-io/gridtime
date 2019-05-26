@@ -20,8 +20,8 @@ public class FlowableFlowActivity extends FlowableActivity {
     }
 
     @Override
-    public Object get() {
-        return flowActivity;
+    public <T> T get() {
+        return (T)flowActivity;
     }
 
     @Override

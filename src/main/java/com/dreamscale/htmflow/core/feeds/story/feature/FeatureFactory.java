@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story.feature;
 
 import com.dreamscale.htmflow.core.feeds.common.RelativeSequence;
-import com.dreamscale.htmflow.core.feeds.executor.parts.mapper.ObjectKeyMapper;
+import com.dreamscale.htmflow.core.feeds.story.mapper.SearchKeyMapper;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.Context;
 import com.dreamscale.htmflow.core.feeds.story.feature.context.ContextChangeEvent;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.Details;
@@ -268,7 +268,7 @@ public class FeatureFactory {
         String fromLocationKey = fromLocation.toKey();
         String toLocationKey = toLocation.toKey();
 
-        String bridgeKey = ObjectKeyMapper.createBridgeKey(fromLocationKey, toLocationKey);
+        String bridgeKey = SearchKeyMapper.createBridgeKey(fromLocationKey, toLocationKey);
 
         Bridge bridge = this.bridgeMap.get(bridgeKey);
         if (bridge == null) {
@@ -307,7 +307,7 @@ public class FeatureFactory {
     }
 
     public LocationInBox findOrCreateLocation(String boxName, String locationPath) {
-        String key = ObjectKeyMapper.createBoxLocationKey(boxName, locationPath);
+        String key = SearchKeyMapper.createLocationSearchKey(boxName, locationPath);
         LocationInBox location = locationMap.get(key);
         if (location == null) {
             location = new LocationInBox(boxName, locationPath);
@@ -319,7 +319,7 @@ public class FeatureFactory {
 
     public Traversal findOrCreateTraversal(LocationInBox locationA, LocationInBox locationB) {
 
-        String traversalKey = ObjectKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
+        String traversalKey = SearchKeyMapper.createLocationTraversalKey(locationA.toKey(), locationB.toKey());
 
         Traversal traversal = traversalMap.get(traversalKey);
 

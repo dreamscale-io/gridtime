@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.executor.machine
 
-import com.dreamscale.htmflow.core.feeds.story.StoryTile
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder
 
 class Torchie {
 
@@ -48,7 +48,7 @@ class Torchie {
 
     }
 
-    StoryTile runTile(String tileUri) {
+    TileBuilder runTile(String tileUri) {
         null
     }
 /**

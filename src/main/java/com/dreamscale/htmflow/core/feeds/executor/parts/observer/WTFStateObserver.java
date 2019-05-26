@@ -4,8 +4,7 @@ import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.feeds.common.Flowable;
 import com.dreamscale.htmflow.core.feeds.executor.parts.fetch.flowable.FlowableCircleMessageEvent;
-import com.dreamscale.htmflow.core.feeds.story.StoryTile;
-import com.dreamscale.htmflow.core.feeds.executor.parts.source.Window;
+import com.dreamscale.htmflow.core.feeds.story.TileBuilder;
 import com.dreamscale.htmflow.core.feeds.story.feature.details.CircleDetails;
 
 import java.util.List;
@@ -13,31 +12,26 @@ import java.util.List;
 /**
  * Translates the Circle Feed messages of start/stop shelf/resume on WTF Circles to TimeBands
  */
-public class WTFStateObserver implements FlowObserver {
+public class WTFStateObserver implements FlowObserver<FlowableCircleMessageEvent> {
 
     @Override
-    public void see(Window window, StoryTile currentStoryTile) {
-
-        List<Flowable> flowables = window.getFlowables();
+    public void seeInto(List<FlowableCircleMessageEvent> flowables, TileBuilder tileBuilder) {
 
         for (Flowable flowable : flowables) {
-            if (flowable instanceof FlowableCircleMessageEvent) {
-                CircleFeedMessageEntity circleMessage = ((CircleFeedMessageEntity) flowable.get());
+            CircleFeedMessageEntity circleMessage = (flowable.get());
 
-                CircleMessageType circleMessageType = circleMessage.getMessageType();
+            CircleMessageType circleMessageType = circleMessage.getMessageType();
 
-                if (isCircleOpening(circleMessageType)) {
-                    currentStoryTile.startWTF(circleMessage.getPosition(), createCircleContext(circleMessage));
-                }
+            if (isCircleOpening(circleMessageType)) {
+                tileBuilder.startWTF(circleMessage.getPosition(), createCircleContext(circleMessage));
+            }
 
-                if (isCircleEnding(circleMessageType)) {
-                    currentStoryTile.clearWTF(circleMessage.getPosition());
-                }
-
+            if (isCircleEnding(circleMessageType)) {
+                tileBuilder.clearWTF(circleMessage.getPosition());
             }
         }
 
-        currentStoryTile.finishAfterLoad();
+        tileBuilder.finishAfterLoad();
     }
 
     private CircleDetails createCircleContext(CircleFeedMessageEntity circleFeedMessageEntity) {
