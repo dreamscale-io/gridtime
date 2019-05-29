@@ -2,28 +2,27 @@ package com.dreamscale.htmflow.resources
 
 
 import com.dreamscale.htmflow.DataTest
-import com.dreamscale.htmflow.api.torchie.TorchieJobStatus
-import com.dreamscale.htmflow.client.TorchieJobClient
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.circuit.CircuitMonitor
+
 import com.dreamscale.htmflow.core.domain.member.*
-import com.dreamscale.htmflow.core.feeds.executor.Torchie
-import com.dreamscale.htmflow.core.feeds.executor.TorchieFactory
-import com.dreamscale.htmflow.core.feeds.story.mapper.TileUri
-import com.dreamscale.htmflow.core.feeds.story.TileBuilder
-import com.dreamscale.htmflow.core.service.TorchieExecutorService
+import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie
+import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchieFactory
+import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
+import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.TileUri
+
+import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchiePoolExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 @DataTest
 class TorchieJobResourceSpec extends Specification {
 
-    @Autowired
-    TorchieJobClient torchieJobClient
 
     @Autowired
     OrganizationMemberRepository memberRepository
 
     @Autowired
-    TorchieExecutorService torchieExecutorService
+    TorchiePoolExecutor torchieExecutor
 
     @Autowired
     TorchieFactory torchieFactory
@@ -43,7 +42,7 @@ class TorchieJobResourceSpec extends Specification {
         List<OrganizationMemberEntity> members = memberRepository.findByMasterAccountId(testUser.id)
 
         when:
-        TorchieJobStatus status = torchieJobClient.startTorchieJobForMember(members.get(0).getId().toString())
+        CircuitMonitor status = torchieJobClient.startTorchieJobForMember(members.get(0).getId().toString())
 
         then:
         assert members.size() > 0
@@ -56,10 +55,10 @@ class TorchieJobResourceSpec extends Specification {
 
         when:
         TileUri.SourceCoordinates coords = TileUri.extractCoordinatesFromUri(tileUri);
-        System.out.println(coords.getTileCoordinates().formatDreamTime());
+        System.out.println(coords.getTileCoordinates().formatGridTime());
 
-        Torchie torchie = torchieExecutorService.findOrCreateMemberTorchie(UUID.fromString("3883f615-9787-4648-b9a8-0a088fb555b7"));
-        TileBuilder tileOutput = torchie.runTile(tileUri);
+        Torchie torchie = torchieExecutor.findOrCreateMemberTorchie(UUID.fromString("3883f615-9787-4648-b9a8-0a088fb555b7"));
+        GridTile tileOutput = torchie.runTile(tileUri);
 
         then:
         assert tileOutput != null;
@@ -71,12 +70,12 @@ class TorchieJobResourceSpec extends Specification {
         given:
         List<OrganizationMemberEntity> members = memberRepository.findByMasterAccountId(testUser.id)
         OrganizationMemberEntity member = members.get(0);
-        torchieExecutorService.startMemberTorchie(member.getId())
+        torchieExecutor.startMemberTorchie(member.getId())
 
         when:
-        torchieExecutorService.runAllTorchies();
+        torchieExecutor.runAllTorchies();
 
-        List<TorchieJobStatus> jobStatuses = torchieExecutorService.getAllJobStatus();
+        List<CircuitMonitor> jobStatuses = torchieExecutor.getAllTorchieMonitors();
         print jobStatuses
 
         //

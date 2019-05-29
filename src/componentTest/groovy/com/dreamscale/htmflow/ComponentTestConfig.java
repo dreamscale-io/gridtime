@@ -99,10 +99,6 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     TeamClient teamClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamClient.class); }
 
-    @Bean
-    TorchieJobClient flowJobClient() {
-        return createClientWithStaticApiKey(jacksonFeignBuilder, TorchieJobClient.class);
-    }
 
     @Bean
     FlowClient unauthenticatedFlowClient() {

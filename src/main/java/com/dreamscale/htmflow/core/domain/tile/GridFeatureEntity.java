@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.domain.tile;
 
-import com.dreamscale.htmflow.core.feeds.pool.FeatureType;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.FeatureType;
 import lombok.*;
 
 import javax.persistence.Entity;

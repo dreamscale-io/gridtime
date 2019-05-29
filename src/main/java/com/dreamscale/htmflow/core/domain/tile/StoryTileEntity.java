@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.domain.tile;
 
-import com.dreamscale.htmflow.core.feeds.clock.ZoomLevel;
 import lombok.*;
 
 import javax.persistence.Entity;

@@ -1,0 +1,80 @@
+package com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type;
+
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.*;
+import org.springframework.web.util.UriTemplate;
+
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+
+public enum PlaceType implements FeatureType {
+
+    BOX("/box", "/box/{boxName}", Box.class),
+    LOCATION_IN_BOX("/location", "/project/{projectId}/location/{locationName}", LocationInBox.class),
+    TRAVERSAL_WIRE("/wire", "/project/{projectId}/wire/A/location/{locationNameA}/B/location/{locationNameB}", Traversal.class),
+    TRAVERSAL_WIRE_LOCAL_IN_BOX("/traversal", "/box/{boxName}/traversal/A/location/{locationNameA}/B/location/{locationNameB}", Traversal.class),
+    TRAVERSAL_WIRE_BRIDGE_BETWEEN_BOXES("/bridge", "/bridge/A/box/{boxNameA}/location/{locationNameA}/B/box/{boxNameB}/location/{locationNameB}", Bridge.class);
+
+    private final String typeUri;
+    private final Class<? extends FeatureDetails> serializationClass;
+    private final UriTemplate uriTemplate;
+
+    private static final String CLASS_TYPE = "@place";
+    private static final String CLASS_TYPE_LETTER = "P";
+
+    private static final LinkedHashSet<String> TEMPLATE_VARIABLES =
+            DefaultCollections.toSet(
+                TemplateVariable.BOX_NAME,
+                TemplateVariable.LOCATION_NAME,
+                    TemplateVariable.BOX_NAME_A,
+                    TemplateVariable.LOCATION_NAME_A,
+                    TemplateVariable.BOX_NAME_B,
+                    TemplateVariable.LOCATION_NAME_B);
+
+
+
+    PlaceType(String typeUri, String uriTemplatePath, Class<? extends FeatureDetails> serializationClass) {
+        this.typeUri = typeUri;
+        this.uriTemplate = new UriTemplate(CLASS_TYPE + uriTemplatePath);
+        this.serializationClass = serializationClass;
+    }
+
+    @Override
+    public String getClassType() {
+        return CLASS_TYPE;
+    }
+
+    @Override
+    public Set<String> getTemplateVariables() {
+        return TEMPLATE_VARIABLES;
+    }
+
+    @Override
+    public String expandUri(Map<String, String> templateVariables) {
+        return uriTemplate.expand(templateVariables).toString();
+    }
+
+    @Override
+    public Class<? extends FeatureDetails> getSerializationClass() {
+        return serializationClass;
+    }
+
+    @Override
+    public String toDisplayString() {
+        return typeUri;
+    }
+
+
+    public static class TemplateVariable {
+        public static String PROJECT_ID = "projectId";
+        public static String BOX_NAME = "boxName";
+        public static String LOCATION_NAME = "locationName";
+        public static String BOX_NAME_A = "boxNameA";
+        public static String LOCATION_NAME_A = "locationNameA";
+        public static String BOX_NAME_B = "boxNameB";
+        public static String LOCATION_NAME_B = "locationNameB";
+    }
+
+}

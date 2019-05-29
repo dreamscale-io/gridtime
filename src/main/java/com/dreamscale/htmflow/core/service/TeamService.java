@@ -159,6 +159,7 @@ public class TeamService {
         return teamOutputMapper.toApiList(teamEntityList);
     }
 
+
     public TeamDto getMyPrimaryTeam(UUID orgId, UUID memberId) {
         List<TeamEntity> teamEntities = teamRepository.findMyTeamsByOrgMembership(orgId, memberId);
 
