@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile;
 
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.List;
 public class JournalFeelsObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void seeInto(List<FlowableJournalEntry> flowables, GridTile gridTile) {
+    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
-        for (FlowableJournalEntry flowable : flowables) {
+        for (FlowableJournalEntry flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());
 
             Integer flameRating = journalEntry.getFlameRating();

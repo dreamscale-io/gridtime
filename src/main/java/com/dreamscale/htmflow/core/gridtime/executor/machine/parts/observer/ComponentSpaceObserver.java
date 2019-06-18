@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableFlowActivity;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile;
 
 import java.util.List;
@@ -12,13 +13,14 @@ import java.util.List;
  * Identifies the enter and exit of components and builds a model of geographic locality
  * by counting traversals from location to location to estimate a heuristic for organizing "gravity"
  */
+
 public class ComponentSpaceObserver implements FlowObserver<FlowableFlowActivity> {
 
 
     @Override
-    public void seeInto(List<FlowableFlowActivity> flowables, GridTile gridTile) {
+    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
-        for (FlowableFlowActivity flowable : flowables) {
+        for (FlowableFlowActivity flowable : window.getFlowables()) {
                 FlowActivityEntity flowActivity = flowable.get();
 
                 if (flowActivity.getActivityType().equals(FlowActivityType.Editor)) {

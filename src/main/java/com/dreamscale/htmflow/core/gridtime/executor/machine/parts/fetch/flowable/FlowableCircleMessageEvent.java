@@ -29,4 +29,8 @@ public class FlowableCircleMessageEvent extends FlowableEvent {
         return circleFeedMessageEntity.getPosition();
     }
 
+    @Override
+    public String toDisplayString() {
+        return "CircleMessage["+getPosition()+"]";
+    }
 }

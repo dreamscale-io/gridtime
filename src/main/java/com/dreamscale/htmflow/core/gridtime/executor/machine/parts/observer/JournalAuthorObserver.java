@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.member.json.Member;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.AuthorsDetails;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableJournalEntry;
@@ -16,14 +17,13 @@ import java.util.List;
  * otherwise generates a single author.  Attribution of authors is by Intention
  */
 @Slf4j
-@Component
 public class JournalAuthorObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void seeInto(List<FlowableJournalEntry> flowables, GridTile gridTile) {
+    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
 
-        for (Flowable flowable : flowables) {
+        for (Flowable flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());
 
             if (journalEntry.getLinked() != null && journalEntry.getLinked()) {

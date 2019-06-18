@@ -51,4 +51,9 @@ public class FlowableFlowActivity extends FlowableActivity {
         return new FlowableFlowActivity(clone);
     }
 
+    @Override
+    public String toDisplayString() {
+        return "FlowActivity["+getStart()+"]";
+    }
+
 }

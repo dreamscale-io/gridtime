@@ -22,7 +22,6 @@ public enum PlaceType implements FeatureType {
     private final UriTemplate uriTemplate;
 
     private static final String CLASS_TYPE = "@place";
-    private static final String CLASS_TYPE_LETTER = "P";
 
     private static final LinkedHashSet<String> TEMPLATE_VARIABLES =
             DefaultCollections.toSet(
@@ -47,6 +46,11 @@ public enum PlaceType implements FeatureType {
     }
 
     @Override
+    public String getTypeUri() {
+        return typeUri;
+    }
+
+    @Override
     public Set<String> getTemplateVariables() {
         return TEMPLATE_VARIABLES;
     }
@@ -59,6 +63,11 @@ public enum PlaceType implements FeatureType {
     @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
         return serializationClass;
+    }
+
+    @Override
+    public FeatureType resolveType(String searchKeyUri) {
+        return null;
     }
 
     @Override

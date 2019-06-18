@@ -1,10 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory.feed;
 
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Observable;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Bookmark;
 
 import java.time.LocalDateTime;
 
-public interface Flowable {
+public interface Flowable extends Observable {
 
     Bookmark getBookmark();
 

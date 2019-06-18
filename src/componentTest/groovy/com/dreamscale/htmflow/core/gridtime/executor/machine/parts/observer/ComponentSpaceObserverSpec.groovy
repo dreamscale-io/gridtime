@@ -59,7 +59,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.seeInto(window, storyTile)
+        componentSpaceObserver.see(window, storyTile)
         //BoxAndBridgeActivity boxAndBridgeStructure = storyTile.getSpatialStructure();
 
         then:

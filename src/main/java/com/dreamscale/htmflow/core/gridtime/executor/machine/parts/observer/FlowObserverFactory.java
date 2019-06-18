@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,19 +9,16 @@ public class FlowObserverFactory {
     private final JournalFeelsObserver journalFeelsObserver;
     private final ExecutionRhythmObserver executionRhythmObserver;
     private final WTFStateObserver wtfStateObserver;
-
-
-    @Autowired
-    private ComponentSpaceObserver componentSpaceObserver;
-
-    @Autowired
-    private JournalAuthorObserver journalAuthorObserver;
+    private final ComponentSpaceObserver componentSpaceObserver;
+    private final JournalAuthorObserver journalAuthorObserver;
 
     FlowObserverFactory() {
         this.journalContextObserver = new JournalContextObserver();
         this.journalFeelsObserver = new JournalFeelsObserver();
         this.executionRhythmObserver = new ExecutionRhythmObserver();
         this.wtfStateObserver = new WTFStateObserver();
+        this.componentSpaceObserver = new ComponentSpaceObserver();
+        this.journalAuthorObserver = new JournalAuthorObserver();
     }
 
     public FlowObserver get(ObserverType observerType) {

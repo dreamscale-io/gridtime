@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishCircleTag;
@@ -16,9 +17,9 @@ import java.util.List;
 public class WTFStateObserver implements FlowObserver<FlowableCircleMessageEvent> {
 
     @Override
-    public void seeInto(List<FlowableCircleMessageEvent> flowables, GridTile gridTile) {
+    public void see(Window<FlowableCircleMessageEvent> window, GridTile gridTile) {
 
-        for (Flowable flowable : flowables) {
+        for (Flowable flowable : window.getFlowables()) {
             CircleFeedMessageEntity circleMessage = (flowable.get());
 
             CircleMessageType circleMessageType = circleMessage.getMessageType();

@@ -22,21 +22,21 @@ public class JournalFetcher extends FetchStrategy {
 
 
     @Override
-    public Batch fetchNextBatch(UUID memberId, Bookmark bookmark, int fetchSize) {
+    public Batch<FlowableJournalEntry> fetchNextBatch(UUID memberId, Bookmark bookmark, int fetchSize) {
 
         LocalDateTime afterDate = bookmark.getPosition();
 
         List<JournalEntryEntity> journalEntries =
                 journalEntryRepository.findByMemberIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), fetchSize);
 
-        List<Flowable> flowables = convertToFlowables(journalEntries);
+        List<FlowableJournalEntry> flowables = convertToFlowables(journalEntries);
 
-        return new Batch(memberId, bookmark, flowables);
+        return new Batch<>(memberId, bookmark, flowables);
 
     }
 
-    private List<Flowable> convertToFlowables(List<JournalEntryEntity> journalEntries) {
-        List<Flowable> flowables = new ArrayList<>();
+    private List<FlowableJournalEntry> convertToFlowables(List<JournalEntryEntity> journalEntries) {
+        List<FlowableJournalEntry> flowables = new ArrayList<>();
 
         for (JournalEntryEntity journalEntryEntity : journalEntries) {
             flowables.add(new FlowableJournalEntry(journalEntryEntity));

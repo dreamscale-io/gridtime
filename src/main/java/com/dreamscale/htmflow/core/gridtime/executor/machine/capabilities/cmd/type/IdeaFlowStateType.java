@@ -4,15 +4,14 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.Defau
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.FeatureDetails;
 import org.springframework.web.util.UriTemplate;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 public enum IdeaFlowStateType implements FeatureType {
 
-    WTF_STATE("/wtf", "/wtf", null),
-    LEARNING_STATE("/learn", "/learn", null),
-    PROGRESS_STATE("/progress", "/progress", null);
+    WTF_STATE("/wtf"),
+    LEARNING_STATE("/learn"),
+    PROGRESS_STATE("/progress");
 
     private static final String CLASS_TYPE = "@flow";
 
@@ -20,14 +19,12 @@ public enum IdeaFlowStateType implements FeatureType {
 
     private final Class<? extends FeatureDetails> serializationClass;
     private final UriTemplate uriTemplate;
-    private final String uri;
     private final String typeUri;
 
-    IdeaFlowStateType(String typeUri, String uriTemplatePath, Class<? extends FeatureDetails> serializationClass) {
+    IdeaFlowStateType(String typeUri) {
         this.typeUri = CLASS_TYPE + typeUri;
-        this.uri = CLASS_TYPE + uriTemplatePath;
-        this.uriTemplate = new UriTemplate(CLASS_TYPE + uriTemplatePath);
-        this.serializationClass = serializationClass;
+        this.uriTemplate = new UriTemplate(CLASS_TYPE + typeUri);
+        this.serializationClass = null;
     }
 
     @Override
@@ -45,13 +42,14 @@ public enum IdeaFlowStateType implements FeatureType {
         if (templateVariables != null && !templateVariables.isEmpty()) {
             return uriTemplate.expand(templateVariables).toString();
         } else {
-            return uri;
+            return typeUri;
         }
     }
 
-    public String getUri() {
-        return uri;
+    public String getTypeUri() {
+        return typeUri;
     }
+
 
     @Override
     public Class<? extends FeatureDetails> getSerializationClass() {

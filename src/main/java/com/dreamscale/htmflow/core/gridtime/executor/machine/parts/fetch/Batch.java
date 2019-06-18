@@ -6,13 +6,13 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Bookma
 import java.util.List;
 import java.util.UUID;
 
-public class Batch {
+public class Batch<T extends Flowable> {
 
     private final UUID memberId;
     private final Bookmark bookmarkUsedToSearch;
-    private final List<? extends Flowable> flowables;
+    private final List<T> flowables;
 
-    public Batch(UUID memberId, Bookmark bookmarkUsedToSearch, List<? extends Flowable> flowables) {
+    public Batch(UUID memberId, Bookmark bookmarkUsedToSearch, List<T> flowables) {
         this.memberId = memberId;
         this.bookmarkUsedToSearch = bookmarkUsedToSearch;
         this.flowables = flowables;
@@ -28,7 +28,7 @@ public class Batch {
         return bookmark;
     }
 
-    public List<? extends Flowable> getFlowables() {
+    public List<T> getFlowables() {
         return flowables;
     }
 

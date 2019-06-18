@@ -24,8 +24,7 @@ public class GridFeatureEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID teamId;
 
-    @Enumerated(EnumType.STRING)
-    private FeatureType featureType;
+    private String typeUri;
 
     private String searchKey;
 

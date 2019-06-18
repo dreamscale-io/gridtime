@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.WorkContextReference;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishTypeTag;
@@ -17,13 +18,13 @@ import java.util.List;
 public class JournalContextObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void seeInto(List<FlowableJournalEntry> flowables, GridTile gridTile) {
+    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
         WorkContextReference lastOpenProject = gridTile.getFirstContext(StructureLevel.PROJECT);
         WorkContextReference lastOpenTask = gridTile.getFirstContext(StructureLevel.TASK);
         WorkContextReference lastOpenIntention = gridTile.getFirstContext(StructureLevel.INTENTION);
 
-        for (FlowableJournalEntry flowable : flowables) {
+        for (FlowableJournalEntry flowable : window.getFlowables()) {
                 JournalEntryEntity journalEntry = flowable.get();
 
                 createIntentionDoneIfNotNull(gridTile, journalEntry, lastOpenIntention);

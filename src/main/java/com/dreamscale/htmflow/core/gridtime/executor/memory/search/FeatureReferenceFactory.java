@@ -12,7 +12,7 @@ public class FeatureReferenceFactory {
     public static final String UNKNOWN = "[UNKNOWN]";
 
     public IdeaFlowStateReference createStateReference(IdeaFlowStateType stateType) {
-        return new IdeaFlowStateReference(stateType, stateType.getUri());
+        return new IdeaFlowStateReference(stateType, stateType.getTypeUri());
     }
 
     public FeelsReference createFeelsStateReference(Integer feelsRating) {

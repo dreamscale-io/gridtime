@@ -7,11 +7,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Window {
+public class Window<T extends Flowable> {
 
     private final LocalDateTime fromClockPosition;
     private final LocalDateTime toClockPosition;
-    private final ArrayList<Flowable> flowables;
+    private final List<T> flowables;
 
     private boolean isFinished;
 
@@ -34,20 +34,20 @@ public class Window {
         return Duration.between(getStart(), getEnd());
     }
 
-    public List<Flowable> getFlowables() {
+    public List<T> getFlowables() {
         return flowables;
     }
 
-    public void addAll(List<Flowable> flowables) {
+    public void addAll(List<T> flowables) {
         this.flowables.addAll(flowables);
     }
 
-    public void add(Flowable item) {
+    public void add(T item) {
         this.flowables.add(item);
     }
 
-    public void addAndTrimToFit(Flowable flowable) {
-        Flowable trimmedFlowable = flowable.trimToFit(fromClockPosition, toClockPosition);
+    public void addAndTrimToFit(T flowable) {
+        T trimmedFlowable = (T) flowable.trimToFit(fromClockPosition, toClockPosition);
         this.flowables.add(trimmedFlowable);
     }
 
@@ -64,12 +64,12 @@ public class Window {
         return flowable.hasTimeInWindow(fromClockPosition, toClockPosition);
     }
 
-    public boolean hasTimeAfterWindow(Flowable flowable) {
+    public boolean hasTimeAfterWindow(T flowable) {
         return flowable.hasTimeAfterWindow(toClockPosition);
     }
 
-    public Flowable splitTimeAfterWindowIntoNewFlowable(Flowable flowable) {
-        return flowable.splitTimeAfterWindowIntoNewFlowable(toClockPosition);
+    public T splitTimeAfterWindowIntoNewFlowable(T flowable) {
+        return (T) flowable.splitTimeAfterWindowIntoNewFlowable(toClockPosition);
     }
 
     public boolean isNotEmpty() {

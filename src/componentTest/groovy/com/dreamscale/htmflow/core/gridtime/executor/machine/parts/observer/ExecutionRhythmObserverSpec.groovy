@@ -6,7 +6,6 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
 
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableFlowActivity
-import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
 import spock.lang.Specification
 
@@ -42,7 +41,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
         def flowables = [executionEvent1, executionEvent2, executionEvent3, executionEvent4] as List
 
         when:
-        executionRhythmObserver.seeInto(flowables, storyTile)
+        executionRhythmObserver.see(flowables, storyTile)
         def movements = storyTile.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY).getMovements();
 
         then:

@@ -9,6 +9,8 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.FileAct
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.JournalFetcher
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer.FlowObserver
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache
+import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool
+import com.dreamscale.htmflow.core.gridtime.executor.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.executor.memory.PerProcessFeaturePool
 import com.dreamscale.htmflow.core.gridtime.executor.memory.search.FeatureSearchService
 import com.dreamscale.htmflow.core.gridtime.executor.memory.search.TileSearchService
@@ -29,23 +31,15 @@ class FlowSourceSpec extends Specification {
    @Autowired
    FileActivityFetcher fileActivityFetcher
 
-    @Autowired
-    TileSearchService tileSearchService
-
-    @Autowired
-    FeatureSearchService featureSearchService
-
     UUID memberId
-    PerProcessFeaturePool featurePool
+    FeaturePool featurePool
     FlowSource journalFlowSource
     Window latestWindow
     FlowSource activityFlowSource
-    FeatureCache featureCache;
 
     def setup() {
         this.memberId = UUID.randomUUID();
-        featureCache = new FeatureCache(memberId, featureSearchService, tileSearchService);
-        this.featurePool = new PerProcessFeaturePool(memberId, featureCache);
+        this.featurePool = new MemoryOnlyFeaturePool(memberId);
 
         FlowObserver flowObserverMock =
                 [see: { Window window, GridTile storyFrame -> this.latestWindow = window }] as FlowObserver

@@ -48,6 +48,7 @@ public enum CmdType implements FeatureType {
     ALARM_WHEN_BOX_IS_FULL_OF_UNCERTAINTY("alarm-when", "/threshold/learning/count/box/{sha}", AlarmIsOnResults.class);
 
     private final String cmdName;
+    private final String typeUri;
     private final Class<?> resultsClazz;
     private final UriTemplate uriTemplateWithType;
     private final String uriTemplateStr;
@@ -62,8 +63,8 @@ public enum CmdType implements FeatureType {
                     TemplateVariable.GRIDTIME);
 
 
-
     CmdType(String cmdName, String uriTemplateStr, Class<?> resultsClazz) {
+        this.typeUri = CLASS_TYPE + "/" + cmdName;
         this.cmdName = cmdName;
         this.uriTemplateStr = uriTemplateStr;
         this.uriTemplateWithType = new UriTemplate(CLASS_TYPE + uriTemplateStr);
@@ -73,6 +74,11 @@ public enum CmdType implements FeatureType {
     @Override
     public String getClassType() {
         return CLASS_TYPE;
+    }
+
+    @Override
+    public String getTypeUri() {
+        return typeUri;
     }
 
 

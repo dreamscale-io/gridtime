@@ -41,6 +41,11 @@ public enum WorkContextType implements FeatureType {
     }
 
     @Override
+    public String getTypeUri() {
+        return typeUri;
+    }
+
+    @Override
     public Set<String> getTemplateVariables() {
         return TEMPLATE_VARIABLES;
     }

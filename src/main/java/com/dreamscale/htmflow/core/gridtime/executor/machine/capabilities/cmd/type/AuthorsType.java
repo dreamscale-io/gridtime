@@ -38,6 +38,11 @@ public enum AuthorsType implements FeatureType {
     }
 
     @Override
+    public String getTypeUri() {
+        return typeUri;
+    }
+
+    @Override
     public Set<String> getTemplateVariables() {
         return TEMPLATE_VARIABLES;
     }
@@ -51,6 +56,7 @@ public enum AuthorsType implements FeatureType {
     public Class<? extends FeatureDetails> getSerializationClass() {
         return serializationClass;
     }
+
 
     @Override
     public String toDisplayString() {

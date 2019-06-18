@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableFlowActivity;
@@ -20,9 +21,9 @@ public class ExecutionRhythmObserver implements FlowObserver<FlowableFlowActivit
 
 
     @Override
-    public void seeInto(List<FlowableFlowActivity> flowables, GridTile gridTile) {
+    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
-        for (Flowable flowable : flowables) {
+        for (Flowable flowable : window.getFlowables()) {
             if (flowable instanceof FlowableFlowActivity) {
                 FlowActivityEntity flowActivity = flowable.get();
 

@@ -30,4 +30,8 @@ public class FlowableJournalEntry extends FlowableEvent {
         return journalEntry.getPosition();
     }
 
+    @Override
+    public String toDisplayString() {
+        return "JournalEntry["+getPosition()+"]";
+    }
 }

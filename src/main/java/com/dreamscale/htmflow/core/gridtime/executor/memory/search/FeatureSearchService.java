@@ -2,6 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory.search;
 
 import com.dreamscale.htmflow.core.domain.tile.GridFeatureEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridFeatureRepository;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.FeatureType;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.TypeRegistry;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.sink.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.FeatureDetails;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
@@ -24,6 +26,11 @@ public class FeatureSearchService {
     @Autowired
     GridFeatureRepository gridFeatureRepository;
 
+    private TypeRegistry typeRegistry;
+
+    FeatureSearchService() {
+        typeRegistry = new TypeRegistry();
+    }
 
     private boolean isSameBox(String boxNameA, String boxNameB) {
         return boxNameA != null && boxNameA.equals(boxNameB);
@@ -39,7 +46,9 @@ public class FeatureSearchService {
             GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndAndSearchKey(teamId, originalReference.getSearchKey());
 
             if (gridFeatureEntity != null) {
-                FeatureDetails feature = deserialize(gridFeatureEntity.getJson(), gridFeatureEntity.getFeatureType().getSerializationClass());
+                FeatureType featureType = lookupFeatureType(gridFeatureEntity.getTypeUri());
+
+                FeatureDetails feature = deserialize(gridFeatureEntity.getJson(), featureType.getSerializationClass());
 
                 resolvedReference = originalReference.resolve(gridFeatureEntity.getId(), feature);
             } else {
@@ -47,7 +56,7 @@ public class FeatureSearchService {
                 gridFeatureEntity = new GridFeatureEntity(
                         originalReference.getId(),
                         teamId,
-                        originalReference.getFeatureType(),
+                        originalReference.getFeatureType().getTypeUri(),
                         originalReference.getSearchKey(),
                         json);
                 gridFeatureRepository.save(gridFeatureEntity);
@@ -57,6 +66,10 @@ public class FeatureSearchService {
         }
 
         return resolvedReference;
+    }
+
+    private FeatureType lookupFeatureType(String typeUri) {
+        return typeRegistry.resolveFeatureType(typeUri);
     }
 
     private String serialize(FeatureDetails feature) {
