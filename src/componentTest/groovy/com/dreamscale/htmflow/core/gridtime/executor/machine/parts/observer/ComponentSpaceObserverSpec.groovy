@@ -6,14 +6,15 @@ import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache
+import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName
 import com.dreamscale.htmflow.core.gridtime.executor.memory.search.FeatureSearchService
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
-import com.dreamscale.htmflow.core.service.ComponentLookupService
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -23,56 +24,45 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ComponentSpaceObserverSpec extends Specification {
 
     ComponentSpaceObserver componentSpaceObserver
-    GridTile storyTile
+    GridTile gridTile
+    GeometryClock clock
+    UUID torchieId
+    FeatureCache featureCache
 
     def setup() {
+
+        clock = new GeometryClock(LocalDateTime.now())
         componentSpaceObserver = new ComponentSpaceObserver()
-
-
-        ComponentLookupService componentLookupServiceMock =
-                [lookupComponent: { UUID projectId, String filePath -> return "mainFocus" }] as ComponentLookupService
-
-        componentSpaceObserver.componentLookupService = componentLookupServiceMock;
-
-        //TODO write mock feature cache
-
-        FeatureCache featureCache = new FeatureCache(UUID.randomUUID(), new FeatureSearchService());
-
-        storyTile = new GridTile("@torchie/id", new GeometryClock(LocalDateTime.now()).getActiveCoords(), ZoomLevel.TWENTIES)
+        torchieId = UUID.randomUUID()
+        featureCache = new FeatureCache()
+        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache)
     }
 
-    def "should create Location traversals inside a Place"() {
+    def "should create Location traversals"() {
         given:
 
-        LocalDateTime time1 = aRandom.localDateTime()
-        LocalDateTime time2 = time1.plusMinutes(20);
-        LocalDateTime time3 = time2.plusMinutes(20);
-        LocalDateTime time4 = time3.plusMinutes(20);
+        LocalDateTime time1 = clock.getActiveCoords().getClockTime();
+        LocalDateTime time2 = time1.plusMinutes(2);
 
         FlowableFlowActivity activity1 = createActivity("locationA", time1, time2)
-        FlowableFlowActivity activity2 = createActivity("locationB", time2, time3)
-        FlowableFlowActivity activity3 = createActivity("locationA", time3, time4)
-        FlowableFlowActivity activity4 = createActivity("locationA", time4, time4)
+        FlowableFlowActivity activity2 = createActivity("locationB", time2, time2.plusSeconds(3))
+        FlowableFlowActivity activity3 = createActivity("locationC", time2, time2.plusSeconds(10))
+        FlowableFlowActivity activity4 = createActivity("locationB", time2, time2.plusSeconds(15))
 
         def flowables = [activity1, activity2, activity3, activity4] as List
-        Window window = new Window(time1, time4)
+        Window window = new Window(time1, time1.plusMinutes(20))
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(window, storyTile)
-        //BoxAndBridgeActivity boxAndBridgeStructure = storyTile.getSpatialStructure();
+        componentSpaceObserver.see(window, gridTile)
+        gridTile.finishAfterLoad()
+
+        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetName.Navigations)
+        print tileOutput
 
         then:
-        assert true
+        assert tileOutput.getCell("@nav/rhythm", "20.3") == "bcb"
     }
-
-    //TODO journal walk should include flames over time, need a way to mark these dirty
-    //TODO need to reprocess frames on dirty
-    //TODO locations should include movements over time
-    //TODO component spaces should include bridges
-    //TODO locations should be mapped to resolve tables
-    //story frames abstract out, once I have the saving and persistance in mainFocus
-
 
     FlowableFlowActivity createActivity( String location, LocalDateTime start, LocalDateTime end) {
 

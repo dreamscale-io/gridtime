@@ -6,10 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public class MetricCell implements GridCell {
-    private static final int DEFAULT_CELL_SIZE_FOR_20_BEATS = 8;
-    private static final int DEFAULT_CELL_SIZE_FOR_4_BEATS = 40;
+    private static final int DEFAULT_CELL_SIZE_FOR_20_BEATS = 7;
+    private static final int DEFAULT_CELL_SIZE_FOR_4_BEATS = 39;
 
-    private static final String EMPTY_CELL = "  ";
+    private static final String EMPTY_CELL = "";
 
     private static final String TRUNCATED_INDICATOR = "*";
     private final AggregateType aggregateType;
@@ -36,34 +36,36 @@ public class MetricCell implements GridCell {
         }
     }
 
-
-    public String getHeaderCell() {
-        return getHeaderCell(cellSizeForBeat);
+    public String toHeaderCell() {
+        return toHeaderCell(cellSizeForBeat);
     }
 
-    public String getHeaderCell(int overrideCellSize) {
-        return toRightSizedCell("|"+beat.toShortString(), overrideCellSize);
+    public String toHeaderCell(int overrideCellSize) {
+        return toRightSizedCell(beat.toDisplayString(), overrideCellSize);
     }
 
-    public String getValueCell() {
-        return getValueCell(cellSizeForBeat);
+    public String toValueCell() {
+        return toValueCell(cellSizeForBeat);
     }
 
-    public String getValueCell(int overrideCellSize) {
-        String str = "|";
+    public String toValueCell(int overrideCellSize) {
+        return toRightSizedCell(toDisplayString(), overrideCellSize);
+    }
 
+    @Override
+    public String toDisplayString() {
+        String str;
         if (candleStick != null) {
             double value = candleStick.getValueByAggregateType(aggregateType);
-            str += Math.round(value * 100)*1.0 / 100;
+            str = Double.toString(Math.round(value * 100)*1.0 / 100);
         } else {
-            str += EMPTY_CELL;
+            str = EMPTY_CELL;
         }
-
-        return toRightSizedCell(str, overrideCellSize);
+        return str;
     }
 
     public String toString() {
-        return getValueCell();
+        return toValueCell();
     }
 
     private String toRightSizedCell(String cellContents, int cellSize) {
@@ -75,6 +77,7 @@ public class MetricCell implements GridCell {
         }
         return fittedContent;
     }
+
 
 
 }

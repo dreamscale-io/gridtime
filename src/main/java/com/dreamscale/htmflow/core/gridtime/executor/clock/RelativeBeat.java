@@ -1,12 +1,13 @@
 package com.dreamscale.htmflow.core.gridtime.executor.clock;
 
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Observable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.ToString;
 
 import java.time.Duration;
 
 @ToString
-public class RelativeBeat {
+public class RelativeBeat implements Observable {
 
     private final Duration relativeDuration;
     private final Beat flyweightBeat;
@@ -62,7 +63,7 @@ public class RelativeBeat {
         return toSummaryBeat;
     }
 
-    public String toShortString() {
-        return flyweightBeat.toShortString();
+    public String toDisplayString() {
+        return flyweightBeat.toDisplayString();
     }
 }

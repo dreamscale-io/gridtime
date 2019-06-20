@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.Auth
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.WorkContextEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.IdeaFlowStateType;
@@ -51,30 +52,38 @@ public class GridTile {
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void beginContext(LocalDateTime moment, StructureLevel structureLevel, UUID referenceId, String description) {
-        WorkContextReference contextReference = featureCache.lookupContextReference(structureLevel, referenceId, description);
+    public void startWorkContext(LocalDateTime moment, WorkContextEvent workContextEvent) {
+        WorkContextReference projectReference = featureCache.lookupContextReference(StructureLevel.PROJECT,
+                workContextEvent.getProjectId(), workContextEvent.getProjectName());
+
+        WorkContextReference taskReference = featureCache.lookupContextReference(StructureLevel.TASK,
+                workContextEvent.getTaskId(), workContextEvent.getTaskName());
+
+        WorkContextReference intentionReference = featureCache.lookupContextReference(StructureLevel.INTENTION,
+                workContextEvent.getIntentionId(), workContextEvent.getDescription());
 
         RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-        musicGrid.startWorkContext(beat, contextReference);
+        musicGrid.startWorkContext(beat, projectReference);
+        musicGrid.startWorkContext(beat, taskReference);
+        musicGrid.startWorkContext(beat, intentionReference);
     }
 
     /**
      * Change the active context, such as starting project, task, or intention
      */
 
-    public void endContext(LocalDateTime moment, StructureLevel structureLevel, UUID referenceId, String description, FinishTag finishTag) {
-        WorkContextReference contextReference = featureCache.lookupContextReference(structureLevel, referenceId, description);
+    public void clearWorkContext(LocalDateTime moment, FinishTag finishTag) {
 
         Duration relativeTime = gridCoordinates.getRelativeTime(moment);
         if (musicClock.isWithinMeasure(relativeTime)) {
             RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-            musicGrid.endWorkContext(beat, contextReference, finishTag);
+            musicGrid.clearWorkContext(beat, finishTag);
         } else {
-            TimeBombTrigger futureTimeBombTrigger = musicClock.getFutureTimeBomb(gridCoordinates.getRelativeTime(moment));
+            TimeBombTrigger timeBomb = musicClock.getFutureTimeBomb(gridCoordinates.getRelativeTime(moment));
 
-            musicGrid.timeBombContextEnding(futureTimeBombTrigger, contextReference, finishTag);
+            musicGrid.timeBombFutureContextEnding(timeBomb, finishTag);
         }
     }
 

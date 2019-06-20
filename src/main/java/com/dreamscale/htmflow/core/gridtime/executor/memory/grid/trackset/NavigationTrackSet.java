@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory.grid.trackset;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.ExecutionReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.PlaceReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
@@ -61,7 +60,7 @@ public class NavigationTrackSet implements PlayableCompositeTrack {
     }
 
     public void modifyPlace(RelativeBeat beat, int modificationCount) {
-        log.debug("modify: "+beat.toShortString() + modificationCount);
+        log.debug("modify: "+beat.toDisplayString() + modificationCount);
         metricsTrack.getMetricsFor(beat).addModificationSample(modificationCount);
     }
 

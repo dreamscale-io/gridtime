@@ -9,6 +9,7 @@ import com.dreamscale.htmflow.core.domain.tile.StoryTileEntity
 import com.dreamscale.htmflow.core.domain.tile.StoryTileRepository
 import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchieFactory
+import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.TileInstructions
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -26,14 +27,17 @@ class TorchieSpec extends Specification {
     TorchieFactory torchieFactory
 
     UUID torchieId
+    UUID teamId
     LocalDateTime clockStart
 
     def "should create executable torchie job that doesn't splode"() {
         given:
         torchieId = UUID.randomUUID();
+        teamId = UUID.randomUUID();
+
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
 
-        Torchie torchie = torchieFactory.wireUpMemberTorchie(torchieId, clockStart)
+        Torchie torchie = torchieFactory.wireUpMemberTorchie(teamId, torchieId, clockStart)
 
         LocalDateTime time1_0 = aRandom.localDateTime()
         LocalDateTime time2_0 = time1_0.plusMinutes(20);
@@ -44,8 +48,8 @@ class TorchieSpec extends Specification {
         createEvent(torchieId, time2_5)
 
         when:
-        Runnable runnable = torchie.whatsNext();
-        runnable.run()
+        TileInstructions instructions = torchie.whatsNext();
+        instructions.call()
 
         List<StoryTileEntity> tiles = tileRepository.findByTorchieIdOrderByClockPosition(torchieId);
 

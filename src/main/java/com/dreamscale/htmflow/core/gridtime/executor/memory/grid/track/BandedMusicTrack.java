@@ -10,7 +10,6 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.ta
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.FeatureCell;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridCell;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
@@ -46,21 +45,34 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
     public void startPlaying(RelativeBeat fromBeat, F feature, StartTag startTag) {
         F existingFeature = trackMusic.get(fromBeat);
         if (existingFeature != null) {
-            log.warn("Overwriting existing music at beat: " + fromBeat + ": " + existingFeature);
+            log.warn("Overwriting existing music at beat: " + fromBeat.toDisplayString() + ": "
+                    + existingFeature.toDisplayString() +" with "+feature.toDisplayString());
+            removeFinishTags(fromBeat);
         }
 
-        FeatureTag<F> lastStartTag = getLastStartTagInProgress(fromBeat);
+        FeatureTag<F> lastStartTag = getLastStartTag(fromBeat);
 
         if (lastStartTag == null || lastStartTag.getFeature() != feature) {
             trackMusic.put(fromBeat, feature);
             trackTags.add(fromBeat, new FeatureTag<>(feature, startTag));
         }
 
-        if (lastStartTag != null && lastStartTag.getFeature() != feature) {
+        if (lastStartTag != null && lastStartTag.getFeature() == feature) {
+            removeFinishTags(fromBeat);
+        } else if (lastStartTag != null && lastStartTag.getFeature() != feature) {
             RelativeBeat prevBeat = musicClock.getPreviousBeat(fromBeat);
             trackTags.add(prevBeat, new FeatureTag<>(lastStartTag.getFeature(), FinishTypeTag.Success));
         }
 
+    }
+
+    private void removeFinishTags(RelativeBeat fromBeat) {
+
+            List<FeatureTag<F>> tagsAtBeat = trackTags.get(fromBeat);
+            if (tagsAtBeat != null && tagsAtBeat.size() > 0) {
+
+                tagsAtBeat.removeIf(tag -> tag.getTag() instanceof FinishTag);
+            }
     }
 
     public void stopPlaying(RelativeBeat toBeat) {
@@ -68,7 +80,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     public void stopPlaying(RelativeBeat toBeat, FinishTag finishTag) {
-        FeatureTag<F> startTag = getLastStartTagInProgress(toBeat);
+        FeatureTag<F> startTag = getLastStartTag(toBeat);
         if (startTag != null) {
             fillBackwardUntilNotNull(toBeat, startTag.getFeature());
             if (finishTag != null) {
@@ -227,7 +239,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
         }
     }
 
-    private FeatureTag<F> getLastStartTagInProgress(RelativeBeat searchBackwardsFromBeat) {
+    private FeatureTag<F> getLastStartTag(RelativeBeat searchBackwardsFromBeat) {
 
         Iterator<RelativeBeat> iterator = musicClock.getBackwardsIterator(searchBackwardsFromBeat);
 
@@ -237,9 +249,6 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
             List<FeatureTag<F>> tags = trackTags.get(beat);
             if (tags != null && tags.size() > 0) {
                 for (FeatureTag<F> tag : tags) {
-                    if (tag.isFinish()) {
-                        return null;
-                    }
                     if (tag.isStart()) {
                         return tag;
                     }

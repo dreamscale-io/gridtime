@@ -10,8 +10,8 @@ import java.util.List;
 
 @Getter
 public class FeatureCell<F extends FeatureReference> implements GridCell {
-    private static final int DEFAULT_CELL_SIZE = 8;
-    private static final String EMPTY_CELL = "  ";
+    private static final int DEFAULT_CELL_SIZE = 7;
+    private static final String EMPTY_CELL = "";
 
     private static final String TRUNCATED_INDICATOR = "*";
 
@@ -40,20 +40,21 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         this.tags = tags;
     }
 
-    public String getHeaderCell() {
-        return getHeaderCell(DEFAULT_CELL_SIZE);
+    public String toHeaderCell() {
+        return toHeaderCell(DEFAULT_CELL_SIZE);
     }
 
-    public String getHeaderCell(int overrideCellSize) {
-        return toRightSizedCell("|"+beat.toShortString(), "", overrideCellSize);
+    public String toHeaderCell(int overrideCellSize) {
+        return toRightSizedCell(beat.toDisplayString(), "", overrideCellSize);
     }
 
-    public String getValueCell() {
-        return getValueCell(DEFAULT_CELL_SIZE);
+    public String toValueCell() {
+        return toValueCell(DEFAULT_CELL_SIZE);
     }
 
-    public String getValueCell(int overrideCellSize) {
-        String featureStr = "|";
+
+    public String toValueCell(int overrideCellSize) {
+        String featureStr = "";
 
         String tagStr = "";
 
@@ -69,6 +70,22 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         }
 
         return toRightSizedCell(featureStr, tagStr, overrideCellSize);
+    }
+
+    @Override
+    public String toDisplayString() {
+        String str = "";
+        if (feature != null) {
+            str += feature.toDisplayString();
+            if (tags != null && !tags.isEmpty()) {
+                str += toAllTagString();
+            }
+        } else if (features != null && !features.isEmpty()) {
+            str += toAllFeatureWithTagsString();
+        } else {
+            str += EMPTY_CELL;
+        }
+        return str;
     }
 
     private String toAllFeatureWithTagsString() {
@@ -112,7 +129,7 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     }
 
     public String toString() {
-        return getValueCell();
+        return toValueCell();
     }
 
     private String toRightSizedCell(String featureStr, String tagStr, int cellSize) {
@@ -126,7 +143,11 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     }
 
     private String truncateFeature(String featureStr, String tagStr, int maxSize) {
-        return featureStr.substring(0, maxSize - tagStr.length() - 1)  + TRUNCATED_INDICATOR + tagStr;
+        String truncatedTags = tagStr;
+        if (tagStr.length() > maxSize - 1) {
+            truncatedTags = tagStr.substring(0, maxSize - 1);
+        }
+        return featureStr.substring(0, maxSize - truncatedTags.length() - 1)  + TRUNCATED_INDICATOR + truncatedTags;
     }
 
     private boolean isOverMaxSize(String featureStr, String tagStr, int maxSize) {
@@ -136,5 +157,6 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     private boolean isOverMaxSize(String contents, int maxSize) {
         return contents.length() > maxSize;
     }
+
 
 }

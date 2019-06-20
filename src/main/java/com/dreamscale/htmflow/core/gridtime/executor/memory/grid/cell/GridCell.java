@@ -1,13 +1,15 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell;
 
-public interface GridCell {
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Observable;
 
-    String getHeaderCell();
+public interface GridCell extends Observable {
 
-    String getValueCell();
+    String toHeaderCell();
 
-    String getHeaderCell(int overrideCellSize);
+    String toValueCell();
 
-    String getValueCell(int overrideCellSize);
+    String toHeaderCell(int overrideCellSize);
+
+    String toValueCell(int overrideCellSize);
 
 }

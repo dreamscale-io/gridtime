@@ -43,13 +43,14 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
         ExecutionReference lastEvent = getLatestEventOnOrBeforeBeat(beat);
 
         rhythmTrack.playEventAtBeat(beat, executionEvent);
+        metricsTrack.getMetricsFor(beat).addExecutionTimeSample(executionEvent.getExecutionTime());
 
         if (lastEvent != null) {
             Duration durationSinceLastExec = Duration.between(lastEvent.getPosition(), executionEvent.getPosition());
-
             metricsTrack.getMetricsFor(beat).addExecutionCycleTimeSample(durationSinceLastExec);
-            metricsTrack.getMetricsFor(beat).addExecutionTimeSample(executionEvent.getExecutionTime());
         }
+
+
 
         if (!isRedAndWantingGreen && executionEvent.isRed()) {
             rhythmTrack.addTagAtBeat(beat, new FeatureTag<>(executionEvent, StartTypeTag.FirstRed));

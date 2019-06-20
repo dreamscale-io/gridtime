@@ -103,11 +103,6 @@ public class MusicClock implements Iterator<RelativeBeat> {
         }
 
         clockBeats = allClockBeats;
-
-        for (int i = 0; i < clockBeats.length; i++) {
-
-            log.debug("beat: "+clockBeats[i]);
-        }
     }
 
     private MusicClock generateSummaryClock() {

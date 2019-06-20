@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.domain.member.json.Member
 import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Results
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishCircleTag
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartCircleTag
@@ -13,6 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.MemoryOnlyFeaturePoo
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.AuthorsDetails
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.StructureLevel
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.WorkContextEvent
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName
 import spock.lang.Specification
 
@@ -73,12 +75,12 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTrack(TrackSetName.IdeaFlow)
-        print trackOutput.toDisplayString();
+        MusicGridResults trackOutput = cmd.playTrack(TrackSetName.IdeaFlow)
+        print trackOutput;
 
         then:
         assert trackOutput != null
-        assert trackOutput.toDisplayString().contains("wtf^")
+        assert trackOutput.getCell("@flow/wtf", "20.4") == "wtf^"
     }
 
     def "goto tile and play execution track with red/green"() {
@@ -97,11 +99,14 @@ class TorchieCmdSpec extends Specification {
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetName.Executions)
-        print trackOutput.toDisplayString();
+        print trackOutput;
 
         then:
         assert trackOutput != null
-        assert trackOutput.toDisplayString().contains("gr^rr")
+        assert trackOutput.getCell("@exec/rhythm", "20.2") == "gr^rr"
+        assert trackOutput.getCell("@exec/rhythm", "20.3") == "g\$"
+        assert trackOutput.getCell("@exec/runtime", "20.3") == "1.0"
+        assert trackOutput.getCell("@exec/cycletim", "20.3") == "60.0"
     }
 
     def "goto tile and play navigation rhythm track"() {
@@ -125,12 +130,16 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTrack(TrackSetName.Navigations)
-        print trackOutput.toDisplayString();
+        MusicGridResults trackOutput = cmd.playTrack(TrackSetName.Navigations)
+        print trackOutput;
 
         then:
         assert trackOutput != null
-        assert trackOutput.toDisplayString().contains("abca")
+        assert trackOutput.getCell("@nav/rhythm", "20.2") == "abca"
+        assert trackOutput.getCell("@nav/rhythm", "20.3") == "cc"
+        assert trackOutput.getCell("@nav/rhythm", "20.4") == "bc"
+
+        assert trackOutput.getCell("@nav/batch", "20.2") == "abc"
     }
 
     def "change work contexts and update bands and start/finish tags"() {
@@ -144,22 +153,23 @@ class TorchieCmdSpec extends Specification {
         UUID intentionB = UUID.randomUUID();
 
 
-        featurePool.getActiveGridTile().beginContext(time1, StructureLevel.PROJECT, projA, "projectA");
-        featurePool.getActiveGridTile().beginContext(time1, StructureLevel.TASK, taskA, "taskA");
-        featurePool.getActiveGridTile().beginContext(time1, StructureLevel.INTENTION, intentionA, "intA");
-
-        featurePool.getActiveGridTile().beginContext(time3, StructureLevel.TASK, taskB, "taskB");
-        featurePool.getActiveGridTile().beginContext(time3, StructureLevel.INTENTION, intentionB, "intB");
+        featurePool.getActiveGridTile().startWorkContext(time1, createWorkContextEvent("projectA", "taskA", "intA"));
+        featurePool.getActiveGridTile().startWorkContext(time3, createWorkContextEvent("projectA", "taskB", "intB"));
 
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetName.WorkContext)
-        print trackOutput.toDisplayString();
+        print trackOutput;
 
         then:
         assert trackOutput != null
-        assert trackOutput.toDisplayString().contains("proje*^")
+
+        assert trackOutput.getCell("@work/project", "20.2") == "proje*^"
+        assert trackOutput.getCell("@work/task", "20.2") == "taskA^"
+        assert trackOutput.getCell("@work/task", "20.3") == "taskA\$"
+        assert trackOutput.getCell("@work/task", "20.4") == "taskB^"
+
     }
 
     def "authors print initials in track"() {
@@ -178,11 +188,16 @@ class TorchieCmdSpec extends Specification {
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetName.Authors)
-        print trackOutput.toDisplayString();
+        print trackOutput;
 
         then:
         assert trackOutput != null
-        assert trackOutput.toDisplayString().contains("AS ML")
+        assert trackOutput.getCell("@author", "20.2") == "AS ML^"
+        assert trackOutput.getCell("@author", "20.3") == "AS ML\$"
+        assert trackOutput.getCell("@author", "20.4") == "AS^"
+        assert trackOutput.getCell("@author", "20.7") == "AS\$"
+        assert trackOutput.getCell("@author", "20.8") == ""
+
     }
 
     def "carry over context from one tile to the next"() {
@@ -191,7 +206,7 @@ class TorchieCmdSpec extends Specification {
 
         Member arty = new Member(UUID.randomUUID().toString(), "Arty Starr");
 
-        featurePool.getActiveGridTile().beginContext(time3, StructureLevel.PROJECT, UUID.randomUUID(), "projA");
+        featurePool.getActiveGridTile().startWorkContext(time3, createWorkContextEvent("projA", "taskA", "intA"));
         featurePool.getActiveGridTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty)));
 
         featurePool.getActiveGridTile().startFeelsBand(time2.plusMinutes(5), -4)
@@ -208,21 +223,25 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTile()
-        print trackOutput.toDisplayString();
+        MusicGridResults firstTile = cmd.playTile()
+        print firstTile;
 
         cmd.nextTile();
 
-        featurePool.getActiveGridTile().executeThing(time2.plusMinutes(20), new ExecutionEvent(5, time2.plusMinutes(20), Duration.ofSeconds(5), "JUnit", -2))
-
+        featurePool.getActiveGridTile().executeThing(time2.plusMinutes(20),
+                new ExecutionEvent(5, time2.plusMinutes(20), Duration.ofSeconds(5), "JUnit", -2))
         featurePool.getActiveGridTile().finishAfterLoad()
 
-        trackOutput = cmd.playTile()
-        print trackOutput.toDisplayString();
+        MusicGridResults secondTile = cmd.playTile()
+        print secondTile;
 
         then:
-        assert trackOutput != null;
-        assert trackOutput.toDisplayString().contains("1200")
+        assert firstTile != null;
+        assert secondTile != null;
+
+        assert firstTile.getCell("@flow/wtf", "20.4") == "wtf^"
+        assert secondTile.getCell("@flow/wtf", "20.4") == "wtf"
+        assert secondTile.getCell("@exec/cycletim", "20.3") == "1200.0"
     }
 
     def "should create progress band when modification threshold reached"() {
@@ -240,20 +259,42 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTile()
-        print trackOutput.toDisplayString();
+        MusicGridResults firstTile = cmd.playTile()
+        print firstTile;
 
         cmd.nextTile();
 
         featurePool.getActiveGridTile().clearWTF(time3.plusMinutes(20), new FinishCircleTag(UUID.randomUUID(), "circle", "cancel"))
         featurePool.getActiveGridTile().finishAfterLoad()
 
-        trackOutput = cmd.playTile()
-        print trackOutput.toDisplayString();
+        MusicGridResults secondTile = cmd.playTile()
+        print secondTile
 
         then:
-        assert trackOutput != null;
-        assert trackOutput.toDisplayString().contains("563")
+        assert firstTile != null;
+        assert secondTile != null;
+
+        assert firstTile.getCell("@flow/learning", "20.1") == "prg^"
+
+        assert firstTile.getQuarterCell("@flow/modify", "20.1") == "543.0"
+        assert firstTile.getQuarterCell("@flow/modify", "20.6") == "563.0"
+        assert firstTile.getQuarterCell("@flow/modify", "20.11") == "563.0"
+        assert firstTile.getQuarterCell("@flow/modify", "20.16") == "563.0"
+
+        assert secondTile.getCell("@flow/learning", "20.1") == "prg"
+        assert secondTile.getCell("@flow/learning", "20.6") == "lrn^"
+        assert secondTile.getCell("@flow/learning", "20.20") == "lrn"
+
+        assert secondTile.getQuarterCell("@flow/modify", "20.1") == "563.0"
+        assert secondTile.getQuarterCell("@flow/modify", "20.6") == "20.0"
+        assert secondTile.getQuarterCell("@flow/modify", "20.11") == "0.0"
+        assert secondTile.getQuarterCell("@flow/modify", "20.16") == "0.0"
+
+    }
+
+
+    private WorkContextEvent createWorkContextEvent(String projectName, String taskName, String intentionDescription) {
+        return new WorkContextEvent(UUID.randomUUID(), intentionDescription, UUID.randomUUID(), taskName, UUID.randomUUID(), projectName)
     }
 
 

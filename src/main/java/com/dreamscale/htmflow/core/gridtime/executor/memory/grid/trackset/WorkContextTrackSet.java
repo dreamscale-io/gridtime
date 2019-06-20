@@ -1,7 +1,10 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory.grid.trackset;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
+import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.WorkContextType;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.WorkContextEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.WorkContextReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContext;
@@ -16,6 +19,15 @@ public class WorkContextTrackSet extends MusicTrackSet<WorkContextType, WorkCont
     public WorkContextTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
         super(trackSetName, musicClock);
     }
+
+    public void startWorkContext(RelativeBeat beat, WorkContextReference workContext) {
+        startPlaying(workContext.getWorkType(), beat, workContext);
+    }
+
+    public void clearWorkContext(RelativeBeat beat, FinishTag finishTag) {
+        clearAllTracks(beat, finishTag);
+    }
+
 
     public CarryOverContext getCarryOverContext(String subcontextName) {
 

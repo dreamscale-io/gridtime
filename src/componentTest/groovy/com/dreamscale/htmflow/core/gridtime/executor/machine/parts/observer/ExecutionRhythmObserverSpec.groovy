@@ -4,8 +4,11 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
-
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableFlowActivity
+import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window
+import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache
+import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
 import spock.lang.Specification
 
@@ -18,38 +21,52 @@ public class ExecutionRhythmObserverSpec extends Specification {
     ExecutionRhythmObserver executionRhythmObserver
     GridTile gridTile
     GeometryClock clock
+    LocalDateTime time1
+    LocalDateTime time2
+    LocalDateTime time3
+    LocalDateTime time4
 
     def setup() {
-        clock = new GeometryClock(LocalDateTime.now())
+
+        clock = new GeometryClock(aRandom.localDateTime())
+
+        time1 = clock.getActiveCoords().getClockTime()
+        time2 = time1.plusMinutes(3);
+        time3 = time2.plusMinutes(4);
+        time4 = time3.plusMinutes(3);
+
+
         executionRhythmObserver = new ExecutionRhythmObserver()
-        storyTile = new GridTile(UUID.randomUUID(), clock.getActiveCoords(), null)
+        gridTile = new GridTile(UUID.randomUUID(), clock.getActiveCoords(), new FeatureCache())
     }
 
     def "should create red/green cycles from execution activity"() {
         given:
-
-        LocalDateTime time1 = aRandom.localDateTime()
-        LocalDateTime time2 = time1.plusMinutes(3);
-        LocalDateTime time3 = time2.plusMinutes(4);
-        LocalDateTime time4 = time3.plusMinutes(5);
-
         FlowableFlowActivity executionEvent1 = createTestExecutionEvent(time1, time1.plusSeconds(1), false)
         FlowableFlowActivity executionEvent2 = createTestExecutionEvent(time2, time2.plusSeconds(2), true)
-        FlowableFlowActivity executionEvent3 = createOtherExecutionEvent(time3, time3.plusSeconds(1))
-        FlowableFlowActivity executionEvent4 = createTestExecutionEvent(time4, time4.plusSeconds(2), false)
+        FlowableFlowActivity executionEvent3 = createOtherExecutionEvent(time3, time3.plusSeconds(3))
+        FlowableFlowActivity executionEvent4 = createTestExecutionEvent(time4, time4.plusSeconds(4), false)
 
         def flowables = [executionEvent1, executionEvent2, executionEvent3, executionEvent4] as List
+        def window = new Window(time1, time1.plusMinutes(20));
+        window.addAll(flowables)
 
         when:
-        executionRhythmObserver.see(flowables, storyTile)
-        def movements = storyTile.getRhythmLayer(RhythmLayerType.EXECUTION_ACTIVITY).getMovements();
+        executionRhythmObserver.see(window, gridTile)
+        MusicGridResults results = gridTile.getMusicGrid().playTrackSet(TrackSetName.Executions);
+        println results
 
         then:
-        assert movements.size() == 4
-//        assert ((ExecuteThing)movements.get(0)).getExecutionEvent().isRedAndWantingGreen() == false;
-//        assert ((ExecuteThing)movements.get(1)).getExecutionEvent().isRedAndWantingGreen() == true;
-//        assert ((ExecuteThing)movements.get(2)).getExecutionEvent().isRedAndWantingGreen() == true;
-//        assert ((ExecuteThing)movements.get(3)).getExecutionEvent().isRedAndWantingGreen() == false;
+        assert results.getCell("@exec/rhythm", "20.1") == "g"
+        assert results.getCell("@exec/rhythm", "20.4") == "r^"
+        assert results.getCell("@exec/rhythm", "20.8") == "a"
+        assert results.getCell("@exec/rhythm", "20.11") == "g\$"
+
+        assert results.getCell("@exec/cycletim", "20.1") == ""
+        assert results.getCell("@exec/cycletim", "20.4") == "180.0"
+        assert results.getCell("@exec/cycletim", "20.8") == "240.0"
+        assert results.getCell("@exec/cycletim", "20.11") == "180.0"
+
     }
 
 
@@ -57,7 +74,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
                                                   LocalDateTime end) {
         FlowActivityEntity executionActivity = new FlowActivityEntity()
 
-        executionActivity.id = 5L;
+        executionActivity.id = aRandom.nextLong();
         executionActivity.start = start;
         executionActivity.end = end;
         executionActivity.activityType = FlowActivityType.Execution;
@@ -73,7 +90,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
                                                   boolean isRed) {
         FlowActivityEntity executionActivity = new FlowActivityEntity()
 
-        executionActivity.id = 5L;
+        executionActivity.id = aRandom.nextLong();
         executionActivity.start = start;
         executionActivity.end = end;
         executionActivity.activityType = FlowActivityType.Execution;

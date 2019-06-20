@@ -78,9 +78,9 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
         bandedMusicTrack.stopPlaying(beat);
     }
 
-    public void clearAllTracks(RelativeBeat beat) {
+    public void clearAllTracks(RelativeBeat beat, FinishTag finishTag) {
         for (BandedMusicTrack<F> track : musicTracks.values()) {
-            track.stopPlaying(beat);
+            track.stopPlaying(beat, finishTag);
         }
     }
 

@@ -20,13 +20,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.year == 2019
-        assert coords.daysIntoWeek == 1
-        assert coords.weeksIntoYear == 1
-        assert coords.twelves == 1
-        assert coords.twenties == 8
-        assert coords.weeksIntoBlock == 1
-        assert coords.block == 1
+        assert coords.getFormattedGridTime() == "2019B1-W1-D1_12am+2:00"
 
     }
 
@@ -40,15 +34,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.year == 2019
-        assert coords.daysIntoWeek == 1
-        assert coords.weeksIntoYear == 1
-        assert coords.twelves == 6
-        assert coords.twenties == 12
-        assert coords.weeksIntoBlock == 1
-        assert coords.block == 1
-
-
+        assert coords.getFormattedGridTime() == "2019B1-W1-D1_8pm+3:00"
     }
 
 
@@ -62,9 +48,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.year == 2019
-        assert coords.daysIntoWeek == 7
-        assert coords.weeksIntoYear == 3
+        assert coords.getFormattedGridTime() == "2019B1-W3-D7_4am+0:40"
 
     }
 
@@ -78,9 +62,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.year == 2018
-        assert coords.daysIntoWeek == 2
-        assert coords.weeksIntoYear == 53
+        assert coords.getFormattedGridTime() == "2018B9-W5-D2_4am+0:40"
 
     }
 

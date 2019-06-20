@@ -10,7 +10,6 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.IdeaFlowStateType;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.WorkContextType;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.StartTag;
@@ -66,11 +65,11 @@ public class MusicGrid {
     }
 
     public void startWorkContext(RelativeBeat beat, WorkContextReference workContext) {
-        contextTracks.startPlaying(workContext.getWorkType(), beat, workContext);
+        contextTracks.startWorkContext(beat, workContext);
     }
 
-    public void endWorkContext(RelativeBeat beat, WorkContextReference workContext, FinishTag finishTag) {
-        contextTracks.stopPlaying(workContext.getWorkType(), beat, finishTag);
+    public void clearWorkContext(RelativeBeat beat, FinishTag finishTag) {
+        contextTracks.clearWorkContext(beat, finishTag);
     }
 
     public void startAuthors(RelativeBeat beat, AuthorsReference authorsReference) {
@@ -106,8 +105,8 @@ public class MusicGrid {
         ideaflowTracks.clearWTF(beat, finishTag);
     }
 
-    public void timeBombContextEnding(TimeBombTrigger timeBombTrigger, WorkContextReference context, FinishTag finishTag) {
-        timeBombTrigger.wireUpTrigger(new EndContextTrigger(timeBombTrigger.getFutureSplodingBeat(), context, finishTag));
+    public void timeBombFutureContextEnding(TimeBombTrigger timeBombTrigger, FinishTag finishTag) {
+        timeBombTrigger.wireUpTrigger(new EndContextTrigger(timeBombTrigger.getFutureSplodingBeat(), finishTag));
 
         timeBombTriggers.add(timeBombTrigger);
     }
@@ -125,18 +124,6 @@ public class MusicGrid {
         executionTracks.executeThing(beat, execution);
     }
 
-    public MusicTrackSet<IdeaFlowStateType, IdeaFlowStateReference> play(IdeaFlowStateType ideaFlowState) {
-        return null;
-    }
-
-    public IdeaFlowStateType getLastIdeaFlowState() {
-        return null;
-    }
-
-    public MusicTrackSet<IdeaFlowStateType, IdeaFlowStateReference> getIdeaFlowMusic() {
-        return null;
-    }
-
     public void finish(FeatureCache featureCache) {
         authorsTracks.finish();
         feelsTracks.finish();
@@ -150,85 +137,52 @@ public class MusicGrid {
 
     public MusicGridResults playTrackSet(TrackSetName trackToPlay) {
         PlayableCompositeTrack trackSet = trackSetsByName.get(trackToPlay);
-        List<String> rowsAsStrings = toMusicNotationRowsWithHeader(trackSet.toGridRows());
 
-        return new MusicGridResults(rowsAsStrings);
+        return toMusicGridResults(trackSet.toGridRows());
     }
 
     public MusicGridResults playAllTracks() {
-        List<String> rowsAsString = new ArrayList<>();
+        List<GridRow> allRows = new ArrayList<>();
 
         for (TrackSetName trackName : trackSetsByName.keySet()) {
             PlayableCompositeTrack track = trackSetsByName.get(trackName);
 
-            if (rowsAsString.isEmpty()) {
-                rowsAsString.addAll(toMusicNotationRowsWithHeader(track.toGridRows()));
-            } else {
-                rowsAsString.addAll(toMusicNotationRows(track.toGridRows()));
-            }
-        }
-        return new MusicGridResults(rowsAsString);
-    }
-
-    private List<String> toMusicNotationRows(List<GridRow> gridRows) {
-        //first row is header row
-
-        List<String> rows = DefaultCollections.list();
-
-        if (gridRows != null && gridRows.size() > 0) {
-            for (GridRow gridRow : gridRows) {
-                rows.add( gridRow.getPrintedValueRow());
-            }
+            allRows.addAll(track.toGridRows());
         }
 
-        return rows;
+        return toMusicGridResults(allRows);
     }
 
+    private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
 
-    private List<String> toMusicNotationRowsWithHeader(List<GridRow> gridRows) {
-        //first row is header row
-
-        List<String> rows = DefaultCollections.list();
+        List<String> headerRow = new ArrayList<>();
+        List<List<String>> valueRows = new ArrayList<>();
 
         if (gridRows != null && gridRows.size() > 0) {
             GridRow firstRow = gridRows.get(0);
 
-            rows.add( firstRow.getPrintedHeaderRow());
+            headerRow.addAll(firstRow.toHeaderColumns());
 
             for (GridRow gridRow : gridRows) {
-                rows.add( gridRow.getPrintedValueRow());
+                valueRows.add( gridRow.toValueRow());
             }
         }
 
-        return rows;
+        return new MusicGridResults(headerRow, valueRows);
     }
-
-
-    private List<GridRow> getPlayedTrackResults(TrackSetName trackSetName) {
-        //todo implement one at a time, the context on some of these is a bit off
-
-        if (trackSetName == contextTracks.getTrackSetName()) {
-            return contextTracks.toGridRows();
-        }
-        return DefaultCollections.emptyList();
-    }
-
-
 
 
     private class EndContextTrigger implements Trigger {
-        private final WorkContextReference contextReference;
         private final FinishTag finishTag;
         private final RelativeBeat beat;
 
-        public EndContextTrigger(RelativeBeat beat, WorkContextReference contextReference, FinishTag finishTag) {
+        public EndContextTrigger(RelativeBeat beat, FinishTag finishTag) {
             this.beat = beat;
-            this.contextReference = contextReference;
             this.finishTag = finishTag;
         }
 
         public void fire() {
-            endWorkContext(beat, contextReference, finishTag);
+            clearWorkContext(beat, finishTag);
         }
     }
 

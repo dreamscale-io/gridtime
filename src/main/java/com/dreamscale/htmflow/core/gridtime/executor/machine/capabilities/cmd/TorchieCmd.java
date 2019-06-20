@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.CmdType;
@@ -49,18 +50,18 @@ public class TorchieCmd {
         runInstructionAndWaitTilDone(instructions);
     }
 
-    public Results playTile() {
+    public MusicGridResults playTile() {
         TileInstructions instructions = torchie.getInstructionsBuilder().playTile();
         runInstructionAndWaitTilDone(instructions);
 
-        return instructions.getOutputResults();
+        return (MusicGridResults) instructions.getOutputResults();
     }
 
-    public Results playTrack(TrackSetName trackSetName) {
+    public MusicGridResults playTrack(TrackSetName trackSetName) {
         TileInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
         runInstructionAndWaitTilDone(instructions);
 
-        return instructions.getOutputResults();
+        return (MusicGridResults) instructions.getOutputResults();
     }
 
     public void haltMetronome() {

@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.executor.clock;
 
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Observable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -7,7 +8,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @ToString
-public class Beat {
+public class Beat implements Observable {
 
     public static Beat BEAT_1_OF_20 = new Beat(1, 20);
     public static Beat BEAT_2_OF_20 = new Beat(2, 20);
@@ -122,7 +123,7 @@ public class Beat {
         return new Beat[0];
     }
 
-    public String toShortString() {
+    public String toDisplayString() {
         return beatsPerMeasure + "." + beat;
     }
 }

@@ -47,6 +47,7 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
             List<F> eventsAtBeat = trackMusic.get(prevBeat);
             if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
                 latestEvent = eventsAtBeat.get(eventsAtBeat.size() - 1);
+                break;
             }
         }
 

@@ -1,19 +1,17 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell;
 
-import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.Tag;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class GridRow {
 
     private String rowName;
-    private static final int DEFAULT_ROW_NAME_COLUMN_SIZE = 15;
+    private static final int DEFAULT_ROW_NAME_COLUMN_SIZE = 14;
 
 
     List<GridCell> gridCells = DefaultCollections.list();
@@ -26,22 +24,23 @@ public class GridRow {
         gridCells.add(cell);
     }
 
-    public String getPrintedHeaderRow() {
-        String headerRow = toRightSizedRowName("|");
+    public List<String> toHeaderColumns() {
+        List<String> headerColumns = new ArrayList<>();
+        headerColumns.add(toRightSizedRowName(""));
         for (GridCell cell : gridCells) {
-            headerRow += cell.getHeaderCell();
+            headerColumns.add(cell.toHeaderCell());
         }
-
-        return headerRow;
+        return headerColumns;
     }
 
-    public String getPrintedValueRow() {
-        String valueRow = toRightSizedRowName("|"+rowName);
+    public List<String> toValueRow() {
+        List<String> valueColumns = new ArrayList<>();
+        valueColumns.add(toRightSizedRowName(rowName));
         for (GridCell cell : gridCells) {
-            valueRow += cell.getValueCell();
+            valueColumns.add(cell.toValueCell());
         }
 
-        return valueRow;
+        return valueColumns;
     }
 
     private String toRightSizedRowName(String rowName) {
@@ -53,4 +52,7 @@ public class GridRow {
         }
         return fittedContent;
     }
+
+
+
 }

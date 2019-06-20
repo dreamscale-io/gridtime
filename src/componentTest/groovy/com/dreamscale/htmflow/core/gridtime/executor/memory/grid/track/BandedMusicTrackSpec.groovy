@@ -20,7 +20,7 @@ class BandedMusicTrackSpec extends Specification {
 
         featureCache = new FeatureCache();
         musicClock = new MusicClock(ZoomLevel.TWENTY)
-        bandedMusicTrack = new BandedMusicTrack<>(musicClock)
+        bandedMusicTrack = new BandedMusicTrack<>("@row/name", musicClock)
 
         featureCache
     }
