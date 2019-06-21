@@ -2,14 +2,13 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.observer;
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishTypeTag;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartTypeTag;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.CircleDetails;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.flowable.FlowableCircleMessageEvent;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishCircleTag;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartCircleTag;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile;
-
-import java.util.List;
 
 /**
  * Translates the Circle Feed messages of start/stop shelf/resume on WTF Circles to TimeBands
@@ -25,22 +24,36 @@ public class WTFStateObserver implements FlowObserver<FlowableCircleMessageEvent
             CircleMessageType circleMessageType = circleMessage.getMessageType();
 
             if (isCircleOpening(circleMessageType)) {
-                gridTile.startWTF(circleMessage.getPosition(), createStartCircleTag(circleMessage));
+                gridTile.startWTF(circleMessage.getPosition(), createCircleDetails(circleMessage), decodeStartTag(circleMessage.getMessageType()));
             }
 
             if (isCircleEnding(circleMessageType)) {
-                gridTile.clearWTF(circleMessage.getPosition(), createFinishCircleTag(circleMessage));
+                gridTile.clearWTF(circleMessage.getPosition(), decodeFinishTag(circleMessage.getMessageType()));
             }
         }
-
     }
 
-    private FinishCircleTag createFinishCircleTag(CircleFeedMessageEntity circleMessage) {
-        return new FinishCircleTag(circleMessage.getCircleId(), circleMessage.getCircleName(), circleMessage.getMessageType().name());
+    private CircleDetails createCircleDetails(CircleFeedMessageEntity circleMessage) {
+        return new CircleDetails(circleMessage.getCircleId(), circleMessage.getCircleName());
     }
 
-    private StartCircleTag createStartCircleTag(CircleFeedMessageEntity circleMessage) {
-        return new StartCircleTag(circleMessage.getCircleId(), circleMessage.getCircleName(), circleMessage.getMessageType().name());
+
+    private StartTypeTag decodeStartTag(CircleMessageType circleMessageType) {
+        if (circleMessageType.equals(CircleMessageType.CIRCLE_START)) {
+            return StartTypeTag.Start;
+        } else if (circleMessageType.equals(CircleMessageType.CIRCLE_RESUMED)) {
+            return StartTypeTag.Resume;
+        }
+        return StartTypeTag.Start;
+    }
+
+    private FinishTypeTag decodeFinishTag(CircleMessageType circleMessageType) {
+        if (circleMessageType.equals(CircleMessageType.CIRCLE_CLOSED)) {
+            return FinishTypeTag.Success;
+        } else if (circleMessageType.equals(CircleMessageType.CIRCLE_SHELVED)) {
+            return FinishTypeTag.DoItLater;
+        }
+        return FinishTypeTag.Success;
     }
 
 

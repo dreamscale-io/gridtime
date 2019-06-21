@@ -6,6 +6,6 @@ public enum  FinishTypeTag implements FinishTag {
     Success,
     Fail,
     Abort,
-    FirstGreenAfterRed;
+    FirstGreenAfterRed, DoItLater;
 
 }

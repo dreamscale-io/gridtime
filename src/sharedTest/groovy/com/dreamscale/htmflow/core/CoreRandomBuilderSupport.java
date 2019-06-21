@@ -4,6 +4,8 @@ import com.dreamscale.htmflow.api.activity.*;
 import com.dreamscale.htmflow.api.batch.*;
 import com.dreamscale.htmflow.api.event.RandomSnippetEventBuilder;
 import com.dreamscale.htmflow.api.journal.RandomIntentionInputDtoBuilder;
+import com.dreamscale.htmflow.core.domain.circle.CircleMessageRepository;
+import com.dreamscale.htmflow.core.domain.circle.RandomCircleMessageEntityBuilder;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.htmflow.core.domain.flow.RandomFlowActivityEntityBuilder;
 import com.dreamscale.htmflow.core.domain.journal.*;
@@ -29,6 +31,9 @@ public class CoreRandomBuilderSupport {
 
     @Autowired
     private FlowActivityRepository flowActivityRepository;
+
+    @Autowired
+    private CircleMessageRepository circleMessageRepository;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -63,6 +68,8 @@ public class CoreRandomBuilderSupport {
     public RandomIntentionEntityBuilder intentionEntity() { return new RandomIntentionEntityBuilder(intentionRepository);}
 
     public RandomFlowActivityEntityBuilder flowActivityEntity() { return new RandomFlowActivityEntityBuilder(flowActivityRepository);}
+
+    public RandomCircleMessageEntityBuilder circleMessageEntity() { return new RandomCircleMessageEntityBuilder(circleMessageRepository);}
 
     public RandomIntentionInputDtoBuilder intentionInputDto() {
         return new RandomIntentionInputDtoBuilder();

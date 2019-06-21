@@ -12,14 +12,6 @@ import java.util.*;
 @Slf4j
 public class SaveToPostgresSink implements SinkStrategy {
 
-    @Autowired
-    StoryTileRepository storyTileRepository;
-
-    @Autowired
-    StoryGridSummaryRepository storyGridSummaryRepository;
-
-    @Autowired
-    StoryGridMetricsRepository storyGridMetricsRepository;
 
     @Override
     public void save(UUID torchieId, GridTile gridTile) {

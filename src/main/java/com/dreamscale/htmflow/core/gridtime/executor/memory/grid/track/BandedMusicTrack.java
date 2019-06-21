@@ -50,7 +50,8 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
             removeFinishTags(fromBeat);
         }
 
-        FeatureTag<F> lastStartTag = getLastStartTag(fromBeat);
+        FeatureTag<F> lastStartTag = getLastStartTagInProgress(fromBeat);
+
 
         if (lastStartTag == null || lastStartTag.getFeature() != feature) {
             trackMusic.put(fromBeat, feature);
@@ -80,7 +81,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     public void stopPlaying(RelativeBeat toBeat, FinishTag finishTag) {
-        FeatureTag<F> startTag = getLastStartTag(toBeat);
+        FeatureTag<F> startTag = getLastStartTagInProgress(toBeat);
         if (startTag != null) {
             fillBackwardUntilNotNull(toBeat, startTag.getFeature());
             if (finishTag != null) {
@@ -239,7 +240,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
         }
     }
 
-    private FeatureTag<F> getLastStartTag(RelativeBeat searchBackwardsFromBeat) {
+    private FeatureTag<F> getLastStartTagInProgress(RelativeBeat searchBackwardsFromBeat) {
 
         Iterator<RelativeBeat> iterator = musicClock.getBackwardsIterator(searchBackwardsFromBeat);
 
@@ -249,6 +250,9 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
             List<FeatureTag<F>> tags = trackTags.get(beat);
             if (tags != null && tags.size() > 0) {
                 for (FeatureTag<F> tag : tags) {
+                    if (tag.isFinish() && !beat.equals(searchBackwardsFromBeat)) {
+                        return null;
+                    }
                     if (tag.isStart()) {
                         return tag;
                     }

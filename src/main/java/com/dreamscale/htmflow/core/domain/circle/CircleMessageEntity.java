@@ -16,16 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CircleMessageEntity {
 
-    public static String MESSAGE_FIELD = "message";
-
-    public static String FILE_NAME_FIELD = "name";
-    public static String FILEPATH_FIELD = "filePath";
-
-    public static String SNIPPET_SOURCE_FIELD = "snippetSource";
-    public static String SNIPPET_FIELD = "snippet";
-
-
-
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
@@ -47,13 +37,13 @@ public class CircleMessageEntity {
     @Transient
     private final MetadataFields metadataFields = new MetadataFields();
 
-    public void setMetadataField(String key, Object value) {
-        metadataFields.set(key, value);
+    public void setMetadataField(CircleMessageMetadataField field, Object value) {
+        metadataFields.set(field.name(), value);
         metadata = metadataFields.toJson();
     }
 
-    public String getMetadataValue(String key) {
-        return metadataFields.get(key);
+    public String getMetadataValue(CircleMessageMetadataField field) {
+        return metadataFields.get(field.name());
     }
 
     @PostLoad

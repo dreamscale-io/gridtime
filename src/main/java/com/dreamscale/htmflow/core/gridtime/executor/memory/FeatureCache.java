@@ -1,9 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory;
 
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.AuthorsDetails;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.LocationInBox;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.StructureLevel;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.search.FeatureReferenceFactory;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.*;
@@ -38,10 +35,14 @@ public class FeatureCache {
         this.featureReferenceFactory = new FeatureReferenceFactory();
     }
 
+    public IdeaFlowStateReference lookupWTFReference(CircleDetails circleDetails) {
+        IdeaFlowStateReference stateReference = featureReferenceFactory.createWTFReference(circleDetails);
 
+        return cacheLookup(stateReference);
+    }
 
     public IdeaFlowStateReference lookupIdeaFlowStateReference(IdeaFlowStateType stateType) {
-        IdeaFlowStateReference stateReference = featureReferenceFactory.createStateReference(stateType);
+        IdeaFlowStateReference stateReference = featureReferenceFactory.createIdeaFlowReference(stateType);
 
         return cacheLookup(stateReference);
     }

@@ -3,5 +3,5 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.t
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.StartTag;
 
 public enum StartTypeTag implements StartTag {
-    Start, Rollover, FirstRed, Temp;
+    Start, Rollover, FirstRed, Resume;
 }

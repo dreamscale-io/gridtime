@@ -5,8 +5,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.journal.IntentionEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
-import com.dreamscale.htmflow.core.domain.tile.StoryTileEntity
-import com.dreamscale.htmflow.core.domain.tile.StoryTileRepository
+
 import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchieFactory
 import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.TileInstructions
@@ -20,8 +19,8 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 @ComponentTest
 class TorchieSpec extends Specification {
 
-    @Autowired
-    StoryTileRepository tileRepository;
+//    @Autowired
+//    StoryTileRepository tileRepository;
 
     @Autowired
     TorchieFactory torchieFactory
@@ -51,10 +50,10 @@ class TorchieSpec extends Specification {
         TileInstructions instructions = torchie.whatsNext();
         instructions.call()
 
-        List<StoryTileEntity> tiles = tileRepository.findByTorchieIdOrderByClockPosition(torchieId);
+//        List<?> tiles = tileRepository.findByTorchieIdOrderByClockPosition(torchieId);
 
         then:
-        assert tiles.size() > 0
+        assert instructions.getOutputTile() != null
 
     }
 

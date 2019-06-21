@@ -1,30 +1,32 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type;
 
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.CircleDetails;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.FeatureDetails;
 import org.springframework.web.util.UriTemplate;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 public enum IdeaFlowStateType implements FeatureType {
 
-    WTF_STATE("/wtf"),
-    LEARNING_STATE("/learn"),
-    PROGRESS_STATE("/progress");
+    WTF_STATE("/wtf", "/wtf/{circleId}", CircleDetails.class),
+    LEARNING_STATE("/learn", "/learn", null),
+    PROGRESS_STATE("/progress", "/progress", null);
 
     private static final String CLASS_TYPE = "@flow";
 
-    private static final Set<String> TEMPLATE_VARIABLES = DefaultCollections.emptySet();
+    private static final LinkedHashSet<String> TEMPLATE_VARIABLES = DefaultCollections.toSet(TemplateVariable.CIRCLE_ID);
 
     private final Class<? extends FeatureDetails> serializationClass;
     private final UriTemplate uriTemplate;
     private final String typeUri;
 
-    IdeaFlowStateType(String typeUri) {
+    IdeaFlowStateType(String typeUri, String uriTemplatePath, Class<? extends FeatureDetails> serializationClass) {
         this.typeUri = CLASS_TYPE + typeUri;
-        this.uriTemplate = new UriTemplate(CLASS_TYPE + typeUri);
-        this.serializationClass = null;
+        this.uriTemplate = new UriTemplate(CLASS_TYPE + uriTemplatePath);
+        this.serializationClass = serializationClass;
     }
 
     @Override
@@ -61,4 +63,7 @@ public enum IdeaFlowStateType implements FeatureType {
         return typeUri;
     }
 
+    public static class TemplateVariable {
+        public static String CIRCLE_ID = "circleId";
+    }
 }

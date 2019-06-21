@@ -6,14 +6,14 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchiePoolExecutor
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Results
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishCircleTag
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartCircleTag
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishTypeTag
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartTypeTag
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool
 import com.dreamscale.htmflow.core.gridtime.executor.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.AuthorsDetails
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.StructureLevel
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.WorkContextEvent
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName
 import spock.lang.Specification
@@ -70,7 +70,7 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().startWTF(time3, new StartCircleTag(UUID.randomUUID(), "hi", "resume"))
+        featurePool.getActiveGridTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
         featurePool.getActiveGridTile().finishAfterLoad()
 
@@ -210,7 +210,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty)));
 
         featurePool.getActiveGridTile().startFeelsBand(time2.plusMinutes(5), -4)
-        featurePool.getActiveGridTile().startWTF(time3, new StartCircleTag(UUID.randomUUID(), "hi", "resume"))
+        featurePool.getActiveGridTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
         featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeA", Duration.ofSeconds(9))
         featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
@@ -248,7 +248,7 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().startWTF(time1, new StartCircleTag(UUID.randomUUID(), "circle", "resume"))
+        featurePool.getActiveGridTile().startWTF(time1, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Resume)
         featurePool.getActiveGridTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(9))
 
         featurePool.getActiveGridTile().modifyCurrentLocation(time1, 100)
@@ -264,7 +264,7 @@ class TorchieCmdSpec extends Specification {
 
         cmd.nextTile();
 
-        featurePool.getActiveGridTile().clearWTF(time3.plusMinutes(20), new FinishCircleTag(UUID.randomUUID(), "circle", "cancel"))
+        featurePool.getActiveGridTile().clearWTF(time3.plusMinutes(20), FinishTypeTag.DoItLater)
         featurePool.getActiveGridTile().finishAfterLoad()
 
         MusicGridResults secondTile = cmd.playTile()
@@ -291,7 +291,6 @@ class TorchieCmdSpec extends Specification {
         assert secondTile.getQuarterCell("@flow/modify", "20.16") == "0.0"
 
     }
-
 
     private WorkContextEvent createWorkContextEvent(String projectName, String taskName, String intentionDescription) {
         return new WorkContextEvent(UUID.randomUUID(), intentionDescription, UUID.randomUUID(), taskName, UUID.randomUUID(), projectName)

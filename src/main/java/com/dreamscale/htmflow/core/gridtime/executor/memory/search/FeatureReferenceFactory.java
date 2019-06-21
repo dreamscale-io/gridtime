@@ -11,7 +11,12 @@ public class FeatureReferenceFactory {
 
     public static final String UNKNOWN = "[UNKNOWN]";
 
-    public IdeaFlowStateReference createStateReference(IdeaFlowStateType stateType) {
+    public IdeaFlowStateReference createWTFReference(CircleDetails circleDetails) {
+
+        return new IdeaFlowStateReference(IdeaFlowStateType.WTF_STATE, circleDetails.toSearchKey(), circleDetails);
+    }
+
+    public IdeaFlowStateReference createIdeaFlowReference(IdeaFlowStateType stateType) {
         return new IdeaFlowStateReference(stateType, stateType.getTypeUri());
     }
 
@@ -84,6 +89,7 @@ public class FeatureReferenceFactory {
 
        return new AuthorsReference(authorsType, authorsDetails.toSearchKey(), authorsDetails);
     }
+
 
 
 }

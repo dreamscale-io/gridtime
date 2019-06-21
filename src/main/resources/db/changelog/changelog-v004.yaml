@@ -1,0 +1,7 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v004/drop_unused_tables.sql
+
+  - include:
+        file: db/v004/create_grid_feature.sql

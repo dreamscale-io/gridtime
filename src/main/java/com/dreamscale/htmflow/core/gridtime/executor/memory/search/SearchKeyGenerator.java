@@ -214,4 +214,10 @@ public class SearchKeyGenerator {
     }
 
 
+    public static String createCircleSearchKey(UUID circleId) {
+        Map<String, String> variableMap = new HashMap<>();
+        variableMap.put(IdeaFlowStateType.TemplateVariable.CIRCLE_ID, circleId.toString());
+
+        return IdeaFlowStateType.WTF_STATE.expandUri(variableMap);
+    }
 }

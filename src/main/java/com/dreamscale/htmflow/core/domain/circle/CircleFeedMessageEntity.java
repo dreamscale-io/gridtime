@@ -38,7 +38,6 @@ public class CircleFeedMessageEntity {
     private CircleMessageType messageType;
 
 
-
     private String metadata;
 
     @Transient
@@ -50,27 +49,27 @@ public class CircleFeedMessageEntity {
     }
 
     public String getMessage() {
-        return getMetadataValue(CircleMessageEntity.MESSAGE_FIELD);
+        return getMetadataValue(CircleMessageMetadataField.message);
     }
 
     public String getFileName() {
-        return getMetadataValue(CircleMessageEntity.FILE_NAME_FIELD);
+        return getMetadataValue(CircleMessageMetadataField.name);
     }
 
     public String getFilePath() {
-        return getMetadataValue(CircleMessageEntity.FILEPATH_FIELD);
+        return getMetadataValue(CircleMessageMetadataField.filePath);
     }
 
     public String getSnippet() {
-        return getMetadataValue(CircleMessageEntity.SNIPPET_FIELD);
+        return getMetadataValue(CircleMessageMetadataField.snippet);
     }
 
     public String getSnippetSource() {
-        return getMetadataValue(CircleMessageEntity.SNIPPET_SOURCE_FIELD);
+        return getMetadataValue(CircleMessageMetadataField.snippetSource);
     }
 
-    public String getMetadataValue(String key) {
-        return metadataFields.get(key);
+    public String getMetadataValue(CircleMessageMetadataField field) {
+        return metadataFields.get(field.name());
     }
 
     @PostLoad

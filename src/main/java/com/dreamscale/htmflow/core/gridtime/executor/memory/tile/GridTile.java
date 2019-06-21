@@ -2,21 +2,17 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory.tile;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.AuthorsDetails;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.ExecutionEvent;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.StartTag;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.WorkContextEvent;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.IdeaFlowStateType;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.WorkContextType;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.MusicGrid;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.FinishTag;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishCircleTag;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartCircleTag;
 import com.dreamscale.htmflow.core.gridtime.executor.alarm.TimeBombTrigger;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.StructureLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -98,21 +94,21 @@ public class GridTile {
     /**
      * Starts a WTF friction band...
      */
-    public void startWTF(LocalDateTime moment, StartCircleTag startCircleTag) {
-        IdeaFlowStateReference stateReference = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE);
+    public void startWTF(LocalDateTime moment, CircleDetails circleDetails, StartTag startTag) {
+        IdeaFlowStateReference stateReference = featureCache.lookupWTFReference(circleDetails);
 
         RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-        musicGrid.startWTF(beat, stateReference, startCircleTag);
+        musicGrid.startWTF(beat, stateReference, startTag);
     }
 
     /**
      * Clears a WTF friction band...
      */
-    public void clearWTF(LocalDateTime endBandPosition, FinishCircleTag finishCircleTag) {
+    public void clearWTF(LocalDateTime endBandPosition, FinishTag finishTag) {
         RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(endBandPosition));
 
-        musicGrid.clearWTF(beat, finishCircleTag);
+        musicGrid.clearWTF(beat, finishTag);
     }
 
     /**
