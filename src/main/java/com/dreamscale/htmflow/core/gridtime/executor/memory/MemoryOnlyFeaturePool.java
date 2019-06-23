@@ -14,12 +14,11 @@ public class MemoryOnlyFeaturePool extends AbstractFeaturePool {
     }
 
     @Override
-    FeatureReference resolve(FeatureReference originalReference) {
-        return originalReference;
+    public void resolveReferences() {
     }
 
     @Override
-    CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords) {
+    protected CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords) {
         return null;
     }
 

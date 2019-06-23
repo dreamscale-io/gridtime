@@ -23,4 +23,6 @@ public interface FeaturePool {
     void nextGridTile(GeometryClock.Coords toCoordPosition);
 
     <T extends Flowable> Feed<T> registerFeed(UUID memberId, FetchStrategy<T> fetchStrategy);
+
+    void resolveReferences();
 }

@@ -1,23 +1,23 @@
 package com.dreamscale.htmflow.core.gridtime.executor.memory.tile;
 
+import com.dreamscale.htmflow.core.gridtime.executor.alarm.TimeBombTrigger;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
-import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.StartTag;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.*;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.IdeaFlowStateType;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.WorkContextType;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.MusicGrid;
+import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.FinishTag;
-import com.dreamscale.htmflow.core.gridtime.executor.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.StartTag;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.WorkContextType;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.details.*;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.*;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.MusicGrid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -42,8 +42,7 @@ public class GridTile {
         this.musicGrid = new MusicGrid(musicClock);
         this.featureCache = featureCache;
     }
-
-
+    
     /**
      * Change the active context, such as starting project, task, or intention
      */
@@ -81,14 +80,6 @@ public class GridTile {
 
             musicGrid.timeBombFutureContextEnding(timeBomb, finishTag);
         }
-    }
-
-    public WorkContextReference getFirstContext(StructureLevel structureLevel) {
-        return musicGrid.getFirstContextOfType(WorkContextType.fromLevel(structureLevel));
-    }
-
-    public WorkContextReference getLastContext(StructureLevel structureLevel) {
-        return musicGrid.getLastContextOfTime(WorkContextType.fromLevel(structureLevel));
     }
 
     /**
@@ -172,7 +163,7 @@ public class GridTile {
 
         RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-        WorkContextReference projectContext = musicGrid.getLastContextOfTime(WorkContextType.PROJECT_WORK);
+        WorkContextReference projectContext = musicGrid.getLastContextOnOrBeforeBeat(beat, WorkContextType.PROJECT_WORK);
 
         if (projectContext == null) {
             projectContext = featureCache.lookupDefaultProject();
@@ -181,7 +172,7 @@ public class GridTile {
 
         PlaceReference locationInBox = featureCache.lookupLocationReference(projectContext.getReferenceId(), locationPath);
 
-        musicGrid.gotoLocation(featureCache, beat, locationInBox, timeInLocation);
+        musicGrid.gotoLocation(beat, locationInBox, timeInLocation);
 
     }
 
@@ -230,5 +221,10 @@ public class GridTile {
 
     public IdeaFlowTile getIdeaFlowTile() {
         return musicGrid.getIdeaFlowTile();
+    }
+
+
+    public Set<FeatureReference> getFeatures() {
+        return musicGrid.getAllFeatures();
     }
 }

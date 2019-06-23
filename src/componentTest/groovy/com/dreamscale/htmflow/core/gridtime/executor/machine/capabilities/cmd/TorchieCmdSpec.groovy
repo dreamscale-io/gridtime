@@ -300,9 +300,9 @@ class TorchieCmdSpec extends Specification {
     //so the next things to do...
 
     //feature resolver, add support for boxes & bridges
-
-    //feeds pull chain, and bookmarking, run this through the pool, write a new test around pull chains
     //save matrix grid
+
+    //integration harness
 
     //aggregate up
     //traversals with bridges

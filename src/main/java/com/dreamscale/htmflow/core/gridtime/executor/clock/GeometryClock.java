@@ -64,12 +64,12 @@ public class GeometryClock {
     }
 
     private static int calcBlocksIntoYear(int weeksIntoYear) {
-        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCK_OF_SIX_WEEKS.getInnerBeats()) + 1;
+        return Math.floorDiv(weeksIntoYear, ZoomLevel.BLOCK.getInnerBeats()) + 1;
     }
 
     private static int calcWeeksIntoBlock(int weeksIntoYear) {
 
-        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK_OF_SIX_WEEKS.getInnerBeats());
+        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK.getInnerBeats());
     }
 
     private static int calcAdjustedYear(int firstMondayOffset, LocalDateTime clock) {
@@ -100,7 +100,7 @@ public class GeometryClock {
             weekNumber = findLastWeekOfPriorYear(clock);
         } else {
             weekNumber = Math.floorDiv((dayNumber - firstMondayOffset),
-                    ZoomLevel.WORK_WEEK.getInnerBeats());
+                    ZoomLevel.WEEK.getInnerBeats());
         }
 
         return weekNumber + 1;
@@ -113,7 +113,7 @@ public class GeometryClock {
         LocalDate endOfPriorYear = LocalDate.of(clock.getYear() - 1, 12, 31);
 
         return Math.floorDiv((endOfPriorYear.getDayOfYear() - firstMondayOfPriorYear.getDayOfYear()),
-                ZoomLevel.WORK_WEEK.getInnerBeats());
+                ZoomLevel.WEEK.getInnerBeats());
 
     }
 
@@ -165,9 +165,9 @@ public class GeometryClock {
                         return minus4Hour();
                     case DAY:
                         return minusDay();
-                    case WORK_WEEK:
+                    case WEEK:
                         return minusWeek();
-                    case BLOCK_OF_SIX_WEEKS:
+                    case BLOCK:
                         return minusBlock();
                     case YEAR:
                         return minusYear();
@@ -183,9 +183,9 @@ public class GeometryClock {
                     return plus4Hour();
                 case DAY:
                     return plusDay();
-                case WORK_WEEK:
+                case WEEK:
                     return plusWeek();
-                case BLOCK_OF_SIX_WEEKS:
+                case BLOCK:
                     return plusBlock();
                 case YEAR:
                     return plusYear();

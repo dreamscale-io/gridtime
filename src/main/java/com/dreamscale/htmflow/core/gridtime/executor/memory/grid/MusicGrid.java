@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class MusicGrid {
@@ -64,6 +65,16 @@ public class MusicGrid {
         }
     }
 
+    public Set<FeatureReference> getAllFeatures() {
+        Set<FeatureReference> allFeatures = DefaultCollections.set();
+
+        for (PlayableCompositeTrack trackset : trackSetsByName.values()) {
+            allFeatures.addAll(trackset.getFeatures());
+        }
+
+        return allFeatures;
+    }
+
     public void startWorkContext(RelativeBeat beat, WorkContextReference workContext) {
         contextTracks.startWorkContext(beat, workContext);
     }
@@ -89,12 +100,8 @@ public class MusicGrid {
         feelsTracks.clearFeels(beat);
     }
 
-    public WorkContextReference getFirstContextOfType(WorkContextType fromStructureLevel) {
-        return contextTracks.getFirst(fromStructureLevel);
-    }
-
-    public WorkContextReference getLastContextOfTime(WorkContextType fromStructureLevel) {
-        return contextTracks.getLast(fromStructureLevel);
+    public WorkContextReference getLastContextOnOrBeforeBeat(RelativeBeat beat, WorkContextType fromStructureLevel) {
+        return contextTracks.getLastOnOrBeforeBeat(beat, fromStructureLevel);
     }
 
     public void startWTF(RelativeBeat beat, IdeaFlowStateReference wtfState, StartTag startTag) {
@@ -111,7 +118,7 @@ public class MusicGrid {
         timeBombTriggers.add(timeBombTrigger);
     }
 
-    public void gotoLocation(FeatureCache featureCache, RelativeBeat beat, PlaceReference locationInBox, Duration timeInLocation) {
+    public void gotoLocation(RelativeBeat beat, PlaceReference locationInBox, Duration timeInLocation) {
         navigationTracks.gotoPlace(beat, locationInBox, timeInLocation);
     }
 

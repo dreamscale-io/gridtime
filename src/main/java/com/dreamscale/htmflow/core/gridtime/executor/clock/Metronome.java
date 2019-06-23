@@ -66,11 +66,11 @@ public class Metronome {
         }
 
         if (!Objects.equals(fromClockPosition.gridTime.getBlockWeek(), toClockPosition.gridTime.getBlockWeek())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.WORK_WEEK));
+            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.WEEK));
         }
 
         if (!Objects.equals(fromClockPosition.gridTime.getBlock(), toClockPosition.gridTime.getBlock())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.BLOCK_OF_SIX_WEEKS));
+            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.BLOCK));
         }
         if (!Objects.equals(fromClockPosition.gridTime.getYear(), toClockPosition.gridTime.getYear())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.YEAR));

@@ -25,7 +25,7 @@ public class FlowTransformer implements Flow {
     public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) {
 
         for (TransformStrategy transform : transformStrategies) {
-            transform.transform(featurePool.getActiveGridTile());
+            transform.transform(featurePool, featurePool.getActiveGridTile());
         }
     }
 

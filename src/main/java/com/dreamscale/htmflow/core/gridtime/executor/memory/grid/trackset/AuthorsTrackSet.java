@@ -12,7 +12,9 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.PlayableC
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContext;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 
 public class AuthorsTrackSet implements PlayableCompositeTrack {
@@ -60,5 +62,9 @@ public class AuthorsTrackSet implements PlayableCompositeTrack {
     public void initFromCarryOverContext(CarryOverContext subContext) {
         AuthorsReference lastAuthors = (AuthorsReference) subContext.getReference("last.authors");
         authorsTrack.initFirst(lastAuthors);
+    }
+
+    public Set<? extends FeatureReference> getFeatures() {
+        return authorsTrack.getFeatures();
     }
 }

@@ -14,10 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.PlayableC
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureReference> implements PlayableCompositeTrack {
@@ -43,6 +40,14 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
         BandedMusicTrack<F> bandedMusicTrack = musicTracks.get(type);
         if (bandedMusicTrack != null) {
             return bandedMusicTrack.getLast();
+        }
+        return null;
+    }
+
+    public F getLastOnOrBeforeBeat(RelativeBeat beat, T type) {
+        BandedMusicTrack<F> bandedMusicTrack = musicTracks.get(type);
+        if (bandedMusicTrack != null) {
+            return bandedMusicTrack.getLastOnOrBeforeBeat(beat);
         }
         return null;
     }
@@ -104,6 +109,15 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
         }
     }
 
+    public Set<? extends FeatureReference> getFeatures() {
+        Set<FeatureReference> features = DefaultCollections.set();
+
+        for (BandedMusicTrack<F> track : musicTracks.values()) {
+            features.addAll(track.getFeatures());
+        }
+
+        return features;
+    }
 
     public TrackSetName getTrackSetName() {
         return trackSetName;

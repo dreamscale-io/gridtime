@@ -92,10 +92,10 @@ public class GridTime {
             case DAY:
                 minus(newCoords, zoomLevel, 3);
                 break;
-            case WORK_WEEK:
+            case WEEK:
                 minus(newCoords, zoomLevel, 2);
                 break;
-            case BLOCK_OF_SIX_WEEKS:
+            case BLOCK:
                 minus(newCoords, zoomLevel, 1);
                 break;
             case YEAR:
@@ -117,10 +117,10 @@ public class GridTime {
             case DAY:
                 plus(newCoords, zoomLevel, 3);
                 break;
-            case WORK_WEEK:
+            case WEEK:
                 plus(newCoords, zoomLevel, 2);
                 break;
-            case BLOCK_OF_SIX_WEEKS:
+            case BLOCK:
                 plus(newCoords, zoomLevel, 1);
                 break;
             case YEAR:

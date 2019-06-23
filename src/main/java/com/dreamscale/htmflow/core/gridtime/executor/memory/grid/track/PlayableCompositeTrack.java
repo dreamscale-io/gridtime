@@ -13,6 +13,8 @@ public interface PlayableCompositeTrack {
 
     List<GridRow> toGridRows();
 
+    Set<? extends FeatureReference> getFeatures();
+
     CarryOverContext getCarryOverContext(String subcontextName);
 
     void initFromCarryOverContext(CarryOverContext subContext);

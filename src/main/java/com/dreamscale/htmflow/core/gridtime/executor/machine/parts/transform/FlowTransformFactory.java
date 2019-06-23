@@ -1,23 +1,21 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.transform;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FlowTransformFactory {
 
-    @Autowired
-    private URIAssignmentTransform uriAssignmentTransformer;
+    private ResolveFeaturesTransform resolveFeaturesTransform = new ResolveFeaturesTransform();
 
     public TransformStrategy get(TransformType transformType) {
         switch (transformType) {
-            case URI_ASSIGNMENT_TRANSFORM:
-                return uriAssignmentTransformer;
+            case RESOLVE_FEATURES_TRANSFORM:
+                return resolveFeaturesTransform;
         }
         return null;
     }
 
     public enum TransformType {
-        URI_ASSIGNMENT_TRANSFORM
+        RESOLVE_FEATURES_TRANSFORM
     }
 }

@@ -18,6 +18,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContex
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ExecutionTrackSet implements PlayableCompositeTrack {
 
@@ -112,5 +113,8 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
         return rows;
     }
 
+    public Set<? extends FeatureReference> getFeatures() {
+        return rhythmTrack.getFeatures();
+    }
 
 }

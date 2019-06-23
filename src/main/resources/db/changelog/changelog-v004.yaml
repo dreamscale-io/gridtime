@@ -5,3 +5,18 @@ databaseChangeLog:
 
   - include:
         file: db/v004/create_grid_feature.sql
+
+  - include:
+        file: db/v004/create_grid_box_metrics.sql
+
+  - include:
+        file: db/v004/create_grid_marker.sql
+
+  - include:
+        file: db/v004/create_grid_row.sql
+
+  - include:
+        file: db/v004/create_grid_tile_summary.sql
+
+  - include:
+        file: db/v004/create_grid_time_calendar.sql

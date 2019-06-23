@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory.grid.trackset;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.PlaceReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
@@ -15,6 +16,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class NavigationTrackSet implements PlayableCompositeTrack {
@@ -96,5 +98,7 @@ public class NavigationTrackSet implements PlayableCompositeTrack {
         return rows;
     }
 
-
+    public Set<? extends FeatureReference> getFeatures() {
+        return batchTrack.getFeatures();
+    }
 }

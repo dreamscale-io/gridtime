@@ -6,6 +6,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.search.FeatureSearch
 import com.dreamscale.htmflow.core.gridtime.executor.memory.search.TileSearchService;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContext;
 
+import java.util.Set;
 import java.util.UUID;
 
 public class PerProcessFeaturePool extends AbstractFeaturePool {
@@ -27,8 +28,12 @@ public class PerProcessFeaturePool extends AbstractFeaturePool {
     }
 
     @Override
-    public FeatureReference resolve(FeatureReference originalReference) {
-        return featureSearchService.resolve(teamId, originalReference);
+    public void resolveReferences() {
+        Set<FeatureReference> features = getActiveGridTile().getMusicGrid().getAllFeatures();
+
+        for (FeatureReference feature : features) {
+            featureSearchService.resolve(teamId, feature);
+        }
     }
 
     @Override

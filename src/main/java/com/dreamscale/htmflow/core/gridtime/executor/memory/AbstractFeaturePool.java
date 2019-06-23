@@ -82,8 +82,9 @@ public abstract class AbstractFeaturePool implements FeaturePool {
         }
     }
 
-    abstract FeatureReference resolve(FeatureReference originalReference);
+    @Override
+    public abstract void resolveReferences();
 
-    abstract CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords);
+    protected abstract CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords);
 
 }

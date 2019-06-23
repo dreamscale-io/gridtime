@@ -63,4 +63,8 @@ public class FeelsTrackSet implements PlayableCompositeTrack {
         FeelsReference lastState = (FeelsReference) subContext.getReference("last.feels");
         feelsTrack.initFirst(lastState);
     }
+
+    public Set<? extends FeatureReference> getFeatures() {
+        return feelsTrack.getFeatures();
+    }
 }

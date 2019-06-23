@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.ta
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.type.IdeaFlowStateType;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
+import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.IdeaFlowStateReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
@@ -129,6 +130,16 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
 
         return rows;
     }
+
+    public Set<? extends FeatureReference> getFeatures() {
+        Set<FeatureReference> allFeatures = DefaultCollections.set();
+
+        allFeatures.addAll(wtfTrack.getFeatures());
+        allFeatures.addAll(learningProgressTrack.getFeatures());
+
+        return allFeatures;
+    }
+
 
 
 }

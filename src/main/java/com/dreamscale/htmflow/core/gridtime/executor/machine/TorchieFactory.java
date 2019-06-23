@@ -99,7 +99,7 @@ public class TorchieFactory {
         //transformation only, with no new data
 
         torchie.addFlowTransformerToPullChain(
-                flowTransformFactory.get(FlowTransformFactory.TransformType.URI_ASSIGNMENT_TRANSFORM));
+                flowTransformFactory.get(FlowTransformFactory.TransformType.RESOLVE_FEATURES_TRANSFORM));
 
         //save off the data in the tiles to permanent stores
 

@@ -7,8 +7,8 @@ public enum ZoomLevel {
     TWENTY(20, 5, Duration.ofMinutes(20)),
     DAY_PART(12, 3, Duration.ofHours(4)),
     DAY(6, 3, Duration.ofDays(1)),
-    WORK_WEEK(7, 1, Duration.ofDays(7)),
-    BLOCK_OF_SIX_WEEKS(6, 2, Duration.ofDays(42)),
+    WEEK(7, 1, Duration.ofDays(7)),
+    BLOCK(6, 2, Duration.ofDays(42)),
     YEAR(9, 3, Duration.ofDays(365));
 
     private final int innerBeatsToAggregate;
@@ -56,12 +56,12 @@ public enum ZoomLevel {
                 return TWENTY;
             case DAY:
                 return DAY_PART;
-            case WORK_WEEK:
+            case WEEK:
                 return DAY;
-            case BLOCK_OF_SIX_WEEKS:
-                return WORK_WEEK;
+            case BLOCK:
+                return WEEK;
             case YEAR:
-                return BLOCK_OF_SIX_WEEKS;
+                return BLOCK;
         }
         return TWENTY;
     }
@@ -73,10 +73,10 @@ public enum ZoomLevel {
             case DAY_PART:
                 return DAY;
             case DAY:
-                return WORK_WEEK;
-            case WORK_WEEK:
-                return BLOCK_OF_SIX_WEEKS;
-            case BLOCK_OF_SIX_WEEKS:
+                return WEEK;
+            case WEEK:
+                return BLOCK;
+            case BLOCK:
                 return YEAR;
             case YEAR:
                 return YEAR;

@@ -14,9 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack {
@@ -30,6 +28,10 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
     public BandedMusicTrack(String rowName, MusicClock musicClock) {
         this.rowName = rowName;
         this.musicClock = musicClock;
+    }
+
+    public Set<? extends FeatureReference> getFeatures() {
+        return new LinkedHashSet<>(trackMusic.values());
     }
 
     public void initFirst(F feature) {
@@ -129,6 +131,18 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
             }
         }
 
+        return null;
+    }
+
+    public F getLastOnOrBeforeBeat(RelativeBeat beat) {
+        Iterator<RelativeBeat> iterator = musicClock.getBackwardsIterator(beat);
+
+        while (iterator.hasNext()) {
+            F feature = getFeatureAt(iterator.next());
+            if (feature != null) {
+                return feature;
+            }
+        }
         return null;
     }
 
@@ -263,6 +277,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         return null;
     }
+
 
 
 }

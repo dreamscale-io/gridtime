@@ -14,10 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.cell.GridRow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack {
@@ -52,6 +49,22 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
         }
 
         return latestEvent;
+    }
+
+    public Set<? extends FeatureReference> getFeatures() {
+        Set<FeatureReference> features = DefaultCollections.set();
+
+        Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
+
+        while (iterator.hasNext()) {
+            RelativeBeat beat = iterator.next();
+            List<F> eventsAtBeat = trackMusic.get(beat);
+            if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
+                features.addAll(eventsAtBeat);
+            }
+        }
+
+        return features;
     }
 
     @Override
@@ -203,4 +216,6 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         return shorthands;
     }
+
+
 }
