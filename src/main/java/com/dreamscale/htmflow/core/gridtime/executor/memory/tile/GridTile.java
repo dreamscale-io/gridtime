@@ -25,7 +25,7 @@ import java.util.UUID;
 public class GridTile {
 
     private final UUID torchieId;
-    private final GeometryClock.Coords gridCoordinates;
+    private final GeometryClock.GridTime gridCoordinates;
     private final ZoomLevel zoomLevel;
 
     private final MusicClock musicClock;
@@ -33,7 +33,7 @@ public class GridTile {
 
     private transient FeatureCache featureCache;
 
-    public GridTile(UUID torchieId, GeometryClock.Coords gridCoordinates, FeatureCache featureCache) {
+    public GridTile(UUID torchieId, GeometryClock.GridTime gridCoordinates, FeatureCache featureCache) {
         this.torchieId = torchieId;
         this.gridCoordinates = gridCoordinates;
         this.zoomLevel = gridCoordinates.getZoomLevel();
@@ -42,7 +42,7 @@ public class GridTile {
         this.musicGrid = new MusicGrid(musicClock);
         this.featureCache = featureCache;
     }
-    
+
     /**
      * Change the active context, such as starting project, task, or intention
      */

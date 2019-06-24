@@ -13,7 +13,6 @@ import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.source.Window
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.executor.memory.grid.track.TrackSetName
-import com.dreamscale.htmflow.core.gridtime.executor.memory.search.FeatureSearchService
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
 import spock.lang.Specification
 
@@ -35,13 +34,13 @@ public class ComponentSpaceObserverSpec extends Specification {
         componentSpaceObserver = new ComponentSpaceObserver()
         torchieId = UUID.randomUUID()
         featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache)
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
     }
 
     def "should create Location traversals"() {
         given:
 
-        LocalDateTime time1 = clock.getActiveCoords().getClockTime();
+        LocalDateTime time1 = clock.getActiveGridTime().getClockTime();
         LocalDateTime time2 = time1.plusMinutes(2);
 
         FlowableFlowActivity activity1 = createActivity("locationA", time1, time2)

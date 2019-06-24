@@ -44,7 +44,7 @@ public enum ZoomLevel {
         return beatsPerPartialSum;
     }
 
-    public Duration getTileDuration() {
+    public Duration getDuration() {
         return tileDuration;
     }
 

@@ -30,14 +30,14 @@ public class ExecutionRhythmObserverSpec extends Specification {
 
         clock = new GeometryClock(aRandom.localDateTime())
 
-        time1 = clock.getActiveCoords().getClockTime()
+        time1 = clock.getActiveGridTime().getClockTime()
         time2 = time1.plusMinutes(3);
         time3 = time2.plusMinutes(4);
         time4 = time3.plusMinutes(3);
 
 
         executionRhythmObserver = new ExecutionRhythmObserver()
-        gridTile = new GridTile(UUID.randomUUID(), clock.getActiveCoords(), new FeatureCache())
+        gridTile = new GridTile(UUID.randomUUID(), clock.getActiveGridTime(), new FeatureCache())
     }
 
     def "should create red/green cycles from execution activity"() {

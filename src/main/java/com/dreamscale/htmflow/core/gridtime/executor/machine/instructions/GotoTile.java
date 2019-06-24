@@ -1,21 +1,18 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.Flow;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 @Slf4j
 public class GotoTile extends TileInstructions {
 
     private final FeaturePool featurePool;
 
-    private final GeometryClock.Coords gotoPosition;
+    private final GeometryClock.GridTime gotoPosition;
 
 
-    public GotoTile(FeaturePool featurePool, GeometryClock.Coords gotoPosition ) {
+    public GotoTile(FeaturePool featurePool, GeometryClock.GridTime gotoPosition ) {
         this.featurePool = featurePool;
         this.gotoPosition = gotoPosition;
     }

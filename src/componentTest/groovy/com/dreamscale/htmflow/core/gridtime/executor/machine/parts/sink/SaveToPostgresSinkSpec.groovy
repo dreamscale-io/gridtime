@@ -25,10 +25,10 @@ class SaveToPostgresSinkSpec extends Specification {
         clock = new GeometryClock(LocalDateTime.now())
         torchieId = UUID.randomUUID()
         featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache)
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
     }
 
     def "should save tile grid to DB"() {
-        
+
     }
 }

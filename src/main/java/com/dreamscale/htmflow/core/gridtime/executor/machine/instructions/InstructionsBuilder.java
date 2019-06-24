@@ -21,9 +21,9 @@ public class InstructionsBuilder {
     }
 
     public TileInstructions gotoTile(ZoomLevel zoomLevel, LocalDateTime clockPosition) {
-        GeometryClock.Coords gotoCoords = GeometryClock.createCoords(zoomLevel, clockPosition);
+        GeometryClock.GridTime gotoGridTime = GeometryClock.createGridTime(zoomLevel, clockPosition);
 
-        return new GotoTile(featurePool, gotoCoords);
+        return new GotoTile(featurePool, gotoGridTime);
     }
 
     public TileInstructions playTrack(TrackSetName trackSetName) {

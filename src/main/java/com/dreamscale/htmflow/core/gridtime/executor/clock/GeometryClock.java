@@ -5,17 +5,18 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.time.*;
+import java.util.Arrays;
 
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
 public class GeometryClock {
 
-    private Coords activeCoords;
+    private GridTime activeGridTime;
 
     public GeometryClock(LocalDateTime clockTime) {
 
         LocalDateTime roundedClockTime = roundDownToNearestTwenty(clockTime);
-        this.activeCoords = createCoords(ZoomLevel.TWENTY, roundedClockTime);
+        this.activeGridTime = createGridTime(ZoomLevel.TWENTY, roundedClockTime);
     }
 
     public static LocalDateTime roundDownToNearestTwenty(LocalDateTime middleOfNowhereTime) {
@@ -27,18 +28,26 @@ public class GeometryClock {
         return roundedTime.withSecond(0).withNano(0);
     }
 
-    public Coords next() {
-        Coords nextCoords = activeCoords;
-        activeCoords = activeCoords.panRight();
-
-        return nextCoords;
+    public static LocalDateTime getFirstMomentOfYear(int year) {
+        LocalDate sameYear = LocalDate.of(year, 1, 1);
+        LocalDate firstMondayOfSameYear = sameYear.with(firstInMonth(DayOfWeek.MONDAY));
+        return firstMondayOfSameYear.atStartOfDay();
     }
 
-    public Coords getActiveCoords() {
-        return activeCoords;
+    public GridTime next() {
+        GridTime nextGridTime = activeGridTime;
+        activeGridTime = activeGridTime.panRight();
+
+        return nextGridTime;
     }
 
-    public static Coords createCoords(ZoomLevel zoomLevel, LocalDateTime nextClockTime) {
+    public GridTime getActiveGridTime() {
+        return activeGridTime;
+    }
+
+
+
+    public static GridTime createGridTime(ZoomLevel zoomLevel, LocalDateTime nextClockTime) {
 
         int firstMondayOffset = calcFirstMondayOfYear(nextClockTime);
 
@@ -55,9 +64,31 @@ public class GeometryClock {
 
         int twentyWithinDayPart = calc20MinutesWithinDayPart(nextClockTime);
 
-        return new Coords(zoomLevel, nextClockTime, year, block, weeksIntoBlock, daysIntoWeek, dayPart, twentyWithinDayPart);
-
+        return new GridTime(zoomLevel, nextClockTime, year, block, weeksIntoBlock, daysIntoWeek, dayPart, twentyWithinDayPart);
     }
+
+    private static GridTime createGridTimeFromCoordinates(ZoomLevel zoomLevel, Integer[] coords) {
+        LocalDateTime moment = getFirstMomentOfYear(coords[0]);
+
+        if (coords.length >= 2) {
+            moment = moment.plus(ZoomLevel.BLOCK.getDuration().multipliedBy(coords[1] - 1));
+        }
+        if (coords.length >= 3) {
+            moment = moment.plus(ZoomLevel.WEEK.getDuration().multipliedBy(coords[2] - 1));
+        }
+        if (coords.length >= 4) {
+            moment = moment.plus(ZoomLevel.DAY.getDuration().multipliedBy(coords[3] - 1));
+        }
+        if (coords.length >= 5) {
+            moment = moment.plus(ZoomLevel.DAY_PART.getDuration().multipliedBy(coords[4] - 1));
+        }
+        if (coords.length >= 6) {
+            moment = moment.plus(ZoomLevel.TWENTY.getDuration().multipliedBy(coords[5] - 1));
+        }
+
+        return new GridTime(zoomLevel, moment, coords);
+    }
+
 
     private static int calc4HourSteps(LocalDateTime nextClockTime) {
         return Math.floorDiv(nextClockTime.getHour(), 4) + 1;
@@ -131,34 +162,66 @@ public class GeometryClock {
     }
 
     public LocalDateTime getNextTickTime() {
-        return activeCoords.clockTime.plusMinutes(20);
+        return activeGridTime.clockTime.plusMinutes(20);
     }
 
     @AllArgsConstructor
     @Getter
     @ToString
-    public static class Coords {
+    public static class GridTime {
 
-        final LocalDateTime clockTime;
-        final GridTime gridTime;
+        private final LocalDateTime clockTime;
+        private final ZoomLevel zoomLevel;
+        private final Integer[] coords;
 
-        public Coords(ZoomLevel zoomLevel, LocalDateTime clockTime, Integer ... gridCoords) {
+        private final String formattedGridTime;
+
+
+        public GridTime(ZoomLevel zoomLevel, LocalDateTime clockTime, Integer ... fullCoordinates) {
+            this.zoomLevel = zoomLevel;
              this.clockTime = clockTime;
-             this.gridTime = new GridTime(zoomLevel, gridCoords);
+             this.coords = truncateCoordinates(zoomLevel, fullCoordinates);
+             this.formattedGridTime = GridTimeFormatter.formatGridTime(coords);
         }
 
-        public boolean equals(Coords o) {
-            return gridTime.equals(o.gridTime);
+        private static Integer[] truncateCoordinates(ZoomLevel zoomLevel, Integer[] fullCoordinates) {
+            switch (zoomLevel) {
+                case TWENTY:
+                    return fullCoordinates;
+                case DAY_PART:
+                    return Arrays.copyOf(fullCoordinates, 5);
+                case DAY:
+                    return Arrays.copyOf(fullCoordinates, 4);
+                case WEEK:
+                    return Arrays.copyOf(fullCoordinates, 3);
+                case BLOCK:
+                    return Arrays.copyOf(fullCoordinates, 2);
+                case YEAR:
+                    return Arrays.copyOf(fullCoordinates, 1);
+            }
+
+            return new Integer[0];
+        }
+
+        public boolean equals(GridTime o) {
+            return formattedGridTime.equals(o.formattedGridTime);
         }
 
         public Duration getRelativeTime(LocalDateTime moment) {
             return Duration.between(clockTime, moment);
         }
 
+        public GridTime zoomOut() {
+            return GeometryClock.createGridTimeFromCoordinates(zoomLevel.zoomOut(), Arrays.copyOf(coords, coords.length - 1));
+        }
 
-        public Coords panLeft() {
+        public GridTime zoomIn() {
+            return GeometryClock.createGridTime(zoomLevel.zoomIn(), clockTime);
+        }
 
-                switch (gridTime.getZoomLevel()) {
+        public GridTime panLeft() {
+
+                switch (zoomLevel) {
                     case TWENTY:
                         return minus20Minutes();
                     case DAY_PART:
@@ -175,8 +238,8 @@ public class GeometryClock {
                 return this;
         }
 
-        public Coords panRight() {
-            switch (gridTime.getZoomLevel()) {
+        public GridTime panRight() {
+            switch (zoomLevel) {
                 case TWENTY:
                     return plus20Minutes();
                 case DAY_PART:
@@ -195,64 +258,78 @@ public class GeometryClock {
 
         //pan left functions
 
-        public Coords minus20Minutes() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusMinutes(20));
+        private GridTime minus20Minutes() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusMinutes(20));
         }
 
-        public Coords minus4Hour() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusHours(4));
+        private GridTime minus4Hour() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusHours(4));
         }
 
-        public Coords minusDay() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusDays(1));
+        private GridTime minusDay() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusDays(1));
         }
 
-        public Coords minusWeek() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusWeeks(1));
+        private GridTime minusWeek() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusWeeks(1));
         }
 
-        public Coords minusBlock() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusWeeks(6));
+        private GridTime minusBlock() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusWeeks(6));
         }
 
-        public Coords minusYear() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.minusYears(1));
+        private GridTime minusYear() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.minusYears(1));
         }
 
         // pan right functions
 
-        public Coords plus20Minutes() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusMinutes(20));
+        private GridTime plus20Minutes() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusMinutes(20));
         }
 
-        public Coords plus4Hour() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusHours(4));
+        private GridTime plus4Hour() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusHours(4));
         }
 
-        public Coords plusDay() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusDays(1));
+        private GridTime plusDay() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusDays(1));
         }
 
-        public Coords plusWeek() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusWeeks(1));
+        private GridTime plusWeek() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusWeeks(1));
         }
 
-        public Coords plusBlock() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusWeeks(6));
+        private GridTime plusBlock() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusWeeks(6));
         }
 
-        public Coords plusYear() {
-            return GeometryClock.createCoords(gridTime.getZoomLevel(), clockTime.plusYears(1));
+        private GridTime plusYear() {
+            return GeometryClock.createGridTime(zoomLevel, clockTime.plusYears(1));
         }
 
-
-        public String getFormattedGridTime() {
-            return gridTime.getFormattedGridTime();
+        public Integer getYear() {
+            return GridTimeFormatter.getYear(coords);
         }
 
-        public ZoomLevel getZoomLevel() {
-            return gridTime.getZoomLevel();
+        public Integer getBlock() {
+            return GridTimeFormatter.getBlock(coords);
+        }
+
+        public Integer getBlockWeek() {
+            return GridTimeFormatter.getBlockWeek(coords);
+        }
+
+        public Integer getDay() {
+            return GridTimeFormatter.getDay(coords);
+        }
+
+        public Integer getDayPart() {
+            return GridTimeFormatter.getDayPart(coords);
+        }
+
+        public Integer getTwentyOfTwelve() {
+            return GridTimeFormatter.getTwentyOfTwelve(coords);
         }
     }
-
 }

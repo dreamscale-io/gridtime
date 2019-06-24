@@ -1,12 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.parts.sink
 
-import com.dreamscale.htmflow.core.domain.member.json.Member
+
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
 import spock.lang.Specification
 
-import java.time.Duration
 import java.time.LocalDateTime
 
 class JSONTransformerSpec extends Specification {
@@ -21,7 +20,7 @@ class JSONTransformerSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         torchieId = UUID.randomUUID();
-        tile = new GridTile(torchieId, geometryClock.activeCoords, new FeatureCache())
+        tile = new GridTile(torchieId, geometryClock.activeGridTime, new FeatureCache())
 
     }
 

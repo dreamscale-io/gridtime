@@ -18,8 +18,8 @@ public class Metronome {
 
     private GeometryClock clock;
 
-    private GeometryClock.Coords fromClockPosition;
-    private GeometryClock.Coords toClockPosition;
+    private GeometryClock.GridTime fromClockPosition;
+    private GeometryClock.GridTime toClockPosition;
 
     private final FeaturePool featurePool;
     private final List<Flow> pullChain;
@@ -31,15 +31,15 @@ public class Metronome {
 
         this.clock = new GeometryClock(startTime);
 
-        this.fromClockPosition = clock.getActiveCoords();
-        this.toClockPosition = clock.getActiveCoords();
+        this.fromClockPosition = clock.getActiveGridTime();
+        this.toClockPosition = clock.getActiveGridTime();
 
         this.pullChain = new ArrayList<>();
 
         featurePool.gotoGridTile(fromClockPosition);
     }
 
-    public GeometryClock.Coords getActiveCoordinates() {
+    public GeometryClock.GridTime getActiveCoordinates() {
         return fromClockPosition;
     }
 
@@ -48,7 +48,7 @@ public class Metronome {
             return DefaultCollections.emptyList();
         }
 
-        GeometryClock.Coords nextCoordinates = clock.next();
+        GeometryClock.GridTime nextCoordinates = clock.next();
 
         this.fromClockPosition = this.toClockPosition;
         this.toClockPosition = nextCoordinates;
@@ -57,22 +57,22 @@ public class Metronome {
 
         instructions.add(createInstructionsForFlowTick());
 
-        if (!Objects.equals(fromClockPosition.gridTime.getDayPart(), toClockPosition.gridTime.getDayPart())) {
+        if (!Objects.equals(fromClockPosition.getDayPart(), toClockPosition.getDayPart())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.DAY_PART));
         }
 
-        if (!Objects.equals(fromClockPosition.gridTime.getDay(), toClockPosition.gridTime.getDay())) {
+        if (!Objects.equals(fromClockPosition.getDay(), toClockPosition.getDay())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.DAY));
         }
 
-        if (!Objects.equals(fromClockPosition.gridTime.getBlockWeek(), toClockPosition.gridTime.getBlockWeek())) {
+        if (!Objects.equals(fromClockPosition.getBlockWeek(), toClockPosition.getBlockWeek())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.WEEK));
         }
 
-        if (!Objects.equals(fromClockPosition.gridTime.getBlock(), toClockPosition.gridTime.getBlock())) {
+        if (!Objects.equals(fromClockPosition.getBlock(), toClockPosition.getBlock())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.BLOCK));
         }
-        if (!Objects.equals(fromClockPosition.gridTime.getYear(), toClockPosition.gridTime.getYear())) {
+        if (!Objects.equals(fromClockPosition.getYear(), toClockPosition.getYear())) {
             instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.YEAR));
         }
         return instructions;
@@ -94,11 +94,11 @@ public class Metronome {
     }
 
 
-    public GeometryClock.Coords getFromClockPosition() {
+    public GeometryClock.GridTime getFromClockPosition() {
         return this.fromClockPosition;
     }
 
-    public GeometryClock.Coords getToClockPosition() {
+    public GeometryClock.GridTime getToClockPosition() {
         return this.toClockPosition;
     }
 

@@ -33,13 +33,13 @@ public class WTFStateObserverSpec extends Specification {
         wtfStateObserver = new WTFStateObserver()
         torchieId = UUID.randomUUID()
         featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache)
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
     }
 
     def "should create wtf circle states"() {
         given:
 
-        LocalDateTime time1 = clock.getActiveCoords().getClockTime();
+        LocalDateTime time1 = clock.getActiveGridTime().getClockTime();
         LocalDateTime time2 = time1.plusMinutes(2);
         LocalDateTime time3 = time1.plusMinutes(4);
         LocalDateTime time4 = time1.plusMinutes(11);

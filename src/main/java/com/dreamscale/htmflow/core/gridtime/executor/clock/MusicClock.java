@@ -30,7 +30,7 @@ public class MusicClock implements Iterator<RelativeBeat> {
 
         this.zoomLevel = zoomLevel;
         this.relativeStart = Duration.ofSeconds(0);
-        this.relativeEnd = zoomLevel.getTileDuration();
+        this.relativeEnd = zoomLevel.getDuration();
         this.beatsPerMeasure = beats;
 
         initializeClockBeats(relativeStart, relativeEnd, beats);

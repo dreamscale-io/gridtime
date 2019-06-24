@@ -37,8 +37,8 @@ public class PerProcessFeaturePool extends AbstractFeaturePool {
     }
 
     @Override
-    protected CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords) {
-        return tileSearchService.getCarryOverContextOfTile(torchieId, coords);
+    protected CarryOverContext getCarryOverContextFromTile(GeometryClock.GridTime gridTime) {
+        return tileSearchService.getCarryOverContextOfTile(torchieId, gridTime);
     }
 
 

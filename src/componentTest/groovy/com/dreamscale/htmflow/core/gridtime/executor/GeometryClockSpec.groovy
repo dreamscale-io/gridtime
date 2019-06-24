@@ -16,7 +16,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getActiveCoords();
+        GeometryClock.GridTime coords = geometryClock.getActiveGridTime();
 
         then:
         assert coords != null
@@ -30,7 +30,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getActiveCoords();
+        GeometryClock.GridTime coords = geometryClock.getActiveGridTime();
 
         then:
         assert coords != null
@@ -44,7 +44,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getActiveCoords();
+        GeometryClock.GridTime coords = geometryClock.getActiveGridTime();
 
         then:
         assert coords != null
@@ -58,7 +58,7 @@ class GeometryClockSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         when:
-        GeometryClock.Coords coords = geometryClock.getActiveCoords();
+        GeometryClock.GridTime coords = geometryClock.getActiveGridTime();
 
         then:
         assert coords != null

@@ -13,11 +13,11 @@ public class GenerateNextTile extends TileInstructions {
     private final List<Flow> pullChain;
     private final FeaturePool featurePool;
 
-    private final GeometryClock.Coords fromPosition;
-    private final GeometryClock.Coords toPosition;
+    private final GeometryClock.GridTime fromPosition;
+    private final GeometryClock.GridTime toPosition;
 
 
-    public GenerateNextTile(FeaturePool featurePool, List<Flow> pullChain, GeometryClock.Coords fromPosition,  GeometryClock.Coords toPosition ) {
+    public GenerateNextTile(FeaturePool featurePool, List<Flow> pullChain, GeometryClock.GridTime fromPosition, GeometryClock.GridTime toPosition ) {
         this.featurePool = featurePool;
         this.pullChain = pullChain;
         this.fromPosition = fromPosition;

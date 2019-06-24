@@ -2,7 +2,6 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory.search;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -11,7 +10,7 @@ import java.util.UUID;
 public class TileSearchService {
 
 
-    public CarryOverContext getCarryOverContextOfTile(UUID torchieId, GeometryClock.Coords gridCoords) {
+    public CarryOverContext getCarryOverContextOfTile(UUID torchieId, GeometryClock.GridTime gridGridTime) {
 
         //StoryTileEntity tile = storyTileRepository.findByTorchieIdAndDreamTime(torchieId, gridCoords.getFormattedGridTime());
 

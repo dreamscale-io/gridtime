@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.gridtime.executor.memory;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.FetchStrategy;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Feed;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.CarryOverContext;
@@ -19,7 +18,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     private Map<String, Feed> sourceFeeds = DefaultCollections.map();
 
-    private GeometryClock.Coords activeGridCoords;
+    private GeometryClock.GridTime activeGridGridTime;
 
     private GridTile activeGridTile;
 
@@ -34,36 +33,36 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     @Override
     public String getActiveGridTime() {
-        return activeGridCoords.getFormattedGridTime();
+        return activeGridGridTime.getFormattedGridTime();
     }
 
-    public void gotoGridTile(GeometryClock.Coords coords) {
-        this.activeGridCoords = coords;
-        this.activeGridTile = new GridTile(torchieId, activeGridCoords, featureCache);
+    public void gotoGridTile(GeometryClock.GridTime gridTime) {
+        this.activeGridGridTime = gridTime;
+        this.activeGridTile = new GridTile(torchieId, activeGridGridTime, featureCache);
 
-        CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridCoords.panLeft());
+        CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridGridTime.panLeft());
         activeGridTile.initFromCarryOverContext(carryOverContext);
     }
 
     @Override
-    public void nextGridTile(GeometryClock.Coords toCoordPosition) {
-        GeometryClock.Coords nextCoords = activeGridCoords.panRight();
+    public void nextGridTile(GeometryClock.GridTime toCoordPosition) {
+        GeometryClock.GridTime nextGridTime = activeGridGridTime.panRight();
 
-        validateCoordsMatchAndResetTileIfNeeded(toCoordPosition, nextCoords);
+        validateCoordsMatchAndResetTileIfNeeded(toCoordPosition, nextGridTime);
 
         if (activeGridTile == null) {
-            CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridCoords.panLeft());
+            CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridGridTime.panLeft());
 
-            activeGridTile = new GridTile(torchieId, activeGridCoords, featureCache);
+            activeGridTile = new GridTile(torchieId, activeGridGridTime, featureCache);
             activeGridTile.initFromCarryOverContext(carryOverContext);
         } else {
 
-            GridTile nextGridTile = new GridTile(torchieId, nextCoords, featureCache);
+            GridTile nextGridTile = new GridTile(torchieId, nextGridTime, featureCache);
 
             nextGridTile.initFromCarryOverContext(activeGridTile.getCarryOverContext());
 
             activeGridTile = nextGridTile;
-            activeGridCoords = nextCoords;
+            activeGridGridTime = nextGridTime;
         }
     }
 
@@ -75,9 +74,9 @@ public abstract class AbstractFeaturePool implements FeaturePool {
         return feed;
     }
 
-    private void validateCoordsMatchAndResetTileIfNeeded(GeometryClock.Coords toCoordPosition, GeometryClock.Coords nextCoords) {
-        if (!nextCoords.equals(toCoordPosition)) {
-            activeGridCoords = toCoordPosition;
+    private void validateCoordsMatchAndResetTileIfNeeded(GeometryClock.GridTime toCoordPosition, GeometryClock.GridTime nextGridTime) {
+        if (!nextGridTime.equals(toCoordPosition)) {
+            activeGridGridTime = toCoordPosition;
             activeGridTile = null;
         }
     }
@@ -85,6 +84,6 @@ public abstract class AbstractFeaturePool implements FeaturePool {
     @Override
     public abstract void resolveReferences();
 
-    protected abstract CarryOverContext getCarryOverContextFromTile(GeometryClock.Coords coords);
+    protected abstract CarryOverContext getCarryOverContextFromTile(GeometryClock.GridTime gridTime);
 
 }

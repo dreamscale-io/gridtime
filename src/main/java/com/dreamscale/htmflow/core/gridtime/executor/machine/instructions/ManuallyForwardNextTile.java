@@ -1,12 +1,9 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
-import com.dreamscale.htmflow.core.gridtime.executor.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 @Slf4j
 public class ManuallyForwardNextTile extends TileInstructions {
@@ -22,10 +19,10 @@ public class ManuallyForwardNextTile extends TileInstructions {
 
         GridTile activeTile = featurePool.getActiveGridTile();
         if (activeTile != null) {
-            GeometryClock.Coords nextCoords = activeTile.getGridCoordinates().panRight();
-            log.debug("Forwarding tile to "+nextCoords.getFormattedGridTime());
+            GeometryClock.GridTime nextGridTime = activeTile.getGridCoordinates().panRight();
+            log.debug("Forwarding tile to "+ nextGridTime.getFormattedGridTime());
 
-            featurePool.nextGridTile(nextCoords);
+            featurePool.nextGridTile(nextGridTime);
         } else {
             log.error("Unable to forward to next tile, active tile is null");
         }

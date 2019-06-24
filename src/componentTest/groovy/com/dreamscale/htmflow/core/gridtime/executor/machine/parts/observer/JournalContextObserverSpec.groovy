@@ -31,7 +31,7 @@ public class JournalContextObserverSpec extends Specification {
         journalContextObserver = new JournalContextObserver()
         torchieId = UUID.randomUUID()
         featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache)
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
     }
 
     def "should create project & task switch events"() {
@@ -40,7 +40,7 @@ public class JournalContextObserverSpec extends Specification {
         TaskEntity task1 = aRandom.taskEntity().name("t1").forProject(project).build();
         TaskEntity task2 = aRandom.taskEntity().name("t2").forProject(project).build();
 
-        LocalDateTime time1 = clock.getActiveCoords().getClockTime()
+        LocalDateTime time1 = clock.getActiveGridTime().getClockTime()
         LocalDateTime time2 = time1.plusMinutes(2);
         LocalDateTime time3 = time2.plusMinutes(3);
         LocalDateTime time4 = time3.plusMinutes(5);
@@ -78,7 +78,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        gridTile = new GridTile(torchieId, clock.getActiveCoords(), featureCache);
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache);
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -92,7 +92,7 @@ public class JournalContextObserverSpec extends Specification {
 
         journalContextObserver.see(window, gridTile)
 
-        GridTile nextTile = new GridTile(torchieId, clock.getActiveCoords().panRight().panRight(), featureCache);
+        GridTile nextTile = new GridTile(torchieId, clock.getActiveGridTime().panRight().panRight(), featureCache);
         nextTile.initFromCarryOverContext(gridTile.getCarryOverContext());
         Window nextWindow = new Window(time3, time4)
 
