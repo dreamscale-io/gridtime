@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
 public class CircleDetails implements FeatureDetails {
 

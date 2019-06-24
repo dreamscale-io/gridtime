@@ -10,6 +10,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileIn
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.IdeaFlowStateType;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class IdeaFlowCircuit {
 
@@ -18,11 +19,15 @@ public class IdeaFlowCircuit {
 
     private LinkedList<TileInstructions> instructionsToExecuteQueue;
     private LinkedList<TileInstructions> highPriorityInstructionQueue;
+    private TileInstructions lastInstruction;
 
     private LinkedList<IdeaFlowTile> recentIdeaFlowTracer;
     private IdeaFlowStateType mostRecentIdeaFlowState;
 
     private LinkedList<TimeBombTrigger> activeWaits;
+
+    private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+
 
     private static final int MAX_IDEA_FLOW_TILES_TO_KEEP = 4;
 
@@ -53,7 +58,9 @@ public class IdeaFlowCircuit {
             instructionsToExecuteQueue.addAll(metronome.tick());
             nextInstructions = instructionsToExecuteQueue.removeFirst();
 
-            circuitMonitor.forwardTickPosition(metronome.getActiveCoordinates().getFormattedGridTime());
+            circuitMonitor.updateTickPosition(metronome.getTickPosition());
+        } else {
+            fireProgramDoneTriggers();
         }
 
         if (nextInstructions != null) {
@@ -61,7 +68,19 @@ public class IdeaFlowCircuit {
             nextInstructions.addTriggerToNotifyList(new EvaluateOutputTrigger());
         }
 
+        lastInstruction = nextInstructions;
         return nextInstructions;
+    }
+
+    private void fireProgramDoneTriggers() {
+        for (NotifyTrigger trigger: notifyWhenProgramDoneTriggers) {
+            trigger.notifyWhenDone(lastInstruction, lastInstruction.getOutputResults());
+        }
+        notifyWhenProgramDoneTriggers.clear();
+    }
+
+    public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
+        this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
     }
 
     private class EvaluateOutputTrigger implements NotifyTrigger {

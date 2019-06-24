@@ -14,3 +14,11 @@ truncate table organization_invite_token cascade;
 truncate table organization_member cascade;
 truncate table team_member cascade;
 truncate table team cascade;
+
+truncate table grid_time_twenties cascade ;
+truncate table grid_time_dayparts cascade ;
+truncate table grid_time_days cascade ;
+truncate table grid_time_weeks cascade ;
+
+
+

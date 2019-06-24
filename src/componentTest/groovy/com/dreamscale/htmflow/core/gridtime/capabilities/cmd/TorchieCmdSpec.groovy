@@ -63,7 +63,7 @@ class TorchieCmdSpec extends Specification {
 
         then:
         assert featurePool.getActiveGridTile() != null
-        assert featurePool.getActiveGridTile().gridCoordinates.getFormattedGridTime() == "2019B1-W1-D1_12am+2:00"
+        assert featurePool.getActiveGridTile().gridCoordinates.getFormattedGridTime() == "2019-B1-W1-D1_12am+2:20"
 
     }
 

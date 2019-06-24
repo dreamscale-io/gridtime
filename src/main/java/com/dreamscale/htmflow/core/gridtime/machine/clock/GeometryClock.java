@@ -35,10 +35,8 @@ public class GeometryClock {
     }
 
     public GridTime next() {
-        GridTime nextGridTime = activeGridTime;
         activeGridTime = activeGridTime.panRight();
-
-        return nextGridTime;
+        return activeGridTime;
     }
 
     public GridTime getActiveGridTime() {

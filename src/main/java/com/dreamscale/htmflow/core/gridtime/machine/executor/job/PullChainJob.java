@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class IdeaFlowChainJob implements MetronomeJob {
+public class PullChainJob implements MetronomeJob {
 
     private final UUID torchieId;
 
@@ -27,7 +27,7 @@ public class IdeaFlowChainJob implements MetronomeJob {
     private final List<Flow> pullChain = DefaultCollections.list();
     private final LocalDateTime startPosition;
 
-    public IdeaFlowChainJob(UUID torchieId, FeaturePool featurePool, LocalDateTime startPosition) {
+    public PullChainJob(UUID torchieId, FeaturePool featurePool, LocalDateTime startPosition) {
         this.torchieId = torchieId;
         this.featurePool = featurePool;
         this.startPosition = startPosition;

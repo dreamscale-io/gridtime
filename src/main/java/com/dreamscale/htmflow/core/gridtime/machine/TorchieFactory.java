@@ -1,7 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.job.IdeaFlowChainJob;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.job.CalendarGeneratorJob;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.job.PullChainJob;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.job.parts.fetch.FetchStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.job.parts.search.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.job.parts.search.FeatureSearchService;
@@ -39,6 +43,9 @@ public class TorchieFactory {
     @Autowired
     private TileSearchService tileSearchService;
 
+    @Autowired
+    private CalendarService calendarService;
+
     private Map<UUID, FeatureCache> teamCacheMap = new HashMap<>();
 
 
@@ -58,14 +65,25 @@ public class TorchieFactory {
                 featureCache, featureSearchService, tileSearchService);
 
         //stream data into the tiles
-        IdeaFlowChainJob job = createIdeaFlowGeneratorJob(memberId, featurePool, startingPosition);
+        PullChainJob job = createPullChainJob(memberId, featurePool, startingPosition);
 
         return new Torchie(memberId, featurePool, job);
 
     }
 
-    private IdeaFlowChainJob createIdeaFlowGeneratorJob(UUID memberId, PerProcessFeaturePool featurePool, LocalDateTime startingPosition) {
-        IdeaFlowChainJob job = new IdeaFlowChainJob(memberId, featurePool, startingPosition);
+    public Torchie wireUpCalendarTorchie(int tilesToGenerate) {
+
+        UUID torchieId = UUID.randomUUID();
+
+        FeaturePool featurePool = new MemoryOnlyFeaturePool(torchieId);
+        CalendarGeneratorJob job = new CalendarGeneratorJob(tilesToGenerate, calendarService);
+
+        return new Torchie(torchieId, featurePool, job);
+
+    }
+
+    private PullChainJob createPullChainJob(UUID memberId, PerProcessFeaturePool featurePool, LocalDateTime startingPosition) {
+        PullChainJob job = new PullChainJob(memberId, featurePool, startingPosition);
 
         job.addFlowSourceToPullChain(
                 fetchStrategyFactory.get(FetchStrategyFactory.FeedType.JOURNAL_FEED),

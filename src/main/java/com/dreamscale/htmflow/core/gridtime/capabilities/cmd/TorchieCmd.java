@@ -39,6 +39,15 @@ public class TorchieCmd {
         LOG_EXECUTION_DONE = new LogExecutionDoneTrigger();
     }
 
+    public void runProgram() {
+        syncCommandInProgress.set(true);
+
+        torchie.notifyWhenProgramDone(NOTIFY_WHEN_DONE);
+
+        torchieExecutor.startTorchieIfNotActive(torchie);
+
+        waitForCommandToFinish();
+    }
 
     public void gotoTile(ZoomLevel zoom, LocalDateTime tileTime) {
         TileInstructions instructions = torchie.getInstructionsBuilder().gotoTile(zoom, tileTime);

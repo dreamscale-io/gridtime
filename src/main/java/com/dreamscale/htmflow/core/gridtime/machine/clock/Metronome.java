@@ -27,7 +27,7 @@ public class Metronome {
         this.clock = new GeometryClock(metronomeJob.getStartPosition());
 
         this.fromGridTime = clock.getActiveGridTime();
-        this.toGridTime = clock.getActiveGridTime();
+        this.toGridTime = clock.next();
 
         metronomeJob.gotoPosition(fromGridTime);
     }
@@ -40,11 +40,6 @@ public class Metronome {
         if (isHalted) {
             return DefaultCollections.emptyList();
         }
-
-        GeometryClock.GridTime nextCoordinates = clock.next();
-
-        this.fromGridTime = this.toGridTime;
-        this.toGridTime = nextCoordinates;
 
         List<TileInstructions> instructions = new ArrayList<>();
 
@@ -68,6 +63,12 @@ public class Metronome {
         if (!Objects.equals(fromGridTime.getYear(), toGridTime.getYear())) {
             addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.YEAR));
         }
+
+        GeometryClock.GridTime nextCoordinates = clock.next();
+
+        this.fromGridTime = this.toGridTime;
+        this.toGridTime = nextCoordinates;
+
         return instructions;
     }
 
@@ -82,7 +83,7 @@ public class Metronome {
     }
 
     private TileInstructions getJobInstructionsForAggregateTick(ZoomLevel zoomLevel) {
-        GeometryClock.GridTime toZoomedOutCoords = fromGridTime.toZoomLevel(zoomLevel);
+        GeometryClock.GridTime toZoomedOutCoords = toGridTime.toZoomLevel(zoomLevel);
         GeometryClock.GridTime fromZoomedOutCoords = toZoomedOutCoords.panLeft();
 
         return metronomeJob.aggregateTick(fromZoomedOutCoords, toZoomedOutCoords);
@@ -104,16 +105,15 @@ public class Metronome {
         return this.toGridTime;
     }
 
-
-    public String getGridTime() {
-        return getActiveCoordinates().getFormattedGridTime();
-    }
-
     public void halt() {
         isHalted = true;
     }
 
     public void resume() {
         isHalted = false;
+    }
+
+    public String getTickPosition() {
+        return getActiveCoordinates().getFormattedGridTime();
     }
 }

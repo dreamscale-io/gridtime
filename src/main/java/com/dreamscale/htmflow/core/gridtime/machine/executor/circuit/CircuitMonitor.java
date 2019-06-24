@@ -57,7 +57,7 @@ public class CircuitMonitor {
         updateStatusTimestamp();
     }
 
-    public void forwardTickPosition(String activeGridTime) {
+    public void updateTickPosition(String activeGridTime) {
         this.activeGridTime = activeGridTime;
 
         ticksProcessed++;

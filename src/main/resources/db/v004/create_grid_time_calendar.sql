@@ -9,7 +9,7 @@ create table grid_time_twenties (
   block int,
   block_week int,
   day int,
-  daypart int,
+  day_part int,
   twenty_of_twelve int
 );
 
@@ -21,7 +21,7 @@ create table grid_time_dayparts (
   block int,
   block_week int,
   day int,
-  daypart int
+  day_part int
 );
 
 create table grid_time_days (

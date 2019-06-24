@@ -71,8 +71,8 @@ public class GridTimeFormatter {
 
     private static String appendHourTwentyAdjust(Integer twenties, String gridTime) {
         if (twenties != null) {
-            int hourAdjust = Math.floorDiv(twenties , 4);
-            int twentiesRemainder = Math.floorMod(twenties, 4) * 20;
+            int hourAdjust = Math.floorDiv(twenties-1, 3);
+            int twentiesRemainder = Math.floorMod(twenties -1, 3) * 20;
             String zeroPaddedTwenties = StringUtils.rightPad(Integer.toString(twentiesRemainder), 2, "0");
 
             gridTime += "+"+hourAdjust + ":" + zeroPaddedTwenties;
@@ -122,7 +122,7 @@ public class GridTimeFormatter {
 
     private static String appendBlock(Integer block, String gridTime) {
         if (block != null) {
-            gridTime += "B"+block;
+            gridTime += "-B"+block;
         }
         return gridTime;
     }

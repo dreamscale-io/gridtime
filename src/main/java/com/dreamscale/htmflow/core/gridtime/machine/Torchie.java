@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.InstructionsBuilder;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.job.MetronomeJob;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
@@ -37,6 +38,10 @@ public class Torchie {
 
     public void scheduleInstruction(TileInstructions instructions) {
         ideaFlowCircuit.scheduleHighPriorityInstruction(instructions);
+    }
+
+    public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
+        ideaFlowCircuit.notifyWhenProgramDone(notifyTrigger);
     }
 
     public TileInstructions whatsNext() {
