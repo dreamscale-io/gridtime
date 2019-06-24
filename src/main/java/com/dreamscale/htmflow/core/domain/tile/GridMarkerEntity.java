@@ -1,11 +1,8 @@
 package com.dreamscale.htmflow.core.domain.tile;
 
-import com.dreamscale.htmflow.core.gridtime.executor.clock.ZoomLevel;
 import lombok.*;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.math.BigInteger;
 import java.util.UUID;

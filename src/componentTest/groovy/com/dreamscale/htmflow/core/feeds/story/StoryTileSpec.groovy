@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.feeds.story;
 
-import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock
-import com.dreamscale.htmflow.core.gridtime.executor.memory.tile.GridTile
+import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
+import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
 import spock.lang.Specification
 
 import java.time.LocalDateTime;

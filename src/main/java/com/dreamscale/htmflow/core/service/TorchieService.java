@@ -1,15 +1,15 @@
 package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.team.TeamDto;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.circuit.CircuitMonitor;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkEntity;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkRepository;
-import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.Torchie;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchiePoolExecutor;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.TorchieFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
+import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
+import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
