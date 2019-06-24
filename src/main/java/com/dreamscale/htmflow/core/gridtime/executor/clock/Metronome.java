@@ -1,11 +1,9 @@
 package com.dreamscale.htmflow.core.gridtime.executor.clock;
 
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.MetronomeJob;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.Flow;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.GenerateAggregateUpTile;
-import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.GenerateNextTile;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -18,29 +16,26 @@ public class Metronome {
 
     private GeometryClock clock;
 
-    private GeometryClock.GridTime fromClockPosition;
-    private GeometryClock.GridTime toClockPosition;
+    private GeometryClock.GridTime fromGridTime;
+    private GeometryClock.GridTime toGridTime;
 
-    private final FeaturePool featurePool;
-    private final List<Flow> pullChain;
+    private final MetronomeJob metronomeJob;
 
     private boolean isHalted = false;
 
-    public Metronome(FeaturePool featurePool, LocalDateTime startTime) {
-        this.featurePool = featurePool;
+    public Metronome(MetronomeJob metronomeJob, LocalDateTime startTime) {
+        this.metronomeJob = metronomeJob;
 
         this.clock = new GeometryClock(startTime);
 
-        this.fromClockPosition = clock.getActiveGridTime();
-        this.toClockPosition = clock.getActiveGridTime();
+        this.fromGridTime = clock.getActiveGridTime();
+        this.toGridTime = clock.getActiveGridTime();
 
-        this.pullChain = new ArrayList<>();
-
-        featurePool.gotoGridTile(fromClockPosition);
+        metronomeJob.gotoPosition(fromGridTime);
     }
 
     public GeometryClock.GridTime getActiveCoordinates() {
-        return fromClockPosition;
+        return fromGridTime;
     }
 
     public List<TileInstructions> tick() {
@@ -50,40 +45,49 @@ public class Metronome {
 
         GeometryClock.GridTime nextCoordinates = clock.next();
 
-        this.fromClockPosition = this.toClockPosition;
-        this.toClockPosition = nextCoordinates;
+        this.fromGridTime = this.toGridTime;
+        this.toGridTime = nextCoordinates;
 
         List<TileInstructions> instructions = new ArrayList<>();
 
-        instructions.add(createInstructionsForFlowTick());
+        addIfNotNull(instructions, getJobInstructionsForFlowTick());
 
-        if (!Objects.equals(fromClockPosition.getDayPart(), toClockPosition.getDayPart())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.DAY_PART));
+        if (!Objects.equals(fromGridTime.getDayPart(), toGridTime.getDayPart())) {
+            addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.DAY_PART));
         }
 
-        if (!Objects.equals(fromClockPosition.getDay(), toClockPosition.getDay())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.DAY));
+        if (!Objects.equals(fromGridTime.getDay(), toGridTime.getDay())) {
+            addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.DAY));
         }
 
-        if (!Objects.equals(fromClockPosition.getBlockWeek(), toClockPosition.getBlockWeek())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.WEEK));
+        if (!Objects.equals(fromGridTime.getBlockWeek(), toGridTime.getBlockWeek())) {
+            addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.WEEK));
         }
 
-        if (!Objects.equals(fromClockPosition.getBlock(), toClockPosition.getBlock())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.BLOCK));
+        if (!Objects.equals(fromGridTime.getBlock(), toGridTime.getBlock())) {
+            addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.BLOCK));
         }
-        if (!Objects.equals(fromClockPosition.getYear(), toClockPosition.getYear())) {
-            instructions.add(createTileInstructionsForAggregateTick(ZoomLevel.YEAR));
+        if (!Objects.equals(fromGridTime.getYear(), toGridTime.getYear())) {
+            addIfNotNull(instructions, getJobInstructionsForAggregateTick(ZoomLevel.YEAR));
         }
         return instructions;
     }
 
-    private TileInstructions createInstructionsForFlowTick() {
-        return new GenerateNextTile(featurePool, pullChain, fromClockPosition, toClockPosition);
+    private void addIfNotNull(List<TileInstructions> instructions, TileInstructions newInstruction) {
+        if (newInstruction != null) {
+            instructions.add(newInstruction);
+        }
     }
 
-    private TileInstructions createTileInstructionsForAggregateTick(ZoomLevel zoomLevel) {
-        return new GenerateAggregateUpTile(featurePool, zoomLevel, fromClockPosition.getClockTime());
+    private TileInstructions getJobInstructionsForFlowTick() {
+        return metronomeJob.baseTick(fromGridTime, toGridTime);
+    }
+
+    private TileInstructions getJobInstructionsForAggregateTick(ZoomLevel zoomLevel) {
+        GeometryClock.GridTime toZoomedOutCoords = fromGridTime.toZoomLevel(zoomLevel);
+        GeometryClock.GridTime fromZoomedOutCoords = toZoomedOutCoords.panLeft();
+
+        return metronomeJob.aggregateTick(fromZoomedOutCoords, toZoomedOutCoords);
     }
 
     public boolean canTick() {
@@ -94,16 +98,12 @@ public class Metronome {
     }
 
 
-    public GeometryClock.GridTime getFromClockPosition() {
-        return this.fromClockPosition;
+    public GeometryClock.GridTime getFromGridTime() {
+        return this.fromGridTime;
     }
 
-    public GeometryClock.GridTime getToClockPosition() {
-        return this.toClockPosition;
-    }
-
-    public void addFlowToPullChain(Flow flow) {
-        this.pullChain.add(flow);
+    public GeometryClock.GridTime getToGridTime() {
+        return this.toGridTime;
     }
 
 

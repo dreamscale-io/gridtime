@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.executor.machine;
 
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.IdeaFlowGeneratorJob;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.MetronomeJob;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.fetch.FetchStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.PerProcessFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeatureCache;
@@ -40,21 +42,6 @@ public class TorchieFactory {
 
     private Map<UUID, FeatureCache> teamCacheMap = new HashMap<>();
 
-    public Torchie wireUpTeamTorchie(UUID teamId, LocalDateTime startingPosition) {
-        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
-
-        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, teamId,
-                featureCache, featureSearchService, tileSearchService);
-
-        Torchie torchie = new Torchie(teamId, featurePool, startingPosition);
-
-        //tile source
-        //tile transform is aggregation of a window
-
-        //tile sink is saving of a team tile
-
-        return torchie;
-    }
 
     private FeatureCache findOrCreateFeatureCache(UUID teamId) {
         FeatureCache featureCache = teamCacheMap.get(teamId);
@@ -65,52 +52,53 @@ public class TorchieFactory {
         return featureCache;
     }
 
-    //
-
-
     public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
         FeatureCache featureCache = findOrCreateFeatureCache(teamId);
 
         PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, memberId,
                 featureCache, featureSearchService, tileSearchService);
 
-        Torchie torchie = new Torchie(memberId, featurePool, startingPosition);
-
         //stream data into the tiles
+        IdeaFlowGeneratorJob job = createIdeaFlowGeneratorJob(memberId, featurePool);
 
-        torchie.addFlowSourceToPullChain(
+        return new Torchie(memberId, featurePool, job, startingPosition);
+
+    }
+
+    private IdeaFlowGeneratorJob createIdeaFlowGeneratorJob(UUID memberId, PerProcessFeaturePool featurePool) {
+        IdeaFlowGeneratorJob job = new IdeaFlowGeneratorJob(memberId, featurePool);
+
+        job.addFlowSourceToPullChain(
                 fetchStrategyFactory.get(FetchStrategyFactory.FeedType.JOURNAL_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER));
 
-        torchie.addFlowSourceToPullChain(
+        job.addFlowSourceToPullChain(
                 fetchStrategyFactory.get(FetchStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER));
 
-        torchie.addFlowSourceToPullChain(
+        job.addFlowSourceToPullChain(
                 fetchStrategyFactory.get(FetchStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER));
 
-        torchie.addFlowSourceToPullChain(
+        job.addFlowSourceToPullChain(
                 fetchStrategyFactory.get(FetchStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER));
 
         //transformation only, with no new data
 
-        torchie.addFlowTransformerToPullChain(
+        job.addFlowTransformerToPullChain(
                 flowTransformFactory.get(FlowTransformFactory.TransformType.RESOLVE_FEATURES_TRANSFORM));
 
         //save off the data in the tiles to permanent stores
 
-        torchie.addFlowSinkToPullChain(
+        job.addFlowSinkToPullChain(
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES),
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
 
-        return torchie;
-
+        return job;
     }
-
 
 
 }

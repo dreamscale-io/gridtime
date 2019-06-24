@@ -19,7 +19,7 @@ public class GotoTile extends TileInstructions {
 
     @Override
     public void executeInstruction() throws InterruptedException {
-        featurePool.gotoGridTile(gotoPosition);
+        featurePool.gotoPosition(gotoPosition);
 
         setOutputTile(featurePool.getActiveGridTile());
     }

@@ -2,6 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.executor.machine;
 
 import com.dreamscale.htmflow.core.gridtime.executor.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.InstructionsBuilder;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.IdeaFlowGeneratorJob;
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.MetronomeJob;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.circuit.CircuitMonitor;
 import com.dreamscale.htmflow.core.gridtime.executor.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.executor.machine.instructions.TileInstructions;
@@ -29,26 +31,14 @@ public class Torchie {
 
     private CircuitMonitor circuitMonitor;
 
-    public Torchie(UUID torchieId, FeaturePool featurePool, LocalDateTime startingPosition) {
+    public Torchie(UUID torchieId, FeaturePool featurePool, MetronomeJob metronomeJob, LocalDateTime startingPosition) {
         this.torchieId = torchieId;
 
         this.featurePool = featurePool;
-        this.metronome = new Metronome(featurePool, startingPosition);
+        this.metronome = new Metronome(metronomeJob, startingPosition);
 
         this.circuitMonitor = new CircuitMonitor(torchieId);
         this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, metronome);
-    }
-
-    void addFlowSourceToPullChain(FetchStrategy fetchStrategy, FlowObserver... observers) {
-        metronome.addFlowToPullChain(new FlowSource(torchieId, featurePool,fetchStrategy, observers));
-    }
-
-    void addFlowTransformerToPullChain(TransformStrategy... transforms) {
-        metronome.addFlowToPullChain(new FlowTransformer(torchieId, featurePool, transforms));
-    }
-
-    void addFlowSinkToPullChain(SinkStrategy... sinks) {
-        metronome.addFlowToPullChain(new FlowSink(torchieId, featurePool, sinks));
     }
 
     public InstructionsBuilder getInstructionsBuilder() {

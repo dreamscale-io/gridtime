@@ -36,7 +36,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
         return activeGridGridTime.getFormattedGridTime();
     }
 
-    public void gotoGridTile(GeometryClock.GridTime gridTime) {
+    public void gotoPosition(GeometryClock.GridTime gridTime) {
         this.activeGridGridTime = gridTime;
         this.activeGridTile = new GridTile(torchieId, activeGridGridTime, featureCache);
 

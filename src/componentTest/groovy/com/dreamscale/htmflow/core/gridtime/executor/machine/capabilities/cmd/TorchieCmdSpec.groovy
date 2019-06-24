@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.re
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.returns.Results
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.FinishTypeTag
 import com.dreamscale.htmflow.core.gridtime.executor.machine.capabilities.cmd.tag.types.StartTypeTag
+import com.dreamscale.htmflow.core.gridtime.executor.machine.job.NoOpJob
 import com.dreamscale.htmflow.core.gridtime.executor.machine.parts.commons.DefaultCollections
 import com.dreamscale.htmflow.core.gridtime.executor.memory.FeaturePool
 import com.dreamscale.htmflow.core.gridtime.executor.memory.MemoryOnlyFeaturePool
@@ -45,7 +46,7 @@ class TorchieCmdSpec extends Specification {
         torchieId = UUID.randomUUID();
         featurePool = new MemoryOnlyFeaturePool(torchieId);
 
-        torchie = new Torchie(torchieId, featurePool, clockStart);
+        torchie = new Torchie(torchieId, featurePool, new NoOpJob(featurePool), clockStart);
         System.out.println(clockStart);
         
         torchieExecutor = new TorchiePoolExecutor(1);

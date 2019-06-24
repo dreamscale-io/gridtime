@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface FeaturePool {
 
-    void gotoGridTile(GeometryClock.GridTime toCoordPosition);
+    void gotoPosition(GeometryClock.GridTime toCoordPosition);
 
     GridTile getActiveGridTile();
 

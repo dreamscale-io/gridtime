@@ -211,6 +211,11 @@ public class GeometryClock {
             return Duration.between(clockTime, moment);
         }
 
+        public GridTime toZoomLevel(ZoomLevel newZoomLevel) {
+            Integer[] newCoords = truncateCoordinates(newZoomLevel, coords);
+            return GeometryClock.createGridTimeFromCoordinates(newZoomLevel, newCoords);
+        }
+
         public GridTime zoomOut() {
             return GeometryClock.createGridTimeFromCoordinates(zoomLevel.zoomOut(), Arrays.copyOf(coords, coords.length - 1));
         }
@@ -331,5 +336,7 @@ public class GeometryClock {
         public Integer getTwentyOfTwelve() {
             return GridTimeFormatter.getTwentyOfTwelve(coords);
         }
+
+
     }
 }
