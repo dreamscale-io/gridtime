@@ -3,16 +3,24 @@ package com.dreamscale.htmflow.core.service;
 import com.dreamscale.htmflow.api.admin.ProjectSyncInputDto;
 import com.dreamscale.htmflow.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.htmflow.api.organization.*;
+import com.dreamscale.htmflow.api.project.ProjectDto;
 import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.htmflow.core.domain.journal.ConfigProjectSyncRepository;
+import com.dreamscale.htmflow.core.domain.journal.ProjectEntity;
+import com.dreamscale.htmflow.core.domain.journal.ProjectRepository;
 import com.dreamscale.htmflow.core.domain.member.OrganizationEntity;
 import com.dreamscale.htmflow.core.domain.member.OrganizationRepository;
+import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigEntity;
+import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.sink.JSONTransformer;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.matcher.BoxMatcherConfig;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
-import com.dreamscale.htmflow.core.job.UpdateFlowActivityJob;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.matcher.CPGBucketConfig;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.ProjectBoxes;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +48,16 @@ public class AdminService {
     private OrganizationRepository organizationRepository;
 
     @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
     private OrganizationService organizationService;
 
     @Autowired
     private TeamService teamService;
 
     @Autowired
-    private UpdateFlowActivityJob updateFlowActivityJob;
+    GridBoxBucketConfigRepository gridBoxBucketConfigRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -55,6 +66,40 @@ public class AdminService {
     @PostConstruct
     private void init() {
         projectSyncMapper = mapperFactory.createDtoEntityMapper(ProjectSyncOutputDto.class, ConfigProjectSyncEntity.class);
+    }
+
+    public void configureOnPremBuckets() {
+        String domainName = "onprem.com";
+        String teamName = "CPG";
+        String projectName = "NBCU CPG";
+
+        OrganizationDto organizationDto = organizationService.getOrganizationByDomainName(domainName);
+
+        UUID orgId = organizationDto.getId();
+
+        TeamDto teamDto = teamService.getTeamByName(orgId, teamName);
+
+        ProjectEntity projectEntity = projectRepository.findByOrganizationIdAndName(orgId, projectName);
+
+        List<BoxMatcherConfig> boxMatcherConfigs = new CPGBucketConfig().createBoxMatchers();
+
+        saveTeamProjectBuckets(teamDto.getId(), projectEntity.getId(), boxMatcherConfigs);
+
+    }
+
+    public void saveTeamProjectBuckets(UUID teamId, UUID projectId, List<BoxMatcherConfig> boxMatcherConfigs) {
+
+        for (BoxMatcherConfig config : boxMatcherConfigs) {
+            GridBoxBucketConfigEntity configEntity = new GridBoxBucketConfigEntity();
+            configEntity.setId(UUID.randomUUID());
+            configEntity.setTeamId(teamId);
+            configEntity.setProjectId(projectId);
+            configEntity.setBoxName(config.getBox());
+            configEntity.setBoxMatcherConfigJson(JSONTransformer.toJson(config));
+
+            gridBoxBucketConfigRepository.save(configEntity);
+        }
+
     }
 
     public ProjectSyncOutputDto configureJiraProjectSync(ProjectSyncInputDto projectSyncDto) {
@@ -211,7 +256,5 @@ public class AdminService {
         return organizationService.registerMember(org.getId(), membership);
     }
 
-    public void runJobToUpdateFlowActivityComponents() {
-        updateFlowActivityJob.run();
-    }
+
 }

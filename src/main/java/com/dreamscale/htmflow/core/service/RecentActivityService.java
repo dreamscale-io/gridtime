@@ -111,16 +111,6 @@ public class RecentActivityService {
         activeWorkStatusRepository.save(workStatus);
     }
 
-    public String lookupComponentOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
-        String component = "default";
-        FlowActivityEntity flowActivityEntity = flowActivityRepository.findFirst1ByMemberIdOrderByEndDesc(memberEntity.getId());
-
-        if (flowActivityEntity != null) {
-            component = flowActivityEntity.getComponent();
-        }
-
-        return component;
-    }
 
     public UUID lookupProjectIdOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
         UUID projectId = null;

@@ -22,10 +22,14 @@ public interface AdminClient {
     @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.JIRA_PATH + ResourcePaths.SYNC_PATH)
     void syncAllOrgs();
 
-    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.DREAMSCALE_PATH)
+    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.DREAMSCALE_PATH)
     List<MemberRegistrationDetailsDto> configureDreamScaleOrg(AutoConfigInputDto inputConfig);
 
-    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.ONPREM_PATH)
+    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.ONPREM_PATH)
     List<MemberRegistrationDetailsDto> configureOnPremOrg(AutoConfigInputDto inputConfig);
+
+
+    @RequestLine("POST " + ResourcePaths.ADMIN_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.ONPREM_PATH + ResourcePaths.BUCKET_PATH)
+    void configureOnPremBuckets();
 
 }

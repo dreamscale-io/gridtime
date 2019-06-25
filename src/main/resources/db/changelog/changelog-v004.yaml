@@ -20,3 +20,9 @@ databaseChangeLog:
 
   - include:
         file: db/v004/create_grid_time_calendar.sql
+
+  - include:
+        file: db/v004/alter_flow_activity_drop_component.sql
+
+  - include:
+        file: db/v004/create_grid_box_bucket_config.sql

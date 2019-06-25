@@ -74,6 +74,12 @@ public class TeamService {
         return teamOutputMapper.toApi(teamEntity);
     }
 
+    public TeamDto getTeamByName(UUID organizationId, String teamName) {
+
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, teamName);
+        return teamOutputMapper.toApi(teamEntity);
+    }
+
     public List<TeamMemberDto> addMembersToTeam(UUID orgId, UUID teamId, List<UUID> membersToAdd) {
         OrganizationEntity org = validateOrganization(orgId);
         TeamEntity team = validateTeam(orgId, teamId);

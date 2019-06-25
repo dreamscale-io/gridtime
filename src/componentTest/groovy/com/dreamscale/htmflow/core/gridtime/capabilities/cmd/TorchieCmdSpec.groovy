@@ -1,22 +1,22 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.cmd
 
 import com.dreamscale.htmflow.core.domain.member.json.Member
-import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
-import com.dreamscale.htmflow.core.gridtime.machine.Torchie
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel
+import com.dreamscale.htmflow.core.gridtime.kernel.Torchie
+import com.dreamscale.htmflow.core.gridtime.kernel.TorchiePoolExecutor
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results
-import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.FinishTypeTag
-import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTag
-import com.dreamscale.htmflow.core.gridtime.machine.executor.job.NoOpJob
-import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.AuthorsDetails
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.CircleDetails
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.ExecutionEvent
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.WorkContextEvent
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.TrackSetName
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.FinishTypeTag
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.StartTypeTag
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.NoOpProgram
+import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.FeaturePool
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.AuthorsDetails
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.CircleDetails
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.ExecutionEvent
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.WorkContextEvent
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName
 import spock.lang.Specification
 
 import java.time.Duration
@@ -46,7 +46,7 @@ class TorchieCmdSpec extends Specification {
         torchieId = UUID.randomUUID();
         featurePool = new MemoryOnlyFeaturePool(torchieId);
 
-        torchie = new Torchie(torchieId, featurePool, new NoOpJob(featurePool));
+        torchie = new Torchie(torchieId, featurePool, new NoOpProgram(featurePool));
         System.out.println(clockStart);
         
         torchieExecutor = new TorchiePoolExecutor(1);

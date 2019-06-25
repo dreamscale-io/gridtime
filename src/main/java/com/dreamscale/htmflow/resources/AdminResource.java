@@ -36,15 +36,6 @@ public class AdminResource {
     /**
      * Synchronize all Jira Projects for all organizations
      */
-    @PostMapping(ResourcePaths.FEED_PATH + ResourcePaths.UPDATE_PATH + ResourcePaths.ACTIVITY_PATH)
-    void runJobToUpdateFlowActivityComponents() {
-        adminService.runJobToUpdateFlowActivityComponents();
-    }
-
-
-    /**
-     * Synchronize all Jira Projects for all organizations
-     */
     @PostMapping(ResourcePaths.JIRA_PATH + ResourcePaths.SYNC_PATH)
     void synchronizeWithJira() {
         adminService.synchronizeAllOrgs();
@@ -66,17 +57,13 @@ public class AdminResource {
         return adminService.configureOnPrem(inputConfig);
     }
 
-
     /**
-     * Configure OnPrem component getBeats so that all Idea Flow data gets dereferenced into components
-     * This is memory resident, not persistent, but maybe should be persistent too?  Would mayb
+     * Configure the hard coded bucket configuration in associate with the team
      */
-    @PostMapping(ResourcePaths.CONFIG_PATH + ResourcePaths.BUCKET_PATH + ResourcePaths.ONPREM_PATH)
-    List<MemberRegistrationDetailsDto>  configureOnPremBuckets(@RequestBody AutoConfigInputDto inputConfig) {
+    @PostMapping(ResourcePaths.CONFIG_PATH + ResourcePaths.ORG_PATH + ResourcePaths.ONPREM_PATH + ResourcePaths.BUCKET_PATH)
+    void configureOnPremBuckets() {
 
-        //TODO make this configure the getBeats
-
-        return adminService.configureOnPrem(inputConfig);
+        adminService.configureOnPremBuckets();
     }
 
 

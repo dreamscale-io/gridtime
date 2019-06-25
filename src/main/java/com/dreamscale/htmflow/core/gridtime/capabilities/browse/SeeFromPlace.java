@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

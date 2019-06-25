@@ -34,9 +34,6 @@ public class FlowService {
     FlowEventRepository flowEventRepository;
 
     @Autowired
-    ComponentLookupService componentLookupService;
-
-    @Autowired
     RecentActivityService recentActivityService;
 
     //okay, next thing I need to do, is wire in a component resolve service, that will get used on batch processing
@@ -47,53 +44,34 @@ public class FlowService {
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 
         UUID mostRecentProjectId = lookupProjectIdOfMostRecentIntention(memberEntity);
-        String mostRecentComponent = lookupComponentOfMostRecentActivity(memberEntity);
 
         List<Activity> sortedBatchItems = sortAllItemsByTime(batch.getAllBatchActivity());
         Duration timeAdjustment = calculateTimeAdjustment(batch.getTimeSent());
 
         for (Activity activityInSequence : sortedBatchItems) {
             if (activityInSequence instanceof NewEditorActivity) {
-                String component = lookupComponent(mostRecentProjectId, (NewEditorActivity) activityInSequence);
-                saveEditorActivity(memberEntity.getId(), component, timeAdjustment, (NewEditorActivity) activityInSequence);
+                saveEditorActivity(memberEntity.getId(), timeAdjustment, (NewEditorActivity) activityInSequence);
 
-                mostRecentComponent = component;
             } else {
-                saveActivity(memberEntity.getId(), mostRecentComponent, timeAdjustment, activityInSequence);
+                saveActivity(memberEntity.getId(), timeAdjustment, activityInSequence);
             }
         }
 
         saveEvents(memberEntity.getId(), timeAdjustment, batch.getEventList());
     }
 
-    private void saveActivity(UUID memberId,  String component, Duration timeAdjustment, Activity activity) {
+    private void saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {
 
         if (activity instanceof NewExecutionActivity) {
-            saveExecutionActivity(memberId, component, timeAdjustment, (NewExecutionActivity) activity);
+            saveExecutionActivity(memberId, timeAdjustment, (NewExecutionActivity) activity);
         } else if (activity instanceof NewModificationActivity) {
-            saveModificationActivity(memberId, component, timeAdjustment, (NewModificationActivity) activity);
+            saveModificationActivity(memberId, timeAdjustment, (NewModificationActivity) activity);
         } else if (activity instanceof NewIdleActivity) {
-            saveIdleActivity(memberId, component, timeAdjustment, (NewIdleActivity) activity);
+            saveIdleActivity(memberId, timeAdjustment, (NewIdleActivity) activity);
         } else if (activity instanceof NewExternalActivity) {
-            saveExternalActivity(memberId, component, timeAdjustment, (NewExternalActivity) activity);
+            saveExternalActivity(memberId, timeAdjustment, (NewExternalActivity) activity);
         }
 
-    }
-
-    //wire up component resolve service, that will use the configuration based on the project
-    //and look up the component for that, caching all the things for that project, or returning a default
-
-    private String lookupComponent(UUID projectId, NewEditorActivity editorActivity) {
-
-        return componentLookupService.lookupComponent(projectId, editorActivity.getFilePath());
-    }
-
-    //query the most recent flow activity for a member feed, look at the component of the last batch,
-    //and start from there.  Assumption of last batch happened about 30 min ago, so shouldn't have timing issues
-
-    private String lookupComponentOfMostRecentActivity(OrganizationMemberEntity memberEntity) {
-
-        return recentActivityService.lookupComponentOfMostRecentActivity(memberEntity);
     }
 
     //what is the most recent intention of the user that this batch corresponds to, the entire batch
@@ -148,7 +126,7 @@ public class FlowService {
         flowEventRepository.save(entity);
     }
 
-    private void saveIdleActivity(UUID memberId, String component, Duration adjustment, NewIdleActivity idleActivity) {
+    private void saveIdleActivity(UUID memberId, Duration adjustment, NewIdleActivity idleActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Idle);
@@ -158,11 +136,10 @@ public class FlowService {
             entity.setStart(idleActivity.getEndTime().plus(adjustment).minusSeconds(idleActivity.getDurationInSeconds()));
             entity.setEnd(idleActivity.getEndTime().plus(adjustment));
 
-            entity.setComponent(component);
             flowActivityRepository.save(entity);
     }
 
-    private void saveExternalActivity(UUID memberId, String component, Duration adjustment, NewExternalActivity externalActivity) {
+    private void saveExternalActivity(UUID memberId, Duration adjustment, NewExternalActivity externalActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.External);
@@ -174,11 +151,10 @@ public class FlowService {
 
             entity.setMetadataField(FlowActivityMetadataField.comment, externalActivity.getComment());
 
-            entity.setComponent(component);
             flowActivityRepository.save(entity);
     }
 
-    private void saveModificationActivity(UUID memberId, String component, Duration adjustment, NewModificationActivity modificationActivity) {
+    private void saveModificationActivity(UUID memberId, Duration adjustment, NewModificationActivity modificationActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Modification);
@@ -190,11 +166,10 @@ public class FlowService {
 
             entity.setMetadataField(FlowActivityMetadataField.modificationCount, modificationActivity.getModificationCount());
 
-            entity.setComponent(component);
             flowActivityRepository.save(entity);
     }
 
-    private void saveExecutionActivity(UUID memberId, String component, Duration adjustment, NewExecutionActivity executionActivity) {
+    private void saveExecutionActivity(UUID memberId, Duration adjustment, NewExecutionActivity executionActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Execution);
@@ -209,12 +184,10 @@ public class FlowService {
             entity.setMetadataField(FlowActivityMetadataField.exitCode, executionActivity.getExitCode());
             entity.setMetadataField(FlowActivityMetadataField.isDebug, executionActivity.isDebug());
 
-            entity.setComponent(component);
-
             flowActivityRepository.save(entity);
     }
 
-    private String saveEditorActivity(UUID memberId, String component, Duration adjustment, NewEditorActivity editorActivity) {
+    private void saveEditorActivity(UUID memberId, Duration adjustment, NewEditorActivity editorActivity) {
 
         FlowActivityEntity entity = new FlowActivityEntity();
 
@@ -228,11 +201,7 @@ public class FlowService {
         entity.setMetadataField(FlowActivityMetadataField.filePath, editorActivity.getFilePath());
         entity.setMetadataField(FlowActivityMetadataField.isModified, editorActivity.isModified());
 
-        entity.setComponent(component);
-
         flowActivityRepository.save(entity);
-
-        return component;
     }
 
     private Duration calculateTimeAdjustment(LocalDateTime messageSentAt) {

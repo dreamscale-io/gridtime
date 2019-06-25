@@ -1,14 +1,14 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.cmd;
 
-import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.kernel.Torchie;
+import com.dreamscale.htmflow.core.gridtime.kernel.TorchiePoolExecutor;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.type.CmdType;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.CmdType;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;

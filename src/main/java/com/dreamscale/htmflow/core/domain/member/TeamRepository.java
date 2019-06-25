@@ -13,6 +13,8 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
 
     List<TeamEntity> findByOrganizationId(UUID orgId);
 
+    TeamEntity findByOrganizationIdAndName(UUID organizationId, String name);
+
         @Query(nativeQuery = true, value = "select t.* from team t, team_member tm, organization_member om " +
             "where t.id = tm.team_id " +
             "and tm.member_id = om.id "+
@@ -40,5 +42,6 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
             "and tm2.team_id = t.id )")
     List<TeamEntity> findTeamsContainingBothMembers(@Param("orgId") UUID orgId, @Param("member1") UUID member1,
                                                     @Param("member2") UUID member2 );
+
 
 }

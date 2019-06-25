@@ -57,6 +57,11 @@ public class OrganizationService {
         orgOutputMapper = mapperFactory.createDtoEntityMapper(OrganizationDto.class, OrganizationEntity.class);
     }
 
+    public OrganizationDto getOrganizationByDomainName(String domainName) {
+        OrganizationEntity orgEntity = organizationRepository.findByDomainName(domainName);
+        return orgOutputMapper.toApi(orgEntity);
+    }
+
     public OrganizationDto createOrganization(OrganizationInputDto orgInputDto) {
 
         OrganizationEntity inputOrgEntity = orgInputMapper.toEntity(orgInputDto);
@@ -251,5 +256,6 @@ public class OrganizationService {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
         }
     }
+
 
 }

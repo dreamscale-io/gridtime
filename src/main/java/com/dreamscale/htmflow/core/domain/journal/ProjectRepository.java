@@ -13,6 +13,8 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
 
     List<ProjectEntity> findByOrganizationId(UUID organizationId);
 
+    ProjectEntity findByOrganizationIdAndName(UUID orgId, String name);
+
     ProjectEntity findById(UUID id);
 
     @Query(nativeQuery = true, value = "select p.* from project p, recent_project rp " +
@@ -20,4 +22,6 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
             "and rp.member_id=(:memberId) " +
             "order by rp.last_accessed desc ")
     List<ProjectEntity> findByRecentMemberAccess(@Param("memberId") UUID memberId);
+
+
 }
