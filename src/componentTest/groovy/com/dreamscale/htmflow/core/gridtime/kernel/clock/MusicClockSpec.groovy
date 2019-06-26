@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.clock
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb
 import spock.lang.Specification
 
 import java.time.Duration
@@ -131,7 +131,7 @@ class MusicClockSpec extends Specification {
         musicClock = new MusicClock(ZoomLevel.TWENTY)
 
         when:
-        TimeBombTrigger timebomb = musicClock.getFutureTimeBomb(Duration.ofHours(3).plusMinutes(4))
+        TimeBomb timebomb = musicClock.getFutureTimeBomb(Duration.ofHours(3).plusMinutes(4))
 
         then:
         assert timebomb.getFullMeasuresRemainingToCountDown() == 9

@@ -8,4 +8,9 @@ public interface StartTag extends Tag {
     default String toDisplayString() {
         return "^";
     }
+
+    default String getType() {
+        return "Start";
+    }
+
 }

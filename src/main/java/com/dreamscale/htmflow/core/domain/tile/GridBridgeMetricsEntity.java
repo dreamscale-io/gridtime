@@ -10,13 +10,13 @@ import javax.persistence.Id;
 import java.math.BigInteger;
 import java.util.UUID;
 
-@Entity(name = "grid_tile_summary")
+@Entity(name = "grid_bridge_metrics")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridTileSummaryEntity {
+public class GridBridgeMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -31,26 +31,21 @@ public class GridTileSummaryEntity {
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 
-    private Long tileSeq;
+    private Long tileSequence;
 
-    private Integer timeInTile;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID bridgeFeatureId;
 
-    private Integer timeInWtf;
+    private Integer totalVisits;
 
-    private Integer timeInLearning;
+    private Integer visitsDuringWtf;
 
-    private Integer timeInProgress;
+    private Integer visitsDuringLearning;
 
-    private Integer timeInPairing;
+    private Integer visitsDuringRedToGreen;
 
     private Float avgFlame;
 
-    private Float avgBatchSize;
-
     private Float avgTraversalSpeed;
-
-    private Float avgExecutionTime;
-
-    private Float avgRedToGreenTime;
 
 }

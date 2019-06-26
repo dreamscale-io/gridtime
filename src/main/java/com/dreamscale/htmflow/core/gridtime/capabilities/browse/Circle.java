@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 
 import java.util.LinkedList;
@@ -17,17 +17,17 @@ public class Circle<S> {
         this.circleCapabilities = circleCapabilities;
     }
 
-    public TimeBombTrigger refreshWithPeersAroundThisOrigin(S centerOfCircle) {
+    public TimeBomb refreshWithPeersAroundThisOrigin(S centerOfCircle) {
         this.centerOfCircle = centerOfCircle;
         return circleCapabilities.refreshWithPeersAroundThisOrigin(centerOfCircle);
     }
 
-    public TimeBombTrigger refreshWithChildrenOfThisOrigin(S centerOfCircle) {
+    public TimeBomb refreshWithChildrenOfThisOrigin(S centerOfCircle) {
         this.centerOfCircle = centerOfCircle;
         return circleCapabilities.refreshWithChildrenOfThisOrigin(centerOfCircle);
     }
 
-    public TimeBombTrigger refreshWTFsWithinThisCircle() {
+    public TimeBomb refreshWTFsWithinThisCircle() {
         return circleCapabilities.refreshWTFsForThesePlaces(similarsInCircle);
     }
 

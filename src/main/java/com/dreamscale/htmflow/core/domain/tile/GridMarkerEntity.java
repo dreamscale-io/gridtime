@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "grid_marker")
@@ -22,16 +23,17 @@ public class GridMarkerEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
+    private Long tileSeq;
+
+    private LocalDateTime position;
+
     private String rowName;
 
-    private BigInteger tileSequence;
+    private String tagType;
 
-    private Integer beatNumber;
-
-    private String startOrStop;
+    private String tagName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID gridFeatureId;
 
 }
-

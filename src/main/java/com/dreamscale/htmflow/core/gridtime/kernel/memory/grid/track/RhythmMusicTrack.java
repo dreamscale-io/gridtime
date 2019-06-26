@@ -1,33 +1,45 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.FeatureCell;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.FeatureCell;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
 public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack {
 
+    private final GeometryClock.GridTime gridTime;
     protected final MusicClock musicClock;
     private final String rowName;
 
-    private MultiValueMap<RelativeBeat, F> trackMusic = DefaultCollections.multiMap();
+    private MultiValueMap<RelativeBeat, Movement<F>> trackMusic = DefaultCollections.multiMap();
     private MultiValueMap<RelativeBeat, FeatureTag<F>> trackTags = DefaultCollections.multiMap();
 
-    public RhythmMusicTrack(String rowName, MusicClock musicClock) {
+    public RhythmMusicTrack(String rowName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.rowName = rowName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
 
-    public void playEventAtBeat(RelativeBeat beat, F event) {
-        trackMusic.add(beat, event);
+    protected RelativeBeat getBeat(LocalDateTime moment) {
+        return musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
+    }
+
+    public void playEventAtBeat(LocalDateTime moment, F event) {
+        trackMusic.add(getBeat(moment), new Movement<>(moment, event));
     }
 
     public F getLatestEventOnOrBeforeBeat(RelativeBeat beat) {
@@ -37,9 +49,9 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         while (iterator.hasNext()) {
             RelativeBeat prevBeat = iterator.next();
-            List<F> eventsAtBeat = trackMusic.get(prevBeat);
+            List<Movement<F>> eventsAtBeat = trackMusic.get(prevBeat);
             if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
-                latestEvent = eventsAtBeat.get(eventsAtBeat.size() - 1);
+                latestEvent = eventsAtBeat.get(eventsAtBeat.size() - 1).getFeature();
                 break;
             }
         }
@@ -54,9 +66,11 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         while (iterator.hasNext()) {
             RelativeBeat beat = iterator.next();
-            List<F> eventsAtBeat = trackMusic.get(beat);
+            List<Movement<F>> eventsAtBeat = trackMusic.get(beat);
             if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
-                features.addAll(eventsAtBeat);
+                for (Movement<F> movement : eventsAtBeat) {
+                    features.add(movement.getFeature());
+                }
             }
         }
 
@@ -136,18 +150,18 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     public F getFirstFeatureAt(RelativeBeat beat) {
-        List<F> featuresAtBeat = trackMusic.get(beat);
+        List<Movement<F>> featuresAtBeat = trackMusic.get(beat);
         if (featuresAtBeat != null && featuresAtBeat.size() > 0) {
-            return featuresAtBeat.get(0);
+            return featuresAtBeat.get(0).getFeature();
         }
 
         return null;
     }
 
     public F getLastFeatureAt(RelativeBeat beat) {
-        List<F> featuresAtBeat = trackMusic.get(beat);
+        List<Movement<F>> featuresAtBeat = trackMusic.get(beat);
         if (featuresAtBeat != null && featuresAtBeat.size() > 0) {
-            return featuresAtBeat.get(featuresAtBeat.size() - 1);
+            return featuresAtBeat.get(featuresAtBeat.size() - 1).getFeature();
         }
 
         return null;
@@ -155,7 +169,15 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
 
 
     public List<F> getAllFeaturesAtBeat(RelativeBeat beat) {
-        return trackMusic.get(beat);
+        List<F> features = DefaultCollections.list();
+        List<Movement<F>> eventsAtBeat = trackMusic.get(beat);
+        if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
+            for (Movement<F> movement : eventsAtBeat) {
+                features.add(movement.getFeature());
+            }
+        }
+
+        return features;
     }
 
 
@@ -214,4 +236,13 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
 
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    private static class Movement<F> {
+        LocalDateTime position;
+        F feature;
+    }
 }

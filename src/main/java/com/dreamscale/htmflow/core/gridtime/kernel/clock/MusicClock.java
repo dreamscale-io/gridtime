@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.clock;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -158,13 +158,13 @@ public class MusicClock implements Iterator<RelativeBeat> {
         return closestBeat;
     }
 
-    public TimeBombTrigger getFutureTimeBomb(Duration futureTime) {
+    public TimeBomb getFutureTimeBomb(Duration futureTime) {
         int fullMeasuresToCountDown = (int)Math.floorDiv(futureTime.getSeconds() , relativeEnd.getSeconds() );
         int secondsOffset = (int)Math.floorMod(futureTime.getSeconds(), relativeEnd.getSeconds());
 
         RelativeBeat beatWithinMeasureToSplode = getClosestBeat(Duration.ofSeconds(secondsOffset));
 
-        return new TimeBombTrigger(zoomLevel, fullMeasuresToCountDown, beatWithinMeasureToSplode);
+        return new TimeBomb(zoomLevel, fullMeasuresToCountDown, beatWithinMeasureToSplode);
     }
 
 

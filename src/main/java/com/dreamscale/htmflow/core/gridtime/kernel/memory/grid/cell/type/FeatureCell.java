@@ -1,12 +1,18 @@
-package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
+package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridCell;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MarkerValue;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 public class FeatureCell<F extends FeatureReference> implements GridCell {
@@ -70,6 +76,46 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         }
 
         return toRightSizedCell(featureStr, tagStr, overrideCellSize);
+    }
+
+    @Override
+    public List<UUID> getFeatureRefs() {
+        List<UUID> refs = null;
+
+        if (feature != null && (hasStartTag() || isFirstCell())) {
+                refs = DefaultCollections.toList(feature.getFeatureId());
+        } else if (features != null && !features.isEmpty()) {
+            refs = DefaultCollections.list();
+            for (FeatureReference feature : features) {
+                refs.add(feature.getFeatureId());
+            }
+        }
+
+        return refs;
+    }
+
+    public boolean hasStartTag() {
+        if (tags != null && tags.size() > 0) {
+            for (FeatureTag<F> tag : tags) {
+                if (tag.isStart()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isFirstCell() {
+        return beat.getBeat() == 1;
+    }
+
+    @Override
+    public List<FeatureTag<?>> getFeatureTags() {
+        List<FeatureTag<?>> featureTags = null;
+        if (tags != null && tags.size() > 0) {
+            featureTags = new ArrayList<>(tags);
+        }
+        return featureTags;
     }
 
     @Override

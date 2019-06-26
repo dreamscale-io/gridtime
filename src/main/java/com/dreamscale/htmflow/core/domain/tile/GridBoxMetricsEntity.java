@@ -31,7 +31,7 @@ public class GridBoxMetricsEntity {
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 
-    private BigInteger tileSequence;
+    private Long tileSequence;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID boxFeatureId;
@@ -56,4 +56,18 @@ public class GridBoxMetricsEntity {
 
     private Float avgRedToGreenTime;
 
+
+//    create table grid_bridge_metrics (
+//            id uuid primary key not null,
+//            team_id uuid not null,
+//            torchie_id uuid not null,
+//            zoom_level text,
+//            tile_seq bigint,
+//            bridge_feature_id uuid,
+//            total_visits int,
+//            visits_during_wtf int,
+//            visits_during_learning int,
+//            avg_flame float,
+//            avg_traversal_speed float
+//    );
 }

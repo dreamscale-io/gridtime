@@ -20,7 +20,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.getFormattedGridTime() == "2019-B1-W1-D1_12am+2:20"
+        assert coords.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
 
     }
 
@@ -34,7 +34,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.getFormattedGridTime() == "2019-B1-W1-D1_8pm+3:40"
+        assert coords.toDisplayString() == "2019-B1-W1-D1_8pm+3:40"
     }
 
 
@@ -48,7 +48,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.getFormattedGridTime() == "2019-B1-W3-D7_4am+0:20"
+        assert coords.toDisplayString() == "2019-B1-W3-D7_4am+0:20"
 
     }
 
@@ -62,7 +62,7 @@ class GeometryClockSpec extends Specification {
 
         then:
         assert coords != null
-        assert coords.getFormattedGridTime() == "2018-B9-W5-D2_4am+0:20"
+        assert coords.toDisplayString() == "2018-B9-W5-D2_4am+0:20"
 
     }
 

@@ -1,11 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Getter
 public class GridRow {
@@ -41,6 +41,34 @@ public class GridRow {
         }
 
         return valueColumns;
+    }
+
+    public List<FeatureTag<?>> getFeatureTags() {
+        List<FeatureTag<?>> featureTags = new ArrayList<>();
+        for (GridCell cell : gridCells) {
+            List<FeatureTag<?>> cellTags = cell.getFeatureTags();
+
+            if (cellTags != null) {
+                featureTags.addAll(cellTags);
+            }
+        }
+
+        return featureTags;
+    }
+
+    public Map<String, CellValue> toCellValueMap() {
+        Map<String, CellValue> cellValueMap = new LinkedHashMap<>();
+        for (GridCell cell : gridCells) {
+            String beat = cell.toHeaderCell().trim();
+            String value = cell.toValueCell().trim();
+
+            List<UUID> refs = cell.getFeatureRefs();
+
+            if (value.length() > 0) {
+                cellValueMap.put(beat, new CellValue(value, refs));
+            }
+        }
+        return cellValueMap;
     }
 
     private String toRightSizedRowName(String rowName) {

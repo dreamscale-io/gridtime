@@ -26,6 +26,6 @@ public class GotoTile extends TileInstructions {
 
     @Override
     public String getCmdDescription() {
-        return "goto tile at "+gotoPosition.getFormattedGridTime();
+        return "goto tile at "+gotoPosition.toDisplayString();
     }
 }

@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.IdeaFlowTile;
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.IdeaFlowStateType;
 
@@ -24,7 +24,7 @@ public class IdeaFlowCircuit {
     private LinkedList<IdeaFlowTile> recentIdeaFlowTracer;
     private IdeaFlowStateType mostRecentIdeaFlowState;
 
-    private LinkedList<TimeBombTrigger> activeWaits;
+    private LinkedList<TimeBomb> activeWaits;
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
 

@@ -1,7 +1,18 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.sink;
 
+import com.dreamscale.htmflow.core.domain.tile.GridMarkerEntity;
+import com.dreamscale.htmflow.core.domain.tile.GridMarkerRepository;
+import com.dreamscale.htmflow.core.domain.tile.GridRowEntity;
+import com.dreamscale.htmflow.core.domain.tile.GridRowRepository;
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.CellValue;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MarkerValue;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -10,131 +21,110 @@ import java.util.*;
 @Slf4j
 public class SaveToPostgresSink implements SinkStrategy {
 
+    @Autowired
+    CalendarService calendarService;
+
+    @Autowired
+    GridRowRepository gridRowRepository;
+
+    @Autowired
+    GridMarkerRepository gridMarkerRepository;
 
     @Override
     public void save(UUID torchieId, GridTile gridTile) {
 
+        //first thing I need to do, is save the wtf banded row.
+
+        Long tileSeq = calendarService.lookupTileSequenceNumber(gridTile.getGridTime());
+
+        List<GridRow> allGridRows = gridTile.getMusicGrid().getAllGridRows();
+
+        List<GridRowEntity> rowEntities = new ArrayList<>();
+        for (GridRow row: allGridRows) {
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, gridTile.getZoomLevel(), tileSeq, row);
+            if (rowEntity != null) {
+                rowEntities.add(rowEntity);
+            }
+        }
+        gridRowRepository.save(rowEntities);
+
+        //okay markers, what do we need to do for this?
+
+        List<GridMarkerEntity> markerEntities = new ArrayList<>();
+
+        for (GridRow row: allGridRows) {
+            List<GridMarkerEntity> rowMarkers = createRowMarkerEntitiesIfNotEmpty(torchieId, tileSeq, row);
+            if (rowMarkers != null) {
+                markerEntities.addAll(rowMarkers);
+            }
+        }
+        gridMarkerRepository.save(markerEntities);
+
+        //okay tile summary... what do we need to do fo
 
 
-        //alright so first thing, I want to know what project, task, intention, this tile should be contributed toward
-        //these should carry over from tile to tile... let's get that working first.
+        //TODO save tile summary
 
-        //I'm going to add these to the tile summary level, for the most part, they will be consistent
+        //TODO save lookup tables
 
+        //wtf and wtf^ reference UUID
+        //execution, do I need the featureIds? (yes)
 
-        gridTile.finishAfterLoad();
+        //TODO save box metrics
 
-        //TODO rewrite the loading to DB code
+        //TODO save bridge metrics
 
-//        StoryTileModel storyTileModel = gridTile.extractStoryTileModel();
-//
-//        log.debug(storyTileModel.getStoryTileSummary().toString());
-//
-//        StoryTileEntity storyTileEntity = createStoryTileEntity(torchieId, storyTileModel);
-//        storyTileRepository.save(storyTileEntity);
-//
-//        //make sure doesn't explode
-//        StoryTileModel model = JSONTransformer.fromJson(storyTileEntity.getJsonTile(), StoryTileModel.class);
-//
-//        StoryGridSummaryEntity summaryEntity = createStoryGridSummaryEntity(torchieId, storyTileEntity.getId(), storyTileModel.getStoryTileSummary());
-//        storyGridSummaryRepository.save(summaryEntity);
-//
-//        List<StoryGridMetricsEntity> storyGridEntities = createStoryGridMetricEntities(torchieId, storyTileEntity.getId(), storyTileModel.getStoryGrid());
-//        storyGridMetricsRepository.save(storyGridEntities);
-//
-//        log.debug("Saved tile: "+storyTileEntity.getUri());
+        //TODO update floating now
 
-
+        //TODO aggregate up
     }
-//
-//    private StoryGridSummaryEntity createStoryGridSummaryEntity(UUID torchieId, UUID tileId, StoryTileSummary storyTileSummary) {
-//
-//        StoryGridSummaryEntity summaryEntity = new StoryGridSummaryEntity();
-//        summaryEntity.setId(UUID.randomUUID());
-//        summaryEntity.setTorchieId(torchieId);
-//        summaryEntity.setTileId(tileId);
-//
-//        summaryEntity.setAverageMood(storyTileSummary.getAvgMood());
-//        summaryEntity.setPercentLearning(storyTileSummary.getPercentLearning());
-//        summaryEntity.setPercentProgress(storyTileSummary.getPercentProgress());
-//        summaryEntity.setPercentTroubleshooting(storyTileSummary.getPercentTroubleshooting());
-//        summaryEntity.setPercentPairing(storyTileSummary.getPercentPairing());
-//
-//        summaryEntity.setBoxesVisited(storyTileSummary.getBoxesVisited());
-//        summaryEntity.setLocationsVisited(storyTileSummary.getLocationsVisited());
-//        summaryEntity.setBridgesVisited(storyTileSummary.getBridgesVisited());
-//        summaryEntity.setTraversalsVisited(storyTileSummary.getTraversalsVisited());
-//        summaryEntity.setBubblesVisited(storyTileSummary.getBubblesVisited());
-//
-//        return summaryEntity;
-//    }
-//
-//    private List<StoryGridMetricsEntity> createStoryGridMetricEntities(UUID torchieId, UUID tileId, TileGridModel tileGridModel) {
-//
-//        List<StoryGridMetricsEntity> gridMetrics = new ArrayList<>();
-//
-//        Set<String> uris = tileGridModel.getAllFeaturesVisited();
-//
-//        for (String uri : uris) {
-//            FeatureMetrics metrics = tileGridModel.getFeatureMetricTotals().getFeatureMetrics(uri);
-//
-//            Map<CandleType, CandleStick> candleMap = metrics.getMetrics().getCandleMap();
-//
-//            for (CandleType candleType : candleMap.keySet()) {
-//                CandleStick candleStick = candleMap.get(candleType);
-//
-//                StoryGridMetricsEntity metricsEntity = new StoryGridMetricsEntity();
-//                metricsEntity.setId(UUID.randomUUID());
-//                metricsEntity.setFeatureUri(uri);
-//                metricsEntity.setTileId(tileId);
-//                metricsEntity.setTorchieId(torchieId);
-//
-//                metricsEntity.setCandleType(candleType.name());
-//                metricsEntity.setSampleCount(candleStick.getSampleCount());
-//                metricsEntity.setAvg(candleStick.getAvg());
-//                metricsEntity.setTotal(candleStick.getTotal());
-//                metricsEntity.setStddev(candleStick.getStddev());
-//                metricsEntity.setMin(candleStick.getMin());
-//                metricsEntity.setMax(candleStick.getMax());
-//
-//                gridMetrics.add(metricsEntity);
-//            }
-//        }
-//
-//        return gridMetrics;
-//    }
 
+    private List<GridMarkerEntity> createRowMarkerEntitiesIfNotEmpty(UUID torchieId, Long tileSeq, GridRow row) {
 
-//    private StoryTileEntity createStoryTileEntity(UUID torchieId, StoryTileModel storyTileModel) {
-//
-//        StoryTileEntity storyTileEntity = new StoryTileEntity();
-//
-//        storyTileEntity.setId(UUID.randomUUID());
-//        storyTileEntity.setTorchieId(torchieId);
-//        storyTileEntity.setUri(storyTileModel.getTileUri());
-//        storyTileEntity.setZoomLevel(storyTileModel.getZoomLevel().name());
-//
-//        GeometryClock.Coords coordinates = storyTileModel.getTileCoordinates();
-//
-//        storyTileEntity.setClockPosition(coordinates.getStartTime());
-//        storyTileEntity.setDreamTime(coordinates.formatGridTime());
-//
-//        storyTileEntity.setYear(coordinates.getYear());
-//        storyTileEntity.setBlock(coordinates.getBlock());
-//        storyTileEntity.setWeeksIntoBlock(coordinates.getWeeksIntoBlock());
-//        storyTileEntity.setWeeksIntoYear(coordinates.getWeeksIntoYear());
-//        storyTileEntity.setDaysIntoWeek(coordinates.getDaysIntoWeek());
-//        storyTileEntity.setFourHourSteps(coordinates.getTwelves());
-//        storyTileEntity.setTwentyMinuteSteps(coordinates.getTwenties());
-//
-//
-//        String storyTileAsJson = JSONTransformer.toJson(storyTileModel);
-//        String summaryAsJson = JSONTransformer.toJson(storyTileModel.getStoryTileSummary());
-//
-//        storyTileEntity.setJsonTile(storyTileAsJson);
-//        storyTileEntity.setJsonTileSummary(summaryAsJson);
-//
-//        return storyTileEntity;
-//    }
+        List<GridMarkerEntity> markerEntities = null;
+
+        List<FeatureTag<?>> featureTags = row.getFeatureTags();
+
+        if (featureTags != null && featureTags.size() > 0) {
+            markerEntities = new ArrayList<>();
+
+            for (FeatureTag<?> featureTag : featureTags) {
+                GridMarkerEntity markerEntity = new GridMarkerEntity();
+                markerEntity.setId(UUID.randomUUID());
+                markerEntity.setTorchieId(torchieId);
+                markerEntity.setTileSeq(tileSeq);
+                markerEntity.setRowName(row.getRowName());
+                markerEntity.setPosition(featureTag.getPosition());
+                markerEntity.setTagType(featureTag.getTag().getType());
+                markerEntity.setTagName(featureTag.getTag().name());
+                markerEntity.setGridFeatureId(featureTag.getFeature().getFeatureId());
+
+                markerEntities.add(markerEntity);
+            }
+        }
+
+        return markerEntities;
+    }
+
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {
+        GridRowEntity gridRowEntity = null;
+
+        Map<String, CellValue> rowValues = row.toCellValueMap();
+
+        if (rowValues.size() > 0) {
+
+            gridRowEntity = new GridRowEntity();
+            gridRowEntity.setId(UUID.randomUUID());
+            gridRowEntity.setRowName(row.getRowName());
+            gridRowEntity.setTorchieId(torchieId);
+            gridRowEntity.setZoomLevel(zoomLevel);
+            gridRowEntity.setTileSeq(tileSeq);
+            gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
+
+            log.debug(row.getRowName() + ":" +gridRowEntity.getJson());
+        }
+
+        return gridRowEntity;
+    }
 
 }

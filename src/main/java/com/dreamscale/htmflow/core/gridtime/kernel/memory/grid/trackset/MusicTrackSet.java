@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
@@ -14,6 +15,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCom
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -21,10 +23,12 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
 
     private final TrackSetName trackSetName;
     private final MusicClock musicClock;
+    private final GeometryClock.GridTime gridTime;
     private Map<T, BandedMusicTrack<F>> musicTracks = DefaultCollections.map();
 
-    public MusicTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public MusicTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
 
@@ -44,7 +48,9 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
         return null;
     }
 
-    public F getLastOnOrBeforeBeat(RelativeBeat beat, T type) {
+    public F getLastOnOrBeforeMoment(LocalDateTime moment, T type) {
+        RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
+
         BandedMusicTrack<F> bandedMusicTrack = musicTracks.get(type);
         if (bandedMusicTrack != null) {
             return bandedMusicTrack.getLastOnOrBeforeBeat(beat);
@@ -61,38 +67,38 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
         return null;
     }
 
-    public void startPlaying(T type, RelativeBeat beat, F reference) {
+    public void startPlaying(T type, LocalDateTime moment, F reference) {
         BandedMusicTrack<F> bandedMusicTrack = findOrCreateTrack(type);
 
-        bandedMusicTrack.startPlaying(beat, reference);
+        bandedMusicTrack.startPlaying(moment, reference);
     }
 
-    public void startPlaying(T type, RelativeBeat beat, F reference, StartTag startTag) {
+    public void startPlaying(T type, LocalDateTime moment, F reference, StartTag startTag) {
         BandedMusicTrack<F> bandedMusicTrack = findOrCreateTrack(type);
 
-        bandedMusicTrack.startPlaying(beat, reference, startTag);
+        bandedMusicTrack.startPlaying(moment, reference, startTag);
     }
 
-    public void stopPlaying(T type, RelativeBeat beat, FinishTag finishTag) {
+    public void stopPlaying(T type, LocalDateTime moment, FinishTag finishTag) {
         BandedMusicTrack<F> bandedMusicTrack = findOrCreateTrack(type);
-        bandedMusicTrack.stopPlaying(beat, finishTag);
+        bandedMusicTrack.stopPlaying(moment, finishTag);
     }
 
-    public void stopPlaying(T type, RelativeBeat beat) {
+    public void stopPlaying(T type, LocalDateTime moment) {
         BandedMusicTrack<F> bandedMusicTrack = findOrCreateTrack(type);
-        bandedMusicTrack.stopPlaying(beat);
+        bandedMusicTrack.stopPlaying(moment);
     }
 
-    public void clearAllTracks(RelativeBeat beat, FinishTag finishTag) {
+    public void clearAllTracks(LocalDateTime moment,FinishTag finishTag) {
         for (BandedMusicTrack<F> track : musicTracks.values()) {
-            track.stopPlaying(beat, finishTag);
+            track.stopPlaying(moment, finishTag);
         }
     }
 
     private BandedMusicTrack<F> findOrCreateTrack(T type) {
         BandedMusicTrack<F> bandedMusicTrack = musicTracks.get(type);
         if (bandedMusicTrack == null) {
-            bandedMusicTrack = new BandedMusicTrack<>(type.toDisplayString(), musicClock);
+            bandedMusicTrack = new BandedMusicTrack<>(type.toDisplayString(), gridTime, musicClock);
             musicTracks.put(type, bandedMusicTrack);
             log.debug("Adding track for type: "+type);
         }
@@ -100,7 +106,7 @@ public abstract class MusicTrackSet<T extends FeatureType, F extends FeatureRefe
     }
 
     public void initFirst(T type, F reference) {
-        startPlaying(type, musicClock.getStartBeat(), reference, StartTypeTag.Rollover);
+        startPlaying(type, null, reference, StartTypeTag.Rollover);
     }
 
     public void finish() {

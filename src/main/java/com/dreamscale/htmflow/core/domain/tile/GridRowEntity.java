@@ -28,7 +28,7 @@ public class GridRowEntity {
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 
-    private BigInteger tileSequence;
+    private Long tileSeq;
 
     private String rowName;
 

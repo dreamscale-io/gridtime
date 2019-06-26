@@ -34,7 +34,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     @Override
     public String getActiveGridTime() {
-        return activeGridGridTime.getFormattedGridTime();
+        return activeGridGridTime.toDisplayString();
     }
 
     public void gotoPosition(GeometryClock.GridTime gridTime) {

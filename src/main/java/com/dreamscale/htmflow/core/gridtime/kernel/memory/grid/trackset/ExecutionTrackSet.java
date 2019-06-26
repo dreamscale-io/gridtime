@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.*;
@@ -16,34 +17,42 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetNam
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class ExecutionTrackSet implements PlayableCompositeTrack {
 
-    private final TrackSetName trackSetName;
+    private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
+
+    private final TrackSetName trackSetName;
+
     private final RhythmMusicTrack<ExecutionReference> rhythmTrack;
     private final MetricsTrack metricsTrack;
+
 
     private boolean isRedAndWantingGreen = false;
 
     private ExecutionReference carryOverLastExec;
 
-    public ExecutionTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public ExecutionTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.rhythmTrack = new RhythmMusicTrack<>("@exec/rhythm", musicClock);
-        this.metricsTrack = new MetricsTrack(musicClock);
+        this.rhythmTrack = new RhythmMusicTrack<>("@exec/rhythm", gridTime, musicClock);
+        this.metricsTrack = new MetricsTrack(gridTime, musicClock);
     }
 
-    public void executeThing(RelativeBeat beat, ExecutionReference executionEvent) {
+    public void executeThing(LocalDateTime moment, ExecutionReference executionEvent) {
+
+        RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
 
         ExecutionReference lastEvent = getLatestEventOnOrBeforeBeat(beat);
 
-        rhythmTrack.playEventAtBeat(beat, executionEvent);
+        rhythmTrack.playEventAtBeat(moment, executionEvent);
         metricsTrack.getMetricsFor(beat).addExecutionTimeSample(executionEvent.getExecutionTime());
 
         if (lastEvent != null) {
@@ -51,13 +60,11 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
             metricsTrack.getMetricsFor(beat).addExecutionCycleTimeSample(durationSinceLastExec);
         }
 
-
-
         if (!isRedAndWantingGreen && executionEvent.isRed()) {
-            rhythmTrack.addTagAtBeat(beat, new FeatureTag<>(executionEvent, StartTypeTag.FirstRed));
+            rhythmTrack.addTagAtBeat(beat, new FeatureTag<>(moment, executionEvent, StartTypeTag.FirstRed));
             isRedAndWantingGreen = true;
         } else if (isRedAndWantingGreen && executionEvent.isGreen()) {
-            rhythmTrack.addTagAtBeat(beat, new FeatureTag<>(executionEvent, FinishTypeTag.FirstGreenAfterRed));
+            rhythmTrack.addTagAtBeat(beat, new FeatureTag<>(moment, executionEvent, FinishTypeTag.FirstGreenAfterRed));
             isRedAndWantingGreen = false;
         }
 

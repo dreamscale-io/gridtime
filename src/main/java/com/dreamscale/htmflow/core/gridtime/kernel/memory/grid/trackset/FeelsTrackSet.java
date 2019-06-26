@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
@@ -11,6 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCom
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -20,17 +22,17 @@ public class FeelsTrackSet implements PlayableCompositeTrack {
     private final TrackSetName trackSetName;
     private final BandedMusicTrack<FeelsReference> feelsTrack;
 
-    public FeelsTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public FeelsTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
-        this.feelsTrack = new BandedMusicTrack<>("@feels", musicClock);
+        this.feelsTrack = new BandedMusicTrack<>("@feels", gridTime, musicClock);
     }
 
-    public void startFeels(RelativeBeat fromBeat, FeelsReference feelsReference) {
-        feelsTrack.startPlaying(fromBeat, feelsReference);
+    public void startFeels(LocalDateTime moment, FeelsReference feelsReference) {
+        feelsTrack.startPlaying(moment, feelsReference);
     }
 
-    public void clearFeels(RelativeBeat toBeat) {
-        feelsTrack.stopPlaying(toBeat);
+    public void clearFeels(LocalDateTime moment) {
+        feelsTrack.stopPlaying(moment);
     }
 
     public void finish() {

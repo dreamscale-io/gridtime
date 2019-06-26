@@ -1,19 +1,23 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.MetricCell;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 public class MetricsTrack {
     private final MusicClock musicClock;
+    private final GeometryClock.GridTime gridTime;
 
     private LinkedHashMap<RelativeBeat, GridMetrics> metricsPerBeat = DefaultCollections.map();
 
-    public MetricsTrack(MusicClock musicClock) {
+    public MetricsTrack(GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
 

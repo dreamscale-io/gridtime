@@ -1,9 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.MetricCell;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -11,10 +13,12 @@ import java.util.Map;
 public class RollingAggregateTrack {
 
     private final MusicClock summaryClock;
+    private final GeometryClock.GridTime gridTime;
 
     private Map<RelativeBeat, RollingAggregate> aggregatesPerSummaryBeat = DefaultCollections.map();
 
-    public RollingAggregateTrack(MusicClock musicClock) {
+    public RollingAggregateTrack(GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.gridTime = gridTime;
         this.summaryClock = musicClock.toSummaryClock();
 
         Iterator<RelativeBeat> beatIterator = summaryClock.getForwardsIterator();

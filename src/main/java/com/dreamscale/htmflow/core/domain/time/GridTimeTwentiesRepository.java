@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.domain.tile.GridTileSummaryEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public interface GridTimeTwentiesRepository extends CrudRepository<GridTimeTwentiesEntity, UUID> {
@@ -12,4 +13,5 @@ public interface GridTimeTwentiesRepository extends CrudRepository<GridTimeTwent
             "order by tile_seq desc limit 1")
     GridTimeTwentiesEntity getLast();
 
+    GridTimeTwentiesEntity findByClockTime(LocalDateTime clockTime);
 }

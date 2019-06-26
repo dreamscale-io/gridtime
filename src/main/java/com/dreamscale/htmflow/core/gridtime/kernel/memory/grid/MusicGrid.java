@@ -1,24 +1,25 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.*;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.*;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset.*;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.IdeaFlowTile;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.Trigger;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.IdeaFlowTile;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,8 @@ import java.util.Set;
 @Slf4j
 public class MusicGrid {
 
+    private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
-
 
     private AuthorsTrackSet authorsTracks;
     private FeelsTrackSet feelsTracks;
@@ -39,21 +40,22 @@ public class MusicGrid {
     private ExecutionTrackSet executionTracks;
     private NavigationTrackSet navigationTracks;
 
-    private List<TimeBombTrigger> timeBombTriggers = DefaultCollections.list();
-
     private Map<TrackSetName, PlayableCompositeTrack> trackSetsByName = DefaultCollections.map();
 
-    public MusicGrid(MusicClock musicClock) {
+    private List<GridRow> allExtractedGridRows;
+
+    public MusicGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.authorsTracks = new AuthorsTrackSet(TrackSetName.Authors, musicClock);
-        this.feelsTracks = new FeelsTrackSet(TrackSetName.Feels, musicClock);
+        this.authorsTracks = new AuthorsTrackSet(TrackSetName.Authors, gridTime, musicClock);
+        this.feelsTracks = new FeelsTrackSet(TrackSetName.Feels, gridTime, musicClock);
 
-        this.contextTracks = new WorkContextTrackSet(TrackSetName.WorkContext, musicClock);
-        this.ideaflowTracks = new IdeaFlowTrackSet(TrackSetName.IdeaFlow, musicClock);
+        this.contextTracks = new WorkContextTrackSet(TrackSetName.WorkContext, gridTime, musicClock);
+        this.ideaflowTracks = new IdeaFlowTrackSet(TrackSetName.IdeaFlow, gridTime, musicClock);
 
-        this.executionTracks = new ExecutionTrackSet(TrackSetName.Executions, musicClock);
-        this.navigationTracks = new NavigationTrackSet(TrackSetName.Navigations, musicClock);
+        this.executionTracks = new ExecutionTrackSet(TrackSetName.Executions, gridTime, musicClock);
+        this.navigationTracks = new NavigationTrackSet(TrackSetName.Navigations, gridTime, musicClock);
 
         addAllTrackSets(authorsTracks, feelsTracks, contextTracks, ideaflowTracks, navigationTracks, executionTracks);
 
@@ -75,60 +77,56 @@ public class MusicGrid {
         return allFeatures;
     }
 
-    public void startWorkContext(RelativeBeat beat, WorkContextReference workContext) {
-        contextTracks.startWorkContext(beat, workContext);
+    public void startWorkContext(LocalDateTime moment, WorkContextReference workContext) {
+        contextTracks.startWorkContext(moment, workContext);
     }
 
-    public void clearWorkContext(RelativeBeat beat, FinishTag finishTag) {
-        contextTracks.clearWorkContext(beat, finishTag);
+    public void clearWorkContext(LocalDateTime moment, FinishTag finishTag) {
+        contextTracks.clearWorkContext(moment, finishTag);
     }
 
-    public void startAuthors(RelativeBeat beat, AuthorsReference authorsReference) {
-        authorsTracks.startAuthors(beat, authorsReference);
+    public void startAuthors(LocalDateTime moment, AuthorsReference authorsReference) {
+        authorsTracks.startAuthors(moment, authorsReference);
     }
 
-    public void clearAuthors(RelativeBeat beat) {
-        authorsTracks.clearAuthors(beat);
+    public void clearAuthors(LocalDateTime moment) {
+        authorsTracks.clearAuthors(moment);
     }
 
 
-    public void startFeels(RelativeBeat beat, FeelsReference feelsState) {
-        feelsTracks.startFeels(beat, feelsState);
+    public void startFeels(LocalDateTime moment, FeelsReference feelsState) {
+        feelsTracks.startFeels(moment, feelsState);
     }
 
-    public void clearFeels(RelativeBeat beat) {
-        feelsTracks.clearFeels(beat);
+    public void clearFeels(LocalDateTime moment) {
+        feelsTracks.clearFeels(moment);
     }
 
-    public WorkContextReference getLastContextOnOrBeforeBeat(RelativeBeat beat, WorkContextType fromStructureLevel) {
-        return contextTracks.getLastOnOrBeforeBeat(beat, fromStructureLevel);
+    public WorkContextReference getLastContextOnOrBeforeMoment(LocalDateTime moment, WorkContextType fromStructureLevel) {
+        return contextTracks.getLastOnOrBeforeMoment(moment, fromStructureLevel);
     }
 
-    public void startWTF(RelativeBeat beat, IdeaFlowStateReference wtfState, StartTag startTag) {
-        ideaflowTracks.startWTF(beat, wtfState, startTag);
+    public void startWTF(LocalDateTime moment, IdeaFlowStateReference wtfState, StartTag startTag) {
+       ideaflowTracks.startWTF(moment, wtfState, startTag);
     }
 
-    public void clearWTF(RelativeBeat beat, FinishTag finishTag) {
-        ideaflowTracks.clearWTF(beat, finishTag);
+    public void clearWTF(LocalDateTime moment, FinishTag finishTag) {
+        ideaflowTracks.clearWTF(moment, finishTag);
     }
 
-    public void timeBombFutureContextEnding(TimeBombTrigger timeBombTrigger, FinishTag finishTag) {
-        timeBombTrigger.wireUpTrigger(new EndContextTrigger(timeBombTrigger.getFutureSplodingBeat(), finishTag));
-
-        timeBombTriggers.add(timeBombTrigger);
+    public void gotoLocation(LocalDateTime moment, PlaceReference locationInBox, Duration timeInLocation) {
+        navigationTracks.gotoPlace(moment, locationInBox, timeInLocation);
     }
 
-    public void gotoLocation(RelativeBeat beat, PlaceReference locationInBox, Duration timeInLocation) {
-        navigationTracks.gotoPlace(beat, locationInBox, timeInLocation);
-    }
+    public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
+        RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
 
-    public void modifyCurrentLocation(RelativeBeat beat, int modificationCount) {
         navigationTracks.modifyPlace(beat, modificationCount);
         ideaflowTracks.addModificationSampleForLearningBand(beat, modificationCount);
     }
 
-    public void executeThing(RelativeBeat beat, ExecutionReference execution) {
-        executionTracks.executeThing(beat, execution);
+    public void executeThing(ExecutionReference execution) {
+        executionTracks.executeThing(execution.getPosition(), execution);
     }
 
     public void finish(FeatureCache featureCache) {
@@ -149,15 +147,7 @@ public class MusicGrid {
     }
 
     public MusicGridResults playAllTracks() {
-        List<GridRow> allRows = new ArrayList<>();
-
-        for (TrackSetName trackName : trackSetsByName.keySet()) {
-            PlayableCompositeTrack track = trackSetsByName.get(trackName);
-
-            allRows.addAll(track.toGridRows());
-        }
-
-        return toMusicGridResults(allRows);
+        return toMusicGridResults(getAllGridRows());
     }
 
     private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
@@ -178,20 +168,22 @@ public class MusicGrid {
         return new MusicGridResults(headerRow, valueRows);
     }
 
+    public List<GridRow> getAllGridRows() {
 
-    private class EndContextTrigger implements Trigger {
-        private final FinishTag finishTag;
-        private final RelativeBeat beat;
+        if (allExtractedGridRows == null) {
 
-        public EndContextTrigger(RelativeBeat beat, FinishTag finishTag) {
-            this.beat = beat;
-            this.finishTag = finishTag;
+            allExtractedGridRows = new ArrayList<>();
+
+            for (TrackSetName trackName : trackSetsByName.keySet()) {
+                PlayableCompositeTrack track = trackSetsByName.get(trackName);
+
+                allExtractedGridRows.addAll(track.toGridRows());
+            }
         }
 
-        public void fire() {
-            clearWorkContext(beat, finishTag);
-        }
+        return allExtractedGridRows;
     }
+
 
     public CarryOverContext getCarryOverContext() {
         log.info("getCarryOverContext");

@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
@@ -9,15 +9,15 @@ import java.util.LinkedList;
 public class CircleCapabilities {
 
 
-    public <S> TimeBombTrigger refreshWTFsForThesePlaces(LinkedList<S> similarsOneHopAway) {
+    public <S> TimeBomb refreshWTFsForThesePlaces(LinkedList<S> similarsOneHopAway) {
         return null;
     }
 
-    public <S> TimeBombTrigger refreshWithPeersAroundThisOrigin(S centerOfCircle) {
+    public <S> TimeBomb refreshWithPeersAroundThisOrigin(S centerOfCircle) {
         return null;
     }
 
-    public <S> TimeBombTrigger refreshWithChildrenOfThisOrigin(S centerOfCircle) {
+    public <S> TimeBomb refreshWithChildrenOfThisOrigin(S centerOfCircle) {
         return null;
     }
 }

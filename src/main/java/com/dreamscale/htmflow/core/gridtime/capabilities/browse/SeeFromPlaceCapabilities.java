@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class SeeFromPlaceCapabilities {
     private TracerArrowCapabilities tracerArrowCapabilities;
 
 
-    public TimeBombTrigger refreshWTFsWithinThisPlace(SeeFromPlace seeFromPlace) {
+    public TimeBomb refreshWTFsWithinThisPlace(SeeFromPlace seeFromPlace) {
         return null;
     }
 

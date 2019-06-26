@@ -1,22 +1,24 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.tile;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
-import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
+import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.MusicGrid;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.CmdType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +27,7 @@ import java.util.UUID;
 public class GridTile {
 
     private final UUID torchieId;
-    private final GeometryClock.GridTime gridCoordinates;
+    private final GeometryClock.GridTime gridTime;
     private final ZoomLevel zoomLevel;
 
     private final MusicClock musicClock;
@@ -33,18 +35,22 @@ public class GridTile {
 
     private transient FeatureCache featureCache;
 
-    public GridTile(UUID torchieId, GeometryClock.GridTime gridCoordinates, FeatureCache featureCache) {
+    private final List<TimeBomb> timeBombTriggers;
+
+    public GridTile(UUID torchieId, GeometryClock.GridTime gridTime, FeatureCache featureCache) {
         this.torchieId = torchieId;
-        this.gridCoordinates = gridCoordinates;
-        this.zoomLevel = gridCoordinates.getZoomLevel();
+        this.gridTime = gridTime;
+        this.zoomLevel = gridTime.getZoomLevel();
         this.musicClock = new MusicClock(zoomLevel);
 
-        this.musicGrid = new MusicGrid(musicClock);
+        this.musicGrid = new MusicGrid(gridTime, musicClock);
         this.featureCache = featureCache;
+
+        this.timeBombTriggers = DefaultCollections.list();
     }
 
     /**
-     * Change the active context, such as starting project, task, or intention
+     * Change the active work context, such as starting project, task, or intention
      */
 
     public void startWorkContext(LocalDateTime moment, WorkContextEvent workContextEvent) {
@@ -57,28 +63,26 @@ public class GridTile {
         WorkContextReference intentionReference = featureCache.lookupContextReference(StructureLevel.INTENTION,
                 workContextEvent.getIntentionId(), workContextEvent.getDescription());
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-        musicGrid.startWorkContext(beat, projectReference);
-        musicGrid.startWorkContext(beat, taskReference);
-        musicGrid.startWorkContext(beat, intentionReference);
+        musicGrid.startWorkContext(moment, projectReference);
+        musicGrid.startWorkContext(moment, taskReference);
+        musicGrid.startWorkContext(moment, intentionReference);
     }
 
     /**
-     * Change the active context, such as starting project, task, or intention
+     * Clear the active work context, will clear project, task, and intention
      */
 
     public void clearWorkContext(LocalDateTime moment, FinishTag finishTag) {
 
-        Duration relativeTime = gridCoordinates.getRelativeTime(moment);
+        Duration relativeTime = gridTime.getRelativeTime(moment);
         if (musicClock.isWithinMeasure(relativeTime)) {
-            RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
-
-            musicGrid.clearWorkContext(beat, finishTag);
+            musicGrid.clearWorkContext(moment, finishTag);
         } else {
-            TimeBombTrigger timeBomb = musicClock.getFutureTimeBomb(gridCoordinates.getRelativeTime(moment));
+            TimeBomb timeBomb = musicClock.getFutureTimeBomb(gridTime.getRelativeTime(moment));
+            timeBomb.addOnAlarmInstruction(CmdType.END_WORK_CONTEXT, "tagName", finishTag.name());
 
-            musicGrid.timeBombFutureContextEnding(timeBomb, finishTag);
+            timeBombTriggers.add(timeBomb);
         }
     }
 
@@ -88,82 +92,60 @@ public class GridTile {
     public void startWTF(LocalDateTime moment, CircleDetails circleDetails, StartTag startTag) {
         IdeaFlowStateReference stateReference = featureCache.lookupWTFReference(circleDetails);
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
-
-        musicGrid.startWTF(beat, stateReference, startTag);
+        musicGrid.startWTF(moment, stateReference, startTag);
     }
 
     /**
      * Clears a WTF friction band...
      */
-    public void clearWTF(LocalDateTime endBandPosition, FinishTag finishTag) {
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(endBandPosition));
+    public void clearWTF(LocalDateTime moment, FinishTag finishTag) {
 
-        musicGrid.clearWTF(beat, finishTag);
+        musicGrid.clearWTF(moment, finishTag);
     }
 
     /**
      * An alternative set of authors is active for all subsequent data until changed
-     *
-     * @param startBandPosition
      */
-    public void startAuthors(LocalDateTime startBandPosition, AuthorsDetails authorsDetails) {
+    public void startAuthors(LocalDateTime moment, AuthorsDetails authorsDetails) {
         AuthorsReference authorsReference = featureCache.lookupAuthorsReference(authorsDetails);
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(startBandPosition));
-
-        musicGrid.startAuthors(beat, authorsReference);
+        musicGrid.startAuthors(moment, authorsReference);
     }
 
     /**
-     * Clears a WTF friction band...
+     * Clears out the current authors band, going back to default
      */
-    public void clearAuthors(LocalDateTime endBandPosition) {
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(endBandPosition));
+    public void clearAuthors(LocalDateTime moment) {
 
-        musicGrid.clearAuthors(beat);
+        musicGrid.clearAuthors(moment);
     }
 
     /**
      * Activate the feels flame rating from this point forward until cleared or changed
-     *
-     * @param startBandPosition
-     * @param feelsRating
      */
-    public void startFeelsBand(LocalDateTime startBandPosition, Integer feelsRating) {
+    public void startFeelsBand(LocalDateTime moment, Integer feelsRating) {
         FeelsReference feelsState = featureCache.lookupFeelsStateReference(feelsRating);
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(startBandPosition));
-
-        musicGrid.startFeels(beat, feelsState);
+        musicGrid.startFeels(moment, feelsState);
     }
 
     /**
      * Clear out the feels flame rating, and go back to default
-     *
-     * @param endBandPosition
      */
-    public void clearFeelsBand(LocalDateTime endBandPosition) {
+    public void clearFeelsBand(LocalDateTime moment) {
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(endBandPosition));
-
-        musicGrid.clearFeels(beat);
-
+        musicGrid.clearFeels(moment);
     }
 
-    //next thing I need to do is location mappings
-
-
     /**
-     * Walk through a sequence of events, and the StoryFrame will build a model of locations in space,
-     * and movements through time, that can be played back like music
+     * Walk through a sequence of locations in time and space, will map the rhythm of the transitions,
+     * the frequency of traversals, and build a model of the connected software space based on visiting activity.
+     * All the movements can be played back like music.
      */
 
     public void gotoLocation(LocalDateTime moment, String locationPath, Duration timeInLocation) {
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
-
-        WorkContextReference projectContext = musicGrid.getLastContextOnOrBeforeBeat(beat, WorkContextType.PROJECT_WORK);
+        WorkContextReference projectContext = musicGrid.getLastContextOnOrBeforeMoment(moment, WorkContextType.PROJECT_WORK);
 
         if (projectContext == null) {
             projectContext = featureCache.lookupDefaultProject();
@@ -172,7 +154,7 @@ public class GridTile {
 
         PlaceReference locationInBox = featureCache.lookupLocationReference(projectContext.getReferenceId(), locationPath);
 
-        musicGrid.gotoLocation(beat, locationInBox, timeInLocation);
+        musicGrid.gotoLocation(moment, locationInBox, timeInLocation);
 
     }
 
@@ -182,26 +164,18 @@ public class GridTile {
 
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
 
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
-
-        musicGrid.modifyCurrentLocation(beat, modificationCount);
+        musicGrid.modifyCurrentLocation(moment, modificationCount);
     }
 
-
     /**
-     * Execution rhythms are mapped by the FlowRhythmMapper to look for patterns of red/green bar
-     * changes, and patterns in execution cycles.  Execution times are aggregated across focus areas
-     *
-     * @param moment
-     * @param executionEvent
+     * Walk through a sequence of executions of tests, builds, and firing up applications.  Look for
+     * rhythms in the red/green patterns and cycle times.
      */
-    public void executeThing(LocalDateTime moment, ExecutionEvent executionEvent) {
+    public void executeThing(ExecutionEvent executionEvent) {
 
         ExecutionReference executionReference = featureCache.lookupExecutionReference(executionEvent);
-        RelativeBeat beat = musicClock.getClosestBeat(gridCoordinates.getRelativeTime(moment));
 
-        musicGrid.executeThing(beat, executionReference);
-
+        musicGrid.executeThing(executionReference);
     }
 
 

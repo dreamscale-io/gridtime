@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
@@ -20,6 +21,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetNam
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.Set;
 @Slf4j
 public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
 
+    private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
     private final TrackSetName trackSetName;
 
@@ -38,22 +41,23 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
 
     private static final int MODIFICATION_THRESHOLD_FOR_PROGRESS = 150;
 
-    public IdeaFlowTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public IdeaFlowTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.wtfTrack = new BandedMusicTrack<>("@flow/wtf", musicClock);
-        this.learningProgressTrack = new BandedMusicTrack<>("@flow/learning", musicClock);
+        this.wtfTrack = new BandedMusicTrack<>("@flow/wtf", gridTime, musicClock);
+        this.learningProgressTrack = new BandedMusicTrack<>("@flow/learning", gridTime, musicClock);
 
-        this.rollingAggregateModificationsTrack = new RollingAggregateTrack(musicClock);
+        this.rollingAggregateModificationsTrack = new RollingAggregateTrack(gridTime, musicClock);
     }
 
-    public void startWTF(RelativeBeat beat, IdeaFlowStateReference wtfState, StartTag startTag) {
-        wtfTrack.startPlaying(beat, wtfState, startTag);
+    public void startWTF(LocalDateTime moment, IdeaFlowStateReference wtfState, StartTag startTag) {
+        wtfTrack.startPlaying(moment, wtfState, startTag);
     }
 
-    public void clearWTF(RelativeBeat beat, FinishTag finishTag) {
-        wtfTrack.stopPlaying(beat, finishTag);
+    public void clearWTF(LocalDateTime moment, FinishTag finishTag) {
+        wtfTrack.stopPlaying(moment, finishTag);
     }
 
     public void addModificationSampleForLearningBand(RelativeBeat beat, int modificationSample) {
@@ -79,12 +83,12 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
             RelativeBeat summaryBeat = iterator.next();
             RollingAggregate aggregate = rollingAggregateModificationsTrack.getAggregateAt(summaryBeat);
 
-            RelativeBeat detailBeat = musicClock.getClosestBeat(summaryBeat.getRelativeDuration());
+            LocalDateTime moment = gridTime.getMomentFromOffset(summaryBeat.getRelativeDuration());
 
             if (aggregate.isTotalOverThreshold(MODIFICATION_THRESHOLD_FOR_PROGRESS)) {
-                learningProgressTrack.startPlaying(detailBeat, progressState);
+                learningProgressTrack.startPlaying(moment, progressState);
             } else {
-                learningProgressTrack.startPlaying(detailBeat, learningState);
+                learningProgressTrack.startPlaying(moment, learningState);
             }
         }
     }

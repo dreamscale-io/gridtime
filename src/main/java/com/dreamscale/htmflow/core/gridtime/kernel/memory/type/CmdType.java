@@ -45,7 +45,8 @@ public enum CmdType implements FeatureType {
     SEE_FROM_WIRE("see-from", "/wire/{sha}", SeeFromPlaceResults.class),
 
     ALARM_WHEN_BOX_IS_FULL_OF_WTF("alarm-when", "/threshold/wtf/count/box/{sha}", AlarmIsOnResults.class),
-    ALARM_WHEN_BOX_IS_FULL_OF_UNCERTAINTY("alarm-when", "/threshold/learning/count/box/{sha}", AlarmIsOnResults.class);
+    ALARM_WHEN_BOX_IS_FULL_OF_UNCERTAINTY("alarm-when", "/threshold/learning/count/box/{sha}", AlarmIsOnResults.class),
+    END_WORK_CONTEXT("end-work-context", "/finish/tag/{tagName}", null );
 
     private final String cmdName;
     private final String typeUri;
@@ -112,6 +113,7 @@ public enum CmdType implements FeatureType {
         public static String ROW_NUMBER = "rowNumber";
         public static String BEAT_NUMBER = "beatNumber";
         public static String GRIDTIME = "gridtime";
+        public static String TAG_NAME = "tagName";
     }
 
 }

@@ -1,8 +1,13 @@
-package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
+package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 public class MetricCell implements GridCell {
@@ -50,6 +55,16 @@ public class MetricCell implements GridCell {
 
     public String toValueCell(int overrideCellSize) {
         return toRightSizedCell(toDisplayString(), overrideCellSize);
+    }
+
+    @Override
+    public List<UUID> getFeatureRefs() {
+        return null;
+    }
+
+    @Override
+    public List<FeatureTag<?>> getFeatureTags() {
+        return null;
     }
 
     @Override

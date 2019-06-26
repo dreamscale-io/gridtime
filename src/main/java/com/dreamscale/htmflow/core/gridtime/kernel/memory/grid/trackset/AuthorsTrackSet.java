@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
@@ -11,6 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCom
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -20,17 +22,17 @@ public class AuthorsTrackSet implements PlayableCompositeTrack {
     private final TrackSetName trackSetName;
     private final BandedMusicTrack<AuthorsReference> authorsTrack;
 
-    public AuthorsTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public AuthorsTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
-        this.authorsTrack = new BandedMusicTrack<>("@author", musicClock);
+        this.authorsTrack = new BandedMusicTrack<>("@author", gridTime, musicClock);
     }
 
-    public void startAuthors(RelativeBeat fromBeat, AuthorsReference authorsReference) {
-        authorsTrack.startPlaying(fromBeat, authorsReference);
+    public void startAuthors(LocalDateTime moment, AuthorsReference authorsReference) {
+        authorsTrack.startPlaying(moment, authorsReference);
     }
 
-    public void clearAuthors(RelativeBeat toBeat) {
-        authorsTrack.stopPlaying(toBeat);
+    public void clearAuthors(LocalDateTime moment) {
+        authorsTrack.stopPlaying(moment);
     }
 
     public void finish() {

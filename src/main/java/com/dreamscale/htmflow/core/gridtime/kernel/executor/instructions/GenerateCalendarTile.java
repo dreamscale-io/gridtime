@@ -27,6 +27,6 @@ public class GenerateCalendarTile extends TileInstructions {
 
     @Override
     public String getCmdDescription() {
-        return "generate calendar for "+ gridTime.getFormattedGridTime();
+        return "generate calendar for "+ gridTime.toDisplayString();
     }
 }

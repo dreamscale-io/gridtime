@@ -28,7 +28,7 @@ public class ExecutionRhythmObserver implements FlowObserver<FlowableFlowActivit
                 if (flowActivity.getActivityType().equals(FlowActivityType.Execution)) {
                     ExecutionEvent executionEvent = createExecutionEvent(flowActivity);
 
-                    gridTile.executeThing(executionEvent.getPosition(), executionEvent);
+                    gridTile.executeThing(executionEvent);
                 }
 
             }

@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
@@ -9,24 +10,27 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.FinishTypeTa
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.StartTypeTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.FeatureCell;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.FeatureCell;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
 public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack {
 
     private final MusicClock musicClock;
+    private final GeometryClock.GridTime gridTime;
     private final String rowName;
 
     private Map<RelativeBeat, F> trackMusic = DefaultCollections.map();
     private MultiValueMap<RelativeBeat, FeatureTag<F>> trackTags = DefaultCollections.multiMap();
 
-    public BandedMusicTrack(String rowName, MusicClock musicClock) {
+    public BandedMusicTrack(String rowName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.rowName = rowName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
 
@@ -36,15 +40,21 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
     public void initFirst(F feature) {
         if (feature != null) {
-            startPlaying(musicClock.getStartBeat(), feature, StartTypeTag.Rollover);
+            startPlaying(null, feature, StartTypeTag.Rollover);
         }
     }
 
-    public void startPlaying(RelativeBeat fromBeat, F feature) {
-        startPlaying(fromBeat, feature, StartTypeTag.Start);
+    public void startPlaying(LocalDateTime moment, F feature) {
+        startPlaying(moment, feature, StartTypeTag.Start);
     }
 
-    public void startPlaying(RelativeBeat fromBeat, F feature, StartTag startTag) {
+    public void startPlaying(LocalDateTime moment, F feature, StartTag startTag) {
+        if (moment == null) {
+            moment = gridTime.getClockTime();
+        }
+
+        RelativeBeat fromBeat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
+
         F existingFeature = trackMusic.get(fromBeat);
         if (existingFeature != null) {
             log.warn("Overwriting existing music at beat: " + fromBeat.toDisplayString() + ": "
@@ -57,14 +67,14 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         if (lastStartTag == null || lastStartTag.getFeature() != feature) {
             trackMusic.put(fromBeat, feature);
-            trackTags.add(fromBeat, new FeatureTag<>(feature, startTag));
+            trackTags.add(fromBeat, new FeatureTag<>(moment, feature, startTag));
         }
 
         if (lastStartTag != null && lastStartTag.getFeature() == feature) {
             removeFinishTags(fromBeat);
         } else if (lastStartTag != null && lastStartTag.getFeature() != feature) {
             RelativeBeat prevBeat = musicClock.getPreviousBeat(fromBeat);
-            trackTags.add(prevBeat, new FeatureTag<>(lastStartTag.getFeature(), FinishTypeTag.Success));
+            trackTags.add(prevBeat, new FeatureTag<>(moment, lastStartTag.getFeature(), FinishTypeTag.Success));
         }
 
     }
@@ -78,16 +88,18 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
             }
     }
 
-    public void stopPlaying(RelativeBeat toBeat) {
-        stopPlaying(toBeat, FinishTypeTag.Success);
+    public void stopPlaying(LocalDateTime moment) {
+        stopPlaying(moment, FinishTypeTag.Success);
     }
 
-    public void stopPlaying(RelativeBeat toBeat, FinishTag finishTag) {
+    public void stopPlaying(LocalDateTime moment, FinishTag finishTag) {
+        RelativeBeat toBeat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
+
         FeatureTag<F> startTag = getLastStartTagInProgress(toBeat);
         if (startTag != null) {
             fillBackwardUntilNotNull(toBeat, startTag.getFeature());
             if (finishTag != null) {
-                trackTags.add(toBeat, new FeatureTag<>(startTag.getFeature(), finishTag));
+                trackTags.add(toBeat, new FeatureTag<>(moment, startTag.getFeature(), finishTag));
             }
         }
     }
@@ -227,7 +239,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         FeatureTag<F> rolloverTag = null;
         if (featureToReplicate != null) {
-            rolloverTag = new FeatureTag<>(featureToReplicate, StartTypeTag.Rollover);
+            rolloverTag = new FeatureTag<>(null, featureToReplicate, StartTypeTag.Rollover);
         }
 
         return rolloverTag;

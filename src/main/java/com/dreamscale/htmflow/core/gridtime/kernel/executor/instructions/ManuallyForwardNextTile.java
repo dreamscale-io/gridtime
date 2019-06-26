@@ -19,8 +19,8 @@ public class ManuallyForwardNextTile extends TileInstructions {
 
         GridTile activeTile = featurePool.getActiveGridTile();
         if (activeTile != null) {
-            GeometryClock.GridTime nextGridTime = activeTile.getGridCoordinates().panRight();
-            log.debug("Forwarding tile to "+ nextGridTime.getFormattedGridTime());
+            GeometryClock.GridTime nextGridTime = activeTile.getGridTime().panRight();
+            log.debug("Forwarding tile to "+ nextGridTime.toDisplayString());
 
             featurePool.nextGridTile(nextGridTime);
         } else {

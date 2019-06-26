@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBombTrigger;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,26 +35,26 @@ public class SeeFromPlace {
         return gotoPlace;
     }
 
-    public TimeBombTrigger refreshAsPeerCircle() {
-        TimeBombTrigger fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWithPeersAroundThisOrigin(this);
+    public TimeBomb refreshAsPeerCircle() {
+        TimeBomb fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWithPeersAroundThisOrigin(this);
 
         return fireWhenDone;
     }
 
-    public TimeBombTrigger refreshAsChildrenCircle() {
-        TimeBombTrigger fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWithChildrenOfThisOrigin(this);
+    public TimeBomb refreshAsChildrenCircle() {
+        TimeBomb fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWithChildrenOfThisOrigin(this);
 
         return fireWhenDone;
     }
 
-    public TimeBombTrigger refreshWTFs() {
-        TimeBombTrigger fireWhenDone = capabilities.refreshWTFsWithinThisPlace(this);
+    public TimeBomb refreshWTFs() {
+        TimeBomb fireWhenDone = capabilities.refreshWTFsWithinThisPlace(this);
 
         return fireWhenDone;
     }
 
-    public TimeBombTrigger refreshCircleWTFs() {
-        TimeBombTrigger fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWTFsWithinThisCircle();
+    public TimeBomb refreshCircleWTFs() {
+        TimeBomb fireWhenDone = circleOfOneHopAwayFromThisPlace.refreshWTFsWithinThisCircle();
 
         return fireWhenDone;
     }

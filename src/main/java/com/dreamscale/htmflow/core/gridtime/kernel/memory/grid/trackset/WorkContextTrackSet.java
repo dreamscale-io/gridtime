@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
@@ -10,22 +11,23 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetNam
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 
 @Slf4j
 public class WorkContextTrackSet extends MusicTrackSet<WorkContextType, WorkContextReference> {
 
-    public WorkContextTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
-        super(trackSetName, musicClock);
+    public WorkContextTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        super(trackSetName, gridTime, musicClock);
     }
 
-    public void startWorkContext(RelativeBeat beat, WorkContextReference workContext) {
-        startPlaying(workContext.getWorkType(), beat, workContext);
+    public void startWorkContext(LocalDateTime moment, WorkContextReference workContext) {
+        startPlaying(workContext.getWorkType(), moment, workContext);
     }
 
-    public void clearWorkContext(RelativeBeat beat, FinishTag finishTag) {
-        clearAllTracks(beat, finishTag);
+    public void clearWorkContext(LocalDateTime moment, FinishTag finishTag) {
+        clearAllTracks(moment, finishTag);
     }
 
 

@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
@@ -13,6 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,9 @@ import java.util.Set;
 public class NavigationTrackSet implements PlayableCompositeTrack {
 
     private final TrackSetName trackSetName;
+    private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
+
     private final RhythmMusicTrack<PlaceReference> rhythmTrack;
     private final BatchMusicTrack<PlaceReference> batchTrack;
     private final MetricsTrack metricsTrack;
@@ -33,20 +37,22 @@ public class NavigationTrackSet implements PlayableCompositeTrack {
 
     private PlaceReference carryOverLastLocation;
 
-    public NavigationTrackSet(TrackSetName trackSetName, MusicClock musicClock) {
+    public NavigationTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
+        this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.rhythmTrack = new RhythmMusicTrack<>("@nav/rhythm", musicClock);
-        this.batchTrack = new BatchMusicTrack<>("@nav/batch", musicClock);
-        this.metricsTrack = new MetricsTrack(musicClock);
+        this.rhythmTrack = new RhythmMusicTrack<>("@nav/rhythm", gridTime, musicClock);
+        this.batchTrack = new BatchMusicTrack<>("@nav/batch", gridTime, musicClock);
+        this.metricsTrack = new MetricsTrack(gridTime, musicClock);
     }
 
-    public void gotoPlace(RelativeBeat beat, PlaceReference placeReference, Duration durationInPlace) {
+    public void gotoPlace(LocalDateTime moment, PlaceReference placeReference, Duration durationInPlace) {
         mapShortHandReference(placeReference);
+        rhythmTrack.playEventAtBeat(moment, placeReference);
+        batchTrack.playEventAtBeat(moment, placeReference);
 
-        rhythmTrack.playEventAtBeat(beat, placeReference);
-        batchTrack.playEventAtBeat(beat, placeReference);
+        RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
 
         metricsTrack.getMetricsFor(beat).addVelocitySample(durationInPlace);
     }

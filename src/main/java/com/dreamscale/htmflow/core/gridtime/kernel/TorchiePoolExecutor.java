@@ -36,8 +36,9 @@ public class TorchiePoolExecutor {
         executorPool.submit(new GameLoopRunner());
     }
 
-    public void stopExecutor() {
+    public void shutdown() {
         isGameLoopRunning.set(false);
+        executorPool.shutdown();
     }
 
     public void startTorchieIfNotActive(Torchie torchie) {

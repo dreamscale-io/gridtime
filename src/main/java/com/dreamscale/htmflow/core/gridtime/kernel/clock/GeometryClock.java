@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.clock;
 
+import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Observable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -176,9 +177,8 @@ public class GeometryClock {
     }
 
     @AllArgsConstructor
-    @Getter
     @ToString
-    public static class GridTime {
+    public static class GridTime implements Observable {
 
         private final LocalDateTime clockTime;
         private final ZoomLevel zoomLevel;
@@ -218,7 +218,11 @@ public class GeometryClock {
         }
 
         public Duration getRelativeTime(LocalDateTime moment) {
-            return Duration.between(clockTime, moment);
+            if (moment == null) {
+                return Duration.ofSeconds(0);
+            } else {
+                return Duration.between(clockTime, moment);
+            }
         }
 
         public GridTime toZoomLevel(ZoomLevel newZoomLevel) {
@@ -348,5 +352,21 @@ public class GeometryClock {
         }
 
 
+        @Override
+        public String toDisplayString() {
+            return formattedGridTime;
+        }
+
+        public ZoomLevel getZoomLevel() {
+            return zoomLevel;
+        }
+
+        public LocalDateTime getClockTime() {
+            return clockTime;
+        }
+
+        public LocalDateTime getMomentFromOffset(Duration relativeDuration) {
+            return clockTime.plus(relativeDuration);
+        }
     }
 }

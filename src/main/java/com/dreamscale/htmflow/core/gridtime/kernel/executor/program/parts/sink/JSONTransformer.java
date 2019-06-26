@@ -38,7 +38,7 @@ public class JSONTransformer {
                     .setTimeZone(TimeZone.getTimeZone("UTC"));
 
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(model);
+            return mapper.writer().writeValueAsString(model);
         } catch (JsonProcessingException ex) {
             log.error("Failed to convert "+model.getClass()+" into json", ex);
             return "";

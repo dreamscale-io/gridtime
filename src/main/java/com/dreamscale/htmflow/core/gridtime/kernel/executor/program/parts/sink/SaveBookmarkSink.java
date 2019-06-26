@@ -26,7 +26,7 @@ public class SaveBookmarkSink implements SinkStrategy {
             latestBookmark.setTorchieId(torchieId);
         }
 
-        LocalDateTime startOfNextTile = gridTile.getGridCoordinates().panRight().getClockTime();
+        LocalDateTime startOfNextTile = gridTile.getGridTime().panRight().getClockTime();
         latestBookmark.setMetronomeCursor(startOfNextTile);
 
         bookmarkRepository.save(latestBookmark);

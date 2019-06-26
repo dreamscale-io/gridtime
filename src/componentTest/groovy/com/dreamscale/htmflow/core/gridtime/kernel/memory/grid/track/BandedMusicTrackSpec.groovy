@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache
@@ -9,18 +10,22 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.StartTypeTag
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.IdeaFlowStateType
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+
 class BandedMusicTrackSpec extends Specification {
 
 
     BandedMusicTrack<IdeaFlowStateReference> bandedMusicTrack
     MusicClock musicClock
     FeatureCache featureCache
+    GeometryClock.GridTime gridTime
 
     def setup() {
 
         featureCache = new FeatureCache();
+        gridTime = new GeometryClock(LocalDateTime.now()).getActiveGridTime()
         musicClock = new MusicClock(ZoomLevel.TWENTY)
-        bandedMusicTrack = new BandedMusicTrack<>("@row/name", musicClock)
+        bandedMusicTrack = new BandedMusicTrack<>("@row/name", gridTime, musicClock)
 
         featureCache
     }
@@ -29,8 +34,10 @@ class BandedMusicTrackSpec extends Specification {
         given:
         IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE)
 
+        LocalDateTime moment = gridTime.getMomentFromOffset(musicClock.getBeat(5).getRelativeDuration());
+
         when:
-        bandedMusicTrack.startPlaying(musicClock.getBeat(5), wtfState)
+        bandedMusicTrack.startPlaying(moment, wtfState)
         FeatureTag<IdeaFlowStateReference> rolloverTag = bandedMusicTrack.finish()
 
         then:
@@ -53,9 +60,13 @@ class BandedMusicTrackSpec extends Specification {
         IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE)
         IdeaFlowStateReference progressState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.PROGRESS_STATE)
 
+        LocalDateTime moment5 = gridTime.getMomentFromOffset(musicClock.getBeat(5).getRelativeDuration());
+        LocalDateTime moment9 = gridTime.getMomentFromOffset(musicClock.getBeat(9).getRelativeDuration());
+
+
         when:
-        bandedMusicTrack.startPlaying(musicClock.getBeat(5), wtfState)
-        bandedMusicTrack.startPlaying(musicClock.getBeat(9), progressState)
+        bandedMusicTrack.startPlaying(moment5, wtfState)
+        bandedMusicTrack.startPlaying(moment9, progressState)
 
         FeatureTag<IdeaFlowStateReference> rolloverTag = bandedMusicTrack.finish()
 
@@ -78,9 +89,12 @@ class BandedMusicTrackSpec extends Specification {
         given:
         IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE)
 
+        LocalDateTime moment5 = gridTime.getMomentFromOffset(musicClock.getBeat(5).getRelativeDuration());
+        LocalDateTime moment7 = gridTime.getMomentFromOffset(musicClock.getBeat(7).getRelativeDuration());
+
         when:
-        bandedMusicTrack.startPlaying(musicClock.getBeat(5), wtfState)
-        bandedMusicTrack.stopPlaying(musicClock.gotoBeat(7))
+        bandedMusicTrack.startPlaying(moment5, wtfState)
+        bandedMusicTrack.stopPlaying(moment7)
 
         FeatureTag<IdeaFlowStateReference> rolloverTag = bandedMusicTrack.finish()
 
@@ -90,7 +104,6 @@ class BandedMusicTrackSpec extends Specification {
         assert wtfState == bandedMusicTrack.getFeatureAt(7)
         assert null == bandedMusicTrack.getFeatureAt(8)
 
-        assert rolloverTag == null
 
     }
 

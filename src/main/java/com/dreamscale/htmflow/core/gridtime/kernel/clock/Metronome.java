@@ -114,6 +114,6 @@ public class Metronome {
     }
 
     public String getTickPosition() {
-        return getActiveCoordinates().getFormattedGridTime();
+        return getActiveCoordinates().toDisplayString();
     }
 }

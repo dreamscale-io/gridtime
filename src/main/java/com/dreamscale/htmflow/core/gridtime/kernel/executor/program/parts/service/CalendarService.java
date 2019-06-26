@@ -22,6 +22,38 @@ public class CalendarService {
     GridTimeWeeksRepository gridTimeWeeksRepository;
 
 
+    public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
+        Long tileSequence = null;
+
+        switch (gridTime.getZoomLevel()) {
+            case TWENTY:
+                GridTimeTwentiesEntity twenty = gridTimeTwentiesRepository.findByClockTime(gridTime.getClockTime());
+                if (twenty != null) {
+                    tileSequence = twenty.getTileSeq();
+                }
+                break;
+            case DAY_PART:
+                GridTimeDayPartsEntity dayPart = gridTimeDayPartsRepository.findByClockTime(gridTime.getClockTime());
+                if (dayPart != null) {
+                    tileSequence = dayPart.getTileSeq();
+                }
+                break;
+            case DAY:
+                GridTimeDaysEntity day = gridTimeDaysRepository.findByClockTime(gridTime.getClockTime());
+                if (day != null) {
+                    tileSequence = day.getTileSeq();
+                }
+                break;
+            case WEEK:
+                GridTimeWeeksEntity week = gridTimeWeeksRepository.findByClockTime(gridTime.getClockTime());
+                if (week != null) {
+                    tileSequence = week.getTileSeq();
+                }
+        }
+
+        return tileSequence;
+    }
+
     public void saveCalendar(long tileSequence, GeometryClock.GridTime gridTime) {
         switch (gridTime.getZoomLevel()) {
             case TWENTY:
@@ -82,7 +114,7 @@ public class CalendarService {
 
         twenty.setTileSeq(tileSequence);
         twenty.setClockTime(coords.getClockTime());
-        twenty.setGridTime(coords.getFormattedGridTime());
+        twenty.setGridTime(coords.toDisplayString());
 
         twenty.setYear(coords.getYear());
         twenty.setBlock(coords.getBlock());
@@ -99,7 +131,7 @@ public class CalendarService {
 
         week.setTileSeq(tileSequence);
         week.setClockTime(coords.getClockTime());
-        week.setGridTime(coords.getFormattedGridTime());
+        week.setGridTime(coords.toDisplayString());
 
         week.setYear(coords.getYear());
         week.setBlock(coords.getBlock());
@@ -113,7 +145,7 @@ public class CalendarService {
 
         day.setTileSeq(tileSequence);
         day.setClockTime(coords.getClockTime());
-        day.setGridTime(coords.getFormattedGridTime());
+        day.setGridTime(coords.toDisplayString());
 
         day.setYear(coords.getYear());
         day.setBlock(coords.getBlock());
@@ -128,7 +160,7 @@ public class CalendarService {
 
         dayPart.setTileSeq(tileSequence);
         dayPart.setClockTime(coords.getClockTime());
-        dayPart.setGridTime(coords.getFormattedGridTime());
+        dayPart.setGridTime(coords.toDisplayString());
 
         dayPart.setYear(coords.getYear());
         dayPart.setBlock(coords.getBlock());

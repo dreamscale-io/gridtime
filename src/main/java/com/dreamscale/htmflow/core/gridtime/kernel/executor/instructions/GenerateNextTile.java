@@ -37,6 +37,6 @@ public class GenerateNextTile extends TileInstructions {
 
     @Override
     public String getCmdDescription() {
-        return "generate tile for "+fromPosition.getFormattedGridTime();
+        return "generate tile for "+fromPosition.toDisplayString();
     }
 }

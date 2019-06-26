@@ -63,7 +63,7 @@ class TorchieCmdSpec extends Specification {
 
         then:
         assert featurePool.getActiveGridTile() != null
-        assert featurePool.getActiveGridTile().gridCoordinates.getFormattedGridTime() == "2019-B1-W1-D1_12am+2:20"
+        assert featurePool.getActiveGridTile().gridTime.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
 
     }
 
@@ -88,13 +88,13 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().executeThing(time1, new ExecutionEvent(1, time1, Duration.ofSeconds(15), "JUnit", 0))
-        featurePool.getActiveGridTile().executeThing(time1, new ExecutionEvent(2, time1, Duration.ofSeconds(1), "JUnit", -1))
-        featurePool.getActiveGridTile().executeThing(time1, new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
-        featurePool.getActiveGridTile().executeThing(time1, new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(1, time1, Duration.ofSeconds(15), "JUnit", 0))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(2, time1, Duration.ofSeconds(1), "JUnit", -1))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
 
-        featurePool.getActiveGridTile().executeThing(time2, new ExecutionEvent(4, time2, Duration.ofSeconds(1), "JUnit", 0))
-        featurePool.getActiveGridTile().executeThing(time3, new ExecutionEvent(5, time3, Duration.ofSeconds(7), "JUnit", 0))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(1), "JUnit", 0))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(5, time3, Duration.ofSeconds(7), "JUnit", 0))
 
         featurePool.getActiveGridTile().finishAfterLoad()
 
@@ -216,8 +216,8 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeA", Duration.ofSeconds(9))
         featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
 
-        featurePool.getActiveGridTile().executeThing(time1, new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
-        featurePool.getActiveGridTile().executeThing(time2, new ExecutionEvent(4, time2, Duration.ofSeconds(5), "JUnit", -3))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(5), "JUnit", -3))
 
         featurePool.getActiveGridTile().modifyCurrentLocation(time2, 443)
 
@@ -229,7 +229,7 @@ class TorchieCmdSpec extends Specification {
 
         cmd.nextTile();
 
-        featurePool.getActiveGridTile().executeThing(time2.plusMinutes(20),
+        featurePool.getActiveGridTile().executeThing(
                 new ExecutionEvent(5, time2.plusMinutes(20), Duration.ofSeconds(5), "JUnit", -2))
         featurePool.getActiveGridTile().finishAfterLoad()
 
