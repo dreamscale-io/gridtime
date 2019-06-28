@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.FeaturePool;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class InstructionsBuilder {
         return new GotoTile(featurePool, gotoGridTime);
     }
 
-    public TileInstructions playTrack(TrackSetName trackSetName) {
+    public TileInstructions playTrack(TrackSetKey trackSetName) {
         return new PlayTrack(featurePool, trackSetName);
     }
 

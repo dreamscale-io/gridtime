@@ -4,6 +4,8 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.FeatureCell;
@@ -23,13 +25,13 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
 
     private final GeometryClock.GridTime gridTime;
     protected final MusicClock musicClock;
-    private final String rowName;
+    private final FeatureRowKey rowKey;
 
     private MultiValueMap<RelativeBeat, Movement<F>> trackMusic = DefaultCollections.multiMap();
     private MultiValueMap<RelativeBeat, FeatureTag<F>> trackTags = DefaultCollections.multiMap();
 
-    public RhythmMusicTrack(String rowName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        this.rowName = rowName;
+    public RhythmMusicTrack(FeatureRowKey rowKey, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.rowKey = rowKey;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
@@ -38,11 +40,38 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
         return musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
     }
 
+    public F findNearestEventBeforeMoment(LocalDateTime moment) {
+        RelativeBeat closestBeat = getBeat(moment);
+
+        List<Movement<F>> eventsAtBeat = trackMusic.get(closestBeat);
+        if (eventsAtBeat != null && eventsAtBeat.size() > 0) {
+            for (int i = eventsAtBeat.size() - 1; i >= 0; i--) {
+                if (eventsAtBeat.get(i).getPosition().isBefore(moment)) {
+                    return eventsAtBeat.get(i).getFeature();
+                }
+            }
+        }
+
+        if (closestBeat.getBeat() > 1) {
+            return findLatestEventOnOrBeforeBeat(musicClock.getBeat(closestBeat.getBeat() - 1));
+        }
+
+        return null;
+    }
+
+
+
     public void playEventAtBeat(LocalDateTime moment, F event) {
         trackMusic.add(getBeat(moment), new Movement<>(moment, event));
     }
 
-    public F getLatestEventOnOrBeforeBeat(RelativeBeat beat) {
+    public void playEventAtBeat(RelativeBeat beat, F event) {
+        LocalDateTime moment = gridTime.getMomentFromOffset(beat.getRelativeDuration());
+        trackMusic.add(beat, new Movement<>(moment, event));
+    }
+
+
+    public F findLatestEventOnOrBeforeBeat(RelativeBeat beat) {
         F latestEvent = null;
 
         Iterator<RelativeBeat> iterator = musicClock.getBackwardsIterator(beat);
@@ -59,7 +88,7 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
         return latestEvent;
     }
 
-    public Set<? extends FeatureReference> getFeatures() {
+    public Set<FeatureReference> getFeatures() {
         Set<FeatureReference> features = DefaultCollections.set();
 
         Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
@@ -80,7 +109,7 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
     @Override
     public GridRow toGridRow() {
 
-        GridRow gridRow = new GridRow(rowName);
+        GridRow gridRow = new GridRow(rowKey);
 
         Iterator<RelativeBeat> beatIterator = musicClock.getForwardsIterator();
 
@@ -119,8 +148,8 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     @Override
-    public String getRowName() {
-        return rowName;
+    public Key getRowKey() {
+        return rowKey;
     }
 
     public F getFirst() {
@@ -208,7 +237,7 @@ public class RhythmMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     public GridRow toGridRow(Map<F, String> shortHandReferences) {
-        GridRow gridRow = new GridRow(rowName);
+        GridRow gridRow = new GridRow(rowKey);
 
         Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
         while (iterator.hasNext()) {

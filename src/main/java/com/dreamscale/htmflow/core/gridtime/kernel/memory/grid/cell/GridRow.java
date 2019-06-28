@@ -1,6 +1,9 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.GridCell;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -8,16 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 @Getter
-public class GridRow {
+public class GridRow implements Iterable<GridCell> {
 
-    private String rowName;
+    private Key rowKey;
     private static final int DEFAULT_ROW_NAME_COLUMN_SIZE = 14;
-
 
     List<GridCell> gridCells = DefaultCollections.list();
 
-    public GridRow(String rowName) {
-        this.rowName = rowName;
+    public GridRow(Key rowKey) {
+        this.rowKey = rowKey;
     }
 
     public void add(GridCell cell) {
@@ -35,7 +37,7 @@ public class GridRow {
 
     public List<String> toValueRow() {
         List<String> valueColumns = new ArrayList<>();
-        valueColumns.add(toRightSizedRowName(rowName));
+        valueColumns.add(toRightSizedRowName(rowKey.getName()));
         for (GridCell cell : gridCells) {
             valueColumns.add(cell.toValueCell());
         }
@@ -82,5 +84,16 @@ public class GridRow {
     }
 
 
+    @Override
+    public Iterator<GridCell> iterator() {
+        return gridCells.iterator();
+    }
 
+    public GridCell getCell(RelativeBeat beat) {
+        return gridCells.get(beat.getBeat() - 1);
+    }
+
+    public GridCell getLast() {
+        return gridCells.get(gridCells.size() - 1);
+    }
 }

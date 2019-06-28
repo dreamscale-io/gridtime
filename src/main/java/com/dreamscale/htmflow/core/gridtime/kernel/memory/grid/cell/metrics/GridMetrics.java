@@ -1,6 +1,7 @@
-package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
+package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.Map;
 public class GridMetrics  {
 
 
-    private Map<MetricType, CandleStick> metricsByType = DefaultCollections.map();
+    private Map<MetricRowKey, CandleStick> metricsByType = DefaultCollections.map();
 
     private GridMetrics cascadeToParent;
 
@@ -26,17 +27,17 @@ public class GridMetrics  {
         this.cascadeToParent = cascadeToParent;
     }
 
-    private CandleStick findOrCreateCandle(MetricType metricType) {
-        CandleStick candle = metricsByType.get(metricType);
+    private CandleStick findOrCreateCandle(MetricRowKey metricRowKey) {
+        CandleStick candle = metricsByType.get(metricRowKey);
         if (candle == null) {
             candle = new CandleStick();
-            metricsByType.put(metricType, candle);
+            metricsByType.put(metricRowKey, candle);
         }
         return candle;
     }
 
     public void addVelocitySample(Duration duration) {
-        CandleStick candle = findOrCreateCandle(MetricType.FILE_TRAVERSAL_VELOCITY);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.FILE_TRAVERSAL_VELOCITY);
         candle.addSample(duration.getSeconds());
         if (cascadeToParent != null) {
             cascadeToParent.addVelocitySample(duration);
@@ -44,7 +45,7 @@ public class GridMetrics  {
     }
 
     public void addModificationSample(int modificationCount) {
-        CandleStick candle = findOrCreateCandle(MetricType.MODIFICATION_COUNT);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.MODIFICATION_COUNT);
         candle.addSample(modificationCount);
         if (cascadeToParent != null) {
             cascadeToParent.addModificationSample(modificationCount);
@@ -52,7 +53,7 @@ public class GridMetrics  {
     }
 
     public void addExecutionTimeSample(Duration executionTime) {
-        CandleStick candle = findOrCreateCandle(MetricType.EXECUTION_RUN_TIME);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.EXECUTION_RUN_TIME);
 
         candle.addSample(executionTime.getSeconds());
         if (cascadeToParent != null) {
@@ -61,7 +62,7 @@ public class GridMetrics  {
     }
 
     public void addExecutionCycleTimeSample(Duration durationBetweenExecution) {
-        CandleStick candle = findOrCreateCandle(MetricType.EXECUTION_CYCLE_TIME);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.EXECUTION_CYCLE_TIME);
         candle.addSample(durationBetweenExecution.getSeconds());
         if (cascadeToParent != null) {
             cascadeToParent.addExecutionCycleTimeSample(durationBetweenExecution);
@@ -69,7 +70,7 @@ public class GridMetrics  {
     }
 
     public void addFeelsSample(int feels) {
-        CandleStick candle = findOrCreateCandle(MetricType.FEELS);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.FEELS);
         candle.addSample(feels);
         if (cascadeToParent != null) {
             cascadeToParent.addFeelsSample(feels);
@@ -77,7 +78,7 @@ public class GridMetrics  {
     }
 
     public void addWtfSample(boolean isWTF) {
-        CandleStick candle = findOrCreateCandle(MetricType.IS_WTF);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.IS_WTF);
 
         if (isWTF) {
             candle.addSample(1);
@@ -90,7 +91,7 @@ public class GridMetrics  {
     }
 
     public void addLearningSample(boolean isLearning) {
-        CandleStick candle = findOrCreateCandle(MetricType.IS_LEARNING);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.IS_LEARNING);
         if (isLearning) {
             candle.addSample(1);
         } else {
@@ -102,7 +103,7 @@ public class GridMetrics  {
     }
 
     public void addPairingSample(boolean isPairing) {
-        CandleStick candle = findOrCreateCandle(MetricType.IS_PAIRING);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.IS_PAIRING);
 
         if (isPairing) {
             candle.addSample(1);
@@ -115,7 +116,7 @@ public class GridMetrics  {
     }
 
     public void addFocusWeightSample(double focusWeight) {
-        CandleStick candle = findOrCreateCandle(MetricType.FOCUS_WEIGHT);
+        CandleStick candle = findOrCreateCandle(MetricRowKey.FOCUS_WEIGHT);
 
         candle.addSample(focusWeight);
         if (cascadeToParent != null) {
@@ -125,7 +126,7 @@ public class GridMetrics  {
 
     @JsonIgnore
     public Duration getTotalTimeInvestment() {
-        CandleStick velocityCandle = metricsByType.get(MetricType.FILE_TRAVERSAL_VELOCITY);
+        CandleStick velocityCandle = metricsByType.get(MetricRowKey.FILE_TRAVERSAL_VELOCITY);
         if (velocityCandle != null) {
             return Duration.ofSeconds(Math.round(velocityCandle.getTotal()));
         } else {
@@ -139,26 +140,26 @@ public class GridMetrics  {
 
 
     public void combineWith(GridMetrics sourceMetrics) {
-        combineAndSet(sourceMetrics, MetricType.FILE_TRAVERSAL_VELOCITY);
-        combineAndSet(sourceMetrics, MetricType.MODIFICATION_COUNT);
-        combineAndSet(sourceMetrics, MetricType.FEELS);
-        combineAndSet(sourceMetrics, MetricType.IS_LEARNING);
-        combineAndSet(sourceMetrics, MetricType.IS_WTF);
-        combineAndSet(sourceMetrics, MetricType.IS_PAIRING);
-        combineAndSet(sourceMetrics, MetricType.EXECUTION_RUN_TIME);
-        combineAndSet(sourceMetrics, MetricType.EXECUTION_CYCLE_TIME);
-        combineAndSet(sourceMetrics, MetricType.FOCUS_WEIGHT);
+        combineAndSet(sourceMetrics, MetricRowKey.FILE_TRAVERSAL_VELOCITY);
+        combineAndSet(sourceMetrics, MetricRowKey.MODIFICATION_COUNT);
+        combineAndSet(sourceMetrics, MetricRowKey.FEELS);
+        combineAndSet(sourceMetrics, MetricRowKey.IS_LEARNING);
+        combineAndSet(sourceMetrics, MetricRowKey.IS_WTF);
+        combineAndSet(sourceMetrics, MetricRowKey.IS_PAIRING);
+        combineAndSet(sourceMetrics, MetricRowKey.EXECUTION_RUN_TIME);
+        combineAndSet(sourceMetrics, MetricRowKey.EXECUTION_CYCLE_TIME);
+        combineAndSet(sourceMetrics, MetricRowKey.FOCUS_WEIGHT);
     }
 
-    private void combineAndSet(GridMetrics sourceMetrics, MetricType metricType) {
-        CandleStick combinedCandle = combineCandles(getMetric(metricType), sourceMetrics.getMetric(metricType));
+    private void combineAndSet(GridMetrics sourceMetrics, MetricRowKey metricRowKey) {
+        CandleStick combinedCandle = combineCandles(getMetric(metricRowKey), sourceMetrics.getMetric(metricRowKey));
         if (combinedCandle != null) {
-            metricsByType.put(metricType, combinedCandle);
+            metricsByType.put(metricRowKey, combinedCandle);
         }
     }
 
-    public CandleStick getMetric(MetricType metricType) {
-        return metricsByType.get(metricType);
+    public CandleStick getMetric(MetricRowKey metricRowKey) {
+        return metricsByType.get(metricRowKey);
     }
 
 

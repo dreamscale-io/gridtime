@@ -8,13 +8,15 @@ import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.glyph.GlyphReferences;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.aggregate.FeatureTotals;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.Key;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.IdeaFlowTile;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,8 +30,11 @@ import java.util.Set;
 @Slf4j
 public class MusicGrid {
 
+    private final FeatureCache featureCache;
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
+    private final GlyphReferences glyphReferences;
+    private final FeatureTotals featureTotals;
 
     private AuthorsTrackSet authorsTracks;
     private FeelsTrackSet feelsTracks;
@@ -40,37 +45,42 @@ public class MusicGrid {
     private ExecutionTrackSet executionTracks;
     private NavigationTrackSet navigationTracks;
 
-    private Map<TrackSetName, PlayableCompositeTrack> trackSetsByName = DefaultCollections.map();
+    private Map<TrackSetKey, PlayableCompositeTrackSet> trackSetsByKey = DefaultCollections.map();
 
-    private List<GridRow> allExtractedGridRows;
+    private List<GridRow> exportedRows;
+    private Map<Key, GridRow> exportedRowsByKey;
 
-    public MusicGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public MusicGrid(FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.featureCache = featureCache;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.authorsTracks = new AuthorsTrackSet(TrackSetName.Authors, gridTime, musicClock);
-        this.feelsTracks = new FeelsTrackSet(TrackSetName.Feels, gridTime, musicClock);
+        this.glyphReferences = new GlyphReferences();
+        this.featureTotals = new FeatureTotals();
 
-        this.contextTracks = new WorkContextTrackSet(TrackSetName.WorkContext, gridTime, musicClock);
-        this.ideaflowTracks = new IdeaFlowTrackSet(TrackSetName.IdeaFlow, gridTime, musicClock);
+        this.authorsTracks = new AuthorsTrackSet(TrackSetKey.Authors, gridTime, musicClock);
+        this.feelsTracks = new FeelsTrackSet(TrackSetKey.Feels, gridTime, musicClock);
 
-        this.executionTracks = new ExecutionTrackSet(TrackSetName.Executions, gridTime, musicClock);
-        this.navigationTracks = new NavigationTrackSet(TrackSetName.Navigations, gridTime, musicClock);
+        this.contextTracks = new WorkContextTrackSet(TrackSetKey.WorkContext, gridTime, musicClock);
+        this.ideaflowTracks = new IdeaFlowTrackSet(TrackSetKey.IdeaFlow, featureCache, gridTime, musicClock);
+
+        this.executionTracks = new ExecutionTrackSet(TrackSetKey.Executions, gridTime, musicClock);
+        this.navigationTracks = new NavigationTrackSet(TrackSetKey.Navigations, featureCache, glyphReferences, gridTime, musicClock);
 
         addAllTrackSets(authorsTracks, feelsTracks, contextTracks, ideaflowTracks, navigationTracks, executionTracks);
 
     }
 
-    private void addAllTrackSets(PlayableCompositeTrack ... trackSets) {
-        for (PlayableCompositeTrack trackSet : trackSets) {
-            trackSetsByName.put(trackSet.getTrackSetName(), trackSet);
+    private void addAllTrackSets(PlayableCompositeTrackSet... trackSets) {
+        for (PlayableCompositeTrackSet trackSet : trackSets) {
+            trackSetsByKey.put(trackSet.getTrackSetKey(), trackSet);
         }
     }
 
     public Set<FeatureReference> getAllFeatures() {
         Set<FeatureReference> allFeatures = DefaultCollections.set();
 
-        for (PlayableCompositeTrack trackset : trackSetsByName.values()) {
+        for (PlayableCompositeTrackSet trackset : trackSetsByKey.values()) {
             allFeatures.addAll(trackset.getFeatures());
         }
 
@@ -114,40 +124,87 @@ public class MusicGrid {
         ideaflowTracks.clearWTF(moment, finishTag);
     }
 
-    public void gotoLocation(LocalDateTime moment, PlaceReference locationInBox, Duration timeInLocation) {
-        navigationTracks.gotoPlace(moment, locationInBox, timeInLocation);
+    public void gotoLocation(LocalDateTime moment, PlaceReference nextLocation, Duration timeInLocation) {
+        PlaceReference lastLocation = navigationTracks.getLastLocation();
+
+        if (lastLocation != null) {
+            PlaceReference traversalReference = featureCache.lookupTraversalReference(lastLocation, nextLocation);
+            featureTotals.getMetricsFor(traversalReference).addVelocitySample(timeInLocation);
+        }
+
+        PlaceReference boxReference = featureCache.lookupBoxReference(nextLocation);
+        featureTotals.getMetricsFor(nextLocation).addVelocitySample(timeInLocation);
+        featureTotals.getMetricsFor(boxReference).addVelocitySample(timeInLocation);
+
+        navigationTracks.gotoLocation(moment, nextLocation, timeInLocation);
     }
 
     public void modifyCurrentLocation(LocalDateTime moment, int modificationCount) {
         RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
 
-        navigationTracks.modifyPlace(beat, modificationCount);
+        PlaceReference lastLocation = navigationTracks.getLastLocationBeforeMoment(moment);
+        if (lastLocation != null) {
+            PlaceReference boxReference = featureCache.lookupBoxReference(lastLocation);
+            featureTotals.getMetricsFor(boxReference).addModificationSample(modificationCount);
+            featureTotals.getMetricsFor(lastLocation).addModificationSample(modificationCount);
+        }
+
+        WorkContextReference lastProject = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.PROJECT_WORK);
+        WorkContextReference lastTask = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.TASK_WORK);
+        WorkContextReference lastIntention = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.INTENTION_WORK);
+
+        featureTotals.getMetricsFor(lastProject).addModificationSample(modificationCount);
+        featureTotals.getMetricsFor(lastTask).addModificationSample(modificationCount);
+        featureTotals.getMetricsFor(lastIntention).addModificationSample(modificationCount);
+
         ideaflowTracks.addModificationSampleForLearningBand(beat, modificationCount);
     }
 
     public void executeThing(ExecutionReference execution) {
-        executionTracks.executeThing(execution.getPosition(), execution);
+        LocalDateTime moment = execution.getPosition();
+
+        PlaceReference lastLocation = navigationTracks.getLastLocationBeforeMoment(moment);
+        if (lastLocation != null) {
+            PlaceReference boxReference = featureCache.lookupBoxReference(lastLocation);
+            featureTotals.getMetricsFor(boxReference).addExecutionTimeSample(execution.getExecutionTime());
+        }
+
+        WorkContextReference lastProject = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.PROJECT_WORK);
+        WorkContextReference lastTask = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.TASK_WORK);
+        WorkContextReference lastIntention = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.INTENTION_WORK);
+
+        featureTotals.getMetricsFor(lastProject).addExecutionTimeSample(execution.getExecutionTime());
+        featureTotals.getMetricsFor(lastTask).addExecutionTimeSample(execution.getExecutionTime());
+        featureTotals.getMetricsFor(lastIntention).addExecutionTimeSample(execution.getExecutionTime());
+
+        executionTracks.executeThing(moment, execution);
     }
 
-    public void finish(FeatureCache featureCache) {
-        authorsTracks.finish();
-        feelsTracks.finish();
-        contextTracks.finish();
-        ideaflowTracks.finish(featureCache);
+    public void finish() {
+
+        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
+            trackSet.finish();
+        }
+
+        exportGridRows();
     }
 
-    public IdeaFlowTile getIdeaFlowTile() {
-        return null;
-    }
-
-    public MusicGridResults playTrackSet(TrackSetName trackToPlay) {
-        PlayableCompositeTrack trackSet = trackSetsByName.get(trackToPlay);
+    public MusicGridResults playTrackSet(TrackSetKey trackToPlay) {
+        PlayableCompositeTrackSet trackSet = trackSetsByKey.get(trackToPlay);
 
         return toMusicGridResults(trackSet.toGridRows());
     }
 
+    public GridRow getRow(Key rowKey) {
+        return exportedRowsByKey.get(rowKey);
+    }
+
+    public List<GridRow> getAllGridRows() {
+        return exportedRows;
+    }
+
     public MusicGridResults playAllTracks() {
-        return toMusicGridResults(getAllGridRows());
+        return toMusicGridResults(exportedRows);
     }
 
     private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
@@ -168,20 +225,23 @@ public class MusicGrid {
         return new MusicGridResults(headerRow, valueRows);
     }
 
-    public List<GridRow> getAllGridRows() {
+    private void exportGridRows() {
 
-        if (allExtractedGridRows == null) {
+        if (exportedRows == null) {
+            exportedRows = DefaultCollections.list();
 
-            allExtractedGridRows = new ArrayList<>();
+            for (TrackSetKey trackSetKey : trackSetsByKey.keySet()) {
+                PlayableCompositeTrackSet track = trackSetsByKey.get(trackSetKey);
 
-            for (TrackSetName trackName : trackSetsByName.keySet()) {
-                PlayableCompositeTrack track = trackSetsByName.get(trackName);
+                exportedRows.addAll(track.toGridRows());
+            }
 
-                allExtractedGridRows.addAll(track.toGridRows());
+            exportedRowsByKey = DefaultCollections.map();
+
+            for (GridRow row: exportedRows) {
+                exportedRowsByKey.put(row.getRowKey(), row);
             }
         }
-
-        return allExtractedGridRows;
     }
 
 
@@ -189,7 +249,7 @@ public class MusicGrid {
         log.info("getCarryOverContext");
         CarryOverContext carryOverContext = new CarryOverContext("[MusicGrid]");
 
-        for (PlayableCompositeTrack trackSet : trackSetsByName.values()) {
+        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
             String subcontextName = getSubcontextName(trackSet);
             carryOverContext.addSubContext(trackSet.getCarryOverContext(subcontextName));
         }
@@ -201,15 +261,16 @@ public class MusicGrid {
     public void initFromCarryOverContext(CarryOverContext carryOverContext) {
         log.info("initFromCarryOverContext");
 
-        for (PlayableCompositeTrack trackSet : trackSetsByName.values()) {
+        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
             String subcontextName = getSubcontextName(trackSet);
             trackSet.initFromCarryOverContext(carryOverContext.getSubContext(subcontextName));
         }
 
     }
 
-    private String getSubcontextName(PlayableCompositeTrack compositeTrack) {
-        return "[MusicGrid." + compositeTrack.getTrackSetName().name() + "]";
+    private String getSubcontextName(PlayableCompositeTrackSet compositeTrack) {
+        return "[MusicGrid." + compositeTrack.getTrackSetKey().name() + "]";
     }
+
 
 }

@@ -2,14 +2,17 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
 import java.util.List;
 import java.util.Set;
 
-public interface PlayableCompositeTrack {
+public interface PlayableCompositeTrackSet {
 
-    TrackSetName getTrackSetName();
+    TrackSetKey getTrackSetKey();
+
+    void finish();
 
     List<GridRow> toGridRows();
 

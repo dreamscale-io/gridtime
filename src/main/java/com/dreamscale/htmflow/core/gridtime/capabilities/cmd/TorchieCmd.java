@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.NotifyTrigge
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.CmdType;
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -66,7 +66,7 @@ public class TorchieCmd {
         return (MusicGridResults) instructions.getOutputResults();
     }
 
-    public MusicGridResults playTrack(TrackSetName trackSetName) {
+    public MusicGridResults playTrack(TrackSetKey trackSetName) {
         TileInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
         runInstructionAndWaitTilDone(instructions);
 

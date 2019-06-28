@@ -2,14 +2,14 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
-import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeelsReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.BandedMusicTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
 import java.time.LocalDateTime;
@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Set;
 
 
-public class FeelsTrackSet implements PlayableCompositeTrack {
+public class FeelsTrackSet implements PlayableCompositeTrackSet {
 
-    private final TrackSetName trackSetName;
+    private final TrackSetKey trackSetName;
     private final BandedMusicTrack<FeelsReference> feelsTrack;
 
-    public FeelsTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public FeelsTrackSet(TrackSetKey trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
-        this.feelsTrack = new BandedMusicTrack<>("@feels", gridTime, musicClock);
+        this.feelsTrack = new BandedMusicTrack<>(FeatureRowKey.FEELS_RATING, gridTime, musicClock);
     }
 
     public void startFeels(LocalDateTime moment, FeelsReference feelsReference) {
@@ -40,7 +40,7 @@ public class FeelsTrackSet implements PlayableCompositeTrack {
     }
 
     @Override
-    public TrackSetName getTrackSetName() {
+    public TrackSetKey getTrackSetKey() {
         return trackSetName;
     }
 

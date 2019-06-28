@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.IdeaFlowStateType;
@@ -10,14 +11,14 @@ import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.IdeaFlowStateReference;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.AggregateType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MetricType;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.RollingAggregate;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.RollingAggregate;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.BandedMusicTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.RollingAggregateTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,11 +29,12 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
+public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
 
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
-    private final TrackSetName trackSetName;
+    private final TrackSetKey trackSetKey;
+    private final FeatureCache featureCache;
 
     private BandedMusicTrack<IdeaFlowStateReference> wtfTrack;
     private BandedMusicTrack<IdeaFlowStateReference> learningProgressTrack;
@@ -41,13 +43,14 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
 
     private static final int MODIFICATION_THRESHOLD_FOR_PROGRESS = 150;
 
-    public IdeaFlowTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        this.trackSetName = trackSetName;
+    public IdeaFlowTrackSet(TrackSetKey trackSetKey, FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.trackSetKey = trackSetKey;
+        this.featureCache = featureCache;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.wtfTrack = new BandedMusicTrack<>("@flow/wtf", gridTime, musicClock);
-        this.learningProgressTrack = new BandedMusicTrack<>("@flow/learning", gridTime, musicClock);
+        this.wtfTrack = new BandedMusicTrack<>(FeatureRowKey.FLOW_WTF, gridTime, musicClock);
+        this.learningProgressTrack = new BandedMusicTrack<>(FeatureRowKey.FLOW_LEARNING, gridTime, musicClock);
 
         this.rollingAggregateModificationsTrack = new RollingAggregateTrack(gridTime, musicClock);
     }
@@ -64,16 +67,17 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
         rollingAggregateModificationsTrack.addModificationSample(beat, modificationSample);
     }
 
-    public void finish(FeatureCache featureCache) {
+    @Override
+    public void finish() {
         wtfTrack.finish();
 
         rollingAggregateModificationsTrack.finish();
-        createLearningBandsBasedOnThreshold(featureCache);
+        createLearningBandsBasedOnThreshold();
 
         learningProgressTrack.finish();
     }
 
-    private void createLearningBandsBasedOnThreshold(FeatureCache featureCache) {
+    private void createLearningBandsBasedOnThreshold() {
         IdeaFlowStateReference progressState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.PROGRESS_STATE);
         IdeaFlowStateReference learningState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.LEARNING_STATE);
 
@@ -120,8 +124,8 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
     }
 
     @Override
-    public TrackSetName getTrackSetName() {
-        return trackSetName;
+    public TrackSetKey getTrackSetKey() {
+        return trackSetKey;
     }
 
     @Override
@@ -129,7 +133,7 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrack  {
         List<GridRow> rows = new ArrayList<>();
         rows.add(wtfTrack.toGridRow());
         rows.add(learningProgressTrack.toGridRow());
-        rows.add(rollingAggregateModificationsTrack.toGridRow(MetricType.FLOW_MODS, AggregateType.TOTAL));
+        rows.add(rollingAggregateModificationsTrack.toGridRow(MetricRowKey.FLOW_MODS, AggregateType.TOTAL));
 
         return rows;
     }

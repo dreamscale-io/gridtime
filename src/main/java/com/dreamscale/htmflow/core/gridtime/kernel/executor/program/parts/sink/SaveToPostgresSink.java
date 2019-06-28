@@ -1,14 +1,10 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.sink;
 
-import com.dreamscale.htmflow.core.domain.tile.GridMarkerEntity;
-import com.dreamscale.htmflow.core.domain.tile.GridMarkerRepository;
-import com.dreamscale.htmflow.core.domain.tile.GridRowEntity;
-import com.dreamscale.htmflow.core.domain.tile.GridRowRepository;
+import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MarkerValue;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +58,25 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         //okay tile summary... what do we need to do fo
 
+        GridTileSummaryEntity summaryEntity = new GridTileSummaryEntity();
+        summaryEntity.setId(UUID.randomUUID());
+        summaryEntity.setTorchieId(torchieId);
+        summaryEntity.setZoomLevel(gridTile.getZoomLevel());
+        summaryEntity.setTileSeq(tileSeq);
+
+
+
+//        private Integer timeInTile;
+//        private Integer timeInWtf;
+//        private Integer timeInLearning;
+//        private Integer timeInProgress;
+//        private Integer timeInPairing;
+//
+//        private Float avgFlame;
+//        private Float avgBatchSize;
+//        private Float avgTraversalSpeed;
+//        private Float avgExecutionTime;
+//        private Float avgRedToGreenTime;
 
         //TODO save tile summary
 
@@ -93,7 +108,7 @@ public class SaveToPostgresSink implements SinkStrategy {
                 markerEntity.setId(UUID.randomUUID());
                 markerEntity.setTorchieId(torchieId);
                 markerEntity.setTileSeq(tileSeq);
-                markerEntity.setRowName(row.getRowName());
+                markerEntity.setRowName(row.getRowKey().getName());
                 markerEntity.setPosition(featureTag.getPosition());
                 markerEntity.setTagType(featureTag.getTag().getType());
                 markerEntity.setTagName(featureTag.getTag().name());
@@ -115,13 +130,13 @@ public class SaveToPostgresSink implements SinkStrategy {
 
             gridRowEntity = new GridRowEntity();
             gridRowEntity.setId(UUID.randomUUID());
-            gridRowEntity.setRowName(row.getRowName());
+            gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
             gridRowEntity.setZoomLevel(zoomLevel);
             gridRowEntity.setTileSeq(tileSeq);
             gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
 
-            log.debug(row.getRowName() + ":" +gridRowEntity.getJson());
+            log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
         }
 
         return gridRowEntity;

@@ -1,8 +1,12 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
+import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.Metronome;
+import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.now.NowMetrics;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.IdeaFlowStateReference;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.IdeaFlowTile;
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
@@ -17,19 +21,16 @@ public class IdeaFlowCircuit {
     private final Metronome metronome;
     private final CircuitMonitor circuitMonitor;
 
+
     private LinkedList<TileInstructions> instructionsToExecuteQueue;
     private LinkedList<TileInstructions> highPriorityInstructionQueue;
     private TileInstructions lastInstruction;
 
-    private LinkedList<IdeaFlowTile> recentIdeaFlowTracer;
-    private IdeaFlowStateType mostRecentIdeaFlowState;
-
     private LinkedList<TimeBomb> activeWaits;
+    private final NowMetrics nowMetrics;
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
 
-
-    private static final int MAX_IDEA_FLOW_TILES_TO_KEEP = 4;
 
     public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Metronome metronome) {
         this.circuitMonitor = circuitMonitor;
@@ -37,8 +38,9 @@ public class IdeaFlowCircuit {
 
         this.highPriorityInstructionQueue = DefaultCollections.queueList();
         this.instructionsToExecuteQueue = DefaultCollections.queueList();
-        this.recentIdeaFlowTracer = DefaultCollections.queueList();
         this.activeWaits = DefaultCollections.queueList();
+
+        this.nowMetrics = new NowMetrics();
     }
 
     public void fireTriggersForActiveWaits() {
@@ -87,15 +89,11 @@ public class IdeaFlowCircuit {
 
         @Override
         public void notifyWhenDone(TileInstructions finishedInstruction, Results results) {
-            IdeaFlowTile ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
+            IdeaFlowMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
 
             if (ideaFlowTile != null) {
-                mostRecentIdeaFlowState = ideaFlowTile.getLastIdeaFlowState();
-                recentIdeaFlowTracer.push(ideaFlowTile);
 
-                if (recentIdeaFlowTracer.size() > MAX_IDEA_FLOW_TILES_TO_KEEP) {
-                    recentIdeaFlowTracer.removeLast();
-                }
+                nowMetrics.push(ideaFlowTile);
 
                 generateAlarms();
                 triggerAlarms();
@@ -106,21 +104,21 @@ public class IdeaFlowCircuit {
         }
     }
 
-    private IdeaFlowTile getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
+    private IdeaFlowMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();
 
         if (output != null) {
-            return output.getIdeaFlowTile();
+            return output.getIdeaFlowMetrics();
         }
         return null;
     }
 
     private void generateAlarms() {
-        //TODO evaluate Idea Flow Tracer, and generate TimeBomb Alarms
+        //TODO evaluate NowMetrics, and generate AlarmScripts
     }
 
     private void triggerAlarms() {
-        //TODO evaluate all existing alarms, and generate instructions
+        //TODO evaluate all existing alarms, and run AlarmScripts as part of high priority queue
     }
 
     public void scheduleInstruction(TileInstructions instructions) {

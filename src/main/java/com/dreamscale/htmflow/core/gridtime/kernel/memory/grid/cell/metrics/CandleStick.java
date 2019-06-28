@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
+package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

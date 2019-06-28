@@ -2,8 +2,6 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridCell;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MarkerValue;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import lombok.Getter;
@@ -11,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -116,6 +113,23 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
             featureTags = new ArrayList<>(tags);
         }
         return featureTags;
+    }
+
+    @Override
+    public boolean hasFeature(FeatureReference reference) {
+        if (feature != null && feature.equals(reference)) {
+            return true;
+        }
+
+        if (features != null) {
+            for (F featuredItem : features) {
+                if (featuredItem.equals(reference)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

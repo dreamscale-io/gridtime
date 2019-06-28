@@ -23,9 +23,6 @@ public class GridTileSummaryEntity {
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
     @Enumerated(EnumType.STRING)

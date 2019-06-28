@@ -67,6 +67,10 @@ public class MusicClock implements Iterator<RelativeBeat> {
         return currentBeat;
     }
 
+    public ZoomLevel getZoomLevel() {
+        return zoomLevel;
+    }
+
     @Override
     public boolean hasNext() {
         if (currentBeatIndex + 1 > beatsPerMeasure - 1) {

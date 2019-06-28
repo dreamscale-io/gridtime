@@ -5,6 +5,10 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.AggregateType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.CandleStick;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.RollingAggregate;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.MetricCell;
 
 import java.util.Iterator;
@@ -75,16 +79,16 @@ public class RollingAggregateTrack {
         return aggregatesPerSummaryBeat.get(beat);
     }
 
-    public GridRow toGridRow(MetricType metricType, AggregateType aggregateType) {
+    public GridRow toGridRow(MetricRowKey metricRowKey, AggregateType aggregateType) {
         Iterator<RelativeBeat> iterator = summaryClock.getForwardsIterator();
 
-        GridRow row = new GridRow(metricType.toDisplayString());
+        GridRow row = new GridRow(metricRowKey);
 
         while (iterator.hasNext()) {
             RelativeBeat summaryBeat = iterator.next();
             CandleStick aggregateCandle = aggregatesPerSummaryBeat.get(summaryBeat).getAggregateCandleStick();
 
-            MetricCell cell = new MetricCell(summaryBeat, metricType, aggregateType, aggregateCandle);
+            MetricCell cell = new MetricCell(summaryBeat, metricRowKey, aggregateType, aggregateCandle);
             row.add(cell);
         }
         return row;

@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.IdeaFlowStateReference
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.StartTypeTag
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.IdeaFlowStateType
@@ -25,7 +26,7 @@ class BandedMusicTrackSpec extends Specification {
         featureCache = new FeatureCache();
         gridTime = new GeometryClock(LocalDateTime.now()).getActiveGridTime()
         musicClock = new MusicClock(ZoomLevel.TWENTY)
-        bandedMusicTrack = new BandedMusicTrack<>("@row/name", gridTime, musicClock)
+        bandedMusicTrack = new BandedMusicTrack<>(FeatureRowKey.EXEC_RHYTHM, gridTime, musicClock)
 
         featureCache
     }

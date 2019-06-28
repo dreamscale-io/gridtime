@@ -3,58 +3,133 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.BandedMusicTrack;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.WorkContextType;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.WorkContextReference;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
 @Slf4j
-public class WorkContextTrackSet extends MusicTrackSet<WorkContextType, WorkContextReference> {
+public class WorkContextTrackSet implements PlayableCompositeTrackSet {
 
-    public WorkContextTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        super(trackSetName, gridTime, musicClock);
+    private final TrackSetKey trackSetKey;
+    private final GeometryClock.GridTime gridTime;
+    private final MusicClock musicClock;
+
+    private final BandedMusicTrack<WorkContextReference> projectTrack;
+    private final BandedMusicTrack<WorkContextReference> taskTrack;
+    private final BandedMusicTrack<WorkContextReference> intentionTrack;
+
+    public WorkContextTrackSet(TrackSetKey trackSetKey, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.trackSetKey = trackSetKey;
+        this.gridTime = gridTime;
+        this.musicClock = musicClock;
+
+        this.projectTrack = new BandedMusicTrack<>(FeatureRowKey.WORK_PROJECT, gridTime, musicClock);
+        this.taskTrack = new BandedMusicTrack<>(FeatureRowKey.WORK_TASK, gridTime, musicClock);
+        this.intentionTrack = new BandedMusicTrack<>(FeatureRowKey.WORK_INTENTION, gridTime, musicClock);
     }
 
     public void startWorkContext(LocalDateTime moment, WorkContextReference workContext) {
-        startPlaying(workContext.getWorkType(), moment, workContext);
+        if (workContext.getWorkType() == WorkContextType.PROJECT_WORK) {
+            projectTrack.startPlaying(moment, workContext);
+        } else if (workContext.getWorkType() == WorkContextType.TASK_WORK) {
+            taskTrack.startPlaying(moment, workContext);
+        } else if (workContext.getWorkType() == WorkContextType.INTENTION_WORK) {
+            intentionTrack.startPlaying(moment, workContext);
+        }
     }
 
     public void clearWorkContext(LocalDateTime moment, FinishTag finishTag) {
-        clearAllTracks(moment, finishTag);
+        projectTrack.stopPlaying(moment, finishTag);
+        taskTrack.stopPlaying(moment, finishTag);
+        intentionTrack.stopPlaying(moment, finishTag);
     }
 
+    public WorkContextReference getLastOnOrBeforeMoment(LocalDateTime moment, WorkContextType workContextType) {
+        RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
+
+        if (workContextType == WorkContextType.PROJECT_WORK) {
+            return projectTrack.getLastOnOrBeforeBeat(beat);
+        } else if (workContextType == WorkContextType.TASK_WORK) {
+            return taskTrack.getLastOnOrBeforeBeat(beat);
+        } else if (workContextType == WorkContextType.INTENTION_WORK) {
+            return intentionTrack.getLastOnOrBeforeBeat(beat);
+        }
+        return null;
+    }
 
     public CarryOverContext getCarryOverContext(String subcontextName) {
 
         CarryOverContext carryOverContext = new CarryOverContext(subcontextName);
 
-        Set<WorkContextType> types = super.getTrackTypes();
+        WorkContextReference lastProject = projectTrack.getLast();
+        WorkContextReference lastTask = taskTrack.getLast();
+        WorkContextReference lastIntention = intentionTrack.getLast();
 
-        for (WorkContextType type : types) {
-            WorkContextReference lastContext = getLast(type);
-            log.debug("Saving reference: "+lastContext);
-            carryOverContext.saveReference(type.name(), lastContext);
-        }
+        carryOverContext.saveReference("last.project", lastProject);
+        carryOverContext.saveReference("last.task", lastTask);
+        carryOverContext.saveReference("last.intention", lastIntention);
 
         return carryOverContext;
     }
 
-    public void initFromCarryOverContext(CarryOverContext subContext) {
-        Set<String> referenceKeys = subContext.getReferenceKeys();
-        for (String referenceKey: referenceKeys) {
-            WorkContextType type = WorkContextType.valueOf(referenceKey);
-            initFirst(type, (WorkContextReference) subContext.getReference(referenceKey));
-        }
+    public void initFromCarryOverContext(CarryOverContext carryOverContext) {
+
+        WorkContextReference lastProject = carryOverContext.getReference("last.project");
+        WorkContextReference lastTask = carryOverContext.getReference("last.task");
+        WorkContextReference lastIntention = carryOverContext.getReference("last.intention");
+
+        projectTrack.initFirst(lastProject);
+        taskTrack.initFirst(lastTask);
+        intentionTrack.initFirst(lastIntention);
     }
 
-    public Set<? extends FeatureReference> getFeatures() {
-        return super.getFeatures();
+    @Override
+    public TrackSetKey getTrackSetKey() {
+        return trackSetKey;
     }
+
+    @Override
+    public void finish() {
+        projectTrack.finish();
+        taskTrack.finish();
+        intentionTrack.finish();
+    }
+
+    @Override
+    public List<GridRow> toGridRows() {
+        List<GridRow> gridRows = new ArrayList<>();
+        gridRows.add(projectTrack.toGridRow());
+        gridRows.add(taskTrack.toGridRow());
+        gridRows.add(intentionTrack.toGridRow());
+
+        return gridRows;
+    }
+
+    public Set<FeatureReference> getFeatures() {
+        Set<FeatureReference> featureReferences = DefaultCollections.set();
+
+        featureReferences.addAll(projectTrack.getFeatures());
+        featureReferences.addAll(taskTrack.getFeatures());
+        featureReferences.addAll(intentionTrack.getFeatures());
+
+        return featureReferences;
+    }
+
+
+
 }

@@ -12,7 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.fetch.
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.source.Window
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile
 import spock.lang.Specification
 
@@ -56,7 +56,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         componentSpaceObserver.see(window, gridTile)
         gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetName.Navigations)
+        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetKey.Navigations)
         print tileOutput
 
         then:

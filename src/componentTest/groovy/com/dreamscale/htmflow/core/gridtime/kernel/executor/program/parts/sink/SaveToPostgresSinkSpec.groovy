@@ -7,10 +7,8 @@ import com.dreamscale.htmflow.core.domain.tile.GridMarkerEntity
 import com.dreamscale.htmflow.core.domain.tile.GridMarkerRepository
 import com.dreamscale.htmflow.core.domain.tile.GridRowEntity
 import com.dreamscale.htmflow.core.domain.tile.GridRowRepository
-import com.dreamscale.htmflow.core.domain.tile.GridTileSummaryEntity
 import com.dreamscale.htmflow.core.domain.tile.GridTileSummaryRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.TorchieCmd
-import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.kernel.Torchie
 import com.dreamscale.htmflow.core.gridtime.kernel.TorchiePoolExecutor
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock
@@ -20,14 +18,10 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.FeaturePool
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.CircleDetails
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.StartTypeTag
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import java.time.LocalDateTime
 
 @ComponentTest

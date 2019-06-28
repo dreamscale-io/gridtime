@@ -1,6 +1,7 @@
-package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell;
+package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Observable;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface GridCell extends Observable {
     List<UUID> getFeatureRefs();
 
     List<FeatureTag<?>> getFeatureTags();
+
+    boolean hasFeature(FeatureReference reference);
+
+    <F extends FeatureReference> F getFeature();
 }

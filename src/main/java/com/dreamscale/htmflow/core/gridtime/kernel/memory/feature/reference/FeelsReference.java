@@ -23,6 +23,10 @@ public class FeelsReference extends FeatureReference {
         return (FeelsType) getFeatureType();
     }
 
+    public int getFlameRating() {
+        return ((FeelsRatingDetails) getDetails()).getRating();
+    }
+
     @Override
     public String toDisplayString() {
         return ((FeelsRatingDetails) getDetails()).toDisplayString();

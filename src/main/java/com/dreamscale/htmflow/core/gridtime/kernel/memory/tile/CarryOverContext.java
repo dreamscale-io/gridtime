@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.tile;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.Tag;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.RollingAggregate;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.RollingAggregate;
 import lombok.*;
 
 import java.util.*;
@@ -65,8 +65,8 @@ public class CarryOverContext {
         return savedRollingAggregates.get(key);
     }
 
-    public FeatureReference getReference(String key) {
-        return savedFeatureReferences.get(key);
+    public <F extends FeatureReference> F getReference(String key) {
+        return (F)savedFeatureReferences.get(key);
     }
 
     public Set<String> getReferenceKeys() {

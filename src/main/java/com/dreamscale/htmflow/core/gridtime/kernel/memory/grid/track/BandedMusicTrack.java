@@ -3,6 +3,8 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
@@ -23,13 +25,13 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
     private final MusicClock musicClock;
     private final GeometryClock.GridTime gridTime;
-    private final String rowName;
+    private final FeatureRowKey rowKey;
 
     private Map<RelativeBeat, F> trackMusic = DefaultCollections.map();
     private MultiValueMap<RelativeBeat, FeatureTag<F>> trackTags = DefaultCollections.multiMap();
 
-    public BandedMusicTrack(String rowName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        this.rowName = rowName;
+    public BandedMusicTrack(FeatureRowKey rowKey, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.rowKey = rowKey;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
@@ -106,7 +108,7 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
     @Override
     public GridRow toGridRow() {
-        GridRow gridRow = new GridRow(rowName);
+        GridRow gridRow = new GridRow(rowKey);
 
         Iterator<RelativeBeat> beatIterator = musicClock.getForwardsIterator();
 
@@ -182,8 +184,8 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
     }
 
     @Override
-    public String getRowName() {
-        return rowName;
+    public Key getRowKey() {
+        return rowKey;
     }
 
     @Override

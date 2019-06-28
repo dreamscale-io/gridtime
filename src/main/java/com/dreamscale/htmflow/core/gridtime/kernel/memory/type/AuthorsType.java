@@ -11,7 +11,7 @@ import java.util.Set;
 
 public enum AuthorsType implements FeatureType {
 
-    SOLO("/authors", "/authors/{authorsKey}", null),
+    SOLO("/me", "/me/{authorsKey}", null),
     PAIR("/pair", "/pair/{authorsKey}", null),
     MOB("/mob", "/mob/{authorsKey}", null);
 

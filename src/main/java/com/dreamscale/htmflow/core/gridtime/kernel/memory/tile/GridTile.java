@@ -8,7 +8,9 @@ import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBo
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.AnalyticsEngine;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.MusicGrid;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.StartTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.CmdType;
@@ -32,6 +34,7 @@ public class GridTile {
 
     private final MusicClock musicClock;
     private final MusicGrid musicGrid;
+    private final AnalyticsEngine analyticsEngine;
 
     private transient FeatureCache featureCache;
 
@@ -40,11 +43,12 @@ public class GridTile {
     public GridTile(UUID torchieId, GeometryClock.GridTime gridTime, FeatureCache featureCache) {
         this.torchieId = torchieId;
         this.gridTime = gridTime;
+        this.featureCache = featureCache;
+
         this.zoomLevel = gridTime.getZoomLevel();
         this.musicClock = new MusicClock(zoomLevel);
-
-        this.musicGrid = new MusicGrid(gridTime, musicClock);
-        this.featureCache = featureCache;
+        this.musicGrid = new MusicGrid(featureCache, gridTime, musicClock);
+        this.analyticsEngine = new AnalyticsEngine(featureCache, musicClock, musicGrid);
 
         this.timeBombTriggers = DefaultCollections.list();
     }
@@ -178,6 +182,15 @@ public class GridTile {
         musicGrid.executeThing(executionReference);
     }
 
+    public void finishAfterLoad() {
+        musicGrid.finish();
+
+        analyticsEngine.runIdeaFlowMetrics();
+    }
+
+    public IdeaFlowMetrics getIdeaFlowMetrics() {
+        return analyticsEngine.getIdeaFlowMetrics();
+    }
 
     public CarryOverContext getCarryOverContext() {
         return musicGrid.getCarryOverContext();
@@ -189,13 +202,6 @@ public class GridTile {
         }
     }
 
-    public void finishAfterLoad() {
-        musicGrid.finish(featureCache);
-    }
-
-    public IdeaFlowTile getIdeaFlowTile() {
-        return musicGrid.getIdeaFlowTile();
-    }
 
 
     public Set<FeatureReference> getFeatures() {

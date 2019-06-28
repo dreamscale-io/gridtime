@@ -2,14 +2,14 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
-import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.AuthorsReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.BandedMusicTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
 import java.time.LocalDateTime;
@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Set;
 
 
-public class AuthorsTrackSet implements PlayableCompositeTrack {
+public class AuthorsTrackSet implements PlayableCompositeTrackSet {
 
-    private final TrackSetName trackSetName;
+    private final TrackSetKey trackSetName;
     private final BandedMusicTrack<AuthorsReference> authorsTrack;
 
-    public AuthorsTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public AuthorsTrackSet(TrackSetKey trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
-        this.authorsTrack = new BandedMusicTrack<>("@author", gridTime, musicClock);
+        this.authorsTrack = new BandedMusicTrack<>(FeatureRowKey.AUTHOR_NAME, gridTime, musicClock);
     }
 
     public void startAuthors(LocalDateTime moment, AuthorsReference authorsReference) {
@@ -40,7 +40,7 @@ public class AuthorsTrackSet implements PlayableCompositeTrack {
     }
 
     @Override
-    public TrackSetName getTrackSetName() {
+    public TrackSetKey getTrackSetKey() {
         return trackSetName;
     }
 

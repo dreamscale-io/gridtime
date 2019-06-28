@@ -82,6 +82,14 @@ public class FeatureCache {
         return cacheLookup(locationReference);
     }
 
+    public PlaceReference lookupBoxReference(PlaceReference locationReference) {
+        LocationInBox locationInBox = locationReference.getPlaceDetails();
+
+        PlaceReference boxReference = featureReferenceFactory.createBoxReference(locationInBox.getProjectId(), locationInBox.getBoxName());
+
+        return cacheLookup(boxReference);
+    }
+
     public PlaceReference lookupBoxReference(UUID projectId, String boxName) {
         PlaceReference boxReference = featureReferenceFactory.createBoxReference(projectId, boxName);
 

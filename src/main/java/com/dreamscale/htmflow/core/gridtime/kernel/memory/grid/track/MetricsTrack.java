@@ -5,6 +5,10 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.AggregateType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.CandleStick;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.GridMetrics;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type.MetricCell;
 
 import java.util.Iterator;
@@ -39,25 +43,25 @@ public class MetricsTrack {
         return metrics;
     }
 
-    public GridRow toGridRow(MetricType metricType, AggregateType aggregateType) {
+    public GridRow toGridRow(MetricRowKey metricRowKey, AggregateType aggregateType) {
         Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
 
-        GridRow row = new GridRow(metricType.toDisplayString());
+        GridRow row = new GridRow(metricRowKey);
 
         while (iterator.hasNext()) {
             RelativeBeat beat = iterator.next();
-            CandleStick candleStick = getCandleStick(metricsPerBeat.get(beat), metricType);
-            MetricCell cell = new MetricCell(beat, metricType, aggregateType, candleStick);
+            CandleStick candleStick = getCandleStick(metricsPerBeat.get(beat), metricRowKey);
+            MetricCell cell = new MetricCell(beat, metricRowKey, aggregateType, candleStick);
             row.add(cell);
         }
 
         return row;
     }
 
-    private CandleStick getCandleStick(GridMetrics metrics, MetricType metricType) {
+    private CandleStick getCandleStick(GridMetrics metrics, MetricRowKey metricRowKey) {
         CandleStick candleStick = null;
         if (metrics != null) {
-            candleStick = metrics.getMetric(metricType);
+            candleStick = metrics.getMetric(metricRowKey);
         }
         return candleStick;
     }

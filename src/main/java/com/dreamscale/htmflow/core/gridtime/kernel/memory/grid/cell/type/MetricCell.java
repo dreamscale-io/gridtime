@@ -1,7 +1,10 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.*;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.AggregateType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.CandleStick;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -21,12 +24,12 @@ public class MetricCell implements GridCell {
     private final int cellSizeForBeat;
 
     private RelativeBeat beat;
-    private MetricType metricType;
+    private MetricRowKey metricRowKey;
     private CandleStick candleStick;
 
-    public MetricCell(RelativeBeat beat, MetricType metricType, AggregateType aggregateType, CandleStick candleStick) {
+    public MetricCell(RelativeBeat beat, MetricRowKey metricRowKey, AggregateType aggregateType, CandleStick candleStick) {
         this.beat = beat;
-        this.metricType = metricType;
+        this.metricRowKey = metricRowKey;
         this.aggregateType = aggregateType;
         this.candleStick = candleStick;
 
@@ -64,6 +67,16 @@ public class MetricCell implements GridCell {
 
     @Override
     public List<FeatureTag<?>> getFeatureTags() {
+        return null;
+    }
+
+    @Override
+    public boolean hasFeature(FeatureReference reference) {
+        return false;
+    }
+
+    @Override
+    public <F extends FeatureReference> F getFeature() {
         return null;
     }
 

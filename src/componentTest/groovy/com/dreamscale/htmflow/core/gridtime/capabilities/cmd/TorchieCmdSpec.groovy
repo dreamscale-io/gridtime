@@ -16,7 +16,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.Author
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.ExecutionEvent
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.details.WorkContextEvent
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey
 import spock.lang.Specification
 
 import java.time.Duration
@@ -76,7 +76,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        MusicGridResults trackOutput = cmd.playTrack(TrackSetName.IdeaFlow)
+        MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.IdeaFlow)
         print trackOutput;
 
         then:
@@ -99,7 +99,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTrack(TrackSetName.Executions)
+        Results trackOutput = cmd.playTrack(TrackSetKey.Executions)
         print trackOutput;
 
         then:
@@ -131,7 +131,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        MusicGridResults trackOutput = cmd.playTrack(TrackSetName.Navigations)
+        MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.Navigations)
         print trackOutput;
 
         then:
@@ -160,7 +160,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTrack(TrackSetName.WorkContext)
+        Results trackOutput = cmd.playTrack(TrackSetKey.WorkContext)
         print trackOutput;
 
         then:
@@ -188,7 +188,7 @@ class TorchieCmdSpec extends Specification {
         featurePool.getActiveGridTile().finishAfterLoad()
 
         when:
-        Results trackOutput = cmd.playTrack(TrackSetName.Authors)
+        Results trackOutput = cmd.playTrack(TrackSetKey.Authors)
         print trackOutput;
 
         then:

@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.commons;
 
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
 import org.apache.commons.collections.map.LRUMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -78,4 +79,5 @@ public class DefaultCollections {
     public static <T> LinkedList<T> queueList() {
         return new LinkedList<>();
     }
+
 }

@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track;
 
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.Tag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
@@ -26,5 +27,5 @@ public interface MusicTrack<F extends FeatureReference> {
 
     List<Tag> getTagsAt(RelativeBeat beat);
 
-    String getRowName();
+    Key getRowKey();
 }

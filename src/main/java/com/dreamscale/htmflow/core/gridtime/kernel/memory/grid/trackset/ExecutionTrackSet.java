@@ -3,17 +3,18 @@ package com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.trackset;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.kernel.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.types.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.ExecutionReference;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.feature.reference.FeatureReference;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.AggregateType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.MetricType;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.MetricsTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrack;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.RhythmMusicTrack;
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.TrackSetName;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
 
 import java.time.Duration;
@@ -22,12 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class ExecutionTrackSet implements PlayableCompositeTrack {
+public class ExecutionTrackSet implements PlayableCompositeTrackSet {
 
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
 
-    private final TrackSetName trackSetName;
+    private final TrackSetKey trackSetName;
 
     private final RhythmMusicTrack<ExecutionReference> rhythmTrack;
     private final MetricsTrack metricsTrack;
@@ -37,12 +38,12 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
 
     private ExecutionReference carryOverLastExec;
 
-    public ExecutionTrackSet(TrackSetName trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public ExecutionTrackSet(TrackSetKey trackSetName, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.trackSetName = trackSetName;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
 
-        this.rhythmTrack = new RhythmMusicTrack<>("@exec/rhythm", gridTime, musicClock);
+        this.rhythmTrack = new RhythmMusicTrack<>(FeatureRowKey.EXEC_RHYTHM, gridTime, musicClock);
         this.metricsTrack = new MetricsTrack(gridTime, musicClock);
     }
 
@@ -71,7 +72,7 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
     }
 
     private ExecutionReference getLatestEventOnOrBeforeBeat(RelativeBeat beat) {
-        ExecutionReference lastExecution = rhythmTrack.getLatestEventOnOrBeforeBeat(beat);
+        ExecutionReference lastExecution = rhythmTrack.findLatestEventOnOrBeforeBeat(beat);
 
         if (lastExecution == null) {
             lastExecution = carryOverLastExec;
@@ -96,7 +97,7 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
 
     public void initFromCarryOverContext(CarryOverContext subContext) {
 
-        carryOverLastExec = (ExecutionReference) subContext.getReference("last.exec");
+        carryOverLastExec = subContext.getReference("last.exec");
 
         Boolean isRedAndWantingGreenFlag = subContext.getStateFlag("is.red.and.wanting.green");
         if (isRedAndWantingGreenFlag != null) {
@@ -104,8 +105,13 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
         }
     }
 
-    public TrackSetName getTrackSetName() {
+    public TrackSetKey getTrackSetKey() {
         return trackSetName;
+    }
+
+    @Override
+    public void finish() {
+
     }
 
     @Override
@@ -114,8 +120,8 @@ public class ExecutionTrackSet implements PlayableCompositeTrack {
 
         rows.add(rhythmTrack.toGridRow());
 
-        rows.add(metricsTrack.toGridRow(MetricType.EXECUTION_RUN_TIME, AggregateType.AVG));
-        rows.add(metricsTrack.toGridRow(MetricType.EXECUTION_CYCLE_TIME, AggregateType.AVG));
+        rows.add(metricsTrack.toGridRow(MetricRowKey.EXECUTION_RUN_TIME, AggregateType.AVG));
+        rows.add(metricsTrack.toGridRow(MetricRowKey.EXECUTION_CYCLE_TIME, AggregateType.AVG));
 
         return rows;
     }
