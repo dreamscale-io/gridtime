@@ -17,6 +17,7 @@ public enum FeatureRowKey implements Key {
     WORK_INTENTION("@work/intention"),
 
     NAV_BOX("@nav/box"),
+    NAV_BRIDGE("@nav/bridge"),
     NAV_BATCH("@nav/batch"),
     NAV_RHYTHM("@nav/rhythm");
 

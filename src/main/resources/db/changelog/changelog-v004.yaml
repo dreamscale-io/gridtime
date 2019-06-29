@@ -16,7 +16,7 @@ databaseChangeLog:
         file: db/v004/create_grid_row.sql
 
   - include:
-        file: db/v004/create_grid_tile_summary.sql
+        file: db/v004/create_grid_tile_idea_flow.sql
 
   - include:
         file: db/v004/create_grid_time_calendar.sql

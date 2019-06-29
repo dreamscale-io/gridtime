@@ -14,7 +14,7 @@ public class GlyphReferences {
     private char shortHandLocationLetter = 'a';
 
     private Map<PlaceReference, String> boxGlyphMappings = DefaultCollections.map();
-    private char shortHandBoxLetter = 'A';
+    private char shortHandBoxLetter = 'K'; //need fewer boxes than other things, start from K to Z
 
     private Map<PlaceReference, String> traversalGlyphMappings = DefaultCollections.map();
     private char shortHandTraversalLetter = 'a';

@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface GridTileSummaryRepository extends CrudRepository<GridTileSummaryEntity, UUID> {
+public interface GridTileIdeaFlowRepository extends CrudRepository<GridTileIdeaFlowEntity, UUID> {
 
 }

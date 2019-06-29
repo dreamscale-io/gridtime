@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.domain.tile.GridMarkerEntity
 import com.dreamscale.htmflow.core.domain.tile.GridMarkerRepository
 import com.dreamscale.htmflow.core.domain.tile.GridRowEntity
 import com.dreamscale.htmflow.core.domain.tile.GridRowRepository
-import com.dreamscale.htmflow.core.domain.tile.GridTileSummaryRepository
+import com.dreamscale.htmflow.core.domain.tile.GridTileIdeaFlowRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.TorchieCmd
 import com.dreamscale.htmflow.core.gridtime.kernel.Torchie
 import com.dreamscale.htmflow.core.gridtime.kernel.TorchiePoolExecutor
@@ -44,7 +44,7 @@ class SaveToPostgresSinkSpec extends Specification {
     GridRowRepository gridRowRepository
 
     @Autowired
-    GridTileSummaryRepository gridTileSummaryRepository
+    GridTileIdeaFlowRepository gridTileSummaryRepository
 
     GeometryClock clock
 

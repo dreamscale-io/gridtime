@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.domain.time;
 
-import com.dreamscale.htmflow.core.domain.tile.GridTileSummaryEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 

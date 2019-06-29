@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.kernel.executor.program.parts.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class SaveToPostgresSink implements SinkStrategy {
 
     @Autowired
     GridMarkerRepository gridMarkerRepository;
+
+    @Autowired
+    GridTileIdeaFlowRepository gridTileIdeaFlowRepository;
 
     @Override
     public void save(UUID torchieId, GridTile gridTile) {
@@ -56,29 +60,20 @@ public class SaveToPostgresSink implements SinkStrategy {
         }
         gridMarkerRepository.save(markerEntities);
 
+
+        IdeaFlowMetrics ideaFlowMetrics = gridTile.getIdeaFlowMetrics();
+
+        GridTileIdeaFlowEntity gridTileIdeaFlowEntity = createGridTileIdeaFlowEntity(torchieId, tileSeq, ideaFlowMetrics);
+        gridTileIdeaFlowRepository.save(gridTileIdeaFlowEntity);
+
+        //TILE DICTIONARY...
+
+        //so rows will have all these rhythm patterns... bridge patterns... need to add bridges, okay added bridges
+        //instead of feature references being in rows, save the lookup table
+
+        //we want to be able to do union distinct on dictionaries
+
         //okay tile summary... what do we need to do fo
-
-        GridTileSummaryEntity summaryEntity = new GridTileSummaryEntity();
-        summaryEntity.setId(UUID.randomUUID());
-        summaryEntity.setTorchieId(torchieId);
-        summaryEntity.setZoomLevel(gridTile.getZoomLevel());
-        summaryEntity.setTileSeq(tileSeq);
-
-
-
-//        private Integer timeInTile;
-//        private Integer timeInWtf;
-//        private Integer timeInLearning;
-//        private Integer timeInProgress;
-//        private Integer timeInPairing;
-//
-//        private Float avgFlame;
-//        private Float avgBatchSize;
-//        private Float avgTraversalSpeed;
-//        private Float avgExecutionTime;
-//        private Float avgRedToGreenTime;
-
-        //TODO save tile summary
 
         //TODO save lookup tables
 
@@ -92,6 +87,23 @@ public class SaveToPostgresSink implements SinkStrategy {
         //TODO update floating now
 
         //TODO aggregate up
+    }
+
+    private GridTileIdeaFlowEntity createGridTileIdeaFlowEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
+
+        GridTileIdeaFlowEntity ideaFlowEntity = new GridTileIdeaFlowEntity();
+        ideaFlowEntity.setId(UUID.randomUUID());
+        ideaFlowEntity.setTorchieId(torchieId);
+        ideaFlowEntity.setTileSeq(tileSeq);
+        ideaFlowEntity.setZoomLevel(ideaFlowMetrics.getZoomLevel());
+        ideaFlowEntity.setLastIdeaFlowState(ideaFlowMetrics.getLastIdeaFlowState().getFeatureId());
+        ideaFlowEntity.setAvgFlame(ideaFlowMetrics.getAvgFlame());
+        ideaFlowEntity.setTimeInTile(ideaFlowMetrics.getTimeInTile().getSeconds());
+        ideaFlowEntity.setPercentWtf(ideaFlowMetrics.getPercentWtf());
+        ideaFlowEntity.setPercentLearning(ideaFlowMetrics.getPercentLearning());
+        ideaFlowEntity.setPercentProgress(ideaFlowMetrics.getPercentProgress());
+        ideaFlowEntity.setPercentPairing(ideaFlowMetrics.getPercentPairing());
+        return ideaFlowEntity;
     }
 
     private List<GridMarkerEntity> createRowMarkerEntitiesIfNotEmpty(UUID torchieId, Long tileSeq, GridRow row) {

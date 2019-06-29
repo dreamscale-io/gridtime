@@ -10,13 +10,13 @@ import javax.persistence.Id;
 import java.math.BigInteger;
 import java.util.UUID;
 
-@Entity(name = "grid_tile_summary")
+@Entity(name = "grid_tile_idea_flow")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridTileSummaryEntity {
+public class GridTileIdeaFlowEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -30,24 +30,19 @@ public class GridTileSummaryEntity {
 
     private Long tileSeq;
 
-    private Integer timeInTile;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID lastIdeaFlowState;
 
-    private Integer timeInWtf;
+    private Long timeInTile;
 
-    private Integer timeInLearning;
+    private Double avgFlame;
 
-    private Integer timeInProgress;
+    private Double percentWtf;
 
-    private Integer timeInPairing;
+    private Double percentLearning;
 
-    private Float avgFlame;
+    private Double percentProgress;
 
-    private Float avgBatchSize;
-
-    private Float avgTraversalSpeed;
-
-    private Float avgExecutionTime;
-
-    private Float avgRedToGreenTime;
+    private Double percentPairing;
 
 }

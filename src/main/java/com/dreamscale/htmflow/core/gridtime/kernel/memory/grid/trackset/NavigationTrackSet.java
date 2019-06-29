@@ -15,6 +15,7 @@ import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.glyph.GlyphRefere
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.track.*;
 import com.dreamscale.htmflow.core.gridtime.kernel.memory.tile.CarryOverContext;
+import com.dreamscale.htmflow.core.gridtime.kernel.memory.type.PlaceType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -29,9 +30,12 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
 
+
+    private final BatchMusicTrack<PlaceReference> boxTrack;
+    private final RhythmMusicTrack<PlaceReference> bridgeTrack;
+
     private final RhythmMusicTrack<PlaceReference> rhythmTrack;
     private final BatchMusicTrack<PlaceReference> batchTrack;
-    private final BatchMusicTrack<PlaceReference> boxTrack;
 
     private final MetricsTrack speedTrack;
     private final GlyphReferences glyphReferences;
@@ -50,25 +54,34 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
         this.musicClock = musicClock;
 
         this.boxTrack = new BatchMusicTrack<>(FeatureRowKey.NAV_BOX, gridTime, musicClock);
-        this.batchTrack = new BatchMusicTrack<>(FeatureRowKey.NAV_BATCH, gridTime, musicClock);
+        this.bridgeTrack = new RhythmMusicTrack<>(FeatureRowKey.NAV_BRIDGE, gridTime, musicClock);
+
         this.rhythmTrack = new RhythmMusicTrack<>(FeatureRowKey.NAV_RHYTHM, gridTime, musicClock);
+        this.batchTrack = new BatchMusicTrack<>(FeatureRowKey.NAV_BATCH, gridTime, musicClock);
 
         this.speedTrack = new MetricsTrack(gridTime, musicClock);
-
     }
 
-    public void gotoLocation(LocalDateTime moment, PlaceReference locationReference, Duration durationInPlace) {
+    public void gotoLocation(LocalDateTime moment, PlaceReference nextLocation, Duration durationInPlace) {
 
-        PlaceReference boxReference = featureCache.lookupBoxReference(locationReference);
+        PlaceReference boxReference = featureCache.lookupBoxReference(nextLocation);
 
         glyphReferences.addBoxGlyph(boxReference);
         boxTrack.playEventAtBeat(moment, boxReference);
 
-        glyphReferences.addLocationGlyph(locationReference);
-        rhythmTrack.playEventAtBeat(moment, locationReference);
-        batchTrack.playEventAtBeat(moment, locationReference);
+        glyphReferences.addLocationGlyph(nextLocation);
+        rhythmTrack.playEventAtBeat(moment, nextLocation);
+        batchTrack.playEventAtBeat(moment, nextLocation);
 
-        lastLocation = locationReference;
+        if (getLastLocation() != null) {
+            PlaceReference traversal = featureCache.lookupTraversalReference(lastLocation, nextLocation);
+            if (traversal.getPlaceType() == PlaceType.BRIDGE_BETWEEN_BOXES) {
+                glyphReferences.addTraversalGlyph(traversal);
+                bridgeTrack.playEventAtBeat(moment, traversal);
+            }
+        }
+
+        lastLocation = nextLocation;
 
         RelativeBeat beat = musicClock.getClosestBeat(gridTime.getRelativeTime(moment));
         speedTrack.getMetricsFor(beat).addVelocitySample(durationInPlace);
@@ -142,6 +155,7 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
         rows.add(boxTrack.toGridRow(glyphReferences.getBoxGlyphMappings()));
         rows.add(batchTrack.toGridRow(glyphReferences.getLocationGlyphMappings()));
         rows.add(rhythmTrack.toGridRow(glyphReferences.getLocationGlyphMappings()));
+        rows.add(bridgeTrack.toGridRow(glyphReferences.getTraversalGlyphMappings()));
 
         rows.add(speedTrack.toGridRow(MetricRowKey.FILE_TRAVERSAL_VELOCITY, AggregateType.AVG));
 
