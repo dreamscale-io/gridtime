@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.feeds.story.grid
 
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.grid.cell.metrics.CandleStick
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.CandleStick
 import spock.lang.Specification
 
 class CandleStickSpec extends Specification {

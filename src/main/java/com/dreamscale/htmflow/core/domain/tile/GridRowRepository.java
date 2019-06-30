@@ -1,6 +1,6 @@
 package com.dreamscale.htmflow.core.domain.tile;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

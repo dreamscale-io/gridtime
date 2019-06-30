@@ -1,13 +1,9 @@
 package com.dreamscale.htmflow.core.domain.tile;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.clock.ZoomLevel;
 import lombok.*;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import java.math.BigInteger;
 import java.util.UUID;
 
 @Entity(name = "grid_box_bucket_config")

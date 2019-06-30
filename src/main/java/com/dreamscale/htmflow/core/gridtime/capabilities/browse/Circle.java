@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.browse;
 
-import com.dreamscale.htmflow.core.gridtime.kernel.executor.circuit.alarm.TimeBomb;
-import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 
 import java.util.LinkedList;
 

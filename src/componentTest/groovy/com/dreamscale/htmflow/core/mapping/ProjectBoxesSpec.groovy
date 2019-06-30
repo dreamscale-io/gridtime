@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.mapping
 
-import com.dreamscale.htmflow.core.gridtime.kernel.commons.DefaultCollections
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.ProjectBoxes
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.matcher.BoxMatcherConfig
+import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections
+import com.dreamscale.htmflow.core.gridtime.machine.memory.box.ProjectBoxes
+import com.dreamscale.htmflow.core.gridtime.machine.memory.box.matcher.BoxMatcherConfig
 import spock.lang.Specification
 
 

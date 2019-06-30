@@ -1,10 +1,8 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.api.activity.NewEditorActivity
 import com.dreamscale.htmflow.api.batch.NewFlowBatch
 import com.dreamscale.htmflow.api.event.NewSnippetEvent
-import com.dreamscale.htmflow.api.journal.IntentionInputDto
 import com.dreamscale.htmflow.client.FlowClient
 import com.dreamscale.htmflow.client.JournalClient
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
@@ -12,11 +10,8 @@ import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
-import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
-import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository
 import com.dreamscale.htmflow.core.domain.flow.FlowEventRepository
-import com.dreamscale.htmflow.core.gridtime.kernel.memory.box.TeamBoxConfiguration
 import com.dreamscale.htmflow.core.service.RecentActivityService
 import com.dreamscale.htmflow.core.service.TimeService
 import org.dreamscale.exception.ForbiddenException
