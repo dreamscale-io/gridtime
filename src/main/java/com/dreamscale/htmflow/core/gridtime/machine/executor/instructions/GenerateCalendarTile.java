@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

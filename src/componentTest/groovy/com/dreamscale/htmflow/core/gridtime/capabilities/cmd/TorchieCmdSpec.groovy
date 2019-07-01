@@ -308,12 +308,12 @@ class TorchieCmdSpec extends Specification {
     //aggregate up
     //traversals with bridges
     //timestamp positions on start/end tags
-    //matrix metrics by project, task, component
+    //matrix analytics by project, task, component
 
     //batch box track?
     //traversal track?
 
-    //metrics per box
+    //analytics per box
 
 
 

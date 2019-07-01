@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.NowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.IdeaFlowMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
@@ -85,7 +85,7 @@ public class IdeaFlowCircuit {
 
         @Override
         public void notifyWhenDone(TileInstructions finishedInstruction, Results results) {
-            IdeaFlowMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
+            TileMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
 
             if (ideaFlowTile != null) {
 
@@ -100,7 +100,7 @@ public class IdeaFlowCircuit {
         }
     }
 
-    private IdeaFlowMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
+    private TileMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();
 
         if (output != null) {

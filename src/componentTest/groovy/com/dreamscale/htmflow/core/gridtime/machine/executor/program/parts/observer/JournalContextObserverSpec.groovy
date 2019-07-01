@@ -58,7 +58,7 @@ public class JournalContextObserverSpec extends Specification {
 
         gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetKey.WorkContext)
+        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:
@@ -98,7 +98,7 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(nextWindow, nextTile)
-        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetKey.WorkContext)
+        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:

@@ -53,7 +53,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
 
         when:
         executionRhythmObserver.see(window, gridTile)
-        MusicGridResults results = gridTile.getMusicGrid().playTrackSet(TrackSetKey.Executions);
+        MusicGridResults results = gridTile.playTrack(TrackSetKey.Executions);
         println results
 
         then:

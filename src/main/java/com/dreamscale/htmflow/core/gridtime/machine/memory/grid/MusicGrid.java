@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-public class MusicGrid {
+public class MusicGrid implements IMusicGrid {
 
     private final FeatureCache featureCache;
     private final GeometryClock.GridTime gridTime;
@@ -189,7 +189,7 @@ public class MusicGrid {
         exportGridRows();
     }
 
-    public MusicGridResults playTrackSet(TrackSetKey trackToPlay) {
+    public MusicGridResults playTrack(TrackSetKey trackToPlay) {
         PlayableCompositeTrackSet trackSet = trackSetsByKey.get(trackToPlay);
 
         return toMusicGridResults(trackSet.toGridRows());

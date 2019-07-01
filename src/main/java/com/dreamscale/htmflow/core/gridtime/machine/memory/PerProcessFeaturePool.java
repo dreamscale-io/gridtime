@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureResolverService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.service.TileSearchService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.TileSearchService;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 
 import java.util.Set;
@@ -30,7 +30,7 @@ public class PerProcessFeaturePool extends AbstractFeaturePool {
 
     @Override
     public void resolveReferences() {
-        Set<FeatureReference> features = getActiveGridTile().getMusicGrid().getAllFeatures();
+        Set<FeatureReference> features = getActiveGridTile().getAllFeatures();
 
         for (FeatureReference feature : features) {
             featureResolverService.resolve(teamId, feature);

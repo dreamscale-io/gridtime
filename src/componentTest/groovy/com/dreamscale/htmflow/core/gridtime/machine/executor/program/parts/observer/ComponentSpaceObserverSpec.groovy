@@ -56,7 +56,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         componentSpaceObserver.see(window, gridTile)
         gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetKey.Navigations)
+        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.Navigations)
         print tileOutput
 
         then:

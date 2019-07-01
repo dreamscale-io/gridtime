@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine.memory.tile;
 
+import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
@@ -8,14 +9,16 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeB
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AnalyticsEngine;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.AnalyticsEngine;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.MusicGrid;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.IdeaFlowMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.StartTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.CmdType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.WorkContextType;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -24,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Getter
 @Slf4j
 public class GridTile {
 
@@ -186,10 +188,15 @@ public class GridTile {
         musicGrid.finish();
 
         analyticsEngine.runIdeaFlowMetrics();
+        analyticsEngine.runFeatureMetrics();
     }
 
-    public IdeaFlowMetrics getIdeaFlowMetrics() {
-        return analyticsEngine.getIdeaFlowMetrics();
+    public TileMetrics getIdeaFlowMetrics() {
+        return analyticsEngine.getTileMetrics();
+    }
+
+    public List<FeatureMetrics> getFeatureMetrics() {
+        return analyticsEngine.getFeatureMetrics();
     }
 
     public CarryOverContext getCarryOverContext() {
@@ -202,9 +209,27 @@ public class GridTile {
         }
     }
 
+    public GeometryClock.GridTime getGridTime() {
+        return gridTime;
+    }
 
+    public ZoomLevel getZoomLevel() {
+        return zoomLevel;
+    }
 
-    public Set<FeatureReference> getFeatures() {
+    public List<GridRow> getAllGridRows() {
+        return musicGrid.getAllGridRows();
+    }
+
+    public Set<FeatureReference> getAllFeatures() {
         return musicGrid.getAllFeatures();
+    }
+
+    public MusicGridResults playAllTracks() {
+        return musicGrid.playAllTracks();
+    }
+
+    public MusicGridResults playTrack(TrackSetKey trackToPlay) {
+        return musicGrid.playTrack(trackToPlay);
     }
 }

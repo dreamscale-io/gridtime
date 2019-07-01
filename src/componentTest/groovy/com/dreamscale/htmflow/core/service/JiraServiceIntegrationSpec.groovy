@@ -121,7 +121,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 		List<JiraTaskDto> openTasks = jiraService.getOpenTasksForProject(validOrg.id, project.id)
 
 		then:
-		assert openTasks.size() == 6
+		assert openTasks.size() == 7
 	}
 
 	def "should page through all tasks for project"() {

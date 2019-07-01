@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.service;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service;
 
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigRepository;

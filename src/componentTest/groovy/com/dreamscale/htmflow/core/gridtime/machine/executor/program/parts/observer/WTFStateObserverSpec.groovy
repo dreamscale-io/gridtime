@@ -61,7 +61,7 @@ public class WTFStateObserverSpec extends Specification {
         wtfStateObserver.see(window, gridTile)
         gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.getMusicGrid().playTrackSet(TrackSetKey.IdeaFlow)
+        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.IdeaFlow)
         print tileOutput
 
         then:

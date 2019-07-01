@@ -18,7 +18,7 @@ public class PlayTrack extends TileInstructions {
 
     @Override
     protected void executeInstruction() throws InterruptedException {
-        MusicGridResults results = this.featurePool.getActiveGridTile().getMusicGrid().playTrackSet(trackToPlay);
+        MusicGridResults results = this.featurePool.getActiveGridTile().playTrack(trackToPlay);
         setOutputResults(results);
     }
 
