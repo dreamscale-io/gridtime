@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityMetadataField;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityType;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableFlowActivity;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 
 /**
@@ -16,7 +17,9 @@ public class ComponentSpaceObserver implements FlowObserver<FlowableFlowActivity
 
 
     @Override
-    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
+    public void see(Window<FlowableFlowActivity> window, FeaturePool featurePool) {
+
+        GridTile gridTile = featurePool.getActiveGridTile();
 
         for (FlowableFlowActivity flowable : window.getFlowables()) {
                 FlowActivityEntity flowActivity = flowable.get();

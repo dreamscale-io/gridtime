@@ -5,6 +5,8 @@ import com.dreamscale.htmflow.core.domain.journal.IntentionEntity
 import com.dreamscale.htmflow.core.domain.journal.ProjectEntity
 import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FileActivityFetcher
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.JournalFetcher
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver
@@ -38,10 +40,11 @@ class FlowSourceSpec extends Specification {
         this.featurePool = new MemoryOnlyFeaturePool(memberId);
 
         FlowObserver flowObserverMock =
-                [see: { Window window, GridTile storyFrame -> this.latestWindow = window }] as FlowObserver
+                [see: { Window window, FeaturePool pool -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)
+
     }
 
     def "should create window with inclusive start and exclusive end"() {
@@ -55,7 +58,7 @@ class FlowSourceSpec extends Specification {
         createEvent(memberId, time3)
 
         when:
-        journalFlowSource.tick(time1, time3)
+        journalFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time1, time3))
 
         then:
         assert latestWindow != null;
@@ -78,8 +81,8 @@ class FlowSourceSpec extends Specification {
         createEvent(memberId, time2_5)
 
         when:
-        journalFlowSource.tick(time1_0, time2_0)
-        journalFlowSource.tick(time2_0, time3_0)
+        journalFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time1_0, time2_0))
+        journalFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time2_0, time3_0))
 
         then:
         assert latestWindow != null;
@@ -101,7 +104,7 @@ class FlowSourceSpec extends Specification {
         createEvent(memberId, time2_5)
 
         when:
-        journalFlowSource.tick(time1_0, time2_0)
+        journalFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time1_0, time2_0))
 
         then:
         assert latestWindow != null;
@@ -121,7 +124,7 @@ class FlowSourceSpec extends Specification {
         createEvent(memberId, time2_5)
 
         when:
-        journalFlowSource.tick(time2_0, time3_0)
+        journalFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time2_0, time3_0))
 
         then:
         assert latestWindow != null;
@@ -139,8 +142,8 @@ class FlowSourceSpec extends Specification {
         createActivity(memberId, time1_0, time4_0)
 
         when:
-        activityFlowSource.tick(time1_0, time2_0)
-        activityFlowSource.tick(time2_0, time3_0)
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY,time1_0, time2_0))
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time2_0, time3_0))
 
         then:
         assert latestWindow != null;
@@ -161,8 +164,8 @@ class FlowSourceSpec extends Specification {
         createActivity(memberId, time1_0, time2_5)
 
         when:
-        activityFlowSource.tick(time1_0, time2_0)
-        activityFlowSource.tick(time2_0, time3_0)
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY,time1_0, time2_0))
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY,time2_0, time3_0))
 
         then:
         assert latestWindow != null;
@@ -183,8 +186,8 @@ class FlowSourceSpec extends Specification {
         createActivity(memberId, time2_5, time4_0)
 
         when:
-        activityFlowSource.tick(time1_0, time2_0)
-        activityFlowSource.tick(time2_0, time3_0)
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time1_0, time2_0))
+        activityFlowSource.tick(Metronome.createTick(ZoomLevel.TWENTY, time2_0, time3_0))
 
         then:
         assert latestWindow != null;

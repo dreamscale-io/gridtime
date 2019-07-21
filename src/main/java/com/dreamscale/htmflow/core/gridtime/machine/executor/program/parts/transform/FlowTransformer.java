@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform;
 
 
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 
@@ -22,10 +23,10 @@ public class FlowTransformer implements Flow {
         this.transformStrategies = Arrays.asList(transforms);
     }
 
-    public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) {
+    public void tick(Metronome.Tick coordinates) {
 
         for (TransformStrategy transform : transformStrategies) {
-            transform.transform(featurePool, featurePool.getActiveGridTile());
+            transform.transform(featurePool);
         }
     }
 

@@ -26,3 +26,6 @@ databaseChangeLog:
 
   - include:
         file: db/v004/create_grid_box_bucket_config.sql
+
+  - include:
+        file: db/v004/alter_grid_tile_idea_flow_rename.sql

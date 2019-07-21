@@ -13,7 +13,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.AnalyticsEngine;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.MusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.StartTag;
@@ -191,8 +191,8 @@ public class GridTile {
         analyticsEngine.runFeatureMetrics();
     }
 
-    public TileMetrics getIdeaFlowMetrics() {
-        return analyticsEngine.getTileMetrics();
+    public IdeaFlowMetrics getIdeaFlowMetrics() {
+        return analyticsEngine.getIdeaFlowMetrics();
     }
 
     public List<FeatureMetrics> getFeatureMetrics() {

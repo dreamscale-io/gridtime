@@ -12,12 +12,10 @@ import java.util.UUID;
 public class InstructionsBuilder {
     private final UUID torchieId;
     private final FeaturePool featurePool;
-    private final Metronome metronome;
 
-    public InstructionsBuilder(UUID torchieId, FeaturePool featurePool, Metronome metronome) {
+    public InstructionsBuilder(UUID torchieId, FeaturePool featurePool) {
         this.torchieId = torchieId;
         this.featurePool = featurePool;
-        this.metronome = metronome;
     }
 
     public TileInstructions gotoTile(ZoomLevel zoomLevel, LocalDateTime clockPosition) {
@@ -32,14 +30,6 @@ public class InstructionsBuilder {
 
     public TileInstructions playTile() {
         return new PlayTile(featurePool);
-    }
-
-    public TileInstructions haltMetronome() {
-        return new HaltMetronome(featurePool, metronome);
-    }
-
-    public TileInstructions resumeMetronome() {
-        return new ResumeMetronome(featurePool, metronome);
     }
 
     public TileInstructions nextTile() {

@@ -2,9 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetc
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureId;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,7 @@ public class TileSearchService {
         return null;
     }
 
-    List<TileMetrics> queryTiles(UUID torchieId, GeometryClock.GridTime queryByGridTime) {
+    List<IdeaFlowMetrics> queryTiles(UUID torchieId, GeometryClock.GridTime queryByGridTime) {
         //zoom in one level for the same feed
         return null;
     }

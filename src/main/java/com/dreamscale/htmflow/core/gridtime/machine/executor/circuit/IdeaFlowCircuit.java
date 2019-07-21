@@ -2,21 +2,24 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.NowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class IdeaFlowCircuit {
 
-    private final Metronome metronome;
     private final CircuitMonitor circuitMonitor;
 
+    private final Program program;
+    private Map<UUID, Program> parallelPrograms = DefaultCollections.map();
 
     private LinkedList<TileInstructions> instructionsToExecuteQueue;
     private LinkedList<TileInstructions> highPriorityInstructionQueue;
@@ -26,11 +29,12 @@ public class IdeaFlowCircuit {
     private final NowMetrics nowMetrics;
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+    private boolean isProgramHalted;
 
 
-    public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Metronome metronome) {
+    public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
         this.circuitMonitor = circuitMonitor;
-        this.metronome = metronome;
+        this.program = program;
 
         this.highPriorityInstructionQueue = DefaultCollections.queueList();
         this.instructionsToExecuteQueue = DefaultCollections.queueList();
@@ -43,6 +47,21 @@ public class IdeaFlowCircuit {
         //generates instructions for actively firing triggers
     }
 
+    public void haltProgram() {
+        this.isProgramHalted = true;
+    }
+
+    public void resumeProgram() {
+        isProgramHalted = false;
+    }
+
+    public void runParallelProgram(UUID programId, Program parallelProgram) {
+        parallelPrograms.put(programId, parallelProgram);
+    }
+
+    public void removeParallelProgram(UUID programId) {
+        parallelPrograms.remove(programId);
+    }
 
     public TileInstructions getNextInstruction() {
 
@@ -52,11 +71,18 @@ public class IdeaFlowCircuit {
             nextInstructions = highPriorityInstructionQueue.removeFirst();
         } else if (instructionsToExecuteQueue.size() > 0) {
             nextInstructions = instructionsToExecuteQueue.removeFirst();
-        } else if (metronome.canTick()) {
-            instructionsToExecuteQueue.addAll(metronome.tick());
+        } else if (!isProgramHalted && !program.isDone()) {
+            program.tick();
+
+            instructionsToExecuteQueue.addAll(program.getInstructionsAtActiveTick());
+
+            for (Program parallelProgram : parallelPrograms.values()) {
+                instructionsToExecuteQueue.addAll(parallelProgram.getInstructionsAtTick(program.getActiveTick()));
+            }
+
             nextInstructions = instructionsToExecuteQueue.removeFirst();
 
-            circuitMonitor.updateTickPosition(metronome.getTickPosition());
+            circuitMonitor.updateTickPosition(program.getActiveTick().getFrom().toDisplayString());
         } else {
             fireProgramDoneTriggers();
         }
@@ -85,7 +111,7 @@ public class IdeaFlowCircuit {
 
         @Override
         public void notifyWhenDone(TileInstructions finishedInstruction, Results results) {
-            TileMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
+            IdeaFlowMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
 
             if (ideaFlowTile != null) {
 
@@ -100,7 +126,7 @@ public class IdeaFlowCircuit {
         }
     }
 
-    private TileMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
+    private IdeaFlowMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();
 
         if (output != null) {

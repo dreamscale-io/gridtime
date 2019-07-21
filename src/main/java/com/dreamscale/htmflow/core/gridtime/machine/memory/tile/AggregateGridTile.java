@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.Fea
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateMusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.AnalyticsEngine;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,7 +51,7 @@ public class AggregateGridTile {
 
     }
 
-    public void loadTileMetrics(LocalDateTime moment, TileMetrics metrics) {
+    public void loadTileMetrics(LocalDateTime moment, IdeaFlowMetrics metrics) {
         musicGrid.loadTileMetrics(moment, metrics);
     }
 

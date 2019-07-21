@@ -73,14 +73,12 @@ public class TorchieCmd {
         return (MusicGridResults) instructions.getOutputResults();
     }
 
-    public void haltMetronome() {
-        TileInstructions instructions = torchie.getInstructionsBuilder().haltMetronome();
-        runInstructionAndWaitTilDone(instructions);
+    public void haltProgram() {
+        torchie.haltProgram();
     }
 
-    public void resumeMetronome() {
-        TileInstructions instructions = torchie.getInstructionsBuilder().resumeMetronome();
-        runInstructionAndWaitTilDone(instructions);
+    public void resumeProgram() {
+        torchie.resumeProgram();
     }
 
     private void runInstructionAndWaitTilDone(TileInstructions instructions) {

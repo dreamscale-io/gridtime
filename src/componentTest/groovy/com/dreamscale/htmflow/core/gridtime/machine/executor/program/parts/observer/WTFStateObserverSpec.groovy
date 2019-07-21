@@ -10,6 +10,8 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
@@ -22,18 +24,17 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class WTFStateObserverSpec extends Specification {
 
     WTFStateObserver wtfStateObserver
-    GridTile gridTile
     GeometryClock clock
     UUID torchieId
-    FeatureCache featureCache
+    MemoryOnlyFeaturePool pool
 
     def setup() {
 
         clock = new GeometryClock(LocalDateTime.now())
         wtfStateObserver = new WTFStateObserver()
         torchieId = UUID.randomUUID()
-        featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
+        pool = new MemoryOnlyFeaturePool(torchieId)
+        pool.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create wtf circle states"() {
@@ -58,10 +59,10 @@ public class WTFStateObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        wtfStateObserver.see(window, gridTile)
-        gridTile.finishAfterLoad()
+        wtfStateObserver.see(window, pool)
+        pool.getActiveGridTile().finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.IdeaFlow)
+        MusicGridResults tileOutput = pool.getActiveGridTile().playTrack(TrackSetKey.IdeaFlow)
         print tileOutput
 
         then:

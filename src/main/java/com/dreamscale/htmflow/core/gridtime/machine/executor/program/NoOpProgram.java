@@ -1,41 +1,39 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class NoOpProgram implements MetronomeProgram {
+public class NoOpProgram implements Program {
 
-    private final FeaturePool featurePool;
 
-    public NoOpProgram(FeaturePool featurePool) {
-        this.featurePool = featurePool;
+    @Override
+    public void tick() {
+
     }
 
     @Override
-    public LocalDateTime getStartPosition() {
-        return LocalDateTime.now();
+    public Metronome.Tick getActiveTick() {
+        return null;
     }
 
     @Override
-    public boolean canTick(LocalDateTime nextPosition) {
+    public List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick) {
+        return DefaultCollections.emptyList();
+    }
+
+    @Override
+    public List<TileInstructions> getInstructionsAtActiveTick() {
+        return DefaultCollections.emptyList();
+    }
+
+    @Override
+    public boolean isDone() {
         return false;
-    }
-
-    @Override
-    public void gotoPosition(GeometryClock.GridTime coords) {
-        featurePool.gotoPosition(coords);
-    }
-
-    @Override
-    public TileInstructions baseTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
-        return null;
-    }
-
-    @Override
-    public TileInstructions aggregateTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
-        return null;
     }
 }

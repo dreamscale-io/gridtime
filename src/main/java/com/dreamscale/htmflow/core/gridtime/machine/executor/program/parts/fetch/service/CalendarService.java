@@ -3,8 +3,11 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetc
 import com.dreamscale.htmflow.core.domain.time.*;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class CalendarService {
@@ -21,6 +24,12 @@ public class CalendarService {
     @Autowired
     GridTimeWeeksRepository gridTimeWeeksRepository;
 
+    @Autowired
+    TimeService timeService;
+
+    public LocalDateTime getNow() {
+        return LocalDateTime.now();
+    }
 
     public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
         Long tileSequence = null;

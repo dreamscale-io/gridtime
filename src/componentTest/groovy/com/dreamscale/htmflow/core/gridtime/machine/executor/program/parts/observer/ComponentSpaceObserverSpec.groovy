@@ -11,6 +11,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
@@ -23,18 +24,18 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ComponentSpaceObserverSpec extends Specification {
 
     ComponentSpaceObserver componentSpaceObserver
-    GridTile gridTile
     GeometryClock clock
     UUID torchieId
-    FeatureCache featureCache
+    MemoryOnlyFeaturePool pool
 
     def setup() {
 
         clock = new GeometryClock(LocalDateTime.now())
         componentSpaceObserver = new ComponentSpaceObserver()
         torchieId = UUID.randomUUID()
-        featureCache = new FeatureCache()
-        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
+
+        pool = new MemoryOnlyFeaturePool(UUID.randomUUID())
+        pool.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create Location traversals"() {
@@ -53,10 +54,10 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(window, gridTile)
-        gridTile.finishAfterLoad()
+        componentSpaceObserver.see(window, pool)
+        pool.getActiveGridTile().finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.Navigations)
+        MusicGridResults tileOutput = pool.getActiveGridTile().playTrack(TrackSetKey.Navigations)
         print tileOutput
 
         then:

@@ -16,7 +16,7 @@ public interface FeaturePool {
 
     String getActiveGridTime();
 
-    void nextGridTile(GeometryClock.GridTime toCoordPosition);
+    void nextGridTile();
 
     <T extends Flowable> Feed<T> registerFeed(UUID memberId, FetchStrategy<T> fetchStrategy);
 

@@ -1,20 +1,15 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.CalendarGeneratorProgram;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.PullChainProgram;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.*;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.BoxConfigurationLoaderService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureResolverService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.TileSearchService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.box.TeamBoxConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,16 +22,7 @@ import java.util.UUID;
 public class TorchieFactory {
 
     @Autowired
-    private FetchStrategyFactory fetchStrategyFactory;
-
-    @Autowired
-    private FlowObserverFactory flowObserverFactory;
-
-    @Autowired
-    private FlowTransformFactory flowTransformFactory;
-
-    @Autowired
-    private SinkStrategyFactory sinkStrategyFactory;
+    private ProgramFactory programFactory;
 
     @Autowired
     private FeatureResolverService featureResolverService;
@@ -44,8 +30,6 @@ public class TorchieFactory {
     @Autowired
     private TileSearchService tileSearchService;
 
-    @Autowired
-    private CalendarService calendarService;
 
     @Autowired
     private BoxConfigurationLoaderService boxConfigurationLoaderService;
@@ -53,6 +37,50 @@ public class TorchieFactory {
     private static final int MAX_TEAMS = 5;
 
     private Map<UUID, FeatureCache> teamCacheMap = DefaultCollections.lruMap(MAX_TEAMS);
+
+    private Map<UUID, AggregatingWire> teamWiresMap = DefaultCollections.map();
+
+
+    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
+        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+
+        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, memberId,
+                featureCache, featureResolverService, tileSearchService);
+
+        //stream data into the tiles
+        Program program = programFactory.createBaseTileGeneratorProgram(memberId, featurePool, startingPosition);
+
+        return new Torchie(memberId, featurePool, program);
+
+    }
+
+    public Torchie wireUpTeamTorchie(UUID teamId) {
+        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+
+        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, teamId,
+                featureCache, featureResolverService, tileSearchService);
+
+        AggregatingWire teamWire = findOrCreateWire(teamId);
+
+        return null;
+//        AggregateByTeamProgram aggregateWiresProgram = programFactory.createAggregateWiresProgram(teamId, featurePool, teamWire);
+//
+//        return new Torchie(teamId, featurePool, aggregateWiresProgram);
+        //teamTorchie is going to listen to queue of team events,
+
+    }
+
+    //wire up calendar Torchie, does a years worth of tiles ahead, then stops.
+
+    public Torchie wireUpCalendarTorchie(int maxTiles) {
+
+        UUID torchieId = UUID.randomUUID();
+        FeaturePool featurePool = new MemoryOnlyFeaturePool(torchieId);
+
+        CalendarGeneratorProgram program = programFactory.createCalendarGenerator(maxTiles);
+
+        return new Torchie(torchieId, featurePool, program);
+    }
 
     private FeatureCache findOrCreateFeatureCache(UUID teamId) {
         FeatureCache featureCache = teamCacheMap.get(teamId);
@@ -65,64 +93,16 @@ public class TorchieFactory {
         return featureCache;
     }
 
-    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
-        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
-
-        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, memberId,
-                featureCache, featureResolverService, tileSearchService);
-
-        //stream data into the tiles
-        PullChainProgram job = createPullChainJob(memberId, featurePool, startingPosition);
-
-        return new Torchie(memberId, featurePool, job);
-
+    private AggregatingWire findOrCreateWire(UUID teamId) {
+        AggregatingWire teamWire = teamWiresMap.get(teamId);
+        if (teamWire == null) {
+            teamWire = new AggregatingWire();
+            teamWiresMap.put(teamId, teamWire);
+        }
+        return teamWire;
     }
 
-    public Torchie wireUpCalendarTorchie(int tilesToGenerate) {
 
-        UUID torchieId = UUID.randomUUID();
-
-        FeaturePool featurePool = new MemoryOnlyFeaturePool(torchieId);
-        CalendarGeneratorProgram job = new CalendarGeneratorProgram(tilesToGenerate, calendarService);
-
-        return new Torchie(torchieId, featurePool, job);
-
-    }
-
-    private PullChainProgram createPullChainJob(UUID memberId, PerProcessFeaturePool featurePool, LocalDateTime startingPosition) {
-        PullChainProgram job = new PullChainProgram(memberId, featurePool, startingPosition);
-
-        job.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.JOURNAL_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER));
-
-        job.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER));
-
-        job.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER));
-
-        job.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
-                flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER));
-
-        //transformation only, with no new data
-
-        job.addFlowTransformerToPullChain(
-                flowTransformFactory.get(FlowTransformFactory.TransformType.RESOLVE_FEATURES_TRANSFORM));
-
-        //save off the data in the tiles to permanent stores
-
-        job.addFlowSinkToPullChain(
-                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES),
-                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
-
-        return job;
-    }
 
 
 }

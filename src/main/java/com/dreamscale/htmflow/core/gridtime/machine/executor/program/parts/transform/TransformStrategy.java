@@ -5,5 +5,5 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 
 public interface TransformStrategy {
 
-    void transform(FeaturePool featurePool, GridTile gridTile);
+    void transform(FeaturePool featurePool);
 }

@@ -9,7 +9,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.glyph.GlyphReferences;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.FeatureTotals;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
@@ -46,7 +46,7 @@ public class AggregateMusicGrid implements IMusicGrid {
         this.featureTotals = new FeatureTotals();
     }
 
-    public void loadTileMetrics(LocalDateTime moment, TileMetrics metrics) {
+    public void loadTileMetrics(LocalDateTime moment, IdeaFlowMetrics metrics) {
 
     }
 

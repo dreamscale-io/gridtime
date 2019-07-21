@@ -3,9 +3,10 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink
 import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +29,12 @@ public class SaveToPostgresSink implements SinkStrategy {
     GridMarkerRepository gridMarkerRepository;
 
     @Autowired
-    GridTileIdeaFlowRepository gridTileIdeaFlowRepository;
+    GridMetricsIdeaFlowRepository gridMetricsIdeaFlowRepository;
 
     @Override
-    public void save(UUID torchieId, GridTile gridTile) {
+    public void save(UUID torchieId, FeaturePool featurePool) {
+
+        GridTile gridTile = featurePool.getActiveGridTile();
 
         //first thing I need to do, is save the wtf banded row.
 
@@ -61,10 +64,10 @@ public class SaveToPostgresSink implements SinkStrategy {
         gridMarkerRepository.save(markerEntities);
 
 
-        TileMetrics tileMetrics = gridTile.getIdeaFlowMetrics();
+        IdeaFlowMetrics ideaFlowMetrics = gridTile.getIdeaFlowMetrics();
 
-        GridTileIdeaFlowEntity gridTileIdeaFlowEntity = createGridTileIdeaFlowEntity(torchieId, tileSeq, tileMetrics);
-        gridTileIdeaFlowRepository.save(gridTileIdeaFlowEntity);
+        GridMetricsIdeaFlowEntity gridMetricsIdeaFlowEntity = createGridMetricsIdeaFlowEntity(torchieId, tileSeq, ideaFlowMetrics);
+        gridMetricsIdeaFlowRepository.save(gridMetricsIdeaFlowEntity);
 
         //TILE DICTIONARY...
 
@@ -89,20 +92,20 @@ public class SaveToPostgresSink implements SinkStrategy {
         //TODO aggregate up
     }
 
-    private GridTileIdeaFlowEntity createGridTileIdeaFlowEntity(UUID torchieId, Long tileSeq, TileMetrics tileMetrics) {
+    private GridMetricsIdeaFlowEntity createGridMetricsIdeaFlowEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
 
-        GridTileIdeaFlowEntity ideaFlowEntity = new GridTileIdeaFlowEntity();
+        GridMetricsIdeaFlowEntity ideaFlowEntity = new GridMetricsIdeaFlowEntity();
         ideaFlowEntity.setId(UUID.randomUUID());
         ideaFlowEntity.setTorchieId(torchieId);
         ideaFlowEntity.setTileSeq(tileSeq);
-        ideaFlowEntity.setZoomLevel(tileMetrics.getZoomLevel());
-        ideaFlowEntity.setLastIdeaFlowState(tileMetrics.getLastIdeaFlowState().getFeatureId());
-        ideaFlowEntity.setAvgFlame(tileMetrics.getAvgFlame());
-        ideaFlowEntity.setTimeInTile(tileMetrics.getTimeInTile().getSeconds());
-        ideaFlowEntity.setPercentWtf(tileMetrics.getPercentWtf());
-        ideaFlowEntity.setPercentLearning(tileMetrics.getPercentLearning());
-        ideaFlowEntity.setPercentProgress(tileMetrics.getPercentProgress());
-        ideaFlowEntity.setPercentPairing(tileMetrics.getPercentPairing());
+        ideaFlowEntity.setZoomLevel(ideaFlowMetrics.getZoomLevel());
+        ideaFlowEntity.setLastIdeaFlowState(ideaFlowMetrics.getLastIdeaFlowState().getFeatureId());
+        ideaFlowEntity.setAvgFlame(ideaFlowMetrics.getAvgFlame());
+        ideaFlowEntity.setTimeInTile(ideaFlowMetrics.getTimeInTile().getSeconds());
+        ideaFlowEntity.setPercentWtf(ideaFlowMetrics.getPercentWtf());
+        ideaFlowEntity.setPercentLearning(ideaFlowMetrics.getPercentLearning());
+        ideaFlowEntity.setPercentProgress(ideaFlowMetrics.getPercentProgress());
+        ideaFlowEntity.setPercentPairing(ideaFlowMetrics.getPercentPairing());
         return ideaFlowEntity;
     }
 

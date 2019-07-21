@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import spock.lang.Specification;
 
 @ComponentTest
-class CalendarGeneratorJobSpec extends Specification {
+class CalendarGeneratorProgramSpec extends Specification {
 
     @Autowired
     TorchieFactory torchieFactory

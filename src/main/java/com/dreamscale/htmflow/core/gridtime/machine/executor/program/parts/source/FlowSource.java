@@ -1,10 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source;
 
 
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 
@@ -30,7 +31,10 @@ public class FlowSource<T extends Flowable> implements Flow {
         }
     }
 
-    public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) throws InterruptedException {
+    public void tick(Metronome.Tick tick) {
+
+        LocalDateTime fromClockPosition = tick.getFrom().getClockTime();
+        LocalDateTime toClockPosition = tick.getTo().getClockTime();
 
         sourceFeed.pullMoreIfCapacityAvailable(fromClockPosition);
 
@@ -52,7 +56,7 @@ public class FlowSource<T extends Flowable> implements Flow {
     private void observeFlowables(Window<T> window) {
         for (FlowObserver<T> observer : flowObservers) {
 
-            observer.see(window, featurePool.getActiveGridTile());
+            observer.see(window, featurePool);
         }
     }
 

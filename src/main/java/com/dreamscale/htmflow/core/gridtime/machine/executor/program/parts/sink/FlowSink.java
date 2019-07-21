@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink;
 
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 
@@ -27,10 +28,10 @@ public class FlowSink implements Flow {
     }
 
     @Override
-    public void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) throws InterruptedException {
+    public void tick(Metronome.Tick coordinates) throws InterruptedException {
 
         for (SinkStrategy sink : sinkStrategies) {
-            sink.save(memberId, featurePool.getActiveGridTile());
+            sink.save(memberId, featurePool);
         }
     }
 

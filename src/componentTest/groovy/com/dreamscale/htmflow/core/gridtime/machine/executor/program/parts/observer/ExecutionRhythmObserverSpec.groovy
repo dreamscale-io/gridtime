@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
@@ -19,12 +20,12 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 public class ExecutionRhythmObserverSpec extends Specification {
 
     ExecutionRhythmObserver executionRhythmObserver
-    GridTile gridTile
     GeometryClock clock
     LocalDateTime time1
     LocalDateTime time2
     LocalDateTime time3
     LocalDateTime time4
+    MemoryOnlyFeaturePool pool
 
     def setup() {
 
@@ -37,7 +38,9 @@ public class ExecutionRhythmObserverSpec extends Specification {
 
 
         executionRhythmObserver = new ExecutionRhythmObserver()
-        gridTile = new GridTile(UUID.randomUUID(), clock.getActiveGridTime(), new FeatureCache())
+
+        pool = new MemoryOnlyFeaturePool(UUID.randomUUID())
+        pool.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create red/green cycles from execution activity"() {
@@ -52,8 +55,8 @@ public class ExecutionRhythmObserverSpec extends Specification {
         window.addAll(flowables)
 
         when:
-        executionRhythmObserver.see(window, gridTile)
-        MusicGridResults results = gridTile.playTrack(TrackSetKey.Executions);
+        executionRhythmObserver.see(window, pool)
+        MusicGridResults results = pool.getActiveGridTile().playTrack(TrackSetKey.Executions);
         println results
 
         then:

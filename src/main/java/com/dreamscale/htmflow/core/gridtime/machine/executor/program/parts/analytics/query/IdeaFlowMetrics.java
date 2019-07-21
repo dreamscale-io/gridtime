@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 @Getter
 @Setter
-public class TileMetrics implements MetricQuery {
+public class IdeaFlowMetrics implements MetricQuery {
 
     private ZoomLevel zoomLevel;
     private IdeaFlowStateReference lastIdeaFlowState;
@@ -38,7 +38,7 @@ public class TileMetrics implements MetricQuery {
     private Double percentPairing;
 
 
-    public static TileMetrics queryFrom(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
+    public static IdeaFlowMetrics queryFrom(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
 
 
         Duration totalDuration = selectTotalDuration(musicClock);
@@ -48,7 +48,7 @@ public class TileMetrics implements MetricQuery {
         PercentMetric percentLearningAndProgressMetric = selectPercentLearningAndProgressNotInWtf(featureCache, musicClock, musicGrid);
         PercentMetric percentPairingMetric = selectPercentPairing(musicGrid);
 
-        TileMetrics metrics = new TileMetrics();
+        IdeaFlowMetrics metrics = new IdeaFlowMetrics();
 
         metrics.zoomLevel = musicClock.getZoomLevel();
         metrics.lastIdeaFlowState = selectLastIdeaFlowState(featureCache, musicGrid);

@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.obse
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.member.json.Member;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.AuthorsDetails;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry;
@@ -19,8 +20,9 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
+    public void see(Window<FlowableJournalEntry> window, FeaturePool featurePool) {
 
+        GridTile gridTile = featurePool.getActiveGridTile();
 
         for (Flowable flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());

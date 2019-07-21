@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 public class ResolveFeaturesTransform implements TransformStrategy {
 
     @Override
-    public void transform(FeaturePool featurePool, GridTile gridTile) {
+    public void transform(FeaturePool featurePool) {
 
-        gridTile.finishAfterLoad();
+        featurePool.getActiveGridTile().finishAfterLoad();
         featurePool.resolveReferences();
 
     }

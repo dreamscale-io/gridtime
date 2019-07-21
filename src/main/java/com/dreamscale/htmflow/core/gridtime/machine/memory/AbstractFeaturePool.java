@@ -46,20 +46,14 @@ public abstract class AbstractFeaturePool implements FeaturePool {
     }
 
     @Override
-    public void nextGridTile(GeometryClock.GridTime toCoordPosition) {
+    public void nextGridTile() {
         GeometryClock.GridTime nextGridTime = activeGridGridTime.panRight();
 
-        validateCoordsMatchAndResetTileIfNeeded(toCoordPosition, nextGridTime);
-
         if (activeGridTile == null) {
-            CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridGridTime.panLeft());
-
-            activeGridTile = new GridTile(torchieId, activeGridGridTime, featureCache);
-            activeGridTile.initFromCarryOverContext(carryOverContext);
+            gotoPosition(nextGridTime);
         } else {
 
             GridTile nextGridTile = new GridTile(torchieId, nextGridTime, featureCache);
-
             nextGridTile.initFromCarryOverContext(activeGridTile.getCarryOverContext());
 
             activeGridTile = nextGridTile;

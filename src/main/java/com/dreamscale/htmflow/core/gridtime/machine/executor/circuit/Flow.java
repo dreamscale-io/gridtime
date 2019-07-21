@@ -1,9 +1,9 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
 
-import java.time.LocalDateTime;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 
 public interface Flow {
 
-    void tick(LocalDateTime fromClockPosition, LocalDateTime toClockPosition) throws InterruptedException;
+    void tick(Metronome.Tick coordinates) throws InterruptedException;
 
 }

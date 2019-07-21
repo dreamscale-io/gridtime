@@ -46,13 +46,13 @@ class TorchieCmdSpec extends Specification {
         torchieId = UUID.randomUUID();
         featurePool = new MemoryOnlyFeaturePool(torchieId);
 
-        torchie = new Torchie(torchieId, featurePool, new NoOpProgram(featurePool));
+        torchie = new Torchie(torchieId, featurePool, new NoOpProgram());
         System.out.println(clockStart);
         
         torchieExecutor = new TorchiePoolExecutor(1);
 
         cmd = new TorchieCmd(torchieExecutor, torchie);
-        cmd.haltMetronome()
+        cmd.haltProgram()
        
     }
 

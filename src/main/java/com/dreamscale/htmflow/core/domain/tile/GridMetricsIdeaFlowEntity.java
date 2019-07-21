@@ -9,13 +9,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.UUID;
 
-@Entity(name = "grid_tile_idea_flow")
+@Entity(name = "grid_metrics_idea_flow")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridTileIdeaFlowEntity {
+public class GridMetricsIdeaFlowEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")

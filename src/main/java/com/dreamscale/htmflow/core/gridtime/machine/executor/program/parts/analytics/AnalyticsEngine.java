@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.TileMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class AnalyticsEngine {
     private final MusicClock musicClock;
     private final IMusicGrid musicGrid;
 
-    TileMetrics tileMetrics;
+    IdeaFlowMetrics ideaFlowMetrics;
     List<FeatureMetrics> featureMetrics;
 
     public AnalyticsEngine(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
@@ -24,7 +24,7 @@ public class AnalyticsEngine {
     }
 
     public void runIdeaFlowMetrics() {
-        tileMetrics = TileMetrics.queryFrom(featureCache, musicClock, musicGrid);
+        ideaFlowMetrics = IdeaFlowMetrics.queryFrom(featureCache, musicClock, musicGrid);
     }
 
 
@@ -34,8 +34,8 @@ public class AnalyticsEngine {
         featureMetrics = FeatureMetrics.queryFrom(featureCache, musicClock, musicGrid);
     }
 
-    public TileMetrics getTileMetrics() {
-        return tileMetrics;
+    public IdeaFlowMetrics getIdeaFlowMetrics() {
+        return ideaFlowMetrics;
     }
 
     public List<FeatureMetrics> getFeatureMetrics() {
