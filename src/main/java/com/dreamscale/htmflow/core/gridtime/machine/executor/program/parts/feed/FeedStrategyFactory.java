@@ -1,26 +1,26 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FetchStrategyFactory {
+public class FeedStrategyFactory {
 
     @Autowired
-    FileActivityFetcher fileActivityFeedStrategy;
+    FileActivityFeedStrategy fileActivityFeedStrategy;
 
     @Autowired
-    JournalFetcher journalFeedStrategy;
+    JournalFeedStrategy journalFeedStrategy;
 
     @Autowired
-    ExecutionActivityFetcher executionActivityFeedStrategy;
+    ExecutionActivityFeedStrategy executionActivityFeedStrategy;
 
     @Autowired
-    CircleMessagesFetcher circleMessagesFetcher;
+    CircleMessagesFeedStrategy circleMessagesFetcher;
 
 
 
-    public FetchStrategy get(FeedType feedType) {
+    public FeedStrategy get(FeedType feedType) {
         switch (feedType) {
             case FILE_ACTIVITY_FEED:
                 return fileActivityFeedStrategy;

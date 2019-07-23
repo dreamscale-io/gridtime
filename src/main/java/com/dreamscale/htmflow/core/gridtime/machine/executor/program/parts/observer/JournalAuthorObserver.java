@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sourc
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.AuthorsDetails;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 

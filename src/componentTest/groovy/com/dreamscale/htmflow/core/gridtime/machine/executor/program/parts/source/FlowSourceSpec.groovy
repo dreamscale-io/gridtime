@@ -7,12 +7,11 @@ import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FileActivityFetcher
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.JournalFetcher
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FileActivityFeedStrategy
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.JournalFeedStrategy
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -24,10 +23,10 @@ import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 class FlowSourceSpec extends Specification {
 
     @Autowired
-    JournalFetcher journalFetcher
+    JournalFeedStrategy journalFetcher
 
    @Autowired
-   FileActivityFetcher fileActivityFetcher
+   FileActivityFeedStrategy fileActivityFetcher
 
     UUID memberId
     FeaturePool featurePool

@@ -1,16 +1,14 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
 import com.dreamscale.htmflow.ComponentTest
-import com.dreamscale.htmflow.core.domain.time.GridTimeDayPartsEntity
-import com.dreamscale.htmflow.core.domain.time.GridTimeDayPartsRepository
-import com.dreamscale.htmflow.core.domain.time.GridTimeDaysEntity
-import com.dreamscale.htmflow.core.domain.time.GridTimeDaysRepository
-import com.dreamscale.htmflow.core.domain.time.GridTimeTwentiesEntity
-import com.dreamscale.htmflow.core.domain.time.GridTimeTwentiesRepository
+import com.dreamscale.htmflow.core.domain.time.GridTimeCalendarEntity
+import com.dreamscale.htmflow.core.domain.time.GridTimeCalendarRepository
+
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.TorchieCmd
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import spock.lang.Specification;
 
@@ -22,13 +20,7 @@ class CalendarGeneratorProgramSpec extends Specification {
     TorchiePoolExecutor torchieExecutor
 
     @Autowired
-    GridTimeTwentiesRepository gridTimeTwentiesRepository
-
-    @Autowired
-    GridTimeDayPartsRepository gridTimeDayPartsRepository
-
-    @Autowired
-    GridTimeDaysRepository gridTimeDaysRepository
+    GridTimeCalendarRepository gridTimeCalendarRepository
 
     def setup() {
         torchieExecutor = new TorchiePoolExecutor(1);
@@ -42,11 +34,12 @@ class CalendarGeneratorProgramSpec extends Specification {
         when:
         torchieCmd.runProgram()
 
-        Iterable<GridTimeTwentiesEntity> twenties = gridTimeTwentiesRepository.findAll()
+        List<GridTimeCalendarEntity> twenties = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.TWENTY)
 
-        Iterable<GridTimeDayPartsEntity>  dayParts = gridTimeDayPartsRepository.findAll()
+        List<GridTimeCalendarEntity> dayParts = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.DAY_PART)
 
-        Iterable<GridTimeDaysEntity> days = gridTimeDaysRepository.findAll()
+        List<GridTimeCalendarEntity> days = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.DAY)
+
 
         then:
         assert twenties != null

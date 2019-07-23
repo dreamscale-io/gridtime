@@ -1,9 +1,9 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed;
 
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableFlowActivity;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableFlowActivity;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class ExecutionActivityFetcher extends FetchStrategy {
+public class FileActivityFeedStrategy extends FeedStrategy {
 
     @Autowired
     FlowActivityRepository flowActivityRepository;
@@ -27,7 +27,7 @@ public class ExecutionActivityFetcher extends FetchStrategy {
         Long sequence = bookmark.getSequenceNumber();
 
         List<FlowActivityEntity> flowActivityEntities =
-                flowActivityRepository.findExecutionActivityByMemberIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), sequence, fetchSize);
+                flowActivityRepository.findFileActivityByMemberIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), sequence, fetchSize);
 
         List<Flowable> flowables = convertToFlowables(flowActivityEntities);
 

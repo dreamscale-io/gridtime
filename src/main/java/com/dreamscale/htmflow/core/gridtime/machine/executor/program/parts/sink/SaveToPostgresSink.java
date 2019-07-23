@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink
 
 import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;

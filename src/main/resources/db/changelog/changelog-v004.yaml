@@ -29,3 +29,12 @@ databaseChangeLog:
 
   - include:
         file: db/v004/alter_grid_tile_idea_flow_rename.sql
+
+  - include:
+        file: db/v004/create_grid_time_calendar_all.sql
+
+  - include:
+        file: db/v004/create_view_metrics_idea_flow.sql
+
+  - include:
+        file: db/v004/drop_grid_time_old_calendar.sql

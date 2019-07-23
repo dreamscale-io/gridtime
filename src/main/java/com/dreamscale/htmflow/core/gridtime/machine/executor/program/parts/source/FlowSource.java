@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sour
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
@@ -20,9 +20,9 @@ public class FlowSource<T extends Flowable> implements Flow {
     private final FeaturePool featurePool;
     private final Feed<T> sourceFeed;
 
-    public FlowSource(UUID memberId, FeaturePool featurePool, FetchStrategy<T> fetchStrategy, FlowObserver<T>... observers) {
+    public FlowSource(UUID memberId, FeaturePool featurePool, FeedStrategy<T> feedStrategy, FlowObserver<T>... observers) {
         this.featurePool = featurePool;
-        this.sourceFeed = featurePool.registerFeed(memberId, fetchStrategy);
+        this.sourceFeed = featurePool.registerFeed(memberId, feedStrategy);
 
         this.flowObservers = new ArrayList<>();
 

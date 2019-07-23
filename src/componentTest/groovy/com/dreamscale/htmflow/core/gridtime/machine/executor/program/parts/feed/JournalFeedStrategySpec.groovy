@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.journal.IntentionEntity
@@ -13,10 +13,10 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class JournalFetcherSpec extends Specification{
+class JournalFeedStrategySpec extends Specification{
 
     @Autowired
-    JournalFetcher journalFetcher
+    JournalFeedStrategy journalFetcher
 
     def "should fetch batches based on time after"() {
         given:

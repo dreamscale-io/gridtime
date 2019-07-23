@@ -2,8 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory.feed;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Observable;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.Batch;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.Batch;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
 
@@ -18,16 +18,16 @@ public class Feed<T extends Flowable> implements Observable {
 
     private final LinkedList<T> inputQueue;
     private final UUID memberId;
-    private final FetchStrategy<T> fetchStrategy;
+    private final FeedStrategy<T> feedStrategy;
     private final String name;
 
     private Bookmark fetchLocationBookmark;
 
-    public Feed(String name, UUID memberId, FetchStrategy<T> fetchStrategy) {
+    public Feed(String name, UUID memberId, FeedStrategy<T> feedStrategy) {
         this.name = name;
         this.inputQueue = DefaultCollections.queueList();
         this.memberId = memberId;
-        this.fetchStrategy = fetchStrategy;
+        this.feedStrategy = feedStrategy;
     }
 
     public int pullMoreIfCapacityAvailable(LocalDateTime currentWindowPosition) {
@@ -36,7 +36,7 @@ public class Feed<T extends Flowable> implements Observable {
         int recordsPulled = 0;
 
         if (iAmReadyForMore()) {
-            Batch<T> batch = fetchStrategy.fetchNextBatch(memberId, this.fetchLocationBookmark, FETCH_SIZE);
+            Batch<T> batch = feedStrategy.fetchNextBatch(memberId, this.fetchLocationBookmark, FETCH_SIZE);
             inputQueue.addAll(batch.getFlowables());
             if (batch.size() > 0) {
                 this.fetchLocationBookmark = batch.getNextBookmark();

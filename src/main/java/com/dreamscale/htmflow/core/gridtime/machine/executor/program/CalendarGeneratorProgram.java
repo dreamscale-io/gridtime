@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateCalendarTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

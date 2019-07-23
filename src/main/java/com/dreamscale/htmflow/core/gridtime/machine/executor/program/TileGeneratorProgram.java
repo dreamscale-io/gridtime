@@ -6,7 +6,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateAggregateUpTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateBaseTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategy;
@@ -83,8 +83,8 @@ public class TileGeneratorProgram implements Program {
         return false;
     }
 
-    public void addFlowSourceToPullChain(FetchStrategy fetchStrategy, FlowObserver... observers) {
-        pullChain.add(new FlowSource(torchieId, featurePool,fetchStrategy, observers));
+    public void addFlowSourceToPullChain(FeedStrategy feedStrategy, FlowObserver... observers) {
+        pullChain.add(new FlowSource(torchieId, featurePool, feedStrategy, observers));
     }
 
     public void addFlowTransformerToPullChain(TransformStrategy... transforms) {

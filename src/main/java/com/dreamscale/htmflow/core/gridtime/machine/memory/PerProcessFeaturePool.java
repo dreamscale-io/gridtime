@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureResolverService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.TileSearchService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.TileSearchService;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 
 import java.util.Set;

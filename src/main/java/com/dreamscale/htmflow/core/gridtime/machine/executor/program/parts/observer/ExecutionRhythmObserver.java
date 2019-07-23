@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sourc
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.ExecutionEvent;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableFlowActivity;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableFlowActivity;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 
 /**

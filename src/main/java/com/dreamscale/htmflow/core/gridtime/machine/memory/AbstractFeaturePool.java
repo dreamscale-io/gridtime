@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
@@ -61,9 +61,9 @@ public abstract class AbstractFeaturePool implements FeaturePool {
         }
     }
 
-    public <T extends Flowable> Feed<T> registerFeed(UUID memberId, FetchStrategy<T> fetchStrategy) {
-        String name = fetchStrategy.getClass().getSimpleName();
-        Feed<T> feed = new Feed<>(name, memberId, fetchStrategy);
+    public <T extends Flowable> Feed<T> registerFeed(UUID memberId, FeedStrategy<T> feedStrategy) {
+        String name = feedStrategy.getClass().getSimpleName();
+        Feed<T> feed = new Feed<>(name, memberId, feedStrategy);
         sourceFeeds.put(name, feed);
 
         return feed;

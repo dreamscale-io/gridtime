@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.obse
 
 import com.dreamscale.htmflow.core.domain.flow.FinishStatus;
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.WorkContextEvent;

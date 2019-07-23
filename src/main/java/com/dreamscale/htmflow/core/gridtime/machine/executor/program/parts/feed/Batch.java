@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed;
 
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;

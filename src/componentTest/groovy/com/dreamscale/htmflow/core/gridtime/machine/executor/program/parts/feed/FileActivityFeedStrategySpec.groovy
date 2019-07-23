@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.flow.FlowActivityEntity
@@ -11,10 +11,10 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class FileActivityFetcherSpec extends Specification{
+class FileActivityFeedStrategySpec extends Specification{
 
     @Autowired
-    FileActivityFetcher fileActivityFetcher
+    FileActivityFeedStrategy fileActivityFetcher
 
     def "should fetch batches based on time and sequence"() {
         given:

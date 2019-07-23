@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer;
 
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;

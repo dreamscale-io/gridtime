@@ -1,9 +1,9 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed;
 
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableCircleMessageEvent;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class CircleMessagesFetcher extends FetchStrategy {
+public class CircleMessagesFeedStrategy extends FeedStrategy {
 
     @Autowired
     CircleFeedMessageRepository circleFeedMessageRepository;

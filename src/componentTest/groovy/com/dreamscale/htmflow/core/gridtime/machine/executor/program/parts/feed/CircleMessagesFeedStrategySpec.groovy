@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.circle.CircleDto
@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class CircleMessagesFetcherSpec extends Specification{
+class CircleMessagesFeedStrategySpec extends Specification{
 
     @Autowired
     CircleService circleService
@@ -28,7 +28,7 @@ class CircleMessagesFetcherSpec extends Specification{
     MasterAccountEntity testUser
 
     @Autowired
-    CircleMessagesFetcher circleMessagesFetcher
+    CircleMessagesFeedStrategy circleMessagesFetcher
 
     def "should fetch batches of circle messages"() {
         given:

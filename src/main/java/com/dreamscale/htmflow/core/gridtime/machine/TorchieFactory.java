@@ -2,14 +2,14 @@ package com.dreamscale.htmflow.core.gridtime.machine;
 
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.*;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.BoxConfigurationLoaderService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.BoxConfigurationLoaderService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessFeaturePool;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureResolverService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.TileSearchService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.TileSearchService;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.box.TeamBoxConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

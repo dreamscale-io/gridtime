@@ -1,13 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.FetchStrategyFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessFeaturePool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +16,7 @@ import java.util.UUID;
 public class ProgramFactory {
 
     @Autowired
-    private FetchStrategyFactory fetchStrategyFactory;
+    private FeedStrategyFactory feedStrategyFactory;
 
     @Autowired
     private FlowObserverFactory flowObserverFactory;
@@ -37,21 +35,21 @@ public class ProgramFactory {
         TileGeneratorProgram program = new TileGeneratorProgram(torchieId, featurePool, startPosition);
 
         program.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.JOURNAL_FEED),
+                feedStrategyFactory.get(FeedStrategyFactory.FeedType.JOURNAL_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_CONTEXT_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_FEELS_OBSERVER),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.JOURNAL_AUTHOR_OBSERVER));
 
         program.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
+                feedStrategyFactory.get(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER));
 
         program.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
+                feedStrategyFactory.get(FeedStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER));
 
         program.addFlowSourceToPullChain(
-                fetchStrategyFactory.get(FetchStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
+                feedStrategyFactory.get(FeedStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER));
 
         //transformation only, with no new data

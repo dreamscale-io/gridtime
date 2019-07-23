@@ -1,8 +1,8 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed;
 
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.domain.journal.JournalEntryRepository;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableJournalEntry;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class JournalFetcher extends FetchStrategy {
+public class JournalFeedStrategy extends FeedStrategy {
 
     @Autowired
     JournalEntryRepository journalEntryRepository;

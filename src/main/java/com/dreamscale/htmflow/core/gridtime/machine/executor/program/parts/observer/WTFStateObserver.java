@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTa
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.CircleDetails;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.fetch.flowable.FlowableCircleMessageEvent;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 
 /**
