@@ -14,12 +14,14 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sourc
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.TransformStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 public class TileGeneratorProgram implements Program {
 
 
@@ -29,17 +31,23 @@ public class TileGeneratorProgram implements Program {
     private final UUID torchieId;
 
     private final Metronome metronome;
+    private  boolean isInitialized;
 
     public TileGeneratorProgram(UUID torchieId, FeaturePool featurePool, LocalDateTime startPosition) {
         this.torchieId = torchieId;
         this.featurePool = featurePool;
         this.metronome = new Metronome(startPosition);
 
-        featurePool.gotoPosition(metronome.getActivePosition());
+
+        this.isInitialized = false;
     }
 
     public void tick() {
         metronome.tick();
+
+        log.debug("metronome tick: " + metronome.getActiveTick().toDisplayString());
+
+        featurePool.gotoTilePosition(metronome.getActivePosition());
     }
 
     //this one publishes up wires..?

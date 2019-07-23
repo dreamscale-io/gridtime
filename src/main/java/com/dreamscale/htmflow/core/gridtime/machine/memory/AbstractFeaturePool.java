@@ -8,10 +8,12 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 public abstract class AbstractFeaturePool implements FeaturePool {
 
     private final UUID torchieId;
@@ -19,7 +21,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     private Map<String, Feed> sourceFeeds = DefaultCollections.map();
 
-    private GeometryClock.GridTime activeGridGridTime;
+    private GeometryClock.GridTime gridTime;
 
     private GridTile activeGridTile;
 
@@ -34,32 +36,36 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     @Override
     public String getActiveGridTime() {
-        return activeGridGridTime.toDisplayString();
+        return gridTime.toDisplayString();
     }
 
-    public void gotoPosition(GeometryClock.GridTime gridTime) {
-        this.activeGridGridTime = gridTime;
-        this.activeGridTile = new GridTile(torchieId, activeGridGridTime, featureCache);
+    public void nextGridTile() {
+        if (activeGridTile != null) {
+            gotoTilePosition(activeGridTile.getGridTime().panRight());
+        }
+    }
 
-        CarryOverContext carryOverContext = getCarryOverContextFromTile(activeGridGridTime.panLeft());
+    public void gotoTilePosition(GeometryClock.GridTime gridTime) {
+        log.debug("gotoTilePosition: "+gridTime.toDisplayString());
+
+        this.gridTime = gridTime;
+
+        CarryOverContext carryOverContext = getCarryOverContext(this.gridTime.panLeft());
+
+        this.activeGridTile = new GridTile(torchieId, this.gridTime, featureCache);
+
         activeGridTile.initFromCarryOverContext(carryOverContext);
     }
 
-    @Override
-    public void nextGridTile() {
-        GeometryClock.GridTime nextGridTime = activeGridGridTime.panRight();
-
-        if (activeGridTile == null) {
-            gotoPosition(nextGridTime);
-        } else {
-
-            GridTile nextGridTile = new GridTile(torchieId, nextGridTime, featureCache);
-            nextGridTile.initFromCarryOverContext(activeGridTile.getCarryOverContext());
-
-            activeGridTile = nextGridTile;
-            activeGridGridTime = nextGridTime;
+    private CarryOverContext getCarryOverContext(GeometryClock.GridTime panLeftGridTime) {
+        if (activeGridTile != null && activeGridTile.getGridTime().equals(panLeftGridTime)) {
+            return activeGridTile.getCarryOverContext();
+        }
+        else {
+            return getCarryOverContextFromTileDB(gridTime);
         }
     }
+
 
     public <T extends Flowable> Feed<T> registerFeed(UUID memberId, FeedStrategy<T> feedStrategy) {
         String name = feedStrategy.getClass().getSimpleName();
@@ -71,7 +77,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
 
     private void validateCoordsMatchAndResetTileIfNeeded(GeometryClock.GridTime toCoordPosition, GeometryClock.GridTime nextGridTime) {
         if (!nextGridTime.equals(toCoordPosition)) {
-            activeGridGridTime = toCoordPosition;
+            gridTime = toCoordPosition;
             activeGridTile = null;
         }
     }
@@ -79,6 +85,6 @@ public abstract class AbstractFeaturePool implements FeaturePool {
     @Override
     public abstract void resolveReferences();
 
-    protected abstract CarryOverContext getCarryOverContextFromTile(GeometryClock.GridTime gridTime);
+    protected abstract CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime);
 
 }

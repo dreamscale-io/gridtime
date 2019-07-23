@@ -39,8 +39,4 @@ public class CircleEntity {
 
     private Long durationInSeconds;
 
-    private String hypercoreFeedId;
-    private String hypercorePublicKey;
-    private String hypercoreSecretKey;
-
 }

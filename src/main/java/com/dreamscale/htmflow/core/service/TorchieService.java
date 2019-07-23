@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkEntity;
 import com.dreamscale.htmflow.core.domain.tile.TorchieBookmarkRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor;
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +39,12 @@ public class TorchieService {
     @Autowired
     private JournalService journalService;
 
-    private TorchiePoolExecutor torchieExecutorPool;
+    private GridTimeExecutor torchieExecutorPool;
 
     private static final int POOL_SIZE = 10;
 
     public TorchieService() {
-        torchieExecutorPool = new TorchiePoolExecutor(POOL_SIZE);
+        torchieExecutorPool = new GridTimeExecutor(POOL_SIZE);
     }
 
     public CircuitMonitor startMemberTorchie(UUID memberId) {

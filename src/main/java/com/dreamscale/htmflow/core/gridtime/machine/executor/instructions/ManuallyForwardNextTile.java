@@ -22,7 +22,7 @@ public class ManuallyForwardNextTile extends TileInstructions {
             GeometryClock.GridTime nextGridTime = activeTile.getGridTime().panRight();
             log.debug("Forwarding tile to "+ nextGridTime.toDisplayString());
 
-            featurePool.nextGridTile();
+            featurePool.gotoTilePosition(nextGridTime);
         } else {
             log.error("Unable to forward to next tile, active tile is null");
         }

@@ -9,13 +9,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.UUID;
 
-@Entity(name = "grid_metrics_idea_flow")
+@Entity(name = "grid_idea_flow_metrics")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridMetricsIdeaFlowEntity {
+public class GridIdeaFlowMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -28,9 +28,6 @@ public class GridMetricsIdeaFlowEntity {
     private ZoomLevel zoomLevel;
 
     private Long tileSeq;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID lastIdeaFlowState;
 
     private Long timeInTile;
 

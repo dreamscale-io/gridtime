@@ -32,7 +32,7 @@ public class JournalContextObserverSpec extends Specification {
         torchieId = UUID.randomUUID()
 
         pool = new MemoryOnlyFeaturePool(torchieId)
-        pool.gotoPosition(clock.getActiveGridTime())
+        pool.gotoTilePosition(clock.getActiveGridTime())
     }
 
     def "should create project & task switch events"() {
@@ -79,7 +79,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        pool.gotoPosition(clock.getActiveGridTime());
+        pool.gotoTilePosition(clock.getActiveGridTime());
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();

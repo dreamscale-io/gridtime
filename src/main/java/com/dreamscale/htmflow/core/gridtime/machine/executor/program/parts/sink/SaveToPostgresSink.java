@@ -29,7 +29,7 @@ public class SaveToPostgresSink implements SinkStrategy {
     GridMarkerRepository gridMarkerRepository;
 
     @Autowired
-    GridMetricsIdeaFlowRepository gridMetricsIdeaFlowRepository;
+    GridIdeaFlowMetricsRepository gridIdeaFlowMetricsRepository;
 
     @Override
     public void save(UUID torchieId, FeaturePool featurePool) {
@@ -66,8 +66,10 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         IdeaFlowMetrics ideaFlowMetrics = gridTile.getIdeaFlowMetrics();
 
-        GridMetricsIdeaFlowEntity gridMetricsIdeaFlowEntity = createGridMetricsIdeaFlowEntity(torchieId, tileSeq, ideaFlowMetrics);
-        gridMetricsIdeaFlowRepository.save(gridMetricsIdeaFlowEntity);
+        GridIdeaFlowMetricsEntity gridIdeaFlowMetricsEntity = createGridIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
+
+        log.debug("Saving ideaflow tile: "+tileSeq);
+        gridIdeaFlowMetricsRepository.save(gridIdeaFlowMetricsEntity);
 
         //TILE DICTIONARY...
 
@@ -92,14 +94,13 @@ public class SaveToPostgresSink implements SinkStrategy {
         //TODO aggregate up
     }
 
-    private GridMetricsIdeaFlowEntity createGridMetricsIdeaFlowEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
+    private GridIdeaFlowMetricsEntity createGridIdeaFlowMetricsEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
 
-        GridMetricsIdeaFlowEntity ideaFlowEntity = new GridMetricsIdeaFlowEntity();
+        GridIdeaFlowMetricsEntity ideaFlowEntity = new GridIdeaFlowMetricsEntity();
         ideaFlowEntity.setId(UUID.randomUUID());
         ideaFlowEntity.setTorchieId(torchieId);
         ideaFlowEntity.setTileSeq(tileSeq);
         ideaFlowEntity.setZoomLevel(ideaFlowMetrics.getZoomLevel());
-        ideaFlowEntity.setLastIdeaFlowState(ideaFlowMetrics.getLastIdeaFlowState().getFeatureId());
         ideaFlowEntity.setAvgFlame(ideaFlowMetrics.getAvgFlame());
         ideaFlowEntity.setTimeInTile(ideaFlowMetrics.getTimeInTile().getSeconds());
         ideaFlowEntity.setPercentWtf(ideaFlowMetrics.getPercentWtf());

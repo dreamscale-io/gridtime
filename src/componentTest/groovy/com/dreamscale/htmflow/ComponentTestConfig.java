@@ -6,7 +6,6 @@ import com.dreamscale.htmflow.core.CoreRandomBuilderSupport;
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
 import com.dreamscale.htmflow.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
-import com.dreamscale.htmflow.core.service.HypercoreService;
 import com.dreamscale.htmflow.core.service.JiraService;
 import com.dreamscale.htmflow.core.service.TimeService;
 import org.dreamscale.feign.JacksonFeignBuilder;
@@ -40,12 +39,6 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Primary
     public TimeService mockTimeService() {
         return detachedMockFactory().Mock(TimeService.class);
-    }
-
-    @Bean
-    @Primary
-    public HypercoreService mockHypercoreService() {
-       return detachedMockFactory().Mock(HypercoreService.class);
     }
 
 

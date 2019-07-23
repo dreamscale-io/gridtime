@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.domain.time.GridTimeCalendarRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.TorchieCmd
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import spock.lang.Specification;
@@ -17,13 +17,13 @@ class CalendarGeneratorProgramSpec extends Specification {
 
     @Autowired
     TorchieFactory torchieFactory
-    TorchiePoolExecutor torchieExecutor
+    GridTimeExecutor torchieExecutor
 
     @Autowired
     GridTimeCalendarRepository gridTimeCalendarRepository
 
     def setup() {
-        torchieExecutor = new TorchiePoolExecutor(1);
+        torchieExecutor = new GridTimeExecutor(1);
     }
 
     def "should generate 72 twenties and aggregate rollups for dayparts and days"() {

@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.NowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
@@ -27,6 +28,8 @@ public class IdeaFlowCircuit {
 
     private LinkedList<TimeBomb> activeWaits;
     private final NowMetrics nowMetrics;
+
+    //circuit coordinator
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
     private boolean isProgramHalted;
@@ -67,11 +70,14 @@ public class IdeaFlowCircuit {
 
         TileInstructions nextInstructions = null;
 
+
+
         if (highPriorityInstructionQueue.size() > 0) {
             nextInstructions = highPriorityInstructionQueue.removeFirst();
         } else if (instructionsToExecuteQueue.size() > 0) {
             nextInstructions = instructionsToExecuteQueue.removeFirst();
         } else if (!isProgramHalted && !program.isDone()) {
+
             program.tick();
 
             instructionsToExecuteQueue.addAll(program.getInstructionsAtActiveTick());
@@ -83,6 +89,8 @@ public class IdeaFlowCircuit {
             nextInstructions = instructionsToExecuteQueue.removeFirst();
 
             circuitMonitor.updateTickPosition(program.getActiveTick().getFrom().toDisplayString());
+
+
         } else {
             fireProgramDoneTriggers();
         }
@@ -105,6 +113,10 @@ public class IdeaFlowCircuit {
 
     public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
         this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
+    }
+
+    public Metronome.Tick getActiveTick() {
+        return program.getActiveTick();
     }
 
     private class EvaluateOutputTrigger implements NotifyTrigger {

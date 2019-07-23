@@ -18,7 +18,7 @@ public class MemoryOnlyFeaturePool extends AbstractFeaturePool {
     }
 
     @Override
-    protected CarryOverContext getCarryOverContextFromTile(GeometryClock.GridTime gridTime) {
+    protected CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime) {
         return null;
     }
 

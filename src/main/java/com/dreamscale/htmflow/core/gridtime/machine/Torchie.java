@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.InstructionsBuilder;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
@@ -72,5 +73,9 @@ public class Torchie {
 
     public void resumeProgram() {
         ideaFlowCircuit.resumeProgram();
+    }
+
+    public Metronome.Tick getActiveTick() {
+        return ideaFlowCircuit.getActiveTick();
     }
 }

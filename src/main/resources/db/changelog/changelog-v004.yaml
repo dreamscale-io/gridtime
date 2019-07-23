@@ -38,3 +38,15 @@ databaseChangeLog:
 
   - include:
         file: db/v004/drop_grid_time_old_calendar.sql
+
+  - include:
+        file: db/v004/alter_grid_metrics_idea_flow_drop_last_state.sql
+
+  - include:
+        file: db/v004/alter_grid_metrics_idea_flow_rename.sql
+
+  - include:
+        file: db/v004/alter_circle_entity_drop_hypercore.sql
+
+  - include:
+        file: db/v004/alter_team_entity_drop_hypercore.sql

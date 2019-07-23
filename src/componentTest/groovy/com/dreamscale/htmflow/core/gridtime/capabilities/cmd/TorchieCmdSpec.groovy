@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.capabilities.cmd
 import com.dreamscale.htmflow.core.domain.member.json.Member
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.FinishTypeTag
@@ -32,7 +32,7 @@ class TorchieCmdSpec extends Specification {
     LocalDateTime time4
 
     TorchieCmd cmd
-    TorchiePoolExecutor torchieExecutor
+    GridTimeExecutor torchieExecutor
     Torchie torchie
     LocalDateTime clockStart
 
@@ -49,7 +49,7 @@ class TorchieCmdSpec extends Specification {
         torchie = new Torchie(torchieId, featurePool, new NoOpProgram());
         System.out.println(clockStart);
         
-        torchieExecutor = new TorchiePoolExecutor(1);
+        torchieExecutor = new GridTimeExecutor(1);
 
         cmd = new TorchieCmd(torchieExecutor, torchie);
         cmd.haltProgram()
@@ -318,7 +318,7 @@ class TorchieCmdSpec extends Specification {
 
 
 
-//    def "play track SHOULD return text-console output for printing the specified track row"() {
+//    def "play track SHOULD return text-console out for printing the specified track row"() {
 //        given:
 //
 //

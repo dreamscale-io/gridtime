@@ -10,15 +10,15 @@ import java.util.UUID;
 
 public interface FeaturePool {
 
-    void gotoPosition(GeometryClock.GridTime toCoordPosition);
+    void gotoTilePosition(GeometryClock.GridTime toCoordPosition);
 
     GridTile getActiveGridTile();
 
     String getActiveGridTime();
 
-    void nextGridTile();
-
     <T extends Flowable> Feed<T> registerFeed(UUID memberId, FeedStrategy<T> feedStrategy);
 
     void resolveReferences();
+
+    void nextGridTile();
 }

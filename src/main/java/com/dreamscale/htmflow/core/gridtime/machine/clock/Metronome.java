@@ -24,8 +24,6 @@ public class Metronome {
 
         this.fromGridTime = clock.getActiveGridTime();
         this.toGridTime = clock.next();
-
-        this.activeTick = new Tick(fromGridTime, toGridTime);
     }
 
 
@@ -40,43 +38,20 @@ public class Metronome {
 
     public Tick tick() {
 
-        Tick tick = new Tick(fromGridTime, toGridTime);
+        if (activeTick == null) {
+            activeTick = createTick(fromGridTime, toGridTime);
+        } else {
+            GeometryClock.GridTime nextCoordinates = clock.next();
 
-        if (!Objects.equals(fromGridTime.getDayPart(), toGridTime.getDayPart())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY_PART));
+            this.fromGridTime = this.toGridTime;
+            this.toGridTime = nextCoordinates;
+
+            this.activeTick = createTick(fromGridTime, toGridTime);
         }
 
-        if (!Objects.equals(fromGridTime.getDay(), toGridTime.getDay())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY));
-        }
-
-        if (!Objects.equals(fromGridTime.getBlockWeek(), toGridTime.getBlockWeek())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.WEEK));
-        }
-
-        if (!Objects.equals(fromGridTime.getBlock(), toGridTime.getBlock())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.BLOCK));
-        }
-        if (!Objects.equals(fromGridTime.getYear(), toGridTime.getYear())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.YEAR));
-        }
-
-        GeometryClock.GridTime nextCoordinates = clock.next();
-
-        this.fromGridTime = this.toGridTime;
-        this.toGridTime = nextCoordinates;
-
-        this.activeTick = tick;
-
-        return tick;
+        return activeTick;
     }
 
-
-    private Tick getAggregateTick(ZoomLevel zoomLevel) {
-        GeometryClock.GridTime toZoomedOutCoords = toGridTime.toZoomLevel(zoomLevel);
-        GeometryClock.GridTime fromZoomedOutCoords = toZoomedOutCoords.panLeft();
-        return new Tick(fromZoomedOutCoords, toZoomedOutCoords);
-    }
 
     public String getActiveTickPosition() {
         return getActivePosition().toDisplayString();
@@ -89,7 +64,34 @@ public class Metronome {
     }
 
     public static Tick createTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
-        return new Tick(fromGridTime, toGridTime);
+
+        Tick tick = new Tick(fromGridTime, toGridTime);
+
+        if (!Objects.equals(fromGridTime.getDayPart(), toGridTime.getDayPart())) {
+            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY_PART, toGridTime));
+        }
+
+        if (!Objects.equals(fromGridTime.getDay(), toGridTime.getDay())) {
+            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY, toGridTime));
+        }
+
+        if (!Objects.equals(fromGridTime.getBlockWeek(), toGridTime.getBlockWeek())) {
+            tick.addAggregateTick(getAggregateTick(ZoomLevel.WEEK, toGridTime));
+        }
+
+        if (!Objects.equals(fromGridTime.getBlock(), toGridTime.getBlock())) {
+            tick.addAggregateTick(getAggregateTick(ZoomLevel.BLOCK, toGridTime));
+        }
+        if (!Objects.equals(fromGridTime.getYear(), toGridTime.getYear())) {
+            tick.addAggregateTick(getAggregateTick(ZoomLevel.YEAR, toGridTime));
+        }
+        return tick;
+    }
+
+    private static Tick getAggregateTick(ZoomLevel zoomLevel, GeometryClock.GridTime toGridTime) {
+        GeometryClock.GridTime toZoomedOutCoords = toGridTime.toZoomLevel(zoomLevel);
+        GeometryClock.GridTime fromZoomedOutCoords = toZoomedOutCoords.panLeft();
+        return new Tick(fromZoomedOutCoords, toZoomedOutCoords);
     }
 
     @Getter

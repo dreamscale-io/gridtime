@@ -7,10 +7,10 @@ import com.dreamscale.htmflow.core.domain.tile.GridMarkerEntity
 import com.dreamscale.htmflow.core.domain.tile.GridMarkerRepository
 import com.dreamscale.htmflow.core.domain.tile.GridRowEntity
 import com.dreamscale.htmflow.core.domain.tile.GridRowRepository
-import com.dreamscale.htmflow.core.domain.tile.GridMetricsIdeaFlowRepository
+import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.TorchieCmd
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.NoOpProgram
@@ -44,7 +44,7 @@ class SaveToPostgresSinkSpec extends Specification {
     GridRowRepository gridRowRepository
 
     @Autowired
-    GridMetricsIdeaFlowRepository gridTileSummaryRepository
+    GridIdeaFlowMetricsRepository gridTileSummaryRepository
 
     GeometryClock clock
 
@@ -57,7 +57,7 @@ class SaveToPostgresSinkSpec extends Specification {
     LocalDateTime time4
 
     TorchieCmd cmd
-    TorchiePoolExecutor torchieExecutor
+    GridTimeExecutor torchieExecutor
     Torchie torchie
     LocalDateTime clockStart
 
@@ -79,7 +79,7 @@ class SaveToPostgresSinkSpec extends Specification {
         torchie = new Torchie(torchieId, featurePool, new NoOpProgram());
         System.out.println(clockStart);
 
-        torchieExecutor = new TorchiePoolExecutor(1);
+        torchieExecutor = new GridTimeExecutor(1);
 
         cmd = new TorchieCmd(torchieExecutor, torchie);
         cmd.haltProgram()

@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class AggregateMusicGrid implements IMusicGrid {
+public class AggregateGrid implements IMusicGrid {
 
     private final FeatureCache featureCache;
     private final GeometryClock.GridTime gridTime;
-    private final MusicClock musicClock;
     private final GlyphReferences glyphReferences;
     private final FeatureTotals featureTotals;
+    private final MusicClock musicClock;
 
 
     private Map<TrackSetKey, PlayableCompositeTrackSet> trackSetsByKey = DefaultCollections.map();
@@ -37,7 +37,7 @@ public class AggregateMusicGrid implements IMusicGrid {
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
 
-    public AggregateMusicGrid(FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public AggregateGrid(FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.featureCache = featureCache;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
@@ -45,6 +45,12 @@ public class AggregateMusicGrid implements IMusicGrid {
         this.glyphReferences = new GlyphReferences();
         this.featureTotals = new FeatureTotals();
     }
+
+
+    public void addTileMetrics(Map<String, Object> props) {
+
+    }
+
 
     public void loadTileMetrics(LocalDateTime moment, IdeaFlowMetrics metrics) {
 
@@ -146,4 +152,6 @@ public class AggregateMusicGrid implements IMusicGrid {
     public void loadFeatureMetrics(FeatureReference featureReference, FeatureMetrics featureMetrics) {
 
     }
+
+
 }

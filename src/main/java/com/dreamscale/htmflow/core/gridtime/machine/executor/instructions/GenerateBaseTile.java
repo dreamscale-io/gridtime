@@ -25,8 +25,6 @@ public class GenerateBaseTile extends TileInstructions {
 
     @Override
     public void executeInstruction() throws InterruptedException {
-        featurePool.nextGridTile();
-
         for (Flow flow : pullChain) {
             flow.tick(tick);
         }

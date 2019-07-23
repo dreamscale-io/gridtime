@@ -14,8 +14,7 @@ import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
-import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto
-import com.dreamscale.htmflow.core.service.HypercoreService
+
 import com.dreamscale.htmflow.core.service.TeamService
 import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,9 +39,6 @@ class CircleResourceSpec extends Specification {
     @Autowired
     TimeService mockTimeService
 
-    @Autowired
-    HypercoreService mockHypercoreService
-
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
 
@@ -51,7 +47,6 @@ class CircleResourceSpec extends Specification {
         keys.put("key", "key2")
         keys.put("secretKey", "key3")
 
-        mockHypercoreService.createNewFeed() >> new HypercoreKeysDto(keys)
     }
 
     def "should create a circle"() {
@@ -118,31 +113,6 @@ class CircleResourceSpec extends Specification {
         assert activeCircle.id == circle1.id
     }
 
-    def "should return circle key when members on same team"() {
-        given:
-
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
-
-        TeamDto team = teamService.createTeam(org.id, "myTeam")
-        teamService.addMembersToTeam(org.id, team.id, Arrays.asList(member.id))
-
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        when:
-        CircleKeysDto circleKeyDto = circleClient.getCircleKeys(circle1.id.toString())
-
-        then:
-        assert circleKeyDto != null
-        assert circleKeyDto.hypercoreFeedId != null
-        assert circleKeyDto.hypercorePublicKey != null
-        assert circleKeyDto.hypercoreSecretKey != null
-    }
 
 
     def "should return all shelved do it later circles"() {

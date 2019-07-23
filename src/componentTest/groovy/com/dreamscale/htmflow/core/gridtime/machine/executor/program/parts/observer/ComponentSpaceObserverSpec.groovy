@@ -33,7 +33,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         torchieId = UUID.randomUUID()
 
         pool = new MemoryOnlyFeaturePool(UUID.randomUUID())
-        pool.gotoPosition(clock.getActiveGridTime())
+        pool.gotoTilePosition(clock.getActiveGridTime())
     }
 
     def "should create Location traversals"() {

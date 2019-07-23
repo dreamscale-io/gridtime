@@ -38,7 +38,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
         executionRhythmObserver = new ExecutionRhythmObserver()
 
         pool = new MemoryOnlyFeaturePool(UUID.randomUUID())
-        pool.gotoPosition(clock.getActiveGridTime())
+        pool.gotoTilePosition(clock.getActiveGridTime())
     }
 
     def "should create red/green cycles from execution activity"() {

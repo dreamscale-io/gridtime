@@ -14,7 +14,14 @@ public enum MetricRowKey implements Observable, Key {
     IS_WTF("@flow/wtf"),
     FLOW_MODS("@flow/modify"),
     IS_LEARNING("@flow/learn"),
-    IS_PAIRING("@auth/pair");
+    IS_PAIRING("@auth/pair"),
+
+    TIME_IN_TILE("@zoom/time"),
+    AVG_FLAME("@zoom/feels"),
+    PERCENT_WTF("@zoom/wtf"),
+    PERCENT_LEARNING("@zoom/learn"),
+    PERCENT_PAIRING("@zoom/pair"),
+    PERCENT_PROGRESS("@zoom/prog");
 
     private String name;
 

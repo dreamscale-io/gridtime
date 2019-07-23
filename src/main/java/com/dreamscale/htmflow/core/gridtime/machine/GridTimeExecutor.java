@@ -10,7 +10,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
-public class TorchiePoolExecutor {
+public class GridTimeExecutor {
 
     private final int maxTorchieCapacity;
 
@@ -23,7 +23,7 @@ public class TorchiePoolExecutor {
 
     private Map<UUID, Torchie> activeTorchiePool = DefaultCollections.map();
 
-    public TorchiePoolExecutor(int maxTorchieCapacity) {
+    public GridTimeExecutor(int maxTorchieCapacity) {
         this.maxTorchieCapacity = maxTorchieCapacity;
         this.executorPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxTorchieCapacity + 1);
         this.whatsNextQueue = new LinkedList<>();

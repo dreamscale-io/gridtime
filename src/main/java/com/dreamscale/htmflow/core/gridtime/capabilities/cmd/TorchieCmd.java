@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.capabilities.cmd;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
-import com.dreamscale.htmflow.core.gridtime.machine.TorchiePoolExecutor;
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
@@ -26,9 +26,9 @@ public class TorchieCmd {
     private final NotifyTrigger NOTIFY_WHEN_DONE;
     private final NotifyTrigger LOG_EXECUTION_DONE;
 
-    private final TorchiePoolExecutor torchieExecutor;
+    private final GridTimeExecutor torchieExecutor;
 
-    public TorchieCmd(TorchiePoolExecutor executorPool, Torchie torchie) {
+    public TorchieCmd(GridTimeExecutor executorPool, Torchie torchie) {
         this.torchieExecutor = executorPool;
         this.torchie = torchie;
         this.syncCommandInProgress = new AtomicBoolean(false);

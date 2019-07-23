@@ -6,7 +6,6 @@ import com.dreamscale.htmflow.api.team.TeamDto;
 import com.dreamscale.htmflow.api.team.TeamMemberDto;
 import com.dreamscale.htmflow.core.domain.member.*;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
-import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import org.dreamscale.exception.BadRequestException;
@@ -14,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TeamService {
@@ -27,9 +29,6 @@ public class TeamService {
 
     @Autowired
     private ActiveStatusService wtfService;
-
-    @Autowired
-    private HypercoreService hypercoreService;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -172,17 +171,6 @@ public class TeamService {
         TeamDto teamDto = null;
         if (teamEntities.size() > 0) {
             TeamEntity teamEntity = teamEntities.get(0);
-
-            if (teamEntity.getHypercoreFeedId() == null) {
-                HypercoreKeysDto keys = hypercoreService.createNewFeed();
-                if (keys != null) {
-                    teamEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-                    teamEntity.setHypercorePublicKey(keys.getKey());
-                    teamEntity.setHypercoreSecretKey(keys.getSecretKey());
-
-                    teamRepository.save(teamEntity);
-                }
-            }
 
             teamDto = teamOutputMapper.toApi(teamEntity);
         }

@@ -12,7 +12,6 @@ import com.dreamscale.htmflow.core.domain.journal.JournalEntryRepository;
 import com.dreamscale.htmflow.core.domain.member.MemberNameEntity;
 import com.dreamscale.htmflow.core.domain.member.MemberNameRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
-import com.dreamscale.htmflow.core.hooks.hypercore.HypercoreKeysDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
 import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
@@ -64,8 +63,6 @@ public class CircleService {
     @Autowired
     TimeService timeService;
 
-    @Autowired
-    HypercoreService hypercoreService;
 
     @Autowired
     TeamService teamService;
@@ -525,19 +522,6 @@ public class CircleService {
 
             circleKeysDto = new CircleKeysDto();
             circleKeysDto.setCircleId(circleId);
-
-            if (circleEntity.getHypercoreFeedId() == null) {
-                HypercoreKeysDto keys = hypercoreService.createNewFeed();
-                circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-                circleEntity.setHypercorePublicKey(keys.getKey());
-                circleEntity.setHypercoreSecretKey(keys.getSecretKey());
-
-                circleRepository.save(circleEntity);
-            }
-
-            circleKeysDto.setHypercoreFeedId(circleEntity.getHypercoreFeedId());
-            circleKeysDto.setHypercorePublicKey(circleEntity.getHypercorePublicKey());
-            circleKeysDto.setHypercoreSecretKey(circleEntity.getHypercoreSecretKey());
 
         } else {
             throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCLE_KEY, "Unable to retrieve circle keys");

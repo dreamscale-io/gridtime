@@ -4,12 +4,15 @@ import com.dreamscale.htmflow.core.domain.time.*;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.service.TimeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class CalendarService {
 
@@ -34,7 +37,31 @@ public class CalendarService {
         return tileSequence;
     }
 
+    public Long lookupTileSequenceFromSameTime(ZoomLevel zoomInOneLevel, LocalDateTime clockTime) {
+        Long tileSequence = null;
+
+        GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndClockTime(zoomInOneLevel, clockTime);
+        if (calendarTile != null) {
+            tileSequence = calendarTile.getTileSeq();
+        }
+
+        return tileSequence;
+    }
+
+    public void saveCalendar(long startSeq, int tileCount, GeometryClock.GridTime startTime) {
+        long seq = startSeq;
+        GeometryClock.GridTime gridTime = startTime;
+
+        for (int i = 0; i < tileCount; i++) {
+            saveCalendar(seq, gridTime);
+            seq++;
+            gridTime = gridTime.panRight();
+        }
+    }
+
     public void saveCalendar(long tileSequence, GeometryClock.GridTime coords) {
+        log.info("saveCalendar(" +  tileSequence + ", "+coords.toDisplayString() + ")");
+
         GridTimeCalendarEntity calendar = new GridTimeCalendarEntity();
 
         calendar.setId(UUID.randomUUID());
@@ -63,5 +90,6 @@ public class CalendarService {
         }
         return null;
     }
+
 
 }

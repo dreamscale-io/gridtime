@@ -31,7 +31,7 @@ public class WTFStateObserverSpec extends Specification {
         wtfStateObserver = new WTFStateObserver()
         torchieId = UUID.randomUUID()
         pool = new MemoryOnlyFeaturePool(torchieId)
-        pool.gotoPosition(clock.getActiveGridTime())
+        pool.gotoTilePosition(clock.getActiveGridTime())
     }
 
     def "should create wtf circle states"() {

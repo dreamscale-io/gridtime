@@ -3,10 +3,12 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.anal
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.AuthorsReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeelsReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.IdeaFlowStateReference;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.AverageMetric;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.MetricQuery;
@@ -14,20 +16,25 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.type.GridCell;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.FeatureRowKey;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.AuthorsType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.IdeaFlowStateType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.Map;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IdeaFlowMetrics implements MetricQuery {
 
     private ZoomLevel zoomLevel;
-    private IdeaFlowStateReference lastIdeaFlowState;
 
     private Duration timeInTile;
     private Double avgFlame;
@@ -36,6 +43,8 @@ public class IdeaFlowMetrics implements MetricQuery {
     private Double percentLearning;
     private Double percentProgress;
     private Double percentPairing;
+
+
 
 
     public static IdeaFlowMetrics queryFrom(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
@@ -51,7 +60,6 @@ public class IdeaFlowMetrics implements MetricQuery {
         IdeaFlowMetrics metrics = new IdeaFlowMetrics();
 
         metrics.zoomLevel = musicClock.getZoomLevel();
-        metrics.lastIdeaFlowState = selectLastIdeaFlowState(featureCache, musicGrid);
         metrics.timeInTile = totalDuration;
         metrics.avgFlame = averageFlame.getAverage();
 
@@ -63,29 +71,39 @@ public class IdeaFlowMetrics implements MetricQuery {
         return metrics;
     }
 
-    private static IdeaFlowStateReference selectLastIdeaFlowState(FeatureCache featureCache, IMusicGrid musicGrid) {
+//    public static IdeaFlowMetrics queryFrom(AggregateGrid aggregateGrid) {
+//        aggregateGrid.getTilePropertyMetric()
+//
+//    }
 
-        IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE);
-        IdeaFlowStateReference learningState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.LEARNING_STATE);
-        IdeaFlowStateReference progressState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.PROGRESS_STATE);
+    public Map<MetricRowKey, Object> toProps() {
+        Map<MetricRowKey, Object> props = DefaultCollections.map();
 
-        GridRow wtfRow = musicGrid.getRow(FeatureRowKey.FLOW_WTF);
-        GridRow learningRow = musicGrid.getRow(FeatureRowKey.FLOW_LEARNING);
+        props.put(MetricRowKey.TIME_IN_TILE, timeInTile);
+        props.put(MetricRowKey.AVG_FLAME, avgFlame);
+        props.put(MetricRowKey.PERCENT_WTF, percentWtf);
+        props.put(MetricRowKey.PERCENT_LEARNING, percentLearning);
+        props.put(MetricRowKey.PERCENT_PROGRESS, percentProgress);
+        props.put(MetricRowKey.PERCENT_PAIRING, percentPairing);
 
-        GridCell wtfCell = wtfRow.getLast();
-        GridCell learningCell = learningRow.getLast();
-
-        IdeaFlowStateReference lastState;
-
-        if (learningCell.hasFeature(learningState) && !wtfCell.hasFeature(wtfState)) {
-            lastState = learningState;
-        } else if (learningCell.hasFeature(progressState) && !wtfCell.hasFeature(wtfState)) {
-            lastState = progressState;
-        } else {
-            lastState = wtfState;
-        }
-        return lastState;
+        return props;
     }
+
+    public static IdeaFlowMetrics fromProps(ZoomLevel zoomLevel, Map<MetricRowKey, Object> props) {
+        IdeaFlowMetrics metrics = new IdeaFlowMetrics();
+
+        metrics.zoomLevel = zoomLevel;
+        metrics.timeInTile = (Duration) props.get(MetricRowKey.TIME_IN_TILE);
+        metrics.avgFlame = (Double) props.get(MetricRowKey.AVG_FLAME);
+        metrics.percentWtf = (Double) props.get(MetricRowKey.PERCENT_WTF);
+        metrics.percentLearning = (Double) props.get(MetricRowKey.PERCENT_LEARNING);
+        metrics.percentProgress = (Double) props.get(MetricRowKey.PERCENT_PROGRESS);
+        metrics.percentPairing = (Double) props.get(MetricRowKey.PERCENT_PAIRING);
+
+        return metrics;
+
+    }
+
 
     private static Duration selectTotalDuration(MusicClock musicClock) {
         return musicClock.getRelativeEnd();
@@ -180,5 +198,6 @@ public class IdeaFlowMetrics implements MetricQuery {
         }
         return averageMetric;
     }
+
 
 }
