@@ -28,7 +28,4 @@ public class CircleDto {
     Long durationInSeconds;
     Boolean onShelf;
 
-    private String hypercoreFeedId;
-    private String hypercorePublicKey;
-    private String hypercoreSecretKey;
 }

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.lib
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas
 
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity
@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.IdeaFlowAggregatorLocas
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.LocasFactory
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache

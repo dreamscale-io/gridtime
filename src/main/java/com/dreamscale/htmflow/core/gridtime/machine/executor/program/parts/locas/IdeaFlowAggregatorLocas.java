@@ -1,19 +1,13 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.lib;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas;
 
-import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.out.BreatheOutStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +35,7 @@ public class IdeaFlowAggregatorLocas implements Locas {
 
         log.debug("metrics: "+metrics.size());
 
-        this.locasGrid = generateGrid(tick.getFrom(), metrics);
+        //this.locasGrid = generateGrid(tick.getFrom(), metrics);
 
 
 
@@ -56,18 +50,18 @@ public class IdeaFlowAggregatorLocas implements Locas {
     public void breatheOut(Metronome.Tick tick) {
         out.breatheOut(torchieId, tick, locasGrid);
     }
-    private AggregateGrid generateGrid(GeometryClock.GridTime gridTime, List<IdeaFlowMetrics> allEntities) {
-        AggregateGrid aggregateGrid = new AggregateGrid(featureCache, gridTime, new MusicClock(gridTime.getZoomLevel()));
-
-        for (IdeaFlowMetrics entity : allEntities) {
-
-//            IdeaFlowMetrics metrics = toIdeaFlowMetrics(entity);
-//            aggregateGrid.addMetricColumn( entity.getTileSeq(), metrics.toProps());
-        }
-
-
-        return aggregateGrid;
-    }
+//    private AggregateGrid generateGrid(GeometryClock.GridTime gridTime, List<IdeaFlowMetrics> allEntities) {
+//        AggregateGrid aggregateGrid = new AggregateGrid(featureCache, gridTime, new MusicClock(gridTime.getZoomLevel()));
+//
+////        for (IdeaFlowMetrics entity : allEntities) {
+////
+//////            IdeaFlowMetrics metrics = toIdeaFlowMetrics(entity);
+//////            aggregateGrid.addMetricColumn( entity.getTileSeq(), metrics.toProps());
+////        }
+//
+//
+//        return aggregateGrid;
+//    }
 
 
 

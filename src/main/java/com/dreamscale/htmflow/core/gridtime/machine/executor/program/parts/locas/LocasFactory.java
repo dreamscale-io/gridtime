@@ -1,7 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas;
 
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.lib.IdeaFlowAggregatorLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.out.BreatheOutStrategy;
@@ -21,7 +20,7 @@ public class LocasFactory {
     @Autowired
     BreatheOutStrategyFactory breatheOutFactory;
 
-    public Locas createIdeaFlowAggregatorLocas(UUID torchieId, FeatureCache featureCache) {
+    public IdeaFlowAggregatorLocas createIdeaFlowAggregatorLocas(UUID torchieId, FeatureCache featureCache) {
         BreatheInStrategy<IdeaFlowMetrics> metricsIn = breatheInFactory.get(BreatheInStrategyFactory.BreatheInType.QUERY_IDEA_FLOW_METRICS);
         BreatheOutStrategy metricsOut = breatheOutFactory.get(BreatheOutStrategyFactory.BreatheOutType.SUMMARIZE_IDEA_FLOW_METRICS);
 
