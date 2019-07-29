@@ -11,12 +11,14 @@ import java.util.Objects;
 @Slf4j
 public class Metronome {
 
+
     private GeometryClock clock;
 
     private GeometryClock.GridTime fromGridTime;
     private GeometryClock.GridTime toGridTime;
 
     private Tick activeTick;
+    private boolean hasTicked;
 
     public Metronome(LocalDateTime startPosition) {
 
@@ -24,6 +26,10 @@ public class Metronome {
 
         this.fromGridTime = clock.getActiveGridTime();
         this.toGridTime = clock.next();
+
+        activeTick = createTick(fromGridTime, toGridTime);
+
+        this.hasTicked = false;
     }
 
 
@@ -38,9 +44,7 @@ public class Metronome {
 
     public Tick tick() {
 
-        if (activeTick == null) {
-            activeTick = createTick(fromGridTime, toGridTime);
-        } else {
+        if (hasTicked) {
             GeometryClock.GridTime nextCoordinates = clock.next();
 
             this.fromGridTime = this.toGridTime;
@@ -48,7 +52,8 @@ public class Metronome {
 
             this.activeTick = createTick(fromGridTime, toGridTime);
         }
-
+        hasTicked = true;
+        
         return activeTick;
     }
 

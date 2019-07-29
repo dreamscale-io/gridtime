@@ -26,6 +26,8 @@ public class TorchieCmd {
     private final NotifyTrigger NOTIFY_WHEN_DONE;
     private final NotifyTrigger LOG_EXECUTION_DONE;
 
+    private static final int MAX_WAIT_LOOPS = 10;
+
     private final GridTimeExecutor torchieExecutor;
 
     public TorchieCmd(GridTimeExecutor executorPool, Torchie torchie) {
@@ -130,7 +132,12 @@ public class TorchieCmd {
         torchieExecutor.startTorchieIfNotActive(torchie);
     }
 
+    private void waitForCommandToFinishWithTimeout(int millis) {
+
+    }
+
     private void waitForCommandToFinish() {
+
         try {
             while (syncCommandInProgress.get()) {
                 Thread.sleep(100);

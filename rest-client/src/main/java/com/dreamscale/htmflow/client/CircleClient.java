@@ -25,9 +25,6 @@ public interface CircleClient {
     @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + ResourcePaths.DO_IT_LATER_PATH)
     List<CircleDto> getAllDoItLaterCircles();
 
-    @RequestLine("GET " + ResourcePaths.CIRCLE_PATH + "/{id}" + ResourcePaths.KEY_PATH )
-    CircleKeysDto getCircleKeys(@Param("id") String circleId);
-
     @RequestLine("POST " + ResourcePaths.CIRCLE_PATH)
     CircleDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 

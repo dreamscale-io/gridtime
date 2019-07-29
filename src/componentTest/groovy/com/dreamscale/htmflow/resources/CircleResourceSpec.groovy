@@ -3,13 +3,12 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.circle.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
-import com.dreamscale.htmflow.api.circle.CircleKeysDto
+
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
 import com.dreamscale.htmflow.api.circle.FeedMessageDto
 import com.dreamscale.htmflow.api.circle.CircleMessageType
 import com.dreamscale.htmflow.api.circle.ScreenshotReferenceInputDto
 import com.dreamscale.htmflow.api.event.NewSnippetEvent
-import com.dreamscale.htmflow.api.team.TeamDto
 import com.dreamscale.htmflow.client.CircleClient
 import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationEntity

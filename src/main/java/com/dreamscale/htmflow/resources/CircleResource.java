@@ -92,21 +92,6 @@ public class CircleResource {
     }
 
     /**
-     * Retrieves the encryption key for the circle's scrapbook file store
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{id}"  + ResourcePaths.KEY_PATH)
-    public CircleKeysDto getCircleKeys(@PathVariable("id") String circleId) {
-        RequestContext context = RequestContext.get();
-        log.info("getCircleKey, user={}", context.getMasterAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
-
-        return circleService.retrieveKeys(invokingMember.getOrganizationId(), invokingMember.getId(), UUID.fromString(circleId));
-    }
-
-
-    /**
      * Closes an existing circle, and resolves the member status with YAY!
      */
     @PreAuthorize("hasRole('ROLE_USER')")

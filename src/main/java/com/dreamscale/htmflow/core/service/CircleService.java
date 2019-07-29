@@ -510,26 +510,6 @@ public class CircleService {
         return feedMessageDtos;
     }
 
-
-    public CircleKeysDto retrieveKeys(UUID organizationId, UUID invokingMemberId, UUID circleId) {
-        CircleKeysDto circleKeysDto = null;
-
-        //make sure member is on team of the owner
-        CircleEntity circleEntity = circleRepository.findOne(circleId);
-
-        if (circleEntity != null) {
-            validateMemberIsOnTeamOfCircleOwner(organizationId, invokingMemberId, circleEntity);
-
-            circleKeysDto = new CircleKeysDto();
-            circleKeysDto.setCircleId(circleId);
-
-        } else {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCLE_KEY, "Unable to retrieve circle keys");
-        }
-
-        return circleKeysDto;
-    }
-
     private void validateMemberIsOnTeamOfCircleOwner(UUID organizationId, UUID invokingMemberId, CircleEntity circleEntity) {
         UUID circleOrgId = circleEntity.getOrganizationId();
         UUID ownerMemberId = circleEntity.getOwnerMemberId();
