@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 

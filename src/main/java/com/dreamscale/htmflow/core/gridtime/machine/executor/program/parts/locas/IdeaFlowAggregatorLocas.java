@@ -2,8 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.out.BreatheOutStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.BreatheInStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.BreatheOutStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import lombok.extern.slf4j.Slf4j;

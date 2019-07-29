@@ -1,10 +1,10 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas;
 
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.in.BreatheInStrategyFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.out.BreatheOutStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.out.BreatheOutStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.BreatheInStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.BreatheInStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.BreatheOutStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.BreatheOutStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

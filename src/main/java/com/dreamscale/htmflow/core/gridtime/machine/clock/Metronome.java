@@ -53,7 +53,7 @@ public class Metronome {
             this.activeTick = createTick(fromGridTime, toGridTime);
         }
         hasTicked = true;
-        
+
         return activeTick;
     }
 
