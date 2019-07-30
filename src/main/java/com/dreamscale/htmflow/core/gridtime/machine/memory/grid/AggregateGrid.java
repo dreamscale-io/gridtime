@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory.grid;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
@@ -12,11 +13,14 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analy
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.FeatureTotals;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.PlayableCompositeTrackSet;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.WeightedMetricTrack;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +35,7 @@ public class AggregateGrid implements IMusicGrid {
     private final FeatureTotals featureTotals;
     private final MusicClock musicClock;
 
-
-    private Map<TrackSetKey, PlayableCompositeTrackSet> trackSetsByKey = DefaultCollections.map();
+    private Map<MetricRowKey, WeightedMetricTrack> weightedMetricTracks = DefaultCollections.map();
 
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
@@ -46,29 +49,35 @@ public class AggregateGrid implements IMusicGrid {
         this.featureTotals = new FeatureTotals();
     }
 
-
-    public void addTileMetrics(Map<String, Object> props) {
-
+    public RelativeBeat getBeat(String gridTimeKey) {
+        return musicClock.getBeat(gridTimeKey);
     }
 
+    public void addWeightedMetric(MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
+        WeightedMetricTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
 
-    public void loadTileMetrics(LocalDateTime moment, IdeaFlowMetrics metrics) {
-
+        track.addWeightedMetric(beat, durationWeight, metric);
     }
+
+    private WeightedMetricTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
+        WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
+
+        if (track == null) {
+            track = new WeightedMetricTrack(metricRowKey, musicClock);
+            weightedMetricTracks.put(metricRowKey, track);
+        }
+
+        return track;
+    }
+
 
     public void finish() {
 
-        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
-            trackSet.finish();
+        for (WeightedMetricTrack track : weightedMetricTracks.values()) {
+            track.finish();
         }
 
         exportGridRows();
-    }
-
-    public MusicGridResults playTrack(TrackSetKey trackToPlay) {
-        PlayableCompositeTrackSet trackSet = trackSetsByKey.get(trackToPlay);
-
-        return toMusicGridResults(trackSet.toGridRows());
     }
 
     public GridRow getRow(Key rowKey) {
@@ -106,8 +115,8 @@ public class AggregateGrid implements IMusicGrid {
         if (exportedRows == null) {
             exportedRows = DefaultCollections.list();
 
-            for (TrackSetKey trackSetKey : trackSetsByKey.keySet()) {
-                PlayableCompositeTrackSet track = trackSetsByKey.get(trackSetKey);
+            for (MetricRowKey metricRowKey : weightedMetricTracks.keySet()) {
+                WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
 
                 exportedRows.addAll(track.toGridRows());
             }
@@ -118,39 +127,6 @@ public class AggregateGrid implements IMusicGrid {
                 exportedRowsByKey.put(row.getRowKey(), row);
             }
         }
-    }
-
-
-    public CarryOverContext getCarryOverContext() {
-        log.info("getCarryOverContext");
-        CarryOverContext carryOverContext = new CarryOverContext("[MusicGrid]");
-
-        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
-            String subcontextName = getSubcontextName(trackSet);
-            carryOverContext.addSubContext(trackSet.getCarryOverContext(subcontextName));
-        }
-
-        return carryOverContext;
-    }
-
-
-    public void initFromCarryOverContext(CarryOverContext carryOverContext) {
-        log.info("initFromCarryOverContext");
-
-        for (PlayableCompositeTrackSet trackSet : trackSetsByKey.values()) {
-            String subcontextName = getSubcontextName(trackSet);
-            trackSet.initFromCarryOverContext(carryOverContext.getSubContext(subcontextName));
-        }
-
-    }
-
-    private String getSubcontextName(PlayableCompositeTrackSet compositeTrack) {
-        return "[MusicGrid." + compositeTrack.getTrackSetKey().name() + "]";
-    }
-
-
-    public void loadFeatureMetrics(FeatureReference featureReference, FeatureMetrics featureMetrics) {
-
     }
 
 

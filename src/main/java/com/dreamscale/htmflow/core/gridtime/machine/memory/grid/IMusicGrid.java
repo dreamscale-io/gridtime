@@ -14,12 +14,6 @@ public interface IMusicGrid {
 
     List<GridRow> getAllGridRows();
 
-    MusicGridResults playTrack(TrackSetKey trackToPlay);
-
     MusicGridResults playAllTracks();
-
-    CarryOverContext getCarryOverContext();
-
-    void initFromCarryOverContext(CarryOverContext carryOverContext);
 
 }

@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 
 import java.util.UUID;
 
-public interface BreatheOutStrategy {
+public interface OutputStrategy {
 
     void breatheOut(UUID torchieId, Metronome.Tick tick, AggregateGrid aggregateGrid);
 }

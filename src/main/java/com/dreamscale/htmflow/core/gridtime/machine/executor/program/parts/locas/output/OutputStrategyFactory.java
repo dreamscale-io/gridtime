@@ -4,20 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BreatheOutStrategyFactory {
+public class OutputStrategyFactory {
 
     @Autowired
-    BreatheOutIdeaFlow breatheOutIdeaFlow;
+    OutputIdeaFlow outputIdeaFlow;
 
-    public BreatheOutStrategy get(BreatheOutType breatheOutType) {
-        switch (breatheOutType) {
+    public OutputStrategy get(OutputType outputType) {
+        switch (outputType) {
             case SUMMARIZE_IDEA_FLOW_METRICS:
-                return breatheOutIdeaFlow;
+                return outputIdeaFlow;
         }
         return null;
     }
 
-    public enum BreatheOutType {
+    public enum OutputType {
         SUMMARIZE_IDEA_FLOW_METRICS,
     }
 }

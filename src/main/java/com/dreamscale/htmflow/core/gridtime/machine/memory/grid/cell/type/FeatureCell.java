@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.type;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellSize;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FeatureTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import lombok.Getter;
@@ -13,10 +14,12 @@ import java.util.UUID;
 
 @Getter
 public class FeatureCell<F extends FeatureReference> implements GridCell {
-    private static final int DEFAULT_CELL_SIZE = 7;
+
+    private int defaultCellSizeForBeat;
     private static final String EMPTY_CELL = "";
 
     private static final String TRUNCATED_INDICATOR = "*";
+
 
     private RelativeBeat beat;
     private F feature;
@@ -28,23 +31,25 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         this.beat = beat;
         this.feature = feature;
         this.tags = tags;
+
+        this.defaultCellSizeForBeat = CellSize.calculateCellSize(beat);
     }
 
     public FeatureCell(RelativeBeat beat, List<F> features, List<FeatureTag<F>> tags) {
         this.beat = beat;
         this.features = features;
         this.tags = tags;
+
+        this.defaultCellSizeForBeat = CellSize.calculateCellSize(beat);
     }
 
     public FeatureCell(RelativeBeat beat, List<F> features, List<String> featureShorthands, List<FeatureTag<F>> tags) {
-        this.beat = beat;
-        this.features = features;
+        this(beat, features, tags);
         this.featureShorthands = featureShorthands;
-        this.tags = tags;
     }
 
     public String toHeaderCell() {
-        return toHeaderCell(DEFAULT_CELL_SIZE);
+        return toHeaderCell(defaultCellSizeForBeat);
     }
 
     public String toHeaderCell(int overrideCellSize) {
@@ -52,7 +57,7 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     }
 
     public String toValueCell() {
-        return toValueCell(DEFAULT_CELL_SIZE);
+        return toValueCell(defaultCellSizeForBeat);
     }
 
 

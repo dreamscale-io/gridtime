@@ -4,20 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BreatheInStrategyFactory {
+public class InputStrategyFactory {
 
     @Autowired
-    BreatheInIdeaFlow breatheInIdeaFlow;
+    InputIdeaFlow inputIdeaFlow;
 
-    public <T> BreatheInStrategy<T> get(BreatheInType breatheInType) {
-        switch (breatheInType) {
+    public <T> InputStrategy<T> get(InputType inputType) {
+        switch (inputType) {
             case QUERY_IDEA_FLOW_METRICS:
-                return (BreatheInStrategy<T>)breatheInIdeaFlow;
+                return (InputStrategy<T>) inputIdeaFlow;
         }
         return null;
     }
 
-    public enum BreatheInType {
+    public enum InputType {
         QUERY_IDEA_FLOW_METRICS,
     }
 }

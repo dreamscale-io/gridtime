@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class BreatheOutIdeaFlow implements BreatheOutStrategy {
+public class OutputIdeaFlow implements OutputStrategy {
 
 
     @Override

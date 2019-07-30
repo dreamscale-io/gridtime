@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.Fea
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellSize;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.CandleStick;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.MetricDistribution;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.WeightedMetric;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FeatureTag;
 import lombok.Getter;
@@ -15,48 +15,36 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-public class MetricCell implements GridCell {
-
+public class WeightedMetricCell implements GridCell {
 
     private static final String EMPTY_CELL = "";
 
     private static final String TRUNCATED_INDICATOR = "*";
-    private final AggregateType aggregateType;
-    private final int cellSizeForBeat;
-    private final String headerStr;
+    private final int defaultCellSizeForBeat;
+    private final WeightedMetric weightedMetric;
 
+    private RelativeBeat beat;
     private MetricRowKey metricRowKey;
-    private MetricDistribution metricDistribution;
 
-    public MetricCell(RelativeBeat beat, MetricRowKey metricRowKey, AggregateType aggregateType, MetricDistribution metricDistribution) {
-        this.headerStr = beat.toDisplayString();
+    public WeightedMetricCell(RelativeBeat beat, MetricRowKey metricRowKey, WeightedMetric weightedMetric) {
+        this.beat = beat;
         this.metricRowKey = metricRowKey;
-        this.aggregateType = aggregateType;
-        this.metricDistribution = metricDistribution;
+        this.weightedMetric = weightedMetric;
 
-        this.cellSizeForBeat = CellSize.calculateCellSize(beat);
-    }
-
-    public MetricCell(String headerStr, RelativeBeat beat, MetricRowKey metricRowKey, AggregateType aggregateType, MetricDistribution metricDistribution) {
-        this.headerStr = headerStr;
-        this.metricRowKey = metricRowKey;
-        this.aggregateType = aggregateType;
-        this.metricDistribution = metricDistribution;
-
-        this.cellSizeForBeat = CellSize.calculateCellSize(beat);
+        this.defaultCellSizeForBeat = CellSize.calculateCellSizeWithSummaryCell(beat);
     }
 
 
     public String toHeaderCell() {
-        return toHeaderCell(cellSizeForBeat);
+        return toHeaderCell(defaultCellSizeForBeat);
     }
 
     public String toHeaderCell(int overrideCellSize) {
-        return toRightSizedCell(headerStr, overrideCellSize);
+        return toRightSizedCell(beat.toDisplayString(), overrideCellSize);
     }
 
     public String toValueCell() {
-        return toValueCell(cellSizeForBeat);
+        return toValueCell(defaultCellSizeForBeat);
     }
 
     public String toValueCell(int overrideCellSize) {
@@ -86,8 +74,8 @@ public class MetricCell implements GridCell {
     @Override
     public String toDisplayString() {
         String str;
-        if (metricDistribution != null) {
-            double value = metricDistribution.getValueByAggregateType(aggregateType);
+        if (weightedMetric != null) {
+            double value = weightedMetric.getMetric();
             str = Double.toString(Math.round(value * 100)*1.0 / 100);
         } else {
             str = EMPTY_CELL;

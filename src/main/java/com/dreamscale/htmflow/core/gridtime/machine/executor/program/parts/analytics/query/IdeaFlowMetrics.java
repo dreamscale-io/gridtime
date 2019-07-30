@@ -44,7 +44,7 @@ public class IdeaFlowMetrics implements MetricQuery {
     private Double percentProgress;
     private Double percentPairing;
 
-
+//do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
 
     public static IdeaFlowMetrics queryFrom(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
@@ -70,39 +70,7 @@ public class IdeaFlowMetrics implements MetricQuery {
 
         return metrics;
     }
-
-//    public static IdeaFlowMetrics queryFrom(AggregateGrid aggregateGrid) {
-//        aggregateGrid.getTilePropertyMetric()
-//
-//    }
-
-    public Map<MetricRowKey, Object> toProps() {
-        Map<MetricRowKey, Object> props = DefaultCollections.map();
-
-        props.put(MetricRowKey.TIME_IN_TILE, timeInTile);
-        props.put(MetricRowKey.AVG_FLAME, avgFlame);
-        props.put(MetricRowKey.PERCENT_WTF, percentWtf);
-        props.put(MetricRowKey.PERCENT_LEARNING, percentLearning);
-        props.put(MetricRowKey.PERCENT_PROGRESS, percentProgress);
-        props.put(MetricRowKey.PERCENT_PAIRING, percentPairing);
-
-        return props;
-    }
-
-    public static IdeaFlowMetrics fromProps(ZoomLevel zoomLevel, Map<MetricRowKey, Object> props) {
-        IdeaFlowMetrics metrics = new IdeaFlowMetrics();
-
-        metrics.zoomLevel = zoomLevel;
-        metrics.timeInTile = (Duration) props.get(MetricRowKey.TIME_IN_TILE);
-        metrics.avgFlame = (Double) props.get(MetricRowKey.AVG_FLAME);
-        metrics.percentWtf = (Double) props.get(MetricRowKey.PERCENT_WTF);
-        metrics.percentLearning = (Double) props.get(MetricRowKey.PERCENT_LEARNING);
-        metrics.percentProgress = (Double) props.get(MetricRowKey.PERCENT_PROGRESS);
-        metrics.percentPairing = (Double) props.get(MetricRowKey.PERCENT_PAIRING);
-
-        return metrics;
-
-    }
+    
 
 
     private static Duration selectTotalDuration(MusicClock musicClock) {

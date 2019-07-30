@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 @Getter
 @ToString
-public class CandleStick {
+public class CandleStick extends MetricDistribution {
 
     private int sampleCount;
 
@@ -21,23 +21,6 @@ public class CandleStick {
     @JsonIgnore
     private ArrayList<Double> data = new ArrayList<>();
 
-    public double getValueByAggregateType(AggregateType aggregateType) {
-        switch (aggregateType) {
-            case MIN:
-                return getMin();
-            case MAX:
-                return getMax();
-            case AVG:
-                return getAvg();
-            case STDDEV:
-                return getStddev();
-            case TOTAL:
-                return getTotal();
-            case COUNT:
-                return getSampleCount();
-        }
-        return 0;
-    }
 
     public void addSample(double sample) {
         avg = ((avg * sampleCount) + sample) / (sampleCount + 1);

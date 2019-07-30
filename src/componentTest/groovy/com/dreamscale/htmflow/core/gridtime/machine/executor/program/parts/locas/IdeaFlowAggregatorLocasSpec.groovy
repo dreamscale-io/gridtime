@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository
+import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
@@ -83,8 +84,10 @@ class IdeaFlowAggregatorLocasSpec extends Specification {
         Metronome.Tick aggregateTick = tick.aggregateTicks.get(0);
 
         when:
-        ideaflowLocas.breatheIn(aggregateTick)
-        ideaflowLocas.breatheOut(aggregateTick)
+        ideaflowLocas.runProgram(aggregateTick)
+
+        MusicGridResults results = ideaflowLocas.playAllTracks();
+        println results.toDisplayString()
 
         then:
         GridIdeaFlowMetricsEntity metrics = gridMetricsIdeaFlowRepository.findByTorchieGridTime(torchieId,

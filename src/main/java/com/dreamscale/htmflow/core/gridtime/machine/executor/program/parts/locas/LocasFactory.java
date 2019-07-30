@@ -1,10 +1,10 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas;
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.BreatheInStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.BreatheInStrategyFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.BreatheOutStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.BreatheOutStrategyFactory;
+import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsViewEntity;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.InputStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.InputStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.OutputStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.OutputStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,15 +15,15 @@ import java.util.UUID;
 public class LocasFactory {
 
     @Autowired
-    BreatheInStrategyFactory breatheInFactory;
+    InputStrategyFactory inputStrategyFactory;
 
     @Autowired
-    BreatheOutStrategyFactory breatheOutFactory;
+    OutputStrategyFactory outputStrategyFactory;
 
     public IdeaFlowAggregatorLocas createIdeaFlowAggregatorLocas(UUID torchieId, FeatureCache featureCache) {
-        BreatheInStrategy<IdeaFlowMetrics> metricsIn = breatheInFactory.get(BreatheInStrategyFactory.BreatheInType.QUERY_IDEA_FLOW_METRICS);
-        BreatheOutStrategy metricsOut = breatheOutFactory.get(BreatheOutStrategyFactory.BreatheOutType.SUMMARIZE_IDEA_FLOW_METRICS);
+        InputStrategy<GridIdeaFlowMetricsViewEntity> ideaflowIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_IDEA_FLOW_METRICS);
+        OutputStrategy ideaflowOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_IDEA_FLOW_METRICS);
 
-        return new IdeaFlowAggregatorLocas(torchieId, featureCache, metricsIn, metricsOut);
+        return new IdeaFlowAggregatorLocas(torchieId, featureCache, ideaflowIn, ideaflowOut);
     }
 }

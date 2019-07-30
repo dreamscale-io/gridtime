@@ -1,10 +1,12 @@
 package com.dreamscale.htmflow.core.gridtime.machine.clock;
 
+import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 public class MusicClock implements Iterator<RelativeBeat> {
@@ -14,6 +16,7 @@ public class MusicClock implements Iterator<RelativeBeat> {
     private Duration relativeEnd;
 
     private RelativeBeat[] clockBeats;
+    private Map<String, RelativeBeat> gridTimeBeatMap = DefaultCollections.map();
 
     private int beatsPerMeasure;
 
@@ -21,6 +24,18 @@ public class MusicClock implements Iterator<RelativeBeat> {
     private RelativeBeat currentBeat;
 
     private MusicClock summaryClock;
+
+    public MusicClock(GeometryClock.GridTime gridTime) {
+        this(gridTime.getZoomLevel(), gridTime.getZoomLevel().getInnerBeats());
+
+        GeometryClock.GridTime innerGridTime = gridTime.zoomIn();
+
+        for (RelativeBeat beat : clockBeats ) {
+            gridTimeBeatMap.put(innerGridTime.toDisplayString(), beat);
+            innerGridTime = innerGridTime.panRight();
+        }
+
+    }
 
     public MusicClock(ZoomLevel zoomLevel) {
         this(zoomLevel, zoomLevel.getInnerBeats());
@@ -61,6 +76,10 @@ public class MusicClock implements Iterator<RelativeBeat> {
 
         }
         return containingAngle;
+    }
+
+    public RelativeBeat getBeat(String gridTimeKey) {
+        return gridTimeBeatMap.get(gridTimeKey);
     }
 
     public RelativeBeat getActiveBeat() {
