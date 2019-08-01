@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.LocasFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
@@ -26,6 +27,9 @@ public class ProgramFactory {
 
     @Autowired
     private SinkStrategyFactory sinkStrategyFactory;
+
+    @Autowired
+    private LocasFactory locasFactory;
 
     @Autowired
     private CalendarService calendarService;
@@ -63,6 +67,8 @@ public class ProgramFactory {
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES),
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
 
+
+        program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
 
         //proogram add aggregate chain
         //then generate different sort of instructions with alt chain

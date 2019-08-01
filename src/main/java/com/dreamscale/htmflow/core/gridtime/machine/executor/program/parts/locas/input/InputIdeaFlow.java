@@ -30,6 +30,7 @@ public class InputIdeaFlow implements InputStrategy<ZoomableIdeaFlowMetricsEntit
         ZoomLevel zoomInOneLevel = zoomedOutTick.getZoomLevel().zoomIn();
 
         Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, zoomedOutTick.getFrom().getClockTime());
+
         Long zoomInSequenceEnd = zoomInSequenceStart + baseZoom.getInnerBeats() - 1;
 
         List<ZoomableIdeaFlowMetricsEntity> selectedMetrics = zoomableIdeaFlowMetricsRepository.findByTorchieZoomRange(

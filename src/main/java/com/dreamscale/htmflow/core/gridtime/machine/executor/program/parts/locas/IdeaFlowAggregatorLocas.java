@@ -17,10 +17,10 @@ import java.util.UUID;
 public class IdeaFlowAggregatorLocas extends Locas<ZoomableIdeaFlowMetricsEntity> {
 
 
-    public IdeaFlowAggregatorLocas(UUID torchieId, FeatureCache featureCache,
+    public IdeaFlowAggregatorLocas(UUID torchieId,
                                    InputStrategy<ZoomableIdeaFlowMetricsEntity> input,
                                    OutputStrategy output) {
-        super(torchieId, featureCache, input, output);
+        super(torchieId, input, output);
 
     }
 

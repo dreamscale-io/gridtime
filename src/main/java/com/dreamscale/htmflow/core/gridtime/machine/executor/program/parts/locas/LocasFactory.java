@@ -20,10 +20,10 @@ public class LocasFactory {
     @Autowired
     OutputStrategyFactory outputStrategyFactory;
 
-    public IdeaFlowAggregatorLocas createIdeaFlowAggregatorLocas(UUID torchieId, FeatureCache featureCache) {
+    public IdeaFlowAggregatorLocas createIdeaFlowAggregatorLocas(UUID torchieId) {
         InputStrategy<ZoomableIdeaFlowMetricsEntity> ideaflowIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_IDEA_FLOW_METRICS);
         OutputStrategy ideaflowOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_IDEA_FLOW_METRICS);
 
-        return new IdeaFlowAggregatorLocas(torchieId, featureCache, ideaflowIn, ideaflowOut);
+        return new IdeaFlowAggregatorLocas(torchieId, ideaflowIn, ideaflowOut);
     }
 }

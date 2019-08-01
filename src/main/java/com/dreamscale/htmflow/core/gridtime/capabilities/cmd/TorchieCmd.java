@@ -12,6 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackS
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -65,14 +66,14 @@ public class TorchieCmd {
         TileInstructions instructions = torchie.getInstructionsBuilder().playTile();
         runInstructionAndWaitTilDone(instructions);
 
-        return (MusicGridResults) instructions.getOutputResults();
+        return (MusicGridResults) instructions.getOutputResult();
     }
 
     public MusicGridResults playTrack(TrackSetKey trackSetName) {
         TileInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
         runInstructionAndWaitTilDone(instructions);
 
-        return (MusicGridResults) instructions.getOutputResults();
+        return (MusicGridResults) instructions.getOutputResult();
     }
 
     public void haltProgram() {
@@ -95,14 +96,14 @@ public class TorchieCmd {
 
     }
 
-    public Results runSyncCommand(CmdType cmdType, String cmdStr) throws InterruptedException {
+    public List<Results> runSyncCommand(CmdType cmdType, String cmdStr) throws InterruptedException {
 
         Map<String, String> params = cmdType.extractParameters(cmdStr);
 
         return runSyncCommand(cmdType, params);
     }
 
-    public Results runSyncCommand(CmdType cmdType, Map<String, String> templateParameters) throws InterruptedException {
+    public List<Results> runSyncCommand(CmdType cmdType, Map<String, String> templateParameters) throws InterruptedException {
 
         syncCommandInProgress.set(true);
 
@@ -114,7 +115,7 @@ public class TorchieCmd {
 
         waitForCommandToFinish();
 
-        return tileInstructions.getOutputResults();
+        return tileInstructions.getAllOutputResults();
     }
 
     public void runCommand(NotifyTrigger notify, CmdType cmdType, Map<String, String> templateParameters) {
@@ -159,7 +160,7 @@ public class TorchieCmd {
 
     private class UpdateCommandInProgressTrigger implements NotifyTrigger {
         @Override
-        public void notifyWhenDone(TileInstructions instructions, Results results) {
+        public void notifyWhenDone(TileInstructions instructions, List<Results> results) {
             log.debug("Setting cmd in progress to false");
             syncCommandInProgress.set(false);
         }
@@ -168,7 +169,7 @@ public class TorchieCmd {
     private class LogExecutionDoneTrigger implements NotifyTrigger {
 
         @Override
-        public void notifyWhenDone(TileInstructions instructions, Results results) {
+        public void notifyWhenDone(TileInstructions instructions, List<Results> results) {
             log.info("Torchie "+torchie.getTorchieId() + " completed command `" + instructions.getCmdDescription() +
                     "` in "+instructions.getExecutionDuration()
                     + " with queue time: "+ instructions.getQueueDuration());

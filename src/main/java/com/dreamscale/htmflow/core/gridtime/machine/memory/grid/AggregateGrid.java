@@ -23,7 +23,6 @@ import java.util.Map;
 @Slf4j
 public class AggregateGrid implements IMusicGrid {
 
-    private final FeatureCache featureCache;
     private final GeometryClock.GridTime gridTime;
     private final GlyphReferences glyphReferences;
     private final FeatureTotals featureTotals;
@@ -34,8 +33,7 @@ public class AggregateGrid implements IMusicGrid {
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
 
-    public AggregateGrid(FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        this.featureCache = featureCache;
+    public AggregateGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
         this.gridTime = gridTime;
         this.musicClock = musicClock;
 

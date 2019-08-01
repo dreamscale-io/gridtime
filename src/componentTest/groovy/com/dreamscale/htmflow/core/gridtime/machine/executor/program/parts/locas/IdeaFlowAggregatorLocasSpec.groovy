@@ -45,19 +45,16 @@ class IdeaFlowAggregatorLocasSpec extends Specification {
     LocalDateTime time4
 
     IdeaFlowAggregatorLocas ideaflowAggregatorLocas
-    FeatureCache featureCache
     Metronome metronome
 
-    MemoryOnlyTorchieState featurePool
     Torchie torchie
 
 
     def setup() {
 
         torchieId = UUID.randomUUID()
-        featureCache = new FeatureCache()
 
-        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(torchieId, featureCache);
+        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(torchieId);
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)

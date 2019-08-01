@@ -43,7 +43,10 @@ public class CalendarService {
         GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndClockTime(zoomInOneLevel, clockTime);
         if (calendarTile != null) {
             tileSequence = calendarTile.getTileSeq();
+        } else {
+            log.warn("Unable to locate calendar for "+zoomInOneLevel + " : "+clockTime);
         }
+
 
         return tileSequence;
     }

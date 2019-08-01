@@ -6,7 +6,6 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.InputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.OutputStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,22 +16,20 @@ import java.util.UUID;
 public abstract class Locas<T> {
 
     private final UUID torchieId;
-    private final FeatureCache featureCache;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
     private AggregateGrid aggregateGrid;
 
-    public Locas(UUID torchieId, FeatureCache featureCache,
+    public Locas(UUID torchieId,
                  InputStrategy<T> input,
                  OutputStrategy output) {
         this.torchieId = torchieId;
-        this.featureCache = featureCache;
         this.input = input;
         this.output = output;
 
     }
 
-    public void runProgram(Metronome.Tick tick) {
+    public AggregateGrid runProgram(Metronome.Tick tick) {
         List<T> metricInputs = input.breatheIn(torchieId, tick);
 
         log.debug("Found "+metricInputs.size() + " metrics at tick: "+tick.toDisplayString());
@@ -43,6 +40,8 @@ public abstract class Locas<T> {
         aggregateGrid.finish();
 
         output.breatheOut(torchieId, tick, aggregateGrid);
+
+        return aggregateGrid;
     }
 
     public MusicGridResults playAllTracks() {
@@ -55,7 +54,7 @@ public abstract class Locas<T> {
 
         MusicClock musicClock = new MusicClock(gridTime);
 
-        return new AggregateGrid(featureCache, gridTime, musicClock);
+        return new AggregateGrid(gridTime, musicClock);
     }
 
 }

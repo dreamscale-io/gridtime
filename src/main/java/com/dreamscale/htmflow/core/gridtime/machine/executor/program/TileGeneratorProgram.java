@@ -3,10 +3,12 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateAggregateUpTile;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateAggregateTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateBaseTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.IdeaFlowAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategy;
@@ -27,6 +29,9 @@ public class TileGeneratorProgram implements Program {
 
     private final List<Flow> pullChain = DefaultCollections.list();
 
+    private final List<Locas> aggregatorChain = DefaultCollections.list();
+
+
     private final TorchieState torchieState;
     private final UUID torchieId;
 
@@ -37,7 +42,6 @@ public class TileGeneratorProgram implements Program {
         this.torchieId = torchieId;
         this.torchieState = torchieState;
         this.metronome = new Metronome(startPosition);
-
 
         this.isInitialized = false;
     }
@@ -108,14 +112,13 @@ public class TileGeneratorProgram implements Program {
         return new GenerateBaseTile(torchieState, pullChain, tick);
     }
 
-    //aggregate chain, would have aggregate source, aggregate sink?
-    //then wire into the aggregate up instruction
-
     private TileInstructions generateAggregateTickInstructions(Metronome.Tick aggregateTick) {
-        //other chain
 
-        return new GenerateAggregateUpTile(torchieState, aggregateTick);
+        return new GenerateAggregateTile(torchieState, aggregatorChain, aggregateTick);
     }
 
 
+    public void addAggregator( Locas locas) {
+        aggregatorChain.add(locas );
+    }
 }

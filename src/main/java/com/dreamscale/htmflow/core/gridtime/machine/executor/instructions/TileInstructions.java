@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 public abstract class TileInstructions implements Callable<TileInstructions> {
 
     private GridTile outputTile;
-    private Results outputResults;
+    private List<Results> outputResults = DefaultCollections.list();
 
     private Exception exceptionResult;
 
@@ -72,12 +72,20 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
         this.outputTile = outputTile;
     }
 
-    protected void setOutputResults(Results outputResults) {
-        this.outputResults = outputResults;
+    public void appendOutputResults(Results results) {
+        outputResults.add(results);
     }
 
-    public Results getOutputResults() {
+    public Results getOutputResult() {
+        return outputResults.get(0);
+    }
+
+    public List<Results> getAllOutputResults() {
         return outputResults;
+    }
+
+    public boolean isSuccessful() {
+        return exceptionResult == null;
     }
 
     public GridTile getOutputTile() {

@@ -16,7 +16,7 @@ public class PlayTile extends TileInstructions {
     @Override
     protected void executeInstruction() throws InterruptedException {
         MusicGridResults results = this.torchieState.getActiveTile().playAllTracks();
-        setOutputResults(results);
+        appendOutputResults(results);
     }
 
     @Override

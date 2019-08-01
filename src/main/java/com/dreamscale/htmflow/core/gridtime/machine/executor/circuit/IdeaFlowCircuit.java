@@ -106,7 +106,7 @@ public class IdeaFlowCircuit {
 
     private void fireProgramDoneTriggers() {
         for (NotifyTrigger trigger: notifyWhenProgramDoneTriggers) {
-            trigger.notifyWhenDone(lastInstruction, lastInstruction.getOutputResults());
+            trigger.notifyWhenDone(lastInstruction, lastInstruction.getAllOutputResults());
         }
         notifyWhenProgramDoneTriggers.clear();
     }
@@ -122,7 +122,7 @@ public class IdeaFlowCircuit {
     private class EvaluateOutputTrigger implements NotifyTrigger {
 
         @Override
-        public void notifyWhenDone(TileInstructions finishedInstruction, Results results) {
+        public void notifyWhenDone(TileInstructions finishedInstruction, List<Results> results) {
             IdeaFlowMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
 
             if (ideaFlowTile != null) {
