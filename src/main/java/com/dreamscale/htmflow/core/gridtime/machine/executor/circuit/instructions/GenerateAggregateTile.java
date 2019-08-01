@@ -1,7 +1,8 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.instructions;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.EventType;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
@@ -29,6 +30,8 @@ public class GenerateAggregateTile extends TileInstructions {
             AggregateGrid output = aggregator.runProgram(tick);
             appendOutputResults(output.playAllTracks());
         }
+
+        publishEvent(new TileStreamEvent(torchieState.getTorchieId(), tick.getFrom(), EventType.NewTile));
     }
 
     @Override

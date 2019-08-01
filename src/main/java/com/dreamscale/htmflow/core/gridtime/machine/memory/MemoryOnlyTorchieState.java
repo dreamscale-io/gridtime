@@ -14,6 +14,7 @@ public class MemoryOnlyTorchieState extends AbstractTorchieState {
     }
 
 
+
     @Override
     public void resolveFeatureReferences() {
     }

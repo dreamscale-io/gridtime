@@ -1,7 +1,9 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.instructions;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.EventType;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +31,8 @@ public class GenerateBaseTile extends TileInstructions {
         }
 
         setOutputTile(torchieState.getActiveTile());
+
+        publishEvent(new TileStreamEvent(torchieState.getTorchieId(), tick.getFrom(), EventType.NewTile));
     }
 
     @Override

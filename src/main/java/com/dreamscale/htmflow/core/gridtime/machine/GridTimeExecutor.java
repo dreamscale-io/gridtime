@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import lombok.extern.slf4j.Slf4j;
 

@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface TorchieState {
 
+    UUID getTorchieId();
+
     void gotoPosition(GeometryClock.GridTime toGridPosition);
 
     String getActiveTime();
@@ -24,7 +26,6 @@ public interface TorchieState {
     <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type);
 
     void resolveFeatureReferences();
-
 
 
 

@@ -1,8 +1,9 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.instructions;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions;
 
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,7 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
 
     private GridTile outputTile;
     private List<Results> outputResults = DefaultCollections.list();
+    private List<TileStreamEvent> outputTileStreamEvents = DefaultCollections.list();
 
     private Exception exceptionResult;
 
@@ -72,6 +74,14 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
         this.outputTile = outputTile;
     }
 
+    protected void publishEvent(TileStreamEvent tileStreamEvent) {
+        outputTileStreamEvents.add(tileStreamEvent);
+    }
+
+    public List<TileStreamEvent> getOutputTileStreamEvents() {
+        return outputTileStreamEvents;
+    }
+
     public void appendOutputResults(Results results) {
         outputResults.add(results);
     }
@@ -101,7 +111,6 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
     public Duration getQueueDuration() {
         return queueDuration;
     }
-
 
 
 }

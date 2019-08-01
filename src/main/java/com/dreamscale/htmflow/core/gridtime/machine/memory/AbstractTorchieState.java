@@ -31,6 +31,12 @@ public abstract class AbstractTorchieState implements TorchieState {
         this.featureCache = featureCache;
     }
 
+    @Override
+    public UUID getTorchieId() {
+        return torchieId;
+    }
+
+
     public GridTile getActiveTile() {
         return activeGridTile;
     }

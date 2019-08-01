@@ -1,13 +1,14 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.wires;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 @Slf4j
-public class AggregatingWire {
+public class AggregatingWire implements Wire {
 
     private final LinkedHashMap<String, AggregateStreamEvent> aggregateEventStream;
 
@@ -15,13 +16,18 @@ public class AggregatingWire {
         aggregateEventStream = DefaultCollections.map();
     }
 
-    public void sendTileStreamEvent(TileStreamEvent event) {
 
+    public void publishAll(List<TileStreamEvent> tileStreamEvents) {
+        for (TileStreamEvent event : tileStreamEvents) {
+            publish(event);
+        }
+    }
+
+    public void publish(TileStreamEvent event) {
         synchronized (aggregateEventStream) {
-            AggregateStreamEvent aggregate = findOrCreateAggregateByGridTime(event.gridTime, event.streamAction);
+            AggregateStreamEvent aggregate = findOrCreateAggregateByGridTime(event.gridTime, event.eventType);
             aggregate.add(event);
         }
-
     }
 
     public boolean hasNext() {
@@ -39,23 +45,21 @@ public class AggregatingWire {
         return aggregate;
     }
 
-    private AggregateStreamEvent findOrCreateAggregateByGridTime(GeometryClock.GridTime gridTime, StreamAction streamAction) {
+    private AggregateStreamEvent findOrCreateAggregateByGridTime(GeometryClock.GridTime gridTime, EventType eventType) {
 
-        String aggregateKey = createAggregateKey(gridTime, streamAction);
+        String aggregateKey = createAggregateKey(gridTime, eventType);
         AggregateStreamEvent aggregate = aggregateEventStream.get(aggregateKey);
 
         if (aggregate == null) {
-            aggregate = new AggregateStreamEvent(gridTime, streamAction);
+            aggregate = new AggregateStreamEvent(gridTime, eventType);
             aggregateEventStream.put(aggregateKey, aggregate);
         }
         return aggregate;
     }
 
-    private String createAggregateKey(GeometryClock.GridTime gridTime, StreamAction streamAction) {
-        return gridTime.toDisplayString() + "::" + streamAction.name();
+    private String createAggregateKey(GeometryClock.GridTime gridTime, EventType eventType) {
+        return gridTime.toDisplayString() + "::" + eventType.name();
     }
-
-
 
 
 }

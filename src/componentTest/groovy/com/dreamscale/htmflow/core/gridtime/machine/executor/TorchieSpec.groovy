@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.domain.journal.TaskEntity
 
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification

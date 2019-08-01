@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.CmdType;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import lombok.extern.slf4j.Slf4j;
 

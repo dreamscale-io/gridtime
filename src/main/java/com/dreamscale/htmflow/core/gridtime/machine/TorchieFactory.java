@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.*;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.BoxConfigurationLoaderService;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.wires.AggregatingWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessTorchieState;
@@ -43,14 +43,15 @@ public class TorchieFactory {
 
     public Torchie wireUpTeamMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
         FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+        AggregatingWire teamWire = findOrCreateWire(teamId);
 
-        PerProcessTorchieState torchieBody = new PerProcessTorchieState(teamId, memberId,
+        PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,
                 featureCache, featureResolverService, tileSearchService);
 
         //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieBody, startingPosition);
+        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, teamWire, startingPosition);
 
-        return new Torchie(memberId, torchieBody, program);
+        return new Torchie(memberId, torchieState, program);
 
     }
 

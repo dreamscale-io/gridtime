@@ -3,8 +3,10 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateCalendarTile;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateCalendarTile;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.DevNullWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 
 import java.time.LocalDateTime;
@@ -53,6 +55,11 @@ public class CalendarGeneratorProgram implements Program {
     @Override
     public boolean isDone() {
         return isInitialized && (metronome.getActiveTick().isAfter(calendarEnd) || tilesGenerated >= maxTiles);
+    }
+
+    @Override
+    public Wire getOutputStreamEventWire() {
+        return new DevNullWire();
     }
 
     @Override

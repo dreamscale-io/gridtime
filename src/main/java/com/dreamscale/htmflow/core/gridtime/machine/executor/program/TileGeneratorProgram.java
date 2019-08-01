@@ -3,11 +3,11 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateAggregateTile;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.GenerateBaseTile;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateAggregateTile;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateBaseTile;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.IdeaFlowAggregatorLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.FlowSink;
@@ -31,12 +31,12 @@ public class TileGeneratorProgram implements Program {
 
     private final List<Locas> aggregatorChain = DefaultCollections.list();
 
-
     private final TorchieState torchieState;
     private final UUID torchieId;
 
     private final Metronome metronome;
     private  boolean isInitialized;
+    private Wire outputStreamEventWire;
 
     public TileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
         this.torchieId = torchieId;
@@ -95,6 +95,15 @@ public class TileGeneratorProgram implements Program {
         return false;
     }
 
+    @Override
+    public Wire getOutputStreamEventWire() {
+        return outputStreamEventWire;
+    }
+
+    public void setOutputStreamEventWire(Wire teamWire) {
+        this.outputStreamEventWire = teamWire;
+    }
+
     public void addFlowSourceToPullChain(FeedStrategy feedStrategy, FlowObserver... observers) {
         pullChain.add(new FlowSource(torchieId, torchieState, feedStrategy, observers));
     }
@@ -121,4 +130,6 @@ public class TileGeneratorProgram implements Program {
     public void addAggregator( Locas locas) {
         aggregatorChain.add(locas );
     }
+
+
 }

@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.wires;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import lombok.Getter;
@@ -10,12 +10,12 @@ import java.util.List;
 public class AggregateStreamEvent {
 
     private GeometryClock.GridTime gridTime;
-    private StreamAction streamAction;
+    private EventType eventType;
     private List<TileStreamEvent> sourceTileEvents;
 
-    public AggregateStreamEvent(GeometryClock.GridTime gridTime, StreamAction streamAction) {
+    public AggregateStreamEvent(GeometryClock.GridTime gridTime, EventType eventType) {
         this.gridTime = gridTime;
-        this.streamAction = streamAction;
+        this.eventType = eventType;
         this.sourceTileEvents = new ArrayList<>();
     }
 

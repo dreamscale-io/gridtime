@@ -1,6 +1,5 @@
 package com.dreamscale.htmflow.core.gridtime.machine.clock
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions
 
 import spock.lang.Specification
 

@@ -1,5 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.LocasFactory;
@@ -34,7 +36,7 @@ public class ProgramFactory {
     @Autowired
     private CalendarService calendarService;
 
-    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
+    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, Wire teamWire, LocalDateTime startPosition) {
 
         TileGeneratorProgram program = new TileGeneratorProgram(torchieId, torchieState, startPosition);
 
@@ -69,6 +71,8 @@ public class ProgramFactory {
 
 
         program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
+
+        program.setOutputStreamEventWire(teamWire);
 
         //proogram add aggregate chain
         //then generate different sort of instructions with alt chain

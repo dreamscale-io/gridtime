@@ -4,11 +4,14 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.NowMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +31,7 @@ public class IdeaFlowCircuit {
 
     private LinkedList<TimeBomb> activeWaits;
     private final NowMetrics nowMetrics;
+    private final Wire outputStreamEventWire;
 
     //circuit coordinator
 
@@ -44,6 +48,7 @@ public class IdeaFlowCircuit {
         this.activeWaits = DefaultCollections.queueList();
 
         this.nowMetrics = new NowMetrics();
+        this.outputStreamEventWire = program.getOutputStreamEventWire();
     }
 
     public void fireTriggersForActiveWaits() {
@@ -69,8 +74,6 @@ public class IdeaFlowCircuit {
     public TileInstructions getNextInstruction() {
 
         TileInstructions nextInstructions = null;
-
-
 
         if (highPriorityInstructionQueue.size() > 0) {
             nextInstructions = highPriorityInstructionQueue.removeFirst();
@@ -123,22 +126,30 @@ public class IdeaFlowCircuit {
 
         @Override
         public void notifyWhenDone(TileInstructions finishedInstruction, List<Results> results) {
-            IdeaFlowMetrics ideaFlowTile = getOutputIdeaFlowTile(finishedInstruction);
 
-            if (ideaFlowTile != null) {
+            IdeaFlowMetrics ideaFlowMetrics = getOutputIdeaFlowMetrics(finishedInstruction);
+            updateIdeaFlowTracerAndTriggerAlarms(ideaFlowMetrics);
 
-                nowMetrics.push(ideaFlowTile);
+            List<TileStreamEvent> tileStreamEvents = finishedInstruction.getOutputTileStreamEvents();
+            outputStreamEventWire.publishAll(tileStreamEvents);
 
-                generateAlarms();
-                triggerAlarms();
-            }
 
             circuitMonitor.finishInstruction(finishedInstruction.getQueueDuration(), finishedInstruction.getExecutionDuration());
 
         }
+
+        private void updateIdeaFlowTracerAndTriggerAlarms(IdeaFlowMetrics ideaFlowMetrics) {
+            if (ideaFlowMetrics != null) {
+
+                nowMetrics.push(ideaFlowMetrics);
+
+                generateAlarms();
+                triggerAlarms();
+            }
+        }
     }
 
-    private IdeaFlowMetrics getOutputIdeaFlowTile(TileInstructions finishedInstruction) {
+    private IdeaFlowMetrics getOutputIdeaFlowMetrics(TileInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();
 
         if (output != null) {
