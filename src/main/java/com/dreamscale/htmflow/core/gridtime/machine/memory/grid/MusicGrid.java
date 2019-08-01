@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
@@ -193,6 +194,11 @@ public class MusicGrid implements IMusicGrid {
         PlayableCompositeTrackSet trackSet = trackSetsByKey.get(trackToPlay);
 
         return toMusicGridResults(trackSet.toGridRows());
+    }
+
+    @Override
+    public ZoomLevel getZoomLevel() {
+        return musicClock.getZoomLevel();
     }
 
     public GridRow getRow(Key rowKey) {

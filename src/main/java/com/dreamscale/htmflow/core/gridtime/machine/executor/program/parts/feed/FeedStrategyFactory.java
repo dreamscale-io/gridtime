@@ -16,7 +16,7 @@ public class FeedStrategyFactory {
     ExecutionActivityFeedStrategy executionActivityFeedStrategy;
 
     @Autowired
-    CircleMessagesFeedStrategy circleMessagesFetcher;
+    WTFMessagesFeedStrategy wtfMessagesFetcher;
 
 
 
@@ -28,8 +28,8 @@ public class FeedStrategyFactory {
                 return journalFeedStrategy;
             case EXECUTION_ACTIVITY_FEED:
                 return executionActivityFeedStrategy;
-            case CIRCLE_MESSAGES_FEED:
-                return circleMessagesFetcher;
+            case WTF_MESSAGES_FEED:
+                return wtfMessagesFetcher;
         }
         return null;
     }
@@ -38,6 +38,6 @@ public class FeedStrategyFactory {
         JOURNAL_FEED,
         FILE_ACTIVITY_FEED,
         EXECUTION_ACTIVITY_FEED,
-        CIRCLE_MESSAGES_FEED;
+        WTF_MESSAGES_FEED;
     }
 }

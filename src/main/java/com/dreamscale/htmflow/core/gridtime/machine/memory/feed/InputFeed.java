@@ -4,6 +4,8 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Observable;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.Batch;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Bookmark;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
 
@@ -11,20 +13,21 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.UUID;
 
-public class Feed<T extends Flowable> implements Observable {
+public class InputFeed<T extends Flowable> implements Observable {
 
     private final int MAX_QUEUE_SIZE = 300;
     private final int FETCH_SIZE = 100;
 
     private final LinkedList<T> inputQueue;
     private final UUID memberId;
+
+    private final FeedStrategyFactory.FeedType feedType;
     private final FeedStrategy<T> feedStrategy;
-    private final String name;
 
     private Bookmark fetchLocationBookmark;
 
-    public Feed(String name, UUID memberId, FeedStrategy<T> feedStrategy) {
-        this.name = name;
+    public InputFeed(FeedStrategyFactory.FeedType feedType, UUID memberId, FeedStrategy<T> feedStrategy) {
+        this.feedType = feedType;
         this.inputQueue = DefaultCollections.queueList();
         this.memberId = memberId;
         this.feedStrategy = feedStrategy;
@@ -44,6 +47,10 @@ public class Feed<T extends Flowable> implements Observable {
             }
         }
         return recordsPulled;
+    }
+
+    public void addSomeData(T flowable) {
+        inputQueue.add(flowable);
     }
 
     private void initBookmarkIfNeeded(LocalDateTime clockPosition) {
@@ -94,6 +101,8 @@ public class Feed<T extends Flowable> implements Observable {
 
     @Override
     public String toDisplayString() {
-        return name + "["+inputQueue.size()+"]";
+        return feedType.name() + "["+inputQueue.size()+"]";
     }
+
+
 }

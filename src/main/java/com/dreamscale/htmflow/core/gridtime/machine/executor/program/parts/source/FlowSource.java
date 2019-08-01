@@ -5,8 +5,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 
 import java.time.LocalDateTime;
@@ -17,12 +17,12 @@ import java.util.UUID;
 public class FlowSource<T extends Flowable> implements Flow {
 
     private final List<FlowObserver<T>> flowObservers;
-    private final FeaturePool featurePool;
-    private final Feed<T> sourceFeed;
+    private final TorchieState torchieState;
+    private final InputFeed<T> inputFeed;
 
-    public FlowSource(UUID memberId, FeaturePool featurePool, FeedStrategy<T> feedStrategy, FlowObserver<T>... observers) {
-        this.featurePool = featurePool;
-        this.sourceFeed = featurePool.registerFeed(memberId, feedStrategy);
+    public FlowSource(UUID memberId, TorchieState torchieState, FeedStrategy<T> feedStrategy, FlowObserver<T>... observers) {
+        this.torchieState = torchieState;
+        this.inputFeed = torchieState.registerInputFeed(memberId, feedStrategy.getFeedType(), feedStrategy);
 
         this.flowObservers = new ArrayList<>();
 
@@ -36,18 +36,18 @@ public class FlowSource<T extends Flowable> implements Flow {
         LocalDateTime fromClockPosition = tick.getFrom().getClockTime();
         LocalDateTime toClockPosition = tick.getTo().getClockTime();
 
-        sourceFeed.pullMoreIfCapacityAvailable(fromClockPosition);
+        inputFeed.pullMoreIfCapacityAvailable(fromClockPosition);
 
-        Window<T> window = sourceFeed.pullNextWindow(fromClockPosition, toClockPosition);
+        Window<T> window = inputFeed.pullNextWindow(fromClockPosition, toClockPosition);
         observeFlowables(window);
 
-        while (!window.isFinished() && sourceFeed.isEmpty()) {
-            int recordsPulled = sourceFeed.pullMoreIfCapacityAvailable(fromClockPosition);
+        while (!window.isFinished() && inputFeed.isEmpty()) {
+            int recordsPulled = inputFeed.pullMoreIfCapacityAvailable(fromClockPosition);
 
             if (recordsPulled == 0) {
                 break;
             } else {
-                window = sourceFeed.pullNextWindow(fromClockPosition, toClockPosition);
+                window = inputFeed.pullNextWindow(fromClockPosition, toClockPosition);
                 observeFlowables(window);
             }
         }
@@ -56,7 +56,7 @@ public class FlowSource<T extends Flowable> implements Flow {
     private void observeFlowables(Window<T> window) {
         for (FlowObserver<T> observer : flowObservers) {
 
-            observer.see(window, featurePool);
+            observer.see(window, torchieState);
         }
     }
 

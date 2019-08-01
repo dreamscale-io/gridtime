@@ -32,7 +32,6 @@ public class WeightedMetricTrack {
         this.musicClock = musicClock;
     }
 
-
     public void addWeightedMetric(RelativeBeat beat, Duration durationWeight, Double metric) {
         if (beat != null) {
             if (metricsPerBeat.get(beat) != null) {
@@ -57,12 +56,17 @@ public class WeightedMetricTrack {
 
         Iterator<RelativeBeat> beatIterator = musicClock.getForwardsIterator();
 
-        gridRow.add(new MetricCell("Summary", musicClock.getBeat(1), rowKey, AggregateType.AVG, summaryCandle));
+        gridRow.addSummaryCell(new MetricCell(rowKey, AggregateType.AVG, summaryCandle));
+        gridRow.addSummaryCell(new MetricCell(rowKey, AggregateType.MIN, summaryCandle));
+        gridRow.addSummaryCell(new MetricCell(rowKey, AggregateType.MAX, summaryCandle));
+        gridRow.addSummaryCell(new MetricCell(rowKey, AggregateType.STDDEV, summaryCandle));
+        gridRow.addSummaryCell(new MetricCell(rowKey, AggregateType.TOTAL, summaryCandle));
+
 
         while (beatIterator.hasNext()) {
             RelativeBeat beat = beatIterator.next();
 
-            gridRow.add(new WeightedMetricCell(beat, rowKey, metricsPerBeat.get(beat)));
+            gridRow.add(new WeightedMetricCell(3, beat, rowKey, metricsPerBeat.get(beat)));
         }
         return gridRow;
     }
@@ -70,5 +74,10 @@ public class WeightedMetricTrack {
 
     public Collection<? extends GridRow> toGridRows() {
         return DefaultCollections.toList(toGridRow());
+    }
+
+
+    public Double getTotalCalculation() {
+        return summaryCandle.getTotal();
     }
 }

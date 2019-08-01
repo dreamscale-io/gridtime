@@ -3,7 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink
 import com.dreamscale.htmflow.core.domain.tile.*;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
@@ -32,9 +32,9 @@ public class SaveToPostgresSink implements SinkStrategy {
     GridIdeaFlowMetricsRepository gridIdeaFlowMetricsRepository;
 
     @Override
-    public void save(UUID torchieId, FeaturePool featurePool) {
+    public void save(UUID torchieId, TorchieState torchieState) {
 
-        GridTile gridTile = featurePool.getActiveGridTile();
+        GridTile gridTile = torchieState.getActiveTile();
 
         //first thing I need to do, is save the wtf banded row.
 
@@ -65,6 +65,8 @@ public class SaveToPostgresSink implements SinkStrategy {
 
 
         IdeaFlowMetrics ideaFlowMetrics = gridTile.getIdeaFlowMetrics();
+        log.debug("wtf percent: "+ideaFlowMetrics.getPercentWtf());
+        log.debug("ideaflowMetrics: "+ideaFlowMetrics);
 
         GridIdeaFlowMetricsEntity gridIdeaFlowMetricsEntity = createGridIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
 

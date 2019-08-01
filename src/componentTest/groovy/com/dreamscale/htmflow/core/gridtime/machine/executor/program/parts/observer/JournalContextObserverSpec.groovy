@@ -9,7 +9,7 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import spock.lang.Specification
@@ -24,15 +24,15 @@ public class JournalContextObserverSpec extends Specification {
     GeometryClock clock
     FeatureCache featureCache
     UUID torchieId
-    MemoryOnlyFeaturePool pool
+    MemoryOnlyTorchieState torchieState
 
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
         torchieId = UUID.randomUUID()
 
-        pool = new MemoryOnlyFeaturePool(torchieId)
-        pool.gotoTilePosition(clock.getActiveGridTime())
+        torchieState = new MemoryOnlyTorchieState(torchieId)
+        torchieState.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create project & task switch events"() {
@@ -55,11 +55,11 @@ public class JournalContextObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        journalContextObserver.see(window, pool)
+        journalContextObserver.see(window, torchieState)
 
-        pool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
-        MusicGridResults tileOutput = pool.getActiveGridTile().playTrack(TrackSetKey.WorkContext)
+        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:
@@ -79,7 +79,7 @@ public class JournalContextObserverSpec extends Specification {
         LocalDateTime time4 = time3.plusMinutes(20);
 
         clock = new GeometryClock(time1);
-        pool.gotoTilePosition(clock.getActiveGridTime());
+        torchieState.gotoPosition(clock.getActiveGridTime());
 
         ProjectEntity project = aRandom.projectEntity().build();
         TaskEntity task1 = aRandom.taskEntity().forProject(project).build();
@@ -91,16 +91,16 @@ public class JournalContextObserverSpec extends Specification {
         Window window = new Window(time1, time2)
         window.addAll(flowables);
 
-        journalContextObserver.see(window, pool)
+        journalContextObserver.see(window, torchieState)
 
-        pool.nextGridTile();
-        pool.nextGridTile();
+        torchieState.nextTile();
+        torchieState.nextTile();
 
         Window nextWindow = new Window(time3, time4)
 
         when:
-        journalContextObserver.see(nextWindow, pool)
-        MusicGridResults tileOutput = pool.getActiveGridTile().playTrack(TrackSetKey.WorkContext)
+        journalContextObserver.see(nextWindow, torchieState)
+        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:

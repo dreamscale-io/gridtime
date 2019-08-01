@@ -10,7 +10,7 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import spock.lang.Specification
 
@@ -23,15 +23,15 @@ public class WTFStateObserverSpec extends Specification {
     WTFStateObserver wtfStateObserver
     GeometryClock clock
     UUID torchieId
-    MemoryOnlyFeaturePool pool
+    MemoryOnlyTorchieState torchieState
 
     def setup() {
 
         clock = new GeometryClock(LocalDateTime.now())
         wtfStateObserver = new WTFStateObserver()
         torchieId = UUID.randomUUID()
-        pool = new MemoryOnlyFeaturePool(torchieId)
-        pool.gotoTilePosition(clock.getActiveGridTime())
+        torchieState = new MemoryOnlyTorchieState(torchieId)
+        torchieState.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create wtf circle states"() {
@@ -56,10 +56,10 @@ public class WTFStateObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        wtfStateObserver.see(window, pool)
-        pool.getActiveGridTile().finishAfterLoad()
+        wtfStateObserver.see(window, torchieState)
+        torchieState.getActiveTile().finishAfterLoad()
 
-        MusicGridResults tileOutput = pool.getActiveGridTile().playTrack(TrackSetKey.IdeaFlow)
+        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.IdeaFlow)
         print tileOutput
 
         then:

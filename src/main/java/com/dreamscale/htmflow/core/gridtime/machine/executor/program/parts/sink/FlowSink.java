@@ -2,9 +2,8 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,12 +12,12 @@ public class FlowSink implements Flow {
 
 
     private final UUID memberId;
-    private final FeaturePool featurePool;
+    private final TorchieState torchieState;
     private final List<SinkStrategy> sinkStrategies;
 
-    public FlowSink(UUID memberId, FeaturePool featurePool, SinkStrategy... sinkStrategies) {
+    public FlowSink(UUID memberId, TorchieState torchieState, SinkStrategy... sinkStrategies) {
         this.memberId = memberId;
-        this.featurePool = featurePool;
+        this.torchieState = torchieState;
 
         this.sinkStrategies = new ArrayList<>();
 
@@ -31,7 +30,7 @@ public class FlowSink implements Flow {
     public void tick(Metronome.Tick coordinates) throws InterruptedException {
 
         for (SinkStrategy sink : sinkStrategies) {
-            sink.save(memberId, featurePool);
+            sink.save(memberId, torchieState);
         }
     }
 

@@ -10,8 +10,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.FinishTypeT
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.NoOpProgram
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.AuthorsDetails
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.ExecutionEvent
@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 class TorchieCmdSpec extends Specification {
 
     UUID torchieId
-    FeaturePool featurePool
+    TorchieState torchieState
     LocalDateTime time1
     LocalDateTime time2
     LocalDateTime time3
@@ -44,9 +44,9 @@ class TorchieCmdSpec extends Specification {
         time4 = clockStart.plusMinutes(6)
 
         torchieId = UUID.randomUUID();
-        featurePool = new MemoryOnlyFeaturePool(torchieId);
+        torchieState = new MemoryOnlyTorchieState(torchieId);
 
-        torchie = new Torchie(torchieId, featurePool, new NoOpProgram());
+        torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
         
         torchieExecutor = new GridTimeExecutor(1);
@@ -62,8 +62,8 @@ class TorchieCmdSpec extends Specification {
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
         then:
-        assert featurePool.getActiveGridTile() != null
-        assert featurePool.getActiveGridTile().gridTime.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
+        assert torchieState.getActiveTile() != null
+        assert torchieState.getActiveTile().gridTime.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
 
     }
 
@@ -71,9 +71,9 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.IdeaFlow)
@@ -88,15 +88,15 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(1, time1, Duration.ofSeconds(15), "JUnit", 0))
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(2, time1, Duration.ofSeconds(1), "JUnit", -1))
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(1, time1, Duration.ofSeconds(15), "JUnit", 0))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(2, time1, Duration.ofSeconds(1), "JUnit", -1))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
 
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(1), "JUnit", 0))
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(5, time3, Duration.ofSeconds(7), "JUnit", 0))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(1), "JUnit", 0))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(5, time3, Duration.ofSeconds(7), "JUnit", 0))
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetKey.Executions)
@@ -114,21 +114,21 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(6))
-        featurePool.getActiveGridTile().gotoLocation(time1, "/some/other/place", Duration.ofSeconds(9))
-        featurePool.getActiveGridTile().gotoLocation(time1, "/some/placeB", Duration.ofSeconds(12))
-        featurePool.getActiveGridTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(5))
+        torchieState.getActiveTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(6))
+        torchieState.getActiveTile().gotoLocation(time1, "/some/other/place", Duration.ofSeconds(9))
+        torchieState.getActiveTile().gotoLocation(time1, "/some/placeB", Duration.ofSeconds(12))
+        torchieState.getActiveTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(5))
 
-        featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(9))
-        featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
+        torchieState.getActiveTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(9))
+        torchieState.getActiveTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
 
-        featurePool.getActiveGridTile().modifyCurrentLocation(time2, 443)
-        featurePool.getActiveGridTile().modifyCurrentLocation(time2, 243)
+        torchieState.getActiveTile().modifyCurrentLocation(time2, 443)
+        torchieState.getActiveTile().modifyCurrentLocation(time2, 243)
 
-        featurePool.getActiveGridTile().gotoLocation(time3, "/some/other/place", Duration.ofSeconds(9))
-        featurePool.getActiveGridTile().gotoLocation(time3, "/some/placeB", Duration.ofSeconds(12))
+        torchieState.getActiveTile().gotoLocation(time3, "/some/other/place", Duration.ofSeconds(9))
+        torchieState.getActiveTile().gotoLocation(time3, "/some/placeB", Duration.ofSeconds(12))
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.Navigations)
@@ -154,10 +154,10 @@ class TorchieCmdSpec extends Specification {
         UUID intentionB = UUID.randomUUID();
 
 
-        featurePool.getActiveGridTile().startWorkContext(time1, createWorkContextEvent("projectA", "taskA", "intA"));
-        featurePool.getActiveGridTile().startWorkContext(time3, createWorkContextEvent("projectA", "taskB", "intB"));
+        torchieState.getActiveTile().startWorkContext(time1, createWorkContextEvent("projectA", "taskA", "intA"));
+        torchieState.getActiveTile().startWorkContext(time3, createWorkContextEvent("projectA", "taskB", "intB"));
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetKey.WorkContext)
@@ -180,12 +180,12 @@ class TorchieCmdSpec extends Specification {
         Member arty = new Member(UUID.randomUUID().toString(), "Arty Starr");
         Member mike = new Member(UUID.randomUUID().toString(), "Mike Lueders");
 
-        featurePool.getActiveGridTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty, mike)));
-        featurePool.getActiveGridTile().startAuthors(time3, new AuthorsDetails(DefaultCollections.toList(arty)));
+        torchieState.getActiveTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty, mike)));
+        torchieState.getActiveTile().startAuthors(time3, new AuthorsDetails(DefaultCollections.toList(arty)));
 
-        featurePool.getActiveGridTile().clearAuthors(time4)
+        torchieState.getActiveTile().clearAuthors(time4)
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         Results trackOutput = cmd.playTrack(TrackSetKey.Authors)
@@ -207,21 +207,21 @@ class TorchieCmdSpec extends Specification {
 
         Member arty = new Member(UUID.randomUUID().toString(), "Arty Starr");
 
-        featurePool.getActiveGridTile().startWorkContext(time3, createWorkContextEvent("projA", "taskA", "intA"));
-        featurePool.getActiveGridTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty)));
+        torchieState.getActiveTile().startWorkContext(time3, createWorkContextEvent("projA", "taskA", "intA"));
+        torchieState.getActiveTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty)));
 
-        featurePool.getActiveGridTile().startFeelsBand(time2.plusMinutes(5), -4)
-        featurePool.getActiveGridTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startFeelsBand(time2.plusMinutes(5), -4)
+        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
-        featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeA", Duration.ofSeconds(9))
-        featurePool.getActiveGridTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
+        torchieState.getActiveTile().gotoLocation(time2, "/some/placeA", Duration.ofSeconds(9))
+        torchieState.getActiveTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
 
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
-        featurePool.getActiveGridTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(5), "JUnit", -3))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(3, time1, Duration.ofSeconds(1), "JUnit", -3))
+        torchieState.getActiveTile().executeThing(new ExecutionEvent(4, time2, Duration.ofSeconds(5), "JUnit", -3))
 
-        featurePool.getActiveGridTile().modifyCurrentLocation(time2, 443)
+        torchieState.getActiveTile().modifyCurrentLocation(time2, 443)
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         MusicGridResults firstTile = cmd.playTile()
@@ -229,9 +229,9 @@ class TorchieCmdSpec extends Specification {
 
         cmd.nextTile();
 
-        featurePool.getActiveGridTile().executeThing(
+        torchieState.getActiveTile().executeThing(
                 new ExecutionEvent(5, time2.plusMinutes(20), Duration.ofSeconds(5), "JUnit", -2))
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         MusicGridResults secondTile = cmd.playTile()
         print secondTile;
@@ -249,15 +249,15 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().startWTF(time1, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Resume)
-        featurePool.getActiveGridTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(9))
+        torchieState.getActiveTile().startWTF(time1, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Resume)
+        torchieState.getActiveTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(9))
 
-        featurePool.getActiveGridTile().modifyCurrentLocation(time1, 100)
-        featurePool.getActiveGridTile().modifyCurrentLocation(time2, 443)
+        torchieState.getActiveTile().modifyCurrentLocation(time1, 100)
+        torchieState.getActiveTile().modifyCurrentLocation(time2, 443)
 
-        featurePool.getActiveGridTile().modifyCurrentLocation(time4, 20)
+        torchieState.getActiveTile().modifyCurrentLocation(time4, 20)
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
         MusicGridResults firstTile = cmd.playTile()
@@ -265,8 +265,8 @@ class TorchieCmdSpec extends Specification {
 
         cmd.nextTile();
 
-        featurePool.getActiveGridTile().clearWTF(time3.plusMinutes(20), FinishTypeTag.DoItLater)
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().clearWTF(time3.plusMinutes(20), FinishTypeTag.DoItLater)
+        torchieState.getActiveTile().finishAfterLoad()
 
         MusicGridResults secondTile = cmd.playTile()
         print secondTile

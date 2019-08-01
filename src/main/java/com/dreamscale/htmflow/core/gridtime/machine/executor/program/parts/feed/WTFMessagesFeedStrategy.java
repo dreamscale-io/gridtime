@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class CircleMessagesFeedStrategy extends FeedStrategy {
+public class WTFMessagesFeedStrategy extends FeedStrategy {
 
     @Autowired
     CircleFeedMessageRepository circleFeedMessageRepository;
@@ -33,6 +33,11 @@ public class CircleMessagesFeedStrategy extends FeedStrategy {
 
         return new Batch(memberId, bookmark, flowables);
 
+    }
+
+    @Override
+    public FeedStrategyFactory.FeedType getFeedType() {
+        return FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED;
     }
 
     private List<Flowable> convertToFlowables(List<CircleFeedMessageEntity> circleMessages) {

@@ -5,7 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +30,9 @@ public class ProgramFactory {
     @Autowired
     private CalendarService calendarService;
 
-    public Program createBaseTileGeneratorProgram(UUID torchieId, FeaturePool featurePool, LocalDateTime startPosition) {
+    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
-        TileGeneratorProgram program = new TileGeneratorProgram(torchieId, featurePool, startPosition);
+        TileGeneratorProgram program = new TileGeneratorProgram(torchieId, torchieState, startPosition);
 
         program.addFlowSourceToPullChain(
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.JOURNAL_FEED),
@@ -49,7 +49,7 @@ public class ProgramFactory {
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER));
 
         program.addFlowSourceToPullChain(
-                feedStrategyFactory.get(FeedStrategyFactory.FeedType.CIRCLE_MESSAGES_FEED),
+                feedStrategyFactory.get(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.WTF_STATE_OBSERVER));
 
         //transformation only, with no new data

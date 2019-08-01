@@ -1,12 +1,9 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
-import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class NoOpProgram implements Program {

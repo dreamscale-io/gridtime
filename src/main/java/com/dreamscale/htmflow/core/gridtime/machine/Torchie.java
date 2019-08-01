@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
+import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.InstructionsBuilder;
@@ -7,7 +8,10 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMoni
 import com.dreamscale.htmflow.core.gridtime.machine.executor.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
@@ -15,21 +19,28 @@ public class Torchie {
 
     private final UUID torchieId;
 
-    private final FeaturePool featurePool;
+    private final TorchieState torchieState;
 
     private IdeaFlowCircuit ideaFlowCircuit;
 
     private CircuitMonitor circuitMonitor;
 
-    public Torchie(UUID torchieId, FeaturePool featurePool, Program program) {
+    public Torchie(UUID torchieId, TorchieState torchieState, Program program) {
         this.torchieId = torchieId;
 
-        this.featurePool = featurePool;
+        this.torchieState = torchieState;
 
         this.circuitMonitor = new CircuitMonitor(torchieId);
         this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, program);
     }
 
+    public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
+        return torchieState.getInputFeed(type);
+    }
+
+    public String whatTimeIsIt() {
+        return torchieState.getActiveTime();
+    }
 
 
     public void sees() {
@@ -40,7 +51,7 @@ public class Torchie {
     }
 
     public InstructionsBuilder getInstructionsBuilder() {
-        return new InstructionsBuilder(torchieId, featurePool);
+        return new InstructionsBuilder(torchieId, torchieState);
     }
 
     public void scheduleInstruction(TileInstructions instructions) {
@@ -77,5 +88,9 @@ public class Torchie {
 
     public Metronome.Tick getActiveTick() {
         return ideaFlowCircuit.getActiveTick();
+    }
+
+    public MusicGridResults playAllTracks() {
+        return torchieState.getActiveTile().playAllTracks();
     }
 }

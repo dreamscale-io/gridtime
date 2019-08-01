@@ -7,7 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
 import spock.lang.Specification
 
@@ -23,7 +23,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
     LocalDateTime time2
     LocalDateTime time3
     LocalDateTime time4
-    MemoryOnlyFeaturePool pool
+    MemoryOnlyTorchieState torchieState
 
     def setup() {
 
@@ -37,8 +37,8 @@ public class ExecutionRhythmObserverSpec extends Specification {
 
         executionRhythmObserver = new ExecutionRhythmObserver()
 
-        pool = new MemoryOnlyFeaturePool(UUID.randomUUID())
-        pool.gotoTilePosition(clock.getActiveGridTime())
+        torchieState = new MemoryOnlyTorchieState(UUID.randomUUID())
+        torchieState.gotoPosition(clock.getActiveGridTime())
     }
 
     def "should create red/green cycles from execution activity"() {
@@ -53,8 +53,8 @@ public class ExecutionRhythmObserverSpec extends Specification {
         window.addAll(flowables)
 
         when:
-        executionRhythmObserver.see(window, pool)
-        MusicGridResults results = pool.getActiveGridTile().playTrack(TrackSetKey.Executions);
+        executionRhythmObserver.see(window, torchieState)
+        MusicGridResults results = torchieState.getActiveTile().playTrack(TrackSetKey.Executions);
         println results
 
         then:

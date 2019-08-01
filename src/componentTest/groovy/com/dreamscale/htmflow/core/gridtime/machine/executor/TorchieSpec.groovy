@@ -36,7 +36,7 @@ class TorchieSpec extends Specification {
 
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
 
-        Torchie torchie = torchieFactory.wireUpMemberTorchie(teamId, torchieId, clockStart)
+        Torchie torchie = torchieFactory.wireUpTeamMemberTorchie(teamId, torchieId, clockStart)
 
         LocalDateTime time1_0 = aRandom.localDateTime()
         LocalDateTime time2_0 = time1_0.plusMinutes(20);

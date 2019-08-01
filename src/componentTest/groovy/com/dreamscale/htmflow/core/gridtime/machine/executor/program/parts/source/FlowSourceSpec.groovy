@@ -10,8 +10,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FileActivityFeedStrategy
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.JournalFeedStrategy
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -29,17 +29,17 @@ class FlowSourceSpec extends Specification {
    FileActivityFeedStrategy fileActivityFetcher
 
     UUID memberId
-    FeaturePool featurePool
+    TorchieState featurePool
     FlowSource journalFlowSource
     Window latestWindow
     FlowSource activityFlowSource
 
     def setup() {
         this.memberId = UUID.randomUUID();
-        this.featurePool = new MemoryOnlyFeaturePool(memberId);
+        this.featurePool = new MemoryOnlyTorchieState(memberId);
 
         FlowObserver flowObserverMock =
-                [see: { Window window, FeaturePool pool -> this.latestWindow = window }] as FlowObserver
+                [see: { Window window, TorchieState pool -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)

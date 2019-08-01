@@ -13,7 +13,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.FlowSource;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.TransformStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -27,15 +27,15 @@ public class TileGeneratorProgram implements Program {
 
     private final List<Flow> pullChain = DefaultCollections.list();
 
-    private final FeaturePool featurePool;
+    private final TorchieState torchieState;
     private final UUID torchieId;
 
     private final Metronome metronome;
     private  boolean isInitialized;
 
-    public TileGeneratorProgram(UUID torchieId, FeaturePool featurePool, LocalDateTime startPosition) {
+    public TileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
         this.torchieId = torchieId;
-        this.featurePool = featurePool;
+        this.torchieState = torchieState;
         this.metronome = new Metronome(startPosition);
 
 
@@ -47,7 +47,7 @@ public class TileGeneratorProgram implements Program {
 
         log.debug("metronome tick: " + metronome.getActiveTick().toDisplayString());
 
-        featurePool.gotoTilePosition(metronome.getActivePosition());
+        torchieState.gotoPosition(metronome.getActivePosition());
     }
 
     //this one publishes up wires..?
@@ -92,20 +92,20 @@ public class TileGeneratorProgram implements Program {
     }
 
     public void addFlowSourceToPullChain(FeedStrategy feedStrategy, FlowObserver... observers) {
-        pullChain.add(new FlowSource(torchieId, featurePool, feedStrategy, observers));
+        pullChain.add(new FlowSource(torchieId, torchieState, feedStrategy, observers));
     }
 
     public void addFlowTransformerToPullChain(TransformStrategy... transforms) {
-        pullChain.add(new FlowTransformer(torchieId, featurePool, transforms));
+        pullChain.add(new FlowTransformer(torchieId, torchieState, transforms));
     }
 
     public void addFlowSinkToPullChain(SinkStrategy... sinks) {
-        pullChain.add(new FlowSink(torchieId, featurePool, sinks));
+        pullChain.add(new FlowSink(torchieId, torchieState, sinks));
     }
 
 
     private TileInstructions generateBaseTickInstructions(Metronome.Tick tick) {
-        return new GenerateBaseTile(featurePool, pullChain, tick);
+        return new GenerateBaseTile(torchieState, pullChain, tick);
     }
 
     //aggregate chain, would have aggregate source, aggregate sink?
@@ -114,7 +114,7 @@ public class TileGeneratorProgram implements Program {
     private TileInstructions generateAggregateTickInstructions(Metronome.Tick aggregateTick) {
         //other chain
 
-        return new GenerateAggregateUpTile(featurePool, aggregateTick);
+        return new GenerateAggregateUpTile(torchieState, aggregateTick);
     }
 
 

@@ -24,7 +24,7 @@ public class AnalyticsEngine {
     }
 
     public void runIdeaFlowMetrics() {
-        ideaFlowMetrics = IdeaFlowMetrics.queryFrom(featureCache, musicClock, musicGrid);
+        ideaFlowMetrics = IdeaFlowMetrics.queryFrom(musicClock, musicGrid);
     }
 
 

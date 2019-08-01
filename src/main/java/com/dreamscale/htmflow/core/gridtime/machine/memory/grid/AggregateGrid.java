@@ -4,24 +4,18 @@ import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.glyph.GlyphReferences;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.FeatureTotals;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.WeightedMetricTrack;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +47,36 @@ public class AggregateGrid implements IMusicGrid {
         return musicClock.getBeat(gridTimeKey);
     }
 
+    @Override
+    public ZoomLevel getZoomLevel() {
+        return musicClock.getZoomLevel();
+    }
+
+    public void addTimeInTile(RelativeBeat beat, Duration duration) {
+        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        timeTrack.addWeightedMetric(beat, Duration.ofSeconds(1), (double)duration.getSeconds());
+    }
+
+    public Duration getTotalDuration() {
+        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        if (timeTrack != null) {
+            return Duration.ofSeconds(timeTrack.getTotalCalculation().longValue());
+        } else {
+            return Duration.ZERO;
+        }
+    }
+
     public void addWeightedMetric(MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
         WeightedMetricTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
 
         track.addWeightedMetric(beat, durationWeight, metric);
+    }
+
+    private WeightedMetricTrack getFirstTrack() {
+        if (weightedMetricTracks.size() > 0) {
+            return weightedMetricTracks.values().iterator().next();
+        }
+        return null;
     }
 
     private WeightedMetricTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
@@ -79,6 +99,8 @@ public class AggregateGrid implements IMusicGrid {
 
         exportGridRows();
     }
+
+
 
     public GridRow getRow(Key rowKey) {
         return exportedRowsByKey.get(rowKey);
@@ -128,6 +150,7 @@ public class AggregateGrid implements IMusicGrid {
             }
         }
     }
+
 
 
 }

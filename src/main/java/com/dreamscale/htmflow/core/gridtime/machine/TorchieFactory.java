@@ -4,9 +4,9 @@ import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.*;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.BoxConfigurationLoaderService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.wires.AggregatingWire;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessFeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessTorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureResolverService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.TileSearchService;
@@ -41,31 +41,31 @@ public class TorchieFactory {
     private Map<UUID, AggregatingWire> teamWiresMap = DefaultCollections.map();
 
 
-    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
+    public Torchie wireUpTeamMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
         FeatureCache featureCache = findOrCreateFeatureCache(teamId);
 
-        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, memberId,
+        PerProcessTorchieState torchieBody = new PerProcessTorchieState(teamId, memberId,
                 featureCache, featureResolverService, tileSearchService);
 
         //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(memberId, featurePool, startingPosition);
+        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieBody, startingPosition);
 
-        return new Torchie(memberId, featurePool, program);
+        return new Torchie(memberId, torchieBody, program);
 
     }
 
     public Torchie wireUpTeamTorchie(UUID teamId) {
         FeatureCache featureCache = findOrCreateFeatureCache(teamId);
 
-        PerProcessFeaturePool featurePool = new PerProcessFeaturePool(teamId, teamId,
+        PerProcessTorchieState torchieBody = new PerProcessTorchieState(teamId, teamId,
                 featureCache, featureResolverService, tileSearchService);
 
         AggregatingWire teamWire = findOrCreateWire(teamId);
 
         return null;
-//        AggregateByTeamProgram aggregateWiresProgram = programFactory.createAggregateWiresProgram(teamId, featurePool, teamWire);
+//        AggregateByTeamProgram aggregateWiresProgram = programFactory.createAggregateWiresProgram(teamId, torchieBody, teamWire);
 //
-//        return new Torchie(teamId, featurePool, aggregateWiresProgram);
+//        return new Torchie(teamId, torchieBody, aggregateWiresProgram);
         //teamTorchie is going to listen to queue of team events,
 
     }
@@ -75,11 +75,11 @@ public class TorchieFactory {
     public Torchie wireUpCalendarTorchie(int maxTiles) {
 
         UUID torchieId = UUID.randomUUID();
-        FeaturePool featurePool = new MemoryOnlyFeaturePool(torchieId);
+        TorchieState torchieState = new MemoryOnlyTorchieState(torchieId);
 
         CalendarGeneratorProgram program = programFactory.createCalendarGenerator(maxTiles);
 
-        return new Torchie(torchieId, featurePool, program);
+        return new Torchie(torchieId, torchieState, program);
     }
 
     private FeatureCache findOrCreateFeatureCache(UUID teamId) {

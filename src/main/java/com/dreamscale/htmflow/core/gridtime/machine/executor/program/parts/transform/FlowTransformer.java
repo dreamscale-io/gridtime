@@ -3,9 +3,8 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.tran
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -14,19 +13,19 @@ public class FlowTransformer implements Flow {
 
     private final UUID memberId;
     private final List<TransformStrategy> transformStrategies;
-    private final FeaturePool featurePool;
+    private final TorchieState torchieState;
 
 
-    public FlowTransformer(UUID memberId, FeaturePool featurePool, TransformStrategy... transforms) {
+    public FlowTransformer(UUID memberId, TorchieState torchieState, TransformStrategy... transforms) {
         this.memberId = memberId;
-        this.featurePool = featurePool;
+        this.torchieState = torchieState;
         this.transformStrategies = Arrays.asList(transforms);
     }
 
     public void tick(Metronome.Tick coordinates) {
 
         for (TransformStrategy transform : transformStrategies) {
-            transform.transform(featurePool);
+            transform.transform(torchieState);
         }
     }
 

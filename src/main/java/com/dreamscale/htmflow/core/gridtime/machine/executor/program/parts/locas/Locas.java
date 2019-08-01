@@ -40,6 +40,7 @@ public abstract class Locas<T> {
         this.aggregateGrid = createAggregateGrid(tick.getFrom());
 
         fillAggregateGrid(aggregateGrid, metricInputs);
+        aggregateGrid.finish();
 
         output.breatheOut(torchieId, tick, aggregateGrid);
     }

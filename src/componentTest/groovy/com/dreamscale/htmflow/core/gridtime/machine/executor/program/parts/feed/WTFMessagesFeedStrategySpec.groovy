@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class CircleMessagesFeedStrategySpec extends Specification{
+class WTFMessagesFeedStrategySpec extends Specification{
 
     @Autowired
     CircleService circleService
@@ -28,7 +28,7 @@ class CircleMessagesFeedStrategySpec extends Specification{
     MasterAccountEntity testUser
 
     @Autowired
-    CircleMessagesFeedStrategy circleMessagesFetcher
+    WTFMessagesFeedStrategy circleMessagesFetcher
 
     def "should fetch batches of circle messages"() {
         given:

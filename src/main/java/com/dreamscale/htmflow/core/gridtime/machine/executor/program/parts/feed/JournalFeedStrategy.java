@@ -34,6 +34,11 @@ public class JournalFeedStrategy extends FeedStrategy {
 
     }
 
+    @Override
+    public FeedStrategyFactory.FeedType getFeedType() {
+        return FeedStrategyFactory.FeedType.JOURNAL_FEED;
+    }
+
     private List<FlowableJournalEntry> convertToFlowables(List<JournalEntryEntity> journalEntries) {
         List<FlowableJournalEntry> flowables = new ArrayList<>();
 

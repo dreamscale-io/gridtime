@@ -1,9 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-
-import java.util.ArrayList;
 
 @Getter
 public abstract class MetricDistribution {

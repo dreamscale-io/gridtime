@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.obse
 
 import com.dreamscale.htmflow.api.circle.CircleMessageType;
 import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.FinishTypeTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTag;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window;
@@ -17,9 +17,9 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 public class WTFStateObserver implements FlowObserver<FlowableCircleMessageEvent> {
 
     @Override
-    public void see(Window<FlowableCircleMessageEvent> window, FeaturePool featurePool) {
+    public void see(Window<FlowableCircleMessageEvent> window, TorchieState torchieState) {
 
-        GridTile gridTile = featurePool.getActiveGridTile();
+        GridTile gridTile = torchieState.getActiveTile();
 
         for (Flowable flowable : window.getFlowables()) {
             CircleFeedMessageEntity circleMessage = (flowable.get());

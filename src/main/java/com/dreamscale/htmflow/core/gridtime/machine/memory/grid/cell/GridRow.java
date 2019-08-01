@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.type.GridCell;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.type.MetricCell;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FeatureTag;
 import lombok.Getter;
@@ -18,12 +19,19 @@ public class GridRow implements Iterable<GridCell> {
 
     List<GridCell> gridCells = DefaultCollections.list();
 
+    int summaryCellCount = 0;
+
     public GridRow(Key rowKey) {
         this.rowKey = rowKey;
     }
 
     public void add(GridCell cell) {
         gridCells.add(cell);
+    }
+
+    public void addSummaryCell(GridCell summaryCell) {
+        gridCells.add(summaryCell);
+        summaryCellCount++;
     }
 
     public List<String> toHeaderColumns() {
@@ -89,11 +97,22 @@ public class GridRow implements Iterable<GridCell> {
         return gridCells.iterator();
     }
 
+    public GridCell getSummaryCell(String header) {
+        for (GridCell cell : gridCells) {
+            if (cell.toHeaderCell().trim().equals(header)) {
+                return cell;
+            }
+        }
+        return null;
+    }
+
     public GridCell getCell(RelativeBeat beat) {
-        return gridCells.get(beat.getBeat() - 1);
+        return gridCells.get(beat.getBeat() + summaryCellCount - 1);
     }
 
     public GridCell getLast() {
         return gridCells.get(gridCells.size() - 1);
     }
+
+
 }

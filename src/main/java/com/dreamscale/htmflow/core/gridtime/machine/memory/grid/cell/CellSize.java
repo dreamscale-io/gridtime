@@ -9,11 +9,15 @@ public class CellSize {
     private static final int DEFAULT_CELL_SIZE_FOR_6_BEATS = 25;
     private static final int DEFAULT_CELL_SIZE_FOR_4_BEATS = 39;
 
-    public static int calculateCellSizeWithSummaryCell(RelativeBeat beat) {
+    private static final int DEFAULT_CELL_SIZE_FOR_SUMMARY = 10;
 
-        int summaryCellSize = calculateCellSize(beat);
 
-        return Math.floorDiv(160 - summaryCellSize + 1 , beat.getBeatsPerMeasure()) - 1;
+
+    public static int calculateCellSizeWithSummaryCell(RelativeBeat beat, int numberSummaryColumns) {
+
+        int summaryCellSize = calculateSummaryCellSize() * numberSummaryColumns + numberSummaryColumns;
+
+        return Math.floorDiv(160 - summaryCellSize, beat.getBeatsPerMeasure()) - 1;
     }
 
     public static int calculateCellSize(RelativeBeat beat) {
@@ -27,5 +31,9 @@ public class CellSize {
             } else {
                 return DEFAULT_CELL_SIZE_FOR_4_BEATS;
             }
+    }
+
+    public static int calculateSummaryCellSize() {
+        return DEFAULT_CELL_SIZE_FOR_SUMMARY;
     }
 }

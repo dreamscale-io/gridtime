@@ -3,8 +3,9 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Feed;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
@@ -14,41 +15,42 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-public abstract class AbstractFeaturePool implements FeaturePool {
+public abstract class AbstractTorchieState implements TorchieState {
 
     private final UUID torchieId;
     private final FeatureCache featureCache;
 
-    private Map<String, Feed> sourceFeeds = DefaultCollections.map();
+    private Map<FeedStrategyFactory.FeedType, InputFeed> inputFeeds = DefaultCollections.map();
 
     private GeometryClock.GridTime gridTime;
 
     private GridTile activeGridTile;
 
-    public AbstractFeaturePool(UUID torchieId, FeatureCache featureCache) {
+    public AbstractTorchieState(UUID torchieId, FeatureCache featureCache) {
         this.torchieId = torchieId;
         this.featureCache = featureCache;
     }
 
-    public GridTile getActiveGridTile() {
+    public GridTile getActiveTile() {
         return activeGridTile;
     }
 
     @Override
-    public String getActiveGridTime() {
+    public String getActiveTime() {
         return gridTime.toDisplayString();
     }
 
-    public void nextGridTile() {
+
+    public void nextTile() {
         if (activeGridTile != null) {
-            gotoTilePosition(activeGridTile.getGridTime().panRight());
+            gotoPosition(activeGridTile.getGridTime().panRight());
         }
     }
 
-    public void gotoTilePosition(GeometryClock.GridTime gridTime) {
-        log.debug("gotoTilePosition: "+gridTime.toDisplayString());
+    public void gotoPosition(GeometryClock.GridTime toGridPosition) {
+        log.debug("gotoTilePosition: "+ toGridPosition.toDisplayString());
 
-        this.gridTime = gridTime;
+        this.gridTime = toGridPosition;
 
         CarryOverContext carryOverContext = getCarryOverContext(this.gridTime.panLeft());
 
@@ -66,13 +68,16 @@ public abstract class AbstractFeaturePool implements FeaturePool {
         }
     }
 
+    @Override
+    public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
+        return inputFeeds.get(type);
+    }
 
-    public <T extends Flowable> Feed<T> registerFeed(UUID memberId, FeedStrategy<T> feedStrategy) {
-        String name = feedStrategy.getClass().getSimpleName();
-        Feed<T> feed = new Feed<>(name, memberId, feedStrategy);
-        sourceFeeds.put(name, feed);
+    public <T extends Flowable> InputFeed<T> registerInputFeed(UUID memberId, FeedStrategyFactory.FeedType feedType, FeedStrategy<T> feedStrategy) {
+        InputFeed<T> inputFeed = new InputFeed<T>(feedType, memberId, feedStrategy);
+        inputFeeds.put(feedType, inputFeed);
 
-        return feed;
+        return inputFeed;
     }
 
     private void validateCoordsMatchAndResetTileIfNeeded(GeometryClock.GridTime toCoordPosition, GeometryClock.GridTime nextGridTime) {
@@ -83,7 +88,7 @@ public abstract class AbstractFeaturePool implements FeaturePool {
     }
 
     @Override
-    public abstract void resolveReferences();
+    public abstract void resolveFeatureReferences();
 
     protected abstract CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime);
 

@@ -35,6 +35,11 @@ public class ExecutionActivityFeedStrategy extends FeedStrategy {
 
     }
 
+    @Override
+    public FeedStrategyFactory.FeedType getFeedType() {
+        return FeedStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED;
+    }
+
 
     private List<Flowable> convertToFlowables(List<FlowActivityEntity> flowActivityEntities) {
         List<Flowable> flowables = new ArrayList<>();

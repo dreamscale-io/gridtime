@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink;
 
 import com.dreamscale.htmflow.core.domain.tile.*;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,9 @@ public class SaveBookmarkSink implements SinkStrategy {
     TorchieBookmarkRepository bookmarkRepository;
 
     @Override
-    public void save(UUID torchieId, FeaturePool featurePool) {
+    public void save(UUID torchieId, TorchieState torchieState) {
 
-        GridTile gridTile = featurePool.getActiveGridTile();
+        GridTile gridTile = torchieState.getActiveTile();
 
         TorchieBookmarkEntity latestBookmark = bookmarkRepository.findByTorchieId(torchieId);
 

@@ -16,7 +16,10 @@ public class WeightedCandleStick extends MetricDistribution {
     private Duration totalDuration = Duration.ZERO;
 
     private double total;
+    private double weightedTotal;
+
     private double avg;
+
     private double stddev;
     private double min = Integer.MAX_VALUE;
     private double max = Integer.MIN_VALUE;
@@ -27,30 +30,32 @@ public class WeightedCandleStick extends MetricDistribution {
 
     public void addWeightedMetricSample(WeightedMetric weightedMetric) {
 
-        totalDuration = totalDuration.plus(weightedMetric.getDurationWeight());
+        sampleCount++;
 
-        double secondsInState = weightedMetric.getSecondsInState();
+        totalDuration = totalDuration.plus(weightedMetric.getWeight());
 
-        total += secondsInState;
+        weightedTotal += weightedMetric.getCombinedMetricWeight();
+        total += weightedMetric.getMetric();
 
-        min = Math.min(min, secondsInState);
-        max = Math.max(max, secondsInState);
+        data.add(weightedMetric.getMetric());
 
-        data.add(secondsInState);
+        //get the lowest and highest, independent of weight
+
+        min = Math.min(min, weightedMetric.getMetric());
+        max = Math.max(max, weightedMetric.getMetric());
+
+        //get the deviation of specific samples relative to the weighted average
+
+        avg = weightedTotal / totalDuration.getSeconds();
 
         double squares = 0;
         for (Double aSample : data) {
             squares += Math.pow(aSample - avg, 2);
         }
 
-        stddev = Math.sqrt(squares / (sampleCount+1) );
-        avg = total / sampleCount;
+        stddev = Math.sqrt(squares / sampleCount ) ;
 
-
-        sampleCount++;
     }
-
-
 
 
 }

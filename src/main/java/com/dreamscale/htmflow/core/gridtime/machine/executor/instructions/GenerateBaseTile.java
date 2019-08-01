@@ -1,9 +1,8 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.instructions;
 
-import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -12,13 +11,13 @@ import java.util.List;
 public class GenerateBaseTile extends TileInstructions {
 
     private final List<Flow> pullChain;
-    private final FeaturePool featurePool;
+    private final TorchieState torchieState;
 
     private final Metronome.Tick tick;
 
 
-    public GenerateBaseTile(FeaturePool featurePool, List<Flow> pullChain, Metronome.Tick tick) {
-        this.featurePool = featurePool;
+    public GenerateBaseTile(TorchieState torchieState, List<Flow> pullChain, Metronome.Tick tick) {
+        this.torchieState = torchieState;
         this.pullChain = pullChain;
         this.tick = tick;
     }
@@ -29,7 +28,7 @@ public class GenerateBaseTile extends TileInstructions {
             flow.tick(tick);
         }
 
-        setOutputTile(featurePool.getActiveGridTile());
+        setOutputTile(torchieState.getActiveTile());
     }
 
     @Override

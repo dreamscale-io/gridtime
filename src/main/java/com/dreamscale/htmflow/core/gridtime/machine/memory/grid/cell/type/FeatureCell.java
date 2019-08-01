@@ -81,6 +81,11 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     }
 
     @Override
+    public Object toValue() {
+        return toValueCell().trim();
+    }
+
+    @Override
     public List<UUID> getFeatureRefs() {
         List<UUID> refs = null;
 

@@ -10,7 +10,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext
 import java.util.Set;
 import java.util.UUID;
 
-public class PerProcessFeaturePool extends AbstractFeaturePool {
+public class PerProcessTorchieState extends AbstractTorchieState {
 
     private final UUID teamId;
     private final UUID torchieId;
@@ -18,8 +18,8 @@ public class PerProcessFeaturePool extends AbstractFeaturePool {
     private final FeatureResolverService featureResolverService;
     private final TileSearchService tileSearchService;
 
-    public PerProcessFeaturePool(UUID teamId, UUID torchieId, FeatureCache featureCache,
-                                 FeatureResolverService featureResolverService, TileSearchService tileSearchService) {
+    public PerProcessTorchieState(UUID teamId, UUID torchieId, FeatureCache featureCache,
+                                  FeatureResolverService featureResolverService, TileSearchService tileSearchService) {
         super(torchieId, featureCache);
 
         this.teamId = teamId;
@@ -28,9 +28,10 @@ public class PerProcessFeaturePool extends AbstractFeaturePool {
         this.tileSearchService = tileSearchService;
     }
 
+
     @Override
-    public void resolveReferences() {
-        Set<FeatureReference> features = getActiveGridTile().getAllFeatures();
+    public void resolveFeatureReferences() {
+        Set<FeatureReference> features = getActiveTile().getAllFeatures();
 
         for (FeatureReference feature : features) {
             featureResolverService.resolve(teamId, feature);

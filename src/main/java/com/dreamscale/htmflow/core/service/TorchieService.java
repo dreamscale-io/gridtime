@@ -64,7 +64,7 @@ public class TorchieService {
             UUID teamId = determineTeam(organizationId, memberId);
 
             if (startingPosition != null) {
-                torchie = torchieFactory.wireUpMemberTorchie(teamId, memberId, startingPosition);
+                torchie = torchieFactory.wireUpTeamMemberTorchie(teamId, memberId, startingPosition);
             } else {
                 log.error("Unable to start Torchie for until first intention created, memberId: "+memberId);
             }

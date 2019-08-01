@@ -37,13 +37,13 @@ public class MetricCell implements GridCell {
         this.cellSizeForBeat = CellSize.calculateCellSize(beat);
     }
 
-    public MetricCell(String headerStr, RelativeBeat beat, MetricRowKey metricRowKey, AggregateType aggregateType, MetricDistribution metricDistribution) {
-        this.headerStr = headerStr;
+    public MetricCell(MetricRowKey metricRowKey, AggregateType aggregateType, MetricDistribution metricDistribution) {
+        this.headerStr = aggregateType.getHeader();
         this.metricRowKey = metricRowKey;
         this.aggregateType = aggregateType;
         this.metricDistribution = metricDistribution;
 
-        this.cellSizeForBeat = CellSize.calculateCellSize(beat);
+        this.cellSizeForBeat = CellSize.calculateSummaryCellSize();
     }
 
 
@@ -61,6 +61,11 @@ public class MetricCell implements GridCell {
 
     public String toValueCell(int overrideCellSize) {
         return toRightSizedCell(toDisplayString(), overrideCellSize);
+    }
+
+    @Override
+    public Object toValue() {
+        return metricDistribution.getValueByAggregateType(aggregateType);
     }
 
     @Override
@@ -82,6 +87,7 @@ public class MetricCell implements GridCell {
     public <F extends FeatureReference> F getFeature() {
         return null;
     }
+
 
     @Override
     public String toDisplayString() {

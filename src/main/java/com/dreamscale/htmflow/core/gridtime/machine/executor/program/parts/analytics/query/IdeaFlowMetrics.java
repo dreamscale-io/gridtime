@@ -3,13 +3,11 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.anal
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
-import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.AuthorsReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeelsReference;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.IdeaFlowStateReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.AverageMetric;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.MetricQuery;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.PercentMetric;
@@ -19,19 +17,18 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Featur
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.AuthorsType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.IdeaFlowStateType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.Iterator;
-import java.util.Map;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Slf4j
 public class IdeaFlowMetrics implements MetricQuery {
 
     private ZoomLevel zoomLevel;
@@ -46,20 +43,48 @@ public class IdeaFlowMetrics implements MetricQuery {
 
 //do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
+    public static IdeaFlowMetrics queryFrom(AggregateGrid aggregateGrid) {
 
-    public static IdeaFlowMetrics queryFrom(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
+        IdeaFlowMetrics metrics = new IdeaFlowMetrics();
 
+        metrics.zoomLevel = aggregateGrid.getZoomLevel();
+        metrics.timeInTile = aggregateGrid.getTotalDuration();
+
+        metrics.avgFlame = getSummaryMetricValue(aggregateGrid, MetricRowKey.ZOOM_AVG_FLAME, AggregateType.AVG);
+
+        metrics.percentWtf = getSummaryMetricValue(aggregateGrid, MetricRowKey.ZOOM_PERCENT_WTF, AggregateType.AVG);
+        metrics.percentLearning = getSummaryMetricValue(aggregateGrid, MetricRowKey.ZOOM_PERCENT_LEARNING, AggregateType.AVG);
+        metrics.percentProgress = getSummaryMetricValue(aggregateGrid, MetricRowKey.ZOOM_PERCENT_PROGRESS, AggregateType.AVG);
+        metrics.percentPairing = getSummaryMetricValue(aggregateGrid, MetricRowKey.ZOOM_PERCENT_PAIRING, AggregateType.AVG);
+
+        return metrics;
+    }
+
+    private static Double getSummaryMetricValue(AggregateGrid aggregateGrid, MetricRowKey rowKey, AggregateType columnKey) {
+        GridRow row = aggregateGrid.getRow(rowKey);
+
+        if (row != null) {
+            GridCell cell = row.getSummaryCell(columnKey.getHeader());
+            if (cell != null) {
+                return (Double)cell.toValue();
+            }
+        }
+        log.warn("Request for metric row "+rowKey + ", column "+ columnKey + " not found.");
+        return null;
+    }
+
+    public static IdeaFlowMetrics queryFrom(MusicClock musicClock, IMusicGrid musicGrid) {
 
         Duration totalDuration = selectTotalDuration(musicClock);
         AverageMetric averageFlame = selectAverageFlame(musicGrid);
 
-        PercentMetric percentWtfMetric = selectPercentWTF(featureCache, musicGrid);
-        PercentMetric percentLearningAndProgressMetric = selectPercentLearningAndProgressNotInWtf(featureCache, musicClock, musicGrid);
+        PercentMetric percentWtfMetric = selectPercentWTF(musicGrid);
+        PercentMetric percentLearningAndProgressMetric = selectPercentLearningAndProgressNotInWtf(musicClock, musicGrid);
         PercentMetric percentPairingMetric = selectPercentPairing(musicGrid);
 
         IdeaFlowMetrics metrics = new IdeaFlowMetrics();
 
-        metrics.zoomLevel = musicClock.getZoomLevel();
+        metrics.zoomLevel = musicGrid.getZoomLevel();
         metrics.timeInTile = totalDuration;
         metrics.avgFlame = averageFlame.getAverage();
 
@@ -70,22 +95,20 @@ public class IdeaFlowMetrics implements MetricQuery {
 
         return metrics;
     }
-    
+
 
 
     private static Duration selectTotalDuration(MusicClock musicClock) {
         return musicClock.getRelativeEnd();
     }
 
-    private static PercentMetric selectPercentWTF(FeatureCache featureCache, IMusicGrid musicGrid) {
+    private static PercentMetric selectPercentWTF(IMusicGrid musicGrid) {
         GridRow row = musicGrid.getRow(FeatureRowKey.FLOW_WTF);
-
-        IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE);
 
         PercentMetric percentMetric = new PercentMetric();
 
         for (GridCell cell : row) {
-            if (cell.hasFeature(wtfState)) {
+            if (cell.getFeatureType() == IdeaFlowStateType.WTF_STATE) {
                 percentMetric.addSample("wtf");
             } else {
                 percentMetric.addSample("other");
@@ -97,13 +120,9 @@ public class IdeaFlowMetrics implements MetricQuery {
         return percentMetric;
     }
 
-    private static PercentMetric selectPercentLearningAndProgressNotInWtf(FeatureCache featureCache, MusicClock musicClock, IMusicGrid musicGrid) {
+    private static PercentMetric selectPercentLearningAndProgressNotInWtf(MusicClock musicClock, IMusicGrid musicGrid) {
         GridRow wtfRow = musicGrid.getRow(FeatureRowKey.FLOW_WTF);
         GridRow learningRow = musicGrid.getRow(FeatureRowKey.FLOW_LEARNING);
-
-        IdeaFlowStateReference wtfState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.WTF_STATE);
-        IdeaFlowStateReference learningState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.LEARNING_STATE);
-        IdeaFlowStateReference progressState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.PROGRESS_STATE);
 
         PercentMetric percentMetric = new PercentMetric();
 
@@ -115,9 +134,11 @@ public class IdeaFlowMetrics implements MetricQuery {
             GridCell wtfCell = wtfRow.getCell(beat);
             GridCell learningCell = learningRow.getCell(beat);
 
-            if (learningCell.hasFeature(learningState) && !wtfCell.hasFeature(wtfState)) {
+            if (learningCell.getFeatureType() == IdeaFlowStateType.LEARNING_STATE &&
+                    !(wtfCell.getFeatureType() == IdeaFlowStateType.WTF_STATE)) {
                 percentMetric.addSample("learning");
-            } else if (learningCell.hasFeature(progressState) && !wtfCell.hasFeature(wtfState)) {
+            } else if (learningCell.getFeatureType() == IdeaFlowStateType.PROGRESS_STATE &&
+                    !(wtfCell.getFeatureType() == IdeaFlowStateType.WTF_STATE)) {
                 percentMetric.addSample("progress");
             } else {
                 percentMetric.addSample("other");

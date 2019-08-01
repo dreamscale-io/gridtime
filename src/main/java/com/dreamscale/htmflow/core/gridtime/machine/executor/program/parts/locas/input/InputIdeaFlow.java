@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input;
 
-import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsViewEntity;
-import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsViewRepository;
+import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
+import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputIdeaFlow implements InputStrategy<GridIdeaFlowMetricsViewEntity> {
+public class InputIdeaFlow implements InputStrategy<ZoomableIdeaFlowMetricsEntity> {
 
     @Autowired
-    GridIdeaFlowMetricsViewRepository gridIdeaFlowMetricsViewRepository;
+    ZoomableIdeaFlowMetricsRepository zoomableIdeaFlowMetricsRepository;
 
     @Autowired
     CalendarService calendarService;
 
 
     @Override
-    public List<GridIdeaFlowMetricsViewEntity> breatheIn(UUID torchieId, Metronome.Tick zoomedOutTick) {
+    public List<ZoomableIdeaFlowMetricsEntity> breatheIn(UUID torchieId, Metronome.Tick zoomedOutTick) {
 
         //suck in child tiles, within the range of this one
 
@@ -32,7 +32,7 @@ public class InputIdeaFlow implements InputStrategy<GridIdeaFlowMetricsViewEntit
         Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, zoomedOutTick.getFrom().getClockTime());
         Long zoomInSequenceEnd = zoomInSequenceStart + baseZoom.getInnerBeats() - 1;
 
-        List<GridIdeaFlowMetricsViewEntity> selectedMetrics = gridIdeaFlowMetricsViewRepository.findByTorchieZoomRange(
+        List<ZoomableIdeaFlowMetricsEntity> selectedMetrics = zoomableIdeaFlowMetricsRepository.findByTorchieZoomRange(
                 torchieId,
                 zoomInOneLevel.name(),
                 zoomInSequenceStart,

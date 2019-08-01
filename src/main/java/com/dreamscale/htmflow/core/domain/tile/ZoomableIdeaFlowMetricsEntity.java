@@ -10,13 +10,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "grid_idea_flow_metrics_v")
+@Entity(name = "zoomable_idea_flow_metrics_v")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridIdeaFlowMetricsViewEntity {
+public class ZoomableIdeaFlowMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")

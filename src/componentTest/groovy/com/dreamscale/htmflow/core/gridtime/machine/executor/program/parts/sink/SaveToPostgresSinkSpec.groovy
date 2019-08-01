@@ -14,8 +14,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.NoOpProgram
-import com.dreamscale.htmflow.core.gridtime.machine.memory.FeaturePool
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyFeaturePool
+import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState
+import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.CircleDetails
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTag
@@ -50,7 +50,7 @@ class SaveToPostgresSinkSpec extends Specification {
 
     UUID torchieId
     FeatureCache featureCache
-    FeaturePool featurePool
+    TorchieState torchieState
     LocalDateTime time1
     LocalDateTime time2
     LocalDateTime time3
@@ -74,9 +74,9 @@ class SaveToPostgresSinkSpec extends Specification {
         time4 = clockStart.plusMinutes(6)
 
         torchieId = UUID.randomUUID();
-        featurePool = new MemoryOnlyFeaturePool(torchieId);
+        torchieState = new MemoryOnlyTorchieState(torchieId);
 
-        torchie = new Torchie(torchieId, featurePool, new NoOpProgram());
+        torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
 
         torchieExecutor = new GridTimeExecutor(1);
@@ -93,12 +93,12 @@ class SaveToPostgresSinkSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        featurePool.getActiveGridTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
-        featurePool.getActiveGridTile().finishAfterLoad()
+        torchieState.getActiveTile().finishAfterLoad()
 
         when:
-        saveToPostgresSink.save(torchieId, featurePool)
+        saveToPostgresSink.save(torchieId, torchieState)
 
         List<GridRowEntity> rowEntities = gridRowRepository.findByTorchieIdAndZoomLevelAndRowNameOrderByTileSeq(torchieId,
                 ZoomLevel.TWENTY, "@flow/wtf");

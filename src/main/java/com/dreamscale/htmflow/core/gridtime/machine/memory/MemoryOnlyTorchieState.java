@@ -6,15 +6,16 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext
 
 import java.util.UUID;
 
-public class MemoryOnlyFeaturePool extends AbstractFeaturePool {
+public class MemoryOnlyTorchieState extends AbstractTorchieState {
 
 
-    public MemoryOnlyFeaturePool(UUID torchieId) {
+    public MemoryOnlyTorchieState(UUID torchieId) {
         super(torchieId, new FeatureCache());
     }
 
+
     @Override
-    public void resolveReferences() {
+    public void resolveFeatureReferences() {
     }
 
     @Override

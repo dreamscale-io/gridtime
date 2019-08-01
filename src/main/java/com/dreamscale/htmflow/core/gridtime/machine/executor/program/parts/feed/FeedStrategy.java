@@ -8,4 +8,6 @@ import java.util.UUID;
 public abstract class FeedStrategy<T extends Flowable> {
 
     public abstract Batch<T> fetchNextBatch(UUID memberId, Bookmark bookmarkPosition, int fetchSize);
+
+    public abstract FeedStrategyFactory.FeedType getFeedType();
 }
