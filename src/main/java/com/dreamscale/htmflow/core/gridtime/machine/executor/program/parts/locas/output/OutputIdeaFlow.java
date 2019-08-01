@@ -2,16 +2,27 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository;
+import com.dreamscale.htmflow.core.domain.tile.GridRowEntity;
+import com.dreamscale.htmflow.core.domain.tile.GridRowRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class OutputIdeaFlow implements OutputStrategy {
 
     @Autowired
@@ -20,6 +31,9 @@ public class OutputIdeaFlow implements OutputStrategy {
     @Autowired
     GridIdeaFlowMetricsRepository gridIdeaFlowMetricsRepository;
 
+    @Autowired
+    GridRowRepository gridRowRepository;
+
     @Override
     public void breatheOut(UUID torchieId, Metronome.Tick tick, AggregateGrid aggregateGrid) {
 
@@ -27,12 +41,43 @@ public class OutputIdeaFlow implements OutputStrategy {
 
         Long tileSeq = calendarService.lookupTileSequenceNumber(tick.getFrom());
 
-        GridIdeaFlowMetricsEntity metricsEntity = createEntity(torchieId, tileSeq, ideaFlowMetrics);
+        GridIdeaFlowMetricsEntity metricsEntity = createIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
         gridIdeaFlowMetricsRepository.save(metricsEntity);
+
+
+        List<GridRowEntity> rowEntities = new ArrayList<>();
+        for (GridRow row: aggregateGrid.getAllGridRows()) {
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tick.getZoomLevel(), tileSeq, row);
+            if (rowEntity != null) {
+                rowEntities.add(rowEntity);
+            }
+        }
+        gridRowRepository.save(rowEntities);
 
     }
 
-    private GridIdeaFlowMetricsEntity createEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {
+        GridRowEntity gridRowEntity = null;
+
+        Map<String, CellValue> rowValues = row.toCellValueMap();
+
+        if (rowValues.size() > 0) {
+
+            gridRowEntity = new GridRowEntity();
+            gridRowEntity.setId(UUID.randomUUID());
+            gridRowEntity.setRowName(row.getRowKey().getName());
+            gridRowEntity.setTorchieId(torchieId);
+            gridRowEntity.setZoomLevel(zoomLevel);
+            gridRowEntity.setTileSeq(tileSeq);
+            gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
+
+            log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
+        }
+
+        return gridRowEntity;
+    }
+
+    private GridIdeaFlowMetricsEntity createIdeaFlowMetricsEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
         GridIdeaFlowMetricsEntity entity = new GridIdeaFlowMetricsEntity();
 
         entity.setId(UUID.randomUUID());
