@@ -22,16 +22,24 @@ public class WeightedMetricCell implements GridCell {
     private static final String TRUNCATED_INDICATOR = "*";
     private final int defaultCellSizeForBeat;
     private final WeightedMetric weightedMetric;
+    private final String headerColumn;
 
-    private RelativeBeat beat;
     private MetricRowKey metricRowKey;
 
     public WeightedMetricCell(int summaryColumnCount, RelativeBeat beat, MetricRowKey metricRowKey, WeightedMetric weightedMetric) {
-        this.beat = beat;
+        this.headerColumn = beat.toDisplayString();
         this.metricRowKey = metricRowKey;
         this.weightedMetric = weightedMetric;
 
         this.defaultCellSizeForBeat = CellSize.calculateCellSizeWithSummaryCell(beat, summaryColumnCount);
+    }
+
+    public WeightedMetricCell(String headerColumn, MetricRowKey metricRowKey, WeightedMetric weightedMetric) {
+        this.headerColumn = headerColumn;
+        this.metricRowKey = metricRowKey;
+        this.weightedMetric = weightedMetric;
+
+        this.defaultCellSizeForBeat = CellSize.calculateFixedCellSize();
     }
 
 
@@ -40,7 +48,7 @@ public class WeightedMetricCell implements GridCell {
     }
 
     public String toHeaderCell(int overrideCellSize) {
-        return toRightSizedCell(beat.toDisplayString(), overrideCellSize);
+        return toRightSizedCell(headerColumn, overrideCellSize);
     }
 
     public String toValueCell() {

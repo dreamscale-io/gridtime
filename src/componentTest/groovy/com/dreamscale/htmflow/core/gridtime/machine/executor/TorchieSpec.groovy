@@ -40,7 +40,7 @@ class TorchieSpec extends Specification {
 
         clockStart = LocalDateTime.of(2019, 1, 7, 0, 0)
 
-        Torchie torchie = torchieFactory.wireUpTeamMemberTorchie(teamId, torchieId, clockStart)
+        Torchie torchie = torchieFactory.wireUpMemberTorchie(teamId, torchieId, clockStart)
 
         calendarService.saveCalendar(1, 15, torchie.getActiveTick().from)
         calendarService.saveCalendar(1, 2, torchie.getActiveTick().from.zoomOut())

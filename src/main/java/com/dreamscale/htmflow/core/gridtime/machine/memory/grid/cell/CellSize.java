@@ -10,6 +10,7 @@ public class CellSize {
     private static final int DEFAULT_CELL_SIZE_FOR_4_BEATS = 39;
 
     private static final int DEFAULT_CELL_SIZE_FOR_SUMMARY = 10;
+    private static final int DEFAULT_CELL_SIZE_FOR_FIXED = 8;
 
 
 
@@ -35,5 +36,9 @@ public class CellSize {
 
     public static int calculateSummaryCellSize() {
         return DEFAULT_CELL_SIZE_FOR_SUMMARY;
+    }
+
+    public static int calculateFixedCellSize() {
+        return DEFAULT_CELL_SIZE_FOR_FIXED;
     }
 }

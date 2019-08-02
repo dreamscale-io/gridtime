@@ -68,7 +68,8 @@ public class CalendarGeneratorProgram implements Program {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick) {
+    public List<TileInstructions> getInstructionsAtActiveTick() {
+        Metronome.Tick tick = metronome.getActiveTick();
 
         List<TileInstructions> instructions = new ArrayList<>();
 
@@ -84,12 +85,6 @@ public class CalendarGeneratorProgram implements Program {
 
         return instructions;
     }
-
-    @Override
-    public List<TileInstructions> getInstructionsAtActiveTick() {
-        return getInstructionsAtTick(metronome.getActiveTick());
-    }
-
 
 
     private void initMetronomeAndStartSequences() {

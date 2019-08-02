@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.tran
 
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 
 import java.util.Arrays;

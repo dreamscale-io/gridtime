@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
+package com.dreamscale.htmflow.core.gridtime.machine.commons;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 

@@ -43,7 +43,7 @@ public class IdeaFlowMetrics implements MetricQuery {
 
 //do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
-    public static IdeaFlowMetrics queryFrom(AggregateGrid aggregateGrid) {
+    public static IdeaFlowMetrics queryFrom(IMusicGrid aggregateGrid) {
 
         IdeaFlowMetrics metrics = new IdeaFlowMetrics();
 
@@ -60,7 +60,7 @@ public class IdeaFlowMetrics implements MetricQuery {
         return metrics;
     }
 
-    private static Double getSummaryMetricValue(AggregateGrid aggregateGrid, MetricRowKey rowKey, AggregateType columnKey) {
+    private static Double getSummaryMetricValue(IMusicGrid aggregateGrid, MetricRowKey rowKey, AggregateType columnKey) {
         GridRow row = aggregateGrid.getRow(rowKey);
 
         if (row != null) {

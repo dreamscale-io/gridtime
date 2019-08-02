@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

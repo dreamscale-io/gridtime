@@ -4,22 +4,20 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.EventType;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
-public class GenerateAggregateTile extends TileInstructions {
+public class GenerateTeamTile extends TileInstructions {
 
     private final TorchieState torchieState;
     private final Metronome.Tick tick;
     private final List<Locas> aggregatorChain;
 
-    public GenerateAggregateTile(TorchieState torchieState, List<Locas> aggregatorChain, Metronome.Tick tick) {
+    public GenerateTeamTile(TorchieState torchieState, List<Locas> aggregatorChain, Metronome.Tick tick) {
         this.torchieState = torchieState;
         this.aggregatorChain = aggregatorChain;
         this.tick = tick;
@@ -33,11 +31,10 @@ public class GenerateAggregateTile extends TileInstructions {
             appendOutputResults(output.playAllTracks());
         }
 
-        publishEvent(new TileStreamEvent(torchieState.getTorchieId(), tick.getFrom(), EventType.NewTile));
     }
 
     @Override
     public String getCmdDescription() {
-        return "generate aggregate tile for "+tick.getZoomLevel() + " anchored at "+ tick.toDisplayString() ;
+        return "generate team aggregate tile for "+tick.getZoomLevel() + " anchored at "+ tick.toDisplayString() ;
     }
 }

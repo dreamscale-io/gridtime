@@ -7,6 +7,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
 
+import java.time.Duration;
 import java.util.List;
 
 public interface IMusicGrid {
@@ -19,4 +20,5 @@ public interface IMusicGrid {
 
     MusicGridResults playAllTracks();
 
+    Duration getTotalDuration();
 }

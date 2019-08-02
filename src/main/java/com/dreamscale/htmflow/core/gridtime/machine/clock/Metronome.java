@@ -68,6 +68,10 @@ public class Metronome {
                 GeometryClock.createGridTime(zoomLevel, toTime));
     }
 
+    public static Tick createTick(GeometryClock.GridTime fromGridTime) {
+        return createTick(fromGridTime, fromGridTime.panRight());
+    }
+
     public static Tick createTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
 
         Tick tick = new Tick(fromGridTime, toGridTime);

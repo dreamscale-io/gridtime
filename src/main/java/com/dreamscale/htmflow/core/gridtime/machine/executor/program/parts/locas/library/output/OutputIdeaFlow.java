@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output;
 
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository;
@@ -9,7 +9,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +35,9 @@ public class OutputIdeaFlow implements OutputStrategy {
     GridRowRepository gridRowRepository;
 
     @Override
-    public void breatheOut(UUID torchieId, Metronome.Tick tick, AggregateGrid aggregateGrid) {
+    public void breatheOut(UUID torchieId, Metronome.Tick tick, IMusicGrid musicGrid) {
 
-        IdeaFlowMetrics ideaFlowMetrics = IdeaFlowMetrics.queryFrom(aggregateGrid);
+        IdeaFlowMetrics ideaFlowMetrics = IdeaFlowMetrics.queryFrom(musicGrid);
 
         Long tileSeq = calendarService.lookupTileSequenceNumber(tick.getFrom());
 
@@ -46,7 +46,7 @@ public class OutputIdeaFlow implements OutputStrategy {
 
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
-        for (GridRow row: aggregateGrid.getAllGridRows()) {
+        for (GridRow row: musicGrid.getAllGridRows()) {
             GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tick.getZoomLevel(), tileSeq, row);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);

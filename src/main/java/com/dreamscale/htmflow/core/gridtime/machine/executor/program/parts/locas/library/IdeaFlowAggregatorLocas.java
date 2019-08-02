@@ -1,10 +1,10 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library;
 
 import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input.InputStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.output.OutputStrategy;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategy;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.MetricRowKey;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class IdeaFlowAggregatorLocas extends Locas<ZoomableIdeaFlowMetricsEntity> {
+public class IdeaFlowAggregatorLocas extends TimeAggregatorLocas<ZoomableIdeaFlowMetricsEntity> {
 
 
     public IdeaFlowAggregatorLocas(UUID torchieId,

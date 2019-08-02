@@ -1,4 +1,4 @@
-package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.input;
+package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input;
 
 import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsRepository;

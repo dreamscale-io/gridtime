@@ -2,13 +2,14 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.Flow;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.Flow;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateAggregateTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateBaseTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategy;
@@ -54,23 +55,14 @@ public class TileGeneratorProgram implements Program {
         torchieState.gotoPosition(metronome.getActivePosition());
     }
 
-    //this one publishes up wires..?
-    //different types of instructions, can change the program being operated.
-
-    //so if my tick, says I've got aggregate up a tick, and that's the type of program I run, is the AggregateUp program,
-    //then when the first program is run, I should do my little rollup thing.
-
     public Metronome.Tick getActiveTick() {
         return metronome.getActiveTick();
     }
 
-    public LocalDateTime suggestDefaultResumeLocation() {
-        return null;
-    }
 
     @Override
-    public List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick) {
-
+    public List<TileInstructions> getInstructionsAtActiveTick() {
+        Metronome.Tick tick = metronome.getActiveTick();
         List<TileInstructions> instructions = new ArrayList<>();
 
         instructions.add(generateBaseTickInstructions(tick));
@@ -82,12 +74,6 @@ public class TileGeneratorProgram implements Program {
         }
 
         return instructions;
-    }
-
-    @Override
-    public List<TileInstructions> getInstructionsAtActiveTick() {
-        Metronome.Tick tick = metronome.getActiveTick();
-        return getInstructionsAtTick(tick);
     }
 
     @Override
@@ -127,7 +113,7 @@ public class TileGeneratorProgram implements Program {
     }
 
 
-    public void addAggregator( Locas locas) {
+    public void addAggregator( TimeAggregatorLocas locas) {
         aggregatorChain.add(locas );
     }
 

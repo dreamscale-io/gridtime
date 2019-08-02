@@ -213,6 +213,12 @@ public class MusicGrid implements IMusicGrid {
         return toMusicGridResults(exportedRows);
     }
 
+    @Override
+    public Duration getTotalDuration() {
+        //TODO this will need to take idle time into account, and calculate the positive time in the frame
+        return musicClock.getRelativeEnd();
+    }
+
     private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
 
         List<String> headerRow = new ArrayList<>();

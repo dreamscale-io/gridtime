@@ -12,8 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
-import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.IdeaFlowAggregatorLocas
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -59,7 +58,7 @@ class IdeaFlowAggregatorLocasSpec extends Specification {
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)
 
-        torchie = torchieFactory.wireUpTeamMemberTorchie(UUID.randomUUID(), torchieId, clockStart);
+        torchie = torchieFactory.wireUpMemberTorchie(UUID.randomUUID(), torchieId, clockStart);
 
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(45)

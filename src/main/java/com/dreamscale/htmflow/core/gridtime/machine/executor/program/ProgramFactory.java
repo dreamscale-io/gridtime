@@ -8,6 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessTorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -71,15 +72,15 @@ public class ProgramFactory {
 
 
         program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
-
         program.setOutputStreamEventWire(teamWire);
 
-        //proogram add aggregate chain
-        //then generate different sort of instructions with alt chain
+        return program;
+    }
 
-        //maybe if I detach from the feature pool, we will be good
+    public TeamAggregatorProgram createTeamAggregatorProgram(UUID teamId, PerProcessTorchieState torchieState, AggregatingWire teamWire) {
+        TeamAggregatorProgram program = new TeamAggregatorProgram(teamId, torchieState, teamWire);
 
-
+        program.addAggregator(locasFactory.createIdeaFlowTeamAggregatorLocas(teamId));
 
         return program;
     }
@@ -89,6 +90,8 @@ public class ProgramFactory {
 
         return new CalendarGeneratorProgram(calendarService, maxTiles);
     }
+
+
 
 //    public AggregateByTeamProgram createAggregateWiresProgram(UUID teamId, PerProcessFeaturePool featurePool, AggregatingWire teamWire) {
 //

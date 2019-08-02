@@ -3,34 +3,32 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.NowMetrics;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.AlarmScript;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.FitnessMatrix;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.ParallelProgram;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class IdeaFlowCircuit {
 
     private final CircuitMonitor circuitMonitor;
 
     private final Program program;
-    private Map<UUID, Program> parallelPrograms = DefaultCollections.map();
+    private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
 
     private LinkedList<TileInstructions> instructionsToExecuteQueue;
     private LinkedList<TileInstructions> highPriorityInstructionQueue;
     private TileInstructions lastInstruction;
 
-    private LinkedList<TimeBomb> activeWaits;
-    private final NowMetrics nowMetrics;
+    private LinkedList<TimeBomb> activeTimeBombMonitors;
+    private final FitnessMatrix fitnessMatrix;
     private final Wire outputStreamEventWire;
 
     //circuit coordinator
@@ -45,9 +43,9 @@ public class IdeaFlowCircuit {
 
         this.highPriorityInstructionQueue = DefaultCollections.queueList();
         this.instructionsToExecuteQueue = DefaultCollections.queueList();
-        this.activeWaits = DefaultCollections.queueList();
+        this.activeTimeBombMonitors = DefaultCollections.queueList();
 
-        this.nowMetrics = new NowMetrics();
+        this.fitnessMatrix = new FitnessMatrix();
         this.outputStreamEventWire = program.getOutputStreamEventWire();
     }
 
@@ -63,7 +61,7 @@ public class IdeaFlowCircuit {
         isProgramHalted = false;
     }
 
-    public void runParallelProgram(UUID programId, Program parallelProgram) {
+    public void runParallelProgram(UUID programId, ParallelProgram parallelProgram) {
         parallelPrograms.put(programId, parallelProgram);
     }
 
@@ -84,15 +82,13 @@ public class IdeaFlowCircuit {
             program.tick();
 
             instructionsToExecuteQueue.addAll(program.getInstructionsAtActiveTick());
+            instructionsToExecuteQueue.addAll(getParallelProgramInstructions(program.getActiveTick()));
 
-            for (Program parallelProgram : parallelPrograms.values()) {
-                instructionsToExecuteQueue.addAll(parallelProgram.getInstructionsAtTick(program.getActiveTick()));
+            if (instructionsToExecuteQueue.size() > 0) {
+                nextInstructions = instructionsToExecuteQueue.removeFirst();
+
+                circuitMonitor.updateTickPosition(program.getActiveTick().getFrom().toDisplayString());
             }
-
-            nextInstructions = instructionsToExecuteQueue.removeFirst();
-
-            circuitMonitor.updateTickPosition(program.getActiveTick().getFrom().toDisplayString());
-
 
         } else {
             fireProgramDoneTriggers();
@@ -105,6 +101,16 @@ public class IdeaFlowCircuit {
 
         lastInstruction = nextInstructions;
         return nextInstructions;
+    }
+
+    private List<TileInstructions> getParallelProgramInstructions(Metronome.Tick activeTick) {
+        List<TileInstructions> instructionsToExecute = new ArrayList<>();
+
+        for (ParallelProgram parallelProgram : parallelPrograms.values()) {
+            instructionsToExecute.addAll(parallelProgram.getInstructionsAtTick(activeTick));
+        }
+
+        return instructionsToExecute;
     }
 
     private void fireProgramDoneTriggers() {
@@ -128,23 +134,28 @@ public class IdeaFlowCircuit {
         public void notifyWhenDone(TileInstructions finishedInstruction, List<Results> results) {
 
             IdeaFlowMetrics ideaFlowMetrics = getOutputIdeaFlowMetrics(finishedInstruction);
-            updateIdeaFlowTracerAndTriggerAlarms(ideaFlowMetrics);
+            updateFitnessMatrixAndTriggerAlarms(ideaFlowMetrics);
 
             List<TileStreamEvent> tileStreamEvents = finishedInstruction.getOutputTileStreamEvents();
             outputStreamEventWire.publishAll(tileStreamEvents);
-
 
             circuitMonitor.finishInstruction(finishedInstruction.getQueueDuration(), finishedInstruction.getExecutionDuration());
 
         }
 
-        private void updateIdeaFlowTracerAndTriggerAlarms(IdeaFlowMetrics ideaFlowMetrics) {
+        private void updateFitnessMatrixAndTriggerAlarms(IdeaFlowMetrics ideaFlowMetrics) {
             if (ideaFlowMetrics != null) {
 
-                nowMetrics.push(ideaFlowMetrics);
+                fitnessMatrix.push(ideaFlowMetrics);
 
-                generateAlarms();
-                triggerAlarms();
+                List<TimeBomb> timeBombMonitors = fitnessMatrix.generateTimeBombMonitors();
+                activeTimeBombMonitors.addAll(timeBombMonitors);
+
+                List<AlarmScript> alarmScripts = fitnessMatrix.triggerAlarms();
+                for (AlarmScript script : alarmScripts) {
+                    parallelPrograms.put(UUID.randomUUID(), script);
+                }
+
             }
         }
     }
@@ -158,13 +169,7 @@ public class IdeaFlowCircuit {
         return null;
     }
 
-    private void generateAlarms() {
-        //TODO evaluate NowMetrics, and generate AlarmScripts
-    }
 
-    private void triggerAlarms() {
-        //TODO evaluate all existing alarms, and run AlarmScripts as part of high priority queue
-    }
 
     public void scheduleInstruction(TileInstructions instructions) {
         instructionsToExecuteQueue.push(instructions);

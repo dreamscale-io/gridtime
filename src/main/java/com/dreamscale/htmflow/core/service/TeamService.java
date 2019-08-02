@@ -24,6 +24,8 @@ public class TeamService {
     @Autowired
     private OrganizationService organizationService;
 
+
+
     @Autowired
     private SpiritService xpService;
 
@@ -35,6 +37,9 @@ public class TeamService {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -88,8 +93,7 @@ public class TeamService {
         List<TeamMemberDto> teamMembers = new ArrayList<>();
 
         for (UUID memberId : membersToAdd) {
-            MemberStatusEntity memberStatus = memberStatusRepository.findOne(memberId);
-            validateMember(memberId, memberStatus, orgId);
+            validateMember(memberId, orgId);
 
             TeamMemberEntity teamMemberEntity = new TeamMemberEntity();
             teamMemberEntity.setId(UUID.randomUUID());
@@ -104,8 +108,12 @@ public class TeamService {
             teamMemberDto.setMemberId(memberId);
             teamMemberDto.setTeamId(teamId);
 
-            teamMemberDto.setMemberEmail(memberStatus.getEmail());
-            teamMemberDto.setMemberName(memberStatus.getFullName());
+            MemberStatusEntity memberStatus = memberStatusRepository.findOne(memberId);
+            if (memberStatus != null) {
+                teamMemberDto.setMemberEmail(memberStatus.getEmail());
+                teamMemberDto.setMemberName(memberStatus.getFullName());
+            }
+
             teamMemberDto.setTeamName(team.getName());
 
             teamMembers.add(teamMemberDto);
@@ -114,8 +122,10 @@ public class TeamService {
         return teamMembers;
     }
 
-    private void validateMember(UUID memberId, MemberStatusEntity memberStatus, UUID orgId) {
-        if (memberStatus == null || !memberStatus.getOrganizationId().equals(orgId)) {
+    private void validateMember(UUID memberId, UUID orgId) {
+        OrganizationMemberEntity member = organizationMemberRepository.findById(memberId);
+
+        if (member == null || !member.getOrganizationId().equals(orgId)) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT,
                     "Member not found in organization: "+memberId);
         }

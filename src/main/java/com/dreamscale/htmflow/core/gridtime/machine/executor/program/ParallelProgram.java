@@ -6,13 +6,9 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 
 import java.util.List;
 
-public interface Program {
+public interface ParallelProgram {
 
-    void tick();
-
-    Metronome.Tick getActiveTick();
-
-    List<TileInstructions> getInstructionsAtActiveTick();
+    List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick);
 
     boolean isDone();
 

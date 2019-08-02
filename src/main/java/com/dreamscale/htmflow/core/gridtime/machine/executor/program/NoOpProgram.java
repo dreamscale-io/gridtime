@@ -23,11 +23,6 @@ public class NoOpProgram implements Program {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick) {
-        return DefaultCollections.emptyList();
-    }
-
-    @Override
     public List<TileInstructions> getInstructionsAtActiveTick() {
         return DefaultCollections.emptyList();
     }

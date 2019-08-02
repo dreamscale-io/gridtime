@@ -56,3 +56,6 @@ databaseChangeLog:
 
   - include:
         file: db/v004/replace_view_zoomable_idea_flow.sql
+
+  - include:
+        file: db/v004/create_view_zoomable_team_idea_flow.sql
