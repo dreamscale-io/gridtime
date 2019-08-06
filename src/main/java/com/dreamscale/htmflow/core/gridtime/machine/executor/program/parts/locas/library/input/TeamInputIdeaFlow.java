@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputTeamIdeaFlow implements InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> {
+public class TeamInputIdeaFlow implements InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> {
 
     @Autowired
     ZoomableTeamIdeaFlowMetricsRepository zoomableTeamIdeaFlowMetricsRepository;

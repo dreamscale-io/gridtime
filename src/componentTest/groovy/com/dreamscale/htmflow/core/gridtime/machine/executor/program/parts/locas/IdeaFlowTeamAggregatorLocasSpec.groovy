@@ -8,7 +8,6 @@ import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
-import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsEntity
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
@@ -24,7 +23,6 @@ import com.dreamscale.htmflow.core.service.TeamService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
@@ -54,7 +52,7 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
     TorchieFactory torchieFactory
 
     LocalDateTime clockStart
-    LocalDateTime time1
+    LocalDateTime wtfTime
     LocalDateTime time2
     LocalDateTime time3
     LocalDateTime time4
@@ -72,11 +70,11 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
     def setup() {
 
         org = aRandom.organizationEntity().save()
-        member1 = createMembership(org.getId(), UUID.randomUUID())
-        member2 = createMembership(org.getId(), UUID.randomUUID())
-        member3 = createMembership(org.getId(), UUID.randomUUID())
+        member1 = createMembership(org.getId())
+        member2 = createMembership(org.getId())
+        member3 = createMembership(org.getId())
 
-        team = teamService.createTeam(org.getId(), "Phoenix23")
+        team = teamService.createTeam(org.getId(), "Team23")
 
         teamService.addMembersToTeam(org.getId(), team.getId(), extractMemberIds(member1, member2, member3))
 
@@ -85,10 +83,7 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)
 
-        time1 = clockStart.plusMinutes(1)
-        time2 = clockStart.plusMinutes(45)
-        time3 = clockStart.plusMinutes(60)
-        time4 = clockStart.plusMinutes(95)
+        wtfTime = clockStart.plusMinutes(1)
 
         Metronome.Tick tick = metronome.tick();
 
@@ -98,33 +93,31 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
     }
 
 
-    def "should aggregate IdeaFlowMetrics by GridTime across Team 23"() {
+    def "should aggregate IdeaFlowMetrics by GridTime across Team23"() {
 
         given:
 
         Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
-        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
-        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
+        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
+        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
 
         Torchie teamTorchie = torchieFactory.wireUpTeamTorchie(team.id)
 
         InputFeed feed1 = torchie1.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
-        feed1.addSomeData(generateWTFStart(time1))
-        feed1.addSomeData(generateWTFEnd(time2))
+        feed1.addSomeData(generateWTFStart(wtfTime))
+        feed1.addSomeData(generateWTFEnd(wtfTime.plusMinutes(5)))
 
         InputFeed feed2 = torchie2.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
-        feed2.addSomeData(generateWTFStart(time1))
-        feed2.addSomeData(generateWTFEnd(time2))
+        feed2.addSomeData(generateWTFStart(wtfTime))
+        feed2.addSomeData(generateWTFEnd(wtfTime.plusMinutes(15)))
 
         InputFeed feed3 = torchie3.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
-        feed3.addSomeData(generateWTFStart(time1))
-        feed3.addSomeData(generateWTFEnd(time2))
+        feed3.addSomeData(generateWTFStart(wtfTime))
+        feed3.addSomeData(generateWTFEnd(wtfTime.plusMinutes(45)))
 
-        for (int i = 0; i < 12; i++) {
-            torchie1.whatsNext().call()
-            torchie2.whatsNext().call()
-            torchie3.whatsNext().call()
-        }
+        torchie1.whatsNext().call()
+        torchie2.whatsNext().call()
+        torchie3.whatsNext().call()
 
         when:
         TileInstructions instruction = teamTorchie.whatsNext();
@@ -132,7 +125,11 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
 
         then:
         assert instruction != null
-        println instruction.getOutputResult()
+        MusicGridResults results = instruction.getOutputResult()
+
+        println results
+
+        assert results.getCell("@zoom/wtf", "Calc[Avg]") == "0.68"
 
     }
 
@@ -164,10 +161,12 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
     }
 
 
-    private OrganizationMemberEntity createMembership(UUID organizationId, UUID masterAccountId) {
+    private OrganizationMemberEntity createMembership(UUID organizationId) {
+        def account = aRandom.masterAccountEntity().save()
+
         aRandom.memberEntity()
                 .organizationId(organizationId)
-                .masterAccountId(masterAccountId)
+                .masterAccountId(account.id)
                 .save()
     }
 }

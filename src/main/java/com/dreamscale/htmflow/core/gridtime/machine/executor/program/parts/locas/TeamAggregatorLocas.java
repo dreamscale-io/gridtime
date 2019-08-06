@@ -3,7 +3,6 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
@@ -16,22 +15,22 @@ import java.util.UUID;
 @Slf4j
 public abstract class TeamAggregatorLocas<T> implements Locas {
 
-    private final UUID torchieId;
+    private final UUID teamId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
     private TeamGrid teamGrid;
 
-    public TeamAggregatorLocas(UUID torchieId,
+    public TeamAggregatorLocas(UUID teamId,
                                InputStrategy<T> input,
                                OutputStrategy output) {
-        this.torchieId = torchieId;
+        this.teamId = teamId;
         this.input = input;
         this.output = output;
     }
 
     @Override
     public IMusicGrid runProgram(Metronome.Tick tick) {
-        List<T> metricInputs = input.breatheIn(torchieId, tick);
+        List<T> metricInputs = input.breatheIn(teamId, tick);
 
         log.debug("Found "+metricInputs.size() + " metrics at tick: "+tick.toDisplayString());
 
@@ -40,7 +39,7 @@ public abstract class TeamAggregatorLocas<T> implements Locas {
         fillTeamGrid(teamGrid, metricInputs);
         teamGrid.finish();
 
-        output.breatheOut(torchieId, tick, teamGrid);
+        output.breatheOut(teamId, tick, teamGrid);
 
         return teamGrid;
     }

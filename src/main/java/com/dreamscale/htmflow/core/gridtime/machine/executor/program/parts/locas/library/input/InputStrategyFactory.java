@@ -10,14 +10,14 @@ public class InputStrategyFactory {
     InputIdeaFlow inputIdeaFlow;
 
     @Autowired
-    InputTeamIdeaFlow inputTeamIdeaFlow;
+    TeamInputIdeaFlow teamInputIdeaFlow;
 
     public <T> InputStrategy<T> get(InputType inputType) {
         switch (inputType) {
             case QUERY_IDEA_FLOW_METRICS:
                 return (InputStrategy<T>) inputIdeaFlow;
             case QUERY_TEAM_IDEA_FLOW_METRICS:
-                return (InputStrategy<T>) inputTeamIdeaFlow;
+                return (InputStrategy<T>) teamInputIdeaFlow;
         }
         return null;
     }
