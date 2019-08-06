@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class IdeaFlowTeamAggregatorLocas extends TeamAggregatorLocas<ZoomableTeamIdeaFlowMetricsEntity> {
+public class ZoomableTeamIdeaFlowLocas extends TeamAggregatorLocas<ZoomableTeamIdeaFlowMetricsEntity> {
 
 
-    public IdeaFlowTeamAggregatorLocas(UUID teamId,
-                                       InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> input,
-                                       OutputStrategy output) {
+    public ZoomableTeamIdeaFlowLocas(UUID teamId,
+                                     InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> input,
+                                     OutputStrategy output) {
         super(teamId, input, output);
 
     }

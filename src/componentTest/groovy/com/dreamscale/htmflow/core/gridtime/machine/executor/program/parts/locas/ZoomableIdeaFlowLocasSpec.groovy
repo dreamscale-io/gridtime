@@ -12,7 +12,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.IdeaFlowAggregatorLocas
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.ZoomableIdeaFlowLocas
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -21,7 +21,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 
 @ComponentTest
-class IdeaFlowAggregatorLocasSpec extends Specification {
+class ZoomableIdeaFlowLocasSpec extends Specification {
 
     @Autowired
     LocasFactory locasFactory
@@ -43,7 +43,7 @@ class IdeaFlowAggregatorLocasSpec extends Specification {
     LocalDateTime time3
     LocalDateTime time4
 
-    IdeaFlowAggregatorLocas ideaflowAggregatorLocas
+    ZoomableIdeaFlowLocas ideaflowAggregatorLocas
     Metronome metronome
 
     Torchie torchie

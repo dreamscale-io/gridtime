@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputIdeaFlow implements InputStrategy<ZoomableIdeaFlowMetricsEntity> {
+public class MemberInputIdeaFlow implements InputStrategy<ZoomableIdeaFlowMetricsEntity> {
 
     @Autowired
     ZoomableIdeaFlowMetricsRepository zoomableIdeaFlowMetricsRepository;

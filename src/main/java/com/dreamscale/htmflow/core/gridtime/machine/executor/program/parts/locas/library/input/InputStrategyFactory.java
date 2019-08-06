@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class InputStrategyFactory {
 
     @Autowired
-    InputIdeaFlow inputIdeaFlow;
+    MemberInputIdeaFlow inputIdeaFlow;
 
     @Autowired
     TeamInputIdeaFlow teamInputIdeaFlow;

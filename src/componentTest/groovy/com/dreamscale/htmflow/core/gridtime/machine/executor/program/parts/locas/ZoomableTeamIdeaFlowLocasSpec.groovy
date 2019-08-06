@@ -17,7 +17,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instruction
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.IdeaFlowTeamAggregatorLocas
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed
 import com.dreamscale.htmflow.core.service.TeamService
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +28,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.htmflow.core.CoreARandom.aRandom
 
 @ComponentTest
-class IdeaFlowTeamAggregatorLocasSpec extends Specification {
+class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
     @Autowired
     LocasFactory locasFactory
@@ -57,7 +57,7 @@ class IdeaFlowTeamAggregatorLocasSpec extends Specification {
     LocalDateTime time3
     LocalDateTime time4
 
-    IdeaFlowTeamAggregatorLocas ideaFlowTeamAggregatorLocas
+    ZoomableTeamIdeaFlowLocas ideaFlowTeamAggregatorLocas
     Metronome metronome
 
     OrganizationEntity org

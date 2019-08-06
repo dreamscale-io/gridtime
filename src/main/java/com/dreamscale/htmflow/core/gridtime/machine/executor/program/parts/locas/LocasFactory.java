@@ -2,10 +2,10 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 
 import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.domain.tile.ZoomableTeamIdeaFlowMetricsEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.IdeaFlowTeamAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategyFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.IdeaFlowAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.ZoomableIdeaFlowLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +22,17 @@ public class LocasFactory {
     @Autowired
     OutputStrategyFactory outputStrategyFactory;
 
-    public IdeaFlowAggregatorLocas createIdeaFlowAggregatorLocas(UUID torchieId) {
+    public ZoomableIdeaFlowLocas createIdeaFlowAggregatorLocas(UUID torchieId) {
         InputStrategy<ZoomableIdeaFlowMetricsEntity> ideaflowIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_IDEA_FLOW_METRICS);
         OutputStrategy ideaflowOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_IDEA_FLOW_METRICS);
 
-        return new IdeaFlowAggregatorLocas(torchieId, ideaflowIn, ideaflowOut);
+        return new ZoomableIdeaFlowLocas(torchieId, ideaflowIn, ideaflowOut);
     }
 
-    public IdeaFlowTeamAggregatorLocas createIdeaFlowTeamAggregatorLocas(UUID teamId) {
+    public ZoomableTeamIdeaFlowLocas createIdeaFlowTeamAggregatorLocas(UUID teamId) {
         InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> ideaflowIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_TEAM_IDEA_FLOW_METRICS);
         OutputStrategy ideaflowOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_IDEA_FLOW_METRICS);
 
-        return new IdeaFlowTeamAggregatorLocas(teamId, ideaflowIn, ideaflowOut);
+        return new ZoomableTeamIdeaFlowLocas(teamId, ideaflowIn, ideaflowOut);
     }
 }
