@@ -2,6 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.memory.grid.trackset;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.MusicClock;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeelsReference;
@@ -33,6 +34,10 @@ public class FeelsTrackSet implements PlayableCompositeTrackSet {
 
     public void clearFeels(LocalDateTime moment) {
         feelsTrack.stopPlaying(moment);
+    }
+
+    public FeelsReference getFeelsAtBeat(RelativeBeat beat) {
+        return feelsTrack.getFeatureAt(beat);
     }
 
     public void finish() {
@@ -67,4 +72,6 @@ public class FeelsTrackSet implements PlayableCompositeTrackSet {
     public Set<? extends FeatureReference> getFeatures() {
         return feelsTrack.getFeatures();
     }
+
+
 }

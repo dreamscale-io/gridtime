@@ -7,6 +7,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instruction
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.IdeaFlowCircuit;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
@@ -92,5 +94,14 @@ public class Torchie {
 
     public MusicGridResults playAllTracks() {
         return torchieState.getActiveTile().playAllTracks();
+    }
+
+
+    public void configureOutputStreamEventWire(Wire outputWire) {
+        ideaFlowCircuit.configureOutputStreamEventWire(outputWire);
+    }
+
+    public void configureInputStreamEventWire(Wire inputWire) {
+        ideaFlowCircuit.configureInputStreamEventWire(inputWire);
     }
 }

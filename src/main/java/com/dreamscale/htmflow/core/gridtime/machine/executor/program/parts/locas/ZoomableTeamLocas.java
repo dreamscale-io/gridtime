@@ -13,16 +13,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public abstract class TeamAggregatorLocas<T> implements Locas {
+public abstract class ZoomableTeamLocas<T> implements Locas {
 
     private final UUID teamId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
     private TeamGrid teamGrid;
 
-    public TeamAggregatorLocas(UUID teamId,
-                               InputStrategy<T> input,
-                               OutputStrategy output) {
+    public ZoomableTeamLocas(UUID teamId,
+                             InputStrategy<T> input,
+                             OutputStrategy output) {
         this.teamId = teamId;
         this.input = input;
         this.output = output;

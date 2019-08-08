@@ -74,3 +74,6 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/create_rt_channel_member.sql
+
+  - include:
+        file:  db/v004/create_work_item_to_aggregate.sql

@@ -1,18 +1,22 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires;
 
+import com.dreamscale.htmflow.core.domain.work.WorkToDoType;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 public class AggregatingWire implements Wire {
 
     private final LinkedHashMap<String, AggregateStreamEvent> aggregateEventStream;
+    private final UUID teamId;
 
-    public AggregatingWire() {
+    public AggregatingWire(UUID teamId) {
+        this.teamId = teamId;
         aggregateEventStream = DefaultCollections.map();
     }
 
@@ -34,7 +38,9 @@ public class AggregatingWire implements Wire {
         return aggregateEventStream.size() > 0;
     }
 
-    public AggregateStreamEvent pullNext() {
+
+    @Override
+    public AggregateStreamEvent pullNext(UUID workerId) {
         AggregateStreamEvent aggregate;
 
         synchronized (aggregateEventStream) {
@@ -45,19 +51,29 @@ public class AggregatingWire implements Wire {
         return aggregate;
     }
 
-    private AggregateStreamEvent findOrCreateAggregateByGridTime(GeometryClock.GridTime gridTime, EventType eventType) {
+    @Override
+    public void markDone(UUID workerId) {
+
+    }
+
+    @Override
+    public int getQueueDepth() {
+        return aggregateEventStream.size();
+    }
+
+    private AggregateStreamEvent findOrCreateAggregateByGridTime(GeometryClock.GridTime gridTime, WorkToDoType eventType) {
 
         String aggregateKey = createAggregateKey(gridTime, eventType);
         AggregateStreamEvent aggregate = aggregateEventStream.get(aggregateKey);
 
         if (aggregate == null) {
-            aggregate = new AggregateStreamEvent(gridTime, eventType);
+            aggregate = new AggregateStreamEvent(teamId, gridTime, eventType);
             aggregateEventStream.put(aggregateKey, aggregate);
         }
         return aggregate;
     }
 
-    private String createAggregateKey(GeometryClock.GridTime gridTime, EventType eventType) {
+    private String createAggregateKey(GeometryClock.GridTime gridTime, WorkToDoType eventType) {
         return gridTime.toDisplayString() + "::" + eventType.name();
     }
 

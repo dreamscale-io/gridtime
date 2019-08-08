@@ -18,4 +18,6 @@ public interface GridTimeCalendarRepository extends CrudRepository<GridTimeCalen
     GridTimeCalendarEntity findByZoomLevelAndClockTime(ZoomLevel zoomLevel, LocalDateTime clockTime);
 
     List<GridTimeCalendarEntity> findByZoomLevel(ZoomLevel zoomLevel);
+
+    GridTimeCalendarEntity findByZoomLevelAndTileSeq(ZoomLevel zoomLevel, Long tileSeq);
 }

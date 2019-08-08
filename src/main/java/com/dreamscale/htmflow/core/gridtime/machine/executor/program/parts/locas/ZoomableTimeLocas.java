@@ -13,16 +13,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public abstract class TimeAggregatorLocas<T> implements Locas {
+public abstract class ZoomableTimeLocas<T> implements Locas {
 
     private final UUID torchieId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
     private AggregateGrid aggregateGrid;
 
-    public TimeAggregatorLocas(UUID torchieId,
-                               InputStrategy<T> input,
-                               OutputStrategy output) {
+    public ZoomableTimeLocas(UUID torchieId,
+                             InputStrategy<T> input,
+                             OutputStrategy output) {
         this.torchieId = torchieId;
         this.input = input;
         this.output = output;

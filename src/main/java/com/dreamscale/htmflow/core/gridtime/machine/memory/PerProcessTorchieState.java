@@ -12,18 +12,13 @@ import java.util.UUID;
 
 public class PerProcessTorchieState extends AbstractTorchieState {
 
-    private final UUID teamId;
-    private final UUID torchieId;
-
     private final FeatureResolverService featureResolverService;
     private final TileSearchService tileSearchService;
 
     public PerProcessTorchieState(UUID teamId, UUID torchieId, FeatureCache featureCache,
                                   FeatureResolverService featureResolverService, TileSearchService tileSearchService) {
-        super(torchieId, featureCache);
+        super(torchieId, teamId, featureCache);
 
-        this.teamId = teamId;
-        this.torchieId = torchieId;
         this.featureResolverService = featureResolverService;
         this.tileSearchService = tileSearchService;
     }
@@ -34,13 +29,13 @@ public class PerProcessTorchieState extends AbstractTorchieState {
         Set<FeatureReference> features = getActiveTile().getAllFeatures();
 
         for (FeatureReference feature : features) {
-            featureResolverService.resolve(teamId, feature);
+            featureResolverService.resolve(getTeamId(), feature);
         }
     }
 
     @Override
     protected CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime) {
-        return tileSearchService.getCarryOverContextOfTile(torchieId, gridTime);
+        return tileSearchService.getCarryOverContextOfTile(getTorchieId(), gridTime);
     }
 
 

@@ -37,7 +37,7 @@ public class ProgramFactory {
     @Autowired
     private CalendarService calendarService;
 
-    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, Wire teamWire, LocalDateTime startPosition) {
+    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
         TileGeneratorProgram program = new TileGeneratorProgram(torchieId, torchieState, startPosition);
 
@@ -72,13 +72,12 @@ public class ProgramFactory {
 
 
         program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
-        program.setOutputStreamEventWire(teamWire);
 
         return program;
     }
 
-    public TeamAggregatorProgram createTeamAggregatorProgram(UUID teamId, PerProcessTorchieState torchieState, AggregatingWire teamWire) {
-        TeamAggregatorProgram program = new TeamAggregatorProgram(teamId, torchieState, teamWire);
+    public TeamAggregatorProgram createTeamAggregatorProgram(UUID teamId, PerProcessTorchieState torchieState) {
+        TeamAggregatorProgram program = new TeamAggregatorProgram(teamId, torchieState);
 
         program.addAggregator(locasFactory.createIdeaFlowTeamAggregatorLocas(teamId));
 

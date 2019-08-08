@@ -17,9 +17,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 public class WTFStateObserver implements FlowObserver<FlowableCircleMessageEvent> {
 
     @Override
-    public void see(Window<FlowableCircleMessageEvent> window, TorchieState torchieState) {
-
-        GridTile gridTile = torchieState.getActiveTile();
+    public void see(Window<FlowableCircleMessageEvent> window, GridTile gridTile) {
 
         for (Flowable flowable : window.getFlowables()) {
             CircleFeedMessageEntity circleMessage = (flowable.get());

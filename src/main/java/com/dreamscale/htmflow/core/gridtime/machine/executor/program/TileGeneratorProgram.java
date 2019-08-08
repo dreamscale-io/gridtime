@@ -8,7 +8,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instruction
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.ZoomableTimeLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserver;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.FlowSink;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategy;
@@ -46,12 +46,11 @@ public class TileGeneratorProgram implements Program {
         this.isInitialized = false;
     }
 
-    public void tick() {
+    public void tick(Wire inputStreamEventWire) {
         metronome.tick();
 
         log.debug("metronome tick: " + metronome.getActiveTick().toDisplayString());
 
-        torchieState.gotoPosition(metronome.getActivePosition());
     }
 
     public Metronome.Tick getActiveTick() {
@@ -80,15 +79,6 @@ public class TileGeneratorProgram implements Program {
         return false;
     }
 
-    @Override
-    public Wire getOutputStreamEventWire() {
-        return outputStreamEventWire;
-    }
-
-    public void setOutputStreamEventWire(Wire teamWire) {
-        this.outputStreamEventWire = teamWire;
-    }
-
     public void addFlowSourceToPullChain(FeedStrategy feedStrategy, FlowObserver... observers) {
         pullChain.add(new FlowSource(torchieId, torchieState, feedStrategy, observers));
     }
@@ -112,7 +102,7 @@ public class TileGeneratorProgram implements Program {
     }
 
 
-    public void addAggregator( TimeAggregatorLocas locas) {
+    public void addAggregator( ZoomableTimeLocas locas) {
         aggregatorChain.add(locas );
     }
 

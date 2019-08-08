@@ -21,6 +21,8 @@ import java.util.UUID;
 @Component
 public class TorchieFactory {
 
+    private static final int MAX_TEAMS = 5;
+
     @Autowired
     private ProgramFactory programFactory;
 
@@ -30,26 +32,20 @@ public class TorchieFactory {
     @Autowired
     private TileSearchService tileSearchService;
 
-
     @Autowired
     private BoxConfigurationLoaderService boxConfigurationLoaderService;
 
-    private static final int MAX_TEAMS = 5;
-
     private Map<UUID, FeatureCache> teamCacheMap = DefaultCollections.lruMap(MAX_TEAMS);
-
-    private Map<UUID, AggregatingWire> teamWiresMap = DefaultCollections.map();
 
 
     public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
         FeatureCache featureCache = findOrCreateFeatureCache(teamId);
-        AggregatingWire teamEventStreamWire = findOrCreateTeamEventStreamWire(teamId);
 
         PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,
                 featureCache, featureResolverService, tileSearchService);
 
         //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, teamEventStreamWire, startingPosition);
+        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition);
 
         return new Torchie(memberId, torchieState, program);
 
@@ -61,9 +57,7 @@ public class TorchieFactory {
         PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, teamId,
                 featureCache, featureResolverService, tileSearchService);
 
-        AggregatingWire teamEventsWire = findOrCreateTeamEventStreamWire(teamId);
-
-        TeamAggregatorProgram program = programFactory.createTeamAggregatorProgram(teamId, torchieState, teamEventsWire);
+        TeamAggregatorProgram program = programFactory.createTeamAggregatorProgram(teamId, torchieState);
 
         return new Torchie(teamId, torchieState, program);
 
@@ -92,14 +86,6 @@ public class TorchieFactory {
         return featureCache;
     }
 
-    private AggregatingWire findOrCreateTeamEventStreamWire(UUID teamId) {
-        AggregatingWire teamWire = teamWiresMap.get(teamId);
-        if (teamWire == null) {
-            teamWire = new AggregatingWire();
-            teamWiresMap.put(teamId, teamWire);
-        }
-        return teamWire;
-    }
 
 
 

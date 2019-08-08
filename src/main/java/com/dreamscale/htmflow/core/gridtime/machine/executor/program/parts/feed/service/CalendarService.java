@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -35,6 +34,16 @@ public class CalendarService {
         }
 
         return tileSequence;
+    }
+
+    public GeometryClock.GridTimeSequence lookupGridTimeSequence(ZoomLevel zoomLevel, long tileSeq) {
+        GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndTileSeq(zoomLevel, tileSeq);
+        if (calendarTile != null) {
+            return GeometryClock.createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getClockTime());
+        } else {
+            log.warn("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
+        }
+        return null;
     }
 
     public Long lookupTileSequenceFromSameTime(ZoomLevel zoomInOneLevel, LocalDateTime clockTime) {
@@ -83,11 +92,11 @@ public class CalendarService {
         gridTimeCalendarRepository.save(calendar);
     }
 
-    public GeometryClock.Sequence getLast(ZoomLevel zoomLevel) {
+    public GeometryClock.GridTimeSequence getLast(ZoomLevel zoomLevel) {
         return toSequence(gridTimeCalendarRepository.getLast(zoomLevel.name()));
     }
 
-    private GeometryClock.Sequence toSequence(GridTimeCalendarEntity last) {
+    private GeometryClock.GridTimeSequence toSequence(GridTimeCalendarEntity last) {
         if (last != null) {
             return GeometryClock.createSequencedGridTime(last.getZoomLevel(), last.getClockTime(), last.getTileSeq());
         }

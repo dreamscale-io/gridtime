@@ -10,6 +10,8 @@ import com.dreamscale.htmflow.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.htmflow.core.domain.flow.RandomFlowActivityEntityBuilder;
 import com.dreamscale.htmflow.core.domain.journal.*;
 import com.dreamscale.htmflow.core.domain.member.*;
+import com.dreamscale.htmflow.core.domain.work.RandomWorkItemToAggregateEntityBuilder;
+import com.dreamscale.htmflow.core.domain.work.WorkItemToAggregateRepository;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraProjectDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraTaskDtoBuilder;
 import com.dreamscale.htmflow.core.hooks.jira.dto.RandomJiraUserDtoBuilder;
@@ -25,6 +27,9 @@ public class CoreRandomBuilderSupport {
     private OrganizationMemberRepository organizationMemberRepository;
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private WorkItemToAggregateRepository workItemToAggregateRepository;
 
     @Autowired
     private IntentionRepository intentionRepository;
@@ -88,6 +93,10 @@ public class CoreRandomBuilderSupport {
     public RandomExecutionActivityBuilder executionActivity() { return new RandomExecutionActivityBuilder(); }
 
     public RandomModificationActivityBuilder modificationActivity() { return new RandomModificationActivityBuilder(); }
+
+    public RandomWorkItemToAggregateEntityBuilder workItem() {
+        return new RandomWorkItemToAggregateEntityBuilder(workItemToAggregateRepository);
+    }
 
     public RandomIdleActivityBuilder idleActivity() { return new RandomIdleActivityBuilder(); }
 

@@ -5,6 +5,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.AlarmScript;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.now.FitnessMatrix;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.ParallelProgram;
@@ -29,12 +30,14 @@ public class IdeaFlowCircuit {
 
     private LinkedList<TimeBomb> activeTimeBombMonitors;
     private final FitnessMatrix fitnessMatrix;
-    private final Wire outputStreamEventWire;
 
     //circuit coordinator
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
     private boolean isProgramHalted;
+
+    private Wire inputStreamEventWire;
+    private Wire outputStreamEventWire;
 
 
     public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
@@ -46,7 +49,16 @@ public class IdeaFlowCircuit {
         this.activeTimeBombMonitors = DefaultCollections.queueList();
 
         this.fitnessMatrix = new FitnessMatrix();
-        this.outputStreamEventWire = program.getOutputStreamEventWire();
+        this.outputStreamEventWire = new DevNullWire();
+        this.inputStreamEventWire = new DevNullWire();
+    }
+
+    public void configureOutputStreamEventWire(Wire outputWire) {
+        this.outputStreamEventWire = outputWire;
+    }
+
+    public void configureInputStreamEventWire(Wire inputWire) {
+        inputStreamEventWire = inputWire;
     }
 
     public void fireTriggersForActiveWaits() {
@@ -71,36 +83,42 @@ public class IdeaFlowCircuit {
 
     public TileInstructions getNextInstruction() {
 
-        TileInstructions nextInstructions = null;
+        TileInstructions nextInstruction = null;
 
         if (highPriorityInstructionQueue.size() > 0) {
-            nextInstructions = highPriorityInstructionQueue.removeFirst();
+            nextInstruction = highPriorityInstructionQueue.removeFirst();
         } else if (instructionsToExecuteQueue.size() > 0) {
-            nextInstructions = instructionsToExecuteQueue.removeFirst();
+            nextInstruction = instructionsToExecuteQueue.removeFirst();
         } else if (!isProgramHalted && !program.isDone()) {
 
-            program.tick();
+            program.tick(inputStreamEventWire);
 
             instructionsToExecuteQueue.addAll(program.getInstructionsAtActiveTick());
             instructionsToExecuteQueue.addAll(getParallelProgramInstructions(program.getActiveTick()));
 
             if (instructionsToExecuteQueue.size() > 0) {
-                nextInstructions = instructionsToExecuteQueue.removeFirst();
+                nextInstruction = instructionsToExecuteQueue.removeFirst();
 
-                circuitMonitor.updateTickPosition(program.getActiveTick().getFrom().toDisplayString());
+                circuitMonitor.updateTickPosition(program.getActiveTick());
             }
 
         } else {
             fireProgramDoneTriggers();
         }
 
-        if (nextInstructions != null) {
+        if (nextInstruction != null) {
             circuitMonitor.startInstruction();
-            nextInstructions.addTriggerToNotifyList(new EvaluateOutputTrigger());
+            nextInstruction.addTriggerToNotifyList(new EvaluateOutputTrigger());
         }
 
-        lastInstruction = nextInstructions;
-        return nextInstructions;
+
+        circuitMonitor.updateQueueDepth(
+                highPriorityInstructionQueue.size() +
+                instructionsToExecuteQueue.size() +
+                inputStreamEventWire.getQueueDepth());
+
+        lastInstruction = nextInstruction;
+        return nextInstruction;
     }
 
     private List<TileInstructions> getParallelProgramInstructions(Metronome.Tick activeTick) {
@@ -127,6 +145,8 @@ public class IdeaFlowCircuit {
     public Metronome.Tick getActiveTick() {
         return program.getActiveTick();
     }
+
+
 
     private class EvaluateOutputTrigger implements NotifyTrigger {
 
@@ -168,8 +188,6 @@ public class IdeaFlowCircuit {
         }
         return null;
     }
-
-
 
     public void scheduleInstruction(TileInstructions instructions) {
         instructionsToExecuteQueue.push(instructions);

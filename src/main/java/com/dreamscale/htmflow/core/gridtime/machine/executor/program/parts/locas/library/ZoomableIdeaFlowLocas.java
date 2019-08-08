@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.loca
 
 import com.dreamscale.htmflow.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.ZoomableTimeLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.AggregateGrid;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class ZoomableIdeaFlowLocas extends TimeAggregatorLocas<ZoomableIdeaFlowMetricsEntity> {
+public class ZoomableIdeaFlowLocas extends ZoomableTimeLocas<ZoomableIdeaFlowMetricsEntity> {
 
 
     public ZoomableIdeaFlowLocas(UUID torchieId,

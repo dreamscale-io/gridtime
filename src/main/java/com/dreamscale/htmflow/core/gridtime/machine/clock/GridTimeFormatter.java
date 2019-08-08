@@ -1,6 +1,11 @@
 package com.dreamscale.htmflow.core.gridtime.machine.clock;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.AntPathMatcher;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Map;
 
 public class GridTimeFormatter {
 
@@ -134,12 +139,43 @@ public class GridTimeFormatter {
         return gridTime;
     }
 
-    public static Integer [] parseGridTime(String gridtime) {
-        //TODO implement me when we do URI mappings
-        return null;
-    }
+//    public static Integer [] parseGridTime(String gridtime) {
+//        AntPathMatcher pathMatcher = new AntPathMatcher();
+//           Map<String, String> variables = pathMatcher.extractUriTemplateVariables("{year}_B{block}_W{week}_D{day}_TT{twelves}-{twenties}", gridTime);
+//            System.out.println(variables);
+//
+//            int year = Integer.valueOf(variables.get("year"));
+//            int block = Integer.valueOf(variables.get("block"));
+//            int weeksIntoBlock = Integer.valueOf(variables.get("week"));
+//            int daysIntoWeek = Integer.valueOf(variables.get("day"));
+//            int twelves = Integer.valueOf(variables.get("twelves"));
+//            int twenties = Integer.valueOf(variables.get("twenties"));
+//
+//            LocalDate sameYear = LocalDate.of(year, 1, 1);
+//            LocalDate firstMondayOfSameYear = sameYear.with(firstInMonth(DayOfWeek.MONDAY));
+//
+//            int firstDayOfYear = firstMondayOfSameYear.getDayOfYear();
+//
+//            int blockDayTotal = (block - 1) * ZoomLevel.BLOCK_OF_SIX_WEEKS.getInnerBeats() * ZoomLevel.WORK_WEEK.getInnerBeats();
+//            int weekDayTotal = (weeksIntoBlock - 1) * ZoomLevel.WORK_WEEK.getInnerBeats();
+//            int dayIntoYear = firstDayOfYear + blockDayTotal + weekDayTotal + (daysIntoWeek - 1);
+//
+//            int partialTwelves = Math.floorDiv(twenties - 1 , 3);
+//            int remainderInHour = Math.floorMod(twenties - 1, 3);
+//            int hoursIntoDay = (twelves - 1) * 4 + partialTwelves;
+//
+//            int minutesIntoHour = remainderInHour * 20;
+//
+//            LocalDateTime translatedTime = LocalDateTime.of(year, 1, 1, hoursIntoDay, minutesIntoHour);
+//            translatedTime = translatedTime.withDayOfYear(dayIntoYear);
+//
+//
+//        return null;
+//    }
+//
 
-
+//
+//
 //        public static Coords fromGridTime(String gridTime) {
 //            AntPathMatcher pathMatcher = new AntPathMatcher();
 //

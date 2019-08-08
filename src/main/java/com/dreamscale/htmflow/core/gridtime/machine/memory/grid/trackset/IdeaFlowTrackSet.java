@@ -77,6 +77,15 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
         learningProgressTrack.finish();
     }
 
+    public IdeaFlowStateReference getIdeaFlowStateAtBeat(RelativeBeat beat) {
+        IdeaFlowStateReference stateReference = wtfTrack.getFeatureAt(beat);
+        if (stateReference == null) {
+            stateReference = learningProgressTrack.getFeatureAt(beat);
+        }
+
+        return stateReference;
+    }
+
     private void createLearningBandsBasedOnThreshold() {
         IdeaFlowStateReference progressState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.PROGRESS_STATE);
         IdeaFlowStateReference learningState = featureCache.lookupIdeaFlowStateReference(IdeaFlowStateType.LEARNING_STATE);
@@ -96,6 +105,8 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
             }
         }
     }
+
+
 
     public CarryOverContext getCarryOverContext(String subcontextName) {
 

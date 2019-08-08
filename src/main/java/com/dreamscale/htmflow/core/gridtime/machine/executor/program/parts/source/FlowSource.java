@@ -56,7 +56,7 @@ public class FlowSource<T extends Flowable> implements Flow {
     private void observeFlowables(Window<T> window) {
         for (FlowObserver<T> observer : flowObservers) {
 
-            observer.see(window, torchieState);
+            observer.see(window, torchieState.getActiveTile());
         }
     }
 

@@ -10,7 +10,7 @@ public class MemoryOnlyTorchieState extends AbstractTorchieState {
 
 
     public MemoryOnlyTorchieState(UUID torchieId) {
-        super(torchieId, new FeatureCache());
+        super(torchieId, null, new FeatureCache());
     }
 
 

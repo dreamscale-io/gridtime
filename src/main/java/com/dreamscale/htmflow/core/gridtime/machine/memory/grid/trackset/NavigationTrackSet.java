@@ -95,6 +95,10 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
         return location;
     }
 
+    public PlaceReference getBoxAtBeat(RelativeBeat beat) {
+        return boxTrack.getLastFeatureAt(beat);
+    }
+
     public PlaceReference getLastLocation() {
         if (lastLocation == null) {
             return carryOverLastLocation;

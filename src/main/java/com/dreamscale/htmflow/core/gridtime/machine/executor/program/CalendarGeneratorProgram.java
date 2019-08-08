@@ -5,7 +5,6 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateCalendarTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 
@@ -41,7 +40,7 @@ public class CalendarGeneratorProgram implements Program {
 
 
     @Override
-    public void tick() {
+    public void tick(Wire inputStreamEventWire) {
         if (!isInitialized) {
             initMetronomeAndStartSequences();
             isInitialized = true;
@@ -55,11 +54,6 @@ public class CalendarGeneratorProgram implements Program {
     @Override
     public boolean isDone() {
         return isInitialized && (metronome.getActiveTick().isAfter(calendarEnd) || tilesGenerated >= maxTiles);
-    }
-
-    @Override
-    public Wire getOutputStreamEventWire() {
-        return new DevNullWire();
     }
 
     @Override
@@ -88,10 +82,10 @@ public class CalendarGeneratorProgram implements Program {
 
 
     private void initMetronomeAndStartSequences() {
-        GeometryClock.Sequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
-        GeometryClock.Sequence lastDayPart = calendarService.getLast(ZoomLevel.DAY_PART);
-        GeometryClock.Sequence lastDay = calendarService.getLast(ZoomLevel.DAY);
-        GeometryClock.Sequence lastWeek = calendarService.getLast(ZoomLevel.WEEK);
+        GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
+        GeometryClock.GridTimeSequence lastDayPart = calendarService.getLast(ZoomLevel.DAY_PART);
+        GeometryClock.GridTimeSequence lastDay = calendarService.getLast(ZoomLevel.DAY);
+        GeometryClock.GridTimeSequence lastWeek = calendarService.getLast(ZoomLevel.WEEK);
 
         twentiesSequence = getSequence(lastTwenty);
         dayPartSequence = getSequence(lastDayPart);
@@ -104,7 +98,7 @@ public class CalendarGeneratorProgram implements Program {
     }
 
 
-    private LocalDateTime getCalendarStart(GeometryClock.Sequence lastTwenty) {
+    private LocalDateTime getCalendarStart(GeometryClock.GridTimeSequence lastTwenty) {
         if (lastTwenty != null) {
             return lastTwenty.getGridTime().panRight().getClockTime();
         } else {
@@ -118,9 +112,9 @@ public class CalendarGeneratorProgram implements Program {
         return GeometryClock.getFirstMomentOfYear(year + 2);
     }
 
-    private long getSequence(GeometryClock.Sequence sequence) {
-        if (sequence != null) {
-            return sequence.getSequenceNumber() + 1;
+    private long getSequence(GeometryClock.GridTimeSequence gridTimeSequence) {
+        if (gridTimeSequence != null) {
+            return gridTimeSequence.getSequenceNumber() + 1;
         } else {
             return 1;
         }

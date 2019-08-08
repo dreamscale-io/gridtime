@@ -20,9 +20,7 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void see(Window<FlowableJournalEntry> window, TorchieState torchieState) {
-
-        GridTile gridTile = torchieState.getActiveTile();
+    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
         for (Flowable flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());

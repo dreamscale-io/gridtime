@@ -9,8 +9,12 @@ import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.metrics.GridMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.type.GridCell;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.glyph.GlyphReferences;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.FeatureTotals;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.aggregate.PercentMetric;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.Key;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.track.PlayableCompositeTrackSet;
@@ -18,15 +22,13 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.trackset.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.FinishTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.StartTag;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.CarryOverContext;
+import com.dreamscale.htmflow.core.gridtime.machine.memory.type.IdeaFlowStateType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.WorkContextType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class MusicGrid implements IMusicGrid {
@@ -187,8 +189,71 @@ public class MusicGrid implements IMusicGrid {
             trackSet.finish();
         }
 
+        //finishBoxMetrics();
+
         exportGridRows();
     }
+
+    private void finishBoxMetrics() {
+        Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
+
+        while (iterator.hasNext()) {
+
+            RelativeBeat beat = iterator.next();
+            PlaceReference boxReference = navigationTracks.getBoxAtBeat(beat);
+
+            if (boxReference != null) {
+                GridMetrics boxMetrics = featureTotals.getMetricsFor(boxReference);
+
+                IdeaFlowStateReference ideaFlowState = ideaflowTracks.getIdeaFlowStateAtBeat(beat);
+                if (ideaFlowState != null) {
+                    if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.WTF_STATE) {
+                        boxMetrics.addWtfSample(true);
+                    } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.LEARNING_STATE) {
+                        boxMetrics.addLearningSample(true);
+                        boxMetrics.addWtfSample(false);
+                    } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.PROGRESS_STATE) {
+                        boxMetrics.addLearningSample(false);
+                        boxMetrics.addWtfSample(false);
+                    }
+                }
+
+                FeelsReference feelsReference = feelsTracks.getFeelsAtBeat(beat);
+
+                if (feelsReference != null) {
+                    boxMetrics.addFeelsSample(feelsReference.getFlameRating());
+                }
+
+
+            }
+
+            //only include relative to positive activity within the box...
+            // such that, the total of time spent within the box, within the 20 minutes, becomes the overall weight of all box metrics
+
+//            private Integer timeInPairing;
+//
+//            private Float avgBatchSize;
+//
+//            private Float avgTraversalSpeed;
+//
+//            private Float avgExecutionTime;
+//
+//            private Float avgRedToGreenTime;
+//
+//
+//            int batchSize = navigationTracks.getBatchSizeAtBeat(beat); //turn this into 5 min slider similar to modify track
+//
+//            double traversalSpeed = 1; //turn this into continuously slowing down when there's no traversal, speed is this +1, so there's a sort of decay
+
+            //last red to green time, when the red is in the box... what is the box for the red, and then whatever the time is, gets assigend to the box
+
+            //do I need a player?  I feel like I ought to just calculate these metrics by hand first, with each track knowing what it's tracking,
+            //and specific types
+
+        }
+    }
+
+
 
     public MusicGridResults playTrack(TrackSetKey trackToPlay) {
         PlayableCompositeTrackSet trackSet = trackSetsByKey.get(trackToPlay);
@@ -285,4 +350,7 @@ public class MusicGrid implements IMusicGrid {
     }
 
 
+    public List<PlaceReference> getBoxesVisted() {
+        return null;
+    }
 }

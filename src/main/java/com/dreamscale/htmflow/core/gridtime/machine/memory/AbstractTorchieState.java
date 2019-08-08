@@ -19,6 +19,7 @@ public abstract class AbstractTorchieState implements TorchieState {
 
     private final UUID torchieId;
     private final FeatureCache featureCache;
+    private final UUID teamId;
 
     private Map<FeedStrategyFactory.FeedType, InputFeed> inputFeeds = DefaultCollections.map();
 
@@ -26,14 +27,20 @@ public abstract class AbstractTorchieState implements TorchieState {
 
     private GridTile activeGridTile;
 
-    public AbstractTorchieState(UUID torchieId, FeatureCache featureCache) {
+    public AbstractTorchieState(UUID torchieId, UUID teamId, FeatureCache featureCache) {
         this.torchieId = torchieId;
+        this.teamId = teamId;
         this.featureCache = featureCache;
     }
 
     @Override
     public UUID getTorchieId() {
         return torchieId;
+    }
+
+    @Override
+    public UUID getTeamId() {
+        return teamId;
     }
 
 
@@ -54,7 +61,7 @@ public abstract class AbstractTorchieState implements TorchieState {
     }
 
     public void gotoPosition(GeometryClock.GridTime toGridPosition) {
-        log.debug("gotoTilePosition: "+ toGridPosition.toDisplayString());
+        log.debug("gotoTilePosition: " + toGridPosition.toDisplayString());
 
         this.gridTime = toGridPosition;
 
@@ -68,8 +75,7 @@ public abstract class AbstractTorchieState implements TorchieState {
     private CarryOverContext getCarryOverContext(GeometryClock.GridTime panLeftGridTime) {
         if (activeGridTile != null && activeGridTile.getGridTime().equals(panLeftGridTime)) {
             return activeGridTile.getCarryOverContext();
-        }
-        else {
+        } else {
             return getCarryOverContextFromTileDB(gridTime);
         }
     }

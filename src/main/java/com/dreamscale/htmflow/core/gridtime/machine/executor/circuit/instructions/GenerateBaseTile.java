@@ -1,8 +1,8 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions;
 
+import com.dreamscale.htmflow.core.domain.work.WorkToDoType;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Flow;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.EventType;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +26,16 @@ public class GenerateBaseTile extends TileInstructions {
 
     @Override
     public void executeInstruction() throws InterruptedException {
+
+        torchieState.gotoPosition(tick.getFrom());
+
         for (Flow flow : pullChain) {
             flow.tick(tick);
         }
 
         setOutputTile(torchieState.getActiveTile());
 
-        publishEvent(new TileStreamEvent(torchieState.getTorchieId(), tick.getFrom(), EventType.NewTile));
+        publishEvent(new TileStreamEvent(torchieState.getTeamId(), torchieState.getTorchieId(), tick.getFrom(), WorkToDoType.AggregateToTeam));
     }
 
     @Override

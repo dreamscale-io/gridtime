@@ -1,5 +1,6 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit;
 
+import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,9 +28,11 @@ public class CircuitMonitor {
     private int instructionsProcessed;
     private int ticksProcessed;
 
-    private String activeGridTime;
+    private Metronome.Tick activeTickPosition;
+    private int queueDepth;
 
     private State state;
+
 
 
     public CircuitMonitor(UUID torchieId) {
@@ -57,8 +60,8 @@ public class CircuitMonitor {
         updateStatusTimestamp();
     }
 
-    public void updateTickPosition(String activeGridTime) {
-        this.activeGridTime = activeGridTime;
+    public void updateTickPosition(Metronome.Tick activeTickPosition) {
+        this.activeTickPosition = activeTickPosition;
 
         ticksProcessed++;
     }
@@ -73,6 +76,14 @@ public class CircuitMonitor {
 
     public boolean isBusy() {
         return state == State.Busy;
+    }
+
+    public void updateQueueDepth(int depth) {
+        this.queueDepth = depth;
+    }
+
+    public int getQueueDepth() {
+        return queueDepth;
     }
 
     public enum State {

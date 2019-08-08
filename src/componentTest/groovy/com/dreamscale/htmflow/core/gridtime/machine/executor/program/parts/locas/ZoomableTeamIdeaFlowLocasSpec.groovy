@@ -14,6 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
@@ -97,11 +98,19 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         given:
 
+        AggregatingWire teamWire = new AggregatingWire(team.id);
+
         Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
 
+        torchie1.configureOutputStreamEventWire(teamWire)
+        torchie2.configureOutputStreamEventWire(teamWire)
+        torchie3.configureOutputStreamEventWire(teamWire)
+
         Torchie teamTorchie = torchieFactory.wireUpTeamTorchie(team.id)
+
+        teamTorchie.configureInputStreamEventWire(teamWire)
 
         InputFeed feed1 = torchie1.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
         feed1.addSomeData(generateWTFStart(wtfTime))

@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface TorchieState {
 
+    UUID getTeamId();
+
     UUID getTorchieId();
 
     void gotoPosition(GeometryClock.GridTime toGridPosition);

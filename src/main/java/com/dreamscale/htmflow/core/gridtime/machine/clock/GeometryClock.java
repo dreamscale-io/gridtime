@@ -35,6 +35,10 @@ public class GeometryClock {
         return firstMondayOfSameYear.atStartOfDay();
     }
 
+    public static GridTimeSequence createGridTimeSequence(ZoomLevel zoomLevel, long tileSeq, LocalDateTime clockTime) {
+        return new GridTimeSequence(tileSeq, createGridTime(zoomLevel, clockTime));
+    }
+
     public GridTime next() {
         activeGridTime = activeGridTime.panRight();
         return activeGridTime;
@@ -44,10 +48,19 @@ public class GeometryClock {
         return activeGridTime;
     }
 
-    public static Sequence createSequencedGridTime(ZoomLevel zoomLevel, LocalDateTime clockTime, long sequenceNumber) {
+    public static GridTimeSequence createSequencedGridTime(ZoomLevel zoomLevel, LocalDateTime clockTime, long sequenceNumber) {
         GridTime gridTime = createGridTime(zoomLevel, clockTime);
-        return new Sequence(sequenceNumber, gridTime);
+        return new GridTimeSequence(sequenceNumber, gridTime);
     }
+
+    //TODO Leaving this here, since I keep going back and forth changing my mind
+
+//    public static GridTime createGridTime(ZoomLevel zoomLevel, String formattedGridTime) {
+//
+//        Integer[] coords = GridTimeFormatter.parseGridTime(formattedGridTime);
+//
+//        return createGridTimeFromCoordinates(zoomLevel, coords);
+//    }
 
     public static GridTime createGridTime(ZoomLevel zoomLevel, LocalDateTime clockTime) {
 
@@ -171,7 +184,7 @@ public class GeometryClock {
 
     @AllArgsConstructor
     @Getter
-    public static class Sequence {
+    public static class GridTimeSequence {
         long sequenceNumber;
         GridTime gridTime;
     }

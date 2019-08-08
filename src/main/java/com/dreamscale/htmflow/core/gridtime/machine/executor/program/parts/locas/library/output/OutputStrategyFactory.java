@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 public class OutputStrategyFactory {
 
     @Autowired
-    OutputIdeaFlow outputIdeaFlow;
+    OutputIdeaFlowMetrics outputIdeaFlowMetrics;
 
     public OutputStrategy get(OutputType outputType) {
         switch (outputType) {
             case SUMMARIZE_IDEA_FLOW_METRICS:
-                return outputIdeaFlow;
+                return outputIdeaFlowMetrics;
         }
         return null;
     }

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface Program {
 
-    void tick();
+    void tick(Wire inputStreamEventWire);
 
     Metronome.Tick getActiveTick();
 
@@ -16,5 +16,4 @@ public interface Program {
 
     boolean isDone();
 
-    Wire getOutputStreamEventWire();
 }

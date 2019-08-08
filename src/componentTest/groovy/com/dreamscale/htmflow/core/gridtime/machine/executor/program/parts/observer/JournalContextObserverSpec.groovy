@@ -55,7 +55,7 @@ public class JournalContextObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        journalContextObserver.see(window, torchieState)
+        journalContextObserver.see(window, torchieState.getActiveTile())
 
         torchieState.getActiveTile().finishAfterLoad()
 
@@ -91,7 +91,7 @@ public class JournalContextObserverSpec extends Specification {
         Window window = new Window(time1, time2)
         window.addAll(flowables);
 
-        journalContextObserver.see(window, torchieState)
+        journalContextObserver.see(window, torchieState.getActiveTile())
 
         torchieState.nextTile();
         torchieState.nextTile();
@@ -99,7 +99,7 @@ public class JournalContextObserverSpec extends Specification {
         Window nextWindow = new Window(time3, time4)
 
         when:
-        journalContextObserver.see(nextWindow, torchieState)
+        journalContextObserver.see(nextWindow, torchieState.getActiveTile())
         MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
         print tileOutput
 

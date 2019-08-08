@@ -1,8 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library;
 
 import com.dreamscale.htmflow.core.domain.tile.ZoomableTeamIdeaFlowMetricsEntity;
-import com.dreamscale.htmflow.core.gridtime.machine.clock.RelativeBeat;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TeamAggregatorLocas;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.ZoomableTeamLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.TeamGrid;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class ZoomableTeamIdeaFlowLocas extends TeamAggregatorLocas<ZoomableTeamIdeaFlowMetricsEntity> {
+public class ZoomableTeamIdeaFlowLocas extends ZoomableTeamLocas<ZoomableTeamIdeaFlowMetricsEntity> {
 
 
     public ZoomableTeamIdeaFlowLocas(UUID teamId,

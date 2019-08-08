@@ -17,9 +17,7 @@ public class ComponentSpaceObserver implements FlowObserver<FlowableFlowActivity
 
 
     @Override
-    public void see(Window<FlowableFlowActivity> window, TorchieState torchieState) {
-
-        GridTile gridTile = torchieState.getActiveTile();
+    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
         for (FlowableFlowActivity flowable : window.getFlowables()) {
                 FlowActivityEntity flowActivity = flowable.get();

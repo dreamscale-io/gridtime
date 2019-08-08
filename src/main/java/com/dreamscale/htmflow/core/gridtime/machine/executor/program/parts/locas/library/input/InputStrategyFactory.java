@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component;
 public class InputStrategyFactory {
 
     @Autowired
-    MemberInputIdeaFlow inputIdeaFlow;
+    InputIdeaFlowMetrics inputIdeaFlow;
 
     @Autowired
-    TeamInputIdeaFlow teamInputIdeaFlow;
+    InputIdeaFlowMetricsAcrossTeam inputIdeaFlowMetricsAcrossTeam;
 
     public <T> InputStrategy<T> get(InputType inputType) {
         switch (inputType) {
             case QUERY_IDEA_FLOW_METRICS:
                 return (InputStrategy<T>) inputIdeaFlow;
             case QUERY_TEAM_IDEA_FLOW_METRICS:
-                return (InputStrategy<T>) teamInputIdeaFlow;
+                return (InputStrategy<T>) inputIdeaFlowMetricsAcrossTeam;
         }
         return null;
     }

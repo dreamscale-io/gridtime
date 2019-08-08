@@ -6,9 +6,9 @@ import com.dreamscale.htmflow.core.domain.tile.GridRowEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridRowRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
-import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.IMusicGrid;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.CellValue;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.cell.GridRow;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-public class OutputIdeaFlow implements OutputStrategy {
+public class OutputIdeaFlowMetrics implements OutputStrategy {
 
     @Autowired
     CalendarService calendarService;

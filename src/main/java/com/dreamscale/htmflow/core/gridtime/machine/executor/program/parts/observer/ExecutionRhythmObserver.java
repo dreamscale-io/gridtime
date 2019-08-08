@@ -20,9 +20,8 @@ public class ExecutionRhythmObserver implements FlowObserver<FlowableFlowActivit
 
 
     @Override
-    public void see(Window<FlowableFlowActivity> window, TorchieState torchieState) {
+    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
-        GridTile gridTile = torchieState.getActiveTile();
 
         for (Flowable flowable : window.getFlowables()) {
             if (flowable instanceof FlowableFlowActivity) {

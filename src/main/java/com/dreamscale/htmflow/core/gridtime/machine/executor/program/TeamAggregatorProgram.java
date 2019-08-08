@@ -2,20 +2,18 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateAggregateTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.GenerateTeamTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregateStreamEvent;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.Locas;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.TimeAggregatorLocas;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
@@ -25,7 +23,8 @@ public class TeamAggregatorProgram implements Program {
 
     private final TorchieState torchieState;
     private final UUID teamId;
-    private final AggregatingWire inputStreamTeamWire;
+
+    private final UUID workerId;
 
     private AggregateStreamEvent activeEvent;
     private Metronome.Tick activeTick;
@@ -33,18 +32,21 @@ public class TeamAggregatorProgram implements Program {
     private  boolean isInitialized;
 
 
-    public TeamAggregatorProgram(UUID teamId, TorchieState torchieState, AggregatingWire inputStreamTeamWire) {
+    public TeamAggregatorProgram(UUID teamId, TorchieState torchieState) {
         this.teamId = teamId;
         this.torchieState = torchieState;
-        this.inputStreamTeamWire = inputStreamTeamWire;
 
         this.isInitialized = false;
+
+        this.workerId = UUID.randomUUID();
     }
 
-    public void tick() {
+    public void tick(Wire inputStreamEventWire) {
 
-        if (inputStreamTeamWire.hasNext()) {
-            activeEvent = inputStreamTeamWire.pullNext();
+        inputStreamEventWire.markDone(workerId);
+
+        if (inputStreamEventWire.hasNext()) {
+            activeEvent = inputStreamEventWire.pullNext(workerId);
             activeTick = Metronome.createTick(activeEvent.getGridTime());
         }
 
@@ -89,11 +91,6 @@ public class TeamAggregatorProgram implements Program {
     @Override
     public boolean isDone() {
         return false;
-    }
-
-    @Override
-    public Wire getOutputStreamEventWire() {
-        return new DevNullWire();
     }
 
 

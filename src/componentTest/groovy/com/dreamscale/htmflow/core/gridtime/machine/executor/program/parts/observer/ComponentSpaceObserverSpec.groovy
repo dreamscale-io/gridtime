@@ -12,7 +12,9 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.source.Window
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
+import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
+import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -24,7 +26,7 @@ public class ComponentSpaceObserverSpec extends Specification {
     ComponentSpaceObserver componentSpaceObserver
     GeometryClock clock
     UUID torchieId
-    MemoryOnlyTorchieState torchieState
+    GridTile gridTile
 
     def setup() {
 
@@ -32,8 +34,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         componentSpaceObserver = new ComponentSpaceObserver()
         torchieId = UUID.randomUUID()
 
-        torchieState = new MemoryOnlyTorchieState(UUID.randomUUID())
-        torchieState.gotoPosition(clock.getActiveGridTime())
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache());
     }
 
     def "should create Location traversals"() {
@@ -52,10 +53,10 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(window, torchieState)
-        torchieState.getActiveTile().finishAfterLoad()
+        componentSpaceObserver.see(window, gridTile)
+        gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.Navigations)
+        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.Navigations)
         print tileOutput
 
         then:
