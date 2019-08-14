@@ -115,12 +115,7 @@ public class CircleService {
         circleEntity.setOrganizationId(organizationId);
         circleEntity.setOnShelf(false);
 
-//        HypercoreKeysDto keys = hypercoreService.createNewFeed();
-//        if (keys != null) {
-//            circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-//            circleEntity.setHypercorePublicKey(keys.getKey());
-//            circleEntity.setHypercoreSecretKey(keys.getSecretKey());
-//        }
+        circleEntity.setChannelId(UUID.randomUUID());
 
         circleRepository.save(circleEntity);
 
@@ -401,16 +396,11 @@ public class CircleService {
 
         CircleEntity circleEntity = circleRepository.findOne(circleId);
 
-//        if (circleEntity.getHypercoreFeedId() == null) {
-//            HypercoreKeysDto keys = hypercoreService.createNewFeed();
-//            if (keys != null) {
-//                circleEntity.setHypercoreFeedId(keys.getDiscoveryKey());
-//                circleEntity.setHypercorePublicKey(keys.getKey());
-//                circleEntity.setHypercoreSecretKey(keys.getSecretKey());
-//
-//                circleRepository.save(circleEntity);
-//            }
-//        }
+        if (circleEntity.getChannelId() == null) {
+            circleEntity.setChannelId(UUID.randomUUID());
+
+            circleRepository.save(circleEntity);
+        }
 
 
         circleDto = circleMapper.toApi(circleEntity);

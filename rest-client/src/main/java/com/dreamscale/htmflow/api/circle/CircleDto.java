@@ -28,4 +28,6 @@ public class CircleDto {
     Long durationInSeconds;
     Boolean onShelf;
 
+    UUID channelId;
+
 }

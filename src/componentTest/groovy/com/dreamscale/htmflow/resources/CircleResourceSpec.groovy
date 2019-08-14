@@ -90,6 +90,8 @@ class CircleResourceSpec extends Specification {
         then:
         assert circles != null
         assert circles.size() == 2
+        assert circle1.getChannelId() != null
+        assert circles.get(0).getChannelId() != null
     }
 
     def "should return active circle"() {
@@ -110,6 +112,7 @@ class CircleResourceSpec extends Specification {
         then:
         assert activeCircle != null
         assert activeCircle.id == circle1.id
+        assert activeCircle.getChannelId() != null
     }
 
 

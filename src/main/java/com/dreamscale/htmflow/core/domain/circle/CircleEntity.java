@@ -25,6 +25,9 @@ public class CircleEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID ownerMemberId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID channelId;
+
     private String circleName;
 
     private String problemDescription;
@@ -38,5 +41,7 @@ public class CircleEntity {
 
 
     private Long durationInSeconds;
+
+
 
 }

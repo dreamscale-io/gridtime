@@ -59,3 +59,6 @@ databaseChangeLog:
 
   - include:
         file: db/v004/create_view_zoomable_team_idea_flow.sql
+
+  - include:
+        file:  db/v004/alter_circle_add_channel_id.sql
