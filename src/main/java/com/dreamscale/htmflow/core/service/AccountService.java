@@ -8,16 +8,14 @@ import com.dreamscale.htmflow.api.organization.OnlineStatus;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.htmflow.core.domain.active.ActiveAccountStatusRepository;
-import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity;
-import com.dreamscale.htmflow.core.domain.member.MasterAccountRepository;
-import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity;
-import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository;
+import com.dreamscale.htmflow.core.domain.member.*;
 import com.dreamscale.htmflow.core.security.MasterAccountIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -31,7 +29,11 @@ public class AccountService implements MasterAccountIdResolver {
     private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
+    private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
+
 
     public AccountActivationDto activate(String activationCode) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
@@ -68,7 +70,26 @@ public class AccountService implements MasterAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
-        return new ConnectionStatusDto(Status.VALID, "Successfully logged in", accountStatusEntity.getConnectionId());
+        ConnectionStatusDto statusDto = new ConnectionStatusDto();
+        statusDto.setStatus(Status.VALID);
+        statusDto.setMessage("Successfully logged in");
+
+        List<OrganizationMemberEntity> orgMemberEntities = organizationMemberRepository.findByMasterAccountId(masterAccountId);
+
+        if (orgMemberEntities.size() > 0) {
+            OrganizationMemberEntity memberEntity = orgMemberEntities.get(0);
+            statusDto.setMemberId(memberEntity.getId());
+            statusDto.setOrganizationId(memberEntity.getOrganizationId());
+
+            List<TeamMemberEntity> teamMemberEntries = teamMemberRepository.findByMemberId(memberEntity.getId());
+
+            if (teamMemberEntries.size() > 0) {
+                statusDto.setTeamId(teamMemberEntries.get(0).getTeamId());
+            }
+        }
+
+
+        return statusDto;
     }
 
     public SimpleStatusDto logout(UUID masterAccountId) {

@@ -15,5 +15,8 @@ import java.util.UUID;
 public class ConnectionStatusDto {
     private Status status;
     private String message;
-    private UUID connectionId;
+    private UUID organizationId;
+    private UUID teamId;
+    private UUID memberId;
+
 }

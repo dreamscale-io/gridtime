@@ -14,7 +14,10 @@ import com.dreamscale.htmflow.api.status.ConnectionResultDto
 import com.dreamscale.htmflow.api.status.Status
 import com.dreamscale.htmflow.client.AccountClient
 import com.dreamscale.htmflow.client.OrganizationClient
+import com.dreamscale.htmflow.core.domain.member.MasterAccountEntity
 import com.dreamscale.htmflow.core.domain.member.MasterAccountRepository
+import com.dreamscale.htmflow.core.domain.member.OrganizationEntity
+import com.dreamscale.htmflow.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.htmflow.core.service.JiraService
@@ -38,6 +41,9 @@ class AccountResourceSpec extends Specification {
 
     @Autowired
     MasterAccountRepository masterAccountRepository
+
+    @Autowired
+    MasterAccountEntity testUser
 
     @Autowired
     JiraService mockJiraService
@@ -71,12 +77,18 @@ class AccountResourceSpec extends Specification {
     }
 
     def "should login"() {
+
         when:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
         then:
         assert connectionStatusDto != null
-        assert connectionStatusDto.getConnectionId() != null
+        assert connectionStatusDto.organizationId != null
+        assert connectionStatusDto.memberId != null
         assert connectionStatusDto.status == Status.VALID
     }
 
