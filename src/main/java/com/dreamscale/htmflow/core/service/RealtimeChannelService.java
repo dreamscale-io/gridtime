@@ -2,32 +2,21 @@ package com.dreamscale.htmflow.core.service;
 
 import com.dreamscale.htmflow.api.account.ActiveUserContextDto;
 import com.dreamscale.htmflow.api.account.SimpleStatusDto;
+import com.dreamscale.htmflow.api.channel.ChannelMessageDto;
 import com.dreamscale.htmflow.api.channel.ChatMessageInputDto;
-import com.dreamscale.htmflow.api.circle.CircleDto;
-import com.dreamscale.htmflow.api.circle.CircleMemberDto;
-import com.dreamscale.htmflow.api.circle.FeedMessageDto;
-import com.dreamscale.htmflow.api.journal.JournalEntryDto;
 import com.dreamscale.htmflow.api.status.Status;
 import com.dreamscale.htmflow.core.domain.channel.*;
-import com.dreamscale.htmflow.core.domain.circle.CircleEntity;
-import com.dreamscale.htmflow.core.domain.circle.CircleFeedMessageEntity;
-import com.dreamscale.htmflow.core.domain.circle.CircleMemberEntity;
-import com.dreamscale.htmflow.core.domain.circle.CircleMessageEntity;
-import com.dreamscale.htmflow.core.domain.journal.JournalEntryEntity;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
 import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.hooks.realtime.RealtimeConnectionFactory;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;
 import com.dreamscale.htmflow.core.mapper.MapperFactory;
-import com.dreamscale.htmflow.core.mapping.SillyNameGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,10 +43,13 @@ public class RealtimeChannelService {
     private MapperFactory mapperFactory;
 
     private DtoEntityMapper<ActiveUserContextDto, RealtimeChannelMemberEntity> channelMemberMapper;
+    private DtoEntityMapper<ChannelMessageDto, RealtimeChannelMessageEntity> channelMessageMapper;
+
 
     @PostConstruct
     private void init() {
         channelMemberMapper = mapperFactory.createDtoEntityMapper(ActiveUserContextDto.class, RealtimeChannelMemberEntity.class);
+        channelMessageMapper = mapperFactory.createDtoEntityMapper(ChannelMessageDto.class, RealtimeChannelMessageEntity.class);
     }
 
 
@@ -74,7 +66,7 @@ public class RealtimeChannelService {
     }
 
 
-    public SimpleStatusDto postMessageToChannel(UUID channelId, UUID organizationId, UUID memberId, ChatMessageInputDto jsonMessage) {
+    public ChannelMessageDto postMessageToChannel(UUID channelId, UUID organizationId, UUID memberId, ChatMessageInputDto jsonMessage) {
 
         RealtimeChannelEntity channelEntity = realtimeChannelRepository.findOne(channelId);
 
@@ -90,7 +82,7 @@ public class RealtimeChannelService {
 
         realtimeChannelMessageRepository.save(messageEntity);
 
-        return new SimpleStatusDto(Status.SENT, "Message sent to channel");
+        return channelMessageMapper.toApi(messageEntity);
     }
 
     private void validatePermissionsAndChannelExists(RealtimeChannelEntity channelEntity, UUID organizationId, UUID memberId) {
@@ -102,6 +94,20 @@ public class RealtimeChannelService {
                 throw new BadRequestException(ValidationErrorCodes.CHANNEL_ACCESS_DENIED, "Member unabled to write to channel");
             }
         }
+
+    }
+
+    public List<ChannelMessageDto> getAllChannelMessages(UUID channelId, ActiveUserContextDto activeUser) {
+
+        RealtimeChannelMemberEntity memberInChannel = realtimeChannelMemberRepository.findByChannelIdAndMemberId(channelId, activeUser.getMemberId());
+
+        if (memberInChannel == null) {
+            throw new BadRequestException(ValidationErrorCodes.CHANNEL_ACCESS_DENIED, "Cant list messages if member not in channel");
+        }
+
+        List<RealtimeChannelMessageEntity> messages = realtimeChannelMessageRepository.findByChannelIdOrderByMessageTime(channelId);
+
+        return channelMessageMapper.toApiList(messages);
 
     }
 
@@ -152,4 +158,6 @@ public class RealtimeChannelService {
 
         return new SimpleStatusDto(Status.VALID, "Left channel");
     }
+
+
 }

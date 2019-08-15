@@ -3,6 +3,7 @@ package com.dreamscale.htmflow.resources
 import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.api.account.ActiveUserContextDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
+import com.dreamscale.htmflow.api.channel.ChannelMessageDto
 import com.dreamscale.htmflow.api.channel.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
 import com.dreamscale.htmflow.api.circle.CreateWTFCircleInputDto
@@ -52,11 +53,21 @@ class ChannelResourceSpec extends Specification {
         when:
         CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
-        SimpleStatusDto status = channelClient.postChatMessageToChannel(circle.getChannelId().toString(), new ChatMessageInputDto("hello world"))
+        String channelId = circle.getChannelId().toString();
+
+        SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
+
+        ChannelMessageDto message1 = channelClient.postChatMessageToChannel(channelId, new ChatMessageInputDto("hello world"))
+        ChannelMessageDto message2 = channelClient.postChatMessageToChannel(channelId, new ChatMessageInputDto("hello again..."))
+
+        List<ChannelMessageDto> messages = channelClient.getAllChannelMessages(channelId);
 
         then:
-        assert status != null
-        assert status.getStatus() == Status.SENT
+        assert joinStatus.status == Status.VALID
+        assert message1 != null
+        assert message2 != null
+
+        assert messages.size() == 2
 
     }
 
@@ -77,11 +88,11 @@ class ChannelResourceSpec extends Specification {
         SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
         SimpleStatusDto joinAgainStatus = channelClient.joinChannel(channelId)
 
-        List<ActiveUserContextDto> membersInChannelAfterJoin = channelClient.listActiveChannelMembers(channelId)
+        List<ActiveUserContextDto> membersInChannelAfterJoin = channelClient.getActiveChannelMembers(channelId)
 
         SimpleStatusDto leaveStatus = channelClient.leaveChannel(channelId)
         SimpleStatusDto leaveAgainStatus = channelClient.leaveChannel(channelId)
-        
+
         then:
         assert joinStatus.getStatus() == Status.VALID
         assert joinAgainStatus.getStatus() == Status.NO_ACTION

@@ -17,6 +17,9 @@ truncate table team cascade;
 
 truncate table grid_time_calendar cascade ;
 truncate table realtime_channel cascade ;
+truncate table realtime_channel_message cascade ;
+truncate table realtime_channel_member cascade ;
+
 
 
 
