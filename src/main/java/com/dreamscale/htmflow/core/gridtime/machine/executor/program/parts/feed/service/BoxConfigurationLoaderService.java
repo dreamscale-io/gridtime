@@ -2,7 +2,7 @@ package com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed
 
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigRepository;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.box.matcher.BoxMatcherConfig;
 import org.springframework.beans.factory.annotation.Autowired;

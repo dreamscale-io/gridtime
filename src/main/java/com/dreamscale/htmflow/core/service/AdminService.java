@@ -13,7 +13,7 @@ import com.dreamscale.htmflow.core.domain.member.OrganizationRepository;
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridBoxBucketConfigRepository;
 import com.dreamscale.htmflow.core.exception.ValidationErrorCodes;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.box.matcher.BoxMatcherConfig;
 import com.dreamscale.htmflow.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.htmflow.core.mapper.DtoEntityMapper;

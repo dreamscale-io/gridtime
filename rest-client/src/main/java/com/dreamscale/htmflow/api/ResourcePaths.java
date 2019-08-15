@@ -80,6 +80,9 @@ public class ResourcePaths {
 
     public static final String ACTIVE_PATH = "/active";
 
+    public static final String CHANNEL_PATH = "/channel";
+    public static final String MESSAGE_PATH = "/message";
+
     public static final String SCREENSHOT_PATH = "/screenshot";
     public static final String SNIPPET_PATH = "/snippet";
     public static final String CHAT_PATH = "/chat";

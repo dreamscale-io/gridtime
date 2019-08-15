@@ -58,6 +58,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
+    ChannelClient channelClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, ChannelClient.class);
+    }
+
+    @Bean
     MemberStatusClient memberStatusClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, MemberStatusClient.class);
     }

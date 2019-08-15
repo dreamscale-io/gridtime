@@ -4,6 +4,7 @@ import com.dreamscale.htmflow.api.circle.*;
 import com.dreamscale.htmflow.api.event.NewSnippetEvent;
 import com.dreamscale.htmflow.api.journal.FinishStatus;
 import com.dreamscale.htmflow.api.journal.JournalEntryDto;
+import com.dreamscale.htmflow.core.domain.channel.ChannelType;
 import com.dreamscale.htmflow.core.domain.circle.*;
 import com.dreamscale.htmflow.core.domain.journal.IntentionEntity;
 import com.dreamscale.htmflow.core.domain.journal.IntentionRepository;
@@ -63,6 +64,9 @@ public class CircleService {
     @Autowired
     TimeService timeService;
 
+    @Autowired
+    RealtimeChannelService realtimeChannelService;
+
 
     @Autowired
     TeamService teamService;
@@ -104,35 +108,36 @@ public class CircleService {
 
     }
 
-    public CircleDto createNewAdhocCircle(UUID organizationId, UUID torchieId, String problemStatement) {
+    public CircleDto createNewAdhocCircle(UUID organizationId, UUID memberId, String problemStatement) {
         CircleEntity circleEntity = new CircleEntity();
         circleEntity.setId(UUID.randomUUID());
         circleEntity.setCircleName(sillyNameGenerator.random());
         circleEntity.setStartTime(timeService.now());
-        circleEntity.setOwnerMemberId(torchieId);
+        circleEntity.setOwnerMemberId(memberId);
         circleEntity.setDurationInSeconds(0L);
         circleEntity.setProblemDescription(problemStatement);
         circleEntity.setOrganizationId(organizationId);
         circleEntity.setOnShelf(false);
 
-        circleEntity.setChannelId(UUID.randomUUID());
+        UUID channelId = realtimeChannelService.createChannel(organizationId, memberId, ChannelType.WTF);
+        circleEntity.setChannelId(channelId);
 
         circleRepository.save(circleEntity);
 
         CircleMemberEntity circleMemberEntity = new CircleMemberEntity();
         circleMemberEntity.setId(UUID.randomUUID());
         circleMemberEntity.setCircleId(circleEntity.getId());
-        circleMemberEntity.setTorchieId(torchieId);
+        circleMemberEntity.setTorchieId(memberId);
 
         circleMemberRepository.save(circleMemberEntity);
 
-        CircleContextEntity circleContextEntity = createCircleContextEntity(organizationId, torchieId, circleEntity);
+        CircleContextEntity circleContextEntity = createCircleContextEntity(organizationId, memberId, circleEntity);
         circleContextRepository.save(circleContextEntity);
 
         CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
         circleMessageEntity.setId(UUID.randomUUID());
         circleMessageEntity.setCircleId(circleEntity.getId());
-        circleMessageEntity.setTorchieId(torchieId);
+        circleMessageEntity.setTorchieId(memberId);
         circleMessageEntity.setMessageType(CircleMessageType.CIRCLE_START);
         circleMessageEntity.setMetadataField(CircleMessageMetadataField.message, problemStatement);
         circleMessageEntity.setPosition(timeService.now());
@@ -142,10 +147,10 @@ public class CircleService {
         CircleDto circleDto = circleMapper.toApi(circleEntity);
 
         List<CircleMemberDto> memberDtos = new ArrayList<>();
-        memberDtos.add(createCircleMember(torchieId));
+        memberDtos.add(createCircleMember(memberId));
         circleDto.setMembers(memberDtos);
 
-        activeStatusService.pushWTFStatus(organizationId, torchieId, circleDto.getId(), problemStatement);
+        activeStatusService.pushWTFStatus(organizationId, memberId, circleDto.getId(), problemStatement);
 
         return circleDto;
     }
@@ -397,7 +402,9 @@ public class CircleService {
         CircleEntity circleEntity = circleRepository.findOne(circleId);
 
         if (circleEntity.getChannelId() == null) {
-            circleEntity.setChannelId(UUID.randomUUID());
+
+            UUID channelId = realtimeChannelService.createChannel(circleEntity.getOrganizationId(), circleEntity.getOwnerMemberId(), ChannelType.WTF);
+            circleEntity.setChannelId(channelId);
 
             circleRepository.save(circleEntity);
         }

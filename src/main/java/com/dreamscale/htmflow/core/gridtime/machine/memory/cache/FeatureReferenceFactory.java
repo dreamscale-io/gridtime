@@ -1,7 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine.memory.cache;
 
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.*;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.*;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.*;
 

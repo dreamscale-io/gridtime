@@ -4,7 +4,7 @@ import com.dreamscale.htmflow.core.domain.tile.GridFeatureEntity;
 import com.dreamscale.htmflow.core.domain.tile.GridFeatureRepository;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.FeatureType;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.type.TypeRegistry;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.JSONTransformer;
+import com.dreamscale.htmflow.core.gridtime.machine.commons.JSONTransformer;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.FeatureDetails;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.htmflow.core.service.TeamService;

@@ -62,3 +62,9 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/alter_circle_add_channel_id.sql
+
+  - include:
+        file:  db/v004/create_rt_channel.sql
+
+  - include:
+        file:  db/v004/create_rt_channel_message.sql
