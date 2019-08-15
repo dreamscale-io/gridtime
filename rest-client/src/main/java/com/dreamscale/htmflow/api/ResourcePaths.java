@@ -82,6 +82,8 @@ public class ResourcePaths {
 
     public static final String CHANNEL_PATH = "/channel";
     public static final String MESSAGE_PATH = "/message";
+    public static final String JOIN_PATH = "/join";
+    public static final String LEAVE_PATH = "/leave";
 
     public static final String SCREENSHOT_PATH = "/screenshot";
     public static final String SNIPPET_PATH = "/snippet";

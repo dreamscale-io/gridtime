@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.resources
 
 import com.dreamscale.htmflow.ComponentTest
+import com.dreamscale.htmflow.api.account.ActiveUserContextDto
 import com.dreamscale.htmflow.api.account.SimpleStatusDto
 import com.dreamscale.htmflow.api.channel.ChatMessageInputDto
 import com.dreamscale.htmflow.api.circle.CircleDto
@@ -59,6 +60,37 @@ class ChannelResourceSpec extends Specification {
 
     }
 
+    def "should join and leave a channel"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.getId()).save()
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        when:
+        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+
+        String channelId = circle.getChannelId().toString();
+
+        SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
+        SimpleStatusDto joinAgainStatus = channelClient.joinChannel(channelId)
+
+        List<ActiveUserContextDto> membersInChannelAfterJoin = channelClient.listActiveChannelMembers(channelId)
+
+        SimpleStatusDto leaveStatus = channelClient.leaveChannel(channelId)
+        SimpleStatusDto leaveAgainStatus = channelClient.leaveChannel(channelId)
+        
+        then:
+        assert joinStatus.getStatus() == Status.VALID
+        assert joinAgainStatus.getStatus() == Status.NO_ACTION
+
+        assert membersInChannelAfterJoin.size() == 1
+
+        assert leaveStatus.getStatus() == Status.VALID
+        assert leaveAgainStatus.getStatus() == Status.NO_ACTION
+    }
 
 
 }

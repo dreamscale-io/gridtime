@@ -68,3 +68,9 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/create_rt_channel_message.sql
+
+  - include:
+        file:  db/v004/create_active_user_context.sql
+
+  - include:
+        file:  db/v004/create_rt_channel_member.sql
