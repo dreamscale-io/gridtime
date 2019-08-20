@@ -71,6 +71,7 @@ public class AccountService implements MasterAccountIdResolver {
         accountStatusRepository.save(accountStatusEntity);
 
         ConnectionStatusDto statusDto = new ConnectionStatusDto();
+        statusDto.setConnectionId(accountStatusEntity.getConnectionId());
         statusDto.setStatus(Status.VALID);
         statusDto.setMessage("Successfully logged in");
 

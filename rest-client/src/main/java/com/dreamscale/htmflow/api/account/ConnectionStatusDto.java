@@ -13,8 +13,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConnectionStatusDto {
+
+    private UUID connectionId;
     private Status status;
     private String message;
+
     private UUID organizationId;
     private UUID teamId;
     private UUID memberId;
