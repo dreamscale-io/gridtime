@@ -11,13 +11,14 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.ParallelProgram;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.Worker;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tile.GridTile;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 
 import java.util.*;
 
-public class IdeaFlowCircuit {
+public class IdeaFlowCircuit implements Worker {
 
     private final CircuitMonitor circuitMonitor;
 
@@ -36,9 +37,7 @@ public class IdeaFlowCircuit {
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
     private boolean isProgramHalted;
 
-    private Wire inputStreamEventWire;
     private Wire outputStreamEventWire;
-
 
     public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
         this.circuitMonitor = circuitMonitor;
@@ -50,15 +49,10 @@ public class IdeaFlowCircuit {
 
         this.fitnessMatrix = new FitnessMatrix();
         this.outputStreamEventWire = new DevNullWire();
-        this.inputStreamEventWire = new DevNullWire();
     }
 
     public void configureOutputStreamEventWire(Wire outputWire) {
         this.outputStreamEventWire = outputWire;
-    }
-
-    public void configureInputStreamEventWire(Wire inputWire) {
-        inputStreamEventWire = inputWire;
     }
 
     public void fireTriggersForActiveWaits() {
@@ -81,7 +75,7 @@ public class IdeaFlowCircuit {
         parallelPrograms.remove(programId);
     }
 
-    public TileInstructions getNextInstruction() {
+    public TileInstructions whatsNext() {
 
         TileInstructions nextInstruction = null;
 
@@ -91,7 +85,7 @@ public class IdeaFlowCircuit {
             nextInstruction = instructionsToExecuteQueue.removeFirst();
         } else if (!isProgramHalted && !program.isDone()) {
 
-            program.tick(inputStreamEventWire);
+            program.tick();
 
             instructionsToExecuteQueue.addAll(program.getInstructionsAtActiveTick());
             instructionsToExecuteQueue.addAll(getParallelProgramInstructions(program.getActiveTick()));
@@ -114,8 +108,7 @@ public class IdeaFlowCircuit {
 
         circuitMonitor.updateQueueDepth(
                 highPriorityInstructionQueue.size() +
-                instructionsToExecuteQueue.size() +
-                inputStreamEventWire.getQueueDepth());
+                instructionsToExecuteQueue.size() + program.getInputQueueDepth() );
 
         lastInstruction = nextInstruction;
         return nextInstruction;
@@ -146,6 +139,9 @@ public class IdeaFlowCircuit {
         return program.getActiveTick();
     }
 
+    public boolean isWorkerReady() {
+        return circuitMonitor.isReady();
+    }
 
 
     private class EvaluateOutputTrigger implements NotifyTrigger {
@@ -157,7 +153,7 @@ public class IdeaFlowCircuit {
             updateFitnessMatrixAndTriggerAlarms(ideaFlowMetrics);
 
             List<TileStreamEvent> tileStreamEvents = finishedInstruction.getOutputTileStreamEvents();
-            outputStreamEventWire.publishAll(tileStreamEvents);
+            outputStreamEventWire.pushAll(tileStreamEvents);
 
             circuitMonitor.finishInstruction(finishedInstruction.getQueueDuration(), finishedInstruction.getExecutionDuration());
 

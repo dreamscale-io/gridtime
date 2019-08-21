@@ -24,3 +24,4 @@ truncate table work_item_to_aggregate cascade ;
 
 
 
+

@@ -22,7 +22,7 @@ public class TorchieCmd {
 
     private final Torchie torchie;
 
-    private final AtomicBoolean syncCommandInProgress;
+    private boolean syncCommandInProgress;
 
     private final NotifyTrigger NOTIFY_WHEN_DONE;
     private final NotifyTrigger LOG_EXECUTION_DONE;
@@ -34,7 +34,7 @@ public class TorchieCmd {
     public TorchieCmd(GridTimeExecutor executorPool, Torchie torchie) {
         this.torchieExecutor = executorPool;
         this.torchie = torchie;
-        this.syncCommandInProgress = new AtomicBoolean(false);
+        this.syncCommandInProgress = false;
 
         //trigger "constants"
 
@@ -43,7 +43,7 @@ public class TorchieCmd {
     }
 
     public void runProgram() {
-        syncCommandInProgress.set(true);
+        syncCommandInProgress = true;
 
         torchie.notifyWhenProgramDone(NOTIFY_WHEN_DONE);
 
@@ -85,7 +85,11 @@ public class TorchieCmd {
     }
 
     private void runInstructionAndWaitTilDone(TileInstructions instructions) {
-        syncCommandInProgress.set(true);
+        if (syncCommandInProgress == true) {
+            log.error("Already in progress!");
+        }
+
+        syncCommandInProgress = true;
 
         instructions.addTriggerToNotifyList(NOTIFY_WHEN_DONE);
 
@@ -105,7 +109,7 @@ public class TorchieCmd {
 
     public List<Results> runSyncCommand(CmdType cmdType, Map<String, String> templateParameters) throws InterruptedException {
 
-        syncCommandInProgress.set(true);
+        syncCommandInProgress = true;
 
         TileInstructions tileInstructions = generateTileInstructions(cmdType, templateParameters);
         tileInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
@@ -138,10 +142,15 @@ public class TorchieCmd {
     }
 
     private void waitForCommandToFinish() {
-
+        int waitLoopCounter = MAX_WAIT_LOOPS;
         try {
-            while (syncCommandInProgress.get()) {
+            while (syncCommandInProgress && waitLoopCounter > 0) {
+                log.info("Waiting for cmd finish!");
                 Thread.sleep(100);
+                waitLoopCounter--;
+            }
+            if (waitLoopCounter == 0) {
+                log.error("Wait loop count exceeded");
             }
         } catch (InterruptedException ex) {
             log.error("Interrupted", ex);
@@ -162,7 +171,7 @@ public class TorchieCmd {
         @Override
         public void notifyWhenDone(TileInstructions instructions, List<Results> results) {
             log.debug("Setting cmd in progress to false");
-            syncCommandInProgress.set(false);
+            syncCommandInProgress = false;
         }
     }
 

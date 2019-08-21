@@ -1,11 +1,13 @@
 package com.dreamscale.htmflow.core.gridtime.capabilities.cmd
 
+import com.dreamscale.htmflow.ComponentTest
 import com.dreamscale.htmflow.core.domain.member.json.Member
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.Results
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.TorchieWorkerPool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.htmflow.core.gridtime.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.NoOpProgram
@@ -17,6 +19,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.Circl
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.ExecutionEvent
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feature.details.WorkContextEvent
 import com.dreamscale.htmflow.core.gridtime.machine.memory.grid.query.key.TrackSetKey
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import java.time.Duration
@@ -32,7 +35,7 @@ class TorchieCmdSpec extends Specification {
     LocalDateTime time4
 
     TorchieCmd cmd
-    GridTimeExecutor torchieExecutor
+
     Torchie torchie
     LocalDateTime clockStart
 
@@ -48,10 +51,10 @@ class TorchieCmdSpec extends Specification {
 
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
-        
-        torchieExecutor = new GridTimeExecutor(1);
 
-        cmd = new TorchieCmd(torchieExecutor, torchie);
+        GridTimeExecutor gridTimeExecutor = new GridTimeExecutor(new TorchieWorkerPool());
+
+        cmd = new TorchieCmd(gridTimeExecutor, torchie);
         cmd.haltProgram()
        
     }

@@ -40,7 +40,7 @@ public class CalendarGeneratorProgram implements Program {
 
 
     @Override
-    public void tick(Wire inputStreamEventWire) {
+    public void tick() {
         if (!isInitialized) {
             initMetronomeAndStartSequences();
             isInitialized = true;
@@ -78,6 +78,11 @@ public class CalendarGeneratorProgram implements Program {
         }
 
         return instructions;
+    }
+
+    @Override
+    public int getInputQueueDepth() {
+        return 0;
     }
 
 

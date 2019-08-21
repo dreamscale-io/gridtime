@@ -10,6 +10,8 @@ import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie;
 import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor;
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.ProgramFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.TorchieWorkerPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,19 +41,14 @@ public class TorchieService {
     @Autowired
     private JournalService journalService;
 
-    private GridTimeExecutor torchieExecutorPool;
+    private GridTimeExecutor gridTimeExecutor;
 
-    private static final int POOL_SIZE = 10;
-
-    public TorchieService() {
-        torchieExecutorPool = new GridTimeExecutor(POOL_SIZE);
-    }
 
     public CircuitMonitor startMemberTorchie(UUID memberId) {
         OrganizationMemberEntity member = memberRepository.findById(memberId);
 
         Torchie torchie = findOrCreateMemberTorchie(member.getOrganizationId(), memberId);
-        torchieExecutorPool.startTorchieIfNotActive(torchie);
+        gridTimeExecutor.startTorchieIfNotActive(torchie);
 
         return torchie.getCircuitMonitor();
     }
@@ -59,7 +56,7 @@ public class TorchieService {
     public Torchie findOrCreateMemberTorchie(UUID organizationId, UUID memberId) {
         Torchie torchie = null;
 
-        if (!torchieExecutorPool.contains(memberId)) {
+        if (!gridTimeExecutor.contains(memberId)) {
             LocalDateTime startingPosition = determineStartingPositionForMemberFeed(memberId);
             UUID teamId = determineTeam(organizationId, memberId);
 
@@ -70,7 +67,7 @@ public class TorchieService {
             }
 
         } else {
-            torchie = torchieExecutorPool.getTorchie(memberId);
+            torchie = gridTimeExecutor.getTorchie(memberId);
         }
         return torchie;
     }

@@ -14,6 +14,7 @@ import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock
 import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.NoOpProgram
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.TorchieWorkerPool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.htmflow.core.gridtime.machine.memory.cache.FeatureCache
@@ -29,7 +30,6 @@ class SaveToPostgresSinkSpec extends Specification {
 
     @Autowired
     SaveToPostgresSink saveToPostgresSink
-
 
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository
@@ -57,9 +57,9 @@ class SaveToPostgresSinkSpec extends Specification {
     LocalDateTime time4
 
     TorchieCmd cmd
-    GridTimeExecutor torchieExecutor
     Torchie torchie
     LocalDateTime clockStart
+    GridTimeExecutor gridTimeExecutor
 
     def setup() {
 
@@ -79,14 +79,14 @@ class SaveToPostgresSinkSpec extends Specification {
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
 
-        torchieExecutor = new GridTimeExecutor(1);
+        gridTimeExecutor = new GridTimeExecutor(new TorchieWorkerPool());
 
-        cmd = new TorchieCmd(torchieExecutor, torchie);
+        cmd = new TorchieCmd(this.gridTimeExecutor, torchie);
         cmd.haltProgram()
     }
 
     def teardown() {
-        torchieExecutor.shutdown();
+        this.gridTimeExecutor.shutdown();
     }
 
     def "should save grid rows and markers to DB"() {

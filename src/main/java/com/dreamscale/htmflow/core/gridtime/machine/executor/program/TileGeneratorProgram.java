@@ -35,18 +35,14 @@ public class TileGeneratorProgram implements Program {
     private final UUID torchieId;
 
     private final Metronome metronome;
-    private  boolean isInitialized;
-    private Wire outputStreamEventWire;
 
     public TileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
         this.torchieId = torchieId;
         this.torchieState = torchieState;
         this.metronome = new Metronome(startPosition);
-
-        this.isInitialized = false;
     }
 
-    public void tick(Wire inputStreamEventWire) {
+    public void tick() {
         metronome.tick();
 
         log.debug("metronome tick: " + metronome.getActiveTick().toDisplayString());
@@ -72,6 +68,11 @@ public class TileGeneratorProgram implements Program {
         }
 
         return instructions;
+    }
+
+    @Override
+    public int getInputQueueDepth() {
+        return 0;
     }
 
     @Override

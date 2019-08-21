@@ -10,19 +10,15 @@ public class DevNullWire implements Wire {
 
 
     @Override
-    public void publishAll(List<TileStreamEvent> tileStreamEvents) {
+    public void pushAll(List<TileStreamEvent> tileStreamEvents) {
 
     }
 
     @Override
-    public void publish(TileStreamEvent event) {
+    public void push(TileStreamEvent event) {
 
     }
 
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
 
     @Override
     public AggregateStreamEvent pullNext(UUID workerId) {

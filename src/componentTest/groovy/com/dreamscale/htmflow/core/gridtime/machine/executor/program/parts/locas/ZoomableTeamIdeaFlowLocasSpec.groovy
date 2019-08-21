@@ -10,17 +10,23 @@ import com.dreamscale.htmflow.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.htmflow.core.domain.member.OrganizationRepository
 import com.dreamscale.htmflow.core.domain.tile.GridIdeaFlowMetricsRepository
 import com.dreamscale.htmflow.core.gridtime.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeExecutor
+import com.dreamscale.htmflow.core.gridtime.machine.GridTimeWorkerPool
 import com.dreamscale.htmflow.core.gridtime.machine.Torchie
 import com.dreamscale.htmflow.core.gridtime.machine.TorchieFactory
 import com.dreamscale.htmflow.core.gridtime.machine.clock.Metronome
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.WorkToDoQueueWire
+import com.dreamscale.htmflow.core.gridtime.machine.executor.program.ProgramFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.TorchieWorkerPool
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed
 import com.dreamscale.htmflow.core.service.TeamService
+import com.dreamscale.htmflow.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -52,6 +58,15 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     @Autowired
     TorchieFactory torchieFactory
 
+    @Autowired
+    TimeService mockTimeService
+
+    @Autowired
+    ProgramFactory programFactory
+
+    @Autowired
+    WorkToDoQueueWire workToDoQueueWire
+
     LocalDateTime clockStart
     LocalDateTime wtfTime
     LocalDateTime time2
@@ -67,6 +82,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     OrganizationMemberEntity member3
 
     TeamDto team
+    GridTimeWorkerPool gridTimeWorkerPool
 
     def setup() {
 
@@ -91,6 +107,10 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
 
+        mockTimeService.now() >> LocalDateTime.now()
+
+        gridTimeWorkerPool = new GridTimeWorkerPool(programFactory, workToDoQueueWire)
+
     }
 
 
@@ -98,19 +118,13 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         given:
 
-        AggregatingWire teamWire = new AggregatingWire(team.id);
-
         Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
 
-        torchie1.configureOutputStreamEventWire(teamWire)
-        torchie2.configureOutputStreamEventWire(teamWire)
-        torchie3.configureOutputStreamEventWire(teamWire)
-
-        Torchie teamTorchie = torchieFactory.wireUpTeamTorchie(team.id)
-
-        teamTorchie.configureInputStreamEventWire(teamWire)
+        gridTimeWorkerPool.addWorker(torchie1);
+        gridTimeWorkerPool.addWorker(torchie2);
+        gridTimeWorkerPool.addWorker(torchie3);
 
         InputFeed feed1 = torchie1.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
         feed1.addSomeData(generateWTFStart(wtfTime))
@@ -124,20 +138,22 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         feed3.addSomeData(generateWTFStart(wtfTime))
         feed3.addSomeData(generateWTFEnd(wtfTime.plusMinutes(45)))
 
-        torchie1.whatsNext().call()
-        torchie2.whatsNext().call()
-        torchie3.whatsNext().call()
-
         when:
-        TileInstructions instruction = teamTorchie.whatsNext();
-        instruction.call();
+
+        gridTimeWorkerPool.whatsNext().call();
+        gridTimeWorkerPool.whatsNext().call();
+        gridTimeWorkerPool.whatsNext().call();
+
+        //last exec should call team tile
+
+        TileInstructions teamInstruction = gridTimeWorkerPool.whatsNext();
+
+        println "RUNNING LAST: "+ teamInstruction.getCmdDescription()
+        teamInstruction.call()
 
         then:
-        assert instruction != null
-        MusicGridResults results = instruction.getOutputResult()
-
-        println results
-
+        MusicGridResults results = (MusicGridResults) teamInstruction.getOutputResult()
+        assert results != null
         assert results.getCell("@zoom/wtf", "Calc[Avg]") == "0.68"
 
     }

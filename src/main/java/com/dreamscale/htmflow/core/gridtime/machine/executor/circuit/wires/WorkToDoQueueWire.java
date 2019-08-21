@@ -1,26 +1,37 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires;
 
-import com.dreamscale.htmflow.core.domain.work.ProcessingState;
-import com.dreamscale.htmflow.core.domain.work.WorkToDoType;
-import com.dreamscale.htmflow.core.domain.work.WorkItemToAggregateEntity;
-import com.dreamscale.htmflow.core.domain.work.WorkItemToAggregateRepository;
+import com.dreamscale.htmflow.core.domain.work.*;
 import com.dreamscale.htmflow.core.gridtime.exception.UnableToLockException;
 import com.dreamscale.htmflow.core.gridtime.machine.clock.GeometryClock;
+import com.dreamscale.htmflow.core.gridtime.machine.clock.ZoomLevel;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.service.TimeService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Component
-public class QueuedWorkToDoWire implements Wire {
+@Slf4j
+public class WorkToDoQueueWire implements Wire {
 
     private static final Long WORKER_WRITE_LOCK = Long.MAX_VALUE;
 
+    private static final Duration DELAY_BEFORE_PROCESSING_PARTIAL_WORK = Duration.ofMinutes(30);
+
+
     @Autowired
     private WorkItemToAggregateRepository workItemToAggregateRepository;
+
+    @Autowired
+    private WorkReadyByTeamViewRepository workReadyByTeamViewRepository;
 
     @Autowired
     private CalendarService calendarService;
@@ -29,12 +40,16 @@ public class QueuedWorkToDoWire implements Wire {
     private TimeService timeService;
 
     @Override
-    public void publishAll(List<TileStreamEvent> tileStreamEvents) {
-
+    public void pushAll(List<TileStreamEvent> tileStreamEvents) {
+        for (TileStreamEvent tileStreamEvent : tileStreamEvents) {
+            push(tileStreamEvent);
+        }
     }
 
     @Override
-    public void publish(TileStreamEvent event) {
+    public void push(TileStreamEvent event) {
+
+        log.info("Pushing event into WorkToDo queue: "+event.gridTime);
 
         Long tileSeq = calendarService.lookupTileSequenceNumber(event.getGridTime());
 
@@ -52,10 +67,6 @@ public class QueuedWorkToDoWire implements Wire {
         workItemToAggregateRepository.save(workItem);
     }
 
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
 
     @Override
     public AggregateStreamEvent pullNext(UUID workerId) {
@@ -64,14 +75,14 @@ public class QueuedWorkToDoWire implements Wire {
 
         tryToAcquireWorkerLock(WORKER_WRITE_LOCK);
 
-        WorkItemToAggregateEntity workItem = workItemToAggregateRepository.findOldestReadyWorkItem();
+        WorkToDo workToDo = getNextWorkToDo();
 
-        if (workItem != null) {
-            GeometryClock.GridTimeSequence sequence = calendarService.lookupGridTimeSequence(workItem.getZoomLevel(), workItem.getTileSeq());
+        if (workToDo != null) {
+            GeometryClock.GridTimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
 
-            nextEvent = new AggregateStreamEvent(workItem.getTeamId(), sequence.getGridTime(), workItem.getWorkToDoType());
+            nextEvent = new AggregateStreamEvent(workToDo.getTeamId(), sequence.getGridTime(), workToDo.getWorkToDoType());
 
-            workItemToAggregateRepository.updateInProgress(workerId.toString(), workItem.getTeamId().toString(), workItem.getZoomLevel().toString(), workItem.getTileSeq());
+            workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
         }
 
         releaseWorkerLock(WORKER_WRITE_LOCK);
@@ -89,11 +100,45 @@ public class QueuedWorkToDoWire implements Wire {
         return nextEvent;
     }
 
+    private WorkToDo getNextWorkToDo() {
+        log.info("getNextWorkToDo");
+
+        //first check whether there is stuff ready at the team level
+
+        WorkReadyByTeamViewEntity workItem = workReadyByTeamViewRepository.findOldestTeamCompleteWorkItem();
+
+        if (workItem != null) {
+            log.debug(workItem.toString());
+
+            return toWorkToDo(workItem);
+        }
+
+        //if there's no complete stuff, then we can also process incomplete stuff after a delay
+
+        LocalDateTime partialWorkReadyDate = timeService.now().minus(DELAY_BEFORE_PROCESSING_PARTIAL_WORK);
+
+         workItem = workReadyByTeamViewRepository.findOldestPartialTeamWorkItemOlderThan(Timestamp.valueOf(partialWorkReadyDate));
+
+         if (workItem != null) {
+             return toWorkToDo(workItem);
+         }
+
+         return null;
+
+    }
+
+    private WorkToDo toWorkToDo(WorkReadyByTeamViewEntity workItem) {
+        return new WorkToDo(workItem.getWorkId().getTeamId(), workItem.getZoomLevel(), workItem.getTileSeq(), workItem.getWorkToDoType());
+    }
+
+
     @Override
     public void markDone(UUID workerId) {
 
         workItemToAggregateRepository.finishInProgressWorkItems(workerId.toString());
     }
+
+
 
 
     private void releaseWorkerLock(Long lockNumber) {
@@ -118,6 +163,18 @@ public class QueuedWorkToDoWire implements Wire {
 
     @Override
     public int getQueueDepth() {
-        return 0;
+        long queueDepth = workReadyByTeamViewRepository.count();
+
+        log.info("Active queue depth: "+queueDepth);
+        return (int)queueDepth;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private class WorkToDo {
+        UUID teamId;
+        ZoomLevel zoomLevel;
+        Long tileSeq;
+        WorkToDoType workToDoType;
     }
 }

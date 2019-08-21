@@ -8,11 +8,13 @@ import java.util.List;
 
 public interface Program {
 
-    void tick(Wire inputStreamEventWire);
+    void tick();
 
     Metronome.Tick getActiveTick();
 
     List<TileInstructions> getInstructionsAtActiveTick();
+
+    int getInputQueueDepth();
 
     boolean isDone();
 

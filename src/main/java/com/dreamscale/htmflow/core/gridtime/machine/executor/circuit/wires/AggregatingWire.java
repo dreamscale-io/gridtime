@@ -21,13 +21,13 @@ public class AggregatingWire implements Wire {
     }
 
 
-    public void publishAll(List<TileStreamEvent> tileStreamEvents) {
+    public void pushAll(List<TileStreamEvent> tileStreamEvents) {
         for (TileStreamEvent event : tileStreamEvents) {
-            publish(event);
+            push(event);
         }
     }
 
-    public void publish(TileStreamEvent event) {
+    public void push(TileStreamEvent event) {
         synchronized (aggregateEventStream) {
             AggregateStreamEvent aggregate = findOrCreateAggregateByGridTime(event.gridTime, event.eventType);
             aggregate.add(event);

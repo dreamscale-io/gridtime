@@ -7,17 +7,17 @@ import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instruction
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.IdeaFlowCircuit;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.Program;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.workpile.Worker;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.InputFeed;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
-public class Torchie {
+public class Torchie implements Worker {
 
     private final UUID torchieId;
 
@@ -65,7 +65,11 @@ public class Torchie {
     }
 
     public TileInstructions whatsNext() {
-        return ideaFlowCircuit.getNextInstruction();
+        return ideaFlowCircuit.whatsNext();
+    }
+
+    public boolean isWorkerReady() {
+        return ideaFlowCircuit.isWorkerReady();
     }
 
     public CircuitMonitor getCircuitMonitor() {
@@ -101,7 +105,4 @@ public class Torchie {
         ideaFlowCircuit.configureOutputStreamEventWire(outputWire);
     }
 
-    public void configureInputStreamEventWire(Wire inputWire) {
-        ideaFlowCircuit.configureInputStreamEventWire(inputWire);
-    }
 }

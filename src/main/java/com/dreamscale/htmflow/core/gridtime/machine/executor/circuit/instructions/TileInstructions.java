@@ -87,7 +87,11 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
     }
 
     public Results getOutputResult() {
-        return outputResults.get(0);
+        if (outputResults.size() > 0) {
+            return outputResults.get(0);
+        } else {
+            return null;
+        }
     }
 
     public List<Results> getAllOutputResults() {

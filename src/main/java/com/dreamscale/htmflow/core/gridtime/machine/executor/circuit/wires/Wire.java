@@ -5,11 +5,9 @@ import java.util.UUID;
 
 public interface Wire {
 
-    void publishAll(List<TileStreamEvent> tileStreamEvents);
+    void pushAll(List<TileStreamEvent> tileStreamEvents);
 
-    void publish(TileStreamEvent event);
-
-    boolean hasNext();
+    void push(TileStreamEvent event);
 
     AggregateStreamEvent pullNext(UUID workerId);
 

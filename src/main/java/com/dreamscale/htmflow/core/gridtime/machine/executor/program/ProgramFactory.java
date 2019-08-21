@@ -1,14 +1,12 @@
 package com.dreamscale.htmflow.core.gridtime.machine.executor.program;
 
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
-import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.Wire;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.WorkToDoQueueWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.locas.LocasFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.observer.FlowObserverFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.transform.FlowTransformFactory;
-import com.dreamscale.htmflow.core.gridtime.machine.memory.PerProcessTorchieState;
 import com.dreamscale.htmflow.core.gridtime.machine.memory.TorchieState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,6 +34,9 @@ public class ProgramFactory {
 
     @Autowired
     private CalendarService calendarService;
+
+    @Autowired
+    WorkToDoQueueWire workToDoQueueWire;
 
     public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
@@ -76,12 +77,8 @@ public class ProgramFactory {
         return program;
     }
 
-    public TeamAggregatorProgram createTeamAggregatorProgram(UUID teamId, PerProcessTorchieState torchieState) {
-        TeamAggregatorProgram program = new TeamAggregatorProgram(teamId, torchieState);
-
-        program.addAggregator(locasFactory.createIdeaFlowTeamAggregatorLocas(teamId));
-
-        return program;
+    public AggregateWorkerProgram createAggregateWorkerProgram(UUID workerId) {
+        return new AggregateWorkerProgram(workerId, workToDoQueueWire, locasFactory);
     }
 
 

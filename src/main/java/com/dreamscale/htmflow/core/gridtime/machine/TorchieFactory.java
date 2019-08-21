@@ -1,6 +1,7 @@
 package com.dreamscale.htmflow.core.gridtime.machine;
 
 import com.dreamscale.htmflow.core.gridtime.machine.commons.DefaultCollections;
+import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.WorkToDoQueueWire;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.*;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.program.parts.feed.service.BoxConfigurationLoaderService;
 import com.dreamscale.htmflow.core.gridtime.machine.executor.circuit.wires.AggregatingWire;
@@ -33,6 +34,9 @@ public class TorchieFactory {
     private TileSearchService tileSearchService;
 
     @Autowired
+    private WorkToDoQueueWire workToDoQueueWire;
+
+    @Autowired
     private BoxConfigurationLoaderService boxConfigurationLoaderService;
 
     private Map<UUID, FeatureCache> teamCacheMap = DefaultCollections.lruMap(MAX_TEAMS);
@@ -47,19 +51,11 @@ public class TorchieFactory {
         //stream data into the tiles
         Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition);
 
-        return new Torchie(memberId, torchieState, program);
+        Torchie torchie = new Torchie(memberId, torchieState, program);
 
-    }
+        torchie.configureOutputStreamEventWire(workToDoQueueWire);
 
-    public Torchie wireUpTeamTorchie(UUID teamId) {
-        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
-
-        PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, teamId,
-                featureCache, featureResolverService, tileSearchService);
-
-        TeamAggregatorProgram program = programFactory.createTeamAggregatorProgram(teamId, torchieState);
-
-        return new Torchie(teamId, torchieState, program);
+        return torchie;
 
     }
 
@@ -85,8 +81,6 @@ public class TorchieFactory {
         }
         return featureCache;
     }
-
-
 
 
 

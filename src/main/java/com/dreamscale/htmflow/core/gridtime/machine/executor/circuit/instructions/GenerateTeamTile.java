@@ -13,12 +13,10 @@ import java.util.List;
 @Slf4j
 public class GenerateTeamTile extends TileInstructions {
 
-    private final TorchieState torchieState;
     private final Metronome.Tick tick;
     private final List<Locas> aggregatorChain;
 
-    public GenerateTeamTile(TorchieState torchieState, List<Locas> aggregatorChain, Metronome.Tick tick) {
-        this.torchieState = torchieState;
+    public GenerateTeamTile(List<Locas> aggregatorChain, Metronome.Tick tick) {
         this.aggregatorChain = aggregatorChain;
         this.tick = tick;
     }

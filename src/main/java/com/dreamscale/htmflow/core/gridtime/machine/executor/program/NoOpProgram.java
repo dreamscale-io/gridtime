@@ -11,7 +11,7 @@ public class NoOpProgram implements Program {
 
 
     @Override
-    public void tick(Wire inputStreamEventWire) {
+    public void tick() {
 
     }
 
@@ -23,6 +23,11 @@ public class NoOpProgram implements Program {
     @Override
     public List<TileInstructions> getInstructionsAtActiveTick() {
         return DefaultCollections.emptyList();
+    }
+
+    @Override
+    public int getInputQueueDepth() {
+        return 0;
     }
 
     @Override
