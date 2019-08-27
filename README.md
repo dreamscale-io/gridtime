@@ -11,7 +11,7 @@ To retrieve the swagger json, navigate to `/v2/api-docs`
 
 ## Heroku
 
-This application is currently deployed on Heroku at http://ds-htm-flow.herokuapp.com.  For an API-Key on the shared service, 
+This application is currently deployed on Heroku at http://ds-gridtime.herokuapp.com.  For an API-Key on the shared service, 
 please contact janelle@dreamscale.io.  We will have account creation setup soon, but while this project is still in early 
 development, accounts are created manually.
 
@@ -25,7 +25,7 @@ Log into heroku
 
 Create the heroku application
 
-`heroku create ds-htmflow`
+`heroku create ds-gridtime`
 
 Create the database (can upgrade to hobby-basic just by associating credit card w/ account)
 
@@ -33,7 +33,7 @@ Create the database (can upgrade to hobby-basic just by associating credit card 
 
 Configure the domain
 
-`heroku domains:add htmflow.dreamscale.io`
+`heroku domains:add gridtime.dreamscale.io`
 
 Set up SSL
 
@@ -43,7 +43,7 @@ Set up SSL
 
 If you have not previously deployed to Heroku, initialize the remote
 
-`heroku git:remote -a ds-htmflow`
+`heroku git:remote -a ds-gridtime`
 
 Deploy the application on heroku
 
@@ -55,4 +55,4 @@ Deploy the application on heroku
 
 `heroku pg:backups:download`
 
-`pg_restore --verbose --clean --no-acl --no-owner -h local.docker -U postgres -d htmflow latest.dump`
+`pg_restore --verbose --clean --no-acl --no-owner -h local.docker -U postgres -d gridtime latest.dump`
