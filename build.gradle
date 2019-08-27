@@ -6,7 +6,7 @@ apply plugin: "org.dreamscale.postgres"
 allprojects {
     ext {
         // used by the various templates tasks to determine the base service package
-        servicePackageName="com.dreamscale.htmflow"
+        servicePackageName="com.dreamscale.gridtime"
 
         groovyVersion = "2.4.11"
         spockVersion = "1.1-groovy-2.4"
@@ -45,7 +45,7 @@ dependencies {
 }
 
 bintray {
-    publications = ['htmFlowRestClient']
+    publications = ['gridtimeRestClient']
 }
 
 postgres {

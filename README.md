@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/dreamscale/htm-flow.svg?branch=master)](https://travis-ci.org/dreamscale/htm-flow)
+[![Build Status](https://travis-ci.org/dreamscale/gridtime.svg?branch=master)](https://travis-ci.org/dreamscale/gridtime)
 
-# htm_flow
-Consumes @flow/name streams
-
+# GridTime Server
+Generates zoomable tile feeds, and aggregate tile feeds from flow source data streams
 
 ## Swagger
 
