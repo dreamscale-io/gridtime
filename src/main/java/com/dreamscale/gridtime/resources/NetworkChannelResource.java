@@ -1,14 +1,14 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.account.ActiveUserContextDto;
+import com.dreamscale.gridtime.api.account.UserContextDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.channel.ChannelMessageDto;
-import com.dreamscale.gridtime.api.channel.ChatMessageInputDto;
+import com.dreamscale.gridtime.api.network.ChannelMessageDto;
+import com.dreamscale.gridtime.api.network.ChatMessageInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.ActiveUserContextService;
 import com.dreamscale.gridtime.core.service.CircleService;
-import com.dreamscale.gridtime.core.service.RealtimeChannelService;
+import com.dreamscale.gridtime.core.service.RealtimeNetworkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,8 +19,8 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping(path = ResourcePaths.CHANNEL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-public class ChannelResource {
+@RequestMapping(path = ResourcePaths.NETWORK_PATH + ResourcePaths.CHANNEL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+public class NetworkChannelResource {
 
     @Autowired
     ActiveUserContextService activeUserContextService;
@@ -29,7 +29,7 @@ public class ChannelResource {
     CircleService circleService;
 
     @Autowired
-    RealtimeChannelService realtimeChannelService;
+    RealtimeNetworkService realtimeNetworkService;
 
     /**
      * Posts a chat message to the specified realtime channel
@@ -37,14 +37,14 @@ public class ChannelResource {
      * @return SimpleStatusDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{id}" + ResourcePaths.MESSAGE_PATH)
+    @PostMapping("/{id}" + ResourcePaths.EMIT_PATH)
     public ChannelMessageDto postChatMessageToChannel(@PathVariable("id") String channelIdStr, @RequestBody ChatMessageInputDto chatMessageInputDto) {
         RequestContext context = RequestContext.get();
         log.info("postChatMessageToChannel, user={}", context.getMasterAccountId());
 
-        ActiveUserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
+        UserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
         UUID channelId = UUID.fromString(channelIdStr);
-        return realtimeChannelService.postMessageToChannel(channelId, activeUser.getOrganizationId(), activeUser.getMemberId(), chatMessageInputDto);
+        return realtimeNetworkService.postMessageToChannel(channelId, activeUser.getOrganizationId(), activeUser.getMemberId(), chatMessageInputDto);
 
     }
 
@@ -58,10 +58,10 @@ public class ChannelResource {
         RequestContext context = RequestContext.get();
         log.info("joinChannel, user={}", context.getMasterAccountId());
 
-        ActiveUserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
+        UserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
         UUID channelId = UUID.fromString(channelIdStr);
 
-        return realtimeChannelService.joinChannel(channelId, activeUser);
+        return realtimeNetworkService.joinChannel(channelId, activeUser);
 
     }
 
@@ -75,36 +75,36 @@ public class ChannelResource {
         RequestContext context = RequestContext.get();
         log.info("leaveChannel, user={}", context.getMasterAccountId());
 
-        ActiveUserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
+        UserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
         UUID channelId = UUID.fromString(channelIdStr);
 
-        return realtimeChannelService.leaveChannel(channelId, activeUser);
+        return realtimeNetworkService.leaveChannel(channelId, activeUser);
 
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{id}" + ResourcePaths.MEMBER_PATH )
-    public List<ActiveUserContextDto> getActiveChannelMembers(@PathVariable("id") String channelIdStr) {
+    public List<UserContextDto> getActiveChannelMembers(@PathVariable("id") String channelIdStr) {
         RequestContext context = RequestContext.get();
         log.info("listActiveMembers, user={}", context.getMasterAccountId());
 
-        ActiveUserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
+        UserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
         UUID channelId = UUID.fromString(channelIdStr);
 
-        return realtimeChannelService.getActiveChannelMembers(channelId, activeUser);
+        return realtimeNetworkService.getActiveChannelMembers(channelId, activeUser);
 
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{id}" + ResourcePaths.MESSAGE_PATH )
+    @GetMapping("/{id}" + ResourcePaths.MESSAGE_PATH  )
     public List<ChannelMessageDto> getAllChannelMessages(@PathVariable("id") String channelIdStr) {
         RequestContext context = RequestContext.get();
         log.info("listActiveMembers, user={}", context.getMasterAccountId());
 
-        ActiveUserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
+        UserContextDto activeUser = activeUserContextService.getActiveUserContext(context.getMasterAccountId());
         UUID channelId = UUID.fromString(channelIdStr);
 
-        return realtimeChannelService.getAllChannelMessages(channelId, activeUser);
+        return realtimeNetworkService.getAllChannelMessages(channelId, activeUser);
 
     }
 

@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.api.circle.FeedMessageDto
 import com.dreamscale.gridtime.api.circle.CircleMessageType
 import com.dreamscale.gridtime.api.circle.ScreenshotReferenceInputDto
 import com.dreamscale.gridtime.api.event.NewSnippetEvent
-import com.dreamscale.gridtime.client.CircleClient
+import com.dreamscale.gridtime.client.NetworkClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -27,7 +27,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class CircleResourceSpec extends Specification {
 
     @Autowired
-    CircleClient circleClient
+    NetworkClient networkClient
 
     @Autowired
     MasterAccountEntity testUser
@@ -48,6 +48,7 @@ class CircleResourceSpec extends Specification {
 
     }
 
+
     def "should create a circle"() {
         given:
 
@@ -59,7 +60,7 @@ class CircleResourceSpec extends Specification {
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         then:
         assert circle != null
@@ -81,11 +82,11 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
-        CircleDto circle2 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle2 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
-        List<CircleDto> circles = circleClient.getAllOpenCircles()
+        List<CircleDto> circles = networkClient.getAllOpenCircles()
 
         then:
         assert circles != null
@@ -104,10 +105,10 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
-        CircleDto activeCircle = circleClient.getActiveCircle()
+        CircleDto activeCircle = networkClient.getActiveCircle()
 
         then:
         assert activeCircle != null
@@ -127,12 +128,12 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle1 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
-        CircleDto circle2 = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle2 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
-        circleClient.shelveCircleWithDoItLater(circle1.id.toString())
-        List<CircleDto> circles = circleClient.getAllDoItLaterCircles()
+        networkClient.shelveCircleWithDoItLater(circle1.id.toString())
+        List<CircleDto> circles = networkClient.getAllDoItLaterCircles()
 
         then:
         assert circles != null
@@ -150,12 +151,12 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
 
-        CircleDto circleDto = circleClient.closeCircle(circle.id.toString());
-        List<FeedMessageDto> messages = circleClient.getAllMessagesForCircleFeed(circle.id.toString());
+        CircleDto circleDto = networkClient.closeCircle(circle.id.toString());
+        List<FeedMessageDto> messages = networkClient.getAllMessagesForCircleFeed(circle.id.toString());
 
         then:
         assert circleDto != null
@@ -174,11 +175,11 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         when:
 
-        CircleDto circleDto = circleClient.shelveCircleWithDoItLater(circle.id.toString());
+        CircleDto circleDto = networkClient.shelveCircleWithDoItLater(circle.id.toString());
 
         then:
         assert circleDto != null
@@ -195,13 +196,13 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
-        CircleDto circleShelved = circleClient.shelveCircleWithDoItLater(circle.id.toString());
+        CircleDto circleShelved = networkClient.shelveCircleWithDoItLater(circle.id.toString());
 
         when:
 
-        CircleDto resumedCircle = circleClient.resumeAnExistingCircleFromDoItLaterShelf(circle.id.toString());
+        CircleDto resumedCircle = networkClient.resumeAnExistingCircleFromDoItLaterShelf(circle.id.toString());
 
         then:
         assert resumedCircle != null
@@ -219,13 +220,13 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
 
         when:
-        FeedMessageDto feedMessageDto = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        FeedMessageDto feedMessageDto = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         then:
         assert feedMessageDto != null
@@ -245,14 +246,14 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
         screenshotReferenceInputDto.setFileName("file boxName");
         screenshotReferenceInputDto.setFilePath("/some/path/to/file")
 
         when:
-        FeedMessageDto feedMessageDto = circleClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
+        FeedMessageDto feedMessageDto = networkClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
 
         then:
         assert feedMessageDto != null
@@ -273,14 +274,14 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         NewSnippetEvent newSnippetEvent = new NewSnippetEvent();
         newSnippetEvent.setSnippet("{some code}")
         newSnippetEvent.setSource("Source.java")
 
         when:
-        FeedMessageDto feedMessageDto = circleClient.postSnippetToActiveCircleFeed(newSnippetEvent)
+        FeedMessageDto feedMessageDto = networkClient.postSnippetToActiveCircleFeed(newSnippetEvent)
 
         then:
         assert feedMessageDto != null
@@ -303,16 +304,16 @@ class CircleResourceSpec extends Specification {
         CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
 
-        FeedMessageDto feedMessage1 = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
-        FeedMessageDto feedMessage2 = circleClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        FeedMessageDto feedMessage1 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        FeedMessageDto feedMessage2 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         when:
-        List<FeedMessageDto> feedMessages = circleClient.getAllMessagesForCircleFeed(circle.id.toString())
+        List<FeedMessageDto> feedMessages = networkClient.getAllMessagesForCircleFeed(circle.id.toString())
 
         then:
         assert feedMessages != null

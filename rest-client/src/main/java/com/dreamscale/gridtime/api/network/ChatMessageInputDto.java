@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.api.channel;
+package com.dreamscale.gridtime.api.network;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

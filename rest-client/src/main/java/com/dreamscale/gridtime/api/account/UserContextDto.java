@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActiveUserContextDto {
+public class UserContextDto {
 
     UUID organizationId;
     UUID memberId;

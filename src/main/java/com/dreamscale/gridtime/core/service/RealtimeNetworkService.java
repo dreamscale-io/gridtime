@@ -1,9 +1,10 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.account.ActiveUserContextDto;
+import com.dreamscale.gridtime.api.account.UserContextDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.channel.ChannelMessageDto;
-import com.dreamscale.gridtime.api.channel.ChatMessageInputDto;
+import com.dreamscale.gridtime.api.network.ChannelMessageDto;
+import com.dreamscale.gridtime.api.network.ChatMessageInputDto;
+import com.dreamscale.gridtime.api.network.MemberChannelsDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.domain.channel.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -17,12 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
-public class RealtimeChannelService {
+public class RealtimeNetworkService {
 
     @Autowired
     RealtimeChannelRepository realtimeChannelRepository;
@@ -42,14 +44,39 @@ public class RealtimeChannelService {
     @Autowired
     private MapperFactory mapperFactory;
 
-    private DtoEntityMapper<ActiveUserContextDto, RealtimeChannelMemberEntity> channelMemberMapper;
+    private DtoEntityMapper<UserContextDto, RealtimeChannelMemberEntity> channelMemberMapper;
     private DtoEntityMapper<ChannelMessageDto, RealtimeChannelMessageEntity> channelMessageMapper;
 
 
     @PostConstruct
     private void init() {
-        channelMemberMapper = mapperFactory.createDtoEntityMapper(ActiveUserContextDto.class, RealtimeChannelMemberEntity.class);
+        channelMemberMapper = mapperFactory.createDtoEntityMapper(UserContextDto.class, RealtimeChannelMemberEntity.class);
         channelMessageMapper = mapperFactory.createDtoEntityMapper(ChannelMessageDto.class, RealtimeChannelMessageEntity.class);
+    }
+
+    public MemberChannelsDto getAllMemberChannels(UserContextDto userContext) {
+
+        MemberChannelsDto memberChannelsDto = new MemberChannelsDto();
+
+        memberChannelsDto.setUserContext(userContext);
+
+        List<RealtimeChannelMemberEntity> channels = realtimeChannelMemberRepository.findByMemberId(userContext.getMemberId());
+
+        List<UUID> channelIds = extractChannelIds(channels);
+
+        memberChannelsDto.setListeningToChannels(channelIds);
+
+        return memberChannelsDto;
+    }
+
+    private List<UUID> extractChannelIds(List<RealtimeChannelMemberEntity> channels) {
+        List<UUID> channelIds = new ArrayList<>();
+
+        for (RealtimeChannelMemberEntity channelJoined : channels) {
+                channelIds.add(channelJoined.getChannelId());
+        }
+
+        return channelIds;
     }
 
 
@@ -97,7 +124,7 @@ public class RealtimeChannelService {
 
     }
 
-    public List<ChannelMessageDto> getAllChannelMessages(UUID channelId, ActiveUserContextDto activeUser) {
+    public List<ChannelMessageDto> getAllChannelMessages(UUID channelId, UserContextDto activeUser) {
 
         RealtimeChannelMemberEntity memberInChannel = realtimeChannelMemberRepository.findByChannelIdAndMemberId(channelId, activeUser.getMemberId());
 
@@ -111,7 +138,7 @@ public class RealtimeChannelService {
 
     }
 
-    public List<ActiveUserContextDto> getActiveChannelMembers(UUID channelId, ActiveUserContextDto activeUser) {
+    public List<UserContextDto> getActiveChannelMembers(UUID channelId, UserContextDto activeUser) {
 
         RealtimeChannelMemberEntity memberInChannel = realtimeChannelMemberRepository.findByChannelIdAndMemberId(channelId, activeUser.getMemberId());
 
@@ -124,7 +151,7 @@ public class RealtimeChannelService {
         return channelMemberMapper.toApiList(channelMembers);
     }
 
-    public SimpleStatusDto joinChannel(UUID channelId, ActiveUserContextDto activeUser) {
+    public SimpleStatusDto joinChannel(UUID channelId, UserContextDto activeUser) {
 
         RealtimeChannelMemberEntity channelMembership = realtimeChannelMemberRepository.findByChannelIdAndMemberId(channelId, activeUser.getMemberId());
 
@@ -146,7 +173,7 @@ public class RealtimeChannelService {
         return new SimpleStatusDto(Status.VALID, "Joined channel");
     }
 
-    public SimpleStatusDto leaveChannel(UUID channelId, ActiveUserContextDto activeUser) {
+    public SimpleStatusDto leaveChannel(UUID channelId, UserContextDto activeUser) {
 
         RealtimeChannelMemberEntity channelMembership = realtimeChannelMemberRepository.findByChannelIdAndMemberId(channelId, activeUser.getMemberId());
 
@@ -158,6 +185,7 @@ public class RealtimeChannelService {
 
         return new SimpleStatusDto(Status.VALID, "Left channel");
     }
+
 
 
 }

@@ -61,7 +61,7 @@ public class ResourcePaths {
     public static final String SPIRIT_PATH = "/spirit";
     public static final String LINK_PATH = "/link";
     public static final String UNLINK_PATH = "/unlink";
-    public static final String NETWORK_PATH = "/network";
+
 
     public static final String RIP_PATH = "/restinpeace";
 
@@ -71,6 +71,8 @@ public class ResourcePaths {
     public static final String ABORT_PATH = "/abort";
     public static final String XP_PATH = "/xp";
 
+    public static final String AUTH_PATH = "/auth";
+    public static final String NETWORK_PATH = "/network";
     public static final String CIRCLE_PATH = "/circle";
     public static final String KEY_PATH = "/key";
     public static final String TRANSITION_PATH = "/transition";
@@ -82,6 +84,7 @@ public class ResourcePaths {
 
     public static final String CHANNEL_PATH = "/channel";
     public static final String MESSAGE_PATH = "/message";
+    public static final String EMIT_PATH = "/emit";
     public static final String JOIN_PATH = "/join";
     public static final String LEAVE_PATH = "/leave";
 
@@ -94,5 +97,6 @@ public class ResourcePaths {
 
     public static final String API_KEY_HEADER = "X-API-KEY";
     public static final String CONNECT_ID_HEADER = "X-CONNECT-ID";
+
 
 }

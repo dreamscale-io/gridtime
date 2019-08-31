@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.account.ActiveUserContextDto;
+import com.dreamscale.gridtime.api.account.UserContextDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextRepository;
@@ -30,14 +30,14 @@ public class ActiveUserContextService {
     @Autowired
     private MapperFactory mapperFactory;
 
-    private DtoEntityMapper<ActiveUserContextDto, ActiveUserContextEntity> activeUserContextMapper;
+    private DtoEntityMapper<UserContextDto, ActiveUserContextEntity> activeUserContextMapper;
 
     @PostConstruct
     private void init() {
-        activeUserContextMapper = mapperFactory.createDtoEntityMapper(ActiveUserContextDto.class, ActiveUserContextEntity.class);
+        activeUserContextMapper = mapperFactory.createDtoEntityMapper(UserContextDto.class, ActiveUserContextEntity.class);
     }
 
-    public ActiveUserContextDto getActiveUserContext(UUID masterAccountId) {
+    public UserContextDto getActiveUserContext(UUID masterAccountId) {
 
         ActiveUserContextEntity userContext = activeUserContextRepository.findByMasterAccountId(masterAccountId);
 

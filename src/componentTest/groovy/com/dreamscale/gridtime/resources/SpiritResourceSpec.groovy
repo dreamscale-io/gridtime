@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.spirit.SpiritDto
 import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
-import com.dreamscale.gridtime.client.CircleClient
+import com.dreamscale.gridtime.client.NetworkClient
 import com.dreamscale.gridtime.client.SpiritClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
@@ -29,7 +29,7 @@ class SpiritResourceSpec extends Specification {
     SpiritClient spiritClient
 
     @Autowired
-    CircleClient circleClient
+    NetworkClient circleClient
 
     @Autowired
     MasterAccountEntity testUser

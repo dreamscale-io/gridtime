@@ -10,4 +10,6 @@ public interface RealtimeChannelMemberRepository extends CrudRepository<Realtime
     RealtimeChannelMemberEntity findByChannelIdAndMemberId(UUID channelId, UUID memberId);
 
     List<RealtimeChannelMemberEntity> findByChannelId(UUID channelId);
+
+    List<RealtimeChannelMemberEntity> findByMemberId(UUID memberId);
 }

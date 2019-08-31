@@ -65,7 +65,7 @@ public class CircleService {
     TimeService timeService;
 
     @Autowired
-    RealtimeChannelService realtimeChannelService;
+    RealtimeNetworkService realtimeNetworkService;
 
 
     @Autowired
@@ -119,7 +119,7 @@ public class CircleService {
         circleEntity.setOrganizationId(organizationId);
         circleEntity.setOnShelf(false);
 
-        UUID channelId = realtimeChannelService.createChannel(organizationId, memberId, ChannelType.WTF);
+        UUID channelId = realtimeNetworkService.createChannel(organizationId, memberId, ChannelType.WTF);
         circleEntity.setChannelId(channelId);
 
         circleRepository.save(circleEntity);
@@ -403,7 +403,7 @@ public class CircleService {
 
         if (circleEntity.getChannelId() == null) {
 
-            UUID channelId = realtimeChannelService.createChannel(circleEntity.getOrganizationId(), circleEntity.getOwnerMemberId(), ChannelType.WTF);
+            UUID channelId = realtimeNetworkService.createChannel(circleEntity.getOrganizationId(), circleEntity.getOwnerMemberId(), ChannelType.WTF);
             circleEntity.setChannelId(channelId);
 
             circleRepository.save(circleEntity);

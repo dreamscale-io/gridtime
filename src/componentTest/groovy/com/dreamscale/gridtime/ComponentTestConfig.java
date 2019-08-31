@@ -58,8 +58,8 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    ChannelClient channelClient() {
-        return createClientWithStaticApiKey(jacksonFeignBuilder, ChannelClient.class);
+    NetworkChannelClient channelClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, NetworkChannelClient.class);
     }
 
     @Bean
@@ -78,7 +78,7 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    CircleClient circleClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, CircleClient.class); }
+    NetworkClient networkClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, NetworkClient.class); }
 
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);

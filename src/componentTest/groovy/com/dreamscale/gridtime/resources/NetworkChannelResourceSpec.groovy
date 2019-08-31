@@ -1,15 +1,16 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.account.ActiveUserContextDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
-import com.dreamscale.gridtime.api.channel.ChannelMessageDto
-import com.dreamscale.gridtime.api.channel.ChatMessageInputDto
+import com.dreamscale.gridtime.api.account.UserContextDto
+import com.dreamscale.gridtime.api.network.ChannelMessageDto
+import com.dreamscale.gridtime.api.network.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circle.CircleDto
 import com.dreamscale.gridtime.api.circle.CreateWTFCircleInputDto
+import com.dreamscale.gridtime.api.network.MemberChannelsDto
 import com.dreamscale.gridtime.api.status.Status
-import com.dreamscale.gridtime.client.ChannelClient
-import com.dreamscale.gridtime.client.CircleClient
+import com.dreamscale.gridtime.client.NetworkChannelClient
+import com.dreamscale.gridtime.client.NetworkClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -22,13 +23,13 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class ChannelResourceSpec extends Specification {
+class NetworkChannelResourceSpec extends Specification {
 
     @Autowired
-    ChannelClient channelClient
+    NetworkChannelClient channelClient
 
     @Autowired
-    CircleClient circleClient
+    NetworkClient networkClient
 
     @Autowired
     MasterAccountEntity testUser
@@ -41,6 +42,32 @@ class ChannelResourceSpec extends Specification {
 
     }
 
+    def "should auth user on network"() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.getId()).save()
+
+        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
+        circleSessionInputDto.setProblemDescription("Problem is this thing");
+
+        when:
+        MemberChannelsDto memberChannelsDtoBefore = networkClient.authorizeMemberToUseNetwork(member.getId().toString())
+
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        String channelId = circle.getChannelId().toString();
+        SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
+
+        MemberChannelsDto memberChannelsDtoAfter = networkClient.authorizeMemberToUseNetwork(member.getId().toString())
+
+        then:
+        assert memberChannelsDtoBefore.getUserContext().memberId == member.id
+        assert memberChannelsDtoBefore.getUserContext().organizationId == member.organizationId
+
+        assert memberChannelsDtoBefore.listeningToChannels.isEmpty()
+        assert memberChannelsDtoAfter.listeningToChannels.size() == 1
+    }
+
     def "should post a message to WTF channel"() {
         given:
 
@@ -51,7 +78,7 @@ class ChannelResourceSpec extends Specification {
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         String channelId = circle.getChannelId().toString();
 
@@ -81,14 +108,14 @@ class ChannelResourceSpec extends Specification {
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
-        CircleDto circle = circleClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
         String channelId = circle.getChannelId().toString();
 
         SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
         SimpleStatusDto joinAgainStatus = channelClient.joinChannel(channelId)
 
-        List<ActiveUserContextDto> membersInChannelAfterJoin = channelClient.getActiveChannelMembers(channelId)
+        List<UserContextDto> membersInChannelAfterJoin = channelClient.getActiveChannelMembers(channelId)
 
         SimpleStatusDto leaveStatus = channelClient.leaveChannel(channelId)
         SimpleStatusDto leaveAgainStatus = channelClient.leaveChannel(channelId)
