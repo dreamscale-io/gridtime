@@ -1,7 +1,9 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.track;
 
+import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 
@@ -22,4 +24,5 @@ public interface PlayableCompositeTrackSet {
 
     void initFromCarryOverContext(CarryOverContext subContext);
 
+    void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics);
 }

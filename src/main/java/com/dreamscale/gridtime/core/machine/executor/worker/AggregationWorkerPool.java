@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.executor.workpile;
+package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;

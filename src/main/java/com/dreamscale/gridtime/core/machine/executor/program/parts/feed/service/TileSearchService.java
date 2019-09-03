@@ -1,8 +1,8 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureId;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class TileSearchService {
         return null;
     }
 
-    List<FeatureMetrics> queryFeatureMetrics(UUID torchieId, FeatureId featureId, GeometryClock.GridTime queryByGridTime) {
+    List<BoxMetrics> queryBoxMetrics(UUID torchieId, FeatureId featureId, GeometryClock.GridTime queryByGridTime) {
         //public List<IdeaFlowTile>
 
         //these are atomic operations.  FeatureMetrics for the new tile, are combined all at once, and then closed.

@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.FeatureTotals;
+import com.dreamscale.gridtime.core.machine.memory.grid.landscape.FeatureLandscapeMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTrack;
@@ -24,7 +24,7 @@ public class AggregateGrid implements IMusicGrid {
 
     private final GeometryClock.GridTime gridTime;
     private final GlyphReferences glyphReferences;
-    private final FeatureTotals featureTotals;
+    private final FeatureLandscapeMetrics landscapeMetrics;
     private final MusicClock musicClock;
 
     private Map<MetricRowKey, WeightedMetricTrack> weightedMetricTracks = DefaultCollections.map();
@@ -37,7 +37,7 @@ public class AggregateGrid implements IMusicGrid {
         this.musicClock = musicClock;
 
         this.glyphReferences = new GlyphReferences();
-        this.featureTotals = new FeatureTotals();
+        this.landscapeMetrics = new FeatureLandscapeMetrics();
     }
 
     public RelativeBeat getBeat(String gridTimeKey) {

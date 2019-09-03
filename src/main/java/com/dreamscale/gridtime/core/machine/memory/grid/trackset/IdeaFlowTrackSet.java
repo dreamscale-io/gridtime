@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.trackset;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.tag.FinishTag;
 import com.dreamscale.gridtime.core.machine.memory.tag.StartTag;
@@ -132,6 +133,27 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
 
         RollingAggregate aggregate = subContext.getRollingAggregate("last.rolling.aggregate");
         rollingAggregateModificationsTrack.initCarryOver(aggregate);
+    }
+
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+
+        IdeaFlowStateReference ideaFlowState = getIdeaFlowStateAtBeat(beat);
+        if (ideaFlowState != null) {
+            if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.WTF_STATE) {
+                boxMetrics.addWtfSample(true);
+                boxMetrics.addLearningSample(false);
+                boxMetrics.addProgressSample(false);
+            } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.LEARNING_STATE) {
+                boxMetrics.addWtfSample(false);
+                boxMetrics.addLearningSample(true);
+
+            } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.PROGRESS_STATE) {
+                boxMetrics.addWtfSample(false);
+                boxMetrics.addLearningSample(false);
+                boxMetrics.addProgressSample(true);
+            }
+        }
     }
 
     @Override

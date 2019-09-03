@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.trackset;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.tag.types.*;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
@@ -103,6 +104,11 @@ public class ExecutionTrackSet implements PlayableCompositeTrackSet {
         if (isRedAndWantingGreenFlag != null) {
             isRedAndWantingGreen = isRedAndWantingGreenFlag;
         }
+    }
+
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+
     }
 
     public TrackSetKey getTrackSetKey() {

@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.BandedMusicTrack;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.PlayableCompositeTrackSet;
@@ -67,6 +68,17 @@ public class FeelsTrackSet implements PlayableCompositeTrackSet {
     public void initFromCarryOverContext(CarryOverContext subContext) {
         FeelsReference lastState = (FeelsReference) subContext.getReference("last.feels");
         feelsTrack.initFirst(lastState);
+    }
+
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+        //push into feels track
+        FeelsReference feelsReference = getFeelsAtBeat(beat);
+
+        if (feelsReference != null) {
+            boxMetrics.addFeelsSample(feelsReference.getFlameRating());
+        }
+
     }
 
     public Set<? extends FeatureReference> getFeatures() {

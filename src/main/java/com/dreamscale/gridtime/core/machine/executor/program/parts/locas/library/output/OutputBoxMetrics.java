@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.domain.tile.GridRowEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;

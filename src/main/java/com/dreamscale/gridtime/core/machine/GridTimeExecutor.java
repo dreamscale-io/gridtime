@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.workpile.WorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.WorkerPool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;

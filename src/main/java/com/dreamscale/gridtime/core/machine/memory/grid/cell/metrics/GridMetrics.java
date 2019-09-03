@@ -1,7 +1,10 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
+import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
+import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,13 +16,12 @@ import java.util.Map;
 
 
 @NoArgsConstructor
-@Getter
-@Setter
 @ToString
 public class GridMetrics  {
 
-
     private Map<MetricRowKey, CandleStick> metricsByType = DefaultCollections.map();
+
+    FeatureCounter featureCounter = new FeatureCounter();
 
     private GridMetrics cascadeToParent;
 
@@ -34,6 +36,10 @@ public class GridMetrics  {
             metricsByType.put(metricRowKey, candle);
         }
         return candle;
+    }
+
+    public void countFeature(FeatureReference feature) {
+        featureCounter.countSample(feature);
     }
 
     public void addVelocitySample(Duration duration) {
@@ -102,6 +108,18 @@ public class GridMetrics  {
         }
     }
 
+    public void addProgressSample(boolean isProgress) {
+        CandleStick candle = findOrCreateCandle(MetricRowKey.IS_PROGRESS);
+        if (isProgress) {
+            candle.addSample(1);
+        } else {
+            candle.addSample(0);
+        }
+        if (cascadeToParent != null) {
+            cascadeToParent.addProgressSample(isProgress);
+        }
+    }
+
     public void addPairingSample(boolean isPairing) {
         CandleStick candle = findOrCreateCandle(MetricRowKey.IS_PAIRING);
 
@@ -125,7 +143,7 @@ public class GridMetrics  {
     }
 
     @JsonIgnore
-    public Duration getTotalTimeInvestment() {
+    public Duration getTotalDuration() {
         CandleStick velocityCandle = metricsByType.get(MetricRowKey.FILE_TRAVERSAL_VELOCITY);
         if (velocityCandle != null) {
             return Duration.ofSeconds(Math.round(velocityCandle.getTotal()));
@@ -133,6 +151,19 @@ public class GridMetrics  {
             return Duration.ofSeconds(0);
         }
     }
+
+    public double getAverageMetric(MetricRowKey rowKey) {
+        CandleStick metric = metricsByType.get(rowKey);
+
+        if (metric != null) {
+            return metric.getAvg();
+        } else {
+            return 0.0;
+        }
+    }
+
+
+
 
     public void resetMetrics() {
         metricsByType.clear();
@@ -176,4 +207,7 @@ public class GridMetrics  {
     }
 
 
+    public int getFeatureCount(FeatureType featureType) {
+        return featureCounter.getDistinctFeatureCount(featureType);
+    }
 }

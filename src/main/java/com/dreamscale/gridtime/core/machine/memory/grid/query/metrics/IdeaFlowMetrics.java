@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query;
+package com.dreamscale.gridtime.core.machine.memory.grid.query.metrics;
 
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;

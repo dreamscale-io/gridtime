@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
-import com.dreamscale.gridtime.core.machine.executor.workpile.TorchieWorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import spock.lang.Specification;
 

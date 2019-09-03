@@ -2,15 +2,18 @@ package com.dreamscale.gridtime.core.machine.memory.grid.trackset;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
+import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.AuthorsReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.BandedMusicTrack;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.PlayableCompositeTrackSet;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
+import com.dreamscale.gridtime.core.machine.memory.type.AuthorsType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,7 +67,22 @@ public class AuthorsTrackSet implements PlayableCompositeTrackSet {
         authorsTrack.initFirst(lastAuthors);
     }
 
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+        //push into authors track
+        AuthorsReference authorsReference = getAuthorsAtBeat(beat);
+        if (authorsReference != null && authorsReference.getAuthorsType() != AuthorsType.SOLO) {
+            boxMetrics.addPairingSample(true);
+        } else {
+            boxMetrics.addPairingSample(false);
+        }
+    }
+
     public Set<? extends FeatureReference> getFeatures() {
         return authorsTrack.getFeatures();
+    }
+
+    public AuthorsReference getAuthorsAtBeat(RelativeBeat beat) {
+        return authorsTrack.getFeatureAt(beat);
     }
 }

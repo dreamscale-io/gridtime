@@ -10,10 +10,9 @@ import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.AnalyticsEngine;
 import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.FeatureMetrics;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.gridtime.core.machine.memory.tag.FinishTag;
 import com.dreamscale.gridtime.core.machine.memory.tag.StartTag;
@@ -36,7 +35,7 @@ public class GridTile {
 
     private final MusicClock musicClock;
     private final MusicGrid musicGrid;
-    private final AnalyticsEngine analyticsEngine;
+    private final TileAnalytics tileAnalytics;
 
     private transient FeatureCache featureCache;
 
@@ -50,7 +49,7 @@ public class GridTile {
         this.zoomLevel = gridTime.getZoomLevel();
         this.musicClock = new MusicClock(zoomLevel);
         this.musicGrid = new MusicGrid(featureCache, gridTime, musicClock);
-        this.analyticsEngine = new AnalyticsEngine(featureCache, musicClock, musicGrid);
+        this.tileAnalytics = new TileAnalytics(featureCache, musicClock, musicGrid);
 
         this.timeBombTriggers = DefaultCollections.list();
     }
@@ -187,16 +186,15 @@ public class GridTile {
     public void finishAfterLoad() {
         musicGrid.finish();
 
-        analyticsEngine.runIdeaFlowMetrics();
-        analyticsEngine.runFeatureMetrics();
+        tileAnalytics.runMetrics();
     }
 
     public IdeaFlowMetrics getIdeaFlowMetrics() {
-        return analyticsEngine.getIdeaFlowMetrics();
+        return tileAnalytics.getIdeaFlowMetrics();
     }
 
-    public List<FeatureMetrics> getFeatureMetrics() {
-        return analyticsEngine.getFeatureMetrics();
+    public List<BoxMetrics> getBoxMetrics() {
+        return tileAnalytics.getBoxMetrics();
     }
 
     public CarryOverContext getCarryOverContext() {

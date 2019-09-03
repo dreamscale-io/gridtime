@@ -9,6 +9,7 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureRefe
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
@@ -146,6 +147,11 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
 
     public void initFromCarryOverContext(CarryOverContext subContext) {
         carryOverLastLocation = subContext.getReference("last.location");
+    }
+
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+
     }
 
     public TrackSetKey getTrackSetKey() {

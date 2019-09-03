@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValue;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;

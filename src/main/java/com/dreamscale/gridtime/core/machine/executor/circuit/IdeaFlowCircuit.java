@@ -10,8 +10,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEve
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
-import com.dreamscale.gridtime.core.machine.executor.workpile.Worker;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;

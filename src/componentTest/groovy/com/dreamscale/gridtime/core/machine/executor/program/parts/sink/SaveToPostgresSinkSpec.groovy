@@ -14,7 +14,7 @@ import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
-import com.dreamscale.gridtime.core.machine.executor.workpile.TorchieWorkerPool
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool
 import com.dreamscale.gridtime.core.machine.memory.TorchieState
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache

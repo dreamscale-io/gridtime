@@ -4,10 +4,10 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregatingWire;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
-import com.dreamscale.gridtime.core.machine.executor.workpile.AggregationWorkerPool;
-import com.dreamscale.gridtime.core.machine.executor.workpile.TorchieWorkerPool;
-import com.dreamscale.gridtime.core.machine.executor.workpile.Worker;
-import com.dreamscale.gridtime.core.machine.executor.workpile.WorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.AggregationWorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
+import com.dreamscale.gridtime.core.machine.executor.worker.WorkerPool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;

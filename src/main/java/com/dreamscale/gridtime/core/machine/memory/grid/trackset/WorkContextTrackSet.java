@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.BandedMusicTrack;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.PlayableCompositeTrackSet;
@@ -96,6 +97,11 @@ public class WorkContextTrackSet implements PlayableCompositeTrackSet {
         projectTrack.initFirst(lastProject);
         taskTrack.initFirst(lastTask);
         intentionTrack.initFirst(lastIntention);
+    }
+
+    @Override
+    public void populateBoxWithBeat(RelativeBeat beat, GridMetrics boxMetrics) {
+
     }
 
     @Override

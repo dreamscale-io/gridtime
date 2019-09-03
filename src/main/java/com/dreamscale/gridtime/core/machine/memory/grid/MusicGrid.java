@@ -11,7 +11,7 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.FeatureTotals;
+import com.dreamscale.gridtime.core.machine.memory.grid.landscape.FeatureLandscapeMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.PlayableCompositeTrackSet;
@@ -19,7 +19,6 @@ import com.dreamscale.gridtime.core.machine.memory.grid.trackset.*;
 import com.dreamscale.gridtime.core.machine.memory.tag.FinishTag;
 import com.dreamscale.gridtime.core.machine.memory.tag.StartTag;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
-import com.dreamscale.gridtime.core.machine.memory.type.IdeaFlowStateType;
 import com.dreamscale.gridtime.core.machine.memory.type.WorkContextType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +33,7 @@ public class MusicGrid implements IMusicGrid {
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
     private final GlyphReferences glyphReferences;
-    private final FeatureTotals featureTotals;
+    private final FeatureLandscapeMetrics landscapeMetrics;
 
     private AuthorsTrackSet authorsTracks;
     private FeelsTrackSet feelsTracks;
@@ -56,7 +55,7 @@ public class MusicGrid implements IMusicGrid {
         this.musicClock = musicClock;
 
         this.glyphReferences = new GlyphReferences();
-        this.featureTotals = new FeatureTotals();
+        this.landscapeMetrics = new FeatureLandscapeMetrics();
 
         this.authorsTracks = new AuthorsTrackSet(TrackSetKey.Authors, gridTime, musicClock);
         this.feelsTracks = new FeelsTrackSet(TrackSetKey.Feels, gridTime, musicClock);
@@ -129,12 +128,14 @@ public class MusicGrid implements IMusicGrid {
 
         if (lastLocation != null) {
             PlaceReference traversalReference = featureCache.lookupTraversalReference(lastLocation, nextLocation);
-            featureTotals.getMetricsFor(traversalReference).addVelocitySample(timeInLocation);
+            landscapeMetrics.getMetricsFor(traversalReference).addVelocitySample(timeInLocation);
         }
 
+        landscapeMetrics.getMetricsFor(nextLocation).addVelocitySample(timeInLocation);
+
         PlaceReference boxReference = featureCache.lookupBoxReference(nextLocation);
-        featureTotals.getMetricsFor(nextLocation).addVelocitySample(timeInLocation);
-        featureTotals.getMetricsFor(boxReference).addVelocitySample(timeInLocation);
+        landscapeMetrics.getMetricsFor(boxReference).addVelocitySample(timeInLocation);
+        landscapeMetrics.getMetricsFor(boxReference).countFeature(nextLocation);
 
         navigationTracks.gotoLocation(moment, nextLocation, timeInLocation);
     }
@@ -145,17 +146,17 @@ public class MusicGrid implements IMusicGrid {
         PlaceReference lastLocation = navigationTracks.getLastLocationBeforeMoment(moment);
         if (lastLocation != null) {
             PlaceReference boxReference = featureCache.lookupBoxReference(lastLocation);
-            featureTotals.getMetricsFor(boxReference).addModificationSample(modificationCount);
-            featureTotals.getMetricsFor(lastLocation).addModificationSample(modificationCount);
+            landscapeMetrics.getMetricsFor(boxReference).addModificationSample(modificationCount);
+            landscapeMetrics.getMetricsFor(lastLocation).addModificationSample(modificationCount);
         }
 
         WorkContextReference lastProject = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.PROJECT_WORK);
         WorkContextReference lastTask = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.TASK_WORK);
         WorkContextReference lastIntention = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.INTENTION_WORK);
 
-        featureTotals.getMetricsFor(lastProject).addModificationSample(modificationCount);
-        featureTotals.getMetricsFor(lastTask).addModificationSample(modificationCount);
-        featureTotals.getMetricsFor(lastIntention).addModificationSample(modificationCount);
+        landscapeMetrics.getMetricsFor(lastProject).addModificationSample(modificationCount);
+        landscapeMetrics.getMetricsFor(lastTask).addModificationSample(modificationCount);
+        landscapeMetrics.getMetricsFor(lastIntention).addModificationSample(modificationCount);
 
         ideaflowTracks.addModificationSampleForLearningBand(beat, modificationCount);
     }
@@ -166,16 +167,16 @@ public class MusicGrid implements IMusicGrid {
         PlaceReference lastLocation = navigationTracks.getLastLocationBeforeMoment(moment);
         if (lastLocation != null) {
             PlaceReference boxReference = featureCache.lookupBoxReference(lastLocation);
-            featureTotals.getMetricsFor(boxReference).addExecutionTimeSample(execution.getExecutionTime());
+            landscapeMetrics.getMetricsFor(boxReference).addExecutionTimeSample(execution.getExecutionTime());
         }
 
         WorkContextReference lastProject = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.PROJECT_WORK);
         WorkContextReference lastTask = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.TASK_WORK);
         WorkContextReference lastIntention = contextTracks.getLastOnOrBeforeMoment(moment, WorkContextType.INTENTION_WORK);
 
-        featureTotals.getMetricsFor(lastProject).addExecutionTimeSample(execution.getExecutionTime());
-        featureTotals.getMetricsFor(lastTask).addExecutionTimeSample(execution.getExecutionTime());
-        featureTotals.getMetricsFor(lastIntention).addExecutionTimeSample(execution.getExecutionTime());
+        landscapeMetrics.getMetricsFor(lastProject).addExecutionTimeSample(execution.getExecutionTime());
+        landscapeMetrics.getMetricsFor(lastTask).addExecutionTimeSample(execution.getExecutionTime());
+        landscapeMetrics.getMetricsFor(lastIntention).addExecutionTimeSample(execution.getExecutionTime());
 
         executionTracks.executeThing(moment, execution);
     }
@@ -186,7 +187,7 @@ public class MusicGrid implements IMusicGrid {
             trackSet.finish();
         }
 
-        //finishBoxMetrics();
+        finishBoxMetrics();
 
         exportGridRows();
     }
@@ -200,29 +201,19 @@ public class MusicGrid implements IMusicGrid {
             PlaceReference boxReference = navigationTracks.getBoxAtBeat(beat);
 
             if (boxReference != null) {
-                GridMetrics boxMetrics = featureTotals.getMetricsFor(boxReference);
+                GridMetrics boxMetrics = landscapeMetrics.getMetricsFor(boxReference);
 
-                IdeaFlowStateReference ideaFlowState = ideaflowTracks.getIdeaFlowStateAtBeat(beat);
-                if (ideaFlowState != null) {
-                    if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.WTF_STATE) {
-                        boxMetrics.addWtfSample(true);
-                    } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.LEARNING_STATE) {
-                        boxMetrics.addLearningSample(true);
-                        boxMetrics.addWtfSample(false);
-                    } else if (ideaFlowState.getIdeaFlowStateType() == IdeaFlowStateType.PROGRESS_STATE) {
-                        boxMetrics.addLearningSample(false);
-                        boxMetrics.addWtfSample(false);
-                    }
-                }
+                ideaflowTracks.populateBoxWithBeat(beat, boxMetrics);
+                feelsTracks.populateBoxWithBeat(beat, boxMetrics);
+                authorsTracks.populateBoxWithBeat(beat, boxMetrics);
+                navigationTracks.populateBoxWithBeat(beat, boxMetrics);
+                executionTracks.populateBoxWithBeat(beat, boxMetrics);
 
-                FeelsReference feelsReference = feelsTracks.getFeelsAtBeat(beat);
-
-                if (feelsReference != null) {
-                    boxMetrics.addFeelsSample(feelsReference.getFlameRating());
-                }
-
-
+                //push into red vs green time on completion, whenever completion event, save the metric
+                //with the box
             }
+
+            //calculate and save the landscape
 
             //only include relative to positive activity within the box...
             // such that, the total of time spent within the box, within the 20 minutes, becomes the overall weight of all box metrics
@@ -242,10 +233,6 @@ public class MusicGrid implements IMusicGrid {
 //
 //            double traversalSpeed = 1; //turn this into continuously slowing down when there's no traversal, speed is this +1, so there's a sort of decay
 
-            //last red to green time, when the red is in the box... what is the box for the red, and then whatever the time is, gets assigend to the box
-
-            //do I need a player?  I feel like I ought to just calculate these metrics by hand first, with each track knowing what it's tracking,
-            //and specific types
 
         }
     }
@@ -348,6 +335,19 @@ public class MusicGrid implements IMusicGrid {
 
 
     public List<PlaceReference> getBoxesVisted() {
-        return null;
+        return landscapeMetrics.getBoxesVisited();
+    }
+
+    public Iterator<RelativeBeat> iterateBeats() {
+        return musicClock.getForwardsIterator();
+    }
+
+    public GridMetrics getBoxMetricsAtBeat(RelativeBeat beat) {
+        PlaceReference boxReference = navigationTracks.getBoxAtBeat(beat);
+        return landscapeMetrics.getMetricsFor(boxReference);
+    }
+
+    public GridMetrics getGridMetrics(FeatureReference feature) {
+        return landscapeMetrics.getMetricsFor(feature);
     }
 }

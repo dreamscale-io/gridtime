@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.memory.grid.space.metrics;
+package com.dreamscale.gridtime.core.machine.memory.grid.landscape.metrics;
 
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.CandleStick;

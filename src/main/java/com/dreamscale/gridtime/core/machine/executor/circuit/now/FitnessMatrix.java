@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.now;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.analytics.query.IdeaFlowMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 
 import java.util.List;
 

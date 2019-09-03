@@ -1,12 +1,12 @@
-package com.dreamscale.gridtime.core.machine.memory.grid.space;
+package com.dreamscale.gridtime.core.machine.memory.grid.landscape;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
-import com.dreamscale.gridtime.core.machine.memory.grid.space.metrics.BoxMetrics;
-import com.dreamscale.gridtime.core.machine.memory.grid.space.metrics.BridgeMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.landscape.metrics.BoxMetrics;
+import com.dreamscale.gridtime.core.machine.memory.grid.landscape.metrics.BridgeMetrics;
 import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 
 import java.time.Duration;
