@@ -1,13 +1,13 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.sink
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.core.domain.tile.GridBoxMetricsRepository
-import com.dreamscale.gridtime.core.domain.tile.GridBridgeMetricsRepository
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridBridgeMetricsRepository
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerEntity
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository
 import com.dreamscale.gridtime.core.domain.tile.GridRowEntity
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository
-import com.dreamscale.gridtime.core.domain.tile.GridIdeaFlowMetricsRepository
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor

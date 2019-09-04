@@ -21,6 +21,9 @@ truncate table realtime_channel_message cascade ;
 truncate table realtime_channel_member cascade ;
 truncate table work_item_to_aggregate cascade ;
 
+truncate table grid_idea_flow_metrics cascade ;
+truncate table grid_box_metrics cascade ;
+
 
 
 

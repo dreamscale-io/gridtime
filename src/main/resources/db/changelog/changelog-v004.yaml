@@ -80,3 +80,6 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/create_view_work_ready_by_team.sql
+
+  - include:
+        file:  db/v004/replace_grid_box_metrics.sql

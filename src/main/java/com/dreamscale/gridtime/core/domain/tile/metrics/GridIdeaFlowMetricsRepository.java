@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.domain.tile;
+package com.dreamscale.gridtime.core.domain.tile.metrics;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

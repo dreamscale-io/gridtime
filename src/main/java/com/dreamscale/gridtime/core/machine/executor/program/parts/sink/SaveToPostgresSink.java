@@ -1,12 +1,17 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.sink;
 
 import com.dreamscale.gridtime.core.domain.tile.*;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValue;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
@@ -31,6 +36,9 @@ public class SaveToPostgresSink implements SinkStrategy {
 
     @Autowired
     GridIdeaFlowMetricsRepository gridIdeaFlowMetricsRepository;
+
+    @Autowired
+    GridBoxMetricsRepository gridBoxMetricsRepository;
 
     @Override
     public void save(UUID torchieId, TorchieState torchieState) {
@@ -74,6 +82,18 @@ public class SaveToPostgresSink implements SinkStrategy {
         log.debug("Saving ideaflow tile: "+tileSeq);
         gridIdeaFlowMetricsRepository.save(gridIdeaFlowMetricsEntity);
 
+
+        List<BoxMetrics> boxMetricsList = gridTile.getBoxMetrics();
+        List<GridBoxMetricsEntity> boxMetricsEntityList = new ArrayList<>();
+
+        for (BoxMetrics boxMetrics : boxMetricsList) {
+
+            GridBoxMetricsEntity gridBoxMetricsEntity = createGridBoxMetricsEntity(torchieId, tileSeq, boxMetrics);
+            boxMetricsEntityList.add(gridBoxMetricsEntity);
+        }
+
+        gridBoxMetricsRepository.save(boxMetricsEntityList);
+
         //TILE DICTIONARY...
 
         //so rows will have all these rhythm patterns... bridge patterns... need to add bridges, okay added bridges
@@ -95,6 +115,29 @@ public class SaveToPostgresSink implements SinkStrategy {
         //TODO update floating now
 
         //TODO aggregate up
+    }
+
+    private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, Long tileSeq, BoxMetrics boxMetrics) {
+        GridBoxMetricsEntity boxMetricsEntity = new GridBoxMetricsEntity();
+
+        boxMetricsEntity.setId(UUID.randomUUID());
+        boxMetricsEntity.setTorchieId(torchieId);
+        boxMetricsEntity.setTileSequence(tileSeq);
+        boxMetricsEntity.setZoomLevel(boxMetrics.getZoomLevel());
+
+        boxMetricsEntity.setBoxFeatureId(boxMetrics.getBox().getFeatureId());
+        boxMetricsEntity.setTimeInBox(boxMetrics.getTimeInBox().getSeconds());
+
+        boxMetricsEntity.setAvgFlame(boxMetrics.getAvgFlame());
+        boxMetricsEntity.setPercentWtf(boxMetrics.getPercentWtf());
+        boxMetricsEntity.setPercentLearning(boxMetrics.getPercentLearning());
+        boxMetricsEntity.setPercentProgress(boxMetrics.getPercentProgress());
+        boxMetricsEntity.setPercentPairing(boxMetrics.getPercentPairing());
+        boxMetricsEntity.setAvgFileBatchSize(boxMetrics.getAvgFileBatchSize());
+        boxMetricsEntity.setAvgExecutionTime(boxMetrics.getAvgExecutionTime());
+        boxMetricsEntity.setAvgTraversalSpeed(boxMetrics.getAvgTraversalSpeed());
+
+        return boxMetricsEntity;
     }
 
     private GridIdeaFlowMetricsEntity createGridIdeaFlowMetricsEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {

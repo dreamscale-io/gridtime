@@ -1,5 +1,6 @@
-package com.dreamscale.gridtime.core.domain.tile;
+package com.dreamscale.gridtime.core.domain.tile.metrics;
 
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;

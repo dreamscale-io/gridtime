@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output;
 
-import com.dreamscale.gridtime.core.domain.tile.GridIdeaFlowMetricsEntity;
-import com.dreamscale.gridtime.core.domain.tile.GridIdeaFlowMetricsRepository;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.domain.tile.GridRowEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;

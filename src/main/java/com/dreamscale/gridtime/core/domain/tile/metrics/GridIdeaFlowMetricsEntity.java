@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.domain.tile;
+package com.dreamscale.gridtime.core.domain.tile.metrics;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import lombok.*;
@@ -9,20 +9,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.UUID;
 
-@Entity(name = "grid_bridge_metrics")
+@Entity(name = "grid_idea_flow_metrics")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridBridgeMetricsEntity {
+public class GridIdeaFlowMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
@@ -30,21 +27,18 @@ public class GridBridgeMetricsEntity {
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 
-    private Long tileSequence;
+    private Long tileSeq;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID bridgeFeatureId;
+    private Long timeInTile;
 
-    private Integer totalVisits;
+    private Double avgFlame;
 
-    private Integer visitsDuringWtf;
+    private Double percentWtf;
 
-    private Integer visitsDuringLearning;
+    private Double percentLearning;
 
-    private Integer visitsDuringRedToGreen;
+    private Double percentProgress;
 
-    private Float avgFlame;
-
-    private Float avgTraversalSpeed;
+    private Double percentPairing;
 
 }

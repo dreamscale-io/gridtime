@@ -3,8 +3,8 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.locas
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circle.CircleMessageType
 import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity
-import com.dreamscale.gridtime.core.domain.tile.GridIdeaFlowMetricsEntity
-import com.dreamscale.gridtime.core.domain.tile.GridIdeaFlowMetricsRepository
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity
+import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
