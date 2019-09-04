@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library;
 
-import com.dreamscale.gridtime.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTimeLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;

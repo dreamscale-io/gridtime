@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.AuthorsReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
@@ -27,6 +28,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -57,16 +59,16 @@ public class BoxMetrics implements MetricQuery {
 
 //do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
-    public static List<BoxMetrics> queryFrom(MusicGrid musicGrid) {
+    public static List<BoxMetrics> queryFrom(IMusicGrid musicGrid) {
 
         List<BoxMetrics> boxMetricsList = new ArrayList<>();
 
-        List<PlaceReference> boxes = musicGrid.getBoxesVisted();
+        Set<FeatureReference> boxes = musicGrid.getFeaturesOfType(PlaceType.BOX);
 
-        for (PlaceReference box : boxes) {
+        for (FeatureReference box : boxes) {
             BoxMetrics boxMetrics = new BoxMetrics();
 
-            boxMetrics.setBox(box);
+            boxMetrics.setBox((PlaceReference) box);
 
             boxMetrics.setZoomLevel(musicGrid.getZoomLevel());
 

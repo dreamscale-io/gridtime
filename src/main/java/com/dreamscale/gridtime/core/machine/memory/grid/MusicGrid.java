@@ -19,6 +19,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.trackset.*;
 import com.dreamscale.gridtime.core.machine.memory.tag.FinishTag;
 import com.dreamscale.gridtime.core.machine.memory.tag.StartTag;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
+import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import com.dreamscale.gridtime.core.machine.memory.type.WorkContextType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -349,5 +350,10 @@ public class MusicGrid implements IMusicGrid {
 
     public GridMetrics getGridMetrics(FeatureReference feature) {
         return landscapeMetrics.getMetricsFor(feature);
+    }
+
+    @Override
+    public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
+        return landscapeMetrics.getFeaturesOfType(featureType);
     }
 }

@@ -6,18 +6,22 @@ import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
 import com.dreamscale.gridtime.core.machine.memory.grid.landscape.FeatureLandscapeMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTrack;
+import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class AggregateGrid implements IMusicGrid {
@@ -61,6 +65,16 @@ public class AggregateGrid implements IMusicGrid {
         } else {
             return Duration.ZERO;
         }
+    }
+
+    @Override
+    public GridMetrics getGridMetrics(FeatureReference featureReference) {
+        return null;
+    }
+
+    @Override
+    public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
+        return null;
     }
 
     public void addWeightedMetric(MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {

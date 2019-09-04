@@ -7,9 +7,11 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceRefere
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
+import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 public interface IMusicGrid {
 
@@ -23,4 +25,7 @@ public interface IMusicGrid {
 
     Duration getTotalDuration();
 
+    GridMetrics getGridMetrics(FeatureReference featureReference);
+
+    Set<FeatureReference> getFeaturesOfType(FeatureType featureType);
 }

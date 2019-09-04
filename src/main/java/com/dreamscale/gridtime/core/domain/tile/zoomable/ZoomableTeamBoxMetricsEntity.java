@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.domain.tile;
+package com.dreamscale.gridtime.core.domain.tile.zoomable;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import lombok.*;
@@ -10,13 +10,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "zoomable_team_idea_flow_metrics_v")
+@Entity(name = "zoomable_team_box_metrics_v")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ZoomableTeamIdeaFlowMetricsEntity {
+public class ZoomableTeamBoxMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -38,9 +38,10 @@ public class ZoomableTeamIdeaFlowMetricsEntity {
 
     private LocalDateTime clockTime;
 
-    private Long timeInTile;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID boxFeatureId;
 
-    private Double avgFlame;
+    private Long timeInBox;
 
     private Double percentWtf;
 
@@ -49,5 +50,13 @@ public class ZoomableTeamIdeaFlowMetricsEntity {
     private Double percentProgress;
 
     private Double percentPairing;
+
+    private Double avgFlame;
+
+    private Double avgFileBatchSize;
+
+    private Double avgTraversalSpeed;
+
+    private Double avgExecutionTime;
 
 }

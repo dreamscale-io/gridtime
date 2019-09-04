@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input;
 
-import com.dreamscale.gridtime.core.domain.tile.ZoomableIdeaFlowMetricsEntity;
-import com.dreamscale.gridtime.core.domain.tile.ZoomableIdeaFlowMetricsRepository;
+import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
@@ -33,13 +33,11 @@ public class InputIdeaFlowMetrics implements InputStrategy<ZoomableIdeaFlowMetri
 
         Long zoomInSequenceEnd = zoomInSequenceStart + baseZoom.getInnerBeats() - 1;
 
-        List<ZoomableIdeaFlowMetricsEntity> selectedMetrics = zoomableIdeaFlowMetricsRepository.findByTorchieZoomRange(
+        return zoomableIdeaFlowMetricsRepository.findByTorchieZoomRange(
                 torchieId,
                 zoomInOneLevel.name(),
                 zoomInSequenceStart,
                 zoomInSequenceEnd);
-
-        return selectedMetrics;
     }
 
 }

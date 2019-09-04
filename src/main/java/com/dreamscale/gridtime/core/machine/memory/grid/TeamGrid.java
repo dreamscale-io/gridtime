@@ -4,17 +4,17 @@ import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridRe
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTeamTrack;
+import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 public class TeamGrid implements IMusicGrid {
@@ -66,6 +66,16 @@ public class TeamGrid implements IMusicGrid {
         } else {
             return Duration.ZERO;
         }
+    }
+
+    @Override
+    public GridMetrics getGridMetrics(FeatureReference featureReference) {
+        return null;
+    }
+
+    @Override
+    public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
+        return null;
     }
 
 

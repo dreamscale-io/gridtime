@@ -10,6 +10,7 @@ import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class FeatureLandscapeMetrics {
 
@@ -44,6 +45,11 @@ public class FeatureLandscapeMetrics {
         return layer;
     }
 
+    public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
+        LandscapeLayer landscapeLayer = findOrCreateLandscapeLayer(featureType);
+
+        return landscapeLayer.getFeatures();
+    }
 
 
     private class LandscapeLayer {
@@ -56,6 +62,10 @@ public class FeatureLandscapeMetrics {
 
         public FeatureType getFeatureType() {
             return featureType;
+        }
+
+        public Set<FeatureReference> getFeatures() {
+            return metricsPerFeature.keySet();
         }
 
         public GridMetrics getMetricsFor(FeatureReference featureReference) {

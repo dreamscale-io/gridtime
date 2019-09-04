@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.domain.tile;
+package com.dreamscale.gridtime.core.domain.tile.zoomable;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import lombok.*;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ZoomableIdeaFlowMetricsEntity {
+public class ZoomableBoxMetricsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -34,9 +34,10 @@ public class ZoomableIdeaFlowMetricsEntity {
 
     private LocalDateTime clockTime;
 
-    private Long timeInTile;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID boxFeatureId;
 
-    private Double avgFlame;
+    private Long timeInBox;
 
     private Double percentWtf;
 
@@ -45,5 +46,13 @@ public class ZoomableIdeaFlowMetricsEntity {
     private Double percentProgress;
 
     private Double percentPairing;
+
+    private Double avgFlame;
+
+    private Double avgFileBatchSize;
+
+    private Double avgTraversalSpeed;
+
+    private Double avgExecutionTime;
 
 }
