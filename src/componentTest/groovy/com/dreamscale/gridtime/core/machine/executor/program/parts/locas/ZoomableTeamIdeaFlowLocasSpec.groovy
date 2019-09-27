@@ -99,7 +99,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         wtfTime = clockStart.plusMinutes(1)
 
-        Metronome.Tick tick = metronome.tick();
+        Metronome.TickScope tick = metronome.tick();
 
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
@@ -150,6 +150,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         then:
         MusicGridResults results = (MusicGridResults) teamInstruction.getOutputResult()
+        println results
         assert results != null
         assert results.getCell("@zoom/wtf", "Calc[Avg]") == "0.68"
 

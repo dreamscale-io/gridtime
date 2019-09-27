@@ -27,7 +27,7 @@ public class FlowSink implements Flow {
     }
 
     @Override
-    public void tick(Metronome.Tick coordinates) throws InterruptedException {
+    public void tick(Metronome.TickScope coordinates) throws InterruptedException {
 
         for (SinkStrategy sink : sinkStrategies) {
             sink.save(memberId, torchieState);

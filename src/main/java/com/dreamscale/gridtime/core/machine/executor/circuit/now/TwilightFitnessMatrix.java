@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMe
 
 import java.util.List;
 
-public class FitnessMatrix {
+public class TwilightFitnessMatrix {
     public void push(IdeaFlowMetrics ideaFlowTile) {
         //TODO build a signals model for monitoring
 

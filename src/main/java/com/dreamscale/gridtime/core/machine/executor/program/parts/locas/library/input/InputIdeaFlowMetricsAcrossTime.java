@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputIdeaFlowMetrics implements InputStrategy<ZoomableIdeaFlowMetricsEntity> {
+public class InputIdeaFlowMetricsAcrossTime implements InputStrategy<ZoomableIdeaFlowMetricsEntity> {
 
     @Autowired
     ZoomableIdeaFlowMetricsRepository zoomableIdeaFlowMetricsRepository;
@@ -22,14 +22,14 @@ public class InputIdeaFlowMetrics implements InputStrategy<ZoomableIdeaFlowMetri
 
 
     @Override
-    public List<ZoomableIdeaFlowMetricsEntity> breatheIn(UUID torchieId, Metronome.Tick zoomedOutTick) {
+    public List<ZoomableIdeaFlowMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope zoomedOutTickScope) {
 
         //suck in child tiles, within the range of this one
 
-        ZoomLevel baseZoom = zoomedOutTick.getZoomLevel();
-        ZoomLevel zoomInOneLevel = zoomedOutTick.getZoomLevel().zoomIn();
+        ZoomLevel baseZoom = zoomedOutTickScope.getZoomLevel();
+        ZoomLevel zoomInOneLevel = zoomedOutTickScope.getZoomLevel().zoomIn();
 
-        Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, zoomedOutTick.getFrom().getClockTime());
+        Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, zoomedOutTickScope.getFrom().getClockTime());
 
         Long zoomInSequenceEnd = zoomInSequenceStart + baseZoom.getInnerBeats() - 1;
 

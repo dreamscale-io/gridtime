@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 public class InputStrategyFactory {
 
     @Autowired
-    InputIdeaFlowMetrics inputIdeaFlow;
+    InputIdeaFlowMetricsAcrossTime inputIdeaFlow;
 
     @Autowired
     InputIdeaFlowMetricsAcrossTeam inputIdeaFlowMetricsAcrossTeam;
+
+    @Autowired
+    InputBoxMetricsAcrossTime inputBoxMetricsAcrossTime;
 
     public <T> InputStrategy<T> get(InputType inputType) {
         switch (inputType) {
@@ -18,6 +21,8 @@ public class InputStrategyFactory {
                 return (InputStrategy<T>) inputIdeaFlow;
             case QUERY_TEAM_IDEA_FLOW_METRICS:
                 return (InputStrategy<T>) inputIdeaFlowMetricsAcrossTeam;
+            case QUERY_BOX_METRICS:
+                return (InputStrategy<T>) inputBoxMetricsAcrossTime;
         }
         return null;
     }
@@ -25,6 +30,7 @@ public class InputStrategyFactory {
     public enum InputType {
         QUERY_IDEA_FLOW_METRICS,
         QUERY_TEAM_IDEA_FLOW_METRICS,
+        QUERY_BOX_METRICS,
 
     }
 }

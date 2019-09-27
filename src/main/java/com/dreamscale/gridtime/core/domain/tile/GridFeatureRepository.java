@@ -6,5 +6,7 @@ import java.util.UUID;
 
 public interface GridFeatureRepository extends CrudRepository<GridFeatureEntity, UUID> {
 
-    GridFeatureEntity findByTeamIdAndAndSearchKey(UUID teamId, String searchKey);
+    GridFeatureEntity findByTeamIdAndSearchKey(UUID teamId, String searchKey);
+
+    GridFeatureEntity findByTeamIdAndId(UUID teamId, UUID featureId);
 }

@@ -7,12 +7,12 @@ import java.util.UUID;
 
 public class TorchieWorkerPool implements WorkerPool {
 
-    private final WhatsNextWheel whatsNextWheel;
+    private final WhatsNextWheel<TileInstructions> whatsNextWheel;
 
     private TileInstructions peekInstruction;
 
     public TorchieWorkerPool() {
-        this.whatsNextWheel = new WhatsNextWheel();
+        this.whatsNextWheel = new WhatsNextWheel<TileInstructions>();
     }
 
     @Override

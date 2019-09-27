@@ -14,28 +14,28 @@ import java.util.List;
 public class GenerateAggregateTile extends TileInstructions {
 
     private final TorchieState torchieState;
-    private final Metronome.Tick tick;
+    private final Metronome.TickScope tickScope;
     private final List<Locas> aggregatorChain;
 
-    public GenerateAggregateTile(TorchieState torchieState, List<Locas> aggregatorChain, Metronome.Tick tick) {
+    public GenerateAggregateTile(TorchieState torchieState, List<Locas> aggregatorChain, Metronome.TickScope tickScope) {
         this.torchieState = torchieState;
         this.aggregatorChain = aggregatorChain;
-        this.tick = tick;
+        this.tickScope = tickScope;
     }
 
     @Override
     protected void executeInstruction() throws InterruptedException {
 
         for (Locas aggregator : aggregatorChain) {
-            IMusicGrid output = aggregator.runProgram(tick);
+            IMusicGrid output = aggregator.runProgram(tickScope);
             appendOutputResults(output.playAllTracks());
         }
 
-        publishEvent(new TileStreamEvent(torchieState.getTeamId(), torchieState.getTorchieId(), tick.getFrom(), WorkToDoType.AggregateToTeam));
+        publishEvent(new TileStreamEvent(torchieState.getTeamId(), torchieState.getTorchieId(), tickScope.getFrom(), WorkToDoType.AggregateToTeam));
     }
 
     @Override
     public String getCmdDescription() {
-        return "generate aggregate tile for "+tick.getZoomLevel() + " anchored at "+ tick.toDisplayString() ;
+        return "generate aggregate tile for "+ tickScope.getZoomLevel() + " anchored at "+ tickScope.toDisplayString() ;
     }
 }

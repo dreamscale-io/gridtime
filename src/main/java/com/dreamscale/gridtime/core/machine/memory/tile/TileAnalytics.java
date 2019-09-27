@@ -2,7 +2,6 @@ package com.dreamscale.gridtime.core.machine.memory.tile;
 
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;

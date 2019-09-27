@@ -58,7 +58,7 @@ class TorchieSpec extends Specification {
 
         when:
         for (int i = 0; i < 15; i++) {
-            TileInstructions instructions = torchie.whatsNext();
+            TileInstructions instructions = torchie.pullNext();
             instructions.call()
 
             allInstructions.add(instructions);

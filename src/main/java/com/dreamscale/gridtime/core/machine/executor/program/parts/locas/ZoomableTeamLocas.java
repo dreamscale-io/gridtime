@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
-import com.dreamscale.gridtime.core.machine.memory.grid.TeamGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.TeamMetricGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public abstract class ZoomableTeamLocas<T> implements Locas {
     private final UUID teamId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
-    private TeamGrid teamGrid;
+    private TeamMetricGrid teamMetricGrid;
 
     public ZoomableTeamLocas(UUID teamId,
                              InputStrategy<T> input,
@@ -29,31 +29,31 @@ public abstract class ZoomableTeamLocas<T> implements Locas {
     }
 
     @Override
-    public IMusicGrid runProgram(Metronome.Tick tick) {
-        List<T> metricInputs = input.breatheIn(teamId, tick);
+    public IMusicGrid runProgram(Metronome.TickScope tickScope) {
+        List<T> metricInputs = input.breatheIn(teamId, teamId, tickScope);
 
-        log.debug("Found "+metricInputs.size() + " metrics at tick: "+tick.toDisplayString());
+        log.debug("Found "+metricInputs.size() + " metrics at tick: "+ tickScope.toDisplayString());
 
-        this.teamGrid = createTeamGrid(tick.getFrom());
+        this.teamMetricGrid = createTeamGrid(tickScope.getFrom());
 
-        fillTeamGrid(teamGrid, metricInputs);
-        teamGrid.finish();
+        fillTeamGrid(teamMetricGrid, metricInputs);
+        teamMetricGrid.finish();
 
-        output.breatheOut(teamId, tick, teamGrid);
+        output.breatheOut(teamId, tickScope, teamMetricGrid);
 
-        return teamGrid;
+        return teamMetricGrid;
     }
 
     @Override
     public MusicGridResults playAllTracks() {
-        return teamGrid.playAllTracks();
+        return teamMetricGrid.playAllTracks();
     }
 
-    protected abstract void fillTeamGrid(TeamGrid teamGrid, List<T> metricInputs);
+    protected abstract void fillTeamGrid(TeamMetricGrid teamMetricGrid, List<T> metricInputs);
 
-    private TeamGrid createTeamGrid(GeometryClock.GridTime gridTime) {
+    private TeamMetricGrid createTeamGrid(GeometryClock.GridTime gridTime) {
 
-        return new TeamGrid(gridTime);
+        return new TeamMetricGrid(gridTime);
     }
 
 }

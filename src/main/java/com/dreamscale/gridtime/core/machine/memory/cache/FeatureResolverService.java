@@ -2,6 +2,8 @@ package com.dreamscale.gridtime.core.machine.memory.cache;
 
 import com.dreamscale.gridtime.core.domain.tile.GridFeatureEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridFeatureRepository;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.Box;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import com.dreamscale.gridtime.core.machine.memory.type.TypeRegistry;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
@@ -16,27 +18,44 @@ import java.util.UUID;
 @Component
 public class FeatureResolverService {
 
+
     @Autowired
     TeamService teamService;
 
     @Autowired
     GridFeatureRepository gridFeatureRepository;
 
-    private TypeRegistry typeRegistry;
+    private final TypeRegistry typeRegistry;
+    private final FeatureReferenceFactory featureFactory;
 
     FeatureResolverService() {
         typeRegistry = new TypeRegistry();
+        featureFactory = new FeatureReferenceFactory();
     }
 
     private boolean isSameBox(String boxNameA, String boxNameB) {
         return boxNameA != null && boxNameA.equals(boxNameB);
     }
 
+    public PlaceReference lookupBox(UUID teamId, UUID boxFeatureId) {
+
+        GridFeatureEntity boxFeatureEntity = gridFeatureRepository.findByTeamIdAndId(teamId, boxFeatureId);
+
+        if (boxFeatureEntity != null) {
+            FeatureType featureType = lookupFeatureType(boxFeatureEntity.getTypeUri());
+
+            Box box = (Box) deserialize(boxFeatureEntity.getJson(), featureType.getSerializationClass());
+
+            return featureFactory.createResolvedBoxReference(boxFeatureId, box);
+        }
+
+        return null;
+    }
 
     public void resolve(UUID teamId, FeatureReference originalReference) {
 
         if (!originalReference.isResolved()) {
-            GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndAndSearchKey(teamId, originalReference.getSearchKey());
+            GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndSearchKey(teamId, originalReference.getSearchKey());
 
             if (gridFeatureEntity != null) {
                 FeatureType featureType = lookupFeatureType(gridFeatureEntity.getTypeUri());

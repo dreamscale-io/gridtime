@@ -64,11 +64,6 @@ public enum PlaceType implements FeatureType {
     }
 
     @Override
-    public FeatureType resolveType(String searchKeyUri) {
-        return null;
-    }
-
-    @Override
     public String toDisplayString() {
         return typeUri;
     }

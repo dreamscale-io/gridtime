@@ -36,6 +36,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
     TorchieFactory torchieFactory
 
     UUID torchieId
+    UUID teamId
 
     LocalDateTime clockStart
     LocalDateTime time1
@@ -52,8 +53,9 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
     def setup() {
 
         torchieId = UUID.randomUUID()
+        teamId = UUID.randomUUID()
 
-        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(torchieId);
+        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(teamId, torchieId);
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)
@@ -65,7 +67,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
         time3 = clockStart.plusMinutes(60)
         time4 = clockStart.plusMinutes(95)
 
-        Metronome.Tick tick = metronome.tick();
+        Metronome.TickScope tick = metronome.tick();
 
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
@@ -82,12 +84,12 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
         feed.addSomeData(generateWTFEnd(time4))
 
         for (int i = 0; i < 12; i++) {
-            torchie.whatsNext().call()
+            torchie.pullNext().call()
             println torchie.playAllTracks();
         }
 
-        Metronome.Tick tick = torchie.getActiveTick();
-        Metronome.Tick aggregateTick = tick.aggregateTicks.get(0);
+        Metronome.TickScope tick = torchie.getActiveTick();
+        Metronome.TickScope aggregateTick = tick.getAggregateTickScopes().get(0);
 
         when:
         ideaflowAggregatorLocas.runProgram(aggregateTick)

@@ -4,6 +4,6 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 
 public interface Flow {
 
-    void tick(Metronome.Tick coordinates) throws InterruptedException;
+    void tick(Metronome.TickScope coordinates) throws InterruptedException;
 
 }

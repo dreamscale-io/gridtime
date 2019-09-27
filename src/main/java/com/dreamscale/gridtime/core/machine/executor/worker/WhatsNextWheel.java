@@ -7,13 +7,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
-public class WhatsNextWheel {
+public class WhatsNextWheel<T> {
 
-    private Map<UUID, Worker> workerMap = DefaultCollections.map();
+    private Map<UUID, Worker<T>> workerMap = DefaultCollections.map();
 
     private final LinkedList<UUID> nextWorkerQueue = new LinkedList<>();
 
-    public TileInstructions whatsNext() {
+    public T whatsNext() {
         int i = 0;
 
         while (i < nextWorkerQueue.size()) {
@@ -21,7 +21,7 @@ public class WhatsNextWheel {
             if (isWorkerReady(workerId)) {
                 nextWorkerQueue.remove(i);
                 nextWorkerQueue.add(workerId);
-                return workerMap.get(workerId).whatsNext();
+                return workerMap.get(workerId).pullNext();
             }
         }
 
@@ -41,7 +41,7 @@ public class WhatsNextWheel {
         return workerMap.get(workerId).isWorkerReady();
     }
 
-    public void addWorker(UUID workerId, Worker worker) {
+    public void addWorker(UUID workerId, Worker<T> worker) {
         nextWorkerQueue.add(workerId);
         workerMap.put(workerId, worker);
     }

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class GridBoxMetricsEntity {
 
     @Id
@@ -27,7 +28,7 @@ public class GridBoxMetricsEntity {
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 
-    private Long tileSequence;
+    private Long tileSeq;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID boxFeatureId;

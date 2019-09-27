@@ -2,19 +2,22 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.librar
 
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntity;
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsRepository;
-import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsEntity;
-import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.Box;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
+import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputBoxMetrics implements InputStrategy<ZoomableBoxMetricsEntity> {
+public class InputBoxMetricsAcrossTime implements InputStrategy<ZoomableBoxMetricsEntity> {
 
     @Autowired
     ZoomableBoxMetricsRepository zoomableBoxMetricsRepository;
@@ -22,16 +25,20 @@ public class InputBoxMetrics implements InputStrategy<ZoomableBoxMetricsEntity> 
     @Autowired
     CalendarService calendarService;
 
+    @Autowired
+    FeatureResolverService featureResolverService;
+
 
     @Override
-    public List<ZoomableBoxMetricsEntity> breatheIn(UUID torchieId, Metronome.Tick zoomedOutTick) {
+    public List<ZoomableBoxMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope) {
 
         //suck in child tiles, within the range of this one
+        //so this is going to give me all box metrics, with
 
-        ZoomLevel baseZoom = zoomedOutTick.getZoomLevel();
-        ZoomLevel zoomInOneLevel = zoomedOutTick.getZoomLevel().zoomIn();
+        ZoomLevel baseZoom = tickScope.getZoomLevel();
+        ZoomLevel zoomInOneLevel = tickScope.getZoomLevel().zoomIn();
 
-        Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, zoomedOutTick.getFrom().getClockTime());
+        Long zoomInSequenceStart = calendarService.lookupTileSequenceFromSameTime(zoomInOneLevel, tickScope.getFrom().getClockTime());
 
         Long zoomInSequenceEnd = zoomInSequenceStart + baseZoom.getInnerBeats() - 1;
 
@@ -41,5 +48,6 @@ public class InputBoxMetrics implements InputStrategy<ZoomableBoxMetricsEntity> 
                 zoomInSequenceStart,
                 zoomInSequenceEnd);
     }
+
 
 }

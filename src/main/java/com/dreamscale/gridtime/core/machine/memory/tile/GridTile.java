@@ -9,6 +9,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
+import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
@@ -229,5 +230,9 @@ public class GridTile {
 
     public MusicGridResults playTrack(TrackSetKey trackToPlay) {
         return musicGrid.playTrack(trackToPlay);
+    }
+
+    public IMusicGrid getMusicGrid() {
+        return musicGrid;
     }
 }

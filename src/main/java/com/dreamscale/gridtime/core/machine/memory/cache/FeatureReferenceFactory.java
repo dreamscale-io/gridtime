@@ -38,6 +38,10 @@ public class FeatureReferenceFactory {
         return new PlaceReference(PlaceType.LOCATION, location.toSearchKey(), location);
     }
 
+    public PlaceReference createResolvedBoxReference(UUID featureId, Box boxDetails) {
+        return new PlaceReference(featureId, PlaceType.BOX, boxDetails);
+    }
+
     public PlaceReference createBoxReference(UUID projectId, String boxName) {
         Box box = new Box(projectId, boxName);
 
@@ -104,7 +108,6 @@ public class FeatureReferenceFactory {
 
        return new AuthorsReference(authorsType, authorsDetails.toSearchKey(), authorsDetails);
     }
-
 
 
 }

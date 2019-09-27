@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface InputStrategy<T> {
 
-    List<T> breatheIn(UUID torchieId, Metronome.Tick tick);
+    List<T> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope);
 }

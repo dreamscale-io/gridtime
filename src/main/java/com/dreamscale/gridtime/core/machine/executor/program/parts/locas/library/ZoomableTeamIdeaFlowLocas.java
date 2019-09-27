@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMet
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTeamLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
-import com.dreamscale.gridtime.core.machine.memory.grid.TeamGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.TeamMetricGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,21 +24,21 @@ public class ZoomableTeamIdeaFlowLocas extends ZoomableTeamLocas<ZoomableTeamIde
     }
 
     @Override
-    protected void fillTeamGrid(TeamGrid teamGrid, List<ZoomableTeamIdeaFlowMetricsEntity> ideaflowInputs) {
+    protected void fillTeamGrid(TeamMetricGrid teamMetricGrid, List<ZoomableTeamIdeaFlowMetricsEntity> ideaflowInputs) {
 
         for (ZoomableTeamIdeaFlowMetricsEntity ideaflow : ideaflowInputs) {
 
             Duration durationWeight = Duration.ofSeconds(ideaflow.getTimeInTile());
 
-            teamGrid.addColumn(ideaflow.getTorchieId(), toInitials(ideaflow.getMemberName()));
+            teamMetricGrid.addColumn(ideaflow.getTorchieId(), toInitials(ideaflow.getMemberName()));
 
-            teamGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_WTF, durationWeight, ideaflow.getPercentWtf());
-            teamGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_LEARNING, durationWeight, ideaflow.getPercentLearning());
-            teamGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_PROGRESS, durationWeight, ideaflow.getPercentProgress());
-            teamGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_PAIRING, durationWeight, ideaflow.getPercentProgress());
-            teamGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_AVG_FLAME, durationWeight, ideaflow.getAvgFlame());
+            teamMetricGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_WTF, durationWeight, ideaflow.getPercentWtf());
+            teamMetricGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_LEARNING, durationWeight, ideaflow.getPercentLearning());
+            teamMetricGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_PROGRESS, durationWeight, ideaflow.getPercentProgress());
+            teamMetricGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_PERCENT_PAIRING, durationWeight, ideaflow.getPercentProgress());
+            teamMetricGrid.addWeightedMetric(ideaflow.getTorchieId(), MetricRowKey.ZOOM_AVG_FLAME, durationWeight, ideaflow.getAvgFlame());
 
-            teamGrid.addTimeForColumn(ideaflow.getTorchieId(), durationWeight);
+            teamMetricGrid.addTimeForColumn(ideaflow.getTorchieId(), durationWeight);
 
         }
 

@@ -17,7 +17,7 @@ public class Metronome {
     private GeometryClock.GridTime fromGridTime;
     private GeometryClock.GridTime toGridTime;
 
-    private Tick activeTick;
+    private TickScope activeTickScope;
     private boolean hasTicked;
 
     public Metronome(LocalDateTime startPosition) {
@@ -27,22 +27,21 @@ public class Metronome {
         this.fromGridTime = clock.getActiveGridTime();
         this.toGridTime = clock.next();
 
-        activeTick = createTick(fromGridTime, toGridTime);
+        activeTickScope = createTick(fromGridTime, toGridTime);
 
         this.hasTicked = false;
     }
 
 
-
-    public Tick getActiveTick() {
-        return activeTick;
+    public TickScope getActiveTick() {
+        return activeTickScope;
     }
 
     public GeometryClock.GridTime getActivePosition() {
         return fromGridTime;
     }
 
-    public Tick tick() {
+    public TickScope tick() {
 
         if (hasTicked) {
             GeometryClock.GridTime nextCoordinates = clock.next();
@@ -50,83 +49,93 @@ public class Metronome {
             this.fromGridTime = this.toGridTime;
             this.toGridTime = nextCoordinates;
 
-            this.activeTick = createTick(fromGridTime, toGridTime);
+            this.activeTickScope = createTick(fromGridTime, toGridTime);
         }
         hasTicked = true;
 
-        return activeTick;
+        return activeTickScope;
     }
-
 
     public String getActiveTickPosition() {
         return getActivePosition().toDisplayString();
     }
 
-    public static Tick createTick(ZoomLevel zoomLevel, LocalDateTime fromTime, LocalDateTime toTime) {
-        return new Tick(
+    public static TickScope createTick(ZoomLevel zoomLevel, LocalDateTime fromTime, LocalDateTime toTime) {
+        return new TickScope(
                 GeometryClock.createGridTime(zoomLevel, fromTime),
                 GeometryClock.createGridTime(zoomLevel, toTime));
     }
 
-    public static Tick createTick(GeometryClock.GridTime fromGridTime) {
+    public static TickScope createTick(GeometryClock.GridTime fromGridTime) {
         return createTick(fromGridTime, fromGridTime.panRight());
     }
 
-    public static Tick createTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
+    public static TickScope createTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
 
-        Tick tick = new Tick(fromGridTime, toGridTime);
+        TickScope tickScope = new TickScope(fromGridTime, toGridTime);
 
         if (!Objects.equals(fromGridTime.getDayPart(), toGridTime.getDayPart())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY_PART, toGridTime));
+            tickScope.addAggregateTick(getAggregateTick(ZoomLevel.DAY_PART, toGridTime));
         }
 
         if (!Objects.equals(fromGridTime.getDay(), toGridTime.getDay())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.DAY, toGridTime));
+            tickScope.addAggregateTick(getAggregateTick(ZoomLevel.DAY, toGridTime));
         }
 
         if (!Objects.equals(fromGridTime.getBlockWeek(), toGridTime.getBlockWeek())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.WEEK, toGridTime));
+            tickScope.addAggregateTick(getAggregateTick(ZoomLevel.WEEK, toGridTime));
         }
 
         if (!Objects.equals(fromGridTime.getBlock(), toGridTime.getBlock())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.BLOCK, toGridTime));
+            tickScope.addAggregateTick(getAggregateTick(ZoomLevel.BLOCK, toGridTime));
         }
         if (!Objects.equals(fromGridTime.getYear(), toGridTime.getYear())) {
-            tick.addAggregateTick(getAggregateTick(ZoomLevel.YEAR, toGridTime));
+            tickScope.addAggregateTick(getAggregateTick(ZoomLevel.YEAR, toGridTime));
         }
-        return tick;
+        return tickScope;
     }
 
-    private static Tick getAggregateTick(ZoomLevel zoomLevel, GeometryClock.GridTime toGridTime) {
+    private static TickScope getAggregateTick(ZoomLevel zoomLevel, GeometryClock.GridTime toGridTime) {
         GeometryClock.GridTime toZoomedOutCoords = toGridTime.toZoomLevel(zoomLevel);
         GeometryClock.GridTime fromZoomedOutCoords = toZoomedOutCoords.panLeft();
-        return new Tick(fromZoomedOutCoords, toZoomedOutCoords);
+        return new TickScope(fromZoomedOutCoords, toZoomedOutCoords);
+    }
+
+    public void sync(TickScope lastTickScope) {
+        if (lastTickScope != null && activeTickScope != lastTickScope) {
+            clock.sync(lastTickScope.from);
+
+            fromGridTime = lastTickScope.from;
+            toGridTime = lastTickScope.to;
+
+            activeTickScope = lastTickScope;
+        }
     }
 
     @Getter
-    public static class Tick {
+    public static class TickScope {
         private final ZoomLevel zoomLevel;
         GeometryClock.GridTime from;
         GeometryClock.GridTime to;
 
-        List<Tick> aggregateTicks;
+        List<TickScope> aggregateTickScopes;
 
-        Tick(GeometryClock.GridTime from, GeometryClock.GridTime to) {
+        TickScope(GeometryClock.GridTime from, GeometryClock.GridTime to) {
             this.zoomLevel = from.getZoomLevel();
             this.from = from;
             this.to = to;
         }
 
-        void addAggregateTick(Tick aggregateTick) {
-            if (aggregateTicks == null) {
-                aggregateTicks = new ArrayList<>();
+        void addAggregateTick(TickScope aggregateTickScope) {
+            if (aggregateTickScopes == null) {
+                aggregateTickScopes = new ArrayList<>();
             }
 
-            aggregateTicks.add(aggregateTick);
+            aggregateTickScopes.add(aggregateTickScope);
         }
 
         public boolean hasAggregateTicks() {
-            return aggregateTicks != null && aggregateTicks.size() > 0;
+            return aggregateTickScopes != null && aggregateTickScopes.size() > 0;
         }
 
         public boolean isAfter(LocalDateTime endTime) {

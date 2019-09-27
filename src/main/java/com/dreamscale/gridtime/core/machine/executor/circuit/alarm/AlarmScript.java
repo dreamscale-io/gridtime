@@ -37,7 +37,7 @@ public class AlarmScript implements ParallelProgram {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick) {
+    public List<TileInstructions> getInstructionsAtTick(Metronome.TickScope tickScope) {
         return null;
     }
 

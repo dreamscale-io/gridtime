@@ -28,7 +28,7 @@ public class CircuitMonitor {
     private int instructionsProcessed;
     private int ticksProcessed;
 
-    private Metronome.Tick activeTickPosition;
+    private Metronome.TickScope activeTickScopePosition;
     private int queueDepth;
 
     private State state;
@@ -60,8 +60,8 @@ public class CircuitMonitor {
         updateStatusTimestamp();
     }
 
-    public void updateTickPosition(Metronome.Tick activeTickPosition) {
-        this.activeTickPosition = activeTickPosition;
+    public void updateTickPosition(Metronome.TickScope activeTickScopePosition) {
+        this.activeTickScopePosition = activeTickScopePosition;
 
         ticksProcessed++;
     }

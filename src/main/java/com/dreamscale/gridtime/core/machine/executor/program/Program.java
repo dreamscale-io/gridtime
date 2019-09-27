@@ -9,7 +9,7 @@ public interface Program {
 
     void tick();
 
-    Metronome.Tick getActiveTick();
+    Metronome.TickScope getActiveTick();
 
     List<TileInstructions> getInstructionsAtActiveTick();
 

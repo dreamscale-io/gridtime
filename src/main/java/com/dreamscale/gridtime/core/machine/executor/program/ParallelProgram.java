@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ParallelProgram {
 
-    List<TileInstructions> getInstructionsAtTick(Metronome.Tick tick);
+    List<TileInstructions> getInstructionsAtTick(Metronome.TickScope tickScope);
 
     boolean isDone();
 

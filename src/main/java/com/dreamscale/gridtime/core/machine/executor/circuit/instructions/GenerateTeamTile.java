@@ -10,19 +10,19 @@ import java.util.List;
 @Slf4j
 public class GenerateTeamTile extends TileInstructions {
 
-    private final Metronome.Tick tick;
+    private final Metronome.TickScope tickScope;
     private final List<Locas> aggregatorChain;
 
-    public GenerateTeamTile(List<Locas> aggregatorChain, Metronome.Tick tick) {
+    public GenerateTeamTile(List<Locas> aggregatorChain, Metronome.TickScope tickScope) {
         this.aggregatorChain = aggregatorChain;
-        this.tick = tick;
+        this.tickScope = tickScope;
     }
 
     @Override
     protected void executeInstruction() throws InterruptedException {
 
         for (Locas aggregator : aggregatorChain) {
-            IMusicGrid output = aggregator.runProgram(tick);
+            IMusicGrid output = aggregator.runProgram(tickScope);
             appendOutputResults(output.playAllTracks());
         }
 
@@ -30,6 +30,6 @@ public class GenerateTeamTile extends TileInstructions {
 
     @Override
     public String getCmdDescription() {
-        return "generate team aggregate tile for "+tick.getZoomLevel() + " anchored at "+ tick.toDisplayString() ;
+        return "generate team aggregate tile for "+ tickScope.getZoomLevel() + " anchored at "+ tickScope.toDisplayString() ;
     }
 }

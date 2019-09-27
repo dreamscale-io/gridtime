@@ -74,8 +74,8 @@ public class SaveToPostgresSink implements SinkStrategy {
 
 
         IdeaFlowMetrics ideaFlowMetrics = gridTile.getIdeaFlowMetrics();
-        log.debug("wtf percent: "+ideaFlowMetrics.getPercentWtf());
-        log.debug("ideaflowMetrics: "+ideaFlowMetrics);
+        log.debug("wtf percent: "+ ideaFlowMetrics.getPercentWtf());
+        log.debug("ideaflowMetrics: "+ ideaFlowMetrics);
 
         GridIdeaFlowMetricsEntity gridIdeaFlowMetricsEntity = createGridIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
 
@@ -90,9 +90,24 @@ public class SaveToPostgresSink implements SinkStrategy {
 
             GridBoxMetricsEntity gridBoxMetricsEntity = createGridBoxMetricsEntity(torchieId, tileSeq, boxMetrics);
             boxMetricsEntityList.add(gridBoxMetricsEntity);
+            log.debug("box: "+gridBoxMetricsEntity);
         }
 
+        log.debug("Saving BoxMetrics, count: "+boxMetricsEntityList.size());
         gridBoxMetricsRepository.save(boxMetricsEntityList);
+
+        //box metrics, each tile can have multiple boxes... max of all boxes per tile
+
+        //then when I aggregate, need to do it by box...
+        //so I've got a DayPart tile, get all the boxes across all the 12 subtiles, and group by box
+
+        //so each row is a box reference
+
+        //@box/K
+        //@box/F
+
+        //then my columns are the metrics?  So, wtf percent, tile,
+
 
         //TILE DICTIONARY...
 
@@ -122,7 +137,7 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         boxMetricsEntity.setId(UUID.randomUUID());
         boxMetricsEntity.setTorchieId(torchieId);
-        boxMetricsEntity.setTileSequence(tileSeq);
+        boxMetricsEntity.setTileSeq(tileSeq);
         boxMetricsEntity.setZoomLevel(boxMetrics.getZoomLevel());
 
         boxMetricsEntity.setBoxFeatureId(boxMetrics.getBox().getFeatureId());

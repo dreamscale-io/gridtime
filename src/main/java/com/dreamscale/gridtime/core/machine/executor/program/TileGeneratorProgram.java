@@ -48,20 +48,20 @@ public class TileGeneratorProgram implements Program {
 
     }
 
-    public Metronome.Tick getActiveTick() {
+    public Metronome.TickScope getActiveTick() {
         return metronome.getActiveTick();
     }
 
 
     @Override
     public List<TileInstructions> getInstructionsAtActiveTick() {
-        Metronome.Tick tick = metronome.getActiveTick();
+        Metronome.TickScope tick = metronome.getActiveTick();
         List<TileInstructions> instructions = new ArrayList<>();
 
         instructions.add(generateBaseTickInstructions(tick));
 
         if (tick.hasAggregateTicks()) {
-            for (Metronome.Tick aggregateTick : tick.getAggregateTicks()) {
+            for (Metronome.TickScope aggregateTick : tick.getAggregateTickScopes()) {
                 instructions.add(generateAggregateTickInstructions(aggregateTick));
             }
         }
@@ -92,11 +92,11 @@ public class TileGeneratorProgram implements Program {
     }
 
 
-    private TileInstructions generateBaseTickInstructions(Metronome.Tick tick) {
+    private TileInstructions generateBaseTickInstructions(Metronome.TickScope tick) {
         return new GenerateBaseTile(torchieState, pullChain, tick);
     }
 
-    private TileInstructions generateAggregateTickInstructions(Metronome.Tick aggregateTick) {
+    private TileInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
 
         return new GenerateAggregateTile(torchieState, aggregatorChain, aggregateTick);
     }

@@ -35,11 +35,11 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
     GridRowRepository gridRowRepository;
 
     @Override
-    public void breatheOut(UUID torchieId, Metronome.Tick tick, IMusicGrid musicGrid) {
+    public void breatheOut(UUID torchieId, Metronome.TickScope tickScope, IMusicGrid musicGrid) {
 
         IdeaFlowMetrics ideaFlowMetrics = IdeaFlowMetrics.queryFrom(musicGrid);
 
-        Long tileSeq = calendarService.lookupTileSequenceNumber(tick.getFrom());
+        Long tileSeq = calendarService.lookupTileSequenceNumber(tickScope.getFrom());
 
         GridIdeaFlowMetricsEntity metricsEntity = createIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
         gridIdeaFlowMetricsRepository.save(metricsEntity);
@@ -47,7 +47,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
         for (GridRow row: musicGrid.getAllGridRows()) {
-            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tick.getZoomLevel(), tileSeq, row);
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tickScope.getZoomLevel(), tileSeq, row);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);
             }

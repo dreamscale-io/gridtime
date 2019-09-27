@@ -39,6 +39,10 @@ public class GeometryClock {
         return new GridTimeSequence(tileSeq, createGridTime(zoomLevel, clockTime));
     }
 
+    public void sync(GridTime gridTime) {
+        activeGridTime = gridTime;
+    }
+
     public GridTime next() {
         activeGridTime = activeGridTime.panRight();
         return activeGridTime;

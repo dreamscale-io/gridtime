@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
-import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
+import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
@@ -17,7 +17,7 @@ public class AggregationWorkerPool implements WorkerPool {
     private static final int DEFAULT_NUMBER_AGGREGATE_WORKERS = 5;
 
     int currentPoolSize;
-    private WhatsNextWheel whatsNextWheel;
+    private WhatsNextWheel<TileInstructions> whatsNextWheel;
 
     public AggregationWorkerPool(ProgramFactory programFactory, Wire workToDoWire) {
         this.programFactory = programFactory;
@@ -27,14 +27,14 @@ public class AggregationWorkerPool implements WorkerPool {
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
 
-    private WhatsNextWheel createWhatsNextWheel(int initialPoolSize) {
+    private WhatsNextWheel<TileInstructions> createWhatsNextWheel(int initialPoolSize) {
 
-        WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
+        WhatsNextWheel whatsNextWheel = new WhatsNextWheel<TileInstructions>();
 
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
-            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId));
+            TwilightCircuit circuit = new TwilightCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId));
 
             whatsNextWheel.addWorker(workerId, circuit);
         }

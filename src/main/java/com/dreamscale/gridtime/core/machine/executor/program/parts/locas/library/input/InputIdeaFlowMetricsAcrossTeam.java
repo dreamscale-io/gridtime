@@ -21,14 +21,14 @@ public class InputIdeaFlowMetricsAcrossTeam implements InputStrategy<ZoomableTea
 
 
     @Override
-    public List<ZoomableTeamIdeaFlowMetricsEntity> breatheIn(UUID teamId, Metronome.Tick tick) {
+    public List<ZoomableTeamIdeaFlowMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope) {
 
-        Long tileSeq = calendarService.lookupTileSequenceFromSameTime(tick.getZoomLevel(), tick.getFrom().getClockTime());
+        Long tileSeq = calendarService.lookupTileSequenceFromSameTime(tickScope.getZoomLevel(), tickScope.getFrom().getClockTime());
 
         //in this case, I need to query all the tiles for the team, that are at this particular grid time
         //there will be several at the same time from different team members
 
-        return zoomableTeamIdeaFlowMetricsRepository.findByTeamIdAndZoomLevelAndTileSeq(teamId, tick.getZoomLevel(), tileSeq);
+        return zoomableTeamIdeaFlowMetricsRepository.findByTeamIdAndZoomLevelAndTileSeq(teamId, tickScope.getZoomLevel(), tileSeq);
 
     }
 

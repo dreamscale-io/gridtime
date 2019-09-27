@@ -2,8 +2,6 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.librar
 
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamBoxMetricsEntity;
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamBoxMetricsRepository;
-import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMetricsEntity;
-import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +21,14 @@ public class InputBoxMetricsAcrossTeam implements InputStrategy<ZoomableTeamBoxM
 
 
     @Override
-    public List<ZoomableTeamBoxMetricsEntity> breatheIn(UUID teamId, Metronome.Tick tick) {
+    public List<ZoomableTeamBoxMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope) {
 
-        Long tileSeq = calendarService.lookupTileSequenceFromSameTime(tick.getZoomLevel(), tick.getFrom().getClockTime());
+        Long tileSeq = calendarService.lookupTileSequenceFromSameTime(tickScope.getZoomLevel(), tickScope.getFrom().getClockTime());
 
         //in this case, I need to query all the tiles for the team, that are at this particular grid time
         //there will be several at the same time from different team members
 
-        return zoomableTeamBoxMetricsRepository.findByTeamIdAndZoomLevelAndTileSeq(teamId, tick.getZoomLevel(), tileSeq);
+        return zoomableTeamBoxMetricsRepository.findByTeamIdAndZoomLevelAndTileSeq(teamId, tickScope.getZoomLevel(), tileSeq);
 
     }
 

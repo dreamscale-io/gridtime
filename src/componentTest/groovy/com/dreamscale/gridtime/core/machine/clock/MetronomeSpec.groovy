@@ -18,19 +18,19 @@ class MetronomeSpec extends Specification {
         Metronome metronome = new Metronome(clockStart)
 
         when:
-        Metronome.Tick tick1 = metronome.tick()
-        Metronome.Tick tick2 = metronome.tick()
-        Metronome.Tick tick3 = metronome.tick()
-        Metronome.Tick tick4 = metronome.tick()
-        Metronome.Tick tick5 = metronome.tick()
-        Metronome.Tick tick6 = metronome.tick()
-        Metronome.Tick tick7 = metronome.tick()
-        Metronome.Tick tick8 = metronome.tick()
-        Metronome.Tick tick9 = metronome.tick()
-        Metronome.Tick tick10 = metronome.tick()
-        Metronome.Tick tick11 = metronome.tick()
-        Metronome.Tick tick12 = metronome.tick()
-        Metronome.Tick tick13 = metronome.tick()
+        Metronome.TickScope tick1 = metronome.tick()
+        Metronome.TickScope tick2 = metronome.tick()
+        Metronome.TickScope tick3 = metronome.tick()
+        Metronome.TickScope tick4 = metronome.tick()
+        Metronome.TickScope tick5 = metronome.tick()
+        Metronome.TickScope tick6 = metronome.tick()
+        Metronome.TickScope tick7 = metronome.tick()
+        Metronome.TickScope tick8 = metronome.tick()
+        Metronome.TickScope tick9 = metronome.tick()
+        Metronome.TickScope tick10 = metronome.tick()
+        Metronome.TickScope tick11 = metronome.tick()
+        Metronome.TickScope tick12 = metronome.tick()
+        Metronome.TickScope tick13 = metronome.tick()
 
         then:
         assert tick1.from.toDisplayString() == "2019-B1-W1-D1_12am+0:00"
@@ -48,8 +48,8 @@ class MetronomeSpec extends Specification {
 
         assert tick13.from.toDisplayString() == "2019-B1-W1-D1_4am+0:00"
 
-        assert tick12.aggregateTicks[0].from.toDisplayString() == "2019-B1-W1-D1_12am"
-        assert tick12.aggregateTicks[0].to.toDisplayString() == "2019-B1-W1-D1_4am"
+        assert tick12.aggregateTickScopes[0].from.toDisplayString() == "2019-B1-W1-D1_12am"
+        assert tick12.aggregateTickScopes[0].to.toDisplayString() == "2019-B1-W1-D1_4am"
     }
 
 }

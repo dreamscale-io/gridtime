@@ -31,10 +31,10 @@ public class FlowSource<T extends Flowable> implements Flow {
         }
     }
 
-    public void tick(Metronome.Tick tick) {
+    public void tick(Metronome.TickScope tickScope) {
 
-        LocalDateTime fromClockPosition = tick.getFrom().getClockTime();
-        LocalDateTime toClockPosition = tick.getTo().getClockTime();
+        LocalDateTime fromClockPosition = tickScope.getFrom().getClockTime();
+        LocalDateTime toClockPosition = tickScope.getTo().getClockTime();
 
         inputFeed.pullMoreIfCapacityAvailable(fromClockPosition);
 

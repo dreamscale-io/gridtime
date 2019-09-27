@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
+import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
@@ -17,13 +17,13 @@ import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
-public class Torchie implements Worker {
+public class Torchie implements Worker<TileInstructions> {
 
     private final UUID torchieId;
 
     private final TorchieState torchieState;
 
-    private IdeaFlowCircuit ideaFlowCircuit;
+    private TwilightCircuit twilightCircuit;
 
     private CircuitMonitor circuitMonitor;
 
@@ -33,7 +33,7 @@ public class Torchie implements Worker {
         this.torchieState = torchieState;
 
         this.circuitMonitor = new CircuitMonitor(torchieId);
-        this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, program);
+        this.twilightCircuit = new TwilightCircuit(circuitMonitor, program);
     }
 
     public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
@@ -57,19 +57,19 @@ public class Torchie implements Worker {
     }
 
     public void scheduleInstruction(TileInstructions instructions) {
-        ideaFlowCircuit.scheduleHighPriorityInstruction(instructions);
+        twilightCircuit.scheduleHighPriorityInstruction(instructions);
     }
 
     public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
-        ideaFlowCircuit.notifyWhenProgramDone(notifyTrigger);
+        twilightCircuit.notifyWhenProgramDone(notifyTrigger);
     }
 
-    public TileInstructions whatsNext() {
-        return ideaFlowCircuit.whatsNext();
+    public TileInstructions pullNext() {
+        return twilightCircuit.pullNext();
     }
 
     public boolean isWorkerReady() {
-        return ideaFlowCircuit.isWorkerReady();
+        return twilightCircuit.isWorkerReady();
     }
 
     public CircuitMonitor getCircuitMonitor() {
@@ -85,15 +85,15 @@ public class Torchie implements Worker {
     }
 
     public void haltProgram() {
-        ideaFlowCircuit.haltProgram();
+        twilightCircuit.haltProgram();
     }
 
     public void resumeProgram() {
-        ideaFlowCircuit.resumeProgram();
+        twilightCircuit.resumeProgram();
     }
 
-    public Metronome.Tick getActiveTick() {
-        return ideaFlowCircuit.getActiveTick();
+    public Metronome.TickScope getActiveTick() {
+        return twilightCircuit.getActiveTick();
     }
 
     public MusicGridResults playAllTracks() {
@@ -102,7 +102,7 @@ public class Torchie implements Worker {
 
 
     public void configureOutputStreamEventWire(Wire outputWire) {
-        ideaFlowCircuit.configureOutputStreamEventWire(outputWire);
+        twilightCircuit.configureOutputStreamEventWire(outputWire);
     }
 
 }

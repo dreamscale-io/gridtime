@@ -38,7 +38,7 @@ public class ProgramFactory {
     @Autowired
     WorkToDoQueueWire workToDoQueueWire;
 
-    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
+    public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
         TileGeneratorProgram program = new TileGeneratorProgram(torchieId, torchieState, startPosition);
 
@@ -72,7 +72,7 @@ public class ProgramFactory {
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
 
 
-        program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
+        program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(teamId, torchieId));
 
         return program;
     }

@@ -6,25 +6,25 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
-import com.dreamscale.gridtime.core.machine.memory.grid.AggregateMetricGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.BoxAggregateMetricGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public abstract class ZoomableTimeLocas<T> implements Locas {
+public abstract class ZoomableBoxTimeLocas<T> implements Locas {
 
     private final UUID teamId;
     private final UUID torchieId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
 
-    private AggregateMetricGrid aggregateMetricGrid;
+    private BoxAggregateMetricGrid aggregateMetricGrid;
 
-    public ZoomableTimeLocas(UUID teamId, UUID torchieId,
-                             InputStrategy<T> input,
-                             OutputStrategy output) {
+    public ZoomableBoxTimeLocas(UUID teamId, UUID torchieId,
+                                InputStrategy<T> input,
+                                OutputStrategy output) {
         this.teamId = teamId;
         this.torchieId = torchieId;
         this.input = input;
@@ -33,7 +33,7 @@ public abstract class ZoomableTimeLocas<T> implements Locas {
     }
 
     @Override
-    public AggregateMetricGrid runProgram(Metronome.TickScope tickScope) {
+    public BoxAggregateMetricGrid runProgram(Metronome.TickScope tickScope) {
         List<T> metricInputs = input.breatheIn(teamId, torchieId, tickScope);
 
         log.debug("Found "+metricInputs.size() + " metrics at tick: "+ tickScope.toDisplayString());
@@ -53,13 +53,13 @@ public abstract class ZoomableTimeLocas<T> implements Locas {
         return aggregateMetricGrid.playAllTracks();
     }
 
-    protected abstract void fillAggregateGrid(AggregateMetricGrid aggregateMetricGrid, List<T> metricInputs);
+    protected abstract void fillAggregateGrid(BoxAggregateMetricGrid aggregateMetricGrid, List<T> metricInputs);
 
-    private AggregateMetricGrid createAggregateGrid(GeometryClock.GridTime gridTime) {
+    private BoxAggregateMetricGrid createAggregateGrid(GeometryClock.GridTime gridTime) {
 
         MusicClock musicClock = new MusicClock(gridTime);
 
-        return new AggregateMetricGrid(gridTime, musicClock);
+        return new BoxAggregateMetricGrid(gridTime, musicClock);
     }
 
 }

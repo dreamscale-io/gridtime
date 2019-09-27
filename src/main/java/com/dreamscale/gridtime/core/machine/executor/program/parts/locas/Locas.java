@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 
 public interface Locas {
 
-    IMusicGrid runProgram(Metronome.Tick tick);
+    IMusicGrid runProgram(Metronome.TickScope tickScope);
 
      MusicGridResults playAllTracks();
 

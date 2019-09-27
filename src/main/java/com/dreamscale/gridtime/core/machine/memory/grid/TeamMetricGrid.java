@@ -2,64 +2,65 @@ package com.dreamscale.gridtime.core.machine.memory.grid;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
-import com.dreamscale.gridtime.core.machine.clock.MusicClock;
-import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
-import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
-import com.dreamscale.gridtime.core.machine.memory.grid.landscape.FeatureLandscapeMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
-import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTrack;
+import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTeamTrack;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
-public class AggregateGrid implements IMusicGrid {
+public class TeamMetricGrid implements IMusicGrid {
 
     private final GeometryClock.GridTime gridTime;
-    private final GlyphReferences glyphReferences;
-    private final FeatureLandscapeMetrics landscapeMetrics;
-    private final MusicClock musicClock;
 
-    private Map<MetricRowKey, WeightedMetricTrack> weightedMetricTracks = DefaultCollections.map();
+    private Map<MetricRowKey, WeightedMetricTeamTrack> weightedMetricTracks = DefaultCollections.map();
 
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
 
-    public AggregateGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
-        this.gridTime = gridTime;
-        this.musicClock = musicClock;
+    private Map<UUID, String> columnHeaderMap = DefaultCollections.map();
 
-        this.glyphReferences = new GlyphReferences();
-        this.landscapeMetrics = new FeatureLandscapeMetrics();
+    public TeamMetricGrid(GeometryClock.GridTime gridTime) {
+        this.gridTime = gridTime;
+
     }
 
-    public RelativeBeat getBeat(String gridTimeKey) {
-        return musicClock.getBeat(gridTimeKey);
+    public void addColumn(UUID torchieId, String columnHeader) {
+        columnHeaderMap.put(torchieId, columnHeader);
+    }
+
+    public void addTimeForColumn(UUID torchieId, Duration duration) {
+
+        String columnHeader = columnHeaderMap.get(torchieId);
+
+        WeightedMetricTeamTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        timeTrack.addWeightedMetric(torchieId, columnHeader, Duration.ofSeconds(1), (double)duration.getSeconds());
+
+    }
+
+    public void addWeightedMetric(UUID torchieId, MetricRowKey metricRowKey, Duration durationWeight, Double metric) {
+        String columnHeader = columnHeaderMap.get(torchieId);
+
+        WeightedMetricTeamTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
+
+        track.addWeightedMetric(torchieId, columnHeader, durationWeight, metric);
     }
 
     @Override
     public ZoomLevel getZoomLevel() {
-        return musicClock.getZoomLevel();
-    }
-
-    public void addTimeInTile(RelativeBeat beat, Duration duration) {
-        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
-        timeTrack.addWeightedMetric(beat, Duration.ofSeconds(1), (double)duration.getSeconds());
+        return gridTime.getZoomLevel();
     }
 
     public Duration getTotalDuration() {
-        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        WeightedMetricTeamTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
         if (timeTrack != null) {
             return Duration.ofSeconds(timeTrack.getTotalCalculation().longValue());
         } else {
@@ -77,24 +78,12 @@ public class AggregateGrid implements IMusicGrid {
         return null;
     }
 
-    public void addWeightedMetric(MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
-        WeightedMetricTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
 
-        track.addWeightedMetric(beat, durationWeight, metric);
-    }
-
-    private WeightedMetricTrack getFirstTrack() {
-        if (weightedMetricTracks.size() > 0) {
-            return weightedMetricTracks.values().iterator().next();
-        }
-        return null;
-    }
-
-    private WeightedMetricTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
-        WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
+    private WeightedMetricTeamTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
+        WeightedMetricTeamTrack track = weightedMetricTracks.get(metricRowKey);
 
         if (track == null) {
-            track = new WeightedMetricTrack(metricRowKey, musicClock);
+            track = new WeightedMetricTeamTrack(metricRowKey);
             weightedMetricTracks.put(metricRowKey, track);
         }
 
@@ -104,7 +93,7 @@ public class AggregateGrid implements IMusicGrid {
 
     public void finish() {
 
-        for (WeightedMetricTrack track : weightedMetricTracks.values()) {
+        for (WeightedMetricTeamTrack track : weightedMetricTracks.values()) {
             track.finish();
         }
 
@@ -149,7 +138,7 @@ public class AggregateGrid implements IMusicGrid {
             exportedRows = DefaultCollections.list();
 
             for (MetricRowKey metricRowKey : weightedMetricTracks.keySet()) {
-                WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
+                WeightedMetricTeamTrack track = weightedMetricTracks.get(metricRowKey);
 
                 exportedRows.addAll(track.toGridRows());
             }

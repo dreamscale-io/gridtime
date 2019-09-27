@@ -48,7 +48,7 @@ public class TorchieFactory {
                 featureCache, featureResolverService, tileSearchService);
 
         //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition);
+        Program program = programFactory.createBaseTileGeneratorProgram(teamId, memberId, torchieState, startingPosition);
 
         Torchie torchie = new Torchie(memberId, torchieState, program);
 

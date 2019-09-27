@@ -22,7 +22,7 @@ public class FlowTransformer implements Flow {
         this.transformStrategies = Arrays.asList(transforms);
     }
 
-    public void tick(Metronome.Tick coordinates) {
+    public void tick(Metronome.TickScope coordinates) {
 
         for (TransformStrategy transform : transformStrategies) {
             transform.transform(torchieState);

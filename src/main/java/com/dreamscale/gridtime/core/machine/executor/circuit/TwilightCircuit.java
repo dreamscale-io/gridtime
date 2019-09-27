@@ -4,7 +4,8 @@ import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;
-import com.dreamscale.gridtime.core.machine.executor.circuit.now.FitnessMatrix;
+import com.dreamscale.gridtime.core.machine.executor.circuit.now.Eye;
+import com.dreamscale.gridtime.core.machine.executor.circuit.now.TwilightFitnessMatrix;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
@@ -18,19 +19,21 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileIn
 
 import java.util.*;
 
-public class IdeaFlowCircuit implements Worker {
+public class TwilightCircuit implements Worker<TileInstructions> {
+
+    private Program program;
+    private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
 
     private final CircuitMonitor circuitMonitor;
+    private final TwilightFitnessMatrix twilightFitnessMatrix;
 
-    private final Program program;
-    private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
+    private Eye eye;
 
     private LinkedList<TileInstructions> instructionsToExecuteQueue;
     private LinkedList<TileInstructions> highPriorityInstructionQueue;
     private TileInstructions lastInstruction;
 
     private LinkedList<TimeBomb> activeTimeBombMonitors;
-    private final FitnessMatrix fitnessMatrix;
 
     //circuit coordinator
 
@@ -39,7 +42,7 @@ public class IdeaFlowCircuit implements Worker {
 
     private Wire outputStreamEventWire;
 
-    public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
+    public TwilightCircuit(CircuitMonitor circuitMonitor, Program program) {
         this.circuitMonitor = circuitMonitor;
         this.program = program;
 
@@ -47,7 +50,7 @@ public class IdeaFlowCircuit implements Worker {
         this.instructionsToExecuteQueue = DefaultCollections.queueList();
         this.activeTimeBombMonitors = DefaultCollections.queueList();
 
-        this.fitnessMatrix = new FitnessMatrix();
+        this.twilightFitnessMatrix = new TwilightFitnessMatrix();
         this.outputStreamEventWire = new DevNullWire();
     }
 
@@ -75,7 +78,7 @@ public class IdeaFlowCircuit implements Worker {
         parallelPrograms.remove(programId);
     }
 
-    public TileInstructions whatsNext() {
+    public TileInstructions pullNext() {
 
         TileInstructions nextInstruction = null;
 
@@ -114,11 +117,11 @@ public class IdeaFlowCircuit implements Worker {
         return nextInstruction;
     }
 
-    private List<TileInstructions> getParallelProgramInstructions(Metronome.Tick activeTick) {
+    private List<TileInstructions> getParallelProgramInstructions(Metronome.TickScope activeTickScope) {
         List<TileInstructions> instructionsToExecute = new ArrayList<>();
 
         for (ParallelProgram parallelProgram : parallelPrograms.values()) {
-            instructionsToExecute.addAll(parallelProgram.getInstructionsAtTick(activeTick));
+            instructionsToExecute.addAll(parallelProgram.getInstructionsAtTick(activeTickScope));
         }
 
         return instructionsToExecute;
@@ -135,7 +138,7 @@ public class IdeaFlowCircuit implements Worker {
         this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
     }
 
-    public Metronome.Tick getActiveTick() {
+    public Metronome.TickScope getActiveTick() {
         return program.getActiveTick();
     }
 
@@ -162,12 +165,12 @@ public class IdeaFlowCircuit implements Worker {
         private void updateFitnessMatrixAndTriggerAlarms(IdeaFlowMetrics ideaFlowMetrics) {
             if (ideaFlowMetrics != null) {
 
-                fitnessMatrix.push(ideaFlowMetrics);
+                twilightFitnessMatrix.push(ideaFlowMetrics);
 
-                List<TimeBomb> timeBombMonitors = fitnessMatrix.generateTimeBombMonitors();
+                List<TimeBomb> timeBombMonitors = twilightFitnessMatrix.generateTimeBombMonitors();
                 activeTimeBombMonitors.addAll(timeBombMonitors);
 
-                List<AlarmScript> alarmScripts = fitnessMatrix.triggerAlarms();
+                List<AlarmScript> alarmScripts = twilightFitnessMatrix.triggerAlarms();
                 for (AlarmScript script : alarmScripts) {
                     parallelPrograms.put(UUID.randomUUID(), script);
                 }

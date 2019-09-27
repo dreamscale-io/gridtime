@@ -56,13 +56,13 @@ public class CalendarGeneratorProgram implements Program {
     }
 
     @Override
-    public Metronome.Tick getActiveTick() {
+    public Metronome.TickScope getActiveTick() {
         return metronome.getActiveTick();
     }
 
     @Override
     public List<TileInstructions> getInstructionsAtActiveTick() {
-        Metronome.Tick tick = metronome.getActiveTick();
+        Metronome.TickScope tick = metronome.getActiveTick();
 
         List<TileInstructions> instructions = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public class CalendarGeneratorProgram implements Program {
             instructions.add(baseTick(tick.getFrom(), tick.getTo()));
 
             if (tick.hasAggregateTicks()) {
-                for (Metronome.Tick aggregateTick : tick.getAggregateTicks()) {
+                for (Metronome.TickScope aggregateTick : tick.getAggregateTickScopes()) {
                     instructions.add(aggregateTick(aggregateTick.getFrom(), aggregateTick.getTo()));
                 }
             }

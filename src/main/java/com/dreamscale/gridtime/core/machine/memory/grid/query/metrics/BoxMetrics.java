@@ -1,32 +1,19 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.query.metrics;
 
-import com.dreamscale.gridtime.core.machine.clock.MusicClock;
-import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
+import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntity;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.AuthorsReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
-import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
-import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
-import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
-import com.dreamscale.gridtime.core.machine.memory.grid.cell.type.GridCell;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.AverageMetric;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.MetricQuery;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.PercentMetric;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
-import com.dreamscale.gridtime.core.machine.memory.type.AuthorsType;
-import com.dreamscale.gridtime.core.machine.memory.type.IdeaFlowStateType;
 import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -94,4 +81,25 @@ public class BoxMetrics implements MetricQuery {
     }
 
 
+    public static BoxMetrics queryFrom(PlaceReference box, ZoomableBoxMetricsEntity boxEntity) {
+        BoxMetrics boxMetrics = new BoxMetrics();
+
+        boxMetrics.setBox( box);
+
+        boxMetrics.setZoomLevel(boxEntity.getZoomLevel());
+
+        boxMetrics.setTimeInBox(Duration.ofSeconds(boxEntity.getTimeInBox()));
+        boxMetrics.setPercentWtf(boxEntity.getPercentWtf());
+        boxMetrics.setPercentLearning(boxEntity.getPercentLearning());
+        boxMetrics.setPercentProgress(boxEntity.getPercentProgress());
+        boxMetrics.setPercentPairing(boxEntity.getPercentPairing());
+
+        boxMetrics.setAvgExecutionTime(boxEntity.getAvgExecutionTime());
+        boxMetrics.setAvgFlame(boxEntity.getAvgFlame());
+        boxMetrics.setAvgTraversalSpeed(boxEntity.getAvgTraversalSpeed());
+
+        boxMetrics.setAvgFileBatchSize(boxEntity.getAvgFileBatchSize());
+
+        return boxMetrics;
+    }
 }

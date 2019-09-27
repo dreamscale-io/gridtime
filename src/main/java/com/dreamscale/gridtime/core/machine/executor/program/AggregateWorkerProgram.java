@@ -20,7 +20,7 @@ public class AggregateWorkerProgram implements Program {
     private final LocasFactory locasFactory;
 
     private AggregateStreamEvent activeEvent;
-    private Metronome.Tick activeTick;
+    private Metronome.TickScope activeTick;
 
     private int latestQueueDepth;
 
@@ -45,7 +45,7 @@ public class AggregateWorkerProgram implements Program {
     }
 
     @Override
-    public Metronome.Tick getActiveTick() {
+    public Metronome.TickScope getActiveTick() {
         return activeTick;
     }
 
@@ -65,7 +65,7 @@ public class AggregateWorkerProgram implements Program {
         return latestQueueDepth;
     }
 
-    private TileInstructions generateAggregateTickInstructions(Metronome.Tick aggregateTick) {
+    private TileInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
 
         List<Locas> aggregatorChain = new ArrayList<>();
         aggregatorChain.add(locasFactory.createIdeaFlowTeamAggregatorLocas(activeEvent.getTeamId()));

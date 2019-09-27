@@ -15,7 +15,7 @@ public class NoOpProgram implements Program {
     }
 
     @Override
-    public Metronome.Tick getActiveTick() {
+    public Metronome.TickScope getActiveTick() {
         return null;
     }
 
