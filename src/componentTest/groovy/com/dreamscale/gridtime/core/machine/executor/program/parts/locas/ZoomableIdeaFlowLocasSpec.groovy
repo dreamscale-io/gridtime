@@ -84,7 +84,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
         feed.addSomeData(generateWTFEnd(time4))
 
         for (int i = 0; i < 12; i++) {
-            torchie.pullNext().call()
+            torchie.whatsNext().call()
             println torchie.playAllTracks();
         }
 

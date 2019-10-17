@@ -73,6 +73,7 @@ public class ProgramFactory {
 
 
         program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(teamId, torchieId));
+        program.addAggregator(locasFactory.createBoxAggregatorLocas(teamId, torchieId));
 
         return program;
     }

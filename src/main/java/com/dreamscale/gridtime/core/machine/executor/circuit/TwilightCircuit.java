@@ -78,7 +78,7 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         parallelPrograms.remove(programId);
     }
 
-    public TileInstructions pullNext() {
+    public TileInstructions whatsNext() {
 
         TileInstructions nextInstruction = null;
 

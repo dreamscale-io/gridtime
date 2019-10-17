@@ -88,7 +88,7 @@ class ZoomableBoxLocasSpec extends Specification {
 
         //make a tile, make sure box metrics generated
         when:
-        torchie.pullNext().call();
+        torchie.whatsNext().call();
         println torchie.playAllTracks();
 
         then:
@@ -113,7 +113,7 @@ class ZoomableBoxLocasSpec extends Specification {
     }
 
 
-//
+
 //    def "should aggregate BoxMetrics by Box"() {
 //        given:
 //        InputFeed feed = torchie.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)

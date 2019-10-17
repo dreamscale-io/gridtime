@@ -64,8 +64,8 @@ public class Torchie implements Worker<TileInstructions> {
         twilightCircuit.notifyWhenProgramDone(notifyTrigger);
     }
 
-    public TileInstructions pullNext() {
-        return twilightCircuit.pullNext();
+    public TileInstructions whatsNext() {
+        return twilightCircuit.whatsNext();
     }
 
     public boolean isWorkerReady() {

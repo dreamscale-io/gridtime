@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntit
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsEntity;
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMetricsEntity;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamBoxLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategyFactory;
@@ -44,5 +45,12 @@ public class LocasFactory {
         OutputStrategy boxMetricsOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_BOX_METRICS);
 
         return new ZoomableBoxLocas(teamId, torchieId, boxMetricsIn, boxMetricsOut);
+    }
+
+    public ZoomableTeamBoxLocas createTeamBoxAggregatorLocas(UUID teamId) {
+        InputStrategy<ZoomableBoxMetricsEntity> boxMetricsIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_TEAM_BOX_METRICS);
+        OutputStrategy boxMetricsOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_BOX_METRICS);
+
+        return new ZoomableTeamBoxLocas(teamId, boxMetricsIn, boxMetricsOut);
     }
 }

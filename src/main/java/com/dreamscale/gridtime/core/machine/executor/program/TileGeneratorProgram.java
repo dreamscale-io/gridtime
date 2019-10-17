@@ -102,7 +102,7 @@ public class TileGeneratorProgram implements Program {
     }
 
 
-    public void addAggregator( ZoomableTimeLocas locas) {
+    public void addAggregator( Locas locas) {
         aggregatorChain.add(locas );
     }
 

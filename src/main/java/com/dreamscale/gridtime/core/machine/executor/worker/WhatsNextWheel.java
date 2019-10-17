@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class WhatsNextWheel<T> {
             if (isWorkerReady(workerId)) {
                 nextWorkerQueue.remove(i);
                 nextWorkerQueue.add(workerId);
-                return workerMap.get(workerId).pullNext();
+                return workerMap.get(workerId).whatsNext();
             }
         }
 

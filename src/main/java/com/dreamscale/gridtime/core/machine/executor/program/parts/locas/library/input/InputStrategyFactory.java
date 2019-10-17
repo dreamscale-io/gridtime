@@ -15,6 +15,9 @@ public class InputStrategyFactory {
     @Autowired
     InputBoxMetricsAcrossTime inputBoxMetricsAcrossTime;
 
+    @Autowired
+    InputBoxMetricsAcrossTeam inputBoxMetricsAcrossTeam;
+
     public <T> InputStrategy<T> get(InputType inputType) {
         switch (inputType) {
             case QUERY_IDEA_FLOW_METRICS:
@@ -23,6 +26,8 @@ public class InputStrategyFactory {
                 return (InputStrategy<T>) inputIdeaFlowMetricsAcrossTeam;
             case QUERY_BOX_METRICS:
                 return (InputStrategy<T>) inputBoxMetricsAcrossTime;
+            case QUERY_TEAM_BOX_METRICS:
+                return (InputStrategy<T>) inputBoxMetricsAcrossTeam;
         }
         return null;
     }
@@ -31,6 +36,7 @@ public class InputStrategyFactory {
         QUERY_IDEA_FLOW_METRICS,
         QUERY_TEAM_IDEA_FLOW_METRICS,
         QUERY_BOX_METRICS,
+        QUERY_TEAM_BOX_METRICS,
 
     }
 }

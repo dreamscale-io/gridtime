@@ -69,6 +69,7 @@ public class AggregateWorkerProgram implements Program {
 
         List<Locas> aggregatorChain = new ArrayList<>();
         aggregatorChain.add(locasFactory.createIdeaFlowTeamAggregatorLocas(activeEvent.getTeamId()));
+        aggregatorChain.add(locasFactory.createTeamBoxAggregatorLocas(activeEvent.getTeamId()));
 
         return new GenerateTeamTile(aggregatorChain, aggregateTick);
     }

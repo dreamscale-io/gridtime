@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileIn
 
 public interface Worker<T> {
 
-    T pullNext();
+    T whatsNext();
 
     boolean isWorkerReady();
 }

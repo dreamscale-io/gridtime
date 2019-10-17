@@ -74,9 +74,8 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
 
     @Override
     public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
-        return null;
+        return Collections.emptySet();
     }
-
 
 
     public void finish() {
