@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 
@@ -10,9 +11,8 @@ public class MemoryOnlyTorchieState extends AbstractTorchieState {
 
 
     public MemoryOnlyTorchieState(UUID torchieId) {
-        super(torchieId, null, new FeatureCache());
+        super(torchieId, null, new TeamBoxConfiguration.Builder().build());
     }
-
 
 
     @Override

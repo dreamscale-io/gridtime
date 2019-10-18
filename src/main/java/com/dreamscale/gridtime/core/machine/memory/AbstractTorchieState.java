@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
@@ -18,8 +19,9 @@ import java.util.UUID;
 public abstract class AbstractTorchieState implements TorchieState {
 
     private final UUID torchieId;
-    private final FeatureCache featureCache;
     private final UUID teamId;
+    private final TeamBoxConfiguration teamBoxConfiguration;
+    private final FeatureCache featureCache;
 
     private Map<FeedStrategyFactory.FeedType, InputFeed> inputFeeds = DefaultCollections.map();
 
@@ -27,10 +29,11 @@ public abstract class AbstractTorchieState implements TorchieState {
 
     private GridTile activeGridTile;
 
-    public AbstractTorchieState(UUID torchieId, UUID teamId, FeatureCache featureCache) {
+    public AbstractTorchieState(UUID torchieId, UUID teamId, TeamBoxConfiguration teamBoxConfiguration) {
         this.torchieId = torchieId;
         this.teamId = teamId;
-        this.featureCache = featureCache;
+        this.teamBoxConfiguration = teamBoxConfiguration;
+        this.featureCache = new FeatureCache();
     }
 
     @Override
@@ -67,7 +70,7 @@ public abstract class AbstractTorchieState implements TorchieState {
 
         CarryOverContext carryOverContext = getCarryOverContext(this.gridTime.panLeft());
 
-        this.activeGridTile = new GridTile(torchieId, this.gridTime, featureCache);
+        this.activeGridTile = new GridTile(torchieId, this.gridTime, featureCache, teamBoxConfiguration);
 
         activeGridTile.initFromCarryOverContext(carryOverContext);
     }

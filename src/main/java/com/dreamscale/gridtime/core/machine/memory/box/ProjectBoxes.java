@@ -18,6 +18,24 @@ public class ProjectBoxes {
         boxMatchers = new ArrayList<>();
     }
 
+    public ProjectBoxes(BoxMatcherConfig ... boxMatcherConfigs) {
+        packageToBoxMap = new HashMap<>();
+        boxMatchers = new ArrayList<>();
+
+        for (BoxMatcherConfig config : boxMatcherConfigs) {
+            boxMatchers.add(new BoxMatcher(config));
+        }
+    }
+
+    public ProjectBoxes(List<BoxMatcherConfig> boxMatcherConfigs) {
+        packageToBoxMap = new HashMap<>();
+        boxMatchers = new ArrayList<>();
+
+        for (BoxMatcherConfig config : boxMatcherConfigs) {
+            boxMatchers.add(new BoxMatcher(config));
+        }
+    }
+
     public String identifyBox(String filePath) {
 
         String folderPath = extractFolderPath(filePath);
@@ -49,10 +67,6 @@ public class ProjectBoxes {
         } else {
             return "";
         }
-    }
-
-    public void configureBoxMatcher(BoxMatcherConfig boxMatcherConfig) {
-        boxMatchers.add(new BoxMatcher(boxMatcherConfig));
     }
 
 }

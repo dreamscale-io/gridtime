@@ -26,18 +26,12 @@ public class FeatureCache {
 
     private LRUMap miscCache = new LRUMap(MISC_CACHE_SIZE);
 
-    private final TeamBoxConfiguration teamBoxConfiguration;
     private final FeatureReferenceFactory featureReferenceFactory;
 
     private static final UUID DEFAULT_PROJECT_ID = UUID.fromString("9ad99705-3ec3-4979-ab14-104fba3fd38f");
 
-    public FeatureCache(TeamBoxConfiguration boxConfiguration) {
-        this.teamBoxConfiguration = boxConfiguration;
-        this.featureReferenceFactory = new FeatureReferenceFactory();
-    }
 
     public FeatureCache() {
-        this.teamBoxConfiguration = new TeamBoxConfiguration();
         this.featureReferenceFactory = new FeatureReferenceFactory();
     }
 
@@ -75,8 +69,7 @@ public class FeatureCache {
         return cacheLookup(contextReference);
     }
 
-    public PlaceReference lookupLocationReference(UUID projectId, String locationPath) {
-        String boxName = teamBoxConfiguration.identifyBox(projectId, locationPath);
+    public PlaceReference lookupLocationReference(UUID projectId, String boxName, String locationPath) {
         PlaceReference locationReference = featureReferenceFactory.createLocationReference(projectId, boxName, locationPath);
 
         return cacheLookup(locationReference);

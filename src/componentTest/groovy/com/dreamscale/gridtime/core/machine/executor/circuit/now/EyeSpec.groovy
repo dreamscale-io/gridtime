@@ -48,6 +48,7 @@ class EyeSpec extends Specification {
     PlaceReference file2A
     PlaceReference file2B
 
+    TeamBoxConfiguration teamBoxConfiguration
 
 
     def setup() {
@@ -59,12 +60,14 @@ class EyeSpec extends Specification {
         torchieId = UUID.randomUUID()
         circleId = UUID.randomUUID();
 
-        TeamBoxConfiguration teamBoxConfiguration = new TeamBoxConfiguration()
-        teamBoxConfiguration.configureMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
-        teamBoxConfiguration.configureMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
-        teamBoxConfiguration.configureMatcher(projectId, new BoxMatcherConfig("aBoxOfCode3", "/box3/*"))
+        TeamBoxConfiguration.Builder builder = new TeamBoxConfiguration.Builder();
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode3", "/box3/*"))
 
-        featureCache = new FeatureCache(teamBoxConfiguration);
+        teamBoxConfiguration = builder.build();
+
+        featureCache = new FeatureCache();
 
         featureFactory = new FeatureReferenceFactory()
 
@@ -120,7 +123,7 @@ class EyeSpec extends Specification {
     }
 
     IMusicGrid generateSplitWTFExperienceGrid(PlaceReference ... gotoLocations) {
-        GridTile gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache)
+        GridTile gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache, teamBoxConfiguration)
 
         gridTile.startWorkContext(time1, new WorkContextEvent(
                 intentionId, "start work",

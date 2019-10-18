@@ -11,6 +11,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile
@@ -33,7 +34,9 @@ public class ComponentSpaceObserverSpec extends Specification {
         componentSpaceObserver = new ComponentSpaceObserver()
         torchieId = UUID.randomUUID()
 
-        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache());
+        TeamBoxConfiguration teamBoxConfiguration = new TeamBoxConfiguration.Builder().build();
+
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache(), teamBoxConfiguration);
     }
 
     def "should create Location traversals"() {

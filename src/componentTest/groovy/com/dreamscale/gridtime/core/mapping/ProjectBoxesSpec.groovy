@@ -16,7 +16,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should match resources"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("Test", "*/src/test/resources/com/nbcuniversal/forecasting*"))
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("Test", "*/src/test/resources/com/nbcuniversal/forecasting*"))
 
         when:
         String bucketName = projectBuckets.identifyBox("/src/test/resources/com/nbcuniversal/forecasting/domain/SQLUtils.sql");
@@ -27,7 +27,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should match buckets with excludes"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("Test Support",
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("Test Support",
                 "*/src/test/java/com/nbcuniversal/forecasting/*",
                 DefaultCollections.toList(
                 "*/src/test/java/com/nbcuniversal/forecasting/*IT.java",
@@ -43,7 +43,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should match controllers"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java"));
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("User", "*/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java"));
 
         when:
         String bucketName = projectBuckets.identifyBox("/src/main/java/com/nbcuniversal/forecasting/controller/UserController.java")
@@ -54,7 +54,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should match unit test extensions"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("Unit Tests", "/src/test/java/com/nbcuniversal/forecasting/*Test.java"));
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("Unit Tests", "/src/test/java/com/nbcuniversal/forecasting/*Test.java"));
 
         when:
         String bucketName = projectBuckets.identifyBox("/src/test/java/com/nbcuniversal/forecasting/controller/UserControllerTest.java")
@@ -65,7 +65,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should use configuration to identify component name"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("comp1", "/src/main/java/com/company/project/comp/*"))
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("comp1", "/src/main/java/com/company/project/comp/*"))
 
         when:
         String bucketName = projectBuckets.identifyBox("/src/main/java/com/company/project/comp/File.java")
@@ -76,7 +76,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should match when file in root"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("root", "/*"))
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("root", "/*"))
 
         when:
         String bucketName = projectBuckets.identifyBox("/File.java")
@@ -87,7 +87,7 @@ class ProjectBoxesSpec extends Specification {
 
     def "should use default when no bucket match"() {
         given:
-        projectBuckets.configureBoxMatcher(new BoxMatcherConfig("comp1", "/src/main/java/com/company/project/other/*"))
+        projectBuckets = new ProjectBoxes(new BoxMatcherConfig("comp1", "/src/main/java/com/company/project/other/*"))
 
         when:
         String bucketName = projectBuckets.identifyBox("/src/main/java/com/company/project/comp/File.java")

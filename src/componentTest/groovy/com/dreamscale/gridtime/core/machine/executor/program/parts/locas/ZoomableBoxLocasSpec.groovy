@@ -14,6 +14,8 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
+import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -40,6 +42,7 @@ class ZoomableBoxLocasSpec extends Specification {
 
     UUID torchieId
     UUID teamId
+    UUID projectId
 
     LocalDateTime clockStart
     LocalDateTime time1
@@ -56,7 +59,8 @@ class ZoomableBoxLocasSpec extends Specification {
     def setup() {
 
         torchieId = UUID.randomUUID()
-        teamId = UUID.randomUUID();
+        teamId = UUID.randomUUID()
+        projectId = UUID.randomUUID()
 
         boxAggregatorLocas = locasFactory.createBoxAggregatorLocas(teamId,  torchieId);
 
@@ -74,6 +78,11 @@ class ZoomableBoxLocasSpec extends Specification {
 
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
+
+        TeamBoxConfiguration.Builder builder = new TeamBoxConfiguration.Builder()
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+
 
     }
 
@@ -103,7 +112,16 @@ class ZoomableBoxLocasSpec extends Specification {
 
     def "should aggregate BoxMetrics across Time, Grouped by Box"() {
         given:
-            //create box metrics, for the specified calendar times, create grid features for each
+
+        TeamBoxConfiguration.Builder builder = new TeamBoxConfiguration.Builder()
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
+        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+
+        InputFeed fileActivityFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED)
+        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1, time1.plusMinutes(3)))
+
+
+        //create box metrics, for the specified calendar times, create grid features for each
         when:
             println "ji"
             //when cloud breathe in/out

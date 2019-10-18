@@ -17,19 +17,21 @@ public class BoxConfigurationLoaderService {
     @Autowired
     GridBoxBucketConfigRepository gridBoxBucketConfigRepository;
 
+
     public TeamBoxConfiguration loadBoxConfiguration(UUID teamId) {
 
         List<GridBoxBucketConfigEntity> boxBucketConfigEntities = gridBoxBucketConfigRepository.findByTeamId(teamId);
 
-        TeamBoxConfiguration teamBoxConfiguration = new TeamBoxConfiguration();
+        TeamBoxConfiguration.Builder configBuilder = new TeamBoxConfiguration.Builder();
 
         for (GridBoxBucketConfigEntity boxBucketConfig : boxBucketConfigEntities) {
+            BoxMatcherConfig boxMatcherConfig = JSONTransformer.fromJson(boxBucketConfig.getBoxMatcherConfigJson(), BoxMatcherConfig.class);
+
             UUID projectId = boxBucketConfig.getProjectId();
-            BoxMatcherConfig config = JSONTransformer.fromJson(boxBucketConfig.getBoxMatcherConfigJson(), BoxMatcherConfig.class);
-            teamBoxConfiguration.configureMatcher(projectId, config);
+            configBuilder.boxMatcher(projectId, boxMatcherConfig);
         }
 
-        return teamBoxConfiguration;
+        return configBuilder.build();
     }
 
 }

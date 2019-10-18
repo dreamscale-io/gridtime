@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
@@ -15,9 +16,9 @@ public class PerProcessTorchieState extends AbstractTorchieState {
     private final FeatureResolverService featureResolverService;
     private final TileSearchService tileSearchService;
 
-    public PerProcessTorchieState(UUID teamId, UUID torchieId, FeatureCache featureCache,
+    public PerProcessTorchieState(UUID teamId, UUID torchieId, TeamBoxConfiguration teamBoxConfiguration,
                                   FeatureResolverService featureResolverService, TileSearchService tileSearchService) {
-        super(torchieId, teamId, featureCache);
+        super(torchieId, teamId, teamBoxConfiguration);
 
         this.featureResolverService = featureResolverService;
         this.tileSearchService = tileSearchService;

@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.sink
 
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile
 import spock.lang.Specification
@@ -20,7 +21,10 @@ class JSONTransformerSpec extends Specification {
         geometryClock = new GeometryClock(clockStart)
 
         torchieId = UUID.randomUUID();
-        tile = new GridTile(torchieId, geometryClock.activeGridTime, new FeatureCache())
+
+        TeamBoxConfiguration teamBoxConfiguration = new TeamBoxConfiguration.Builder().build();
+
+        tile = new GridTile(torchieId, geometryClock.activeGridTime, new FeatureCache(), teamBoxConfiguration)
 
     }
 

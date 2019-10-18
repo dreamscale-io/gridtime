@@ -38,14 +38,14 @@ public class TorchieFactory {
     @Autowired
     private BoxConfigurationLoaderService boxConfigurationLoaderService;
 
-    private Map<UUID, FeatureCache> teamCacheMap = DefaultCollections.lruMap(MAX_TEAMS);
+    private Map<UUID, TeamBoxConfiguration> teamBoxConfigurations = DefaultCollections.lruMap(MAX_TEAMS);
 
 
     public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
-        FeatureCache featureCache = findOrCreateFeatureCache(teamId);
+        TeamBoxConfiguration teamBoxConfig = findOrCreateTeamBoxConfig(teamId);
 
         PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,
-                featureCache, featureResolverService, tileSearchService);
+                teamBoxConfig, featureResolverService, tileSearchService);
 
         //stream data into the tiles
         Program program = programFactory.createBaseTileGeneratorProgram(teamId, memberId, torchieState, startingPosition);
@@ -70,15 +70,13 @@ public class TorchieFactory {
         return new Torchie(torchieId, torchieState, program);
     }
 
-    private FeatureCache findOrCreateFeatureCache(UUID teamId) {
-        FeatureCache featureCache = teamCacheMap.get(teamId);
-        if (featureCache == null) {
-            TeamBoxConfiguration teamBoxConfig = boxConfigurationLoaderService.loadBoxConfiguration(teamId);
-
-            featureCache = new FeatureCache(teamBoxConfig);
-            teamCacheMap.put(teamId, featureCache);
+    private TeamBoxConfiguration findOrCreateTeamBoxConfig(UUID teamId) {
+        TeamBoxConfiguration teamBoxConfig = teamBoxConfigurations.get(teamId);
+        if (teamBoxConfig == null) {
+            teamBoxConfig = boxConfigurationLoaderService.loadBoxConfiguration(teamId);
+            teamBoxConfigurations.put(teamId, teamBoxConfig);
         }
-        return featureCache;
+        return teamBoxConfig;
     }
 
 
