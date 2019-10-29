@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit;
 
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
@@ -144,6 +145,10 @@ public class TwilightCircuit implements Worker<TileInstructions> {
 
     public boolean isWorkerReady() {
         return circuitMonitor.isReady();
+    }
+
+    public TileInstructions getLastInstruction() {
+        return lastInstruction;
     }
 
 

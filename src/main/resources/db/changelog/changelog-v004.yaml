@@ -92,3 +92,6 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/replace_view_zoomable_box_metrics.sql
+
+  - include:
+        file:  db/v004/replace_view_zoomable_box_metrics2.sql

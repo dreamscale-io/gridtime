@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.grid.AggregateMetricGrid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,14 +20,16 @@ public abstract class ZoomableTimeLocas<T> implements Locas {
     private final UUID torchieId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
+    private final FeatureCache featureCache;
 
     private AggregateMetricGrid aggregateMetricGrid;
 
-    public ZoomableTimeLocas(UUID teamId, UUID torchieId,
+    public ZoomableTimeLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
                              InputStrategy<T> input,
                              OutputStrategy output) {
         this.teamId = teamId;
         this.torchieId = torchieId;
+        this.featureCache = featureCache;
         this.input = input;
         this.output = output;
 

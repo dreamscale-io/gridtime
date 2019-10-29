@@ -5,23 +5,27 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 
 import java.util.UUID;
 
 public class AggregationWorkerPool implements WorkerPool {
 
-    ProgramFactory programFactory;
 
-    Wire workToDoWire;
+    private final FeatureCacheManager featureCacheManager;
+    private final ProgramFactory programFactory;
+    private final Wire workToDoWire;
 
     private static final int DEFAULT_NUMBER_AGGREGATE_WORKERS = 5;
 
-    int currentPoolSize;
+    private int currentPoolSize;
     private WhatsNextWheel<TileInstructions> whatsNextWheel;
 
-    public AggregationWorkerPool(ProgramFactory programFactory, Wire workToDoWire) {
+    public AggregationWorkerPool(ProgramFactory programFactory, Wire workToDoWire, FeatureCacheManager featureCacheManager) {
         this.programFactory = programFactory;
         this.workToDoWire = workToDoWire;
+        this.featureCacheManager = featureCacheManager;
 
         this.currentPoolSize = DEFAULT_NUMBER_AGGREGATE_WORKERS;
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
@@ -34,7 +38,7 @@ public class AggregationWorkerPool implements WorkerPool {
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
-            TwilightCircuit circuit = new TwilightCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId));
+            TwilightCircuit circuit = new TwilightCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
 
             whatsNextWheel.addWorker(workerId, circuit);
         }

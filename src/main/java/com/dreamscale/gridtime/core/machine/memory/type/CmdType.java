@@ -94,6 +94,12 @@ public enum CmdType implements FeatureType {
     }
 
     @Override
+    public Map<String, String> parseUri(String uri) {
+        return uriTemplateWithType.match(uri);
+    }
+
+
+    @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
         return null;
     }

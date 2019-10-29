@@ -16,6 +16,8 @@ public interface FeatureType extends Observable {
 
     String expandUri(Map<String, String> templateVariables);
 
+    Map<String, String> parseUri(String uri);
+
     Class<? extends FeatureDetails> getSerializationClass();
 
     String name();

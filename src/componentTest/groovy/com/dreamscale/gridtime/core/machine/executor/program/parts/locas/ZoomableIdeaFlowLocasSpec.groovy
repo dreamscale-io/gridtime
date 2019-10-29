@@ -85,7 +85,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
 
         for (int i = 0; i < 12; i++) {
             torchie.whatsNext().call()
-            println torchie.playAllTracks();
+            println torchie.getLastOutput();
         }
 
         Metronome.TickScope tick = torchie.getActiveTick();

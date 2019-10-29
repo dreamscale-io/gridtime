@@ -12,6 +12,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
@@ -39,6 +40,11 @@ public class Torchie implements Worker<TileInstructions> {
     public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
         return torchieState.getInputFeed(type);
     }
+
+    public void changeBoxConfiguration(TeamBoxConfiguration teamBoxConfiguration) {
+        torchieState.changeBoxConfiguration(teamBoxConfiguration);
+    }
+
 
     public String whatTimeIsIt() {
         return torchieState.getActiveTime();
@@ -96,8 +102,13 @@ public class Torchie implements Worker<TileInstructions> {
         return twilightCircuit.getActiveTick();
     }
 
-    public MusicGridResults playAllTracks() {
-        return torchieState.getActiveTile().playAllTracks();
+    public String getLastOutput() {
+        TileInstructions lastInstruction = twilightCircuit.getLastInstruction();
+        if (lastInstruction != null) {
+            return lastInstruction.getOutputResultString();
+        }
+
+        return "";
     }
 
 

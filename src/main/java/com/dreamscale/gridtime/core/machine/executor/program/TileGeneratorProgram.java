@@ -97,7 +97,6 @@ public class TileGeneratorProgram implements Program {
     }
 
     private TileInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
-
         return new GenerateAggregateTile(torchieState, aggregatorChain, aggregateTick);
     }
 

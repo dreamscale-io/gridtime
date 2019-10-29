@@ -42,6 +42,11 @@ public enum FeelsType implements FeatureType {
         return uriTemplate.expand(templateVariables).toString();
     }
 
+    @Override
+    public Map<String, String> parseUri(String uri) {
+        return uriTemplate.match(uri);
+    }
+
     public String getTypeUri() {
         return typeUri;
     }

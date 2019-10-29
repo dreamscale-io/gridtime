@@ -6,12 +6,16 @@ import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
+import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -23,8 +27,7 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
 
-    private Map<UUID, AggregateMetricGrid> boxGrids = DefaultCollections.map();
-    private UUID activeBoxKey;
+    private Map<FeatureReference, AggregateMetricGrid> boxGrids = DefaultCollections.map();
 
 
     public BoxAggregateMetricGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
@@ -37,20 +40,44 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
         return musicClock.getZoomLevel();
     }
 
+    @Override
+    public GridRow getRow(Key rowKey) {
+        if (boxGrids.size() > 0) {
+            AggregateMetricGrid firstGrid = boxGrids.values().iterator().next();
+            return firstGrid.getRow(rowKey);
+        }
 
+        return null;
+    }
 
-    public void addBoxMetric(UUID featureId, MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
-        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(featureId);
+    public void addBoxMetric(FeatureReference box, MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
+        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
 
         aggregateMetricGrid.addWeightedMetric(metricRowKey, beat, durationWeight, metric);
     }
 
-    private AggregateMetricGrid findOrCreateAggregateGrid(UUID boxFeatureId) {
-        AggregateMetricGrid grid = boxGrids.get(boxFeatureId);
+    public Double getMetric(FeatureReference box, MetricRowKey metricRowKey) {
+
+        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
+
+        GridRow gridRow = aggregateMetricGrid.getRow(metricRowKey);
+        return (Double) gridRow.getSummaryCell(AggregateType.AVG).toValue();
+    }
+
+    public Duration getTotalDuration(FeatureReference box) {
+
+        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
+
+        return aggregateMetricGrid.getTotalDuration();
+    }
+
+
+    private AggregateMetricGrid findOrCreateAggregateGrid(FeatureReference boxReference) {
+        AggregateMetricGrid grid = boxGrids.get(boxReference);
 
         if (grid == null) {
             grid = new AggregateMetricGrid(gridTime, musicClock);
-            boxGrids.put(boxFeatureId, grid);
+            boxGrids.put(boxReference, grid);
         }
 
         return grid;
@@ -74,6 +101,10 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
 
     @Override
     public Set<FeatureReference> getFeaturesOfType(FeatureType featureType) {
+        if (featureType == PlaceType.BOX) {
+            return boxGrids.keySet();
+        }
+
         return Collections.emptySet();
     }
 
@@ -85,41 +116,26 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
         }
     }
 
-    Set<UUID> getBoxKeys() {
-        return boxGrids.keySet();
-    }
+    public GridRow getRow(FeatureReference box, Key rowKey) {
+        AggregateMetricGrid grid = boxGrids.get(box);
 
-
-    public void setActiveBoxKey(UUID boxKey) {
-        this.activeBoxKey = boxKey;
-    }
-
-    public GridRow getRow(Key rowKey) {
-        initActiveBoxIfNull();
-
-        if (activeBoxKey != null) {
-            AggregateMetricGrid grid = boxGrids.get(activeBoxKey);
+        if (grid != null) {
             return grid.getRow(rowKey);
         }
 
         return null;
     }
 
-    private void initActiveBoxIfNull() {
-        if (activeBoxKey == null && boxGrids.size() > 0) {
-            activeBoxKey = boxGrids.keySet().iterator().next();
-        }
-    }
 
     public List<GridRow> getAllGridRows() {
-        initActiveBoxIfNull();
 
-        if (activeBoxKey != null) {
-            AggregateMetricGrid grid = boxGrids.get(activeBoxKey);
-            return grid.getAllGridRows();
+        List<GridRow> allRows = new ArrayList<>();
+
+        for (FeatureReference box: boxGrids.keySet()) {
+            allRows.addAll(boxGrids.get(box).getAllGridRows());
         }
 
-        return DefaultCollections.emptyList();
+        return allRows;
     }
 
     public MusicGridResults playAllTracks() {
@@ -147,5 +163,6 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
     public RelativeBeat getBeat(String gridTimeKey) {
         return musicClock.getBeat(gridTimeKey);
     }
+
 
 }

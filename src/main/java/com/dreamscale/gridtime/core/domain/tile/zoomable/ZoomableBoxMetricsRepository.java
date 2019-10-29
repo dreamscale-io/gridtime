@@ -30,4 +30,6 @@ public interface ZoomableBoxMetricsRepository extends CrudRepository<ZoomableBox
     List<ZoomableBoxMetricsEntity> findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                         @Param("zoom") String zoomLevel,
                                                         @Param("clock") Timestamp clockTime);
+
+
 }

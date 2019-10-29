@@ -75,7 +75,7 @@ public class NavigationTrackSet implements PlayableCompositeTrackSet {
         batchTrack.playEventAtBeat(moment, nextLocation);
 
         if (getLastLocation() != null) {
-            PlaceReference traversal = featureCache.lookupTraversalReference(lastLocation, nextLocation);
+            PlaceReference traversal = featureCache.lookupTraversalReference(getLastLocation(), nextLocation);
             if (traversal.getPlaceType() == PlaceType.BRIDGE_BETWEEN_BOXES) {
                 glyphReferences.addTraversalGlyph(traversal);
                 bridgeTrack.playEventAtBeat(moment, traversal);

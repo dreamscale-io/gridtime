@@ -20,20 +20,20 @@ public abstract class AbstractTorchieState implements TorchieState {
 
     private final UUID torchieId;
     private final UUID teamId;
-    private final TeamBoxConfiguration teamBoxConfiguration;
     private final FeatureCache featureCache;
 
     private Map<FeedStrategyFactory.FeedType, InputFeed> inputFeeds = DefaultCollections.map();
 
     private GeometryClock.GridTime gridTime;
 
+    private TeamBoxConfiguration teamBoxConfiguration;
     private GridTile activeGridTile;
 
-    public AbstractTorchieState(UUID torchieId, UUID teamId, TeamBoxConfiguration teamBoxConfiguration) {
+    public AbstractTorchieState(UUID torchieId, UUID teamId, TeamBoxConfiguration teamBoxConfiguration, FeatureCache featureCache) {
         this.torchieId = torchieId;
         this.teamId = teamId;
         this.teamBoxConfiguration = teamBoxConfiguration;
-        this.featureCache = new FeatureCache();
+        this.featureCache = featureCache;
     }
 
     @Override
@@ -51,9 +51,19 @@ public abstract class AbstractTorchieState implements TorchieState {
         return activeGridTile;
     }
 
+    public FeatureCache getFeatureCache() {
+        return featureCache;
+    }
+
     @Override
     public String getActiveTime() {
         return gridTime.toDisplayString();
+    }
+
+
+    @Override
+    public void changeBoxConfiguration(TeamBoxConfiguration teamBoxConfiguration) {
+        this.teamBoxConfiguration = teamBoxConfiguration;
     }
 
 

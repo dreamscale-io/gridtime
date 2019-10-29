@@ -7,7 +7,9 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState;
 import com.dreamscale.gridtime.core.machine.memory.PerProcessTorchieState;
+import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfigurationManager;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.TileSearchService;
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
@@ -21,7 +23,7 @@ import java.util.UUID;
 @Component
 public class TorchieFactory {
 
-    private static final int MAX_TEAMS = 5;
+
 
     @Autowired
     private ProgramFactory programFactory;
@@ -35,16 +37,21 @@ public class TorchieFactory {
     @Autowired
     private WorkToDoQueueWire workToDoQueueWire;
 
-    @Autowired
-    private BoxConfigurationLoaderService boxConfigurationLoaderService;
 
-    private Map<UUID, TeamBoxConfiguration> teamBoxConfigurations = DefaultCollections.lruMap(MAX_TEAMS);
+    @Autowired
+    private FeatureCacheManager featureCacheManager;
+
+    @Autowired
+    private TeamBoxConfigurationManager teamBoxConfigurationManager;
+
 
 
     public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
-        TeamBoxConfiguration teamBoxConfig = findOrCreateTeamBoxConfig(teamId);
 
-        PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,
+        FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(teamId);
+        TeamBoxConfiguration teamBoxConfig = teamBoxConfigurationManager.findOrCreateTeamBoxConfig(teamId);
+
+        PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,  featureCache,
                 teamBoxConfig, featureResolverService, tileSearchService);
 
         //stream data into the tiles
@@ -69,16 +76,6 @@ public class TorchieFactory {
 
         return new Torchie(torchieId, torchieState, program);
     }
-
-    private TeamBoxConfiguration findOrCreateTeamBoxConfig(UUID teamId) {
-        TeamBoxConfiguration teamBoxConfig = teamBoxConfigurations.get(teamId);
-        if (teamBoxConfig == null) {
-            teamBoxConfig = boxConfigurationLoaderService.loadBoxConfiguration(teamId);
-            teamBoxConfigurations.put(teamId, teamBoxConfig);
-        }
-        return teamBoxConfig;
-    }
-
 
 
 }

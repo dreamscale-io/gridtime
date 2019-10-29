@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class FeatureReferenceFactory {
@@ -46,6 +47,17 @@ public class FeatureReferenceFactory {
         Box box = new Box(projectId, boxName);
 
         return new PlaceReference(PlaceType.BOX, box.toSearchKey(), box);
+    }
+
+    public PlaceReference createBoxReferenceFromUri(UUID boxFeatureId, String boxUri) {
+
+
+        Map<String, String> variables = PlaceType.BOX.parseUri(boxUri);
+
+        String boxName = variables.get(PlaceType.TemplateVariable.BOX_NAME);
+        String projectId = variables.get(PlaceType.TemplateVariable.PROJECT_ID);
+
+        return new PlaceReference(boxFeatureId, PlaceType.BOX, new Box(UUID.fromString(projectId), boxName));
     }
 
     public PlaceReference createTraversalReference(LocationInBox fromLocation, LocationInBox toLocation) {
@@ -108,6 +120,7 @@ public class FeatureReferenceFactory {
 
        return new AuthorsReference(authorsType, authorsDetails.toSearchKey(), authorsDetails);
     }
+
 
 
 }

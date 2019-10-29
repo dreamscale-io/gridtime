@@ -49,6 +49,11 @@ public enum ExecutionEventType implements FeatureType {
     }
 
     @Override
+    public Map<String, String> parseUri(String uri) {
+        return uriTemplate.match(uri);
+    }
+
+    @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
         return serializationClass;
     }

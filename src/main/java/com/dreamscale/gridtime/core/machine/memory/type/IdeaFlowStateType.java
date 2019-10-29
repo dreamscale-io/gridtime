@@ -48,6 +48,12 @@ public enum IdeaFlowStateType implements FeatureType {
         }
     }
 
+    @Override
+    public Map<String, String> parseUri(String uri) {
+        return uriTemplate.match(uri);
+    }
+
+
     public String getTypeUri() {
         return typeUri;
     }

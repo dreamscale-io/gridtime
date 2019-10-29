@@ -7,6 +7,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateStre
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.LocasFactory;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +20,18 @@ public class AggregateWorkerProgram implements Program {
 
     private final Wire inputWire;
     private final LocasFactory locasFactory;
+    private final FeatureCacheManager featureCacheManager;
 
     private AggregateStreamEvent activeEvent;
     private Metronome.TickScope activeTick;
 
     private int latestQueueDepth;
 
-    public AggregateWorkerProgram(UUID workerId, Wire inputWire, LocasFactory locasFactory) {
+    public AggregateWorkerProgram(UUID workerId, Wire inputWire, LocasFactory locasFactory, FeatureCacheManager featureCacheManager) {
         this.workerId = workerId;
         this.inputWire = inputWire;
         this.locasFactory = locasFactory;
+        this.featureCacheManager = featureCacheManager;
     }
 
     @Override
@@ -66,6 +70,8 @@ public class AggregateWorkerProgram implements Program {
     }
 
     private TileInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
+
+        FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(activeEvent.getTeamId());
 
         List<Locas> aggregatorChain = new ArrayList<>();
         aggregatorChain.add(locasFactory.createIdeaFlowTeamAggregatorLocas(activeEvent.getTeamId()));

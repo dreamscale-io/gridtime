@@ -86,6 +86,20 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
         outputResults.add(results);
     }
 
+    public String getOutputResultString() {
+        String out = "";
+
+        if (outputTile != null) {
+            out += outputTile.playAllTracks().toDisplayString();
+        }
+
+        for (Results results : outputResults) {
+            out += results.toDisplayString();
+        }
+
+        return out;
+    }
+
     public Results getOutputResult() {
         if (outputResults.size() > 0) {
             return outputResults.get(0);

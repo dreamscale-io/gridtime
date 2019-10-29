@@ -11,7 +11,7 @@ public class MemoryOnlyTorchieState extends AbstractTorchieState {
 
 
     public MemoryOnlyTorchieState(UUID torchieId) {
-        super(torchieId, null, new TeamBoxConfiguration.Builder().build());
+        super(torchieId, null, new TeamBoxConfiguration.Builder().build(), new FeatureCache());
     }
 
 

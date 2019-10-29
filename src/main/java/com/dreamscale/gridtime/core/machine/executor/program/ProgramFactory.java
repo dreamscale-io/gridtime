@@ -8,6 +8,8 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.observer.Flow
 import com.dreamscale.gridtime.core.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.transform.FlowTransformFactory;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,8 +80,8 @@ public class ProgramFactory {
         return program;
     }
 
-    public AggregateWorkerProgram createAggregateWorkerProgram(UUID workerId) {
-        return new AggregateWorkerProgram(workerId, workToDoQueueWire, locasFactory);
+    public AggregateWorkerProgram createAggregateWorkerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
+        return new AggregateWorkerProgram(workerId, workToDoQueueWire, locasFactory, featureCacheManager);
     }
 
 

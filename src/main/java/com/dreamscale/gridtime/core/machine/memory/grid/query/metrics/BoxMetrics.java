@@ -4,7 +4,9 @@ import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntit
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
+import com.dreamscale.gridtime.core.machine.memory.grid.BoxAggregateMetricGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.aggregate.MetricQuery;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -46,8 +49,53 @@ public class BoxMetrics implements MetricQuery {
 
 //do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
+    public static List<BoxMetrics> queryFromAggregateGrid(BoxAggregateMetricGrid boxGrid) {
+
+        List<BoxMetrics> boxMetricsList = new ArrayList<>();
+
+        Set<FeatureReference> boxes = boxGrid.getFeaturesOfType(PlaceType.BOX);
+
+        for (FeatureReference box : boxes) {
+            BoxMetrics boxMetrics = new BoxMetrics();
+
+            boxMetrics.setBox((PlaceReference) box);
+
+            boxMetrics.setZoomLevel(boxGrid.getZoomLevel());
+
+            boxMetrics.setTimeInBox(boxGrid.getTotalDuration(box));
+            boxMetrics.setPercentWtf(boxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_WTF));
+            boxMetrics.setPercentLearning(boxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_PROGRESS));
+            boxMetrics.setPercentProgress(boxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_WTF));
+            boxMetrics.setPercentPairing(boxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_PAIRING));
+            boxMetrics.setAvgFlame(boxGrid.getMetric(box, MetricRowKey.ZOOM_AVG_FLAME));
+
+//            boxMetrics.setAvgExecutionTime(boxGrid.getMetric(box, MetricRowKey.EXECUTION_RUN_TIME));
+//            boxMetrics.setAvgTraversalSpeed(boxGrid.getMetric(box, MetricRowKey.FILE_TRAVERSAL_VELOCITY));
+//            boxMetrics.setAvgFileBatchSize(boxGrid.getMetric(box, MetricRowKey.FILE_TRAVERSAL_VELOCITY));
+
+            boxMetricsList.add(boxMetrics);
+
+        }
+
+        return boxMetricsList;
+    }
+
+
+
     public static List<BoxMetrics> queryFrom(IMusicGrid musicGrid) {
 
+        if (musicGrid instanceof MusicGrid) {
+            return queryFromMusicGrid((MusicGrid) musicGrid);
+        }
+
+        if (musicGrid instanceof BoxAggregateMetricGrid) {
+            return queryFromAggregateGrid((BoxAggregateMetricGrid) musicGrid);
+        }
+
+        return Collections.emptyList();
+    }
+
+    private static List<BoxMetrics> queryFromMusicGrid(MusicGrid musicGrid) {
         List<BoxMetrics> boxMetricsList = new ArrayList<>();
 
         Set<FeatureReference> boxes = musicGrid.getFeaturesOfType(PlaceType.BOX);

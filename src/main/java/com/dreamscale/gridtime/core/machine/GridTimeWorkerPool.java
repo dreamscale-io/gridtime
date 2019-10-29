@@ -8,6 +8,8 @@ import com.dreamscale.gridtime.core.machine.executor.worker.AggregationWorkerPoo
 import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.executor.worker.WorkerPool;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -24,8 +26,8 @@ public class GridTimeWorkerPool implements WorkerPool {
 
     boolean lastInstructionIsTorchie = false;
 
-    public GridTimeWorkerPool(ProgramFactory programFactory, Wire workToDoWire) {
-        this.aggregateWorkerPool = new AggregationWorkerPool(programFactory, workToDoWire);
+    public GridTimeWorkerPool(ProgramFactory programFactory, Wire workToDoWire, FeatureCacheManager featureCacheManager) {
+        this.aggregateWorkerPool = new AggregationWorkerPool(programFactory, workToDoWire, featureCacheManager);
     }
 
     public boolean hasWork() {
@@ -57,7 +59,7 @@ public class GridTimeWorkerPool implements WorkerPool {
         return torchieWorkerPool.getWorker(workerId);
     }
 
-    public void startTorchieIfNotActiveInPile(Torchie torchie) {
+    public void startTorchieIfNotActive(Torchie torchie) {
         if (!torchieWorkerPool.containsWorker(torchie)) {
             torchieWorkerPool.addWorker(torchie);
         }

@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMet
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTeamLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.grid.TeamMetricGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +18,10 @@ public class ZoomableTeamIdeaFlowLocas extends ZoomableTeamLocas<ZoomableTeamIde
 
 
     public ZoomableTeamIdeaFlowLocas(UUID teamId,
+                                     FeatureCache featureCache,
                                      InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> input,
                                      OutputStrategy output) {
-        super(teamId, input, output);
+        super(teamId, featureCache, input, output);
 
     }
 

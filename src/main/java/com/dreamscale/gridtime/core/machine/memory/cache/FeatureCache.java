@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.type.*;
 import org.apache.commons.collections.map.LRUMap;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class FeatureCache {
@@ -73,6 +74,13 @@ public class FeatureCache {
         PlaceReference locationReference = featureReferenceFactory.createLocationReference(projectId, boxName, locationPath);
 
         return cacheLookup(locationReference);
+    }
+
+    public PlaceReference lookupBoxReferenceWithUri(UUID boxFeatureId, String boxUri) {
+
+        PlaceReference boxReference = featureReferenceFactory.createBoxReferenceFromUri(boxFeatureId, boxUri);
+
+        return cacheLookup(boxReference);
     }
 
     public PlaceReference lookupBoxReference(PlaceReference locationReference) {

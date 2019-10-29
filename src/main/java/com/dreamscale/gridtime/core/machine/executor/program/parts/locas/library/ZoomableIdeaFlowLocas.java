@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTimeLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.grid.AggregateMetricGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,10 @@ import java.util.UUID;
 public class ZoomableIdeaFlowLocas extends ZoomableTimeLocas<ZoomableIdeaFlowMetricsEntity> {
 
 
-    public ZoomableIdeaFlowLocas(UUID teamId, UUID torchieId,
+    public ZoomableIdeaFlowLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
                                  InputStrategy<ZoomableIdeaFlowMetricsEntity> input,
                                  OutputStrategy output) {
-        super(teamId, torchieId, input, output);
+        super(teamId, torchieId, featureCache, input, output);
 
     }
 

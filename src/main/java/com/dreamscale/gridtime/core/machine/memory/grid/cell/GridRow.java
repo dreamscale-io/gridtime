@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.cell;
 
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.type.GridCell;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
@@ -94,6 +95,10 @@ public class GridRow implements Iterable<GridCell> {
     @Override
     public Iterator<GridCell> iterator() {
         return gridCells.iterator();
+    }
+
+    public GridCell getSummaryCell(AggregateType aggregateType) {
+        return getSummaryCell(aggregateType.getHeader());
     }
 
     public GridCell getSummaryCell(String header) {

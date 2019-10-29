@@ -21,6 +21,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStra
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.service.TeamService
 import com.dreamscale.gridtime.core.service.TimeService
@@ -64,6 +65,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     @Autowired
     WorkToDoQueueWire workToDoQueueWire
 
+    @Autowired
+    FeatureCacheManager featureCacheManager
+
     LocalDateTime clockStart
     LocalDateTime wtfTime
     LocalDateTime time2
@@ -106,7 +110,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         mockTimeService.now() >> LocalDateTime.now()
 
-        gridTimeWorkerPool = new GridTimeWorkerPool(programFactory, workToDoQueueWire)
+        gridTimeWorkerPool = new GridTimeWorkerPool(programFactory, workToDoQueueWire, featureCacheManager)
 
     }
 
