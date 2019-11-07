@@ -1,15 +1,15 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
-import com.dreamscale.gridtime.core.machine.memory.grid.BoxAggregateMetricGrid;
-import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
+import com.dreamscale.gridtime.core.machine.memory.grid.CompositeBoxGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public abstract class ZoomableBoxTimeLocas<T> implements Locas {
 
     private final FeatureCache featureCache;
 
-    private BoxAggregateMetricGrid aggregateMetricGrid;
+    private CompositeBoxGrid compositeBoxGrid;
 
     public ZoomableBoxTimeLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
                                 InputStrategy<T> input,
@@ -39,34 +39,41 @@ public abstract class ZoomableBoxTimeLocas<T> implements Locas {
     }
 
     @Override
-    public BoxAggregateMetricGrid runProgram(Metronome.TickScope tickScope) {
+    public CompositeBoxGrid runProgram(Metronome.TickScope tickScope) {
+
+        TorchieHashId torchieHash = new TorchieHashId(torchieId);
+
+        String zoomGridId = "BoxGrid:Id:"+torchieHash.toDisplayString() + tickScope.getFrom().toDisplayString();
+
         List<T> metricInputs = input.breatheIn(teamId, torchieId, tickScope);
 
-        log.debug("Found "+metricInputs.size() + " metrics at tick: "+ tickScope.toDisplayString());
+        log.debug(zoomGridId + ": Found "+metricInputs.size() + " input metrics");
 
-        this.aggregateMetricGrid = createAggregateGrid(tickScope.getFrom());
+        this.compositeBoxGrid = createCompositeBoxGrid(zoomGridId, tickScope.getFrom());
 
-        fillAggregateGrid(aggregateMetricGrid, featureCache, metricInputs);
-        aggregateMetricGrid.finish();
+        fillCompositeZoomGrid(compositeBoxGrid, featureCache, metricInputs);
+        compositeBoxGrid.finish();
 
-        output.breatheOut(torchieId, tickScope, aggregateMetricGrid);
+        int recordsSaved = output.breatheOut(torchieId, tickScope, compositeBoxGrid);
 
-        return aggregateMetricGrid;
+        log.debug(zoomGridId + ": Saved "+recordsSaved + " output metrics");
+
+        return compositeBoxGrid;
     }
 
     @Override
-    public MusicGridResults playAllTracks() {
-        return aggregateMetricGrid.playAllTracks();
+    public Results playAllTracks() {
+        return compositeBoxGrid.playAllTracks();
     }
 
-    protected abstract void fillAggregateGrid(BoxAggregateMetricGrid aggregateMetricGrid,
-                                              FeatureCache featureCache, List<T> metricInputs);
+    protected abstract void fillCompositeZoomGrid(CompositeBoxGrid boxZoomGrid,
+                                                  FeatureCache featureCache, List<T> metricInputs);
 
-    private BoxAggregateMetricGrid createAggregateGrid(GeometryClock.GridTime gridTime) {
+    private CompositeBoxGrid createCompositeBoxGrid(String gridId, GeometryClock.GridTime gridTime) {
 
         MusicClock musicClock = new MusicClock(gridTime);
 
-        return new BoxAggregateMetricGrid(gridTime, musicClock);
+        return new CompositeBoxGrid(gridId, gridTime, musicClock);
     }
 
 }

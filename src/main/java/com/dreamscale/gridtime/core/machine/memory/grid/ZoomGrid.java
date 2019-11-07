@@ -2,6 +2,8 @@ package com.dreamscale.gridtime.core.machine.memory.grid;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.MusicClock;
+import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
@@ -9,7 +11,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
-import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTeamTrack;
+import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTrack;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,50 +19,38 @@ import java.time.Duration;
 import java.util.*;
 
 @Slf4j
-public class TeamMetricGrid implements IMusicGrid {
+public class ZoomGrid implements IMusicGrid {
 
     private final GeometryClock.GridTime gridTime;
+    private final MusicClock musicClock;
+    private final String groupTitle;
 
-    private Map<MetricRowKey, WeightedMetricTeamTrack> weightedMetricTracks = DefaultCollections.map();
+    private Map<MetricRowKey, WeightedMetricTrack> weightedMetricTracks = DefaultCollections.map();
 
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
 
-    private Map<UUID, String> columnHeaderMap = DefaultCollections.map();
-
-    public TeamMetricGrid(GeometryClock.GridTime gridTime) {
+    public ZoomGrid(String groupTitle, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.groupTitle = groupTitle;
         this.gridTime = gridTime;
-
+        this.musicClock = musicClock;
     }
 
-    public void addColumn(UUID torchieId, String columnHeader) {
-        columnHeaderMap.put(torchieId, columnHeader);
+    public RelativeBeat getBeat(String gridTimeKey) {
+        return musicClock.getBeat(gridTimeKey);
     }
 
-    public void addTimeForColumn(UUID torchieId, Duration duration) {
-
-        String columnHeader = columnHeaderMap.get(torchieId);
-
-        WeightedMetricTeamTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
-        timeTrack.addWeightedMetric(torchieId, columnHeader, Duration.ofSeconds(1), (double)duration.getSeconds());
-
-    }
-
-    public void addWeightedMetric(UUID torchieId, MetricRowKey metricRowKey, Duration durationWeight, Double metric) {
-        String columnHeader = columnHeaderMap.get(torchieId);
-
-        WeightedMetricTeamTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
-
-        track.addWeightedMetric(torchieId, columnHeader, durationWeight, metric);
-    }
-
-    @Override
     public ZoomLevel getZoomLevel() {
-        return gridTime.getZoomLevel();
+        return musicClock.getZoomLevel();
+    }
+
+    public void addDurationAtBeat(RelativeBeat beat, Duration duration) {
+        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        timeTrack.addWeightedMetric(beat, Duration.ofSeconds(1), (double)duration.getSeconds());
     }
 
     public Duration getTotalDuration() {
-        WeightedMetricTeamTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
+        WeightedMetricTrack timeTrack = findOrCreateWeightedMetricTrack(MetricRowKey.ZOOM_DURATION_IN_TILE);
         if (timeTrack != null) {
             return Duration.ofSeconds(timeTrack.getTotalCalculation().longValue());
         } else {
@@ -78,12 +68,18 @@ public class TeamMetricGrid implements IMusicGrid {
         return null;
     }
 
+    public void addWeightedMetric(MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
+        WeightedMetricTrack track = findOrCreateWeightedMetricTrack(metricRowKey);
 
-    private WeightedMetricTeamTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
-        WeightedMetricTeamTrack track = weightedMetricTracks.get(metricRowKey);
+        track.addWeightedMetric(beat, durationWeight, metric);
+    }
+
+
+    private WeightedMetricTrack findOrCreateWeightedMetricTrack(MetricRowKey metricRowKey) {
+        WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
 
         if (track == null) {
-            track = new WeightedMetricTeamTrack(metricRowKey);
+            track = new WeightedMetricTrack(metricRowKey, musicClock);
             weightedMetricTracks.put(metricRowKey, track);
         }
 
@@ -93,14 +89,12 @@ public class TeamMetricGrid implements IMusicGrid {
 
     public void finish() {
 
-        for (WeightedMetricTeamTrack track : weightedMetricTracks.values()) {
+        for (WeightedMetricTrack track : weightedMetricTracks.values()) {
             track.finish();
         }
 
         exportGridRows();
     }
-
-
 
     public GridRow getRow(Key rowKey) {
         return exportedRowsByKey.get(rowKey);
@@ -129,7 +123,7 @@ public class TeamMetricGrid implements IMusicGrid {
             }
         }
 
-        return new MusicGridResults(headerRow, valueRows);
+        return new MusicGridResults(groupTitle, headerRow, valueRows);
     }
 
     private void exportGridRows() {
@@ -138,7 +132,7 @@ public class TeamMetricGrid implements IMusicGrid {
             exportedRows = DefaultCollections.list();
 
             for (MetricRowKey metricRowKey : weightedMetricTracks.keySet()) {
-                WeightedMetricTeamTrack track = weightedMetricTracks.get(metricRowKey);
+                WeightedMetricTrack track = weightedMetricTracks.get(metricRowKey);
 
                 exportedRows.addAll(track.toGridRows());
             }

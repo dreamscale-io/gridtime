@@ -9,6 +9,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
@@ -53,7 +55,11 @@ public class GridTile {
 
         this.zoomLevel = gridTime.getZoomLevel();
         this.musicClock = new MusicClock(zoomLevel);
-        this.musicGrid = new MusicGrid(featureCache, gridTime, musicClock);
+
+        TorchieHashId torchieHashId = new TorchieHashId(torchieId);
+
+        String title = "GridTile:Id:@tile"+ torchieHashId.toDisplayString() + gridTime.toDisplayString();
+        this.musicGrid = new MusicGrid(title, featureCache, gridTime, musicClock);
         this.tileAnalytics = new TileAnalytics(featureCache, musicClock, musicGrid);
 
         this.timeBombTriggers = DefaultCollections.list();

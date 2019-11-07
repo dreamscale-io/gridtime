@@ -371,7 +371,7 @@ public class GeometryClock {
 
         @Override
         public String toDisplayString() {
-            return formattedGridTime;
+            return "/gridtime/"+formattedGridTime;
         }
 
         public ZoomLevel getZoomLevel() {

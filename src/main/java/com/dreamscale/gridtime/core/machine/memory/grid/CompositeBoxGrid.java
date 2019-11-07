@@ -1,14 +1,12 @@
 package com.dreamscale.gridtime.core.machine.memory.grid;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CompoundGridResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
@@ -22,15 +20,17 @@ import java.time.Duration;
 import java.util.*;
 
 @Slf4j
-public class BoxAggregateMetricGrid implements IMusicGrid {
+public class CompositeBoxGrid implements IMusicGrid {
 
     private final GeometryClock.GridTime gridTime;
     private final MusicClock musicClock;
+    private final String gridTitle;
 
-    private Map<FeatureReference, AggregateMetricGrid> boxGrids = DefaultCollections.map();
+    private Map<FeatureReference, ZoomGrid> boxGrids = DefaultCollections.map();
 
 
-    public BoxAggregateMetricGrid(GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public CompositeBoxGrid(String gridTitle, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.gridTitle = gridTitle;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
     }
@@ -43,7 +43,7 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
     @Override
     public GridRow getRow(Key rowKey) {
         if (boxGrids.size() > 0) {
-            AggregateMetricGrid firstGrid = boxGrids.values().iterator().next();
+            ZoomGrid firstGrid = boxGrids.values().iterator().next();
             return firstGrid.getRow(rowKey);
         }
 
@@ -51,32 +51,32 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
     }
 
     public void addBoxMetric(FeatureReference box, MetricRowKey metricRowKey, RelativeBeat beat, Duration durationWeight, Double metric) {
-        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
+        ZoomGrid zoomGrid = findOrCreateZoomGrid(box);
 
-        aggregateMetricGrid.addWeightedMetric(metricRowKey, beat, durationWeight, metric);
+        zoomGrid.addWeightedMetric(metricRowKey, beat, durationWeight, metric);
     }
 
     public Double getMetric(FeatureReference box, MetricRowKey metricRowKey) {
 
-        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
+        ZoomGrid zoomGrid = findOrCreateZoomGrid(box);
 
-        GridRow gridRow = aggregateMetricGrid.getRow(metricRowKey);
+        GridRow gridRow = zoomGrid.getRow(metricRowKey);
         return (Double) gridRow.getSummaryCell(AggregateType.AVG).toValue();
     }
 
     public Duration getTotalDuration(FeatureReference box) {
 
-        AggregateMetricGrid aggregateMetricGrid = findOrCreateAggregateGrid(box);
+        ZoomGrid zoomGrid = findOrCreateZoomGrid(box);
 
-        return aggregateMetricGrid.getTotalDuration();
+        return zoomGrid.getTotalDuration();
     }
 
 
-    private AggregateMetricGrid findOrCreateAggregateGrid(FeatureReference boxReference) {
-        AggregateMetricGrid grid = boxGrids.get(boxReference);
+    private ZoomGrid findOrCreateZoomGrid(FeatureReference boxReference) {
+        ZoomGrid grid = boxGrids.get(boxReference);
 
         if (grid == null) {
-            grid = new AggregateMetricGrid(gridTime, musicClock);
+            grid = new ZoomGrid("Group:Id:"+boxReference.toDisplayString(), gridTime, musicClock);
             boxGrids.put(boxReference, grid);
         }
 
@@ -87,7 +87,7 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
     public Duration getTotalDuration() {
         Duration totalDuration = Duration.ZERO;
 
-        for (AggregateMetricGrid grid : boxGrids.values()) {
+        for (ZoomGrid grid : boxGrids.values()) {
             totalDuration = totalDuration.plus(grid.getTotalDuration());
         }
 
@@ -108,16 +108,15 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
         return Collections.emptySet();
     }
 
-
     public void finish() {
 
-        for (AggregateMetricGrid grid : boxGrids.values()) {
+        for (ZoomGrid grid : boxGrids.values()) {
             grid.finish();
         }
     }
 
     public GridRow getRow(FeatureReference box, Key rowKey) {
-        AggregateMetricGrid grid = boxGrids.get(box);
+        ZoomGrid grid = boxGrids.get(box);
 
         if (grid != null) {
             return grid.getRow(rowKey);
@@ -126,38 +125,24 @@ public class BoxAggregateMetricGrid implements IMusicGrid {
         return null;
     }
 
-
     public List<GridRow> getAllGridRows() {
-
         List<GridRow> allRows = new ArrayList<>();
 
-        for (FeatureReference box: boxGrids.keySet()) {
-            allRows.addAll(boxGrids.get(box).getAllGridRows());
+        for (ZoomGrid grid : boxGrids.values()) {
+            allRows.addAll(grid.getAllGridRows());
         }
-
         return allRows;
     }
 
-    public MusicGridResults playAllTracks() {
-        return toMusicGridResults(getAllGridRows());
-    }
+    public CompoundGridResults playAllTracks() {
 
-    private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
+        CompoundGridResults compoundGrid = new CompoundGridResults(gridTitle);
 
-        List<String> headerRow = new ArrayList<>();
-        List<List<String>> valueRows = new ArrayList<>();
-
-        if (gridRows != null && gridRows.size() > 0) {
-            GridRow firstRow = gridRows.get(0);
-
-            headerRow.addAll(firstRow.toHeaderColumns());
-
-            for (GridRow gridRow : gridRows) {
-                valueRows.add( gridRow.toValueRow());
-            }
+        for (ZoomGrid grid : boxGrids.values()) {
+            compoundGrid.addGrid(grid.playAllTracks());
         }
 
-        return new MusicGridResults(headerRow, valueRows);
+        return compoundGrid;
     }
 
     public RelativeBeat getBeat(String gridTimeKey) {

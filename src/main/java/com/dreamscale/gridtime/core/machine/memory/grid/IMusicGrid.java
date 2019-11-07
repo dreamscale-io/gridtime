@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.grid;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
@@ -21,7 +22,7 @@ public interface IMusicGrid {
 
     List<GridRow> getAllGridRows();
 
-    MusicGridResults playAllTracks();
+    Results playAllTracks();
 
     Duration getTotalDuration();
 

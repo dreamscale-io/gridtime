@@ -35,6 +35,7 @@ public class MusicGrid implements IMusicGrid {
     private final MusicClock musicClock;
     private final GlyphReferences glyphReferences;
     private final FeatureLandscapeMetrics landscapeMetrics;
+    private final String title;
 
     private AuthorsTrackSet authorsTracks;
     private FeelsTrackSet feelsTracks;
@@ -50,7 +51,8 @@ public class MusicGrid implements IMusicGrid {
     private List<GridRow> exportedRows;
     private Map<Key, GridRow> exportedRowsByKey;
 
-    public MusicGrid(FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+    public MusicGrid(String title, FeatureCache featureCache, GeometryClock.GridTime gridTime, MusicClock musicClock) {
+        this.title = title;
         this.featureCache = featureCache;
         this.gridTime = gridTime;
         this.musicClock = musicClock;
@@ -284,7 +286,7 @@ public class MusicGrid implements IMusicGrid {
             }
         }
 
-        return new MusicGridResults(headerRow, valueRows);
+        return new MusicGridResults(title, headerRow, valueRows);
     }
 
     private void exportGridRows() {

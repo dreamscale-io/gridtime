@@ -1,16 +1,13 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library;
 
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntity;
-import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMetricsEntity;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTeamLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.grid.TeamMetricGrid;
-import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
+import com.dreamscale.gridtime.core.machine.memory.grid.TeamZoomGrid;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +23,7 @@ public class ZoomableTeamBoxLocas extends ZoomableTeamLocas<ZoomableBoxMetricsEn
     }
 
     @Override
-    protected void fillTeamGrid(TeamMetricGrid teamMetricGrid, List<ZoomableBoxMetricsEntity> ideaflowInputs) {
+    protected void fillTeamGrid(TeamZoomGrid teamZoomGrid, List<ZoomableBoxMetricsEntity> ideaflowInputs) {
 
         for (ZoomableBoxMetricsEntity ideaflow : ideaflowInputs) {
 

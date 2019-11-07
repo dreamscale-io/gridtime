@@ -24,4 +24,5 @@ public class Box implements FeatureDetails {
     public String toSearchKey() {
         return SearchKeyGenerator.createBoxSearchKey(projectId, boxName);
     }
+
 }

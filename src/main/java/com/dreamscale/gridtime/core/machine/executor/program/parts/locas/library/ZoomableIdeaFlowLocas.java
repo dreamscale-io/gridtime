@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.Zoomabl
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.grid.AggregateMetricGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.ZoomGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,20 +26,20 @@ public class ZoomableIdeaFlowLocas extends ZoomableTimeLocas<ZoomableIdeaFlowMet
     }
 
     @Override
-    protected void fillAggregateGrid(AggregateMetricGrid aggregateMetricGrid, List<ZoomableIdeaFlowMetricsEntity> ideaflowInputs) {
+    protected void fillZoomGrid(ZoomGrid zoomGrid, List<ZoomableIdeaFlowMetricsEntity> ideaflowInputs) {
 
         for (ZoomableIdeaFlowMetricsEntity ideaflow : ideaflowInputs) {
 
-            RelativeBeat beat = aggregateMetricGrid.getBeat(ideaflow.getGridTime());
+            RelativeBeat beat = zoomGrid.getBeat(ideaflow.getGridTime());
             Duration durationWeight = Duration.ofSeconds(ideaflow.getTimeInTile());
 
-            aggregateMetricGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_WTF, beat, durationWeight, ideaflow.getPercentWtf());
-            aggregateMetricGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_LEARNING, beat, durationWeight, ideaflow.getPercentLearning());
-            aggregateMetricGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_PROGRESS, beat, durationWeight, ideaflow.getPercentProgress());
-            aggregateMetricGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_PAIRING, beat, durationWeight, ideaflow.getPercentPairing());
-            aggregateMetricGrid.addWeightedMetric(MetricRowKey.ZOOM_AVG_FLAME, beat, durationWeight, ideaflow.getAvgFlame());
+            zoomGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_WTF, beat, durationWeight, ideaflow.getPercentWtf());
+            zoomGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_LEARNING, beat, durationWeight, ideaflow.getPercentLearning());
+            zoomGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_PROGRESS, beat, durationWeight, ideaflow.getPercentProgress());
+            zoomGrid.addWeightedMetric(MetricRowKey.ZOOM_PERCENT_PAIRING, beat, durationWeight, ideaflow.getPercentPairing());
+            zoomGrid.addWeightedMetric(MetricRowKey.ZOOM_AVG_FLAME, beat, durationWeight, ideaflow.getAvgFlame());
 
-            aggregateMetricGrid.addTimeInTile(beat, durationWeight);
+            zoomGrid.addDurationAtBeat(beat, durationWeight);
 
         }
 

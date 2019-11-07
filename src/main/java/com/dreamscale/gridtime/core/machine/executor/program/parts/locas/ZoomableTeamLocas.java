@@ -6,8 +6,10 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
+import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
-import com.dreamscale.gridtime.core.machine.memory.grid.TeamMetricGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.TeamZoomGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public abstract class ZoomableTeamLocas<T> implements Locas {
     private final InputStrategy<T> input;
     private final OutputStrategy output;
 
-    private TeamMetricGrid teamMetricGrid;
+    private TeamZoomGrid teamZoomGrid;
 
     public ZoomableTeamLocas(UUID teamId, FeatureCache featureCache,
                              InputStrategy<T> input,
@@ -35,30 +37,43 @@ public abstract class ZoomableTeamLocas<T> implements Locas {
 
     @Override
     public IMusicGrid runProgram(Metronome.TickScope tickScope) {
+
+        TeamHashId teamHash = new TeamHashId(teamId);
+
+        String zoomGridId = "TeamZoomGrid:Id:@tile"+teamHash.toDisplayString() +
+                tickScope.getFrom().toDisplayString();
+
+
         List<T> metricInputs = input.breatheIn(teamId, teamId, tickScope);
 
-        log.debug("Found "+metricInputs.size() + " metrics at tick: "+ tickScope.toDisplayString());
+        log.debug(zoomGridId + ": Found "+metricInputs.size() + " input metrics");
 
-        this.teamMetricGrid = createTeamGrid(tickScope.getFrom());
+        this.teamZoomGrid = createTeamZoomGrid(tickScope.getFrom());
 
-        fillTeamGrid(teamMetricGrid, metricInputs);
-        teamMetricGrid.finish();
+        fillTeamGrid(teamZoomGrid, metricInputs);
+        teamZoomGrid.finish();
 
-        output.breatheOut(teamId, tickScope, teamMetricGrid);
+        int recordsSaved = output.breatheOut(teamId, tickScope, teamZoomGrid);
 
-        return teamMetricGrid;
+        log.debug(zoomGridId + ": Saved "+recordsSaved + " output metrics");
+
+        return teamZoomGrid;
     }
 
     @Override
     public MusicGridResults playAllTracks() {
-        return teamMetricGrid.playAllTracks();
+        return teamZoomGrid.playAllTracks();
     }
 
-    protected abstract void fillTeamGrid(TeamMetricGrid teamMetricGrid, List<T> metricInputs);
+    protected abstract void fillTeamGrid(TeamZoomGrid teamZoomGrid, List<T> metricInputs);
 
-    private TeamMetricGrid createTeamGrid(GeometryClock.GridTime gridTime) {
+    private TeamZoomGrid createTeamZoomGrid(GeometryClock.GridTime gridTime) {
 
-        return new TeamMetricGrid(gridTime);
+        TeamHashId teamHashId = new TeamHashId(teamId);
+
+        String title = "TeamZoomGrid:Id:@tile"+teamHashId.toDisplayString() + gridTime.toDisplayString();
+
+        return new TeamZoomGrid(title, gridTime);
     }
 
 }

@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface OutputStrategy {
 
-    void breatheOut(UUID torchieId, Metronome.TickScope tickScope, IMusicGrid outputGrid);
+    int breatheOut(UUID torchieId, Metronome.TickScope tickScope, IMusicGrid outputGrid);
 }

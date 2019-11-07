@@ -65,7 +65,7 @@ class TorchieCmdSpec extends Specification {
 
         then:
         assert torchieState.getActiveTile() != null
-        assert torchieState.getActiveTile().gridTime.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
+        assert torchieState.getActiveTile().gridTime.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+2:20"
 
     }
 

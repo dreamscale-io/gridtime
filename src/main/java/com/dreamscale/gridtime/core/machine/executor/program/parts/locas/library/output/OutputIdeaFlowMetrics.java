@@ -35,7 +35,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
     GridRowRepository gridRowRepository;
 
     @Override
-    public void breatheOut(UUID torchieId, Metronome.TickScope tickScope, IMusicGrid musicGrid) {
+    public int breatheOut(UUID torchieId, Metronome.TickScope tickScope, IMusicGrid musicGrid) {
 
         IdeaFlowMetrics ideaFlowMetrics = IdeaFlowMetrics.queryFrom(musicGrid);
 
@@ -54,6 +54,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
         }
         gridRowRepository.save(rowEntities);
 
+        return rowEntities.size();
     }
 
     private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {

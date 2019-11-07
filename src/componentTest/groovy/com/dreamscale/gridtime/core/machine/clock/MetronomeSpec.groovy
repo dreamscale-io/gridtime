@@ -33,23 +33,23 @@ class MetronomeSpec extends Specification {
         Metronome.TickScope tick13 = metronome.tick()
 
         then:
-        assert tick1.from.toDisplayString() == "2019-B1-W1-D1_12am+0:00"
-        assert tick2.from.toDisplayString() == "2019-B1-W1-D1_12am+0:20"
-        assert tick3.from.toDisplayString() == "2019-B1-W1-D1_12am+0:40"
-        assert tick4.from.toDisplayString() == "2019-B1-W1-D1_12am+1:00"
-        assert tick5.from.toDisplayString() == "2019-B1-W1-D1_12am+1:20"
-        assert tick6.from.toDisplayString() == "2019-B1-W1-D1_12am+1:40"
-        assert tick7.from.toDisplayString() == "2019-B1-W1-D1_12am+2:00"
-        assert tick8.from.toDisplayString() == "2019-B1-W1-D1_12am+2:20"
-        assert tick9.from.toDisplayString() == "2019-B1-W1-D1_12am+2:40"
-        assert tick10.from.toDisplayString() == "2019-B1-W1-D1_12am+3:00"
-        assert tick11.from.toDisplayString() == "2019-B1-W1-D1_12am+3:20"
-        assert tick12.from.toDisplayString() == "2019-B1-W1-D1_12am+3:40"
+        assert tick1.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+0:00"
+        assert tick2.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+0:20"
+        assert tick3.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+0:40"
+        assert tick4.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+1:00"
+        assert tick5.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+1:20"
+        assert tick6.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+1:40"
+        assert tick7.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+2:00"
+        assert tick8.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+2:20"
+        assert tick9.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+2:40"
+        assert tick10.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+3:00"
+        assert tick11.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+3:20"
+        assert tick12.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am+3:40"
 
-        assert tick13.from.toDisplayString() == "2019-B1-W1-D1_4am+0:00"
+        assert tick13.from.toDisplayString() == "/gridtime/2019-B1-W1-D1_4am+0:00"
 
-        assert tick12.aggregateTickScopes[0].from.toDisplayString() == "2019-B1-W1-D1_12am"
-        assert tick12.aggregateTickScopes[0].to.toDisplayString() == "2019-B1-W1-D1_4am"
+        assert tick12.aggregateTickScopes[0].from.toDisplayString() == "/gridtime/2019-B1-W1-D1_12am"
+        assert tick12.aggregateTickScopes[0].to.toDisplayString() == "/gridtime/2019-B1-W1-D1_4am"
     }
 
 }

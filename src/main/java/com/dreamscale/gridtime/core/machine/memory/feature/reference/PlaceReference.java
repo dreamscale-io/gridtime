@@ -122,6 +122,6 @@ public class PlaceReference extends FeatureReference {
 
     @Override
     public String toDisplayString() {
-        return getPlaceType().toDisplayString();
+        return getSearchKey();
     }
 }

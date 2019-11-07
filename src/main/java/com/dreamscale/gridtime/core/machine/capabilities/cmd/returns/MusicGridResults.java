@@ -8,6 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 public class MusicGridResults implements Results {
 
+    String title;
     List<String> headers;
     List<List<String>> rowsOfPaddedCells;
 
@@ -54,6 +55,8 @@ public class MusicGridResults implements Results {
     @Override
     public String toDisplayString() {
         String gridOutput = "\n";
+
+        gridOutput += "|" + title + "\n";
 
         gridOutput += "|" + StringUtils.join(headers, "|") + "\n";
 
