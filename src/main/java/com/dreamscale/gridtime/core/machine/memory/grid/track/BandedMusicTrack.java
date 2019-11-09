@@ -139,8 +139,21 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
         Iterator<RelativeBeat> iterator = musicClock.getBackwardsIterator();
 
         while (iterator.hasNext()) {
-            F feature = getFeatureAt(iterator.next());
+
+            RelativeBeat beat = iterator.next();
+
+            F feature = getFeatureAt(beat);
             if (feature != null) {
+
+                List<FeatureTag<F>> tags = getTagsAt(beat);
+                if (tags != null && !tags.isEmpty()) {
+                    for (FeatureTag<F> tag : tags) {
+                        if (tag.isFinish()) {
+                            return null;
+                        }
+                    }
+                }
+
                 return feature;
             }
         }

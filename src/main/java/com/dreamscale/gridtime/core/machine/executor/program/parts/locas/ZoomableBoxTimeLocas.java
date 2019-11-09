@@ -43,7 +43,7 @@ public abstract class ZoomableBoxTimeLocas<T> implements Locas {
 
         TorchieHashId torchieHash = new TorchieHashId(torchieId);
 
-        String zoomGridId = "BoxGrid:Id:"+torchieHash.toDisplayString() + tickScope.getFrom().toDisplayString();
+        String zoomGridId = "BoxGrid:Id:@tile"+torchieHash.toDisplayString() + tickScope.getFrom().toDisplayString();
 
         List<T> metricInputs = input.breatheIn(teamId, torchieId, tickScope);
 

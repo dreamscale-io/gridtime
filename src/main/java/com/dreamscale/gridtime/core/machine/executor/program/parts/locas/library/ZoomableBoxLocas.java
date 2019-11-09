@@ -48,6 +48,8 @@ public class ZoomableBoxLocas extends ZoomableBoxTimeLocas<ZoomableBoxMetricsEnt
             boxZoomGrid.addBoxMetric(boxReference,
                     MetricRowKey.ZOOM_AVG_FLAME, beat, durationWeight, boxMetrics.getAvgFlame());
 
+            boxZoomGrid.addDurationAtBoxBeat(boxReference, beat, durationWeight);
+
         }
 
     }

@@ -12,6 +12,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateTy
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.Key;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
+import com.dreamscale.gridtime.core.machine.memory.grid.track.WeightedMetricTrack;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import com.dreamscale.gridtime.core.machine.memory.type.PlaceType;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,14 @@ public class CompositeBoxGrid implements IMusicGrid {
         zoomGrid.addWeightedMetric(metricRowKey, beat, durationWeight, metric);
     }
 
+    public void addDurationAtBoxBeat(FeatureReference box, RelativeBeat beat, Duration duration) {
+
+        ZoomGrid zoomGrid = findOrCreateZoomGrid(box);
+        zoomGrid.addDurationAtBeat(beat, duration);
+
+    }
+
+
     public Double getMetric(FeatureReference box, MetricRowKey metricRowKey) {
 
         ZoomGrid zoomGrid = findOrCreateZoomGrid(box);
@@ -76,7 +85,7 @@ public class CompositeBoxGrid implements IMusicGrid {
         ZoomGrid grid = boxGrids.get(boxReference);
 
         if (grid == null) {
-            grid = new ZoomGrid("Group:Id:"+boxReference.toDisplayString(), gridTime, musicClock);
+            grid = new ZoomGrid("Box:Id:"+boxReference.toDisplayString(), gridTime, musicClock);
             boxGrids.put(boxReference, grid);
         }
 

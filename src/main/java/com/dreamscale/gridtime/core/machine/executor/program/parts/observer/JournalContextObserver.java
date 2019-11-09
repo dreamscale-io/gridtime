@@ -29,7 +29,10 @@ public class JournalContextObserver implements FlowObserver<FlowableJournalEntry
                     journalEntry.getProjectName());
 
                 gridTile.startWorkContext(journalEntry.getPosition(), workContextEvent);
-                gridTile.clearWorkContext(journalEntry.getFinishTime(), decodeFinishStatus(journalEntry.getFinishStatus()));
+
+                if (journalEntry.getFinishTime() != null) {
+                    gridTile.clearWorkContext(journalEntry.getFinishTime(), decodeFinishStatus(journalEntry.getFinishStatus()));
+                }
         }
 
     }

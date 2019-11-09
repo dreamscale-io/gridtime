@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.locas
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circle.CircleMessageType
 import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity
+import com.dreamscale.gridtime.core.domain.flow.FinishStatus
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
@@ -49,6 +50,7 @@ class ZoomableBoxLocasSpec extends Specification {
     UUID torchieId
     UUID teamId
     UUID projectId
+    UUID circleId
 
     LocalDateTime clockStart
     LocalDateTime time1
@@ -67,6 +69,7 @@ class ZoomableBoxLocasSpec extends Specification {
         torchieId = UUID.randomUUID()
         teamId = UUID.randomUUID()
         projectId = UUID.randomUUID()
+        circleId = UUID.randomUUID()
 
         boxAggregatorLocas = locasFactory.createBoxAggregatorLocas(teamId,  torchieId);
 
@@ -128,7 +131,8 @@ class ZoomableBoxLocasSpec extends Specification {
         torchie.changeBoxConfiguration(boxConfigBuilder.build())
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
-        journalFeed.addSomeData(generateIntentionStart(time1))
+        journalFeed.addSomeData(generateIntentionStart(time1, null, "taskA", -3))
+
 
         InputFeed fileActivityFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED)
         fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1, "/box1/file.txt"))
@@ -154,21 +158,27 @@ class ZoomableBoxLocasSpec extends Specification {
         //create box metrics, for the specified calendar times, create grid features for each
 
         TeamBoxConfiguration.Builder boxConfigBuilder = new TeamBoxConfiguration.Builder()
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentA", "/box1/*"))
+        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentB", "/box2/*"))
 
         torchie.changeBoxConfiguration(boxConfigBuilder.build())
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
-        journalFeed.addSomeData(generateIntentionStart(time1))
+        journalFeed.addSomeData(generateIntentionStart(time1, time1.plusMinutes(34), "taskA", -3))
+        journalFeed.addSomeData(generateIntentionStart(time1.plusMinutes(34), null, "taskB", 2))
+
+
+        InputFeed wtfFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
+        wtfFeed.addSomeData(generateWTFStart(time3))
+        wtfFeed.addSomeData(generateWTFEnd(time1.plusMinutes(45)))
 
         InputFeed fileActivityFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED)
         fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1, "/box1/file.txt"))
         fileActivityFeed.addSomeData(generateFileActivity(torchieId, time2, "/box1/file2.txt"))
         fileActivityFeed.addSomeData(generateFileActivity(torchieId, time3, "/box2/file3.txt"))
         fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1.plusMinutes(32), "/box1/file.txt"))
-        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1.plusMinutes(38), "/box2/fileZ.txt"))
-        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1.plusMinutes(56), "/box2/file4.txt"))
+        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1.plusMinutes(67), "/box2/fileZ.txt"))
+        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1.plusMinutes(140), "/box2/file4.txt"))
 
         when:
         for (int i = 0; i < 13; i++) {
@@ -223,7 +233,7 @@ class ZoomableBoxLocasSpec extends Specification {
         FlowActivityEntity flowActivityEntity = aRandom.flowActivityEntity()
                 .memberId(memberId)
                 .start(start)
-                .end(start.plusMinutes(1))
+                .end(start.plusMinutes(3))
                 .build();
 
         flowActivityEntity.setMetadataField(FlowActivityMetadataField.filePath, filePath)
@@ -243,14 +253,20 @@ class ZoomableBoxLocasSpec extends Specification {
 
     }
 
-    def generateIntentionStart(LocalDateTime localDateTime) {
+    def generateIntentionStart(LocalDateTime startTime, LocalDateTime finishTime, String taskName, int flame) {
         JournalEntryEntity journalEntryEntity = new JournalEntryEntity()
         journalEntryEntity.setId(UUID.randomUUID())
         journalEntryEntity.setProjectId(projectId)
-        journalEntryEntity.setPosition(localDateTime)
+        journalEntryEntity.setProjectName("projA")
+        journalEntryEntity.setPosition(startTime)
         journalEntryEntity.setTaskId(UUID.randomUUID())
-        journalEntryEntity.setTaskName("taskA")
+        journalEntryEntity.setTaskName(taskName)
+        journalEntryEntity.setFlameRating(flame)
         journalEntryEntity.setMemberId(torchieId)
+        journalEntryEntity.setFinishTime(finishTime)
+        if (finishTime != null) {
+            journalEntryEntity.setFinishStatus(FinishStatus.done.toString());
+        }
 
         return new FlowableJournalEntry(journalEntryEntity)
 
@@ -260,7 +276,7 @@ class ZoomableBoxLocasSpec extends Specification {
         CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
         wtfMessage.setMessageType(CircleMessageType.CIRCLE_START)
         wtfMessage.setPosition(startTime)
-        wtfMessage.setCircleId(UUID.randomUUID())
+        wtfMessage.setCircleId(circleId)
 
         return new FlowableCircleMessageEvent(wtfMessage)
     }
@@ -269,7 +285,7 @@ class ZoomableBoxLocasSpec extends Specification {
         CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
         wtfMessage.setMessageType(CircleMessageType.CIRCLE_CLOSED)
         wtfMessage.setPosition(endTime)
-        wtfMessage.setCircleId(UUID.randomUUID())
+        wtfMessage.setCircleId(circleId)
 
         return new FlowableCircleMessageEvent(wtfMessage)
     }
