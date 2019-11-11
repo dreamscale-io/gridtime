@@ -98,3 +98,6 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/replace_view_zoomable_team_box.sql
+
+  - include:
+        file:  db/v004/replace_view_zoomable_team_box2.sql

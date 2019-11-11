@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.locas;
 
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableBoxMetricsEntity;
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableIdeaFlowMetricsEntity;
+import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamBoxMetricsEntity;
 import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamIdeaFlowMetricsEntity;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamBoxLocas;
@@ -58,7 +59,7 @@ public class LocasFactory {
     }
 
     public ZoomableTeamBoxLocas createTeamBoxAggregatorLocas(UUID teamId) {
-        InputStrategy<ZoomableBoxMetricsEntity> boxMetricsIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_TEAM_BOX_METRICS);
+        InputStrategy<ZoomableTeamBoxMetricsEntity> boxMetricsIn = inputStrategyFactory.get(InputStrategyFactory.InputType.QUERY_TEAM_BOX_METRICS);
         OutputStrategy boxMetricsOut = outputStrategyFactory.get(OutputStrategyFactory.OutputType.SUMMARIZE_BOX_METRICS);
 
         FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(teamId);

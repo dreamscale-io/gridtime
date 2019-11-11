@@ -31,5 +31,6 @@ public interface ZoomableTeamBoxMetricsRepository extends CrudRepository<Zoomabl
                                                          @Param("zoom") String zoomLevel,
                                                          @Param("clock") Timestamp clockTime);
 
+
     List<ZoomableTeamBoxMetricsEntity> findByTeamIdAndZoomLevelAndTileSeq(UUID teamId, ZoomLevel zoomLevel, Long tileSeq);
 }

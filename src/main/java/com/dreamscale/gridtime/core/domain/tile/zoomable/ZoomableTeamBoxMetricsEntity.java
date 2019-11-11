@@ -41,6 +41,8 @@ public class ZoomableTeamBoxMetricsEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID boxFeatureId;
 
+    private String boxUri;
+
     private Long timeInBox;
 
     private Double percentWtf;

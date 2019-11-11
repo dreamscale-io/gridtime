@@ -67,7 +67,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 		organizationRepository.save(validOrg)
 
 		when:
-		JiraUserDto jiraUserDto = jiraService.getUserByEmail(validOrg.getId(), "janelle@dreamscale.io")
+		JiraUserDto jiraUserDto = jiraService.getUserByEmail(validOrg.getId(), "arty@dreamscale.io")
 
 		then:
 		assert jiraUserDto != null
@@ -147,7 +147,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 		organizationRepository.save(validOrg)
 		
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
-		JiraUserDto jiraUser = jiraService.getUserByEmail(validOrg.getId(), "janelle@dreamscale.io")
+		JiraUserDto jiraUser = jiraService.getUserByEmail(validOrg.getId(), "arty@dreamscale.io")
 
 		TaskInputDto taskInputDto = new TaskInputDto("Hello summary!", "description!!")
 
@@ -157,7 +157,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 		then:
 		assert newTask.key != null
 		assert newTask.status == "In Progress"
-		assert newTask.assignee == "janelle@dreamscale.io"
+		assert newTask.assignee == "arty@dreamscale.io"
 
 		when:
 		JiraTaskDto closedTask = jiraService.closeTask(validOrg.id, newTask.key)
@@ -179,7 +179,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 				.id(UUID.randomUUID())
 				.orgName("DreamScale")
 				.domainName("dreamscale.io")
-				.jiraUser("janelle@dreamscale.io")
+				.jiraUser("arty@dreamscale.io")
 				.jiraSiteUrl("dreamscale.atlassian.net")
 				.jiraApiKey("9KC0iM24tfXf8iKDVP2q4198")
 				.build()

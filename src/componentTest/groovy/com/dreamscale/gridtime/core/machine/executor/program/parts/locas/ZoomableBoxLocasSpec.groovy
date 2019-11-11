@@ -197,38 +197,6 @@ class ZoomableBoxLocasSpec extends Specification {
         assert boxMetrics.size() == 2;
     }
 
-
-//    def "should aggregate BoxMetrics by Box"() {
-//        given:
-//        InputFeed feed = torchie.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
-//        feed.addSomeData(generateWTFStart(time1))
-//        feed.addSomeData(generateWTFEnd(time2))
-//        feed.addSomeData(generateWTFStart(time3))
-//        feed.addSomeData(generateWTFEnd(time4))
-//
-//        for (int i = 0; i < 12; i++) {
-//            torchie.whatsNext().call()
-//            println torchie.playAllTracks();
-//        }
-//
-//        Metronome.Tick tick = torchie.getActiveTick();
-//        Metronome.Tick aggregateTick = tick.aggregateTicks.get(0);
-//
-//        when:
-//        boxAggregatorLocas.runProgram(aggregateTick)
-//
-//        MusicGridResults results = boxAggregatorLocas.playAllTracks();
-//        println results
-//
-//        then:
-//        GridIdeaFlowMetricsEntity metrics = gridBoxMetricsRepository.findByTorchieGridTime(torchieId,
-//                aggregateTick.getZoomLevel().name(),
-//                Timestamp.valueOf(aggregateTick.from.getClockTime()))
-//
-//        assert metrics != null
-//
-//    }
-
     FlowableFlowActivity generateFileActivity(UUID memberId, LocalDateTime start, String filePath) {
         FlowActivityEntity flowActivityEntity = aRandom.flowActivityEntity()
                 .memberId(memberId)

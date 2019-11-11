@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.CompositeBoxGrid;
+import com.dreamscale.gridtime.core.machine.memory.grid.CompositeTeamBoxGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.MusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
@@ -49,7 +50,7 @@ public class BoxMetrics implements MetricQuery {
 
 //do I put gridTime in here?  Then when I load up these objects, maybe I use a view, and get the grid times.
 
-    public static List<BoxMetrics> queryFromAggregateGrid(CompositeBoxGrid compositeBoxGrid) {
+    public static List<BoxMetrics> queryFromBoxGrid(CompositeBoxGrid compositeBoxGrid) {
 
         List<BoxMetrics> boxMetricsList = new ArrayList<>();
 
@@ -89,10 +90,46 @@ public class BoxMetrics implements MetricQuery {
         }
 
         if (musicGrid instanceof CompositeBoxGrid) {
-            return queryFromAggregateGrid((CompositeBoxGrid) musicGrid);
+            return queryFromBoxGrid((CompositeBoxGrid) musicGrid);
+        }
+
+        if (musicGrid instanceof CompositeTeamBoxGrid) {
+            return queryFromTeamBoxGrid((CompositeTeamBoxGrid) musicGrid);
         }
 
         return Collections.emptyList();
+    }
+
+    private static List<BoxMetrics> queryFromTeamBoxGrid(CompositeTeamBoxGrid teamBoxGrid) {
+
+        List<BoxMetrics> boxMetricsList = new ArrayList<>();
+
+        Set<FeatureReference> boxes = teamBoxGrid.getFeaturesOfType(PlaceType.BOX);
+
+        for (FeatureReference box : boxes) {
+            BoxMetrics boxMetrics = new BoxMetrics();
+
+            boxMetrics.setBox((PlaceReference) box);
+
+            boxMetrics.setZoomLevel(teamBoxGrid.getZoomLevel());
+
+            boxMetrics.setTimeInBox(teamBoxGrid.getTotalDuration(box));
+            boxMetrics.setPercentWtf(teamBoxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_WTF));
+            boxMetrics.setPercentLearning(teamBoxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_PROGRESS));
+            boxMetrics.setPercentProgress(teamBoxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_WTF));
+            boxMetrics.setPercentPairing(teamBoxGrid.getMetric(box, MetricRowKey.ZOOM_PERCENT_PAIRING));
+            boxMetrics.setAvgFlame(teamBoxGrid.getMetric(box, MetricRowKey.ZOOM_AVG_FLAME));
+
+//            boxMetrics.setAvgExecutionTime(boxGrid.getMetric(box, MetricRowKey.EXECUTION_RUN_TIME));
+//            boxMetrics.setAvgTraversalSpeed(boxGrid.getMetric(box, MetricRowKey.FILE_TRAVERSAL_VELOCITY));
+//            boxMetrics.setAvgFileBatchSize(boxGrid.getMetric(box, MetricRowKey.FILE_TRAVERSAL_VELOCITY));
+
+            boxMetricsList.add(boxMetrics);
+
+        }
+
+
+        return boxMetricsList;
     }
 
     private static List<BoxMetrics> queryFromMusicGrid(MusicGrid musicGrid) {

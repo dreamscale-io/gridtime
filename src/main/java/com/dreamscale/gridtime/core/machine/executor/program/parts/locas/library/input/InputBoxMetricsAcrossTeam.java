@@ -23,6 +23,7 @@ public class InputBoxMetricsAcrossTeam implements InputStrategy<ZoomableTeamBoxM
     @Override
     public List<ZoomableTeamBoxMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope) {
 
+
         Long tileSeq = calendarService.lookupTileSequenceFromSameTime(tickScope.getZoomLevel(), tickScope.getFrom().getClockTime());
 
         //in this case, I need to query all the tiles for the team, that are at this particular grid time
