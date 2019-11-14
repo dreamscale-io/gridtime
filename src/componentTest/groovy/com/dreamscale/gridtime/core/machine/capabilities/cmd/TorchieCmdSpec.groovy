@@ -7,7 +7,8 @@ import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
-import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool
+import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkerPool
+import com.dreamscale.gridtime.core.machine.executor.worker.WhatsNextWheel
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
@@ -38,6 +39,9 @@ class TorchieCmdSpec extends Specification {
     Torchie torchie
     LocalDateTime clockStart
 
+    GridTimeExecutor gridTimeExecutor
+
+
     def setup() {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         time1 = clockStart.plusMinutes(1)
@@ -51,9 +55,11 @@ class TorchieCmdSpec extends Specification {
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
 
-        GridTimeExecutor gridTimeExecutor = new GridTimeExecutor(new TorchieWorkerPool());
+        DefaultWorkerPool workerPool = new DefaultWorkerPool()
+        gridTimeExecutor = new GridTimeExecutor(workerPool);
+        gridTimeExecutor.start()
 
-        cmd = new TorchieCmd(gridTimeExecutor, torchie);
+        cmd = new TorchieCmd(workerPool, torchie);
         cmd.haltProgram()
        
     }

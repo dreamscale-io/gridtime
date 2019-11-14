@@ -3,30 +3,36 @@ package com.dreamscale.gridtime.core.machine.executor.worker;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.UUID;
 
+
+@Component
 public class AggregationWorkerPool implements WorkerPool {
 
+    @Autowired
+    ProgramFactory programFactory;
 
-    private final FeatureCacheManager featureCacheManager;
-    private final ProgramFactory programFactory;
-    private final Wire workToDoWire;
+    @Autowired
+    WorkToDoQueueWire workToDoWire;
+
+    @Autowired
+    FeatureCacheManager featureCacheManager;
+
 
     private static final int DEFAULT_NUMBER_AGGREGATE_WORKERS = 5;
 
     private int currentPoolSize;
     private WhatsNextWheel<TileInstructions> whatsNextWheel;
 
-    public AggregationWorkerPool(ProgramFactory programFactory, Wire workToDoWire, FeatureCacheManager featureCacheManager) {
-        this.programFactory = programFactory;
-        this.workToDoWire = workToDoWire;
-        this.featureCacheManager = featureCacheManager;
-
+    @PostConstruct
+    public void init() {
         this.currentPoolSize = DEFAULT_NUMBER_AGGREGATE_WORKERS;
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
@@ -67,23 +73,12 @@ public class AggregationWorkerPool implements WorkerPool {
     }
 
     @Override
-    public void addWorker(Worker worker) {
-        //no-op, workers can't be added for now
-    }
-
-    @Override
-    public boolean containsWorker(UUID workerId) {
-        return whatsNextWheel.contains(workerId);
-    }
-
-    @Override
-    public Worker getWorker(UUID workerId) {
-        return whatsNextWheel.getWorker(workerId);
-    }
-
-
-    @Override
     public void evictLastWorker() {
         //no-op, workers can't be evicted for now
+    }
+
+    @Override
+    public int size() {
+        return whatsNextWheel.size();
     }
 }

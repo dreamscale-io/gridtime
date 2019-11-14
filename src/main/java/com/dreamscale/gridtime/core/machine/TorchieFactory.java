@@ -24,7 +24,6 @@ import java.util.UUID;
 public class TorchieFactory {
 
 
-
     @Autowired
     private ProgramFactory programFactory;
 
@@ -68,7 +67,6 @@ public class TorchieFactory {
     //wire up calendar Torchie, does a years worth of tiles ahead, then stops.
 
     public Torchie wireUpCalendarTorchie(int maxTiles) {
-
         UUID torchieId = UUID.randomUUID();
         TorchieState torchieState = new MemoryOnlyTorchieState(torchieId);
 
@@ -76,6 +74,8 @@ public class TorchieFactory {
 
         return new Torchie(torchieId, torchieState, program);
     }
+
+
 
 
 }

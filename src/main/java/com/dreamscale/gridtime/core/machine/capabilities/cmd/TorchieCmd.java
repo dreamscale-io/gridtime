@@ -2,10 +2,10 @@ package com.dreamscale.gridtime.core.machine.capabilities.cmd;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.Torchie;
-import com.dreamscale.gridtime.core.machine.GridTimeExecutor;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.core.machine.executor.worker.LiveQueue;
 import com.dreamscale.gridtime.core.machine.memory.type.CmdType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
@@ -18,8 +18,8 @@ import java.util.Map;
 @Slf4j
 public class TorchieCmd {
 
-
     private final Torchie torchie;
+    private final LiveQueue liveTorchieQueue;
 
     private boolean syncCommandInProgress;
 
@@ -28,10 +28,9 @@ public class TorchieCmd {
 
     private static final int MAX_WAIT_LOOPS = 10;
 
-    private final GridTimeExecutor torchieExecutor;
 
-    public TorchieCmd(GridTimeExecutor executorPool, Torchie torchie) {
-        this.torchieExecutor = executorPool;
+    public TorchieCmd(LiveQueue liveTorchieQueue, Torchie torchie) {
+        this.liveTorchieQueue = liveTorchieQueue;
         this.torchie = torchie;
         this.syncCommandInProgress = false;
 
@@ -45,8 +44,7 @@ public class TorchieCmd {
         syncCommandInProgress = true;
 
         torchie.notifyWhenProgramDone(NOTIFY_WHEN_DONE);
-
-        torchieExecutor.startTorchieIfNotActive(torchie);
+        liveTorchieQueue.submit(torchie.getTorchieId(), torchie);
 
         waitForCommandToFinish();
     }
@@ -93,7 +91,7 @@ public class TorchieCmd {
         instructions.addTriggerToNotifyList(NOTIFY_WHEN_DONE);
 
         torchie.scheduleInstruction(instructions);
-        torchieExecutor.startTorchieIfNotActive(torchie);
+        liveTorchieQueue.submit(torchie.getTorchieId(), torchie);
 
         waitForCommandToFinish();
 
@@ -132,8 +130,7 @@ public class TorchieCmd {
 
     private void scheduleInstruction(TileInstructions instructions) {
         torchie.scheduleInstruction(instructions);
-
-        torchieExecutor.startTorchieIfNotActive(torchie);
+        liveTorchieQueue.submit(torchie.getTorchieId(), torchie);
     }
 
     private void waitForCommandToFinishWithTimeout(int millis) {

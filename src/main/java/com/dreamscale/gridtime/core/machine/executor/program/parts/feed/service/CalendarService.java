@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
+import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
+import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.domain.time.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
@@ -20,6 +22,9 @@ public class CalendarService {
 
     @Autowired
     TimeService timeService;
+
+    @Autowired
+    IntentionRepository intentionRepository;
 
     public LocalDateTime getNow() {
         return LocalDateTime.now();
@@ -102,6 +107,5 @@ public class CalendarService {
         }
         return null;
     }
-
 
 }

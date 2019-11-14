@@ -3,13 +3,13 @@ package com.dreamscale.gridtime.core.machine.executor.program;
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.time.GridTimeCalendarEntity
 import com.dreamscale.gridtime.core.domain.time.GridTimeCalendarRepository
-
+import com.dreamscale.gridtime.core.machine.GridTimeEngine
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
-import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool;
+import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkerPool
 import org.springframework.beans.factory.annotation.Autowired;
 import spock.lang.Specification;
 
@@ -23,16 +23,19 @@ class CalendarGeneratorProgramSpec extends Specification {
     GridTimeCalendarRepository gridTimeCalendarRepository
 
 
-
     def "should generate 72 twenties and aggregate rollups for dayparts and days"() {
         given:
         Torchie torchie = torchieFactory.wireUpCalendarTorchie(73)
 
-        GridTimeExecutor gridTimeExecutor = new GridTimeExecutor(new TorchieWorkerPool());
-        TorchieCmd torchieCmd = new TorchieCmd(gridTimeExecutor, torchie)
-
+        DefaultWorkerPool workerPool = new DefaultWorkerPool()
         when:
-        torchieCmd.runProgram()
+
+        workerPool.addTorchie(torchie)
+
+        while (workerPool.hasWork()) {
+            workerPool.whatsNext().call()
+        }
+        
 
         List<GridTimeCalendarEntity> twenties = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.TWENTY)
 

@@ -8,13 +8,14 @@ import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository
 import com.dreamscale.gridtime.core.domain.tile.GridRowEntity
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
+import com.dreamscale.gridtime.core.machine.GridTimeEngine
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
-import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkerPool
+
 import com.dreamscale.gridtime.core.machine.memory.TorchieState
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
@@ -46,6 +47,9 @@ class SaveToPostgresSinkSpec extends Specification {
     @Autowired
     GridIdeaFlowMetricsRepository gridTileSummaryRepository
 
+    @Autowired
+    GridTimeEngine gridTimeEngine;
+
     GeometryClock clock
 
     UUID torchieId
@@ -56,10 +60,8 @@ class SaveToPostgresSinkSpec extends Specification {
     LocalDateTime time3
     LocalDateTime time4
 
-    TorchieCmd cmd
     Torchie torchie
     LocalDateTime clockStart
-    GridTimeExecutor gridTimeExecutor
 
     def setup() {
 
@@ -79,22 +81,14 @@ class SaveToPostgresSinkSpec extends Specification {
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
 
-        gridTimeExecutor = new GridTimeExecutor(new TorchieWorkerPool());
-
-        cmd = new TorchieCmd(this.gridTimeExecutor, torchie);
-        cmd.haltProgram()
-    }
-
-    def teardown() {
-        this.gridTimeExecutor.shutdown();
     }
 
     def "should save grid rows and markers to DB"() {
         given:
-        cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
+
+        torchieState.gotoPosition(GeometryClock.createGridTime(ZoomLevel.TWENTY, clockStart))
 
         torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
-
         torchieState.getActiveTile().finishAfterLoad()
 
         when:

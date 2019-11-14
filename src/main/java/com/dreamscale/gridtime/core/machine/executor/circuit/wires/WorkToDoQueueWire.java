@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.domain.work.*;
 import com.dreamscale.gridtime.core.exception.UnableToLockException;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.LockManager;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.AllArgsConstructor;
@@ -22,10 +23,10 @@ import java.util.UUID;
 @Slf4j
 public class WorkToDoQueueWire implements Wire {
 
-    private static final Long WORKER_WRITE_LOCK = Long.MAX_VALUE;
-
     private static final Duration DELAY_BEFORE_PROCESSING_PARTIAL_WORK = Duration.ofMinutes(30);
 
+    @Autowired
+    private LockManager lockManager;
 
     @Autowired
     private WorkItemToAggregateRepository workItemToAggregateRepository;
@@ -73,7 +74,7 @@ public class WorkToDoQueueWire implements Wire {
 
         AggregateStreamEvent nextEvent = null;
 
-        tryToAcquireWorkerLock(WORKER_WRITE_LOCK);
+        lockManager.tryToAcquireWorkerExclusiveLock();
 
         WorkToDo workToDo = getNextWorkToDo();
 
@@ -85,17 +86,8 @@ public class WorkToDoQueueWire implements Wire {
             workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
         }
 
-        releaseWorkerLock(WORKER_WRITE_LOCK);
+        lockManager.releaseWorkerExclusiveLock();
 
-
-        //lock table pull, Long.Max is always the global lock
-
-        //then get the latest event, and update the inprogress status of all the things pulled
-        //add an in progress timestamp to the table, so we can pick up stuff that dies
-
-        //then finally release the lock
-
-        //map the entry to an aggregate stream event
 
         return nextEvent;
     }
@@ -138,28 +130,6 @@ public class WorkToDoQueueWire implements Wire {
         workItemToAggregateRepository.finishInProgressWorkItems(workerId.toString());
     }
 
-
-
-
-    private void releaseWorkerLock(Long lockNumber) {
-        boolean release = workItemToAggregateRepository.releaseLock(lockNumber);
-    }
-
-    private void tryToAcquireWorkerLock(Long lockNumber) {
-
-        boolean lockAcquired = false;
-        int tries = 0;
-
-        while (!lockAcquired && tries < 10) {
-            lockAcquired = workItemToAggregateRepository.tryToAcquireLock(lockNumber);
-            tries++;
-        }
-
-        if (!lockAcquired) {
-            throw new UnableToLockException("Unable to acquire worker lock after 10 tries");
-        }
-
-    }
 
     @Override
     public int getQueueDepth() {

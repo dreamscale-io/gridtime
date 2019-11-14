@@ -1,12 +1,13 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
+import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
-public class WhatsNextWheel<T> {
+public class WhatsNextWheel<T> implements LiveQueue {
 
     private Map<UUID, Worker<T>> workerMap = DefaultCollections.map();
 
@@ -31,9 +32,8 @@ public class WhatsNextWheel<T> {
         return nextWorkerQueue.size() > 0;
     }
 
-    public void evictLastWorker() {
-        UUID lastWorkerId = nextWorkerQueue.getLast();
-        removeWorker(lastWorkerId);
+    public UUID getLastWorker() {
+        return nextWorkerQueue.getLast();
     }
 
     private boolean isWorkerReady(UUID workerId) {
@@ -45,11 +45,19 @@ public class WhatsNextWheel<T> {
         workerMap.put(workerId, worker);
     }
 
-    public void removeWorker(UUID workerId) {
+    public void evictLastWorker() {
+        UUID lastWorkerId = getLastWorker();
+        evictWorker(lastWorkerId);
+    }
+
+    public void evictWorker(UUID workerId) {
         nextWorkerQueue.remove(workerId);
         workerMap.remove(workerId);
     }
 
+    public int size() {
+        return nextWorkerQueue.size();
+    }
 
     public boolean contains(UUID workerId) {
         return workerMap.containsKey(workerId);
@@ -57,5 +65,18 @@ public class WhatsNextWheel<T> {
 
     public Worker getWorker(UUID workerId) {
         return workerMap.get(workerId);
+    }
+
+    @Override
+    public void submit(UUID workerId, Worker worker) {
+
+        if (!workerMap.containsKey(workerId)) {
+            addWorker(workerId, worker);
+        }
+    }
+
+    public void clear() {
+        workerMap.clear();
+        nextWorkerQueue.clear();
     }
 }

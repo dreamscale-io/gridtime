@@ -8,14 +8,9 @@ public interface WorkerPool {
 
     TileInstructions whatsNext();
 
-    void addWorker(Worker worker);
-
-    boolean containsWorker(UUID workerId);
-
-    Worker getWorker(UUID workerId);
-
     boolean hasWork();
 
     void evictLastWorker();
 
+    int size();
 }

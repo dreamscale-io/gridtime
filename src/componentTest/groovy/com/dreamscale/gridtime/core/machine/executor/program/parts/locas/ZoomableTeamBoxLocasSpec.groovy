@@ -79,6 +79,9 @@ class ZoomableTeamBoxLocasSpec extends Specification {
     @Autowired
     FeatureCacheManager featureCacheManager
 
+    @Autowired
+    GridTimeWorkerPool gridTimeWorkerPool
+
     LocalDateTime clockStart
     LocalDateTime wtfTime
     LocalDateTime time1
@@ -94,7 +97,6 @@ class ZoomableTeamBoxLocasSpec extends Specification {
     OrganizationMemberEntity member3
 
     TeamDto team
-    GridTimeWorkerPool gridTimeWorkerPool
 
     UUID projectId
 
@@ -127,8 +129,6 @@ class ZoomableTeamBoxLocasSpec extends Specification {
         calendarService.saveCalendar(1, tick.from.zoomOut());
 
         mockTimeService.now() >> LocalDateTime.now()
-
-        gridTimeWorkerPool = new GridTimeWorkerPool(programFactory, workToDoQueueWire, featureCacheManager)
 
     }
 

@@ -68,6 +68,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     @Autowired
     FeatureCacheManager featureCacheManager
 
+    @Autowired
+    GridTimeWorkerPool gridTimeWorkerPool
+
     LocalDateTime clockStart
     LocalDateTime wtfTime
     LocalDateTime time2
@@ -83,7 +86,6 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     OrganizationMemberEntity member3
 
     TeamDto team
-    GridTimeWorkerPool gridTimeWorkerPool
 
     def setup() {
 
@@ -110,7 +112,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         mockTimeService.now() >> LocalDateTime.now()
 
-        gridTimeWorkerPool = new GridTimeWorkerPool(programFactory, workToDoQueueWire, featureCacheManager)
+        gridTimeWorkerPool.clear();
 
     }
 

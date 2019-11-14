@@ -24,4 +24,12 @@ public interface IntentionRepository extends CrudRepository<IntentionEntity, UUI
                                                             @Param("beforeDate") Timestamp beforeDate,
                                                             @Param("limit") int limit);
 
+    @Query(nativeQuery = true, value = "select * from intention " +
+            "where member_id=(:memberId) " +
+            "order by position limit 1")
+    IntentionEntity findFirstByMemberId(@Param("memberId") UUID memberId);
+
+    @Query(nativeQuery = true, value = "select * from intention " +
+            "order by position limit 1")
+    IntentionEntity findFirst();
 }

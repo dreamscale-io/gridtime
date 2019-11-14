@@ -34,26 +34,11 @@ public class GridTimeExecutor {
         executorPool.shutdown();
     }
 
-    public void startTorchieIfNotActive(Torchie torchie) {
-        workerPool.addWorker(torchie);
+    public void start() {
 
-        if (!isGameLoopRunning.get()) {
-            log.info("Starting game loop");
-            startExecutorGameLoop();
+        if (!isGameLoopRunning.getAndSet(true)) {
+            executorPool.submit(new GameLoopRunner());
         }
-    }
-
-    private void startExecutorGameLoop() {
-        isGameLoopRunning.set(true);
-        executorPool.submit(new GameLoopRunner());
-    }
-
-    public boolean contains(UUID torchieId) {
-        return workerPool.containsWorker(torchieId);
-    }
-
-    public Torchie getTorchie(UUID torchieId) {
-        return (Torchie) workerPool.getWorker(torchieId);
     }
 
 

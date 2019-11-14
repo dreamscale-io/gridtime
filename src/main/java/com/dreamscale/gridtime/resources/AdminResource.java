@@ -23,6 +23,9 @@ public class AdminResource {
     @Autowired
     private AdminService adminService;
 
+
+
+
     /**
      * Configure a Jira Project for Synchronization
      */

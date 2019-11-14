@@ -101,3 +101,6 @@ databaseChangeLog:
 
   - include:
         file:  db/v004/replace_view_zoomable_team_box2.sql
+
+  - include:
+        file:  db/v004/create_torchie_feed_cursor.sql
