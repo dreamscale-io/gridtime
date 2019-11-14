@@ -2,10 +2,14 @@ package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.job.JobDescriptorDto;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
+import com.dreamscale.gridtime.core.machine.Torchie;
+import com.dreamscale.gridtime.core.machine.TorchieFactory;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -14,6 +18,22 @@ public class JobService {
 
     @Autowired
     GridTimeEngine gridTimeEngine;
+
+    @Autowired
+    TimeService timeService;
+
+    @Autowired
+    TorchieFactory torchieFactory;
+
+    public void generateCalendar() {
+
+        LocalDateTime calendarUntil = timeService.now().plusDays(90);
+
+        Torchie torchie = torchieFactory.wireUpCalendarTorchieToRunUntil(calendarUntil);
+        gridTimeEngine.submitJob(torchie);
+
+    }
+    
 
     /*
 

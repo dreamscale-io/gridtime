@@ -90,6 +90,10 @@ public class ProgramFactory {
         return new CalendarGeneratorProgram(calendarService, maxTiles);
     }
 
+    public CalendarGeneratorProgram createCalendarGenerator(LocalDateTime runUntilDate) {
+
+        return new CalendarGeneratorProgram(calendarService, runUntilDate);
+    }
 
 
 //    public AggregateByTeamProgram createAggregateWiresProgram(UUID teamId, PerProcessFeaturePool featurePool, AggregatingWire teamWire) {

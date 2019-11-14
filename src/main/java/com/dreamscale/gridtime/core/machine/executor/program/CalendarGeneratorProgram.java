@@ -37,6 +37,14 @@ public class CalendarGeneratorProgram implements Program {
         this.isInitialized = false;
     }
 
+    public CalendarGeneratorProgram(CalendarService calendarService, LocalDateTime calendarEnd) {
+        this.calendarService = calendarService;
+        this.calendarEnd = calendarEnd;
+        this.maxTiles = Integer.MAX_VALUE;
+
+        this.isInitialized = false;
+    }
+
 
     @Override
     public void tick() {
@@ -98,7 +106,9 @@ public class CalendarGeneratorProgram implements Program {
 
         metronome = new Metronome(getCalendarStart(lastTwenty));
 
-        calendarEnd = calculateCalendarEnd();
+        if (calendarEnd == null) {
+            calendarEnd = calculateCalendarEnd();
+        }
     }
 
 

@@ -125,9 +125,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
 
-        gridTimeWorkerPool.addWorker(torchie1);
-        gridTimeWorkerPool.addWorker(torchie2);
-        gridTimeWorkerPool.addWorker(torchie3);
+        gridTimeWorkerPool.submitJob(torchie1);
+        gridTimeWorkerPool.submitJob(torchie2);
+        gridTimeWorkerPool.submitJob(torchie3);
 
         InputFeed feed1 = torchie1.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
         feed1.addSomeData(generateWTFStart(wtfTime))

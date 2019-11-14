@@ -62,14 +62,14 @@ public class GridTimeWorkerPool implements WorkerPool {
         return torchieWorkerPool.size() + aggregateWorkerPool.size();
     }
 
-
-    public void addWorker(Torchie torchie) {
-        torchieWorkerPool.addWorker(torchie.getTorchieId(), torchie);
+    public TorchieCmd submitJob(Torchie torchie) {
+        return torchieWorkerPool.submitJob(torchie);
     }
 
     public void clear() {
         torchieWorkerPool.clear();
     }
+
 }
 
 

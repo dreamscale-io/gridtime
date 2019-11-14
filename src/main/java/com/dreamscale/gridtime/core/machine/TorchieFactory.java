@@ -75,7 +75,14 @@ public class TorchieFactory {
         return new Torchie(torchieId, torchieState, program);
     }
 
+    public Torchie wireUpCalendarTorchieToRunUntil(LocalDateTime runUntilDate) {
+        UUID torchieId = UUID.randomUUID();
+        TorchieState torchieState = new MemoryOnlyTorchieState(torchieId);
 
+        CalendarGeneratorProgram program = programFactory.createCalendarGenerator(runUntilDate);
+
+        return new Torchie(torchieId, torchieState, program);
+    }
 
 
 }

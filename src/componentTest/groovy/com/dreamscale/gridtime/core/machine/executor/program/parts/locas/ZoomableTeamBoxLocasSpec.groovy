@@ -12,15 +12,11 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
-import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsEntity
-import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.machine.GridTimeWorkerPool
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
-import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.Metronome
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire
@@ -30,8 +26,6 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas
-import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
@@ -41,7 +35,6 @@ import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
@@ -141,9 +134,9 @@ class ZoomableTeamBoxLocasSpec extends Specification {
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
 
-        gridTimeWorkerPool.addWorker(torchie1);
-        gridTimeWorkerPool.addWorker(torchie2);
-        gridTimeWorkerPool.addWorker(torchie3);
+        gridTimeWorkerPool.submitJob(torchie1);
+        gridTimeWorkerPool.submitJob(torchie2);
+        gridTimeWorkerPool.submitJob(torchie3);
 
         TeamBoxConfiguration.Builder boxConfigBuilder = new TeamBoxConfiguration.Builder()
         boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentA", "/box1/*"))

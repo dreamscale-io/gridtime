@@ -243,8 +243,10 @@ public class TorchieWorkerPool implements WorkerPool {
         }
     }
 
-    public void addWorker(UUID torchieId, Torchie torchie) {
-        whatsNextWheel.submit(torchieId, torchie);
+    public TorchieCmd submitJob(Torchie torchie) {
+        whatsNextWheel.submit(torchie.getTorchieId(), torchie);
+
+        return new TorchieCmd(whatsNextWheel, torchie);
     }
 
     public void clear() {

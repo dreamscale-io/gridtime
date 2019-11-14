@@ -27,4 +27,8 @@ public class GridTimeEngine {
         return gridTimeWorkerPool.getTorchieCmd(torchieId);
     }
 
+    public TorchieCmd submitJob(Torchie torchie) {
+        return gridTimeWorkerPool.submitJob(torchie);
+    }
+
 }

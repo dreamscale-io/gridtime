@@ -35,14 +35,12 @@ class CalendarGeneratorProgramSpec extends Specification {
         while (workerPool.hasWork()) {
             workerPool.whatsNext().call()
         }
-        
 
         List<GridTimeCalendarEntity> twenties = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.TWENTY)
 
         List<GridTimeCalendarEntity> dayParts = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.DAY_PART)
 
         List<GridTimeCalendarEntity> days = gridTimeCalendarRepository.findByZoomLevel(ZoomLevel.DAY)
-
 
         then:
         assert twenties != null
