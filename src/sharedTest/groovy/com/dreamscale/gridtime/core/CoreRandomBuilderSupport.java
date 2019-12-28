@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.api.activity.*;
 import com.dreamscale.gridtime.api.batch.*;
 import com.dreamscale.gridtime.api.event.RandomSnippetEventBuilder;
 import com.dreamscale.gridtime.api.journal.RandomIntentionInputDtoBuilder;
-import com.dreamscale.gridtime.core.domain.circle.CircleMessageRepository;
-import com.dreamscale.gridtime.core.domain.circle.RandomCircleMessageEntityBuilder;
+import com.dreamscale.gridtime.core.domain.circuit.message.RandomWTFCircuitMessageEntityBuilder;
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageRepository;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.flow.RandomFlowActivityEntityBuilder;
 import com.dreamscale.gridtime.core.domain.journal.*;
@@ -38,7 +38,7 @@ public class CoreRandomBuilderSupport {
     private FlowActivityRepository flowActivityRepository;
 
     @Autowired
-    private CircleMessageRepository circleMessageRepository;
+    private WTFFeedMessageRepository wtfFeedMessageRepository;
 
     @Autowired
     private MasterAccountRepository masterAccountRepository;
@@ -74,7 +74,7 @@ public class CoreRandomBuilderSupport {
 
     public RandomFlowActivityEntityBuilder flowActivityEntity() { return new RandomFlowActivityEntityBuilder(flowActivityRepository);}
 
-    public RandomCircleMessageEntityBuilder circleMessageEntity() { return new RandomCircleMessageEntityBuilder(circleMessageRepository);}
+    public RandomWTFCircuitMessageEntityBuilder circleMessageEntity() { return new RandomWTFCircuitMessageEntityBuilder(wtfFeedMessageRepository);}
 
     public RandomIntentionInputDtoBuilder intentionInputDto() {
         return new RandomIntentionInputDtoBuilder();

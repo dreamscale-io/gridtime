@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.circle.CircleDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
@@ -26,7 +26,7 @@ public class MemberStatusService {
     private SpiritService xpService;
 
     @Autowired
-    private CircleService circleService;
+    private LearningCircuitService learningCircuitService;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -81,9 +81,10 @@ public class MemberStatusService {
         memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircleId() != null) {
-            CircleDto circleDto = circleService.getCircle(memberStatusEntity.getId(), memberStatusEntity.getActiveCircleId());
+            LearningCircuitDto circuitDto = learningCircuitService.getCircuit(memberStatusEntity.getOrganizationId(),
+                    memberStatusEntity.getActiveCircleId());
 
-            memberStatusDto.setActiveCircle(circleDto);
+            memberStatusDto.setActiveCircle(circuitDto);
         }
 
         return memberStatusDto;

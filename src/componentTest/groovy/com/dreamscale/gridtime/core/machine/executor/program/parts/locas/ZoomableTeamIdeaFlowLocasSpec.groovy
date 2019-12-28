@@ -1,14 +1,15 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circle.CircleMessageType
+
 import com.dreamscale.gridtime.api.team.TeamDto
-import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
+import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.GridTimeWorkerPool
 import com.dreamscale.gridtime.core.machine.Torchie
@@ -18,7 +19,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
@@ -163,21 +164,21 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     }
 
     def generateWTFStart(LocalDateTime startTime) {
-        CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
-        wtfMessage.setMessageType(CircleMessageType.CIRCLE_START)
+        WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
+        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_OPEN)
         wtfMessage.setPosition(startTime)
-        wtfMessage.setCircleId(UUID.randomUUID())
+        wtfMessage.setCircuitId(UUID.randomUUID())
 
-        return new FlowableCircleMessageEvent(wtfMessage)
+        return new FlowableCircuitWTFMessageEvent(wtfMessage)
     }
 
     def generateWTFEnd(LocalDateTime endTime) {
-        CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
-        wtfMessage.setMessageType(CircleMessageType.CIRCLE_CLOSED)
+        WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
+        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_CLOSED)
         wtfMessage.setPosition(endTime)
-        wtfMessage.setCircleId(UUID.randomUUID())
+        wtfMessage.setCircuitId(UUID.randomUUID())
 
-        return new FlowableCircleMessageEvent(wtfMessage)
+        return new FlowableCircuitWTFMessageEvent(wtfMessage)
     }
 
 

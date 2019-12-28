@@ -23,6 +23,9 @@ public class MasterAccountEntity {
     @Column(name = "master_email")
     private String masterEmail;
 
+    @Column(name = "short_name")
+    private String shortName;
+
     @Column(name = "full_name")
     private String fullName;
 

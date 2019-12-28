@@ -8,7 +8,6 @@ import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
 import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkerPool
-import com.dreamscale.gridtime.core.machine.executor.worker.WhatsNextWheel
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
@@ -16,7 +15,7 @@ import com.dreamscale.gridtime.core.machine.commons.DefaultCollections
 import com.dreamscale.gridtime.core.machine.memory.TorchieState
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.gridtime.core.machine.memory.feature.details.AuthorsDetails
-import com.dreamscale.gridtime.core.machine.memory.feature.details.CircleDetails
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails
 import com.dreamscale.gridtime.core.machine.memory.feature.details.ExecutionEvent
 import com.dreamscale.gridtime.core.machine.memory.feature.details.WorkContextEvent
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey
@@ -79,7 +78,7 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startWTF(time3, new CircuitDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
         torchieState.getActiveTile().finishAfterLoad()
 
@@ -219,7 +218,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().startAuthors(time1, new AuthorsDetails(DefaultCollections.toList(arty)));
 
         torchieState.getActiveTile().startFeelsBand(time2.plusMinutes(5), -4)
-        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startWTF(time3, new CircuitDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
 
         torchieState.getActiveTile().gotoLocation(time2, "/some/placeA", Duration.ofSeconds(9))
         torchieState.getActiveTile().gotoLocation(time2, "/some/placeB", Duration.ofSeconds(12))
@@ -257,7 +256,7 @@ class TorchieCmdSpec extends Specification {
         given:
         cmd.gotoTile(ZoomLevel.TWENTY, clockStart);
 
-        torchieState.getActiveTile().startWTF(time1, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Resume)
+        torchieState.getActiveTile().startWTF(time1, new CircuitDetails(UUID.randomUUID(), "hi"), StartTypeTag.Resume)
         torchieState.getActiveTile().gotoLocation(time1, "/some/placeA", Duration.ofSeconds(9))
 
         torchieState.getActiveTile().modifyCurrentLocation(time1, 100)

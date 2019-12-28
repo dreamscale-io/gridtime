@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.reference;
 
 import com.dreamscale.gridtime.core.machine.memory.type.IdeaFlowStateType;
-import com.dreamscale.gridtime.core.machine.memory.feature.details.CircleDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +15,8 @@ public class IdeaFlowStateReference extends FeatureReference {
         super(UUID.randomUUID(), stateType, searchKey, null, false);
     }
 
-    public IdeaFlowStateReference(IdeaFlowStateType stateType, String searchKey, CircleDetails circleDetails) {
-        super(UUID.randomUUID(), stateType, searchKey, circleDetails, false);
+    public IdeaFlowStateReference(IdeaFlowStateType stateType, String searchKey, CircuitDetails circuitDetails) {
+        super(UUID.randomUUID(), stateType, searchKey, circuitDetails, false);
     }
 
     public IdeaFlowStateType getIdeaFlowStateType() {

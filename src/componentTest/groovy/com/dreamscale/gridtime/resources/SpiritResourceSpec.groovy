@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circle.*
+import com.dreamscale.gridtime.api.circuit.*
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto
 import com.dreamscale.gridtime.api.spirit.SpiritDto
 import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
@@ -217,7 +217,7 @@ class SpiritResourceSpec extends Specification {
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
         ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
 
-        CircleDto circleDto = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("wtf help me"))
+        LearningCircuitDto circleDto = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("wtf help me"))
 
         when:
         SpiritNetworkDto spiritNetworkDto = spiritClient.getMySpiritNetwork();

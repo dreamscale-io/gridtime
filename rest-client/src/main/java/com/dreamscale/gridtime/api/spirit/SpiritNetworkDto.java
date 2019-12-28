@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.api.spirit;
 
-import com.dreamscale.gridtime.api.circle.CircleDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +17,6 @@ public class SpiritNetworkDto {
 
     UUID spiritId;
     ActiveLinksNetworkDto activeLinksNetwork;
-    List<CircleDto> activeCircles;
+    List<LearningCircuitDto> activeCircles;
 
 }

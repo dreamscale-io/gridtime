@@ -9,9 +9,7 @@ import com.dreamscale.gridtime.core.domain.tile.GridRowEntity
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.machine.GridTimeEngine
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.Torchie
-import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
@@ -19,7 +17,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
 import com.dreamscale.gridtime.core.machine.memory.TorchieState
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
-import com.dreamscale.gridtime.core.machine.memory.feature.details.CircleDetails
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -88,7 +86,7 @@ class SaveToPostgresSinkSpec extends Specification {
 
         torchieState.gotoPosition(GeometryClock.createGridTime(ZoomLevel.TWENTY, clockStart))
 
-        torchieState.getActiveTile().startWTF(time3, new CircleDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
+        torchieState.getActiveTile().startWTF(time3, new CircuitDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
         torchieState.getActiveTile().finishAfterLoad()
 
         when:

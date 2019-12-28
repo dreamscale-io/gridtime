@@ -1,28 +1,26 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circle.CircleMessageType
-import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
-import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
 import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository
+import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.Metronome
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -241,20 +239,20 @@ class ZoomableBoxLocasSpec extends Specification {
     }
 
     def generateWTFStart(LocalDateTime startTime) {
-        CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
-        wtfMessage.setMessageType(CircleMessageType.CIRCLE_START)
+        WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
+        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_OPEN)
         wtfMessage.setPosition(startTime)
-        wtfMessage.setCircleId(circleId)
+        wtfMessage.setCircuitId(circleId)
 
-        return new FlowableCircleMessageEvent(wtfMessage)
+        return new FlowableCircuitWTFMessageEvent(wtfMessage)
     }
 
     def generateWTFEnd(LocalDateTime endTime) {
-        CircleFeedMessageEntity wtfMessage = new CircleFeedMessageEntity()
-        wtfMessage.setMessageType(CircleMessageType.CIRCLE_CLOSED)
+        WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
+        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_CLOSED)
         wtfMessage.setPosition(endTime)
-        wtfMessage.setCircleId(circleId)
+        wtfMessage.setCircuitId(circleId)
 
-        return new FlowableCircleMessageEvent(wtfMessage)
+        return new FlowableCircuitWTFMessageEvent(wtfMessage)
     }
 }

@@ -1,9 +1,9 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed;
 
-import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity;
-import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageRepository;
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity;
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageRepository;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Bookmark;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class WTFMessagesFeedStrategy extends FeedStrategy {
 
     @Autowired
-    CircleFeedMessageRepository circleFeedMessageRepository;
+    WTFFeedMessageRepository wtfFeedMessageRepository;
 
 
     @Override
@@ -26,10 +26,10 @@ public class WTFMessagesFeedStrategy extends FeedStrategy {
 
         LocalDateTime afterDate = bookmark.getPosition();
 
-        List<CircleFeedMessageEntity> circleMessageEntities =
-                circleFeedMessageRepository.findByOwnerIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), fetchSize);
+        List<WTFFeedMessageEntity> wtfFeedMessages =
+                wtfFeedMessageRepository.findByOwnerIdAfterDateWithLimit(memberId, Timestamp.valueOf(afterDate), fetchSize);
 
-        List<Flowable> flowables = convertToFlowables(circleMessageEntities);
+        List<Flowable> flowables = convertToFlowables(wtfFeedMessages);
 
         return new Batch(memberId, bookmark, flowables);
 
@@ -40,11 +40,11 @@ public class WTFMessagesFeedStrategy extends FeedStrategy {
         return FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED;
     }
 
-    private List<Flowable> convertToFlowables(List<CircleFeedMessageEntity> circleMessages) {
+    private List<Flowable> convertToFlowables(List<WTFFeedMessageEntity> circuitMessages) {
         List<Flowable> flowables = new ArrayList<>();
 
-        for (CircleFeedMessageEntity circleMessage : circleMessages) {
-            flowables.add(new FlowableCircleMessageEvent(circleMessage));
+        for (WTFFeedMessageEntity circuitMessage : circuitMessages) {
+            flowables.add(new FlowableCircuitWTFMessageEvent(circuitMessage));
         }
         return flowables;
     }

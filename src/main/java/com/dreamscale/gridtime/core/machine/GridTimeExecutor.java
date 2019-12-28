@@ -12,15 +12,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GridTimeExecutor {
 
     private WorkerPool workerPool;
-
     private ThreadPoolExecutor executorPool;
 
     private AtomicBoolean isGameLoopRunning;
 
     private static final int LOOK_FOR_MORE_WORK_DELAY = 100;
-
     private static final int MAX_WORK_CAPACITY = 10;
-
 
     public GridTimeExecutor(WorkerPool workerPool) {
         this.workerPool = workerPool;

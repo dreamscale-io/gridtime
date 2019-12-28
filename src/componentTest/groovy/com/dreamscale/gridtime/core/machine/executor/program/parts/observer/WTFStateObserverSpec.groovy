@@ -1,13 +1,13 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.observer
 
-import com.dreamscale.gridtime.api.circle.CircleMessageType
-import com.dreamscale.gridtime.core.domain.circle.CircleFeedMessageEntity
+import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
+import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircleMessageEvent
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
@@ -49,10 +49,10 @@ public class WTFStateObserverSpec extends Specification {
 
         UUID circleId = UUID.randomUUID()
 
-        FlowableCircleMessageEvent circleEvent1 = createCircleEvent(time2, circleId, "circle", CircleMessageType.CIRCLE_START)
-        FlowableCircleMessageEvent circleEvent2 = createCircleEvent(time3, circleId, "circle", CircleMessageType.CIRCLE_SHELVED)
-        FlowableCircleMessageEvent circleEvent3 = createCircleEvent(time4, circleId, "circle", CircleMessageType.CIRCLE_RESUMED)
-        FlowableCircleMessageEvent circleEvent4 = createCircleEvent(time5, circleId, "circle", CircleMessageType.CIRCLE_CLOSED)
+        FlowableCircuitWTFMessageEvent circleEvent1 = createCircuitMessageEvent(time2, circleId, "circle", CircuitMessageType.CIRCUIT_OPEN)
+        FlowableCircuitWTFMessageEvent circleEvent2 = createCircuitMessageEvent(time3, circleId, "circle", CircuitMessageType.CIRCLE_ONHOLD)
+        FlowableCircuitWTFMessageEvent circleEvent3 = createCircuitMessageEvent(time4, circleId, "circle", CircuitMessageType.CIRCUIT_RESUMED)
+        FlowableCircuitWTFMessageEvent circleEvent4 = createCircuitMessageEvent(time5, circleId, "circle", CircuitMessageType.CIRCUIT_CLOSED)
 
 
         def flowables = [circleEvent1, circleEvent2, circleEvent3, circleEvent4] as List
@@ -77,16 +77,16 @@ public class WTFStateObserverSpec extends Specification {
     }
 
 
-    FlowableCircleMessageEvent createCircleEvent(LocalDateTime position, UUID circleId, String circleName, CircleMessageType messageType) {
+    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circleId, String circleName, TalkMessageType messageType) {
 
-        CircleFeedMessageEntity circleMessage = new CircleFeedMessageEntity()
-        circleMessage.setId(UUID.randomUUID())
-        circleMessage.setCircleId(circleId)
-        circleMessage.setCircleName(circleName)
-        circleMessage.setPosition(position)
-        circleMessage.setMessageType(messageType)
+        WTFFeedMessageEntity circuitMessage = new WTFFeedMessageEntity()
+        circuitMessage.setId(UUID.randomUUID())
+        circuitMessage.setCircuitId(circleId)
+        circuitMessage.setCircuitName(circleName)
+        circuitMessage.setPosition(position)
+        circuitMessage.setMessageType(messageType)
 
-        return new FlowableCircleMessageEvent(circleMessage);
+        return new FlowableCircuitWTFMessageEvent(circuitMessage);
 
     }
 

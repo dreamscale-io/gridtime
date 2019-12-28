@@ -6,14 +6,13 @@ import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureReferenceFactory
-import com.dreamscale.gridtime.core.machine.memory.feature.details.CircleDetails
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails
 import com.dreamscale.gridtime.core.machine.memory.feature.details.WorkContextEvent
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile
 import com.dreamscale.gridtime.core.machine.memory.type.PlaceType
-import org.junit.Ignore
 import spock.lang.Specification
 
 import java.time.Duration
@@ -138,7 +137,7 @@ class EyeSpec extends Specification {
 
             if (i >= halfway ) {
                 if (!wtfStarted) {
-                    gridTile.startWTF(time3, new CircleDetails(circleId, "yo"), StartTypeTag.Start)
+                    gridTile.startWTF(time3, new CircuitDetails(circleId, "yo"), StartTypeTag.Start)
                     gridTile.startFeelsBand(time3, -5)
                 }
                 gridTile.gotoLocation(time4, location.getLocationPath(), Duration.ofSeconds(5))

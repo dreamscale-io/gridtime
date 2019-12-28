@@ -1,5 +1,5 @@
-package com.dreamscale.gridtime.api.event;
+package com.dreamscale.gridtime.api.job;
 
-public enum EventType {
+public enum RunStatus {
     NOTE, SUBTASK, ACTIVATE, DEACTIVATE, CALENDAR, DISTRACTION, SNIPPET;
 }

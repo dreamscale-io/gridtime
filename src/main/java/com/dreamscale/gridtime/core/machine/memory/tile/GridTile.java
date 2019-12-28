@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
-import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
 import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
@@ -105,8 +104,8 @@ public class GridTile {
     /**
      * Starts a WTF friction band...
      */
-    public void startWTF(LocalDateTime moment, CircleDetails circleDetails, StartTag startTag) {
-        IdeaFlowStateReference stateReference = featureCache.lookupWTFReference(circleDetails);
+    public void startWTF(LocalDateTime moment, CircuitDetails circuitDetails, StartTag startTag) {
+        IdeaFlowStateReference stateReference = featureCache.lookupWTFReference(circuitDetails);
 
         musicGrid.startWTF(moment, stateReference, startTag);
     }

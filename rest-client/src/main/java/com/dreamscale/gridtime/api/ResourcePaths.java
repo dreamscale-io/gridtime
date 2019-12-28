@@ -65,6 +65,9 @@ public class ResourcePaths {
 
     public static final String RIP_PATH = "/restinpeace";
 
+    public static final String CONFIRM_PATH = "/confirm";
+    public static final String CONNECTION_PATH = "/connection";
+
     public static final String STATUS_PATH = "/status";
     public static final String WTF_PATH = "/wtf";
     public static final String YAY_PATH = "/yay";
@@ -73,7 +76,7 @@ public class ResourcePaths {
 
     public static final String AUTH_PATH = "/auth";
     public static final String NETWORK_PATH = "/network";
-    public static final String CIRCLE_PATH = "/circle";
+    public static final String CIRCUIT_PATH = "/circuit";
     public static final String KEY_PATH = "/key";
     public static final String TRANSITION_PATH = "/transition";
     public static final String DO_IT_LATER_PATH = "/doitlater";
@@ -99,4 +102,6 @@ public class ResourcePaths {
     public static final String CONNECT_ID_HEADER = "X-CONNECT-ID";
 
 
+    public static final String ROUTER_PATH = "/router";
+    public static final String RETRO_PATH = "/retro";
 }

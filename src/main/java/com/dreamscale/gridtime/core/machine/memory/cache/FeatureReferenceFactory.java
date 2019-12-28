@@ -12,9 +12,9 @@ public class FeatureReferenceFactory {
 
     public static final String UNKNOWN = "[UNKNOWN]";
 
-    public IdeaFlowStateReference createWTFReference(CircleDetails circleDetails) {
+    public IdeaFlowStateReference createWTFReference(CircuitDetails circuitDetails) {
 
-        return new IdeaFlowStateReference(IdeaFlowStateType.WTF_STATE, circleDetails.toSearchKey(), circleDetails);
+        return new IdeaFlowStateReference(IdeaFlowStateType.WTF_STATE, circuitDetails.toSearchKey(), circuitDetails);
     }
 
     public IdeaFlowStateReference createIdeaFlowReference(IdeaFlowStateType stateType) {

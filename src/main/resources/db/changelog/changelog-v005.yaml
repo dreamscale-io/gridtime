@@ -1,0 +1,7 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v005/refactor_member_connection_views.sql
+
+  - include:
+        file: db/v005/refactor_tables_for_circuit.sql

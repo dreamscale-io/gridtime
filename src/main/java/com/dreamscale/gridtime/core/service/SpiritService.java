@@ -26,7 +26,7 @@ public class SpiritService {
     AccountService accountService;
 
     @Autowired
-    CircleService circleService;
+    LearningCircuitService learningCircuitService;
 
     @Autowired
     ActiveSpiritLinkRepository activeSpiritLinkRepository;
@@ -137,7 +137,7 @@ public class SpiritService {
 
     private String getMemberName(UUID torchieId) {
         String memberName = null;
-        MemberNameEntity memberNameEntity = memberNameRepository.findByTorchieId(torchieId);
+        MemberNameEntity memberNameEntity = memberNameRepository.findByMemberId(torchieId);
         if (memberNameEntity != null) {
             memberName = memberNameEntity.getFullName();
         }
@@ -168,7 +168,7 @@ public class SpiritService {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(circleService.getAllParticipatingCircles(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(learningCircuitService.getAllParticipatingCircles(organizationId, torchieId));
 
         return spiritNetworkDto;
     }

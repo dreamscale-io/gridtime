@@ -1,12 +1,10 @@
 package com.dreamscale.gridtime.core.machine.memory.cache;
 
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.type.*;
 import org.apache.commons.collections.map.LRUMap;
 
-import java.util.Map;
 import java.util.UUID;
 
 public class FeatureCache {
@@ -36,8 +34,8 @@ public class FeatureCache {
         this.featureReferenceFactory = new FeatureReferenceFactory();
     }
 
-    public IdeaFlowStateReference lookupWTFReference(CircleDetails circleDetails) {
-        IdeaFlowStateReference stateReference = featureReferenceFactory.createWTFReference(circleDetails);
+    public IdeaFlowStateReference lookupWTFReference(CircuitDetails circuitDetails) {
+        IdeaFlowStateReference stateReference = featureReferenceFactory.createWTFReference(circuitDetails);
 
         return cacheLookup(stateReference);
     }

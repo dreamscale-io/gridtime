@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.memory.feature.details.CircleDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
 import org.springframework.web.util.UriTemplate;
 
@@ -11,7 +11,7 @@ import java.util.Set;
 
 public enum IdeaFlowStateType implements FeatureType {
 
-    WTF_STATE("/wtf", "/wtf/{circleId}", CircleDetails.class),
+    WTF_STATE("/wtf", "/wtf/{circleId}", CircuitDetails.class),
     LEARNING_STATE("/learn", "/learn", null),
     PROGRESS_STATE("/progress", "/progress", null);
 

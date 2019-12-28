@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.api.organization;
 
-import com.dreamscale.gridtime.api.circle.CircleDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public class MemberWorkStatusDto {
     private String shortName;
 
     private XPSummaryDto xpSummary;
-    private CircleDto activeCircle;
+    private LearningCircuitDto activeCircle;
     private OnlineStatus onlineStatus;
 
     private UUID activeTaskId;

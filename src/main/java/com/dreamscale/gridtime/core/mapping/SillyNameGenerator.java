@@ -33,6 +33,14 @@ public class SillyNameGenerator {
         return sillyAdjective + "_" + sillyNoun;
     }
 
+    public String randomNewExtension(String requestedName) {
+
+        int nounIndex = random.nextInt(nouns.size());
+        String sillyNoun = nouns.get(nounIndex);
+
+        return requestedName + "_" + sillyNoun;
+    }
+
     private List<String> loadDictionary(String dictionaryFileName) throws URISyntaxException, IOException {
 
         List<String> dictionaryValues = new ArrayList<>();
@@ -48,5 +56,6 @@ public class SillyNameGenerator {
         return dictionaryValues;
 
     }
+
 
 }

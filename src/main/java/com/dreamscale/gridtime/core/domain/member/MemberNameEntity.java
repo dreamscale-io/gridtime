@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Entity(name = "member_name_view")
 @Data
-@EqualsAndHashCode(of = "torchieId")
+@EqualsAndHashCode(of = "memberId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,9 +15,12 @@ public class MemberNameEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID torchieId;
+    private UUID organizationId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID memberId;
+
+    private String shortName;
     private String fullName;
-
 
 }

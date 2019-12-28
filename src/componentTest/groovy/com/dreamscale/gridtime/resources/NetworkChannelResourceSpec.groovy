@@ -5,8 +5,8 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserContextDto
 import com.dreamscale.gridtime.api.network.ChannelMessageDto
 import com.dreamscale.gridtime.api.network.ChatMessageInputDto
-import com.dreamscale.gridtime.api.circle.CircleDto
-import com.dreamscale.gridtime.api.circle.CreateWTFCircleInputDto
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
+import com.dreamscale.gridtime.api.circuit.CreateWTFCircleInputDto
 import com.dreamscale.gridtime.api.network.MemberChannelsDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.NetworkChannelClient
@@ -54,8 +54,8 @@ class NetworkChannelResourceSpec extends Specification {
         when:
         MemberChannelsDto memberChannelsDtoBefore = networkClient.authorizeMemberToUseNetwork(member.getId().toString())
 
-        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-        String channelId = circle.getChannelId().toString();
+        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        String channelId = circle.getTalkRoomId().toString();
         SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
 
         MemberChannelsDto memberChannelsDtoAfter = networkClient.authorizeMemberToUseNetwork(member.getId().toString())
@@ -78,9 +78,9 @@ class NetworkChannelResourceSpec extends Specification {
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
-        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
-        String channelId = circle.getChannelId().toString();
+        String channelId = circle.getTalkRoomId().toString();
 
         SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
 
@@ -108,9 +108,9 @@ class NetworkChannelResourceSpec extends Specification {
         circleSessionInputDto.setProblemDescription("Problem is this thing");
 
         when:
-        CircleDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
 
-        String channelId = circle.getChannelId().toString();
+        String channelId = circle.getTalkRoomId().toString();
 
         SimpleStatusDto joinStatus = channelClient.joinChannel(channelId)
         SimpleStatusDto joinAgainStatus = channelClient.joinChannel(channelId)

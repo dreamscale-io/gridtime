@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.organization.TeamMemberWorkStatusDto;
+import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusEntity;
@@ -39,6 +40,8 @@ public class ActiveStatusService {
         teamMemberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberWorkStatusDto.class, TeamMemberWorkStatusEntity.class);
     }
 
+
+
     public UUID getActiveCircleId(UUID organizationId, UUID memberId) {
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
@@ -73,7 +76,7 @@ public class ActiveStatusService {
     }
 
 
-    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, UUID circleId, String problemDescription) {
+    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, UUID circuitId, String problemDescription) {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
@@ -85,7 +88,7 @@ public class ActiveStatusService {
         }
 
         activeWorkStatusEntity.setLastUpdate(timeService.now());
-        activeWorkStatusEntity.setActiveCircleId(circleId);
+        activeWorkStatusEntity.setActiveCircleId(circuitId);
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
@@ -106,6 +109,7 @@ public class ActiveStatusService {
 
         return durationInSeconds;
     }
+
 
 
 }
