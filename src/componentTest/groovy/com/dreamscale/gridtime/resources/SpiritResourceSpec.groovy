@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.spirit.SpiritDto
 import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
-import com.dreamscale.gridtime.client.NetworkClient
+import com.dreamscale.gridtime.client.CircuitTalkClient
 import com.dreamscale.gridtime.client.SpiritClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
@@ -27,9 +27,6 @@ class SpiritResourceSpec extends Specification {
 
     @Autowired
     SpiritClient spiritClient
-
-    @Autowired
-    NetworkClient circleClient
 
     @Autowired
     MasterAccountEntity testUser
@@ -217,8 +214,6 @@ class SpiritResourceSpec extends Specification {
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
         ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
 
-        LearningCircuitDto circleDto = circleClient.createNewAdhocWTFCircle(new CreateWTFCircleInputDto("wtf help me"))
-
         when:
         SpiritNetworkDto spiritNetworkDto = spiritClient.getMySpiritNetwork();
         SpiritNetworkDto friendSpiritNetworkDto = spiritClient.getFriendSpiritNetwork(member2.getId().toString())
@@ -227,7 +222,6 @@ class SpiritResourceSpec extends Specification {
         then:
         assert spiritNetworkDto != null
         assert spiritNetworkDto.activeLinksNetwork.spiritLinks.size() == 2
-        assert spiritNetworkDto.activeCircles.size() == 1
 
         assert friendSpiritNetworkDto.activeLinksNetwork.spiritLinks.size() == 2
 

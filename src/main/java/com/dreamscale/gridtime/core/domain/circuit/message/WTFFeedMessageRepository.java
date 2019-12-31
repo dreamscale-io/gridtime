@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.domain.circuit.message;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,10 +14,12 @@ public interface WTFFeedMessageRepository extends CrudRepository<WTFFeedMessageE
     List<WTFFeedMessageEntity> findByCircuitIdOrderByPosition(UUID circuitId);
 
     @Query(nativeQuery = true, value = "select * from wtf_feed_message_view cf " +
-            "where exists (select 1 from circuit c where c.owner_id=(:memberId) and c.id=cf.circuit_id) " +
+            "where exists (select 1 from learning_circuit c where c.owner_id=(:memberId) and c.id=cf.circuit_id) " +
             "and position >= (:afterDate) " +
             "order by position asc limit (:limit)")
-    List<WTFFeedMessageEntity> findByOwnerIdAfterDateWithLimit(UUID memberId, Timestamp valueOf, int fetchSize);
+    List<WTFFeedMessageEntity> findByOwnerIdAfterDateWithLimit(@Param("memberId")UUID memberId,
+                                                               @Param("afterDate") Timestamp valueOf,
+                                                               @Param("limit") int fetchSize);
 
 //    create view wtf_feed_message_view as
 //    select trm.id message_id, c.id circuit_id, tr.id room_id, c.circuit_name, trm.from_id,

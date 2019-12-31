@@ -38,7 +38,7 @@ public class SpiritService {
     SpiritXPRepository spiritXPRepository;
 
     @Autowired
-    MemberNameRepository memberNameRepository;
+    MemberDetailsRepository memberDetailsRepository;
 
     @Autowired
     TimeService timeService;
@@ -137,9 +137,9 @@ public class SpiritService {
 
     private String getMemberName(UUID torchieId) {
         String memberName = null;
-        MemberNameEntity memberNameEntity = memberNameRepository.findByMemberId(torchieId);
-        if (memberNameEntity != null) {
-            memberName = memberNameEntity.getFullName();
+        MemberDetailsEntity memberDetailsEntity = memberDetailsRepository.findByMemberId(torchieId);
+        if (memberDetailsEntity != null) {
+            memberName = memberDetailsEntity.getFullName();
         }
         return memberName;
     }

@@ -147,31 +147,6 @@ public class CircuitResource {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CHAT_PATH)
-    public CircuitMessageDto publishChatToWTFFeed(@PathVariable("name") String circuitName, @RequestBody ChatMessageInputDto chatMessageInputDto) {
-
-        RequestContext context = RequestContext.get();
-        log.info("publishChatToWTFFeed, user={}", context.getMasterAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
-
-        return learningCircuitService.publishChatToWTFRoom(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, chatMessageInputDto.getChatMessage());
-    }
-
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH + ResourcePaths.CHAT_PATH)
-    public CircuitMessageDto publishChatToRetroFeed(@PathVariable("name") String circuitName, @RequestBody ChatMessageInputDto chatMessageInputDto) {
-
-        RequestContext context = RequestContext.get();
-        log.info("publishChatToRetroFeed, user={}", context.getMasterAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
-
-        return learningCircuitService.publishChatToRetroFeed(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, chatMessageInputDto.getChatMessage());
-    }
-
-
     /**
      * Retrieves the active circuit for the user
      * @return TwilightLearningCircuitDto

@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.journal.*
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto
-import com.dreamscale.gridtime.client.NetworkClient
+import com.dreamscale.gridtime.client.CircuitTalkClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.core.domain.active.RecentProjectRepository
 import com.dreamscale.gridtime.core.domain.active.RecentTaskRepository
@@ -34,7 +34,7 @@ class JournalResourceSpec extends Specification {
     JournalClient journalClient
 
     @Autowired
-    private NetworkClient circleClient;
+    private CircuitTalkClient circleClient;
 
     @Autowired
     OrganizationRepository organizationRepository

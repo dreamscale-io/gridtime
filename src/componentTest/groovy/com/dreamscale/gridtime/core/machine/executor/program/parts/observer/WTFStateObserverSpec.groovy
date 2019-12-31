@@ -38,7 +38,7 @@ public class WTFStateObserverSpec extends Specification {
         gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache(), teamBoxConfiguration);
     }
 
-    def "should create wtf circle states"() {
+    def "should create wtf circuit states"() {
         given:
 
         LocalDateTime time1 = clock.getActiveGridTime().getClockTime();
@@ -47,15 +47,15 @@ public class WTFStateObserverSpec extends Specification {
         LocalDateTime time4 = time1.plusMinutes(11);
         LocalDateTime time5 = time1.plusMinutes(15);
 
-        UUID circleId = UUID.randomUUID()
+        UUID circuitId = UUID.randomUUID()
 
-        FlowableCircuitWTFMessageEvent circleEvent1 = createCircuitMessageEvent(time2, circleId, "circle", CircuitMessageType.CIRCUIT_OPEN)
-        FlowableCircuitWTFMessageEvent circleEvent2 = createCircuitMessageEvent(time3, circleId, "circle", CircuitMessageType.CIRCLE_ONHOLD)
-        FlowableCircuitWTFMessageEvent circleEvent3 = createCircuitMessageEvent(time4, circleId, "circle", CircuitMessageType.CIRCUIT_RESUMED)
-        FlowableCircuitWTFMessageEvent circleEvent4 = createCircuitMessageEvent(time5, circleId, "circle", CircuitMessageType.CIRCUIT_CLOSED)
+        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", TalkMessageType.CIRCUIT_OPEN)
+        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", TalkMessageType.CIRCUIT_ONHOLD)
+        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", TalkMessageType.CIRCUIT_RESUMED)
+        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", TalkMessageType.CIRCUIT_CLOSED)
 
 
-        def flowables = [circleEvent1, circleEvent2, circleEvent3, circleEvent4] as List
+        def flowables = [circuitEvent1, circuitEvent2, circuitEvent3, circuitEvent4] as List
         Window window = new Window(time1, time1.plusMinutes(20))
         window.addAll(flowables);
 
@@ -77,11 +77,11 @@ public class WTFStateObserverSpec extends Specification {
     }
 
 
-    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circleId, String circleName, TalkMessageType messageType) {
+    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circuitId, String circleName, TalkMessageType messageType) {
 
         WTFFeedMessageEntity circuitMessage = new WTFFeedMessageEntity()
-        circuitMessage.setId(UUID.randomUUID())
-        circuitMessage.setCircuitId(circleId)
+        circuitMessage.setMessageId(UUID.randomUUID())
+        circuitMessage.setCircuitId(circuitId)
         circuitMessage.setCircuitName(circleName)
         circuitMessage.setPosition(position)
         circuitMessage.setMessageType(messageType)

@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.hooks.talk;
 
-import com.dreamscale.gridtime.core.hooks.talk.dto.ClientConnectionListInputDto;
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageDto;
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.core.hooks.talk.dto.ClientConnectionDto;
 import feign.Headers;
 import feign.Param;
@@ -14,7 +13,7 @@ import feign.RequestLine;
 public interface TalkClient {
 
     @RequestLine("POST "+ TalkPaths.TALK_PATH + TalkPaths.TO_PATH + TalkPaths.CLIENT_PATH + "/{id}")
-    void sendDirectMessage(TalkMessageDto talkMessage);
+    void sendDirectMessage(@Param("id") String clientId, TalkMessageDto talkMessage);
 
     @RequestLine("POST "+  TalkPaths.TALK_PATH + TalkPaths.TO_PATH + TalkPaths.ROOM_PATH + "/{id}" )
     void sendRoomMessage(@Param("id") String roomId, TalkMessageDto talkMessage);

@@ -15,12 +15,22 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "and c.circuit_status = OPEN " +
             "order by c.start_time ")
     List<LearningCircuitEntity> findAllActiveCircuitsOwnedBy(@Param("organizationId") UUID organizationId,
-                                                             @Param("memberId")UUID memberId);
+                                                             @Param("memberId") UUID memberId);
 
 
     LearningCircuitEntity findByOrganizationIdAndCircuitName(UUID organizationId, String circuitName);
 
     LearningCircuitEntity findByOrganizationIdAndOwnerIdAndCircuitName(UUID organizationId, UUID ownerId, String circuitName);
+
+
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and exists (select 1 from talk_room tr " +
+            "where tr.talk_room_id = (:talkRoomId) " +
+            "and (tr.id = c.wtf_room_id or tr.id=c.retro_room_id)) ")
+    LearningCircuitEntity findCircuitByTalkRoomId(@Param("organizationId")UUID organizationId,
+                                                  @Param("talkRoomId") String talkRoomId);
+
 
 
     LearningCircuitEntity findByOrganizationIdAndId(UUID organizationId, UUID circuitId);

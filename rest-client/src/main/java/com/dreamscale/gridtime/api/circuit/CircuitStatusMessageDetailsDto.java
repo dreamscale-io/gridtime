@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.hooks.talk.dto;
+package com.dreamscale.gridtime.api.circuit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircuitStatusMessageDto {
+public class CircuitStatusMessageDetailsDto implements MessageDetailsBody {
 
     UUID circuitId;
     String circuitName;

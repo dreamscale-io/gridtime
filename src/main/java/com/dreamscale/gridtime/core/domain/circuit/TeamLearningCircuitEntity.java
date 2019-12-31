@@ -20,13 +20,13 @@ public class TeamLearningCircuitEntity {
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationOwnerId;
+    private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID createdByOwnerId;
+    private UUID ownerId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID moderatedByMemberId;
+    private UUID moderatorId;
 
     private UUID teamId;
     private String circuitName;

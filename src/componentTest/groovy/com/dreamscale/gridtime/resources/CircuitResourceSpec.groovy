@@ -5,11 +5,11 @@ import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 
 import com.dreamscale.gridtime.api.circuit.CreateWTFCircleInputDto
-import com.dreamscale.gridtime.api.circuit.CircuitMessageDto
 
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.event.NewSnippetEvent
-import com.dreamscale.gridtime.client.NetworkClient
+import com.dreamscale.gridtime.client.CircuitTalkClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -27,7 +27,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class CircuitResourceSpec extends Specification {
 
     @Autowired
-    NetworkClient networkClient
+    CircuitTalkClient networkClient
 
     @Autowired
     MasterAccountEntity testUser
@@ -156,7 +156,7 @@ class CircuitResourceSpec extends Specification {
         when:
 
         LearningCircuitDto circleDto = networkClient.closeCircle(circle.id.toString());
-        List<CircuitMessageDto> messages = networkClient.getAllMessagesForCircleFeed(circle.id.toString());
+        List<TalkMessageDto> messages = networkClient.getAllMessagesForCircleFeed(circle.id.toString());
 
         then:
         assert circleDto != null
@@ -226,14 +226,14 @@ class CircuitResourceSpec extends Specification {
         chatMessageInputDto.setChatMessage("Here's a chat message")
 
         when:
-        CircuitMessageDto feedMessageDto = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        TalkMessageDto talkMessageDto = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         then:
-        assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == CircuitMessageType.CHAT
-        assert feedMessageDto.getMessage() == "Here's a chat message"
+        assert talkMessageDto != null
+        assert talkMessageDto.getMessageType() == CircuitMessageType.CHAT
+        assert talkMessageDto.getMessage() == "Here's a chat message"
 
-        assert feedMessageDto.getMessageFrom() != null
+        assert talkMessageDto.getFromMember() != null
     }
 
     def "should post a screenshot to circle feed"() {
@@ -253,15 +253,15 @@ class CircuitResourceSpec extends Specification {
         screenshotReferenceInputDto.setFilePath("/some/path/to/file")
 
         when:
-        CircuitMessageDto feedMessageDto = networkClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
+        TalkMessageDto talkMessageDto = networkClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
 
         then:
-        assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == CircuitMessageType.SCREENSHOT
-        assert feedMessageDto.getMessage() != null
-        assert feedMessageDto.getFilePath() != null
-        assert feedMessageDto.getFileName() != null
-        assert feedMessageDto.getMessageFrom() != null
+        assert talkMessageDto != null
+        assert talkMessageDto.getMessageType() == CircuitMessageType.SCREENSHOT
+        assert talkMessageDto.getMessage() != null
+        assert talkMessageDto.getFilePath() != null
+        assert talkMessageDto.getFileName() != null
+        assert talkMessageDto.getFromMember() != null
     }
 
     def "should post a snippet to active circle feed"() {
@@ -281,15 +281,15 @@ class CircuitResourceSpec extends Specification {
         newSnippetEvent.setSource("Source.java")
 
         when:
-        CircuitMessageDto feedMessageDto = networkClient.postSnippetToActiveCircleFeed(newSnippetEvent)
+        TalkMessageDto talkMessageDto = networkClient.postSnippetToActiveCircleFeed(newSnippetEvent)
 
         then:
-        assert feedMessageDto != null
-        assert feedMessageDto.getMessageType() == CircuitMessageType.SNIPPET
-        assert feedMessageDto.getMessage() != null
-        assert feedMessageDto.getSnippetSource() != null
-        assert feedMessageDto.getSnippet() != null
-        assert feedMessageDto.getMessageFrom() != null
+        assert talkMessageDto != null
+        assert talkMessageDto.getMessageType() == CircuitMessageType.SNIPPET
+        assert talkMessageDto.getMessage() != null
+        assert talkMessageDto.getSnippetSource() != null
+        assert talkMessageDto.getSnippet() != null
+        assert talkMessageDto.getFromMember() != null
     }
 
     def "should retrieve all messages posted to circle feed"() {
@@ -309,19 +309,19 @@ class CircuitResourceSpec extends Specification {
         ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
         chatMessageInputDto.setChatMessage("Here's a chat message")
 
-        CircuitMessageDto feedMessage1 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
-        CircuitMessageDto feedMessage2 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        TalkMessageDto talkMessage1 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        TalkMessageDto talkMessage2 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
 
         when:
-        List<CircuitMessageDto> feedMessages = networkClient.getAllMessagesForCircleFeed(circle.id.toString())
+        List<TalkMessageDto> talkMessages = networkClient.getAllMessagesForCircleFeed(circle.id.toString())
 
         then:
-        assert feedMessages != null
-        assert feedMessages.size() == 3
+        assert talkMessages != null
+        assert talkMessages.size() == 3
 
-        for (CircuitMessageDto message : feedMessages) {
+        for (TalkMessageDto message : talkMessages) {
             assert message.position != null
-            assert message.messageFrom != null
+            assert message.fromMember != null
         }
 
     }

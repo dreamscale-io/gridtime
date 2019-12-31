@@ -23,10 +23,10 @@ public class TalkRoomEntity {
     private String talkRoomId; //assigned by talk
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationOwnerId;
+    private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID createdByOwnerId;
+    private UUID ownerId;
 
     @Enumerated(EnumType.STRING)
     private FeedType feedType;

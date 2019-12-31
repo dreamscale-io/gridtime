@@ -14,7 +14,7 @@ import java.util.List;
         "Content-Type: application/json",
         "Accept: application/json",
 })
-public interface NetworkClient {
+public interface CircuitTalkClient {
 
     @RequestLine("POST " + ResourcePaths.NETWORK_PATH + ResourcePaths.AUTH_PATH + ResourcePaths.MEMBER_PATH + "/{id}" )
     MemberChannelsDto authorizeMemberToUseNetwork(@Param("id") String memberId);
@@ -32,16 +32,16 @@ public interface NetworkClient {
     LearningCircuitDto createNewAdhocWTFCircle(CreateWTFCircleInputDto circleSessionInputDto);
 
     @RequestLine("POST " + ResourcePaths.NETWORK_PATH + ResourcePaths.CIRCUIT_PATH + "/{id}" + ResourcePaths.FEED_PATH + ResourcePaths.CHAT_PATH)
-    CircuitMessageDto postChatMessageToCircleFeed(@Param("id") String circleId, ChatMessageInputDto chatMessageInputDto);
+    TalkMessageDto postChatMessageToCircleFeed(@Param("id") String circleId, ChatMessageInputDto chatMessageInputDto);
 
     @RequestLine("POST " + ResourcePaths.NETWORK_PATH + ResourcePaths.CIRCUIT_PATH + "/{id}" + ResourcePaths.FEED_PATH + ResourcePaths.SCREENSHOT_PATH)
-    CircuitMessageDto postScreenshotReferenceToCircleFeed(@Param("id") String circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto);
+    TalkMessageDto postScreenshotReferenceToCircleFeed(@Param("id") String circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto);
 
     @RequestLine("POST " + ResourcePaths.NETWORK_PATH + ResourcePaths.CIRCUIT_PATH + ResourcePaths.ACTIVE_PATH + ResourcePaths.FEED_PATH + ResourcePaths.SNIPPET_PATH)
-    CircuitMessageDto postSnippetToActiveCircleFeed(NewSnippetEvent newSnippetEvent);
+    TalkMessageDto postSnippetToActiveCircleFeed(NewSnippetEvent newSnippetEvent);
 
     @RequestLine("GET " + ResourcePaths.NETWORK_PATH + ResourcePaths.CIRCUIT_PATH + "/{id}" + ResourcePaths.FEED_PATH)
-    List<CircuitMessageDto> getAllMessagesForCircleFeed(@Param("id") String circleId );
+    List<TalkMessageDto> getAllMessagesForCircleFeed(@Param("id") String circleId );
 
     @RequestLine("POST " + ResourcePaths.NETWORK_PATH + ResourcePaths.CIRCUIT_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.CLOSE_PATH)
     LearningCircuitDto closeCircle(@Param("id") String circleId);

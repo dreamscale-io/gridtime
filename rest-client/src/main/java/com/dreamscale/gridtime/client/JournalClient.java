@@ -33,11 +33,11 @@ public interface JournalClient {
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
             + "?member={memberId}")
-    RecentJournalDto getRecentJournalForMember(@Param("fromMemberId") String memberId);
+    RecentJournalDto getRecentJournalForMember(@Param("memberId") String memberId);
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH
             + "?member={memberId}&limit={limit}")
-    RecentJournalDto getRecentJournalForMemberWithLimit(@Param("fromMemberId") String memberId, @Param("limit") Integer limit);
+    RecentJournalDto getRecentJournalForMemberWithLimit(@Param("memberId") String memberId, @Param("limit") Integer limit);
 
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
@@ -46,7 +46,7 @@ public interface JournalClient {
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
             + "?member={memberId}&before_date={beforeDate}&limit={limit}")
-    List<JournalEntryDto> getHistoricalIntentionsForMemberWithLimit(@Param("fromMemberId") String memberId, @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
+    List<JournalEntryDto> getHistoricalIntentionsForMemberWithLimit(@Param("memberId") String memberId, @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)

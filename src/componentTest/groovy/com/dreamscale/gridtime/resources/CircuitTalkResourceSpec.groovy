@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.api.circuit.CreateWTFCircleInputDto
 import com.dreamscale.gridtime.api.network.MemberChannelsDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.NetworkChannelClient
-import com.dreamscale.gridtime.client.NetworkClient
+import com.dreamscale.gridtime.client.CircuitTalkClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -23,13 +23,13 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class NetworkChannelResourceSpec extends Specification {
+class CircuitTalkResourceSpec extends Specification {
 
     @Autowired
     NetworkChannelClient channelClient
 
     @Autowired
-    NetworkClient networkClient
+    CircuitTalkClient networkClient
 
     @Autowired
     MasterAccountEntity testUser

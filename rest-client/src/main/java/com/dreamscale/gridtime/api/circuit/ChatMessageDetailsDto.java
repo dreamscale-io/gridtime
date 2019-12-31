@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.hooks.talk.dto;
+package com.dreamscale.gridtime.api.circuit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageDto {
+public class ChatMessageDetailsDto implements MessageDetailsBody {
 
     String message;
 }
