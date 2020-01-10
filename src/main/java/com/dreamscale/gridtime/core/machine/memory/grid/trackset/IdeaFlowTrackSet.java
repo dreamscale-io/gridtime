@@ -113,7 +113,7 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
 
         CarryOverContext carryOverContext = new CarryOverContext(subcontextName);
 
-        //TODO this needs to not rollover on a terminated WTF or learning
+        //TODO this needs to not rollover on a terminated WTF_ROOM or learning
 
         IdeaFlowStateReference lastWtf = wtfTrack.getLast();
         carryOverContext.saveReference("last.wtf", lastWtf);

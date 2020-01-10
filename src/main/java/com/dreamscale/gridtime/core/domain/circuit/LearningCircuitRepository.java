@@ -12,9 +12,18 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
             "and c.owner_id = (:memberId) "+
-            "and c.circuit_status = OPEN " +
-            "order by c.start_time ")
+            "and c.circuit_status = 'ACTIVE' " +
+            "order by c.open_time ")
     List<LearningCircuitEntity> findAllActiveCircuitsOwnedBy(@Param("organizationId") UUID organizationId,
+                                                             @Param("memberId") UUID memberId);
+
+
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and c.owner_id = (:memberId) "+
+            "and c.circuit_status = 'ONHOLD' " +
+            "order by c.open_time ")
+    List<LearningCircuitEntity> findAllOnHoldCircuitsOwnedBy(@Param("organizationId") UUID organizationId,
                                                              @Param("memberId") UUID memberId);
 
 
@@ -34,6 +43,18 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
 
 
     LearningCircuitEntity findByOrganizationIdAndId(UUID organizationId, UUID circuitId);
+
+        @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and exists (select 1 from talk_room tm, talk_room_member trm " +
+            "where tm.id = trm.room_id " +
+            "and c.id = tm.circuit_id " +
+            "and trm.member_id = (:memberId)) " +
+            "and c.circuit_status = 'ACTIVE' " +
+            "order by c.open_time ")
+    List<LearningCircuitEntity> findAllParticipatingCircuits(@Param("organizationId") UUID organizationId,
+                                                             @Param("memberId") UUID memberId);
+
 
 //
 //    @Query(nativeQuery = true, value = "select * from circle c " +

@@ -1,13 +1,11 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circuit.*
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto
 import com.dreamscale.gridtime.api.spirit.SpiritDto
 import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
-import com.dreamscale.gridtime.client.CircuitTalkClient
 import com.dreamscale.gridtime.client.SpiritClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity

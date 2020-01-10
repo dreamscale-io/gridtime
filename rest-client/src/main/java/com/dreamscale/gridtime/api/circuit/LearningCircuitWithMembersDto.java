@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningCircuitDto {
+public class LearningCircuitWithMembersDto {
 
     UUID id;
     String circuitName;
@@ -32,5 +33,11 @@ public class LearningCircuitDto {
     LocalDateTime lastResumeTime;
 
     Long secondsBeforeOnHold;
+
+    List<CircuitMemberStatusDto> circuitMembers = new ArrayList<>();
+
+    public void addCircuitMember(CircuitMemberStatusDto circuitMemberStatus) {
+        circuitMembers.add(circuitMemberStatus);
+    }
 
 }

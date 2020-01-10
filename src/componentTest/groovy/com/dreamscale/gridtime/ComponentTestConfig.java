@@ -57,9 +57,10 @@ public class ComponentTestConfig extends BaseTestConfig {
         return createClientWithStaticApiKey(jacksonFeignBuilder, ProjectClient.class);
     }
 
+
     @Bean
-    NetworkChannelClient channelClient() {
-        return createClientWithStaticApiKey(jacksonFeignBuilder, NetworkChannelClient.class);
+    TalkToClient circuitTalkClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, TalkToClient.class);
     }
 
     @Bean
@@ -78,7 +79,7 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    CircuitTalkClient networkClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, CircuitTalkClient.class); }
+    CircuitClient circuitClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, CircuitClient.class); }
 
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);

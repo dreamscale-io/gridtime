@@ -44,6 +44,6 @@ public class LearningCircuitEntity {
     private LocalDateTime lastOnHoldTime;
     private LocalDateTime lastResumeTime;
 
-    private Long cumulativeSecondsBeforeOnHold;
+    private Long secondsBeforeOnHold;
 
 }

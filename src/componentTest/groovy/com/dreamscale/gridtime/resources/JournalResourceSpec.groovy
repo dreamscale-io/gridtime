@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.journal.*
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto
-import com.dreamscale.gridtime.client.CircuitTalkClient
+import com.dreamscale.gridtime.client.CircuitClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.core.domain.active.RecentProjectRepository
 import com.dreamscale.gridtime.core.domain.active.RecentTaskRepository
@@ -34,7 +34,7 @@ class JournalResourceSpec extends Specification {
     JournalClient journalClient
 
     @Autowired
-    private CircuitTalkClient circleClient;
+    private CircuitClient circleClient;
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -59,12 +59,12 @@ class JournalResourceSpec extends Specification {
     TimeService mockTimeService
 
     @Autowired
-    MasterAccountEntity testUser
+    MasterAccountEntity loggedInUser
 
     def "should save new intention"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
 
@@ -82,7 +82,7 @@ class JournalResourceSpec extends Specification {
     def "should update flame rating"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
         JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
@@ -101,7 +101,7 @@ class JournalResourceSpec extends Specification {
     def "should finish intention"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
         JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
@@ -120,7 +120,7 @@ class JournalResourceSpec extends Specification {
     def "get recent intentions"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -139,7 +139,7 @@ class JournalResourceSpec extends Specification {
     def "get recent intentions with limit"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -163,7 +163,7 @@ class JournalResourceSpec extends Specification {
     def "get historical intentions before date"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), testUser.getId())
+        createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -195,7 +195,7 @@ class JournalResourceSpec extends Specification {
         given:
         OrganizationEntity organization = aRandom.organizationEntity().save()
 
-        createMembership(organization.getId(), testUser.getId())
+        createMembership(organization.getId(), loggedInUser.getId())
 
         ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).save()
         ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).save()
@@ -236,7 +236,7 @@ class JournalResourceSpec extends Specification {
         OrganizationEntity organization = aRandom.organizationEntity().build()
         organizationRepository.save(organization)
 
-        createMembership(organization.getId(), testUser.getId());
+        createMembership(organization.getId(), loggedInUser.getId());
 
         ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
         projectRepository.save(project1)
@@ -275,7 +275,7 @@ class JournalResourceSpec extends Specification {
     def "get recent intentions for other member"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), testUser.getId())
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -284,8 +284,8 @@ class JournalResourceSpec extends Specification {
         createIntentionWithClient(intention2)
 
         //change active logged in user to a different user within same organization
-        testUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId())
+        loggedInUser.setId(UUID.randomUUID())
+        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalForMember(memberWithIntentions.getId().toString()).recentIntentions
@@ -298,7 +298,7 @@ class JournalResourceSpec extends Specification {
     def "get recent intentions for other member with limit"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), testUser.getId())
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -307,8 +307,8 @@ class JournalResourceSpec extends Specification {
         createIntentionWithClient(intention2)
 
         //change active logged in user to a different user within same organization
-        testUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), testUser.getId())
+        loggedInUser.setId(UUID.randomUUID())
+        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalForMemberWithLimit(

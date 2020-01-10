@@ -13,7 +13,7 @@ create view journal_entry_view as
          join project p on i.project_id = p.id
   UNION ALL
   select c.id, c.position, c.description, c.project_id, c.task_id, c.organization_id, c.member_id,
-         c.flame_rating, c.finish_status, c.finish_time, c.circle_id, 'WTF' as journal_entry_type,
+         c.flame_rating, c.finish_status, c.finish_time, c.circle_id, 'WTF_ROOM' as journal_entry_type,
          t.name task_name, t.summary task_summary, p.name project_name
   from circle_context c
          join task t on c.task_id = t.id

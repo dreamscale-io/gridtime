@@ -11,7 +11,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 
 /**
- * Translates the Circle Feed messages of start/stop shelf/resume on WTF Circles to TimeBands
+ * Translates the Circle Feed messages of start/stop shelf/resume on WTF_ROOM Circles to TimeBands
  */
 public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageEvent> {
 

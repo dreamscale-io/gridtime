@@ -102,7 +102,7 @@ public class GridTile {
     }
 
     /**
-     * Starts a WTF friction band...
+     * Starts a WTF_ROOM friction band...
      */
     public void startWTF(LocalDateTime moment, CircuitDetails circuitDetails, StartTag startTag) {
         IdeaFlowStateReference stateReference = featureCache.lookupWTFReference(circuitDetails);
@@ -111,7 +111,7 @@ public class GridTile {
     }
 
     /**
-     * Clears a WTF friction band...
+     * Clears a WTF_ROOM friction band...
      */
     public void clearWTF(LocalDateTime moment, FinishTag finishTag) {
 

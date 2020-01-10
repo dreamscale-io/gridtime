@@ -20,6 +20,8 @@ public class TalkRoomEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
+    private UUID circuitId;
+
     private String talkRoomId; //assigned by talk
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -29,13 +31,6 @@ public class TalkRoomEntity {
     private UUID ownerId;
 
     @Enumerated(EnumType.STRING)
-    private FeedType feedType;
+    private RoomType roomType;
 }
 
-//    create table talk_room (
-//        id uuid primary key not null,
-//        talk_room_id text unique,
-//        organization_owner_id uuid,
-//        created_by_owner_id uuid,
-//        feed_type text
-//);

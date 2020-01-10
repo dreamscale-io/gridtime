@@ -168,7 +168,7 @@ public class SpiritService {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(learningCircuitService.getAllParticipatingCircles(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(learningCircuitService.getAllParticipatingCircuits(organizationId, torchieId));
 
         return spiritNetworkDto;
     }

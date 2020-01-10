@@ -6,12 +6,14 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.LearningCircuitService;
 import com.dreamscale.gridtime.core.service.OrganizationService;
+import feign.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -61,23 +63,34 @@ public class CircuitResource {
     }
 
     /**
-     * Starts the retrospective feed for the provided WTF Circuit
+     * Starts the retrospective feed for the provided WTF_ROOM Circuit
      *
      * @return TwilightLearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
-    public LearningCircuitDto openRetroForWTFLearningCircuit(@PathVariable("name") String circuitName) {
+    public LearningCircuitDto startRetroForWTF(@PathVariable("name") String circuitName) {
         RequestContext context = RequestContext.get();
-        log.info("createLearningCircuitForWTFWithCustomName, user={}", context.getMasterAccountId());
+        log.info("startRetroForWTF, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         return learningCircuitService.startRetroForCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.WTF_PATH + "/{name}" )
+    LearningCircuitWithMembersDto getCircuitWithAllDetails(@PathVariable("name") String circuitName) {
+        RequestContext context = RequestContext.get();
+        log.info("getCircuitWithAllDetails, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return learningCircuitService.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
+    }
+
     /**
-     * Joins an existing WTF circuit
+     * Joins an existing WTF_ROOM circuit
      *
      * @return TwilightLearningCircuitDto
      */
@@ -94,7 +107,7 @@ public class CircuitResource {
     }
 
     /**
-     * Leaves an existing WTF circuit (member will still be joined, but inactive)
+     * Leaves an existing WTF_ROOM circuit (member will still be joined, but inactive)
      *
      * @return TwilightLearningCircuitDto
      */
@@ -152,7 +165,7 @@ public class CircuitResource {
      * @return TwilightLearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.WTF_PATH + ResourcePaths.ACTIVE_PATH)
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
     public LearningCircuitDto getMyActiveCircuit() {
         RequestContext context = RequestContext.get();
         log.info("getMyActiveCircuit, user={}", context.getMasterAccountId());
@@ -163,11 +176,11 @@ public class CircuitResource {
     }
 
     /**
-     * Retrieves the do it later circuits for the user
+     * Retrieves the do it later circuits for the logged in user
      * @return TwilightLearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.DO_IT_LATER_PATH)
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)
     public List<LearningCircuitDto> getMyDoItLaterCircuits() {
         RequestContext context = RequestContext.get();
         log.info("getMyDoItLaterCircuits, user={}", context.getMasterAccountId());
@@ -177,5 +190,35 @@ public class CircuitResource {
         return learningCircuitService.getMyDoItLaterCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
+    /**
+     * Retrieves all participating circuits for the logged in user
+     * @return TwilightLearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
+    public List<LearningCircuitDto> getAllMyParticipatingCircuits() {
+        RequestContext context = RequestContext.get();
+        log.info("getAllMyParticipatingCircuits, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return learningCircuitService.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
+
+
+    @GetMapping(ResourcePaths.MEMBER_PATH + "/{id}" )
+    public List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@PathVariable("memberId") String memberId) {
+        RequestContext context = RequestContext.get();
+        log.info("getAllParticipatingCircuitsForMember, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        UUID otherMemberId = UUID.fromString(memberId);
+
+        return learningCircuitService.getAllParticipatingCircuitsForOtherMember(invokingMember.getOrganizationId(), invokingMember.getId(), otherMemberId);
+    }
 
 }

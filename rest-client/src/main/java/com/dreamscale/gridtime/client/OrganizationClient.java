@@ -51,6 +51,7 @@ public interface OrganizationClient {
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH +  ResourcePaths.MEMBER_PATH )
     MemberRegistrationDetailsDto addMemberToMyTeam(String memberEmail);
 
-
+//    private String inviteToken;
+//    private String orgEmail;
 
 }

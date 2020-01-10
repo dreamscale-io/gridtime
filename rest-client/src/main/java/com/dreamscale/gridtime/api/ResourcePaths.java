@@ -39,6 +39,7 @@ public class ResourcePaths {
     public static final String INVITATION_PATH = "/invitation";
     public static final String TEAM_PATH = "/team";
     public static final String TORCHIE_PATH = "/torchie";
+    public static final String GRIDTIME_PATH = "/gridtime";
 
     public static final String FLOW_PATH = "/flow";
     public static final String START_PATH = "/start";
@@ -97,6 +98,7 @@ public class ResourcePaths {
 
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
+    public static final String MY_PATH = "/my";
 
     public static final String API_KEY_HEADER = "X-API-KEY";
     public static final String CONNECT_ID_HEADER = "X-CONNECT-ID";
@@ -106,4 +108,18 @@ public class ResourcePaths {
     public static final String RETRO_PATH = "/retro";
     public static final String TALK_PATH = "/talk";
     public static final String ROOM_PATH = "/room";
+    public static final String PARTICIPATING_PATH = "/participating";
+    public static final String TO_PATH = "/to";
+    public static final String CALENDAR_PATH = "/calendar";
+    public static final String WATCH_PATH = "/watch";
+    public static final String TAG_PATH = "/tag";
+    public static final String CLEAR_PATH = "/clear";
+    public static final String SCOPE_PATH = "/scope";
+    public static final String LISTEN_PATH = "/listen";
+    public static final String FOR_PATH = "/for";
+    public static final String GATE_PATH = "/gate";
+    public static final String THRESHOLD_PATH = "/threshold";
+    public static final String RUN_PATH = "/run";
+    public static final String PROGRAM_PATH = "/program";
+    public static final String CMD_PATH = "/cmd";
 }

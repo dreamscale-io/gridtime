@@ -1,15 +1,11 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-
-import com.dreamscale.gridtime.api.circuit.CreateWTFCircleInputDto
-
-import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto
-import com.dreamscale.gridtime.api.circuit.TalkMessageDto
-import com.dreamscale.gridtime.api.event.NewSnippetEvent
-import com.dreamscale.gridtime.client.CircuitTalkClient
+import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
+import com.dreamscale.gridtime.client.CircuitClient
+import com.dreamscale.gridtime.core.domain.circuit.CircuitStatus
+import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -27,10 +23,10 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class CircuitResourceSpec extends Specification {
 
     @Autowired
-    CircuitTalkClient networkClient
+    CircuitClient circuitClient
 
     @Autowired
-    MasterAccountEntity testUser
+    MasterAccountEntity loggedInUser
 
     @Autowired
     TeamService teamService
@@ -49,280 +45,178 @@ class CircuitResourceSpec extends Specification {
     }
 
 
-    def "should create a circle"() {
+    def 'should create a circuit'() {
         given:
 
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
-
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
+        loggedInUser.setId(member.getMasterAccountId())
 
         when:
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
         then:
-        assert circle != null
-        assert circle.getCircuitName != null
-        assert circle.problemDescription != null
-
-        assert circle.members != null
-        assert circle.members.size() == 1
+        assert circuit != null
+        assert circuit.circuitName != null
+        assert circuit.circuitStatus != null
 
     }
 
-    def "should return all open circles"() {
+    def "should return active circuit"() {
         given:
 
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-        LearningCircuitDto circle2 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circuit1 = circuitClient.createLearningCircuitForWTF()
 
         when:
-        List<LearningCircuitDto> circles = networkClient.getAllOpenCircles()
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit()
 
         then:
-        assert circles != null
-        assert circles.size() == 2
-        assert circle1.getTalkRoomId() != null
-        assert circles.get(0).getTalkRoomId() != null
+        assert activeCircuit != null
+        assert circuit1 != null
+        assert circuit1.getCircuitName() == activeCircuit.getCircuitName()
     }
 
-    def "should return active circle"() {
+
+    def "should return all shelved do it later circuits"() {
         given:
 
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
+        LearningCircuitDto circuit1 = circuitClient.createLearningCircuitForWTF()
+        circuitClient.putCircuitOnHoldWithDoItLater(circuit1.getCircuitName())
 
-        LearningCircuitDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circuit2 = circuitClient.createLearningCircuitForWTF()
+        circuitClient.putCircuitOnHoldWithDoItLater(circuit2.getCircuitName())
 
         when:
-        LearningCircuitDto activeCircle = networkClient.getActiveCircle()
+        List<LearningCircuitDto> circuits = circuitClient.getAllMyDoItLaterCircuits()
 
         then:
-        assert activeCircle != null
-        assert activeCircle.id == circle1.id
-        assert activeCircle.getTalkRoomId() != null
+        assert circuits != null
+        assert circuits.size() == 2
     }
 
 
-
-    def "should return all shelved do it later circles"() {
-        given:
-
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
-
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle1 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-        LearningCircuitDto circle2 = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        when:
-        networkClient.shelveCircleWithDoItLater(circle1.id.toString())
-        List<LearningCircuitDto> circles = networkClient.getAllDoItLaterCircles()
-
-        then:
-        assert circles != null
-        assert circles.size() == 1
-    }
-
-
-    def "should close a circle"() {
+    def 'should close a circuit'() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
         when:
 
-        LearningCircuitDto circleDto = networkClient.closeCircle(circle.id.toString());
-        List<TalkMessageDto> messages = networkClient.getAllMessagesForCircleFeed(circle.id.toString());
+        LearningCircuitDto closedCircuit = circuitClient.closeExistingCircuit(circuit.getCircuitName());
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
-        assert circleDto != null
-        assert messages != null
-        assert messages.size() == 2
+        assert closedCircuit != null
+        assert activeCircuit == null
     }
 
 
-    def "should shelf a circle with do it later"() {
+    def "should shelf a circuit with do it later"() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
         when:
 
-        LearningCircuitDto circleDto = networkClient.shelveCircleWithDoItLater(circle.id.toString());
+        LearningCircuitDto circuitDto = circuitClient.putCircuitOnHoldWithDoItLater(circuit.getCircuitName());
 
         then:
-        assert circleDto != null
-        assert circleDto.onShelf == true
+        assert circuitDto != null
+        assert circuitDto.circuitStatus == CircuitStatus.ONHOLD.name()
     }
 
-    def "should resume a circle from do it later"() {
+    def 'should resume a circuit from do it later'() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        LearningCircuitDto circleShelved = networkClient.shelveCircleWithDoItLater(circle.id.toString());
+        LearningCircuitDto circuitShelved = circuitClient.putCircuitOnHoldWithDoItLater(circuit.getCircuitName());
 
         when:
-
-        LearningCircuitDto resumedCircle = networkClient.resumeAnExistingCircleFromDoItLaterShelf(circle.id.toString());
+        LearningCircuitDto resumedCircuit = circuitClient.resumeCircuit(circuit.getCircuitName());
 
         then:
-        assert resumedCircle != null
-        assert resumedCircle.onShelf == false
+        assert resumedCircuit != null
+        assert resumedCircuit.circuitStatus == CircuitStatus.ACTIVE.name()
     }
 
 
-    def "should post a chat message to circle feed"() {
-        given:
-
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
-
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
-        chatMessageInputDto.setChatMessage("Here's a chat message")
-
-        when:
-        TalkMessageDto talkMessageDto = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
-
-        then:
-        assert talkMessageDto != null
-        assert talkMessageDto.getMessageType() == CircuitMessageType.CHAT
-        assert talkMessageDto.getMessage() == "Here's a chat message"
-
-        assert talkMessageDto.getFromMember() != null
-    }
-
-    def "should post a screenshot to circle feed"() {
-        given:
-
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        testUser.setId(member.getMasterAccountId())
-
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
-
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
-        screenshotReferenceInputDto.setFileName("file boxName");
-        screenshotReferenceInputDto.setFilePath("/some/path/to/file")
-
-        when:
-        TalkMessageDto talkMessageDto = networkClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
-
-        then:
-        assert talkMessageDto != null
-        assert talkMessageDto.getMessageType() == CircuitMessageType.SCREENSHOT
-        assert talkMessageDto.getMessage() != null
-        assert talkMessageDto.getFilePath() != null
-        assert talkMessageDto.getFileName() != null
-        assert talkMessageDto.getFromMember() != null
-    }
-
-    def "should post a snippet to active circle feed"() {
+    def 'join another persons chat room'() {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        NewSnippetEvent newSnippetEvent = new NewSnippetEvent();
-        newSnippetEvent.setSnippet("{some code}")
-        newSnippetEvent.setSource("Source.java")
+        //change active logged in user to a different user within same organization
+        MasterAccountEntity otherAccount = aRandom.masterAccountEntity().save()
+        OrganizationMemberEntity otherMember =  aRandom.memberEntity().organizationId(org.id).masterAccountId(otherAccount.id).save()
+        loggedInUser.setId(otherMember.getMasterAccountId())
 
         when:
-        TalkMessageDto talkMessageDto = networkClient.postSnippetToActiveCircleFeed(newSnippetEvent)
+
+        LearningCircuitDto myOwnCircuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuitJoined = circuitClient.joinExistingCircuit(circuit.getCircuitName())
+
+        List<LearningCircuitDto> participatingCircuits = circuitClient.getAllMyParticipatingCircuits();
 
         then:
-        assert talkMessageDto != null
-        assert talkMessageDto.getMessageType() == CircuitMessageType.SNIPPET
-        assert talkMessageDto.getMessage() != null
-        assert talkMessageDto.getSnippetSource() != null
-        assert talkMessageDto.getSnippet() != null
-        assert talkMessageDto.getFromMember() != null
+        assert participatingCircuits != null
+        assert participatingCircuits.size() == 2
     }
 
-    def "should retrieve all messages posted to circle feed"() {
+    def 'join and leave another persons chat room to update room status'() {
         given:
-
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
-
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        loggedInUser.setId(member.getMasterAccountId())
 
-        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
-        circleSessionInputDto.setProblemDescription("Problem is this thing");
+        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
-        LearningCircuitDto circle = networkClient.createNewAdhocWTFCircle(circleSessionInputDto)
-
-        ChatMessageInputDto chatMessageInputDto = new ChatMessageInputDto();
-        chatMessageInputDto.setChatMessage("Here's a chat message")
-
-        TalkMessageDto talkMessage1 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
-        TalkMessageDto talkMessage2 = networkClient.postChatMessageToCircleFeed(circle.id.toString(), chatMessageInputDto)
+        //change active logged in user to a different user within same organization
+        MasterAccountEntity otherAccount = aRandom.masterAccountEntity().save()
+        OrganizationMemberEntity otherMember =  aRandom.memberEntity().organizationId(org.id).masterAccountId(otherAccount.id).save()
+        loggedInUser.setId(otherMember.getMasterAccountId())
 
         when:
-        List<TalkMessageDto> talkMessages = networkClient.getAllMessagesForCircleFeed(circle.id.toString())
+
+        LearningCircuitDto circuitJoined = circuitClient.joinExistingCircuit(circuit.getCircuitName())
+        LearningCircuitDto circuitLeft = circuitClient.leaveExistingCircuit(circuit.getCircuitName())
+
+        LearningCircuitWithMembersDto fullDetailsDto = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
 
         then:
-        assert talkMessages != null
-        assert talkMessages.size() == 3
+        assert fullDetailsDto != null
+        assert fullDetailsDto.getCircuitMembers().size() == 2
+        assert fullDetailsDto.getCircuitMembers().get(0).memberId == member.id
+        assert fullDetailsDto.getCircuitMembers().get(1).memberId == otherMember.id
 
-        for (TalkMessageDto message : talkMessages) {
-            assert message.position != null
-            assert message.fromMember != null
-        }
+        assert fullDetailsDto.getCircuitMembers().get(0).wtfRoomStatus == RoomMemberStatus.ACTIVE.name()
+        assert fullDetailsDto.getCircuitMembers().get(1).wtfRoomStatus == RoomMemberStatus.INACTIVE.name()
+
 
     }
 

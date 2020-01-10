@@ -35,7 +35,7 @@ public class TalkRoomMemberEntity {
     private LocalDateTime lastActive;
 
     @Enumerated(EnumType.STRING)
-    private RoomMemberStatus activeStatus;
+    private RoomMemberStatus roomStatus;
 
 
 
