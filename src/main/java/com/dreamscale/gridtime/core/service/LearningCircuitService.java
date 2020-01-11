@@ -244,12 +244,14 @@ public class LearningCircuitService {
     private LearningCircuitDto toDto(LearningCircuitEntity circuitEntity) {
         LearningCircuitDto circuitDto = circuitDtoMapper.toApi(circuitEntity);
 
-        if (circuitEntity.getWtfRoomId() != null) {
-            circuitDto.setWtfTalkRoomId(deriveWTFTalkRoomId(circuitEntity));
-        }
+        if (circuitEntity != null) {
+            if (circuitEntity.getWtfRoomId() != null) {
+                circuitDto.setWtfTalkRoomId(deriveWTFTalkRoomId(circuitEntity));
+            }
 
-        if (circuitEntity.getRetroRoomId() != null) {
-            circuitDto.setRetroTalkRoomId(deriveRetroTalkRoomId(circuitEntity));
+            if (circuitEntity.getRetroRoomId() != null) {
+                circuitDto.setRetroTalkRoomId(deriveRetroTalkRoomId(circuitEntity));
+            }
         }
 
         return circuitDto;
