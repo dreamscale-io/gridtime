@@ -597,11 +597,11 @@ public class LearningCircuitService {
 
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
-        messageDto.setUri(talkRoomId);
+        messageDto.setUri(toTalkRoomUri(talkRoomId));
         messageDto.setJsonBody(JSONTransformer.toJson(new ChatMessageDetailsDto(message)));
         messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
         messageDto.setMessageTime(messageEntity.getPosition());
-        messageDto.setMessageType(messageEntity.getMessageType().name());
+        messageDto.setMessageType(messageEntity.getMessageType().getTalkMessageType());
 
         return messageDto;
     }
@@ -717,7 +717,7 @@ public class LearningCircuitService {
         for (TalkRoomMessageEntity message : talkMessages) {
             TalkMessageDto dto = new TalkMessageDto();
             dto.setId(message.getId());
-            dto.setUri(ResourcePaths.ROOM_PATH + "/"+talkRoomId);
+            dto.setUri(toTalkRoomUri(talkRoomId));
             dto.setMessageTime(message.getPosition());
             dto.setMessageType(message.getMessageType().getTalkMessageType());
             dto.setJsonBody(message.getJsonBody());
@@ -728,7 +728,9 @@ public class LearningCircuitService {
         return talkMessageDtos;
     }
 
-
+    private String toTalkRoomUri(String talkRoomId) {
+        return ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/"+ talkRoomId;
+    }
 
 
     public TalkMessageDto postScreenshotReferenceToCircuitFeed(UUID organizationId, UUID spiritId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
