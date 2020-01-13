@@ -12,4 +12,8 @@ public class TimeService {
     public LocalDateTime now() {
         return LocalDateTime.now();
     }
+
+    public Long nanoTime() {
+        return System.nanoTime();
+    }
 }

@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.api.event.NewSnippetEvent;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsRepository;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusMessageDetailsDto;
+import com.dreamscale.gridtime.core.hooks.talk.TalkConnectionFactory;
 import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
 import com.dreamscale.gridtime.core.domain.circuit.RoomType;
@@ -70,6 +71,9 @@ public class LearningCircuitService {
 
     @Autowired
     private MapperFactory mapperFactory;
+
+    @Autowired
+    private TalkConnectionFactory talkConnectionFactory;
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
@@ -136,6 +140,7 @@ public class LearningCircuitService {
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
@@ -172,21 +177,22 @@ public class LearningCircuitService {
 
         activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), DEFAULT_WTF_MESSAGE);
 
-        sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.CIRCUIT_OPEN);
+        sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.CIRCUIT_OPEN);
 
         return toDto(learningCircuitEntity);
 
     }
 
-    private void sendStatusMessageToWTFRoom(LearningCircuitEntity circuit, LocalDateTime now, TalkMessageType messageType) {
+    private void sendStatusMessageToWTFRoom(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, TalkMessageType messageType) {
         UUID messageId = UUID.randomUUID();
-        sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now,
+
+        sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now, nanoTime,
                 circuit.getOwnerId(), circuit.getWtfRoomId(), deriveWTFTalkRoomId(circuit), messageType);
     }
 
-    private void sendStatusMessageToRetroRoom(LearningCircuitEntity circuit, LocalDateTime now, TalkMessageType messageType) {
+    private void sendStatusMessageToRetroRoom(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, TalkMessageType messageType) {
         UUID messageId = UUID.randomUUID();
-        sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now,
+        sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now, nanoTime,
                 circuit.getOwnerId(), circuit.getRetroRoomId(), deriveRetroTalkRoomId(circuit), messageType);
     }
 
@@ -314,6 +320,7 @@ public class LearningCircuitService {
         List<TalkRoomMemberEntity> retroRoomMembers = new ArrayList<>();
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         for (TalkRoomMemberEntity wtfRoomMember : wtfRoomMembers) {
             TalkRoomMemberEntity retroRoomMember = new TalkRoomMemberEntity();
@@ -330,7 +337,7 @@ public class LearningCircuitService {
 
         talkRoomMemberRepository.save(retroRoomMembers);
 
-        sendStatusMessageToRetroRoom(learningCircuitEntity, now, TalkMessageType.CIRCUIT_RETRO_STARTED);
+        sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.CIRCUIT_RETRO_STARTED);
 
         return toDto(learningCircuitEntity);
 
@@ -376,18 +383,19 @@ public class LearningCircuitService {
         validateCircuitExists(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
         UUID wtfRoomId = learningCircuitEntity.getWtfRoomId();
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
         if (wtfRoomId != null) {
             addMemberToRoom(organizationId, memberId, now, wtfRoomId);
-            sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.ROOM_MEMBER_JOIN);
+            sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.ROOM_MEMBER_JOIN);
 
         }
 
         if (retroRoomId != null) {
             addMemberToRoom(organizationId, memberId, now, retroRoomId);
-            sendStatusMessageToRetroRoom(learningCircuitEntity, now, TalkMessageType.ROOM_MEMBER_JOIN);
+            sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.ROOM_MEMBER_JOIN);
         }
 
 
@@ -421,17 +429,18 @@ public class LearningCircuitService {
         validateCircuitExists(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
         UUID wtfRoomId = learningCircuitEntity.getWtfRoomId();
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
         if (wtfRoomId != null) {
             markMemberAsInactiveInRoom(organizationId, memberId, now, wtfRoomId);
-            sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.ROOM_MEMBER_INACTIVE);
+            sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         if (retroRoomId != null) {
             markMemberAsInactiveInRoom(organizationId, memberId, now, retroRoomId);
-            sendStatusMessageToRetroRoom(learningCircuitEntity, now, TalkMessageType.ROOM_MEMBER_INACTIVE);
+            sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         return toDto(learningCircuitEntity);
@@ -457,13 +466,14 @@ public class LearningCircuitService {
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         learningCircuitEntity.setCloseTime(now);
         learningCircuitEntity.setCircuitStatus(CircuitStatus.LOCKED);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.CIRCUIT_CLOSED);
+        sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.CIRCUIT_CLOSED);
 
         return toDto(learningCircuitEntity);
     }
@@ -476,6 +486,7 @@ public class LearningCircuitService {
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         long durationInSeconds = calculateSecondsBeforeOnHold(learningCircuitEntity, now);
         learningCircuitEntity.setSecondsBeforeOnHold(durationInSeconds);
@@ -488,7 +499,7 @@ public class LearningCircuitService {
 
         activeStatusService.resolveWTFWithAbort(organizationId, ownerId);
 
-        sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.CIRCUIT_ONHOLD);
+        sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.CIRCUIT_ONHOLD);
 
         return toDto(learningCircuitEntity);
     }
@@ -501,6 +512,7 @@ public class LearningCircuitService {
         validateCircuitIsOnHold(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         learningCircuitEntity.setLastResumeTime(now);
         learningCircuitEntity.setLastOnHoldTime(null);
@@ -515,7 +527,7 @@ public class LearningCircuitService {
 
         circuitDto.setSecondsBeforeOnHold(calculateEffectiveDuration(circuitDto));
 
-        sendStatusMessageToWTFRoom(learningCircuitEntity, now, TalkMessageType.CIRCUIT_RESUMED);
+        sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, TalkMessageType.CIRCUIT_RESUMED);
 
         return circuitDto;
     }
@@ -562,11 +574,12 @@ public class LearningCircuitService {
         validateMemberInRoom(organizationId, fromMemberId, talkRoomId);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
         UUID messageId = UUID.randomUUID();
 
         UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomId);
 
-        return sendRoomMessage(messageId, now, fromMemberId, roomId, talkRoomId, chatMessage);
+        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, talkRoomId, chatMessage);
     }
 
     private UUID getRoomIdBasedOnTalkRoomId(LearningCircuitEntity learningCircuitEntity, String talkRoomId) {
@@ -586,11 +599,12 @@ public class LearningCircuitService {
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
         UUID messageId = UUID.randomUUID();
 
         String talkWtfRoomId = deriveWTFTalkRoomId(learningCircuitEntity);
 
-        return sendRoomMessage(messageId, now, fromMemberId, learningCircuitEntity.getWtfRoomId(), talkWtfRoomId, chatMessage);
+        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getWtfRoomId(), talkWtfRoomId, chatMessage);
     }
 
     private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity, String talkRoomId, String message) {
@@ -632,6 +646,7 @@ public class LearningCircuitService {
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
         LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
         UUID messageId = UUID.randomUUID();
 
         if (learningCircuitEntity.getRetroRoomId() != null) {
@@ -639,13 +654,13 @@ public class LearningCircuitService {
             UUID roomId = learningCircuitEntity.getRetroRoomId();
             String retroTalkRoomId = deriveRetroTalkRoomId(learningCircuitEntity);
 
-            return sendRoomMessage(messageId, now, fromMemberId, roomId, retroTalkRoomId, chatMessage);
+            return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, retroTalkRoomId, chatMessage);
 
         }
         return null;
     }
 
-    private TalkMessageDto sendStatusMessage(UUID circuitId, String circuitName, UUID messageId, LocalDateTime now, UUID fromMemberId, UUID roomId,
+    private TalkMessageDto sendStatusMessage(UUID circuitId, String circuitName, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId,
                                              String talkRoomId, TalkMessageType messageType) {
 
 
@@ -656,6 +671,7 @@ public class LearningCircuitService {
         messageEntity.setFromId(fromMemberId);
         messageEntity.setToRoomId(roomId);
         messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(msg));
 
@@ -671,7 +687,7 @@ public class LearningCircuitService {
     }
 
 
-    private TalkMessageDto sendRoomMessage(UUID messageId, LocalDateTime now, UUID fromMemberId, UUID roomId, String talkRoomId, String chatMessage) {
+    private TalkMessageDto sendRoomMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String talkRoomId, String chatMessage) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(messageId);

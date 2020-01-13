@@ -1,6 +1,8 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.circuit.CircuitMemberDto
+import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.client.CircuitClient
@@ -36,12 +38,6 @@ class CircuitResourceSpec extends Specification {
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
-
-        Map<String, String> keys = new HashMap<>();
-        keys.put("discoveryKey", "key1")
-        keys.put("key", "key2")
-        keys.put("secretKey", "key3")
-
     }
 
 
@@ -191,8 +187,8 @@ class CircuitResourceSpec extends Specification {
         given:
         MasterAccountEntity account = aRandom.masterAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        loggedInUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity me = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        loggedInUser.setId(me.getMasterAccountId())
 
         LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
 
@@ -211,14 +207,26 @@ class CircuitResourceSpec extends Specification {
         then:
         assert fullDetailsDto != null
         assert fullDetailsDto.getCircuitMembers().size() == 2
-        assert fullDetailsDto.getCircuitMembers().get(0).memberId == member.id
-        assert fullDetailsDto.getCircuitMembers().get(1).memberId == otherMember.id
 
-        assert fullDetailsDto.getCircuitMembers().get(0).wtfRoomStatus == RoomMemberStatus.ACTIVE.name()
-        assert fullDetailsDto.getCircuitMembers().get(1).wtfRoomStatus == RoomMemberStatus.INACTIVE.name()
+        CircuitMemberStatusDto memberMe = getMemberStatusById(fullDetailsDto.getCircuitMembers(), me.id);
+        CircuitMemberStatusDto memberOther = getMemberStatusById(fullDetailsDto.getCircuitMembers(), otherMember.id);
+
+
+        assert memberMe != null
+        assert memberOther != null
+
+        assert memberMe.wtfRoomStatus == RoomMemberStatus.ACTIVE.name()
+        assert memberOther.wtfRoomStatus == RoomMemberStatus.INACTIVE.name()
 
 
     }
 
-
+    CircuitMemberStatusDto getMemberStatusById(List<CircuitMemberStatusDto> members, UUID memberId) {
+        for (CircuitMemberStatusDto memberStatus: members) {
+            if (memberStatus.memberId == memberId) {
+                return memberStatus;
+            }
+        }
+        return null;
+    }
 }

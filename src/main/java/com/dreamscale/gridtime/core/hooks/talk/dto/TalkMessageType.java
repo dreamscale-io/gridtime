@@ -29,6 +29,13 @@ public enum TalkMessageType {
         this.statusMessage = statusMessage;
     }
 
+    public String getSimpleClassName() {
+        if (messageClazz != null) {
+            return messageClazz.getSimpleName();
+        }
+        return "";
+    }
+
     public String getStatusMessage() {
         return statusMessage;
     }

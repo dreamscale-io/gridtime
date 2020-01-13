@@ -20,6 +20,7 @@ public class TalkMessageDto {
     private UUID id;
     private String uri;
     private LocalDateTime messageTime;
+    private Long nanoTime;
     private Map<String, String> metaProps = new LinkedHashMap<>();
 
     private String messageType;

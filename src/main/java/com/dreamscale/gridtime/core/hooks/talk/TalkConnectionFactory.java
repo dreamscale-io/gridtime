@@ -23,7 +23,7 @@ public class TalkConnectionFactory {
                 .target(TalkClient.class, "https://ds-talk.herokuapp.com");
     }
 
-    public TalkConnection connect(UUID connectionId) {
+    public TalkConnection create(UUID connectionId) {
 
         return new TalkConnection(talkClient, connectionId);
     }

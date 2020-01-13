@@ -30,6 +30,8 @@ public class TalkRoomMessageEntity {
 
     private LocalDateTime position;
 
+    private Long nanoTime;
+
     @Enumerated(EnumType.STRING)
     private TalkMessageType messageType;
 
