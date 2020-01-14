@@ -34,6 +34,9 @@ public class AccountService implements MasterAccountIdResolver {
     @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
 
+    @Autowired
+    private GridTalkRouter gridTalkRouter;
+
 
     public AccountActivationDto activate(String activationCode) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
@@ -63,12 +66,21 @@ public class AccountService implements MasterAccountIdResolver {
     }
 
     public ConnectionStatusDto login(UUID masterAccountId) {
+
+        UUID oldConnectionId = null;
+
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+
+        oldConnectionId = accountStatusEntity.getConnectionId();
+        if (oldConnectionId != null) {
+            gridTalkRouter.removeConnection(oldConnectionId);
+        }
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
 
         accountStatusRepository.save(accountStatusEntity);
+
 
         ConnectionStatusDto statusDto = new ConnectionStatusDto();
         statusDto.setConnectionId(accountStatusEntity.getConnectionId());
@@ -90,12 +102,20 @@ public class AccountService implements MasterAccountIdResolver {
         }
 
 
+
+
         return statusDto;
     }
 
     public SimpleStatusDto logout(UUID masterAccountId) {
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+
+        UUID oldConnectionId = accountStatusEntity.getConnectionId();
+
+        if (oldConnectionId != null) {
+            gridTalkRouter.removeConnection(oldConnectionId);
+        }
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
         accountStatusEntity.setConnectionId(null);

@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.api.account.AccountActivationDto
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.HeartbeatDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.gridtime.api.organization.MembershipInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
@@ -13,6 +14,7 @@ import com.dreamscale.gridtime.api.organization.OrganizationInputDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
+import com.dreamscale.gridtime.client.CircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
@@ -28,6 +30,9 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class AccountResourceSpec extends Specification {
+
+    @Autowired
+    CircuitClient circuitClient
 
     @Autowired
     AccountClient accountClient
@@ -93,6 +98,31 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto.organizationId != null
         assert connectionStatusDto.memberId != null
         assert connectionStatusDto.status == Status.VALID
+    }
+
+    def "should create a circuit then logout & login again"() {
+        given:
+
+        masterAccountRepository.save(testUser)
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+
+        when:
+
+        ConnectionStatusDto connectionStatusDto = accountClient.login()
+
+        LearningCircuitDto circuitDto = circuitClient.createLearningCircuitForWTF()
+
+        SimpleStatusDto logoutStatus = accountClient.logout()
+        ConnectionStatusDto newConnectionStatus = accountClient.login()
+
+
+        then:
+        assert newConnectionStatus != null
+        assert newConnectionStatus.connectionId != connectionStatusDto.connectionId
+        assert newConnectionStatus.organizationId == org.id
+        assert newConnectionStatus.memberId == member.id
+        assert newConnectionStatus.status == Status.VALID
     }
 
     def "should logout"() {

@@ -18,4 +18,6 @@ public interface MemberConnectionRepository extends CrudRepository<MemberConnect
             "and mc.member_id = trm.member_id " +
             "and trm.room_id = (:roomId) ")
     List<MemberConnectionEntity> findByConnectionsInTalkRoom(@Param("organizationId") UUID organizationId, @Param("roomId") UUID roomId);
+
+    MemberConnectionEntity findByConnectionId(UUID connectionId);
 }

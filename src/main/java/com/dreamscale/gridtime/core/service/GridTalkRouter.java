@@ -1,9 +1,7 @@
 package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
-import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
-import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionRepository;
-import com.dreamscale.gridtime.core.domain.circuit.TalkRoomMemberRepository;
+import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.hooks.talk.TalkConnection;
 import com.dreamscale.gridtime.core.hooks.talk.TalkConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +17,9 @@ public class GridTalkRouter {
 
     @Autowired
     private MemberConnectionRepository memberConnectionRepository;
+
+    @Autowired
+    private TalkRoomMemberRepository talkRoomMemberRepository;
 
     @Autowired
     private TalkConnectionFactory talkConnectionFactory;
@@ -41,6 +42,22 @@ public class GridTalkRouter {
             talkConnection.joinRoom(connectionEntity.getConnectionId(), roomId);
         }
 
+    }
+
+
+    public void removeConnection(UUID staleConnectionId) {
+
+        MemberConnectionEntity connectionEntity = memberConnectionRepository.findByConnectionId(staleConnectionId);
+
+        if (connectionEntity != null && connectionEntity.getConnectionId() != null) {
+
+            TalkConnection talkConnection = talkConnectionFactory.connect();
+
+            List<TalkRoomMemberEntity> roomMembershipsToLeave = talkRoomMemberRepository.findByMemberId(connectionEntity.getMemberId());
+            for (TalkRoomMemberEntity roomMembership : roomMembershipsToLeave) {
+                talkConnection.leaveRoom(staleConnectionId, roomMembership.getRoomId());
+            }
+        }
     }
 
     public void leaveRoom(UUID organizationId, UUID memberId, UUID roomId) {
@@ -75,4 +92,6 @@ public class GridTalkRouter {
             talkConnection.joinRoom(memberConnection.getConnectionId(), roomId);
         }
     }
+
+
 }
