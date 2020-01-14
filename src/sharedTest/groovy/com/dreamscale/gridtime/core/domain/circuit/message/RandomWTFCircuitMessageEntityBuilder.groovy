@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.domain.circuit.message
 
 
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
@@ -15,7 +15,7 @@ class RandomWTFCircuitMessageEntityBuilder extends WTFFeedMessageEntity.WTFFeedM
                 .circleId(aRandom.uuid())
                 .torchieId(aRandom.uuid())
                 .position(aRandom.localDateTimeInFuture())
-                .messageType(TalkMessageType.CIRCUIT_OPEN)
+                .messageType(CircuitMessageType.CIRCUIT_OPEN)
     }
 
     WTFFeedMessageEntity save() {

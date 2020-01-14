@@ -144,7 +144,7 @@ public class CircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return learningCircuitService.putCircuitOnHold(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitService.putCircuitOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")

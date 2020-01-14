@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.domain.circuit.message;
 
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType;
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -33,7 +33,7 @@ public class TalkRoomMessageEntity {
     private Long nanoTime;
 
     @Enumerated(EnumType.STRING)
-    private TalkMessageType messageType;
+    private CircuitMessageType messageType;
 
     private String jsonBody;
 }

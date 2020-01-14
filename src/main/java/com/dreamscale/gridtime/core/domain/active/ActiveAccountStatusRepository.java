@@ -9,4 +9,8 @@ public interface ActiveAccountStatusRepository extends CrudRepository<ActiveAcco
     ActiveAccountStatusEntity findByMasterAccountId(UUID id);
 
     ActiveAccountStatusEntity findByConnectionId(UUID connectionId);
+
+
+
+
 }

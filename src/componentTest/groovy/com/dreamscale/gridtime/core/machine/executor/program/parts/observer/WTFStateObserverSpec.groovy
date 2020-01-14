@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
@@ -49,10 +49,10 @@ public class WTFStateObserverSpec extends Specification {
 
         UUID circuitId = UUID.randomUUID()
 
-        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", TalkMessageType.CIRCUIT_OPEN)
-        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", TalkMessageType.CIRCUIT_ONHOLD)
-        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", TalkMessageType.CIRCUIT_RESUMED)
-        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", TalkMessageType.CIRCUIT_CLOSED)
+        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", CircuitMessageType.CIRCUIT_OPEN)
+        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", CircuitMessageType.CIRCUIT_ONHOLD)
+        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", CircuitMessageType.CIRCUIT_RESUMED)
+        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", CircuitMessageType.CIRCUIT_CLOSED)
 
 
         def flowables = [circuitEvent1, circuitEvent2, circuitEvent3, circuitEvent4] as List
@@ -77,7 +77,7 @@ public class WTFStateObserverSpec extends Specification {
     }
 
 
-    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circuitId, String circleName, TalkMessageType messageType) {
+    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circuitId, String circleName, CircuitMessageType messageType) {
 
         WTFFeedMessageEntity circuitMessage = new WTFFeedMessageEntity()
         circuitMessage.setMessageId(UUID.randomUUID())

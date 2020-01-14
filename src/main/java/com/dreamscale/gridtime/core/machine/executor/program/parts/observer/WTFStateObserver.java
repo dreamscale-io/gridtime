@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.observer;
 
 import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity;
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType;
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag;
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window;
@@ -21,7 +21,7 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
         for (Flowable flowable : window.getFlowables()) {
             WTFFeedMessageEntity feedMessageEntity = (flowable.get());
 
-            TalkMessageType messageType = feedMessageEntity.getMessageType();
+            CircuitMessageType messageType = feedMessageEntity.getMessageType();
 
             if (isCircuitBeginningEvent(messageType)) {
                 gridTile.startWTF(feedMessageEntity.getPosition(), createCircuitDetails(feedMessageEntity), decodeStartTag(feedMessageEntity.getMessageType()));
@@ -38,32 +38,32 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
     }
 
 
-    private StartTypeTag decodeStartTag(TalkMessageType messageType) {
-        if (messageType.equals(TalkMessageType.CIRCUIT_OPEN)) {
+    private StartTypeTag decodeStartTag(CircuitMessageType messageType) {
+        if (messageType.equals(CircuitMessageType.CIRCUIT_OPEN)) {
             return StartTypeTag.Start;
-        } else if (messageType.equals(TalkMessageType.CIRCUIT_RESUMED)) {
+        } else if (messageType.equals(CircuitMessageType.CIRCUIT_RESUMED)) {
             return StartTypeTag.Resume;
         }
         return StartTypeTag.Start;
     }
 
-    private FinishTypeTag decodeFinishTag(TalkMessageType messageType) {
-        if (messageType.equals(TalkMessageType.CIRCUIT_CLOSED)) {
+    private FinishTypeTag decodeFinishTag(CircuitMessageType messageType) {
+        if (messageType.equals(CircuitMessageType.CIRCUIT_CLOSED)) {
             return FinishTypeTag.Success;
-        } else if (messageType.equals(TalkMessageType.CIRCUIT_ONHOLD)) {
+        } else if (messageType.equals(CircuitMessageType.CIRCUIT_ONHOLD)) {
             return FinishTypeTag.DoItLater;
         }
         return FinishTypeTag.Success;
     }
 
 
-    private boolean isCircuitBeginningEvent(TalkMessageType messageType) {
-        return messageType.equals(TalkMessageType.CIRCUIT_OPEN)
-                || messageType.equals(TalkMessageType.CIRCUIT_RESUMED);
+    private boolean isCircuitBeginningEvent(CircuitMessageType messageType) {
+        return messageType.equals(CircuitMessageType.CIRCUIT_OPEN)
+                || messageType.equals(CircuitMessageType.CIRCUIT_RESUMED);
     }
 
-    private boolean isCircleEndingEvent(TalkMessageType messageType) {
-        return messageType.equals(TalkMessageType.CIRCUIT_CLOSED)
-                || messageType.equals(TalkMessageType.CIRCUIT_ONHOLD);
+    private boolean isCircleEndingEvent(CircuitMessageType messageType) {
+        return messageType.equals(CircuitMessageType.CIRCUIT_CLOSED)
+                || messageType.equals(CircuitMessageType.CIRCUIT_ONHOLD);
     }
 }

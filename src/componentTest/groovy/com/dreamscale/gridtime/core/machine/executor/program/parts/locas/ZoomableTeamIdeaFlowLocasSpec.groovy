@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.GridTimeWorkerPool
 import com.dreamscale.gridtime.core.machine.Torchie
@@ -165,7 +165,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
     def generateWTFStart(LocalDateTime startTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_OPEN)
+        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_OPEN)
         wtfMessage.setPosition(startTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 
@@ -174,7 +174,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
     def generateWTFEnd(LocalDateTime endTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(TalkMessageType.CIRCUIT_CLOSED)
+        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_CLOSED)
         wtfMessage.setPosition(endTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 

@@ -1,11 +1,10 @@
 package com.dreamscale.gridtime.core.hooks.talk;
 
-import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.core.hooks.talk.dto.ClientConnectionDto;
-import com.dreamscale.gridtime.core.hooks.talk.dto.TalkMessageType;
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 
 import java.time.LocalDateTime;
@@ -33,13 +32,13 @@ public class TalkConnection {
 
     public SimpleStatusDto sendDirectMessage(UUID messageId, UUID toConnectionId, LocalDateTime messageTime, Long nanoTime, String message) {
         return talkClient.sendDirectMessage(toConnectionId.toString(), new TalkMessageDto(messageId, toDirectUri(toConnectionId.toString()),
-                messageTime, nanoTime, Collections.emptyMap(), TalkMessageType.CHAT.getTalkMessageType(),
+                messageTime, nanoTime, Collections.emptyMap(), CircuitMessageType.CHAT.getTalkMessageType(),
                 JSONTransformer.toJson(new ChatMessageDetailsDto(message))));
     }
 
     public SimpleStatusDto sendRoomMessage(UUID messageId, String talkRoomId, LocalDateTime messageTime, Long nanoTime, String message) {
         return talkClient.sendRoomMessage(talkRoomId, new TalkMessageDto(messageId, toRoomUri(talkRoomId), messageTime, nanoTime, Collections.emptyMap(),
-                TalkMessageType.CHAT.getTalkMessageType(), JSONTransformer.toJson(new ChatMessageDetailsDto(message))));
+                CircuitMessageType.CHAT.getTalkMessageType(), JSONTransformer.toJson(new ChatMessageDetailsDto(message))));
     }
 
     private String toDirectUri(String clientId) {

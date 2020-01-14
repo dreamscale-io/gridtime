@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface TalkRoomRepository extends CrudRepository<TalkRoomEntity, UUID> {
 
+    TalkRoomEntity findById(UUID retroRoomId);
 }

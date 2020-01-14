@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircuitStatusMessageDetailsDto implements MessageDetailsBody {
+public class CircuitStatusDto implements MessageDetailsBody {
 
     UUID circuitId;
     String circuitName;
