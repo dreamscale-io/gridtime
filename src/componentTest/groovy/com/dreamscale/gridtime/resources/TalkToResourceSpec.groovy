@@ -63,11 +63,11 @@ class TalkToResourceSpec extends Specification {
 
         LearningCircuitWithMembersDto details = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
 
-        talkClient.publishChatToRoom(circuit.getWtfTalkRoomId(), new ChatMessageInputDto("hello world"))
-        talkClient.publishChatToRoom(circuit.getWtfTalkRoomId(), new ChatMessageInputDto("hello 2"))
+        talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(), new ChatMessageInputDto("hello world"))
+        talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(), new ChatMessageInputDto("hello 2"))
 
 
-        List<TalkMessageDto> messages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomId());
+        List<TalkMessageDto> messages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
 
         then:
         assert messages != null

@@ -15,12 +15,16 @@ public interface TalkRoomMemberRepository extends CrudRepository<TalkRoomMemberE
 
     List<TalkRoomMemberEntity> findByMemberId(UUID memberId);
 
-    @Query(nativeQuery = true, value = "select * from talk_room tr, talk_room_member trm " +
+    @Query(nativeQuery = true, value = "select trm.* from talk_room tr, talk_room_member trm " +
             "where tr.id = trm.room_id " +
             "and tr.organization_id = (:organizationId) " +
             "and trm.member_id = (:memberId) " +
-            "and  tr.talk_room_id = (:talkRoomId) ")
+            "and  tr.room_name = (:talkRoomName) ")
     TalkRoomMemberEntity findByOrganizationMemberAndTalkRoomId(@Param("organizationId") UUID organizationId,
                                                @Param("memberId") UUID memberId,
-                                               @Param("talkRoomId") String talkRoomId);
+                                               @Param("talkRoomName") String talkRoomId);
+
+
+
+
 }

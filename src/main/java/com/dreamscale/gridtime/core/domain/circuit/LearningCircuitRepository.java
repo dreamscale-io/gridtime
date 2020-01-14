@@ -35,10 +35,10 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
             "and exists (select 1 from talk_room tr " +
-            "where tr.talk_room_id = (:talkRoomId) " +
+            "where tr.room_name = (:roomName) " +
             "and (tr.id = c.wtf_room_id or tr.id=c.retro_room_id)) ")
-    LearningCircuitEntity findCircuitByTalkRoomId(@Param("organizationId")UUID organizationId,
-                                                  @Param("talkRoomId") String talkRoomId);
+    LearningCircuitEntity findCircuitByOrganizationAndRoomName(@Param("organizationId")UUID organizationId,
+                                                               @Param("roomName") String roomName);
 
 
 

@@ -15,7 +15,7 @@ public interface TalkRoomMessageRepository extends CrudRepository<TalkRoomMessag
 
     @Query(nativeQuery = true, value = "select trm.* from talk_room tr, talk_room_message trm " +
             "where tr.id = trm.to_room_id " +
-            "and tr.talk_room_id = (:talkRoomId) " +
+            "and tr.room_name = (:talkRoomName) " +
             "order by position ")
-    List<TalkRoomMessageEntity> findByTalkRoomId(@Param("talkRoomId") String talkRoomId);
+    List<TalkRoomMessageEntity> findByTalkRoomName(@Param("talkRoomName") String talkRoomName);
 }

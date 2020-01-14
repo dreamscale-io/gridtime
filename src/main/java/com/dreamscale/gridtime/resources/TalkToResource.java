@@ -29,8 +29,8 @@ public class TalkToResource {
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.CHAT_PATH )
-    public TalkMessageDto publishChatToRoom(@PathVariable("talkRoomId") String talkRoomId,
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CHAT_PATH )
+    public TalkMessageDto publishChatToRoom(@PathVariable("roomName") String roomName,
                                             @RequestBody ChatMessageInputDto chatMessageInputDto) {
 
         RequestContext context = RequestContext.get();
@@ -39,13 +39,13 @@ public class TalkToResource {
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         return learningCircuitService.publishChatToTalkRoom(invokingMember.getOrganizationId(),
-                invokingMember.getId(), talkRoomId, chatMessageInputDto.getChatMessage());
+                invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
 
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.SNIPPET_PATH )
-    public TalkMessageDto publishSnippetToRoom(@PathVariable("talkRoomId") String talkRoomId, @RequestBody NewSnippetEvent newSnippetEvent) {
+    @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH )
+    public TalkMessageDto publishSnippetToRoom(@PathVariable("roomName") String roomName, @RequestBody NewSnippetEvent newSnippetEvent) {
 
         RequestContext context = RequestContext.get();
         log.info("publishSnippetToRoom, user={}", context.getMasterAccountId());
@@ -53,13 +53,13 @@ public class TalkToResource {
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         return learningCircuitService.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
-                invokingMember.getId(), talkRoomId, newSnippetEvent);
+                invokingMember.getId(), roomName, newSnippetEvent);
 
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.SCREENSHOT_PATH )
-    public TalkMessageDto publishScreenshotToRoom(@PathVariable("talkRoomId") String talkRoomId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SCREENSHOT_PATH )
+    public TalkMessageDto publishScreenshotToRoom(@PathVariable("roomName") String talkRoomId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
 
         RequestContext context = RequestContext.get();
         log.info("publishScreenshotToRoom, user={}", context.getMasterAccountId());
@@ -69,8 +69,8 @@ public class TalkToResource {
         return learningCircuitService.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId, screenshotReferenceInput);
     }
 
-    @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{talkRoomId}")
-    List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("talkRoomId") String talkRoomId) {
+    @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}")
+    List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("roomName") String talkRoomId) {
         RequestContext context = RequestContext.get();
         log.info("getAllTalkMessagesFromRoom, user={}", context.getMasterAccountId());
 

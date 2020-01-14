@@ -39,6 +39,8 @@ import java.util.UUID;
 @Service
 public class LearningCircuitService {
 
+    public static final String RETRO_ROOM_SUFFIX = "-retro";
+    public static final String WTF_ROOM_SUFFIX = "-wtf";
     SillyNameGenerator sillyNameGenerator;
 
     @Autowired
@@ -95,7 +97,6 @@ public class LearningCircuitService {
 
         log.info("Creating new circuit : " + circuitName);
         return createNewLearningCircuitWithCustomName(organizationId, memberId, circuitName);
-
     }
 
 
@@ -145,7 +146,7 @@ public class LearningCircuitService {
         wtfRoomEntity.setOrganizationId(organizationId);
         wtfRoomEntity.setOwnerId(memberId);
         wtfRoomEntity.setRoomType(RoomType.WTF_ROOM);
-        wtfRoomEntity.setTalkRoomId(deriveWTFTalkRoomId(learningCircuitEntity));
+        wtfRoomEntity.setRoomName(deriveWTFRoomName(learningCircuitEntity));
 
         talkRoomRepository.save(wtfRoomEntity);
 
@@ -170,7 +171,7 @@ public class LearningCircuitService {
 
         talkRoomMemberRepository.save(talkRoomMemberEntity);
 
-        talkRouter.joinRoom(organizationId, memberId, wtfRoomEntity.getTalkRoomId());
+        talkRouter.joinRoom(organizationId, memberId, wtfRoomEntity.getId());
         //then update active status
 
         activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), DEFAULT_WTF_MESSAGE);
@@ -185,13 +186,13 @@ public class LearningCircuitService {
         UUID messageId = UUID.randomUUID();
 
         sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now, nanoTime,
-                circuit.getOwnerId(), circuit.getWtfRoomId(), deriveWTFTalkRoomId(circuit), messageType);
+                circuit.getOwnerId(), circuit.getWtfRoomId(), messageType);
     }
 
     private void sendStatusMessageToRetroRoom(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
         UUID messageId = UUID.randomUUID();
         sendStatusMessage(circuit.getId(), circuit.getCircuitName(), messageId, now, nanoTime,
-                circuit.getOwnerId(), circuit.getRetroRoomId(), deriveRetroTalkRoomId(circuit), messageType);
+                circuit.getOwnerId(), circuit.getRetroRoomId(), messageType);
     }
 
     public LearningCircuitDto getCircuit(UUID organizationId, UUID circuitId) {
@@ -250,11 +251,13 @@ public class LearningCircuitService {
 
         if (circuitEntity != null) {
             if (circuitEntity.getWtfRoomId() != null) {
-                circuitDto.setWtfTalkRoomId(deriveWTFTalkRoomId(circuitEntity));
+                circuitDto.setWtfTalkRoomId(circuitEntity.getWtfRoomId());
+                circuitDto.setWtfTalkRoomName(deriveWTFRoomName(circuitEntity));
             }
 
             if (circuitEntity.getRetroRoomId() != null) {
-                circuitDto.setRetroTalkRoomId(deriveRetroTalkRoomId(circuitEntity));
+                circuitDto.setRetroTalkRoomId(circuitEntity.getRetroRoomId());
+                circuitDto.setRetroTalkRoomName(deriveRetroTalkRoomId(circuitEntity));
             }
         }
 
@@ -265,22 +268,24 @@ public class LearningCircuitService {
         LearningCircuitWithMembersDto circuitDto = circuitFullDtoMapper.toApi(circuitEntity);
 
         if (circuitEntity.getWtfRoomId() != null) {
-            circuitDto.setWtfTalkRoomId(deriveWTFTalkRoomId(circuitEntity));
+            circuitDto.setWtfTalkRoomId(circuitEntity.getWtfRoomId());
+            circuitDto.setWtfTalkRoomName(deriveWTFRoomName(circuitEntity));
         }
 
         if (circuitEntity.getRetroRoomId() != null) {
-            circuitDto.setRetroTalkRoomId(deriveRetroTalkRoomId(circuitEntity));
+            circuitDto.setRetroTalkRoomId(circuitEntity.getRetroRoomId());
+            circuitDto.setRetroTalkRoomName(deriveRetroTalkRoomId(circuitEntity));
         }
 
         return circuitDto;
     }
 
     private String deriveRetroTalkRoomId(LearningCircuitEntity activeCircuit) {
-        return activeCircuit.getCircuitName() + "-retro";
+        return activeCircuit.getCircuitName() + RETRO_ROOM_SUFFIX;
     }
 
-    private String deriveWTFTalkRoomId(LearningCircuitEntity activeCircuit) {
-        return activeCircuit.getCircuitName() + "-wtf";
+    private String deriveWTFRoomName(LearningCircuitEntity activeCircuit) {
+        return activeCircuit.getCircuitName() + WTF_ROOM_SUFFIX;
     }
 
     @Transactional
@@ -301,7 +306,7 @@ public class LearningCircuitService {
         retroRoomEntity.setOrganizationId(organizationId);
         retroRoomEntity.setOwnerId(memberId);
         retroRoomEntity.setRoomType(RoomType.RETRO_ROOM);
-        retroRoomEntity.setTalkRoomId(deriveRetroTalkRoomId(learningCircuitEntity));
+        retroRoomEntity.setRoomName(deriveRetroTalkRoomId(learningCircuitEntity));
 
         talkRoomRepository.save(retroRoomEntity);
 
@@ -330,9 +335,7 @@ public class LearningCircuitService {
             retroRoomMember.setMemberId(wtfRoomMember.getMemberId());
             retroRoomMember.setRoomStatus(wtfRoomMember.getRoomStatus());
 
-            talkRouter.joinRoom(organizationId, wtfRoomMember.getMemberId(), retroRoomEntity.getTalkRoomId());
-            //then update active status
-
+            talkRouter.joinRoom(organizationId, wtfRoomMember.getMemberId(), retroRoomEntity.getId());
 
             retroRoomMembers.add(retroRoomMember);
         }
@@ -369,12 +372,12 @@ public class LearningCircuitService {
         }
     }
 
-    private void validateMemberInRoom(UUID organizationId, UUID invokingMemberId, String talkRoomId) {
-        log.info("org={}, member={}, room={}", organizationId, invokingMemberId, talkRoomId);
+    private void validateMemberInRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
+        log.info("org={}, member={}, room={}", organizationId, invokingMemberId, talkRoomName);
 
-        TalkRoomMemberEntity foundRoomMember = talkRoomMemberRepository.findByOrganizationMemberAndTalkRoomId(organizationId, invokingMemberId, talkRoomId);
+        TalkRoomMemberEntity foundRoomMember = talkRoomMemberRepository.findByOrganizationMemberAndTalkRoomId(organizationId, invokingMemberId, talkRoomName);
         if (foundRoomMember == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Unable to access talk room: " + talkRoomId);
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Unable to access talk room: " + talkRoomName);
         }
     }
 
@@ -422,7 +425,7 @@ public class LearningCircuitService {
             roomMember.setRoomStatus(RoomMemberStatus.ACTIVE);
         }
 
-        talkRouter.joinRoom(organizationId, memberId, roomEntity.getTalkRoomId());
+        talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
         talkRoomMemberRepository.save(roomMember);
     }
 
@@ -438,19 +441,19 @@ public class LearningCircuitService {
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
         if (wtfRoomId != null) {
-            markMemberAsInactiveInRoom(organizationId, memberId, now, wtfRoomId, deriveWTFTalkRoomId(learningCircuitEntity));
+            markMemberAsInactiveInRoom(organizationId, memberId, now, wtfRoomId);
             sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         if (retroRoomId != null) {
-            markMemberAsInactiveInRoom(organizationId, memberId, now, retroRoomId, deriveRetroTalkRoomId(learningCircuitEntity));
+            markMemberAsInactiveInRoom(organizationId, memberId, now, retroRoomId);
             sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         return toDto(learningCircuitEntity);
     }
 
-    private void markMemberAsInactiveInRoom(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId, String talkRoomId) {
+    private void markMemberAsInactiveInRoom(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId) {
 
         TalkRoomMemberEntity roomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomId, memberId);
 
@@ -461,7 +464,7 @@ public class LearningCircuitService {
             talkRoomMemberRepository.save(roomMember);
         }
 
-        talkRouter.leaveRoom(organizationId, memberId, talkRoomId);
+        talkRouter.leaveRoom(organizationId, memberId, roomId);
     }
 
     public LearningCircuitDto closeExistingCircuit(UUID organizationId, UUID memberId, String circuitName) {
@@ -483,7 +486,7 @@ public class LearningCircuitService {
 
         //retro room is still open
 
-        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), deriveWTFTalkRoomId(learningCircuitEntity));
+        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
         return toDto(learningCircuitEntity);
     }
@@ -508,10 +511,10 @@ public class LearningCircuitService {
         learningCircuitRepository.save(learningCircuitEntity);
 
         if (learningCircuitEntity.getWtfRoomId() != null) {
-            talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), deriveWTFTalkRoomId(learningCircuitEntity));
+            talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
         }
         if (learningCircuitEntity.getRetroRoomId() != null) {
-            talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), deriveRetroTalkRoomId(learningCircuitEntity));
+            talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
         activeStatusService.resolveWTFWithAbort(organizationId, ownerId);
@@ -539,13 +542,11 @@ public class LearningCircuitService {
         learningCircuitRepository.save(learningCircuitEntity);
 
         if (learningCircuitEntity.getWtfRoomId() != null) {
-            talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), deriveWTFTalkRoomId(learningCircuitEntity));
+            talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
         }
         if (learningCircuitEntity.getRetroRoomId() != null) {
-            talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), deriveRetroTalkRoomId(learningCircuitEntity));
+            talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
-
-
 
         activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), RESUMED_WTF_MESSAGE);
 
@@ -590,26 +591,26 @@ public class LearningCircuitService {
         return seconds;
     }
 
-    public TalkMessageDto publishChatToTalkRoom(UUID organizationId, UUID fromMemberId, String talkRoomId, String chatMessage) {
+    public TalkMessageDto publishChatToTalkRoom(UUID organizationId, UUID fromMemberId, String talkRoomName, String chatMessage) {
 
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByTalkRoomId(organizationId, talkRoomId);
+        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
 
-        validateCircuitExists(talkRoomId, learningCircuitEntity);
-        validateCircuitIsActive(talkRoomId, learningCircuitEntity);
+        validateCircuitExists(talkRoomName, learningCircuitEntity);
+        validateCircuitIsActive(talkRoomName, learningCircuitEntity);
 
-        validateMemberInRoom(organizationId, fromMemberId, talkRoomId);
+        validateMemberInRoom(organizationId, fromMemberId, talkRoomName);
 
         LocalDateTime now = timeService.now();
         Long nanoTime = timeService.nanoTime();
         UUID messageId = UUID.randomUUID();
 
-        UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomId);
+        UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomName);
 
-        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, talkRoomId, chatMessage);
+        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, chatMessage);
     }
 
     private UUID getRoomIdBasedOnTalkRoomId(LearningCircuitEntity learningCircuitEntity, String talkRoomId) {
-        if (talkRoomId.endsWith("_retro")) {
+        if (talkRoomId.endsWith(RETRO_ROOM_SUFFIX)) {
             return learningCircuitEntity.getRetroRoomId();
         } else {
             return learningCircuitEntity.getWtfRoomId();
@@ -628,16 +629,14 @@ public class LearningCircuitService {
         Long nanoTime = timeService.nanoTime();
         UUID messageId = UUID.randomUUID();
 
-        String talkWtfRoomId = deriveWTFTalkRoomId(learningCircuitEntity);
-
-        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getWtfRoomId(), talkWtfRoomId, chatMessage);
+        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getWtfRoomId(), chatMessage);
     }
 
-    private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity, String talkRoomId, String message) {
+    private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity, UUID roomId, String message) {
 
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
-        messageDto.setUri(toTalkRoomUri(talkRoomId));
+        messageDto.setUri(roomId.toString());
         messageDto.setJsonBody(JSONTransformer.toJson(new ChatMessageDetailsDto(message)));
         messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
         messageDto.setMessageTime(messageEntity.getPosition());
@@ -678,17 +677,13 @@ public class LearningCircuitService {
 
         if (learningCircuitEntity.getRetroRoomId() != null) {
 
-            UUID roomId = learningCircuitEntity.getRetroRoomId();
-            String retroTalkRoomId = deriveRetroTalkRoomId(learningCircuitEntity);
-
-            return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, retroTalkRoomId, chatMessage);
+            return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getRetroRoomId(), chatMessage);
 
         }
         return null;
     }
 
-    private TalkMessageDto sendStatusMessage(UUID circuitId, String circuitName, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId,
-                                             String talkRoomId, CircuitMessageType messageType) {
+    private TalkMessageDto sendStatusMessage(UUID circuitId, String circuitName, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, CircuitMessageType messageType) {
 
 
         CircuitStatusDto msg = new CircuitStatusDto(circuitId, circuitName, messageType.name(), messageType.getStatusMessage());
@@ -702,9 +697,9 @@ public class LearningCircuitService {
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(msg));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity, talkRoomId, messageType.getStatusMessage());
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity, roomId, messageType.getStatusMessage());
 
-        talkRouter.sendAsyncRoomMessage(talkMessageDto);
+        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
@@ -714,7 +709,7 @@ public class LearningCircuitService {
     }
 
 
-    private TalkMessageDto sendRoomMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String talkRoomId, String chatMessage) {
+    private TalkMessageDto sendRoomMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String chatMessage) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(messageId);
@@ -725,9 +720,9 @@ public class LearningCircuitService {
         messageEntity.setMessageType(CircuitMessageType.CHAT);
         messageEntity.setJsonBody(JSONTransformer.toJson(new ChatMessageDetailsDto(chatMessage)));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity, talkRoomId, chatMessage);
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity, roomId, chatMessage);
 
-        talkRouter.sendAsyncRoomMessage(talkMessageDto);
+        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
@@ -750,18 +745,18 @@ public class LearningCircuitService {
     }
 
 
-    public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomId) {
+    public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
 
-        validateMemberInRoom(organizationId, invokingMemberId, talkRoomId);
+        validateMemberInRoom(organizationId, invokingMemberId, talkRoomName);
 
-        List<TalkRoomMessageEntity> talkMessages = talkRoomMessageRepository.findByTalkRoomId(talkRoomId);
+        List<TalkRoomMessageEntity> talkMessages = talkRoomMessageRepository.findByTalkRoomName(talkRoomName);
 
         List<TalkMessageDto> talkMessageDtos = new ArrayList<>();
 
         for (TalkRoomMessageEntity message : talkMessages) {
             TalkMessageDto dto = new TalkMessageDto();
             dto.setId(message.getId());
-            dto.setUri(toTalkRoomUri(talkRoomId));
+            dto.setUri(message.getToRoomId().toString());
             dto.setMessageTime(message.getPosition());
             dto.setNanoTime(message.getNanoTime());
             dto.setMessageType(message.getMessageType().getSimpleClassName());
@@ -772,11 +767,6 @@ public class LearningCircuitService {
 
         return talkMessageDtos;
     }
-
-    private String toTalkRoomUri(String talkRoomId) {
-        return ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/"+ talkRoomId;
-    }
-
 
     public TalkMessageDto postScreenshotReferenceToCircuitFeed(UUID organizationId, UUID spiritId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
 

@@ -17,8 +17,11 @@ public class LearningCircuitDto {
     UUID id;
     String circuitName;
 
-    String wtfTalkRoomId;
-    String retroTalkRoomId;
+    String wtfTalkRoomName;
+    UUID wtfTalkRoomId;
+
+    String retroTalkRoomName;
+    UUID retroTalkRoomId;
 
     UUID ownerId;
     UUID moderatorId;

@@ -2,8 +2,12 @@ package com.dreamscale.gridtime.core.service
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
+import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.core.hooks.talk.TalkConnection
 import com.dreamscale.gridtime.core.hooks.talk.TalkConnectionFactory
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -23,17 +27,22 @@ public class TalkIntegrationSpec extends Specification {
 
 	def "should join a room, and send a message"() {
 		given:
-		String talkRoomId = "angry_teachers-wtf"
+		UUID roomId = UUID.randomUUID()
+		String talkRoomName = "angry_teachers-wtf"
 		UUID connectionId = UUID.fromString("c0cd50cd-a9c7-48b7-889b-0ae72156bc25")
 		UUID messageId = UUID.randomUUID()
 		LocalDateTime now = LocalDateTime.now()
 		Long nanoTime = System.nanoTime();
 
 		when:
-		TalkConnection connection = talkConnectionFactory.create(connectionId)
+		TalkConnection connection = talkConnectionFactory.connect()
 
 		//SimpleStatusDto status1 = connection.joinRoom(talkRoomId)
-		SimpleStatusDto status2 = connection.sendRoomMessage(messageId, talkRoomId, now, nanoTime, "hello")
+
+		TalkMessageDto talkMessageDto = new TalkMessageDto(messageId, roomId.toString(), now, nanoTime, null,
+				CircuitMessageType.CHAT.getSimpleClassName(), JSONTransformer.toJson(new ChatMessageDetailsDto("hello")))
+
+		SimpleStatusDto status2 = connection.sendRoomMessage(roomId, talkMessageDto)
 
 		//SimpleStatusDto status3 = connection.leaveRoom(talkRoomId)
 

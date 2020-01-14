@@ -22,7 +22,7 @@ public class TalkRoomEntity {
 
     private UUID circuitId;
 
-    private String talkRoomId; //assigned by talk
+    private String roomName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;

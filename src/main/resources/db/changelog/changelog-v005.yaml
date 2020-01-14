@@ -8,3 +8,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/alter_talk_room_message_add_nanotime.sql
+
+  - include:
+        file: db/v005/alter_talk_room_rename_talk_room_id.sql

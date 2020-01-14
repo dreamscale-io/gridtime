@@ -20,21 +20,21 @@ public interface TalkToClient {
 
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.CHAT_PATH)
-    TalkMessageDto publishChatToRoom(@Param("talkRoomId") String talkRoomId, ChatMessageInputDto chatMessageInputDto);
+            ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CHAT_PATH)
+    TalkMessageDto publishChatToRoom(@Param("roomName") String roomName, ChatMessageInputDto chatMessageInputDto);
 
     @RequestLine("GET " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.ROOM_PATH + "/{talkRoomId}")
-    List<TalkMessageDto> getAllTalkMessagesFromRoom(@Param("talkRoomId") String talkRoomId);
+            ResourcePaths.ROOM_PATH + "/{roomName}")
+    List<TalkMessageDto> getAllTalkMessagesFromRoom(@Param("roomName") String talkRoomId);
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.SNIPPET_PATH)
-    TalkMessageDto publishSnippetToRoom(@Param("talkRoomId") String talkRoomId, NewSnippetEvent newSnippetEvent);
+            ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH)
+    TalkMessageDto publishSnippetToRoom(@Param("roomName") String roomName, NewSnippetEvent newSnippetEvent);
 
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.ROOM_PATH + "/{talkRoomId}" + ResourcePaths.SCREENSHOT_PATH)
-    TalkMessageDto publishScreenshotToRoom(@Param("talkRoomId") String talkRoomId,
+            ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SCREENSHOT_PATH)
+    TalkMessageDto publishScreenshotToRoom(@Param("roomName") String roomName,
                                            ScreenshotReferenceInputDto screenshotReferenceInput);
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH +
