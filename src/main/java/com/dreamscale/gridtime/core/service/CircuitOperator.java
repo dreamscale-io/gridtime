@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.event.NewSnippetEvent;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
@@ -37,7 +36,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class LearningCircuitService {
+public class CircuitOperator {
 
     public static final String RETRO_ROOM_SUFFIX = "-retro";
     public static final String WTF_ROOM_SUFFIX = "-wtf";
@@ -69,6 +68,9 @@ public class LearningCircuitService {
 
     @Autowired
     private CircuitMemberStatusRepository circuitMemberStatusRepository;
+
+    @Autowired
+    private MemberConnectionRepository memberConnectionRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -441,19 +443,26 @@ public class LearningCircuitService {
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
         if (wtfRoomId != null) {
-            markMemberAsInactiveInRoom(organizationId, memberId, now, wtfRoomId);
+            updateRoomMemberAsInactiveAndLeaveRoomInTalk(organizationId, memberId, now, wtfRoomId);
             sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         if (retroRoomId != null) {
-            markMemberAsInactiveInRoom(organizationId, memberId, now, retroRoomId);
+            updateRoomMemberAsInactiveAndLeaveRoomInTalk(organizationId, memberId, now, retroRoomId);
             sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.ROOM_MEMBER_INACTIVE);
         }
 
         return toDto(learningCircuitEntity);
     }
 
-    private void markMemberAsInactiveInRoom(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId) {
+    private void updateRoomMemberAsInactiveAndLeaveRoomInTalk(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId) {
+
+        updateRoomMemberToInactive(organizationId, memberId, leaveTime, roomId);
+
+        talkRouter.leaveRoom(organizationId, memberId, roomId);
+    }
+
+    private void updateRoomMemberToInactive(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId) {
 
         TalkRoomMemberEntity roomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomId, memberId);
 
@@ -463,8 +472,6 @@ public class LearningCircuitService {
 
             talkRoomMemberRepository.save(roomMember);
         }
-
-        talkRouter.leaveRoom(organizationId, memberId, roomId);
     }
 
     public LearningCircuitDto closeExistingCircuit(UUID organizationId, UUID memberId, String circuitName) {
@@ -768,6 +775,26 @@ public class LearningCircuitService {
         return talkMessageDtos;
     }
 
+
+    public void notifyRoomsOfMemberDisconnect(UUID oldConnectionId) {
+
+        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(oldConnectionId);
+
+        if (memberConnection != null && memberConnection.getConnectionId() != null) {
+
+            List<TalkRoomMemberEntity> roomMembershipsToLeave = talkRoomMemberRepository.findByMemberId(memberConnection.getMemberId());
+            for (TalkRoomMemberEntity roomMembership : roomMembershipsToLeave) {
+
+                updateRoomMemberToInactive(roomMembership.getOrganizationId(), roomMembership.getMemberId(), timeService.now(), roomMembership.getRoomId());
+                //TODO send circuit status messages, about person leaving
+
+
+            }
+        }
+
+
+    }
+
     public TalkMessageDto postScreenshotReferenceToCircuitFeed(UUID organizationId, UUID spiritId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
 
         //TODO map to the new circuit stuff
@@ -869,6 +896,7 @@ public class LearningCircuitService {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
+
 
 
 }

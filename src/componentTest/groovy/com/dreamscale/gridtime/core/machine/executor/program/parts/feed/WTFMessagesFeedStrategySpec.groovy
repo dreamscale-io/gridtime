@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Bookmark
-import com.dreamscale.gridtime.core.service.LearningCircuitService
+import com.dreamscale.gridtime.core.service.CircuitOperator
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -19,7 +19,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class WTFMessagesFeedStrategySpec extends Specification{
 
     @Autowired
-    LearningCircuitService circuitService
+    CircuitOperator circuitService
 
     @Autowired
     TimeService mockTimeService

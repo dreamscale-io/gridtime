@@ -35,7 +35,7 @@ public class AccountService implements MasterAccountIdResolver {
     private ActiveAccountStatusRepository accountStatusRepository;
 
     @Autowired
-    private GridTalkRouter gridTalkRouter;
+    private CircuitOperator circuitOperator;
 
 
     public AccountActivationDto activate(String activationCode) {
@@ -70,11 +70,6 @@ public class AccountService implements MasterAccountIdResolver {
         UUID oldConnectionId = null;
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
-
-        oldConnectionId = accountStatusEntity.getConnectionId();
-        if (oldConnectionId != null) {
-            gridTalkRouter.removeConnection(oldConnectionId);
-        }
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
@@ -114,7 +109,7 @@ public class AccountService implements MasterAccountIdResolver {
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
 
         if (oldConnectionId != null) {
-            gridTalkRouter.removeConnection(oldConnectionId);
+            circuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
         }
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);

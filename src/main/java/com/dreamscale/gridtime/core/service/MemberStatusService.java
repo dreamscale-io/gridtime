@@ -26,7 +26,7 @@ public class MemberStatusService {
     private SpiritService xpService;
 
     @Autowired
-    private LearningCircuitService learningCircuitService;
+    private CircuitOperator circuitOperator;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -81,7 +81,7 @@ public class MemberStatusService {
         memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircleId() != null) {
-            LearningCircuitDto circuitDto = learningCircuitService.getCircuit(memberStatusEntity.getOrganizationId(),
+            LearningCircuitDto circuitDto = circuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
                     memberStatusEntity.getActiveCircleId());
 
             memberStatusDto.setActiveCircle(circuitDto);

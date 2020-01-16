@@ -45,21 +45,6 @@ public class GridTalkRouter {
     }
 
 
-    public void removeConnection(UUID staleConnectionId) {
-
-        MemberConnectionEntity connectionEntity = memberConnectionRepository.findByConnectionId(staleConnectionId);
-
-        if (connectionEntity != null && connectionEntity.getConnectionId() != null) {
-
-            TalkConnection talkConnection = talkConnectionFactory.connect();
-
-            List<TalkRoomMemberEntity> roomMembershipsToLeave = talkRoomMemberRepository.findByMemberId(connectionEntity.getMemberId());
-            for (TalkRoomMemberEntity roomMembership : roomMembershipsToLeave) {
-                talkConnection.leaveRoom(staleConnectionId, roomMembership.getRoomId());
-            }
-        }
-    }
-
     public void leaveRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
         MemberConnectionEntity connectionEntity = memberConnectionRepository.findByOrganizationIdAndMemberId(organizationId, memberId);

@@ -26,7 +26,7 @@ public class SpiritService {
     AccountService accountService;
 
     @Autowired
-    LearningCircuitService learningCircuitService;
+    CircuitOperator circuitOperator;
 
     @Autowired
     ActiveSpiritLinkRepository activeSpiritLinkRepository;
@@ -168,7 +168,7 @@ public class SpiritService {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(learningCircuitService.getAllParticipatingCircuits(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(circuitOperator.getAllParticipatingCircuits(organizationId, torchieId));
 
         return spiritNetworkDto;
     }
