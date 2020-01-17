@@ -16,7 +16,7 @@ public class FeedStrategyFactory {
     ExecutionActivityFeedStrategy executionActivityFeedStrategy;
 
     @Autowired
-    WTFMessagesFeedStrategy wtfMessagesFetcher;
+    WTFFeedMessagesFetcher wtfMessagesFetcher;
 
 
 

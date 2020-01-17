@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class WTFMessagesFeedStrategy extends FeedStrategy {
+public class WTFFeedMessagesFetcher extends FeedStrategy {
 
     @Autowired
     WTFFeedMessageRepository wtfFeedMessageRepository;

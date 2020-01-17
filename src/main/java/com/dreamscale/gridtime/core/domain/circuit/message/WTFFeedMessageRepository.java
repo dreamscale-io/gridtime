@@ -15,8 +15,8 @@ public interface WTFFeedMessageRepository extends CrudRepository<WTFFeedMessageE
 
     @Query(nativeQuery = true, value = "select * from wtf_feed_message_view cf " +
             "where exists (select 1 from learning_circuit c where c.owner_id=(:memberId) and c.id=cf.circuit_id) " +
-            "and position >= (:afterDate) " +
-            "order by position asc limit (:limit)")
+            "and cf.position >= (:afterDate) " +
+            "order by cf.position asc limit (:limit)")
     List<WTFFeedMessageEntity> findByOwnerIdAfterDateWithLimit(@Param("memberId")UUID memberId,
                                                                @Param("afterDate") Timestamp valueOf,
                                                                @Param("limit") int fetchSize);

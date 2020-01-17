@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class WTFMessagesFeedStrategySpec extends Specification{
+class WTFFeedMessagesFetcherSpec extends Specification{
 
     @Autowired
     CircuitOperator circuitService
@@ -28,7 +28,7 @@ class WTFMessagesFeedStrategySpec extends Specification{
     MasterAccountEntity testUser
 
     @Autowired
-    WTFMessagesFeedStrategy circuitMessagesFetcher
+    WTFFeedMessagesFetcher circuitMessagesFetcher
 
     def "should fetch batches of circle messages"() {
         given:
