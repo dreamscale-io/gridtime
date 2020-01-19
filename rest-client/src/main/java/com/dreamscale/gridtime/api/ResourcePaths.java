@@ -114,7 +114,7 @@ public class ResourcePaths {
     public static final String WATCH_PATH = "/watch";
     public static final String TAG_PATH = "/tag";
     public static final String CLEAR_PATH = "/clear";
-    public static final String SCOPE_PATH = "/scope";
+    public static final String SCOPE_PATH = "/contextScope";
     public static final String LISTEN_PATH = "/listen";
     public static final String FOR_PATH = "/for";
     public static final String GATE_PATH = "/gate";
@@ -122,4 +122,8 @@ public class ResourcePaths {
     public static final String RUN_PATH = "/run";
     public static final String PROGRAM_PATH = "/program";
     public static final String CMD_PATH = "/cmd";
+    public static final String DICTIONARY_PATH = "/dictionary";
+    public static final String HASHTAG_PATH = "/hashtag";
+    public static final String CLOUD_PATH = "/cloud";
+    public static final String DEPTH_PATH = "/depth";
 }
