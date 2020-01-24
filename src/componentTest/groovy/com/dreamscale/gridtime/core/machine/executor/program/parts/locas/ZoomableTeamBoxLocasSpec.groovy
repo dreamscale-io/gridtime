@@ -131,6 +131,8 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         given:
 
+        gridTimeWorkerPool.clear()
+
         Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
