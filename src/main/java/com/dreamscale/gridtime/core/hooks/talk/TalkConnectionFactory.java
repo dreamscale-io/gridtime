@@ -19,7 +19,7 @@ public class TalkConnectionFactory {
     @PostConstruct
     void initSharedTalkClient () {
         this.talkClient = jacksonFeignBuilder
-                .requestInterceptor(new BasicAuthRequestInterceptor("gridtime-server", "replace_me_apikey"))
+                .requestInterceptor(new BasicAuthRequestInterceptor("admin", "p@ssw0rd123"))
                 .target(TalkClient.class, "https://ds-talk.herokuapp.com");
     }
 

@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.api.activity;
+package com.dreamscale.gridtime.api.flow.activity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewIdleActivity implements Activity {
+public class NewExternalActivityDto implements Activity {
 
     private Long durationInSeconds;
     private LocalDateTime endTime;
+
+    private String comment;
 
 }

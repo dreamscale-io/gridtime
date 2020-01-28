@@ -2,10 +2,9 @@ package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
-import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
-import com.dreamscale.gridtime.api.event.NewSnippetEvent;
+import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -29,7 +28,7 @@ public interface TalkToClient {
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
             ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH)
-    TalkMessageDto publishSnippetToRoom(@Param("roomName") String roomName, NewSnippetEvent newSnippetEvent);
+    TalkMessageDto publishSnippetToRoom(@Param("roomName") String roomName, NewSnippetEventDto newSnippetEventDto);
 
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
@@ -43,7 +42,7 @@ public interface TalkToClient {
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH +
             ResourcePaths.ACTIVE_PATH + ResourcePaths.SNIPPET_PATH)
-    TalkMessageDto publishSnippetToActiveRoom(NewSnippetEvent newSnippetEvent);
+    TalkMessageDto publishSnippetToActiveRoom(NewSnippetEventDto newSnippetEventDto);
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH +
             ResourcePaths.ACTIVE_PATH + ResourcePaths.SCREENSHOT_PATH)

@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
-import com.dreamscale.gridtime.api.event.NewSnippetEvent;
+import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.CircuitOperator;
@@ -45,7 +45,7 @@ public class TalkToResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH )
-    public TalkMessageDto publishSnippetToRoom(@PathVariable("roomName") String roomName, @RequestBody NewSnippetEvent newSnippetEvent) {
+    public TalkMessageDto publishSnippetToRoom(@PathVariable("roomName") String roomName, @RequestBody NewSnippetEventDto newSnippetEventDto) {
 
         RequestContext context = RequestContext.get();
         log.info("publishSnippetToRoom, user={}", context.getMasterAccountId());
@@ -53,7 +53,7 @@ public class TalkToResource {
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         return circuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
-                invokingMember.getId(), roomName, newSnippetEvent);
+                invokingMember.getId(), roomName, newSnippetEventDto);
 
     }
 
@@ -97,7 +97,7 @@ public class TalkToResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + ResourcePaths.ACTIVE_PATH + ResourcePaths.SNIPPET_PATH )
-    public TalkMessageDto publishSnippetToActiveRoom(@RequestBody NewSnippetEvent newSnippetEvent) {
+    public TalkMessageDto publishSnippetToActiveRoom(@RequestBody NewSnippetEventDto newSnippetEventDto) {
 
         RequestContext context = RequestContext.get();
         log.info("publishSnippetToActiveRoom, user={}", context.getMasterAccountId());
@@ -105,7 +105,7 @@ public class TalkToResource {
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
         return circuitOperator.publishSnippetToActiveRoom(invokingMember.getOrganizationId(),
-                invokingMember.getId(), newSnippetEvent);
+                invokingMember.getId(), newSnippetEventDto);
 
     }
 

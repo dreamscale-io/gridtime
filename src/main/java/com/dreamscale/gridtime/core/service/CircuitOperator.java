@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.circuit.*;
-import com.dreamscale.gridtime.api.event.NewSnippetEvent;
+import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsRepository;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
@@ -829,7 +829,7 @@ public class CircuitOperator {
 //        circleMessageEntity.setCircleId(circleId);
 //        circleMessageEntity.setMetadataField(CircleMessageMetadataField.message, "Added screenshot for " + screenshotReferenceInputDto.getFileName());
 //        circleMessageEntity.setMetadataField(CircleMessageMetadataField.name, screenshotReferenceInputDto.getFileName());
-//        circleMessageEntity.setMetadataField(CircleMessageMetadataField.filePath, screenshotReferenceInputDto.getFilePath());
+//        circleMessageEntity.setMetadataField(CircleMessageMetadataField.fileUri, screenshotReferenceInputDto.getFileUri());
 //        circleMessageEntity.setMessageType(CircuitMessageType.SCREENSHOT);
 //
 //        circleMessageRepository.save(circleMessageEntity);
@@ -838,7 +838,7 @@ public class CircuitOperator {
 //
 //        circuitMessageDto.setMessage(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.message));
 //        circuitMessageDto.setFileName(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.name));
-//        circuitMessageDto.setFilePath(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.filePath));
+//        circuitMessageDto.setFileUri(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.fileUri));
 //
 //        circuitMessageDto.setMessageFrom(createCircleMember(spiritId));
 //        return circuitMessageDto;
@@ -858,7 +858,7 @@ public class CircuitOperator {
         return participatingCircuits;
     }
 
-    public TalkMessageDto postSnippetToActiveCircuitFeed(UUID organizationId, UUID torchieId, NewSnippetEvent snippetEvent) {
+    public TalkMessageDto postSnippetToActiveCircuitFeed(UUID organizationId, UUID memberId, NewSnippetEventDto snippetEvent) {
 
         //TODO map to the new circuit stuff
 
@@ -896,7 +896,7 @@ public class CircuitOperator {
 
 
 
-    public TalkMessageDto publishSnippetToTalkRoom(UUID organizationId, UUID memberId, String talkRoomId, NewSnippetEvent newSnippetEvent) {
+    public TalkMessageDto publishSnippetToTalkRoom(UUID organizationId, UUID memberId, String talkRoomId, NewSnippetEventDto newSnippetEventDto) {
         return null;
     }
 
@@ -904,7 +904,7 @@ public class CircuitOperator {
         return null;
     }
 
-    public TalkMessageDto publishSnippetToActiveRoom(UUID organizationId, UUID memberId, NewSnippetEvent newSnippetEvent) {
+    public TalkMessageDto publishSnippetToActiveRoom(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {
         return null;
     }
 

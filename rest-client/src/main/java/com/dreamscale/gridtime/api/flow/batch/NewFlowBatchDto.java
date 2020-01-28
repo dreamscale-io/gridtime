@@ -1,6 +1,6 @@
-package com.dreamscale.gridtime.api.batch;
+package com.dreamscale.gridtime.api.flow.batch;
 
-import com.dreamscale.gridtime.api.activity.*;
+import com.dreamscale.gridtime.api.flow.activity.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -13,22 +13,22 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewFlowBatch {
+public class NewFlowBatchDto {
 
     private LocalDateTime timeSent;
 
     @Singular("editorActivity")
-    private List<NewEditorActivity> editorActivityList;
+    private List<NewEditorActivityDto> editorActivityList;
     @Singular("externalActivity")
-    private List<NewExternalActivity> externalActivityList;
+    private List<NewExternalActivityDto> externalActivityList;
     @Singular("idleActivity")
-    private List<NewIdleActivity> idleActivityList;
+    private List<NewIdleActivityDto> idleActivityList;
     @Singular("executionActivity")
-    private List<NewExecutionActivity> executionActivityList;
+    private List<NewExecutionActivityDto> executionActivityList;
     @Singular("modificationActivity")
-    private List<NewModificationActivity> modificationActivityList;
+    private List<NewModificationActivityDto> modificationActivityList;
     @Singular("event")
-    private List<NewBatchEvent> eventList;
+    private List<NewFlowBatchEventDto> eventList;
 
 
     public List getAllBatchActivity() {

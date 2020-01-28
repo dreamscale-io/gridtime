@@ -2,7 +2,6 @@
 package com.dreamscale.gridtime.core.domain.flow;
 
 
-import com.dreamscale.gridtime.api.event.EventType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -29,7 +28,7 @@ public class FlowEventEntity {
 	private LocalDateTime timePosition;
 
 	@Enumerated(EnumType.STRING)
-	private EventType eventType;
+	private FlowEventType eventType;
 
 	private String metadata;
 
@@ -37,8 +36,10 @@ public class FlowEventEntity {
 	private final MetadataFields metadataFields = new MetadataFields();
 
 	public void setMetadataField(FlowEventMetadataField field, Object value) {
-		metadataFields.set(field.name(), value);
-		metadata = metadataFields.toJson();
+		if (value != null) {
+			metadataFields.set(field.name(), value);
+			metadata = metadataFields.toJson();
+		}
 	}
 
 	public String getMetadataValue(FlowEventMetadataField field) {

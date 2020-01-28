@@ -1,8 +1,10 @@
-package com.dreamscale.gridtime.api.activity;
+package com.dreamscale.gridtime.api.flow.activity;
+
+import com.dreamscale.gridtime.api.flow.activity.NewExternalActivityDto;
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom;
 
-public class RandomExternalActivityBuilder extends NewExternalActivity.NewExternalActivityBuilder {
+public class RandomExternalActivityBuilder extends NewExternalActivityDto.NewExternalActivityDtoBuilder {
 
     public RandomExternalActivityBuilder() {
         super();

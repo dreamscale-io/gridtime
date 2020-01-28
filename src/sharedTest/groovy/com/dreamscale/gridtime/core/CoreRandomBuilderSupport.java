@@ -1,8 +1,9 @@
 package com.dreamscale.gridtime.core;
 
-import com.dreamscale.gridtime.api.activity.*;
-import com.dreamscale.gridtime.api.batch.*;
-import com.dreamscale.gridtime.api.event.RandomSnippetEventBuilder;
+import com.dreamscale.gridtime.api.flow.batch.RandomBatchEventBuilder;
+import com.dreamscale.gridtime.api.flow.batch.RandomFlowBatchBuilder;
+import com.dreamscale.gridtime.api.flow.event.RandomSnippetEventBuilder;
+import com.dreamscale.gridtime.api.flow.activity.*;
 import com.dreamscale.gridtime.api.journal.RandomIntentionInputDtoBuilder;
 import com.dreamscale.gridtime.core.domain.circuit.message.RandomWTFCircuitMessageEntityBuilder;
 import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageRepository;

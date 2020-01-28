@@ -1,8 +1,10 @@
-package com.dreamscale.gridtime.api.batch;
+package com.dreamscale.gridtime.api.flow.batch;
+
+import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom;
 
-public class RandomFlowBatchBuilder extends NewFlowBatch.NewFlowBatchBuilder {
+public class RandomFlowBatchBuilder extends NewFlowBatchDto.NewFlowBatchDtoBuilder {
 
     public RandomFlowBatchBuilder() {
         super();

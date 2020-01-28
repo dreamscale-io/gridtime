@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.api.activity;
+package com.dreamscale.gridtime.api.flow.activity;
 
 import java.time.LocalDateTime;
 

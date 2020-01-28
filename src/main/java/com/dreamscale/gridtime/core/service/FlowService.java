@@ -1,10 +1,9 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.activity.*;
-import com.dreamscale.gridtime.api.batch.NewBatchEvent;
-import com.dreamscale.gridtime.api.batch.NewFlowBatch;
-import com.dreamscale.gridtime.api.event.EventType;
-import com.dreamscale.gridtime.api.event.NewSnippetEvent;
+import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchEventDto;
+import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
+import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
+import com.dreamscale.gridtime.api.flow.activity.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.domain.flow.*;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,7 @@ public class FlowService {
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
 
-    public void saveFlowBatch(UUID masterAccountId, NewFlowBatch batch) {
+    public void saveFlowBatch(UUID masterAccountId, NewFlowBatchDto batch) {
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 
         UUID mostRecentProjectId = lookupProjectIdOfMostRecentIntention(memberEntity);
@@ -49,8 +48,8 @@ public class FlowService {
         Duration timeAdjustment = calculateTimeAdjustment(batch.getTimeSent());
 
         for (Activity activityInSequence : sortedBatchItems) {
-            if (activityInSequence instanceof NewEditorActivity) {
-                saveEditorActivity(memberEntity.getId(), timeAdjustment, (NewEditorActivity) activityInSequence);
+            if (activityInSequence instanceof NewEditorActivityDto) {
+                saveEditorActivity(memberEntity.getId(), timeAdjustment, (NewEditorActivityDto) activityInSequence);
 
             } else {
                 saveActivity(memberEntity.getId(), timeAdjustment, activityInSequence);
@@ -62,14 +61,14 @@ public class FlowService {
 
     private void saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {
 
-        if (activity instanceof NewExecutionActivity) {
-            saveExecutionActivity(memberId, timeAdjustment, (NewExecutionActivity) activity);
-        } else if (activity instanceof NewModificationActivity) {
-            saveModificationActivity(memberId, timeAdjustment, (NewModificationActivity) activity);
-        } else if (activity instanceof NewIdleActivity) {
-            saveIdleActivity(memberId, timeAdjustment, (NewIdleActivity) activity);
-        } else if (activity instanceof NewExternalActivity) {
-            saveExternalActivity(memberId, timeAdjustment, (NewExternalActivity) activity);
+        if (activity instanceof NewExecutionActivityDto) {
+            saveExecutionActivity(memberId, timeAdjustment, (NewExecutionActivityDto) activity);
+        } else if (activity instanceof NewModificationActivityDto) {
+            saveModificationActivity(memberId, timeAdjustment, (NewModificationActivityDto) activity);
+        } else if (activity instanceof NewIdleActivityDto) {
+            saveIdleActivity(memberId, timeAdjustment, (NewIdleActivityDto) activity);
+        } else if (activity instanceof NewExternalActivityDto) {
+            saveExternalActivity(memberId, timeAdjustment, (NewExternalActivityDto) activity);
         }
 
     }
@@ -94,11 +93,11 @@ public class FlowService {
         return allBatchActivity;
     }
 
-    private void saveEvents(UUID memberId, Duration adjustment, List<NewBatchEvent> eventList) {
-        for (NewBatchEvent event : eventList) {
+    private void saveEvents(UUID memberId, Duration adjustment, List<NewFlowBatchEventDto> eventList) {
+        for (NewFlowBatchEventDto event : eventList) {
             FlowEventEntity entity = new FlowEventEntity();
 
-            entity.setEventType(event.getType());
+            entity.setEventType(FlowEventType.toFlowEventType(event.getType()));
             entity.setMemberId(memberId);
             entity.setTimePosition(event.getPosition().plus(adjustment));
 
@@ -108,25 +107,26 @@ public class FlowService {
         }
     }
 
-    public void saveSnippetEvent(UUID masterAccountId, NewSnippetEvent snippetEvent) {
+    public void saveSnippetEvent(UUID masterAccountId, NewSnippetEventDto snippetEvent) {
         // TOOD: this seems wrong... what is the 'default' membership and why are we getting it here?
         // shouldn't an api key be tied to a specific membership?  seems like a security hole
         OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
 
         FlowEventEntity entity = FlowEventEntity.builder()
-                .eventType(EventType.SNIPPET)
+                .eventType(FlowEventType.SNIPPET)
                 .memberId(memberEntity.getId())
                 .timePosition(snippetEvent.getPosition())
                 .build();
 
-        entity.setMetadataField(FlowEventMetadataField.comment, snippetEvent.getComment());
+        entity.setMetadataField(FlowEventMetadataField.filePath, snippetEvent.getFilePath());
+        entity.setMetadataField(FlowEventMetadataField.lineNumber, snippetEvent.getLineNumber());
         entity.setMetadataField(FlowEventMetadataField.source, snippetEvent.getSource());
         entity.setMetadataField(FlowEventMetadataField.snippet, snippetEvent.getSnippet());
 
         flowEventRepository.save(entity);
     }
 
-    private void saveIdleActivity(UUID memberId, Duration adjustment, NewIdleActivity idleActivity) {
+    private void saveIdleActivity(UUID memberId, Duration adjustment, NewIdleActivityDto idleActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Idle);
@@ -139,7 +139,7 @@ public class FlowService {
             flowActivityRepository.save(entity);
     }
 
-    private void saveExternalActivity(UUID memberId, Duration adjustment, NewExternalActivity externalActivity) {
+    private void saveExternalActivity(UUID memberId, Duration adjustment, NewExternalActivityDto externalActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.External);
@@ -154,7 +154,7 @@ public class FlowService {
             flowActivityRepository.save(entity);
     }
 
-    private void saveModificationActivity(UUID memberId, Duration adjustment, NewModificationActivity modificationActivity) {
+    private void saveModificationActivity(UUID memberId, Duration adjustment, NewModificationActivityDto modificationActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Modification);
@@ -169,7 +169,7 @@ public class FlowService {
             flowActivityRepository.save(entity);
     }
 
-    private void saveExecutionActivity(UUID memberId, Duration adjustment, NewExecutionActivity executionActivity) {
+    private void saveExecutionActivity(UUID memberId, Duration adjustment, NewExecutionActivityDto executionActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Execution);
@@ -187,7 +187,7 @@ public class FlowService {
             flowActivityRepository.save(entity);
     }
 
-    private void saveEditorActivity(UUID memberId, Duration adjustment, NewEditorActivity editorActivity) {
+    private void saveEditorActivity(UUID memberId, Duration adjustment, NewEditorActivityDto editorActivity) {
 
         FlowActivityEntity entity = new FlowActivityEntity();
 

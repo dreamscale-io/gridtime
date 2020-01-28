@@ -1,8 +1,10 @@
-package com.dreamscale.gridtime.api.activity;
+package com.dreamscale.gridtime.api.flow.activity;
+
+import com.dreamscale.gridtime.api.flow.activity.NewExecutionActivityDto;
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom;
 
-public class RandomExecutionActivityBuilder extends NewExecutionActivity.NewExecutionActivityBuilder {
+public class RandomExecutionActivityBuilder extends NewExecutionActivityDto.NewExecutionActivityDtoBuilder {
 
     public RandomExecutionActivityBuilder() {
         super();

@@ -1,8 +1,8 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.batch.NewFlowBatch
-import com.dreamscale.gridtime.api.event.NewSnippetEvent
+import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto
+import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto
 import com.dreamscale.gridtime.client.FlowClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
@@ -70,10 +70,10 @@ class FlowResourceSpec extends Specification {
 
     def "addBatch should save all the things"() {
         given:
-        NewFlowBatch flowBatch = aRandom.flowBatch().build()
+        NewFlowBatchDto flowBatch = aRandom.flowBatch().build()
 
         when:
-        flowClient.addBatch(flowBatch)
+        flowClient.publishBatch(flowBatch)
 
         then:
         assert flowActivityRepository.findByMemberId(member.getId()).size() == 5
@@ -82,10 +82,10 @@ class FlowResourceSpec extends Specification {
 
     def "addSnippet should save the snippet"() {
         given:
-        NewSnippetEvent snippet = aRandom.snippetEvent().build()
+        NewSnippetEventDto snippet = aRandom.snippetEvent().build()
 
         when:
-        flowClient.addSnippet(snippet)
+        flowClient.publishSnippet(snippet)
 
         then:
         assert flowActivityRepository.findByMemberId(member.getId()).size() == 0

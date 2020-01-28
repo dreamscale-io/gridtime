@@ -1,18 +1,10 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.account.SimpleStatusDto
-import com.dreamscale.gridtime.api.account.UserContextDto
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
-import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
-import com.dreamscale.gridtime.api.event.NewSnippetEvent
-
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-import com.dreamscale.gridtime.api.circuit.CreateWTFCircleInputDto
-import com.dreamscale.gridtime.api.status.Status
-
 import com.dreamscale.gridtime.client.CircuitClient
 import com.dreamscale.gridtime.client.TalkToClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
@@ -149,7 +141,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
 //        screenshotReferenceInputDto.setFileName("file boxName");
-//        screenshotReferenceInputDto.setFilePath("/some/path/to/file")
+//        screenshotReferenceInputDto.setFileUri("/some/path/to/file")
 //
 //        when:
 //        TalkMessageDto talkMessageDto = circuitClient.postScreenshotReferenceToCircleFeed(circle.id.toString(), screenshotReferenceInputDto)
@@ -158,7 +150,7 @@ class TalkToResourceSpec extends Specification {
 //        assert talkMessageDto != null
 //        assert talkMessageDto.getMessageType() == CircuitMessageType.SCREENSHOT
 //        assert talkMessageDto.getMessage() != null
-//        assert talkMessageDto.getFilePath() != null
+//        assert talkMessageDto.getFileUri() != null
 //        assert talkMessageDto.getFileName() != null
 //        assert talkMessageDto.getFromMember() != null
 //    }

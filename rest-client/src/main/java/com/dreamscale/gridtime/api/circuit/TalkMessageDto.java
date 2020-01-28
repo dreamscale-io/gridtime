@@ -21,12 +21,15 @@ public class TalkMessageDto {
     private String uri;
     private LocalDateTime messageTime;
     private Long nanoTime;
-    private Map<String, String> metaProps = new LinkedHashMap<>();
+    private Map<String, String> metaProps;
 
     private String messageType;
     private String jsonBody;
 
     public void addMetaProp(String propName, String value) {
+        if (metaProps == null) {
+            metaProps = new LinkedHashMap<>();
+        }
         metaProps.put(propName, value);
     }
 }

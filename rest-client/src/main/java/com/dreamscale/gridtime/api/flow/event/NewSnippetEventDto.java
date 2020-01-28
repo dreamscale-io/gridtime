@@ -1,6 +1,5 @@
-package com.dreamscale.gridtime.api.batch;
+package com.dreamscale.gridtime.api.flow.event;
 
-import com.dreamscale.gridtime.api.event.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewBatchEvent {
-
-    private String comment;
-    private EventType type;
+public class NewSnippetEventDto {
 
     private LocalDateTime position;
+
+    private String filePath;
+    private Integer lineNumber;
+
+    private SnippetSourceType source;
+    private String snippet;
 
 }
