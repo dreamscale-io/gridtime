@@ -20,8 +20,6 @@ import java.util.UUID;
 @Service
 public class FlowService {
 
-    @Autowired
-    OrganizationService organizationService;
 
     @Autowired
     TimeService timeService;
@@ -39,24 +37,21 @@ public class FlowService {
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
 
-    public void saveFlowBatch(UUID masterAccountId, NewFlowBatchDto batch) {
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
-
-        UUID mostRecentProjectId = lookupProjectIdOfMostRecentIntention(memberEntity);
+    public void saveFlowBatch(UUID organizationId, UUID memberId, NewFlowBatchDto batch) {
 
         List<Activity> sortedBatchItems = sortAllItemsByTime(batch.getAllBatchActivity());
         Duration timeAdjustment = calculateTimeAdjustment(batch.getTimeSent());
 
         for (Activity activityInSequence : sortedBatchItems) {
             if (activityInSequence instanceof NewEditorActivityDto) {
-                saveEditorActivity(memberEntity.getId(), timeAdjustment, (NewEditorActivityDto) activityInSequence);
+                saveEditorActivity(memberId, timeAdjustment, (NewEditorActivityDto) activityInSequence);
 
             } else {
-                saveActivity(memberEntity.getId(), timeAdjustment, activityInSequence);
+                saveActivity(memberId, timeAdjustment, activityInSequence);
             }
         }
 
-        saveEvents(memberEntity.getId(), timeAdjustment, batch.getEventList());
+        saveEvents(memberId, timeAdjustment, batch.getEventList());
     }
 
     private void saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {
@@ -107,14 +102,11 @@ public class FlowService {
         }
     }
 
-    public void saveSnippetEvent(UUID masterAccountId, NewSnippetEventDto snippetEvent) {
-        // TOOD: this seems wrong... what is the 'default' membership and why are we getting it here?
-        // shouldn't an api key be tied to a specific membership?  seems like a security hole
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(masterAccountId);
+    public void saveSnippetEvent(UUID organizationId, UUID memberId, NewSnippetEventDto snippetEvent) {
 
         FlowEventEntity entity = FlowEventEntity.builder()
                 .eventType(FlowEventType.SNIPPET)
-                .memberId(memberEntity.getId())
+                .memberId(memberId)
                 .timePosition(snippetEvent.getPosition())
                 .build();
 

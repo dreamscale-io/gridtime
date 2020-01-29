@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.hooks.talk.dto;
 import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto;
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
+import com.dreamscale.gridtime.api.circuit.SnippetMessageDetailsDto;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
 import lombok.Getter;
 
@@ -10,7 +11,7 @@ import lombok.Getter;
 public enum CircuitMessageType {
     CHAT("chat", null, ChatMessageDetailsDto.class),
     SCREENSHOT("screenshot", null, null),
-    SNIPPET("snippet", null, null),
+    SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
     ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatus.class),
     ROOM_MEMBER_INACTIVE("room-member-inactive", "Member inactive.", RoomMemberStatus.class),
     ROOM_MEMBER_ACTIVE("room-member-active", "Member is active.", RoomMemberStatus.class),

@@ -27,10 +27,14 @@ public class CircuitResource {
     CircuitOperator circuitOperator;
 
     /**
-     * Pulls the "Global Andon Cord" to generate a new "Twilight Learning Circuit" that can be joined by
-     * anyone in the organization that wants to collaborate, provided permission to join is granted by the owner
-     * of the Circuit.  Existance of this new Circuit will be broadcast to listeners.
-     * @return TwilightLearningCircuitDto
+     * Pulls the "Global Andon Cord" to generate a new "Learning Circuit" that can be joined by
+     * anyone in the organization that wants to collaborate.  Learning Circuits help the team navigate through
+     * the learning flow of triaging the WTF, then reflecting with a Retro to distill the experience into patterns.
+     *
+     * Circuits can be put on hold, and resumed.
+     * Each member can have only one WTF circuit active at any given time.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH)
@@ -44,12 +48,17 @@ public class CircuitResource {
     }
 
     /**
-     * Pulls the "Global Andon Cord" to generate a new "Twilight Learning Circuit" with the specified name,
-     * (or throws an error if name already exists.
-     * This new Circuit can be joined by anyone in the organization that wants to collaborate, provided permission to join
-     * is granted by the owner of the Circuit.  Existance of this new Circuit will be broadcast to listeners.
+     * Pulls the "Global Andon Cord" to generate a new "Learning Circuit" with a specified custom name, that can be joined by
+     * anyone in the organization that wants to collaborate.  Learning Circuits help the team navigate through
+     * the learning flow of triaging the WTF, then reflecting with a Retro to distill the experience into patterns.
      *
-     * @return TwilightLearningCircuitDto
+     * If the circuit name already exists, the circuit will add a random extension onto the requested name
+     * to make it unique.
+     *
+     * Circuits can be put on hold, and resumed.
+     * Each member can have only one WTF circuit active at any given time.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}")
@@ -63,9 +72,11 @@ public class CircuitResource {
     }
 
     /**
-     * Starts the retrospective feed for the provided WTF_ROOM Circuit
+     * Starts the retrospective for the specified Learning Circuit
      *
-     * @return TwilightLearningCircuitDto
+     * All members that participated in the WTF, will automatically be added as members of the retro session.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
@@ -78,6 +89,13 @@ public class CircuitResource {
         return circuitOperator.startRetroForCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+
+    /**
+     * To retrieve the full set of details for a Learning Circuit, including a list of all participating members,
+     * and their statuses, use this API.
+     *
+     * @return LearningCircuitWithMembersDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.WTF_PATH + "/{name}" )
     LearningCircuitWithMembersDto getCircuitWithAllDetails(@PathVariable("name") String circuitName) {
@@ -90,9 +108,11 @@ public class CircuitResource {
     }
 
     /**
-     * Joins an existing WTF_ROOM circuit
+     * Joins an existing Learning Circuit created by another team member.
      *
-     * @return TwilightLearningCircuitDto
+     * Will join the WTF and/or Retro rooms, depending on the active state of the Circuit.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
@@ -107,9 +127,11 @@ public class CircuitResource {
     }
 
     /**
-     * Leaves an existing WTF_ROOM circuit (member will still be joined, but inactive)
+     * Leaves an existing Learning Circuit created by another team member.
      *
-     * @return TwilightLearningCircuitDto
+     * The member's status will be changed to Inactive, and will leave the Talk Room.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
@@ -123,6 +145,15 @@ public class CircuitResource {
         return circuitOperator.leaveExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+    /**
+     * Closes an existing Learning Circuit owned by the invoking team member.
+     *
+     * This causes circuits to disappear from the "My Circuits" list, effectively archiving them as complete.
+     *
+     * Circuits can only be closed by the owner.
+     *
+     * @return LearningCircuitDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
     public LearningCircuitDto closeExistingCircuit(@PathVariable("name") String circuitName) {
@@ -135,6 +166,15 @@ public class CircuitResource {
         return circuitOperator.closeExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+    /**
+     * Changes the status of an active Learning Circuit to the "Do It Later" status.
+     *
+     * Circuits in this state will still appear on the "My Circuits" list, and also the "Do It Later" list.
+     *
+     * Only circuits owned by the invoking member can be changed to a different status.
+     *
+     * @return LearningCircuitDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
     public LearningCircuitDto putCircuitOnHoldWithDoItLater(@PathVariable("name") String circuitName) {
@@ -147,6 +187,15 @@ public class CircuitResource {
         return circuitOperator.putCircuitOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+    /**
+     * Changes the status of an inactive Learning Circuit back to the "Active" status.
+     *
+     * Circuits in this state will appear on the "My Circuits" list, and will no longer show on the "Do It Later" list.
+     *
+     * Only circuits owned by the invoking member can be changed to a different status.
+     *
+     * @return LearningCircuitDto
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
     public LearningCircuitDto resumeCircuit(@PathVariable("name") String circuitName) {
@@ -161,8 +210,9 @@ public class CircuitResource {
 
 
     /**
-     * Retrieves the active circuit for the user
-     * @return TwilightLearningCircuitDto
+     * Retrieves the active Learning Circuit of the invoking member.
+     *
+     * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
@@ -176,8 +226,9 @@ public class CircuitResource {
     }
 
     /**
-     * Retrieves the do it later circuits for the logged in user
-     * @return TwilightLearningCircuitDto
+     * Retrieves the list of Learning Circuits in the "Do It Later" status for the invoking member.
+     *
+     * @return List<LearningCircuitDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)
@@ -191,8 +242,12 @@ public class CircuitResource {
     }
 
     /**
-     * Retrieves all participating circuits for the logged in user
-     * @return TwilightLearningCircuitDto
+     * Retrieves the list of Learning Circuits that are "ACTIVE" that the invoking member has also joined.
+     *
+     * When joining and leaving another team member's Learning Circuits, the invoking member is still considered
+     * to be "participating" even if they are inactive, as long as the circuit itself is in an "ACTIVE" state.
+     *
+     * @return List<LearningCircuitDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
@@ -205,10 +260,15 @@ public class CircuitResource {
         return circuitOperator.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
-
+    /**
+     * Retrieves the list of Learning Circuits that are "ACTIVE" that the specified member has also joined.
+     *
+     * When joining and leaving another team member's Learning Circuits, the specified member is still considered
+     * to be "participating" even if they are inactive, as long as the circuit itself is in an "ACTIVE" state.
+     *
+     * @return List<LearningCircuitDto>
+     */
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
-
-
     @GetMapping(ResourcePaths.MEMBER_PATH + "/{id}" )
     public List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@PathVariable("memberId") String memberId) {
         RequestContext context = RequestContext.get();

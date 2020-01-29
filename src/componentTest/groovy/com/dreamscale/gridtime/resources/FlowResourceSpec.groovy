@@ -68,7 +68,7 @@ class FlowResourceSpec extends Specification {
 
 
 
-    def "addBatch should save all the things"() {
+    def "publishBatch should save all the things"() {
         given:
         NewFlowBatchDto flowBatch = aRandom.flowBatch().build()
 
@@ -80,7 +80,7 @@ class FlowResourceSpec extends Specification {
         assert flowEventRepository.findByMemberId(member.getId()).size() == 1
     }
 
-    def "addSnippet should save the snippet"() {
+    def "publishSnippet should save the snippet"() {
         given:
         NewSnippetEventDto snippet = aRandom.snippetEvent().build()
 

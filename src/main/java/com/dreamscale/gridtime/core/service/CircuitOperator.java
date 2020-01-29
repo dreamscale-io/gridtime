@@ -475,9 +475,9 @@ public class CircuitOperator {
         }
     }
 
-    public LearningCircuitDto closeExistingCircuit(UUID organizationId, UUID memberId, String circuitName) {
+    public LearningCircuitDto closeExistingCircuit(UUID organizationId, UUID ownerId, String circuitName) {
 
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
         validateCircuitExists(circuitName, learningCircuitEntity);
         validateCircuitIsActive(circuitName, learningCircuitEntity);
@@ -760,6 +760,39 @@ public class CircuitOperator {
         return talkMessageDto;
     }
 
+    private TalkMessageDto sendSnippetMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, NewSnippetEventDto snippet) {
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(messageId);
+        messageEntity.setFromId(fromMemberId);
+        messageEntity.setToRoomId(roomId);
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.SNIPPET);
+        messageEntity.setJsonBody(JSONTransformer.toJson(createSnippetMessage(snippet)));
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        updateMemberStatusWithTouch(roomId, fromMemberId);
+
+        return talkMessageDto;
+    }
+
+    private SnippetMessageDetailsDto createSnippetMessage(NewSnippetEventDto snippet) {
+
+        SnippetMessageDetailsDto snippetMessage = new SnippetMessageDetailsDto();
+        snippetMessage.setSourceType(snippet.getSource().name());
+        snippetMessage.setFilePath(snippet.getFilePath());
+        snippetMessage.setLineNumber(snippet.getLineNumber());
+        snippetMessage.setSnippet(snippet.getSnippet());
+
+        return snippetMessage;
+    }
+
     public List<LearningCircuitDto> getMyDoItLaterCircuits(UUID organizationId, UUID memberId) {
 
         List<LearningCircuitEntity> circuits = learningCircuitRepository.findAllOnHoldCircuitsOwnedBy(organizationId, memberId);
@@ -860,38 +893,20 @@ public class CircuitOperator {
 
     public TalkMessageDto postSnippetToActiveCircuitFeed(UUID organizationId, UUID memberId, NewSnippetEventDto snippetEvent) {
 
-        //TODO map to the new circuit stuff
+        LearningCircuitDto learningCircuitDto = getMyActiveWTFCircuit(organizationId, memberId);
 
-//        UUID activeCircleId = activeStatusService.getActiveCircleId(organizationId, torchieId);
-//
-//        CircuitMessageDto circuitMessageDto = null;
-//
-//        if (activeCircleId != null) {
-//
-//            CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
-//            circleMessageEntity.setId(UUID.randomUUID());
-//            circleMessageEntity.setTorchieId(torchieId);
-//            circleMessageEntity.setPosition(timeService.now());
-//
-//            circleMessageEntity.setCircleId(activeCircleId);
-//            circleMessageEntity.setMetadataField(CircleMessageMetadataField.message, "Added snippet from " + snippetEvent.getSource());
-//            circleMessageEntity.setMetadataField(CircleMessageMetadataField.snippetSource, snippetEvent.getSource());
-//            circleMessageEntity.setMetadataField(CircleMessageMetadataField.snippet, snippetEvent.getSnippet());
-//            circleMessageEntity.setMessageType(CircuitMessageType.SNIPPET);
-//
-//            circleMessageRepository.save(circleMessageEntity);
-//
-//            circuitMessageDto = feedMessageMapper.toApi(circleMessageEntity);
-//
-//            circuitMessageDto.setMessage(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.message));
-//            circuitMessageDto.setSnippetSource(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.snippetSource));
-//            circuitMessageDto.setSnippet(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.snippet));
-//
-//            circuitMessageDto.setMessageFrom(createCircleMember(torchieId));
-//        }
-//
-//        return circuitMessageDto;
-        return null;
+        TalkMessageDto messageDto = null;
+        if (learningCircuitDto != null) {
+
+            LocalDateTime now = timeService.now();
+            Long nanoTime = timeService.nanoTime();
+            UUID messageId = UUID.randomUUID();
+
+            messageDto = sendSnippetMessage(messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), snippetEvent);
+        }
+
+        return messageDto;
+
     }
 
 
@@ -904,7 +919,7 @@ public class CircuitOperator {
         return null;
     }
 
-    public TalkMessageDto publishSnippetToActiveRoom(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {
+    public TalkMessageDto publishSnippetToActiveCircuit(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {
         return null;
     }
 

@@ -3,8 +3,11 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
+import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
+import com.dreamscale.gridtime.core.service.CircuitOperator;
 import com.dreamscale.gridtime.core.service.FlowService;
+import com.dreamscale.gridtime.core.service.OrganizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,36 +21,42 @@ public class FlowResource {
     @Autowired
     FlowService flowService;
 
+    @Autowired
+    OrganizationService organizationService;
+    @Autowired
+    CircuitOperator circuitOperator;
+
+
+    /**
+     * Saves a batch of flow activity and events from the IDE, (or another pluggable flow source)
+     */
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.INPUT_PATH + ResourcePaths.BATCH_PATH)
-    public void saveInputFlowBatch(@RequestBody NewFlowBatchDto batch) {
-        saveFlowBatch(batch);
-    }
+    public void publishBatch(@RequestBody NewFlowBatchDto batch) {
+        RequestContext context = RequestContext.get();
+        log.info("publishBatch, user={}, batch={}", context.getMasterAccountId(), batch);
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.INPUT_PATH + ResourcePaths.SNIPPET_PATH)
-    public void saveInputFlowSnippet(@RequestBody NewSnippetEventDto snippet) {
-        saveFlowSnippet(snippet);
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        flowService.saveFlowBatch(invokingMember.getOrganizationId(), invokingMember.getId(), batch);
     }
 
     /**
-     * Saves a batch of flow activity and events for the user
+     * Publishes a snippet to the active Learning Circuit of the invoking member
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.BATCH_PATH)
-    public void saveFlowBatch(@RequestBody NewFlowBatchDto batch) {
-        RequestContext context = RequestContext.get();
-        log.info("addFlowBatch, user={}, batch={}", context.getMasterAccountId(), batch);
-        flowService.saveFlowBatch(context.getMasterAccountId(), batch);
-    }
-
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.SNIPPET_PATH)
-    public void saveFlowSnippet(@RequestBody NewSnippetEventDto snippet) {
+    @PostMapping(ResourcePaths.INPUT_PATH + ResourcePaths.SNIPPET_PATH)
+    public void publishSnippet(@RequestBody NewSnippetEventDto snippet) {
         RequestContext context = RequestContext.get();
         log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
-        flowService.saveSnippetEvent(context.getMasterAccountId(), snippet);
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        flowService.saveSnippetEvent(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
+
+        circuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
+
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")

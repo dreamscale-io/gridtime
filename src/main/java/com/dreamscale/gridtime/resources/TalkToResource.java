@@ -104,7 +104,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
-        return circuitOperator.publishSnippetToActiveRoom(invokingMember.getOrganizationId(),
+        return circuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
 
     }

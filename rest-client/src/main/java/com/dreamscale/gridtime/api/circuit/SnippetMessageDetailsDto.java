@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SnippetMessageDetailsDto implements MessageDetailsBody {
 
-    private String message;
-    private String snippetSource;
+    private String sourceType;
+    private String filePath;
+    private Integer lineNumber;
+
     private String snippet;
 
 }
