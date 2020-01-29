@@ -50,7 +50,7 @@ class TalkToResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(loggedInUser.getId()).save()
 
         when:
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
         //should add me to the room?
 
         LearningCircuitWithMembersDto details = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
@@ -77,7 +77,7 @@ class TalkToResourceSpec extends Specification {
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
 //
 //        when:
-//        LearningCircuitDto circle = circuitClient.createLearningCircuitForWTF(circleSessionInputDto)
+//        LearningCircuitDto circle = circuitClient.startLearningCircuitForWTF(circleSessionInputDto)
 //
 //        String channelId = circle.getTalkRoomId().toString();
 //
@@ -111,7 +111,7 @@ class TalkToResourceSpec extends Specification {
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
 //
-//        LearningCircuitDto circle = circuitClient.createLearningCircuitForWTF(circleSessionInputDto)
+//        LearningCircuitDto circle = circuitClient.startLearningCircuitForWTF(circleSessionInputDto)
 //
 //        com.dreamscale.gridtime.api.circuit.ChatMessageInputDto chatMessageInputDto = new com.dreamscale.gridtime.api.circuit.ChatMessageInputDto();
 //        chatMessageInputDto.setChatMessage("Here's a chat message")
@@ -137,7 +137,7 @@ class TalkToResourceSpec extends Specification {
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
 //
-//        LearningCircuitDto circle = circuitClient.createLearningCircuitForWTF(circleSessionInputDto)
+//        LearningCircuitDto circle = circuitClient.startLearningCircuitForWTF(circleSessionInputDto)
 //
 //        ScreenshotReferenceInputDto screenshotReferenceInputDto = new ScreenshotReferenceInputDto();
 //        screenshotReferenceInputDto.setFileName("file boxName");
@@ -165,7 +165,7 @@ class TalkToResourceSpec extends Specification {
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
 //
-//        LearningCircuitDto circle = circuitClient.createLearningCircuitForWTF(circleSessionInputDto)
+//        LearningCircuitDto circle = circuitClient.startLearningCircuitForWTF(circleSessionInputDto)
 //
 //        NewSnippetEvent newSnippetEvent = new NewSnippetEvent();
 //        newSnippetEvent.setSnippet("{some code}")
@@ -195,7 +195,7 @@ class TalkToResourceSpec extends Specification {
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
 //
-//        LearningCircuitDto circle = circuitClient.createLearningCircuitForWTF(circleSessionInputDto)
+//        LearningCircuitDto circle = circuitClient.startLearningCircuitForWTF(circleSessionInputDto)
 //
 //        com.dreamscale.gridtime.api.circuit.ChatMessageInputDto chatMessageInputDto = new com.dreamscale.gridtime.api.circuit.ChatMessageInputDto();
 //        chatMessageInputDto.setChatMessage("Here's a chat message")

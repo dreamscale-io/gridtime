@@ -851,32 +851,22 @@ public class CircuitOperator {
         }
     }
 
-    public TalkMessageDto postScreenshotReferenceToCircuitFeed(UUID organizationId, UUID spiritId, UUID circleId, ScreenshotReferenceInputDto screenshotReferenceInputDto) {
+    public TalkMessageDto publishSnippetToActiveCircuit(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {
+        LearningCircuitDto learningCircuitDto = getMyActiveWTFCircuit(organizationId, memberId);
 
-        //TODO map to the new circuit stuff
-        //        CircleMessageEntity circleMessageEntity = new CircleMessageEntity();
-//        circleMessageEntity.setId(UUID.randomUUID());
-//        circleMessageEntity.setTorchieId(spiritId);
-//        circleMessageEntity.setPosition(timeService.now());
-//
-//        circleMessageEntity.setCircleId(circleId);
-//        circleMessageEntity.setMetadataField(CircleMessageMetadataField.message, "Added screenshot for " + screenshotReferenceInputDto.getFileName());
-//        circleMessageEntity.setMetadataField(CircleMessageMetadataField.name, screenshotReferenceInputDto.getFileName());
-//        circleMessageEntity.setMetadataField(CircleMessageMetadataField.fileUri, screenshotReferenceInputDto.getFileUri());
-//        circleMessageEntity.setMessageType(CircuitMessageType.SCREENSHOT);
-//
-//        circleMessageRepository.save(circleMessageEntity);
-//
-//        CircuitMessageDto circuitMessageDto = feedMessageMapper.toApi(circleMessageEntity);
-//
-//        circuitMessageDto.setMessage(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.message));
-//        circuitMessageDto.setFileName(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.name));
-//        circuitMessageDto.setFileUri(circleMessageEntity.getMetadataValue(CircleMessageMetadataField.fileUri));
-//
-//        circuitMessageDto.setMessageFrom(createCircleMember(spiritId));
-//        return circuitMessageDto;
-        return null;
+        TalkMessageDto messageDto = null;
+        if (learningCircuitDto != null) {
+
+            LocalDateTime now = timeService.now();
+            Long nanoTime = timeService.nanoTime();
+            UUID messageId = UUID.randomUUID();
+
+            messageDto = sendSnippetMessage(messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), newSnippetEventDto);
+        }
+
+        return messageDto;
     }
+
 
     public List<LearningCircuitDto> getAllParticipatingCircuits(UUID organizationId, UUID memberId) {
 
@@ -891,25 +881,6 @@ public class CircuitOperator {
         return participatingCircuits;
     }
 
-    public TalkMessageDto postSnippetToActiveCircuitFeed(UUID organizationId, UUID memberId, NewSnippetEventDto snippetEvent) {
-
-        LearningCircuitDto learningCircuitDto = getMyActiveWTFCircuit(organizationId, memberId);
-
-        TalkMessageDto messageDto = null;
-        if (learningCircuitDto != null) {
-
-            LocalDateTime now = timeService.now();
-            Long nanoTime = timeService.nanoTime();
-            UUID messageId = UUID.randomUUID();
-
-            messageDto = sendSnippetMessage(messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), snippetEvent);
-        }
-
-        return messageDto;
-
-    }
-
-
 
     public TalkMessageDto publishSnippetToTalkRoom(UUID organizationId, UUID memberId, String talkRoomId, NewSnippetEventDto newSnippetEventDto) {
         return null;
@@ -919,9 +890,7 @@ public class CircuitOperator {
         return null;
     }
 
-    public TalkMessageDto publishSnippetToActiveCircuit(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {
-        return null;
-    }
+
 
     public TalkMessageDto publishScreenshotToActiveRoom(UUID organizationId, UUID memberId, ScreenshotReferenceInputDto screenshotReferenceInput) {
         return null;

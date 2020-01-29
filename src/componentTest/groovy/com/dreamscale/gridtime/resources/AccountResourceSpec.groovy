@@ -111,7 +111,7 @@ class AccountResourceSpec extends Specification {
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
-        LearningCircuitDto circuitDto = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuitDto = circuitClient.startLearningCircuitForWTF()
 
         SimpleStatusDto logoutStatus = accountClient.logout()
         ConnectionStatusDto newConnectionStatus = accountClient.login()

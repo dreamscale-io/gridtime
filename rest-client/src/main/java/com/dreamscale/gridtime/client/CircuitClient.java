@@ -16,7 +16,7 @@ public interface CircuitClient {
 
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
-    LearningCircuitDto createLearningCircuitForWTF();
+    LearningCircuitDto startLearningCircuitForWTF();
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}")
     LearningCircuitDto createLearningCircuitWithCustomName(@Param("name") String customCircuitName);

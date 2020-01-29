@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circuit.CircuitMemberDto
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
@@ -49,7 +48,7 @@ class CircuitResourceSpec extends Specification {
         loggedInUser.setId(member.getMasterAccountId())
 
         when:
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         then:
         assert circuit != null
@@ -65,7 +64,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit1 = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit1 = circuitClient.startLearningCircuitForWTF()
 
         when:
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit()
@@ -84,10 +83,10 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit1 = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit1 = circuitClient.startLearningCircuitForWTF()
         circuitClient.putCircuitOnHoldWithDoItLater(circuit1.getCircuitName())
 
-        LearningCircuitDto circuit2 = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit2 = circuitClient.startLearningCircuitForWTF()
         circuitClient.putCircuitOnHoldWithDoItLater(circuit2.getCircuitName())
 
         when:
@@ -106,7 +105,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         when:
 
@@ -126,7 +125,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         when:
 
@@ -144,7 +143,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         LearningCircuitDto circuitShelved = circuitClient.putCircuitOnHoldWithDoItLater(circuit.getCircuitName());
 
@@ -164,7 +163,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         loggedInUser.setId(member.getMasterAccountId())
 
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         //change active logged in user to a different user within same organization
         MasterAccountEntity otherAccount = aRandom.masterAccountEntity().save()
@@ -173,7 +172,7 @@ class CircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitDto myOwnCircuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto myOwnCircuit = circuitClient.startLearningCircuitForWTF()
         LearningCircuitDto circuitJoined = circuitClient.joinExistingCircuit(circuit.getCircuitName())
 
         List<LearningCircuitDto> participatingCircuits = circuitClient.getAllMyParticipatingCircuits();
@@ -190,7 +189,7 @@ class CircuitResourceSpec extends Specification {
         OrganizationMemberEntity me = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
         loggedInUser.setId(me.getMasterAccountId())
 
-        LearningCircuitDto circuit = circuitClient.createLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         //change active logged in user to a different user within same organization
         MasterAccountEntity otherAccount = aRandom.masterAccountEntity().save()

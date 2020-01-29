@@ -1,8 +1,10 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto
+import com.dreamscale.gridtime.client.CircuitClient
 import com.dreamscale.gridtime.client.FlowClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
@@ -27,6 +29,9 @@ class FlowResourceSpec extends Specification {
 
     @Autowired
     FlowClient flowClient
+
+    @Autowired
+    CircuitClient circuitClient
 
     @Autowired
     FlowClient unauthenticatedFlowClient
@@ -85,9 +90,11 @@ class FlowResourceSpec extends Specification {
         NewSnippetEventDto snippet = aRandom.snippetEvent().build()
 
         when:
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
         flowClient.publishSnippet(snippet)
 
         then:
+        assert circuit != null
         assert flowActivityRepository.findByMemberId(member.getId()).size() == 0
         assert flowEventRepository.findByMemberId(member.getId()).size() == 1
     }

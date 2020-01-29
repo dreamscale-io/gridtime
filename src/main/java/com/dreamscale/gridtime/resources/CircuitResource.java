@@ -40,7 +40,7 @@ public class CircuitResource {
     @PostMapping(ResourcePaths.WTF_PATH)
     public LearningCircuitDto createLearningCircuitForWTF() {
         RequestContext context = RequestContext.get();
-        log.info("createLearningCircuitForWTF, user={}", context.getMasterAccountId());
+        log.info("startLearningCircuitForWTF, user={}", context.getMasterAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
 
