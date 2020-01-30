@@ -48,7 +48,7 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "where c.organization_id = (:organizationId) " +
             "and exists (select 1 from talk_room tm, talk_room_member trm " +
             "where tm.id = trm.room_id " +
-            "and c.id = tm.circuit_id " +
+            "and (c.wtf_room_id = tm.id or c.retro_room_id = tm.id) " +
             "and trm.member_id = (:memberId)) " +
             "and c.circuit_status = 'ACTIVE' " +
             "order by c.open_time ")

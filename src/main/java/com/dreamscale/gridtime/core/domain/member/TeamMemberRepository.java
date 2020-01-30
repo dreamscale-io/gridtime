@@ -10,4 +10,6 @@ public interface TeamMemberRepository extends CrudRepository<TeamMemberEntity, U
     TeamMemberEntity findById(UUID id);
 
     List<TeamMemberEntity> findByMemberId(UUID memberId);
+
+    List<TeamMemberEntity> findByTeamId(UUID teamId);
 }

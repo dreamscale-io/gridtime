@@ -78,6 +78,7 @@ public class TeamService {
         return teamOutputMapper.toApi(teamEntity);
     }
 
+
     public TeamDto getTeamByName(UUID organizationId, String teamName) {
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, teamName);

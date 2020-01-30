@@ -7,13 +7,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "team_learning_circuit")
+@Entity(name = "team_circuit")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamLearningCircuitEntity {
+public class TeamCircuitEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -23,21 +23,9 @@ public class TeamLearningCircuitEntity {
     private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID ownerId;
+    private UUID teamId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID moderatorId;
-
-    private UUID teamId;
-    private String circuitName;
+    private UUID statusRoomId;
 
 }
-
-//    create table team_learning_circuit (
-//        id uuid primary key not null,
-//        organization_owner_id uuid,
-//        created_by_owner_id  uuid,
-//        moderated_by_member_id uuid,
-//        team_id  uuid,
-//        circuit_name text
-//);

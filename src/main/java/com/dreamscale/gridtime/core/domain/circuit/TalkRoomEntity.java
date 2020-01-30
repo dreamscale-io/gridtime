@@ -20,8 +20,6 @@ public class TalkRoomEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    private UUID circuitId;
-
     private String roomName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")

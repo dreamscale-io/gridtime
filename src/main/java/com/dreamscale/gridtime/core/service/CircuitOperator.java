@@ -147,7 +147,6 @@ public class CircuitOperator {
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
-        wtfRoomEntity.setCircuitId(learningCircuitEntity.getId());
         wtfRoomEntity.setOrganizationId(organizationId);
         wtfRoomEntity.setOwnerId(memberId);
         wtfRoomEntity.setRoomType(RoomType.WTF_ROOM);
