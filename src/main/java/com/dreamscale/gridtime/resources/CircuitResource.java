@@ -72,6 +72,42 @@ public class CircuitResource {
     }
 
     /**
+     * Overwrites the description property of the Learning Circuit
+     *
+     * Only editable by owner
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
+    public LearningCircuitDto saveDescriptionForLearningCircuit(@PathVariable("name") String circuitName, @RequestBody DescriptionInputDto descriptionInputDto ) {
+        RequestContext context = RequestContext.get();
+        log.info("saveDescriptionForLearningCircuit, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circuitOperator.saveDescriptionForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, descriptionInputDto);
+    }
+
+    /**
+     * Overwrites the tags property of the Learning Circuit
+     *
+     * Only editable by owner
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.TAGS_PATH)
+    public LearningCircuitDto saveTagsForLearningCircuit(@PathVariable("name") String circuitName, @RequestBody TagsInputDto tagsInputDto ) {
+        RequestContext context = RequestContext.get();
+        log.info("saveTagsForLearningCircuit, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return circuitOperator.saveTagsForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, tagsInputDto);
+    }
+
+    /**
      * Starts the retrospective for the specified Learning Circuit
      *
      * All members that participated in the WTF, will automatically be added as members of the retro session.

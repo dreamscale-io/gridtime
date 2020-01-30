@@ -122,4 +122,9 @@ public class ResourcePaths {
     public static final String RUN_PATH = "/run";
     public static final String PROGRAM_PATH = "/program";
     public static final String CMD_PATH = "/cmd";
+    public static final String PROPERTY_PATH = "/property";
+    public static final String DESCRIPTION_PATH = "/description";
+    public static final String TAGS_PATH = "/tags";
+
+
 }

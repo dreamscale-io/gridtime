@@ -2,8 +2,10 @@ package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
+import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
+import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.client.CircuitClient
 import com.dreamscale.gridtime.core.domain.circuit.CircuitStatus
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
@@ -55,6 +57,42 @@ class CircuitResourceSpec extends Specification {
         assert circuit.circuitName != null
         assert circuit.circuitStatus != null
 
+    }
+
+    def 'should update description of a circuit'() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        loggedInUser.setId(member.getMasterAccountId())
+
+        when:
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+
+        LearningCircuitDto updatedCircuit = circuitClient.saveDescriptionForLearningCircuit(circuit.getCircuitName(), new DescriptionInputDto("desc"))
+
+        then:
+        assert updatedCircuit != null
+        assert updatedCircuit.description == "desc"
+
+    }
+
+    def 'should update tags of a circuit'() {
+        given:
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        loggedInUser.setId(member.getMasterAccountId())
+
+        when:
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+
+        LearningCircuitDto updatedCircuit = circuitClient.saveTagsForLearningCircuit(circuit.getCircuitName(), new TagsInputDto(Arrays.asList("tag1", "tag2")))
+
+        then:
+        assert updatedCircuit != null
+        assert updatedCircuit.tags != null
+        assert updatedCircuit.tags.size() == 2
     }
 
     def "should return active circuit"() {

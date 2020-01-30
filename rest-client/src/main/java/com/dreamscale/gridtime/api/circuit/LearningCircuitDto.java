@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,6 +17,8 @@ public class LearningCircuitDto {
 
     UUID id;
     String circuitName;
+    String description;
+    List<String> tags;
 
     String wtfTalkRoomName;
     UUID wtfTalkRoomId;

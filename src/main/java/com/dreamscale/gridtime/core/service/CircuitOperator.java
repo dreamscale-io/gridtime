@@ -262,6 +262,11 @@ public class CircuitOperator {
                 circuitDto.setRetroTalkRoomId(circuitEntity.getRetroRoomId());
                 circuitDto.setRetroTalkRoomName(deriveRetroTalkRoomId(circuitEntity));
             }
+
+            if (circuitEntity.getJsonTags() != null) {
+                TagsInputDto tagsInput = JSONTransformer.fromJson(circuitEntity.getJsonTags(), TagsInputDto.class);
+                circuitDto.setTags(tagsInput.getTags());
+            }
         }
 
         return circuitDto;
@@ -626,19 +631,6 @@ public class CircuitOperator {
     }
 
 
-    public TalkMessageDto publishChatToWTFRoom(UUID organizationId, UUID fromMemberId, String circuitName, String chatMessage) {
-
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
-
-        validateCircuitExists(circuitName, learningCircuitEntity);
-        validateCircuitIsActive(circuitName, learningCircuitEntity);
-
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
-        UUID messageId = UUID.randomUUID();
-
-        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getWtfRoomId(), chatMessage);
-    }
 
     private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity) {
 
@@ -672,25 +664,6 @@ public class CircuitOperator {
     private void updateMemberStatusWithTouch(UUID roomId, UUID memberId) {
         //TODO can do this stuff later
         //activeStatusService.touchActivity(memberId);
-    }
-
-    public TalkMessageDto publishChatToRetroFeed(UUID organizationId, UUID fromMemberId, String circuitName, String chatMessage) {
-
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
-
-        validateCircuitExists(circuitName, learningCircuitEntity);
-        validateCircuitIsActive(circuitName, learningCircuitEntity);
-
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
-        UUID messageId = UUID.randomUUID();
-
-        if (learningCircuitEntity.getRetroRoomId() != null) {
-
-            return sendRoomMessage(messageId, now, nanoTime, fromMemberId, learningCircuitEntity.getRetroRoomId(), chatMessage);
-
-        }
-        return null;
     }
 
     private TalkMessageDto sendCircuitStatusMessage(UUID circuitId, String circuitName, UUID circuitOwnerId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
@@ -849,6 +822,32 @@ public class CircuitOperator {
                 sendMemberStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_INACTIVE);
             }
         }
+    }
+
+    public LearningCircuitDto saveDescriptionForLearningCircuit(UUID organizationId, UUID ownerId, String circuitName, DescriptionInputDto descriptionInputDto) {
+
+        LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
+
+        validateCircuitExists(circuitName, circuitEntity);
+
+        circuitEntity.setDescription(descriptionInputDto.getDescription());
+
+        learningCircuitRepository.save(circuitEntity);
+
+        return toDto(circuitEntity);
+    }
+
+    public LearningCircuitDto saveTagsForLearningCircuit(UUID organizationId, UUID ownerId, String circuitName, TagsInputDto tagsInputDto) {
+
+        LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
+
+        validateCircuitExists(circuitName, circuitEntity);
+
+        circuitEntity.setJsonTags(JSONTransformer.toJson(tagsInputDto));
+
+        learningCircuitRepository.save(circuitEntity);
+
+        return toDto(circuitEntity);
     }
 
     public TalkMessageDto publishSnippetToActiveCircuit(UUID organizationId, UUID memberId, NewSnippetEventDto newSnippetEventDto) {

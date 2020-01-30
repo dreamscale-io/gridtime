@@ -31,6 +31,9 @@ public class LearningCircuitEntity {
     private UUID moderatorId;
 
     private String circuitName;
+    private String description;
+
+    private String jsonTags;
 
     private UUID wtfRoomId;
     private UUID retroRoomId;

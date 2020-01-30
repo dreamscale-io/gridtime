@@ -14,3 +14,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/create_view_circuit_talk_room.sql
+
+  - include:
+        file: db/v005/alter_table_learning_circuit_add_description_and_tags.sql
