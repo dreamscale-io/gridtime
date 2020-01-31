@@ -20,3 +20,15 @@ databaseChangeLog:
 
   - include:
         file: db/v005/alter_table_talk_room_remove_circuit_id.sql
+
+  - include:
+        file: db/v005/alter_active_work_status_rename_active_circle_id.sql
+
+  - include:
+        file: db/v005/create_table_team_circuit_room.sql
+
+  - include:
+        file: db/v005/rename_view_circuit_talk_room_to_learning_talk_room.sql
+
+  - include:
+        file: db/v005/alter_talk_room_add_moderator_id.sql

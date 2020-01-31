@@ -4,7 +4,6 @@ import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.core.domain.active.*;
-import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
@@ -42,13 +41,10 @@ public class RecentActivityService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private ActiveWorkStatusRepository activeWorkStatusRepository;
+    private ActiveStatusService activeStatusService;
 
     @Autowired
     private JiraService jiraService;
-
-    @Autowired
-    private FlowActivityRepository flowActivityRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -94,20 +90,8 @@ public class RecentActivityService {
             recentTaskRepository.save(recentTask);
         }
 
-        ActiveWorkStatusEntity workStatus = activeWorkStatusRepository.findByMemberId(activeIntention.getMemberId());
+        activeStatusService.pushMemberWorkStatus(activeIntention);
 
-        if (workStatus == null) {
-            workStatus = new ActiveWorkStatusEntity();
-            workStatus.setId(UUID.randomUUID());
-            workStatus.setMemberId(activeIntention.getMemberId());
-            workStatus.setOrganizationId(activeIntention.getOrganizationId());
-        }
-
-        workStatus.setActiveTaskId(activeIntention.getTaskId());
-        workStatus.setLastUpdate(LocalDateTime.now());
-        workStatus.setWorkingOn(activeIntention.getDescription());
-
-        activeWorkStatusRepository.save(workStatus);
     }
 
 

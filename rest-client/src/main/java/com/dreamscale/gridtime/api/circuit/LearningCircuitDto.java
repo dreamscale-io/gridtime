@@ -26,16 +26,25 @@ public class LearningCircuitDto {
     String retroTalkRoomName;
     UUID retroTalkRoomId;
 
-    UUID ownerId;
-    UUID moderatorId;
+    private UUID ownerId;
+    private String ownerName;
+
+    private UUID moderatorId;
+    private String moderatorName;
 
     LocalDateTime openTime;
+    String openTimeStr;
+
     LocalDateTime closeTime;
+    String closeTimeStr;
 
     String circuitStatus;
 
     LocalDateTime lastOnHoldTime;
+    String lastOnHoldTimeStr;
+
     LocalDateTime lastResumeTime;
+    String lastResumeTimeStr;
 
     Long secondsBeforeOnHold;
 

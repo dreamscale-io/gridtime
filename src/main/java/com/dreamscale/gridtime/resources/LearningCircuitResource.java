@@ -18,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping(path = ResourcePaths.CIRCUIT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
-public class CircuitResource {
+public class LearningCircuitResource {
 
     @Autowired
     OrganizationService organizationService;

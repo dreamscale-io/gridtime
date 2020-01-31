@@ -30,9 +30,6 @@ public class FlowService {
     @Autowired
     FlowEventRepository flowEventRepository;
 
-    @Autowired
-    RecentActivityService recentActivityService;
-
     //okay, next thing I need to do, is wire in a component resolve service, that will get used on batch processing
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
@@ -66,15 +63,6 @@ public class FlowService {
             saveExternalActivity(memberId, timeAdjustment, (NewExternalActivityDto) activity);
         }
 
-    }
-
-    //what is the most recent intention of the user that this batch corresponds to, the entire batch
-    //will be processed with a single project context, based on whatever the last intention is
-    //in general, devs shouldn't be switching between projects, but I will probably need to make this more robust
-    //at some point, and somehow guess at the project from the file activity or something
-
-    private UUID lookupProjectIdOfMostRecentIntention(OrganizationMemberEntity memberEntity) {
-        return recentActivityService.lookupProjectIdOfMostRecentActivity(memberEntity);
     }
 
     private List<Activity> sortAllItemsByTime(List<Activity> allBatchActivity) {

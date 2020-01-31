@@ -142,20 +142,20 @@ class OrganizationResourceSpec extends Specification {
         OrganizationDto org = createOrganizationWithClient()
 
         when:
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
 
         then:
         assert team != null
         assert team.id != null
-        assert team.name == "Team Unicorn"
+        assert team.name == "unicorn"
     }
 
     def "should get teams within the org"() {
         given:
         OrganizationDto org = createOrganizationWithClient()
 
-        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
-        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Lightning"))
+        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
+        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("lightning"))
 
         when:
         List<TeamDto> teams = organizationClient.getTeams(org.id.toString())
@@ -174,7 +174,7 @@ class OrganizationResourceSpec extends Specification {
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
 
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
 
@@ -201,7 +201,7 @@ class OrganizationResourceSpec extends Specification {
         OrganizationDto org = createOrganizationWithClient()
 
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId])
 
@@ -230,9 +230,9 @@ class OrganizationResourceSpec extends Specification {
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
 
-        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team 1"))
-        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team 2"))
-        TeamDto teamOther = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Other"))
+        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team1"))
+        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team2"))
+        TeamDto teamOther = organizationClient.createTeam(org.id.toString(), new TeamInputDto("other"))
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
 

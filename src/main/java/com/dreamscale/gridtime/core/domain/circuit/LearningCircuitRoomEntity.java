@@ -9,13 +9,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "circuit_talk_room_view")
+@Entity(name = "learning_circuit_room_view")
 @Data
 @EqualsAndHashCode(of = "roomId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircuitTalkRoomEntity {
+public class LearningCircuitRoomEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -32,6 +32,8 @@ public class CircuitTalkRoomEntity {
     private String circuitName;
 
     private UUID circuitOwnerId;
+
+    private UUID circuitModeratorId;
 
     @Enumerated(EnumType.STRING)
     private CircuitStatus circuitStatus;

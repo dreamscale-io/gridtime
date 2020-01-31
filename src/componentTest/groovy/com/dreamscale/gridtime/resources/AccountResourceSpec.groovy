@@ -126,6 +126,12 @@ class AccountResourceSpec extends Specification {
     }
 
     def "should logout"() {
+        given:
+
+        masterAccountRepository.save(testUser)
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+
         when:
         SimpleStatusDto statusDto = accountClient.logout()
 
@@ -136,6 +142,11 @@ class AccountResourceSpec extends Specification {
 
     def "should update heartbeat"() {
         given:
+        masterAccountRepository.save(testUser)
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+
+
         HeartbeatDto heartbeatDto = new HeartbeatDto()
         accountClient.login()
 

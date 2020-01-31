@@ -127,4 +127,5 @@ public class ResourcePaths {
     public static final String TAGS_PATH = "/tags";
 
 
+    public static final String HOME_PATH = "/home";
 }

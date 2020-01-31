@@ -28,6 +28,9 @@ public class TalkRoomEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID ownerId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID moderatorId;
+
     @Enumerated(EnumType.STRING)
     private RoomType roomType;
 }

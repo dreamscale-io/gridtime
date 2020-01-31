@@ -54,6 +54,13 @@ public class MemberStatusService {
         return toDtoWithDetails(memberStatusEntity);
     }
 
+
+    public List<MemberStatusEntity> getTeamMemberStatuses(UUID teamId) {
+
+        return memberStatusRepository.findByTeamId(teamId);
+
+    }
+
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId) {
 
         List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);

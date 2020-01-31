@@ -36,8 +36,8 @@ public class ActiveWorkStatusEntity {
     private String workingOn;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "active_circle_id")
-    private UUID activeCircleId;
+    @Column(name = "active_circuit_id")
+    private UUID activeCircuitId;
 
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;

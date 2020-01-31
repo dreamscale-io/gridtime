@@ -24,8 +24,6 @@ public class TeamService {
     @Autowired
     private OrganizationService organizationService;
 
-
-
     @Autowired
     private SpiritService xpService;
 
@@ -72,12 +70,15 @@ public class TeamService {
         TeamEntity teamEntity = new TeamEntity();
         teamEntity.setId(UUID.randomUUID());
         teamEntity.setOrganizationId(orgEntity.getId());
-        teamEntity.setName(teamName);
+        teamEntity.setName(standardizeTeamName(teamName));
         teamRepository.save(teamEntity);
 
         return teamOutputMapper.toApi(teamEntity);
     }
 
+    private String standardizeTeamName(String teamName) {
+        return teamName.replace(" ", "_").toLowerCase();
+    }
 
     public TeamDto getTeamByName(UUID organizationId, String teamName) {
 

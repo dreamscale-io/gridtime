@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.api.account.HeartbeatDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
+import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -26,16 +26,19 @@ public class AccountService implements MasterAccountIdResolver {
     private MasterAccountRepository masterAccountRepository;
 
     @Autowired
-    private OrganizationMemberRepository organizationMemberRepository;
-
-    @Autowired
-    private TeamMemberRepository teamMemberRepository;
-
-    @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
 
     @Autowired
     private CircuitOperator circuitOperator;
+
+    @Autowired
+    private ActiveStatusService activeStatusService;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
+    private TeamService teamService;
 
 
     public AccountActivationDto activate(String activationCode) {
@@ -76,28 +79,22 @@ public class AccountService implements MasterAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
-
         ConnectionStatusDto statusDto = new ConnectionStatusDto();
         statusDto.setConnectionId(accountStatusEntity.getConnectionId());
         statusDto.setStatus(Status.VALID);
         statusDto.setMessage("Successfully logged in");
 
-        List<OrganizationMemberEntity> orgMemberEntities = organizationMemberRepository.findByMasterAccountId(masterAccountId);
+        OrganizationMemberEntity membership = organizationService.getDefaultMembership(masterAccountId);
+        statusDto.setMemberId(membership.getId());
+        statusDto.setOrganizationId(membership.getOrganizationId());
 
-        if (orgMemberEntities.size() > 0) {
-            OrganizationMemberEntity memberEntity = orgMemberEntities.get(0);
-            statusDto.setMemberId(memberEntity.getId());
-            statusDto.setOrganizationId(memberEntity.getOrganizationId());
+        TeamDto team = teamService.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
 
-            List<TeamMemberEntity> teamMemberEntries = teamMemberRepository.findByMemberId(memberEntity.getId());
-
-            if (teamMemberEntries.size() > 0) {
-                statusDto.setTeamId(teamMemberEntries.get(0).getTeamId());
-            }
+        if (team != null) {
+            statusDto.setTeamId(team.getId());
         }
 
-
-
+        activeStatusService.updateOnlineStatus(statusDto.getOrganizationId(), statusDto.getMemberId(), accountStatusEntity.getOnlineStatus());
 
         return statusDto;
     }
@@ -117,7 +114,16 @@ public class AccountService implements MasterAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
+        updateOnlineStatus(masterAccountId, OnlineStatus.Offline);
+
         return new SimpleStatusDto(Status.VALID, "Successfully logged out");
+    }
+
+    private void updateOnlineStatus(UUID masterAccountId, OnlineStatus onlineStatus) {
+        OrganizationMemberEntity membership = organizationService.getDefaultMembership(masterAccountId);
+
+        activeStatusService.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
+
     }
 
     public SimpleStatusDto heartbeat(UUID masterAccountId, HeartbeatDto heartbeat) {
@@ -170,11 +176,6 @@ public class AccountService implements MasterAccountIdResolver {
     public LocalDateTime getActivationDate(UUID masterAccountId) {
         MasterAccountEntity masterAccountEntity = masterAccountRepository.findById(masterAccountId);
         return masterAccountEntity.getActivationDate();
-    }
-
-    public LocalDateTime getActivationDateForMember(UUID memberId) {
-        OrganizationMemberEntity member = organizationMemberRepository.findById(memberId);
-        return getActivationDate(member.getMasterAccountId());
     }
 
     @Override

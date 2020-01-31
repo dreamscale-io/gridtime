@@ -55,7 +55,7 @@ public class CircuitOperator {
     private TalkRoomMessageRepository talkRoomMessageRepository;
 
     @Autowired
-    private CircuitTalkRoomRepository circuitTalkRoomRepository;
+    private LearningCircuitRoomRepository learningCircuitRoomRepository;
 
     @Autowired
     ActiveStatusService activeStatusService;
@@ -83,8 +83,8 @@ public class CircuitOperator {
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
     private DtoEntityMapper<CircuitMemberStatusDto, CircuitMemberStatusEntity> circuitMemberDtoMapper;
 
-    private static final String DEFAULT_WTF_MESSAGE = "Started WTF_ROOM";
-    private static final String RESUMED_WTF_MESSAGE = "Resumed WTF_ROOM";
+    private static final String DEFAULT_WTF_MESSAGE = "Started WTF";
+    private static final String RESUMED_WTF_MESSAGE = "Resumed WTF";
 
 
     @PostConstruct
@@ -178,7 +178,7 @@ public class CircuitOperator {
         talkRouter.joinRoom(organizationId, memberId, wtfRoomEntity.getId());
         //then update active status
 
-        activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), DEFAULT_WTF_MESSAGE);
+        activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId());
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_OPEN);
 
@@ -496,6 +496,8 @@ public class CircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
+        activeStatusService.resolveWTFWithYay(organizationId, ownerId);
+
         //retro room is still open
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
@@ -560,7 +562,7 @@ public class CircuitOperator {
             talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
-        activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), RESUMED_WTF_MESSAGE);
+        activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -812,9 +814,9 @@ public class CircuitOperator {
             LocalDateTime now = timeService.now();
             Long nanoTime = timeService.nanoTime();
 
-            List<CircuitTalkRoomEntity> circuitRooms = circuitTalkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
+            List<LearningCircuitRoomEntity> circuitRooms = learningCircuitRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
 
-            for (CircuitTalkRoomEntity circuitRoom : circuitRooms) {
+            for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
                 updateRoomMemberToInactive(memberConnection.getOrganizationId(), memberConnection.getMemberId(), timeService.now(), circuitRoom.getRoomId());
 
