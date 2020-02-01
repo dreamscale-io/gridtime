@@ -9,6 +9,8 @@ create table team_circuit (
  id uuid primary key not null,
  organization_id uuid,
  team_id uuid unique,
- status_room_id uuid
-};
+ team_room_id uuid,
+ owner_id uuid,
+ moderator_id uuid
+);
 

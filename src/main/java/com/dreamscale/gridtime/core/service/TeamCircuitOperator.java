@@ -43,6 +43,9 @@ public class TeamCircuitOperator {
     private MemberStatusService memberStatusService;
 
     @Autowired
+    private MemberDetailsService memberDetailsService;
+
+    @Autowired
     private TimeService timeService;
 
     private static final String TEAM_ROOM_PREFIX = "team-";
@@ -64,9 +67,22 @@ public class TeamCircuitOperator {
         teamCircuitDto.setTeamMembers(members);
 
         teamCircuitDto.setDefaultRoom(createDefaultRoom(teamCircuitEntity.getTeamRoomId(), teamDto.getName()));
+        teamCircuitDto.setOwnerId(teamCircuitEntity.getOwnerId());
+        teamCircuitDto.setOwnerName(memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getOwnerId()));
+
+        teamCircuitDto.setModeratedId(teamCircuitEntity.getModeratorId());
+        teamCircuitDto.setModeratorName(memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getModeratorId()));
+
+        teamCircuitDto.setTeamRooms(lookupTeamRooms(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getTeamId()));
 
         return teamCircuitDto;
     }
+
+    private List<TeamCircuitRoomDto> lookupTeamRooms(UUID organizationId, UUID teamId) {
+        return new ArrayList<>();
+    }
+
+
 
     private TeamCircuitRoomDto createDefaultRoom(UUID roomId, String teamName) {
 

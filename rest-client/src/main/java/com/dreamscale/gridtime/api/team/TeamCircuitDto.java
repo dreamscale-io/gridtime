@@ -23,10 +23,10 @@ public class TeamCircuitDto {
     TeamCircuitRoomDto defaultRoom;
 
     private UUID ownerId;
-    private UUID ownerName;
+    private String ownerName;
 
     private UUID moderatedId;
-    private UUID moderatorName;
+    private String moderatorName;
 
     List<MemberWorkStatusDto> teamMembers;
 

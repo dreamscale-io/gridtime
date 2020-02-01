@@ -17,4 +17,9 @@ public class TeamCircuitRoomDto {
     private String talkRoomName;
     private UUID talkRoomId;
 
+    private UUID ownerId;
+    private String ownerName;
+
+    private UUID moderatorId;
+    private String moderatorName;
 }

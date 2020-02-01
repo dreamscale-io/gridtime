@@ -32,3 +32,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/alter_talk_room_add_moderator_id.sql
+
+  - include:
+        file: db/v005/create_table_team_circuit.sql

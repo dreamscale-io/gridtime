@@ -38,7 +38,7 @@ public class SpiritService {
     SpiritXPRepository spiritXPRepository;
 
     @Autowired
-    MemberDetailsRepository memberDetailsRepository;
+    MemberDetailsService memberDetailsService;
 
     @Autowired
     TimeService timeService;
@@ -87,7 +87,7 @@ public class SpiritService {
             SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
             spiritLinkDto.setSpiritId(invokingTorchie);
             spiritLinkDto.setFriendSpiritId(friendTorchie);
-            spiritLinkDto.setName(getMemberName(friendTorchie));
+            spiritLinkDto.setName(memberDetailsService.lookupMemberName(organizationId, friendTorchie));
             spiritNetwork.addSpiritLink(spiritLinkDto);
         }
 
@@ -107,9 +107,9 @@ public class SpiritService {
     }
 
 
-    public ActiveLinksNetworkDto getActiveLinksNetwork(UUID organizationId, UUID torchieId) {
+    public ActiveLinksNetworkDto getActiveLinksNetwork(UUID organizationId, UUID memberId) {
 
-        List<ActiveSpiritLinkEntity> torchieLinks = activeSpiritLinkRepository.findMySpiritNetwork(torchieId);
+        List<ActiveSpiritLinkEntity> torchieLinks = activeSpiritLinkRepository.findMySpiritNetwork(memberId);
 
         ActiveLinksNetworkDto activeLinksNetworkDto = new ActiveLinksNetworkDto();
 
@@ -117,11 +117,11 @@ public class SpiritService {
             for (ActiveSpiritLinkEntity torchieLink : torchieLinks) {
                 activeLinksNetworkDto.setNetworkId(torchieLink.getNetworkId());
 
-                if (!torchieLink.getTorchieId().equals(torchieId)) {
+                if (!torchieLink.getTorchieId().equals(memberId)) {
                     SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
-                    spiritLinkDto.setSpiritId(torchieId);
+                    spiritLinkDto.setSpiritId(memberId);
                     spiritLinkDto.setFriendSpiritId(torchieLink.getTorchieId());
-                    spiritLinkDto.setName(getMemberName(torchieLink.getTorchieId()));
+                    spiritLinkDto.setName(memberDetailsService.lookupMemberName(organizationId, torchieLink.getTorchieId()));
                     activeLinksNetworkDto.addSpiritLink(spiritLinkDto);
                 }
             }
@@ -129,20 +129,12 @@ public class SpiritService {
             activeLinksNetworkDto.setNetworkId(UUID.randomUUID());
         }
 
-        activeLinksNetworkDto.setMyId(torchieId);
-        activeLinksNetworkDto.setMyName(getMemberName(torchieId));
+        activeLinksNetworkDto.setMyId(memberId);
+        activeLinksNetworkDto.setMyName(memberDetailsService.lookupMemberName(organizationId, memberId));
 
         return activeLinksNetworkDto;
     }
 
-    private String getMemberName(UUID torchieId) {
-        String memberName = null;
-        MemberDetailsEntity memberDetailsEntity = memberDetailsRepository.findByMemberId(torchieId);
-        if (memberDetailsEntity != null) {
-            memberName = memberDetailsEntity.getFullName();
-        }
-        return memberName;
-    }
 
     public void unlinkMe(UUID organizationId, UUID spiritId) {
         ActiveLinksNetworkDto spiritNetwork = this.getActiveLinksNetwork(organizationId, spiritId);

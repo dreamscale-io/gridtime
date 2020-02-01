@@ -65,10 +65,6 @@ public class CircuitOperator {
 
     @Autowired
     private GridTalkRouter talkRouter;
-
-    @Autowired
-    private MemberDetailsRepository memberDetailsRepository;
-
     @Autowired
     private CircuitMemberStatusRepository circuitMemberStatusRepository;
 
@@ -649,18 +645,6 @@ public class CircuitOperator {
         return messageDto;
     }
 
-    private CircuitMemberDto lookupMemberDto(UUID memberId) {
-        MemberDetailsEntity memberNameInfo = memberDetailsRepository.findByMemberId(memberId);
-
-        CircuitMemberDto memberDto = new CircuitMemberDto();
-        memberDto.setMemberId(memberId);
-        if (memberNameInfo != null) {
-            memberDto.setFullName(memberNameInfo.getFullName());
-            memberDto.setShortName(memberNameInfo.getShortName());
-        }
-
-        return memberDto;
-    }
 
     private void updateMemberStatusWithTouch(UUID roomId, UUID memberId) {
         //TODO can do this stuff later
