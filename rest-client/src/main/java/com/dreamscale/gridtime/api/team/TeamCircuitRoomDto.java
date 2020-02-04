@@ -22,4 +22,7 @@ public class TeamCircuitRoomDto {
 
     private UUID moderatorId;
     private String moderatorName;
+
+    private String description;
+    private String jsonTags;
 }

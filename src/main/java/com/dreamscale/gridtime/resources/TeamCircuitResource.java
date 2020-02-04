@@ -42,7 +42,6 @@ public class TeamCircuitResource {
         return teamCircuitOperator.getMyPrimaryTeamCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
-
     /**
      * Gets the specified team circuit for the active user, and all member statuses
      *

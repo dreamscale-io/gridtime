@@ -35,3 +35,9 @@ databaseChangeLog:
 
   - include:
         file: db/v005/create_table_team_circuit.sql
+
+  - include:
+        file: db/v005/refactor_tables_for_team_circuit.sql
+
+  - include:
+        file: db/v005/create_view_team_circuit_talk_room.sql

@@ -9,13 +9,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "team_circuit_room")
+@Entity(name = "team_circuit_talk_room_view")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamCircuitRoomEntity {
+public class TeamCircuitTalkRoomEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -28,15 +28,19 @@ public class TeamCircuitRoomEntity {
     private UUID teamId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID talkRoomId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID ownerId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID moderatorId;
 
-    private String localName;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID talkRoomId;
+
+    private String teamName;
+
+    private String circuitRoomName;
+
+    private String talkRoomName;
 
     private LocalDateTime openTime;
 
