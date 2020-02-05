@@ -30,8 +30,12 @@ public class TeamCircuitTalkRoomEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID ownerId;
 
+    private String ownerName;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID moderatorId;
+
+    private String moderatorName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID talkRoomId;

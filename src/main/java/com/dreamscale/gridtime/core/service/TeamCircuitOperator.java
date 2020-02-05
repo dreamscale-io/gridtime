@@ -30,13 +30,7 @@ public class TeamCircuitOperator {
     private TalkRoomMemberRepository talkRoomMemberRepository;
 
     @Autowired
-    private TeamRepository teamRepository;
-
-    @Autowired
     private TeamCircuitRoomRepository teamCircuitRoomRepository;
-
-    @Autowired
-    private TeamMemberRepository teamMemberRepository;
 
     @Autowired
     private TeamCircuitRepository teamCircuitRepository;
@@ -139,6 +133,12 @@ public class TeamCircuitOperator {
         }
     }
 
+    private void validateRoomExists(String roomName, TeamCircuitRoomEntity teamRoom) {
+        if (teamRoom == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ROOM, "Unable to find team room: " + roomName);
+        }
+    }
+
     public TeamCircuitRoomDto getTeamCircuitRoom(UUID organizationId, String teamName, String roomName) {
 
         TeamCircuitTalkRoomEntity teamRoom = teamCircuitTalkRoomRepository.findByOrganizationIdAndTeamNameAndCircuitRoomName(organizationId, teamName, roomName);
@@ -167,7 +167,33 @@ public class TeamCircuitOperator {
 
 
     public TeamCircuitRoomDto closeTeamCircuitRoom(UUID organizationId, String teamName, String roomName) {
-        return null;
+
+        TeamCircuitRoomEntity teamRoom = teamCircuitRoomRepository.findByOrganizationIdTeamNameAndLocalName(organizationId, teamName, roomName);
+
+        validateRoomExists(roomName, teamRoom);
+
+        teamRoom.setCloseTime(timeService.now());
+        teamRoom.setCircuitStatus(CircuitStatus.CLOSED);
+
+        teamCircuitRoomRepository.save(teamRoom);
+
+        TeamCircuitRoomDto teamCircuitRoomDto = new TeamCircuitRoomDto();
+
+        teamCircuitRoomDto.setCircuitRoomName(roomName);
+        teamCircuitRoomDto.setTalkRoomId(teamRoom.getTalkRoomId());
+        teamCircuitRoomDto.setTalkRoomName(deriveTeamRoomNameForTalk(teamName, roomName));
+        teamCircuitRoomDto.setOwnerId(teamRoom.getOwnerId());
+        teamCircuitRoomDto.setModeratorId(teamRoom.getModeratorId());
+
+        String ownerName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getOwnerId());
+        String moderatorName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getModeratorId());
+
+        teamCircuitRoomDto.setOwnerName(ownerName);
+        teamCircuitRoomDto.setModeratorName(moderatorName);
+        teamCircuitRoomDto.setDescription(teamRoom.getDescription());
+        teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
+
+        return teamCircuitRoomDto;
     }
 
     public TeamCircuitDto getTeamCircuitByOrganizationAndName(UUID organizationId, String teamName) {
@@ -176,8 +202,29 @@ public class TeamCircuitOperator {
     }
 
     private List<TeamCircuitRoomDto> lookupTeamRooms(UUID organizationId, UUID teamId) {
-        //TODO find all rooms that aren't closed
-        return new ArrayList<>();
+
+        List<TeamCircuitTalkRoomEntity> teamRooms = teamCircuitTalkRoomRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
+
+        List<TeamCircuitRoomDto> teamCircuitRoomDtos = new ArrayList<>();
+
+        for (TeamCircuitTalkRoomEntity room: teamRooms) {
+            TeamCircuitRoomDto teamCircuitRoomDto = new TeamCircuitRoomDto();
+
+            teamCircuitRoomDto.setCircuitRoomName(room.getCircuitRoomName());
+            teamCircuitRoomDto.setTalkRoomId(room.getTalkRoomId());
+            teamCircuitRoomDto.setTalkRoomName(room.getTalkRoomName());
+            teamCircuitRoomDto.setOwnerId(room.getOwnerId());
+            teamCircuitRoomDto.setModeratorId(room.getModeratorId());
+
+            teamCircuitRoomDto.setOwnerName(room.getOwnerName());
+            teamCircuitRoomDto.setModeratorName(room.getModeratorName());
+            teamCircuitRoomDto.setDescription(room.getDescription());
+            teamCircuitRoomDto.setJsonTags(room.getJsonTags());
+
+            teamCircuitRoomDtos.add(teamCircuitRoomDto);
+        }
+
+        return teamCircuitRoomDtos;
     }
 
     private TeamCircuitEntity findOrCreateTeamCircuit(TeamDto team, List<MemberWorkStatusDto> teamMembers) {

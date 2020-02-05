@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.domain.circuit;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
@@ -12,7 +13,10 @@ public interface TeamCircuitRoomRepository extends CrudRepository<TeamCircuitRoo
     @Query(nativeQuery = true, value = "select tcr.* from team_circuit_room tcr, team t " +
             "where tcr.organization_id = (:organizationId) " +
             "and tcr.team_id = t.id "+
-            "and tcr.local_name = (:localName) "+
+            "and tcr.local_name = (:roomName) "+
             "and t.name = (:teamName) ")
-    TeamCircuitRoomEntity findByOrganizationIdTeamNameAndLocalName(UUID organizationId, String teamName, String roomName);
+    TeamCircuitRoomEntity findByOrganizationIdTeamNameAndLocalName(
+            @Param("organizationId") UUID organizationId,
+            @Param("teamName")  String teamName,
+            @Param("roomName") String roomName);
 }
