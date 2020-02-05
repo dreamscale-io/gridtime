@@ -79,7 +79,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    CircuitClient circuitClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, CircuitClient.class); }
+    LearningCircuitClient circuitClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, LearningCircuitClient.class); }
+
+    @Bean
+    TeamCircuitClient teamCircuitClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamCircuitClient.class); }
+
 
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);

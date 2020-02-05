@@ -12,7 +12,7 @@ import java.util.List;
         "Content-Type: application/json",
         "Accept: application/json",
 })
-public interface CircuitClient {
+public interface LearningCircuitClient {
 
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)

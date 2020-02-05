@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.core.service;
 
+import com.dreamscale.gridtime.api.circuit.DescriptionInputDto;
+import com.dreamscale.gridtime.api.circuit.TagsInputDto;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
@@ -8,6 +10,7 @@ import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,6 +180,10 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomRepository.save(teamRoom);
 
+        return createTeamCircuitRoomDto(teamName, roomName, teamRoom);
+    }
+
+    private TeamCircuitRoomDto createTeamCircuitRoomDto(String teamName, String roomName, TeamCircuitRoomEntity teamRoom) {
         TeamCircuitRoomDto teamCircuitRoomDto = new TeamCircuitRoomDto();
 
         teamCircuitRoomDto.setCircuitRoomName(roomName);
@@ -192,13 +199,37 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setModeratorName(moderatorName);
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
-
         return teamCircuitRoomDto;
     }
 
     public TeamCircuitDto getTeamCircuitByOrganizationAndName(UUID organizationId, String teamName) {
         //TODO retrieve team circuit for a team other than yours...
         return null;
+    }
+
+
+    public TeamCircuitRoomDto saveDescriptionForTeamCircuitRoom(UUID organizationId, String teamName, String roomName, DescriptionInputDto descriptionInputDto) {
+
+        TeamCircuitRoomEntity teamRoom = teamCircuitRoomRepository.findByOrganizationIdTeamNameAndLocalName(organizationId, teamName, roomName);
+
+        validateRoomExists(roomName, teamRoom);
+
+        teamRoom.setDescription(descriptionInputDto.getDescription());
+        teamCircuitRoomRepository.save(teamRoom);
+
+        return createTeamCircuitRoomDto(teamName, roomName, teamRoom);
+    }
+
+    public TeamCircuitRoomDto saveTagsForTeamCircuitRoom(UUID organizationId, String teamName, String roomName, TagsInputDto tagsInputDto) {
+        TeamCircuitRoomEntity teamRoom = teamCircuitRoomRepository.findByOrganizationIdTeamNameAndLocalName(organizationId, teamName, roomName);
+
+        validateRoomExists(roomName, teamRoom);
+
+        teamRoom.setJsonTags(JSONTransformer.toJson(tagsInputDto));
+        teamCircuitRoomRepository.save(teamRoom);
+
+        return createTeamCircuitRoomDto(teamName, roomName, teamRoom);
+
     }
 
     private List<TeamCircuitRoomDto> lookupTeamRooms(UUID organizationId, UUID teamId) {
@@ -346,8 +377,6 @@ public class TeamCircuitOperator {
     private String deriveDefaultTeamRoom(String teamName) {
         return TEAM_ROOM_PREFIX + teamName + "-"+TEAM_ROOM_DEFAULT_NAME;
     }
-
-
 
 
 }

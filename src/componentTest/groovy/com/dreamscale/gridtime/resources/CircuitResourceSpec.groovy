@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
-import com.dreamscale.gridtime.client.CircuitClient
+import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.core.domain.circuit.CircuitStatus
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
@@ -26,7 +26,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class CircuitResourceSpec extends Specification {
 
     @Autowired
-    CircuitClient circuitClient
+    LearningCircuitClient circuitClient
 
     @Autowired
     MasterAccountEntity loggedInUser

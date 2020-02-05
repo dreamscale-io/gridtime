@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-import com.dreamscale.gridtime.client.CircuitClient
+import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.TalkToClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
@@ -23,7 +23,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class TalkToResourceSpec extends Specification {
 
     @Autowired
-    CircuitClient circuitClient
+    LearningCircuitClient circuitClient
 
     @Autowired
     TalkToClient talkClient

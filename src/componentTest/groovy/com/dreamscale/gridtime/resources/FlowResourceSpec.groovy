@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto
-import com.dreamscale.gridtime.client.CircuitClient
+import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.FlowClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
@@ -31,7 +31,7 @@ class FlowResourceSpec extends Specification {
     FlowClient flowClient
 
     @Autowired
-    CircuitClient circuitClient
+    LearningCircuitClient circuitClient
 
     @Autowired
     FlowClient unauthenticatedFlowClient

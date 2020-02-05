@@ -14,7 +14,7 @@ import com.dreamscale.gridtime.api.organization.OrganizationInputDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
-import com.dreamscale.gridtime.client.CircuitClient
+import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
@@ -32,7 +32,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class AccountResourceSpec extends Specification {
 
     @Autowired
-    CircuitClient circuitClient
+    LearningCircuitClient circuitClient
 
     @Autowired
     AccountClient accountClient

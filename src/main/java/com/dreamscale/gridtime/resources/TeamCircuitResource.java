@@ -1,6 +1,8 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.circuit.DescriptionInputDto;
+import com.dreamscale.gridtime.api.circuit.TagsInputDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
@@ -80,7 +82,7 @@ public class TeamCircuitResource {
     /**
      * Returns the details of the specified team circuit talk room
      *
-     * @return CircuitRoomDto
+     * @return TeamCircuitRoomDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
@@ -94,9 +96,9 @@ public class TeamCircuitResource {
     }
 
     /**
-     * Creates a new talk room, under the scope of the current team
+     * Closes an existing team circuit room so it no longer shows up on the Team's talk rooms list
      *
-     * @return CircuitRoomDto
+     * @return TeamCircuitRoomDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CLOSE_PATH)
@@ -109,5 +111,35 @@ public class TeamCircuitResource {
         return teamCircuitOperator.closeTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
 
+    /**
+     * Saves a new description for the team circuit room
+     *
+     * @return TeamCircuitRoomDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
+    public TeamCircuitRoomDto saveDescriptionForTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName, @RequestBody DescriptionInputDto descriptionInputDto ) {
+        RequestContext context = RequestContext.get();
+        log.info("saveDescriptionForTeamCircuitRoom, user={}", context.getMasterAccountId());
 
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return teamCircuitOperator.saveDescriptionForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, descriptionInputDto);
+    }
+
+    /**
+     * Saves a new description for the team circuit room
+     *
+     * @return TeamCircuitRoomDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.TAGS_PATH)
+    public TeamCircuitRoomDto saveTagsForTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName, @RequestBody TagsInputDto tagsInputDto ) {
+        RequestContext context = RequestContext.get();
+        log.info("saveTagsForTeamCircuitRoom, user={}", context.getMasterAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        return teamCircuitOperator.saveTagsForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, tagsInputDto);
+    }
 }
