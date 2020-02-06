@@ -56,6 +56,7 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuit != null
         assert circuit.circuitName != null
         assert circuit.circuitStatus != null
+        assert circuit.openTimeStr != null
 
     }
 
@@ -193,6 +194,22 @@ class LearningCircuitResourceSpec extends Specification {
         assert resumedCircuit.circuitStatus == CircuitStatus.ACTIVE.name()
     }
 
+    def 'should start a retro'() {
+        given:
+        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
+        loggedInUser.setId(member.getMasterAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+
+        when:
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+
+        then:
+
+        assert circuitWithRetroStarted.getRetroStartedTime() != null
+    }
 
     def 'join another persons chat room'() {
         given:

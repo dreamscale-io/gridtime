@@ -313,7 +313,12 @@ public class CircuitOperator {
 
         //update circuit with the new room
 
+        LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
+
+        learningCircuitEntity.setRetroStartedTime(now);
         learningCircuitEntity.setRetroRoomId(retroRoomEntity.getId());
+
         learningCircuitRepository.save(learningCircuitEntity);
 
         //then I need to join this new person in the room...
@@ -322,9 +327,6 @@ public class CircuitOperator {
 
         List<TalkRoomMemberEntity> wtfRoomMembers = talkRoomMemberRepository.findByRoomId(learningCircuitEntity.getWtfRoomId());
         List<TalkRoomMemberEntity> retroRoomMembers = new ArrayList<>();
-
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
 
         for (TalkRoomMemberEntity wtfRoomMember : wtfRoomMembers) {
             TalkRoomMemberEntity retroRoomMember = new TalkRoomMemberEntity();

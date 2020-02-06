@@ -26,3 +26,6 @@ add column owner_id uuid;
 alter table team_circuit_room
 add column moderator_id uuid;
 
+alter table learning_circuit
+add column retro_started_time timestamp ;
+

@@ -40,6 +40,7 @@ public class LearningCircuitEntity {
 
     private LocalDateTime openTime;
     private LocalDateTime closeTime;
+    private LocalDateTime retroStartedTime;
 
     @Enumerated(EnumType.STRING)
     private CircuitStatus circuitStatus;

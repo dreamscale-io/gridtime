@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.api.circuit;
 
+import com.dreamscale.gridtime.api.shared.TimeFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,9 @@ public class LearningCircuitDto {
     private UUID moderatorId;
     private String moderatorName;
 
+    LocalDateTime retroStartedTime;
+    String retroStartedTimeStr;
+
     LocalDateTime openTime;
     String openTimeStr;
 
@@ -48,4 +52,28 @@ public class LearningCircuitDto {
 
     Long secondsBeforeOnHold;
 
+    public void setRetroStartedTime(LocalDateTime retroStartedTime) {
+        this.retroStartedTime = retroStartedTime;
+        this.retroStartedTimeStr = TimeFormatter.format(retroStartedTime);
+    }
+
+    public void setOpenTime(LocalDateTime openTime) {
+        this.openTime = openTime;
+        this.openTimeStr = TimeFormatter.format(openTime);
+    }
+
+    public void setCloseTime(LocalDateTime closeTime) {
+        this.closeTime = closeTime;
+        this.closeTimeStr = TimeFormatter.format(closeTime);
+    }
+
+    public void setLastOnHoldTime(LocalDateTime lastOnHoldTime) {
+        this.lastOnHoldTime = lastOnHoldTime;
+        this.lastOnHoldTimeStr = TimeFormatter.format(lastOnHoldTime);
+    }
+
+    public void setLastResumeTime(LocalDateTime lastResumeTime) {
+        this.lastResumeTime = lastResumeTime;
+        this.lastResumeTimeStr = TimeFormatter.format(lastResumeTime);
+    }
 }
