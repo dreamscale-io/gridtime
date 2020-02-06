@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.domain.circuit;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,5 +18,5 @@ public interface TeamCircuitTalkRoomRepository extends CrudRepository<TeamCircui
             "and team_id = (:teamId) "+
             "and circuit_status = 'ACTIVE' "+
             "order by circuit_room_name ")
-    List<TeamCircuitTalkRoomEntity> findByOrganizationIdAndTeamId(UUID organizationId, UUID teamId);
+    List<TeamCircuitTalkRoomEntity> findByOrganizationIdAndTeamId(@Param("organizationId")UUID organizationId, @Param("teamId")UUID teamId);
 }

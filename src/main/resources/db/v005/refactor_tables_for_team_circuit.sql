@@ -8,9 +8,6 @@ drop column owner_id;
 alter table talk_room
 drop column moderator_id;
 
-alter table team_circuit
-drop column moderator_id;
-
 alter table team_circuit_room
 add column open_time timestamp;
 

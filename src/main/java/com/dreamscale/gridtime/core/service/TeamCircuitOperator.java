@@ -71,27 +71,33 @@ public class TeamCircuitOperator {
         teamCircuitDto.setTeamName(teamDto.getName());
         teamCircuitDto.setTeamMembers(members);
 
-        teamCircuitDto.setDefaultRoom(createDefaultRoom(teamCircuitEntity.getTeamRoomId(), teamDto.getName()));
         teamCircuitDto.setOwnerId(teamCircuitEntity.getOwnerId());
-        teamCircuitDto.setOwnerName(memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getOwnerId()));
-
         teamCircuitDto.setModeratedId(teamCircuitEntity.getModeratorId());
-        teamCircuitDto.setModeratorName(memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getModeratorId()));
+
+        String ownerName = memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getOwnerId());
+        String moderatorName = memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getModeratorId());
+
+        teamCircuitDto.setOwnerName(ownerName);
+        teamCircuitDto.setModeratorName(moderatorName);
+
+        TeamCircuitRoomDto defaultRoom = new TeamCircuitRoomDto();
+        defaultRoom.setTalkRoomId(teamCircuitEntity.getTeamRoomId());
+        defaultRoom.setCircuitRoomName(TEAM_ROOM_DEFAULT_NAME);
+        defaultRoom.setTalkRoomName(deriveDefaultTeamRoom(teamDto.getName()));
+        defaultRoom.setOwnerId(teamCircuitEntity.getOwnerId());
+        defaultRoom.setModeratorId(teamCircuitEntity.getModeratorId());
+        defaultRoom.setOwnerName(ownerName);
+        defaultRoom.setModeratorName(moderatorName);
+        defaultRoom.setCircuitStatus(CircuitStatus.ACTIVE.name());
+
+        teamCircuitDto.setDefaultRoom(defaultRoom);
 
         teamCircuitDto.setTeamRooms(lookupTeamRooms(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getTeamId()));
 
         return teamCircuitDto;
     }
 
-    private TeamCircuitRoomDto createDefaultRoom(UUID roomId, String teamName) {
 
-        TeamCircuitRoomDto teamCircuitRoomDto = new TeamCircuitRoomDto();
-        teamCircuitRoomDto.setTalkRoomId(roomId);
-        teamCircuitRoomDto.setCircuitRoomName(TEAM_ROOM_DEFAULT_NAME);
-        teamCircuitRoomDto.setTalkRoomName(deriveDefaultTeamRoom(teamName));
-
-        return teamCircuitRoomDto;
-    }
 
     public TeamCircuitRoomDto createTeamCircuitRoom(UUID organizationId, String teamName, String roomName) {
 
@@ -109,10 +115,12 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setOwnerId(circuitEntity.getOwnerId());
         teamCircuitRoomDto.setModeratorId(circuitEntity.getModeratorId());
 
-        String memberName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
+        String ownerName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
+        String moderatorName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
 
-        teamCircuitRoomDto.setOwnerName(memberName);
-        teamCircuitRoomDto.setModeratorName(memberName);
+        teamCircuitRoomDto.setOwnerName(ownerName);
+        teamCircuitRoomDto.setModeratorName(moderatorName);
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
 
         return teamCircuitRoomDto;
     }
@@ -164,6 +172,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
 
         return teamCircuitRoomDto;
     }
@@ -199,6 +208,7 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setModeratorName(moderatorName);
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
         return teamCircuitRoomDto;
     }
 
@@ -251,6 +261,7 @@ public class TeamCircuitOperator {
             teamCircuitRoomDto.setModeratorName(room.getModeratorName());
             teamCircuitRoomDto.setDescription(room.getDescription());
             teamCircuitRoomDto.setJsonTags(room.getJsonTags());
+            teamCircuitRoomDto.setCircuitStatus(room.getCircuitStatus().name());
 
             teamCircuitRoomDtos.add(teamCircuitRoomDto);
         }
@@ -272,6 +283,8 @@ public class TeamCircuitOperator {
     @Transactional
     private TeamCircuitRoomEntity createTeamRoom(TeamCircuitEntity teamCircuit, String teamName, String roomName) {
 
+        log.info("Team ID : "+teamCircuit.getTeamId());
+
         TeamCircuitRoomEntity existingRoom = teamCircuitRoomRepository.findByTeamIdAndLocalName(teamCircuit.getTeamId(), roomName);
         validateTeamRoomDoesntAlreadyExist(existingRoom);
 
@@ -291,6 +304,8 @@ public class TeamCircuitOperator {
         teamRoom.setOrganizationId(teamCircuit.getOrganizationId());
         teamRoom.setTeamId(teamCircuit.getTeamId());
         teamRoom.setTalkRoomId(talkRoomEntity.getId());
+        teamRoom.setOwnerId(teamCircuit.getOwnerId());
+        teamRoom.setModeratorId(teamCircuit.getModeratorId());
         teamRoom.setCircuitStatus(CircuitStatus.ACTIVE);
         teamRoom.setOpenTime(now);
 

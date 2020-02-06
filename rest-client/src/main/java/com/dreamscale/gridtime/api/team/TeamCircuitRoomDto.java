@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.api.team;
 
+import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,7 @@ public class TeamCircuitRoomDto {
 
     private String description;
     private String jsonTags;
+
+    private String circuitStatus;
+
 }

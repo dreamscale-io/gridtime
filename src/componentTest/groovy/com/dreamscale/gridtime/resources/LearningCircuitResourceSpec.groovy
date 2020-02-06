@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class CircuitResourceSpec extends Specification {
+class LearningCircuitResourceSpec extends Specification {
 
     @Autowired
     LearningCircuitClient circuitClient

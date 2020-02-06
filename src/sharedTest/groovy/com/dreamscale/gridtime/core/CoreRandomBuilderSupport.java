@@ -47,6 +47,20 @@ public class CoreRandomBuilderSupport {
     @Autowired
     private SpiritXPRepository spiritXPRepository;
 
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private TeamMemberRepository teamMemberRepository;
+
+    public RandomTeamEntityBuilder teamEntity() {
+        return new RandomTeamEntityBuilder(teamRepository);
+    }
+
+    public RandomTeamMemberEntityBuilder teamMemberEntity() {
+        return new RandomTeamMemberEntityBuilder(teamMemberRepository);
+    }
+
     public RandomProjectEntityBuilder projectEntity() {
         return new RandomProjectEntityBuilder(projectRepository);
     }
