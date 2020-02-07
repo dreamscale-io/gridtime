@@ -21,7 +21,7 @@ public class MemberWorkStatusDto {
     private String shortName;
 
     private XPSummaryDto xpSummary;
-    private LearningCircuitDto activeCircle;
+    private LearningCircuitDto activeCircuit;
     private OnlineStatus onlineStatus;
 
     private UUID activeTaskId;

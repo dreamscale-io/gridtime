@@ -48,7 +48,7 @@ class SpiritResourceSpec extends Specification {
 
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member.id).save()
 
         testUser.setId(member.getMasterAccountId())
 
@@ -71,7 +71,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
@@ -99,7 +99,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
@@ -122,7 +122,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member1 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
@@ -145,7 +145,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 
@@ -175,7 +175,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member1 = aRandom.memberEntity()
                 .masterAccountId(masterAccountEntity.id).organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
         TombstoneInputDto inputDto = new TombstoneInputDto(epitaph: "Here lies Torchie");
@@ -205,7 +205,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member2 = aRandom.memberEntity().organizationId(org.id).save()
         OrganizationMemberEntity member3 = aRandom.memberEntity().organizationId(org.id).save()
 
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().torchieId(member1.id).save()
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
         testUser.setId(member1.getMasterAccountId())
 

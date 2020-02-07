@@ -87,11 +87,11 @@ public class MemberStatusService {
         memberStatusDto.setXpSummary(xpSummary);
         memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
 
-        if (memberStatusEntity.getActiveCircleId() != null) {
+        if (memberStatusEntity.getActiveCircuitId() != null) {
             LearningCircuitDto circuitDto = circuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
-                    memberStatusEntity.getActiveCircleId());
+                    memberStatusEntity.getActiveCircuitId());
 
-            memberStatusDto.setActiveCircle(circuitDto);
+            memberStatusDto.setActiveCircuit(circuitDto);
         }
 
         return memberStatusDto;

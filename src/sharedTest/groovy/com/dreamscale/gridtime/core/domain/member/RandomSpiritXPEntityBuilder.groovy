@@ -11,7 +11,7 @@ class RandomSpiritXPEntityBuilder extends SpiritXPEntity.SpiritXPEntityBuilder {
         this.spiritXpRepository = spiritXpRepository
         id(aRandom.uuid())
                 .totalXp(aRandom.intBetween(100, 800))
-                .torchieId(aRandom.uuid())
+                .memberId(aRandom.uuid())
                 .organizationId(aRandom.uuid())
     }
 

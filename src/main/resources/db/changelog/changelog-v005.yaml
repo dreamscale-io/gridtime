@@ -41,3 +41,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/create_view_team_circuit_talk_room.sql
+
+  - include:
+        file: db/v005/replace_member_status_view_rename_active_circle.sql

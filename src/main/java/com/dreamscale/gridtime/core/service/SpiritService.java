@@ -180,7 +180,7 @@ public class SpiritService {
 
         torchieTombstoneRepository.save(torchieTombstoneEntity);
 
-        SpiritXPEntity spiritXp = spiritXPRepository.findByTorchieId(torchieId);
+        SpiritXPEntity spiritXp = spiritXPRepository.findByMemberId(torchieId);
         spiritXp.setTotalXp(0);
 
         spiritXPRepository.save(spiritXp);
@@ -235,13 +235,13 @@ public class SpiritService {
 
 
     public void grantXP(UUID organizationId, UUID torchieId, int xpAmount) {
-        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByTorchieId(torchieId);
+        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByMemberId(torchieId);
 
         if (spiritXPEntity == null) {
             spiritXPEntity = new SpiritXPEntity();
             spiritXPEntity.setId(UUID.randomUUID());
             spiritXPEntity.setOrganizationId(organizationId);
-            spiritXPEntity.setTorchieId(torchieId);
+            spiritXPEntity.setMemberId(torchieId);
             spiritXPEntity.setTotalXp(xpAmount);
 
         } else {
@@ -253,7 +253,7 @@ public class SpiritService {
 
     private XPSummaryDto getLatestXPForSpirit(UUID torchidId) {
 
-        SpiritXPEntity memberXPEntity = spiritXPRepository.findByTorchieId(torchidId);
+        SpiritXPEntity memberXPEntity = spiritXPRepository.findByMemberId(torchidId);
 
         if (memberXPEntity != null) {
             return calculateCurrentXpState(memberXPEntity.getTotalXp());

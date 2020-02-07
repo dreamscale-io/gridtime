@@ -43,8 +43,8 @@ public class MemberStatusEntity {
 
     private String workingOn;
 
-    @Column(name = "active_circle_id")
-    private UUID activeCircleId;
+    @Column(name = "active_circuit_id")
+    private UUID activeCircuitId;
 
     private Integer totalXp;
 
