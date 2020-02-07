@@ -9,8 +9,9 @@ public interface OrganizationMemberRepository extends CrudRepository<Organizatio
 
     OrganizationMemberEntity findById(UUID id);
 
-    List<OrganizationMemberEntity> findByMasterAccountId(UUID masterAccountId);
+    List<OrganizationMemberEntity> findByRootAccountId(UUID rootAccountId);
 
-    OrganizationMemberEntity findByOrganizationIdAndMasterAccountId(UUID organizationId, UUID masterAccountId);
+    OrganizationMemberEntity findByOrganizationIdAndRootAccountId(UUID organizationId, UUID rootAccountId);
 
+    OrganizationMemberEntity findByOrganizationIdAndUsername(UUID organizationId, String userName);
 }

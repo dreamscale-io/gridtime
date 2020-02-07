@@ -35,9 +35,9 @@ public class FlowResource {
     @PostMapping(ResourcePaths.INPUT_PATH + ResourcePaths.BATCH_PATH)
     public void publishBatch(@RequestBody NewFlowBatchDto batch) {
         RequestContext context = RequestContext.get();
-        log.info("publishBatch, user={}, batch={}", context.getMasterAccountId(), batch);
+        log.info("publishBatch, user={}, batch={}", context.getRootAccountId(), batch);
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         flowService.saveFlowBatch(invokingMember.getOrganizationId(), invokingMember.getId(), batch);
     }
@@ -49,9 +49,9 @@ public class FlowResource {
     @PostMapping(ResourcePaths.INPUT_PATH + ResourcePaths.SNIPPET_PATH)
     public void publishSnippet(@RequestBody NewSnippetEventDto snippet) {
         RequestContext context = RequestContext.get();
-        log.info("saveFlowSnippet, user={}, snippet={}", context.getMasterAccountId(), snippet);
+        log.info("saveFlowSnippet, user={}, snippet={}", context.getRootAccountId(), snippet);
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         flowService.saveSnippetEvent(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
 

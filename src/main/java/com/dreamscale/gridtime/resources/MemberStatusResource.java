@@ -30,7 +30,7 @@ public class MemberStatusResource {
     public MemberWorkStatusDto getMyCurrentStatus() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return memberStatusService.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
     }
@@ -44,7 +44,7 @@ public class MemberStatusResource {
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return memberStatusService.getStatusOfMeAndMyTeam(memberEntity.getOrganizationId(), memberEntity.getId());
     }

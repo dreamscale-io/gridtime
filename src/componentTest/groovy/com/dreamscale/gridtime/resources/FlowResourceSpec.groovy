@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.FlowClient
 import com.dreamscale.gridtime.client.JournalClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
@@ -49,7 +49,7 @@ class FlowResourceSpec extends Specification {
     OrganizationMemberRepository organizationMemberRepository
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     @Autowired
     TimeService mockTimeService
@@ -117,7 +117,7 @@ class FlowResourceSpec extends Specification {
     private OrganizationMemberEntity createMembership(UUID organizationId, UUID masterAccountId) {
         aRandom.memberEntity()
                 .organizationId(organizationId)
-                .masterAccountId(masterAccountId)
+                .rootAccountId(masterAccountId)
                 .save()
     }
 

@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity(name = "active_user_context")
 @Data
-@EqualsAndHashCode(of = "masterAccountId")
+@EqualsAndHashCode(of = "rootAccountId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,8 +17,8 @@ public class ActiveUserContextEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "master_account_id")
-    private UUID masterAccountId;
+    @Column(name = "root_account_id")
+    private UUID rootAccountId;
 
     private UUID organizationId;
 

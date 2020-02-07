@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.client.MemberStatusClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.service.TeamService
@@ -23,7 +23,7 @@ class MemberStatusResourceSpec extends Specification {
     MemberStatusClient memberStatusClient
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     @Autowired
     TeamService teamService
@@ -38,10 +38,10 @@ class MemberStatusResourceSpec extends Specification {
     def "should return status for current user"() {
         given:
 
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        testUser.setId(member.getRootAccountId())
 
         when:
         MemberWorkStatusDto memberWorkStatusDto = memberStatusClient.getMyCurrentStatus()
@@ -54,10 +54,10 @@ class MemberStatusResourceSpec extends Specification {
     def "should return status for current team"() {
         given:
 
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        testUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        testUser.setId(member.getRootAccountId())
 
         TeamDto team = teamService.createTeam(org.id, "myTeam")
         teamService.addMembersToTeam(org.id, team.id, Arrays.asList(member.id))

@@ -37,9 +37,9 @@ public class TeamCircuitResource {
     public TeamCircuitDto getMyTeamCircuit() {
 
         RequestContext context = RequestContext.get();
-        log.info("getMyTeamCircuit, user={}", context.getMasterAccountId());
+        log.info("getMyTeamCircuit, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getMyPrimaryTeamCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -55,9 +55,9 @@ public class TeamCircuitResource {
     @GetMapping("/{teamName}")
     public TeamCircuitDto getTeamCircuitByName(@PathVariable("teamName") String teamName) {
         RequestContext context = RequestContext.get();
-        log.info("getTeamCircuitByName, user={}", context.getMasterAccountId());
+        log.info("getTeamCircuitByName, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getTeamCircuitByOrganizationAndName(invokingMember.getOrganizationId(), teamName);
     }
@@ -71,9 +71,9 @@ public class TeamCircuitResource {
     @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
     public TeamCircuitRoomDto createTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName ) {
         RequestContext context = RequestContext.get();
-        log.info("createTeamCircuitRoom, user={}", context.getMasterAccountId());
+        log.info("createTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.createTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -88,9 +88,9 @@ public class TeamCircuitResource {
     @GetMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
     public TeamCircuitRoomDto getTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName ) {
         RequestContext context = RequestContext.get();
-        log.info("getTeamCircuitRoom, user={}", context.getMasterAccountId());
+        log.info("getTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -104,9 +104,9 @@ public class TeamCircuitResource {
     @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CLOSE_PATH)
     public TeamCircuitRoomDto closeTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName ) {
         RequestContext context = RequestContext.get();
-        log.info("closeTeamCircuitRoom, user={}", context.getMasterAccountId());
+        log.info("closeTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.closeTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -120,9 +120,9 @@ public class TeamCircuitResource {
     @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
     public TeamCircuitRoomDto saveDescriptionForTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName, @RequestBody DescriptionInputDto descriptionInputDto ) {
         RequestContext context = RequestContext.get();
-        log.info("saveDescriptionForTeamCircuitRoom, user={}", context.getMasterAccountId());
+        log.info("saveDescriptionForTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.saveDescriptionForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, descriptionInputDto);
     }
@@ -136,9 +136,9 @@ public class TeamCircuitResource {
     @PostMapping("/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.TAGS_PATH)
     public TeamCircuitRoomDto saveTagsForTeamCircuitRoom(@PathVariable("teamName") String teamName, @PathVariable("roomName") String roomName, @RequestBody TagsInputDto tagsInputDto ) {
         RequestContext context = RequestContext.get();
-        log.info("saveTagsForTeamCircuitRoom, user={}", context.getMasterAccountId());
+        log.info("saveTagsForTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.saveTagsForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, tagsInputDto);
     }

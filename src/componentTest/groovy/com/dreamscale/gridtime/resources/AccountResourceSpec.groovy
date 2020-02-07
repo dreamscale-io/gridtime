@@ -16,11 +16,11 @@ import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
-import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,10 +45,10 @@ class AccountResourceSpec extends Specification {
     OrganizationRepository organizationRepository
 
     @Autowired
-    MasterAccountRepository masterAccountRepository
+    RootAccountRepository masterAccountRepository
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     @Autowired
     JiraService mockJiraService
@@ -89,7 +89,7 @@ class AccountResourceSpec extends Specification {
         when:
 
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
@@ -105,7 +105,7 @@ class AccountResourceSpec extends Specification {
 
         masterAccountRepository.save(testUser)
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
 
         when:
 
@@ -130,7 +130,7 @@ class AccountResourceSpec extends Specification {
 
         masterAccountRepository.save(testUser)
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
 
         when:
         SimpleStatusDto statusDto = accountClient.logout()
@@ -144,7 +144,7 @@ class AccountResourceSpec extends Specification {
         given:
         masterAccountRepository.save(testUser)
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.id).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
 
 
         HeartbeatDto heartbeatDto = new HeartbeatDto()

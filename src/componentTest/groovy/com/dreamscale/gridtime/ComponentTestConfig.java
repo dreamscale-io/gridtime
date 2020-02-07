@@ -3,9 +3,9 @@ package com.dreamscale.gridtime;
 import com.dreamscale.gridtime.client.*;
 import com.dreamscale.gridtime.core.CoreARandom;
 import com.dreamscale.gridtime.core.CoreRandomBuilderSupport;
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity;
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
 import com.dreamscale.gridtime.core.security.AuthorizationRequestInterceptor;
-import com.dreamscale.gridtime.core.security.MasterAccountIdResolver;
+import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.service.JiraService;
 import com.dreamscale.gridtime.core.service.TimeService;
 import org.dreamscale.feign.JacksonFeignBuilder;
@@ -109,11 +109,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
-    public MasterAccountEntity testUser() {
-        return MasterAccountEntity.builder()
+    public RootAccountEntity testUser() {
+        return RootAccountEntity.builder()
                 .id(UUID.randomUUID())
                 .apiKey(UUID.randomUUID().toString())
-                .masterEmail("janelle@dreamscale.io")
+                .rootEmail("janelle@dreamscale.io")
                 .fullName("Janelle Klein")
                 .build();
     }
@@ -125,8 +125,8 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Bean
     @Primary
-    public MasterAccountIdResolver userIdResolver() {
-        return new StubMasterAccountIdResolver(testUser());
+    public RootAccountIdResolver userIdResolver() {
+        return new StubRootAccountIdResolver(testUser());
     }
 
     @Bean

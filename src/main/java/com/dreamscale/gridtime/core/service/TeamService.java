@@ -31,7 +31,7 @@ public class TeamService {
     private ActiveStatusService wtfService;
 
     @Autowired
-    private MasterAccountRepository masterAccountRepository;
+    private RootAccountRepository rootAccountRepository;
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -189,8 +189,8 @@ public class TeamService {
         return teamDto;
     }
 
-    public List<TeamDto> getMyTeams(UUID orgId, UUID masterAccountId) {
-        List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByMembership(orgId, masterAccountId);
+    public List<TeamDto> getMyTeams(UUID orgId, UUID rootAccountId) {
+        List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByMembership(orgId, rootAccountId);
         return teamOutputMapper.toApiList(teamEntityList);
     }
 
@@ -225,8 +225,8 @@ public class TeamService {
         return shortName;
     }
 
-    public MemberRegistrationDetailsDto addMemberToMyTeam(UUID masterAccountId, String newMemberEmail) {
-        OrganizationDto orgDto = organizationService.getDefaultOrganizationWithInvitation(masterAccountId);
+    public MemberRegistrationDetailsDto addMemberToMyTeam(UUID rootAccountId, String newMemberEmail) {
+        OrganizationDto orgDto = organizationService.getDefaultOrganizationWithInvitation(rootAccountId);
 
         MembershipInputDto membershipInputDto = new MembershipInputDto();
         membershipInputDto.setInviteToken(orgDto.getInviteToken());
@@ -234,7 +234,7 @@ public class TeamService {
 
         MemberRegistrationDetailsDto registration = organizationService.registerMember(orgDto.getId(), membershipInputDto);
 
-        List<TeamDto> teams = getMyTeams(orgDto.getId(), masterAccountId);
+        List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
 
         if (teams.size() > 0) {
             TeamDto team = teams.get(0);
@@ -247,11 +247,11 @@ public class TeamService {
     }
 
 
-    public TeamWithMembersDto getMeAndMyTeam(UUID masterAccountId) {
-        OrganizationDto orgDto = organizationService.getDefaultOrganization(masterAccountId);
-        MasterAccountEntity masterAccount = masterAccountRepository.findById(masterAccountId);
+    public TeamWithMembersDto getMeAndMyTeam(UUID rootAccountId) {
+        OrganizationDto orgDto = organizationService.getDefaultOrganization(rootAccountId);
+        RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 
-        List<TeamDto> teams = getMyTeams(orgDto.getId(), masterAccountId);
+        List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
 
         TeamWithMembersDto teamWithMembers = null;
 
@@ -266,7 +266,7 @@ public class TeamService {
             List<TeamMemberWorkStatusDto> teamMembers = getStatusOfTeamMembers(team.getOrganizationId(), team.getId());
 
             for (TeamMemberWorkStatusDto teamMember : teamMembers) {
-                if (teamMember.getEmail() != null && teamMember.getEmail().equalsIgnoreCase(masterAccount.getMasterEmail())) {
+                if (teamMember.getEmail() != null && teamMember.getEmail().equalsIgnoreCase(rootAccount.getRootEmail())) {
                     teamWithMembers.setMe(teamMember);
                 } else {
                     teamWithMembers.addMember(teamMember);

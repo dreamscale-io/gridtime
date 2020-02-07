@@ -165,7 +165,7 @@ public class SpiritService {
         return spiritNetworkDto;
     }
 
-    public TorchieTombstoneDto restInPeace(UUID masterAccountId, UUID organizationId, UUID torchieId, String epitaph) {
+    public TorchieTombstoneDto restInPeace(UUID rootAccountId, UUID organizationId, UUID torchieId, String epitaph) {
         XPSummaryDto xpSummaryDto = this.getLatestXPForSpirit(torchieId);
 
         TorchieTombstoneEntity torchieTombstoneEntity = new TorchieTombstoneEntity();
@@ -176,7 +176,7 @@ public class SpiritService {
         torchieTombstoneEntity.setTotalXp(xpSummaryDto.getTotalXP());
         torchieTombstoneEntity.setEpitaph(epitaph);
         torchieTombstoneEntity.setDateOfDeath(timeService.now());
-        torchieTombstoneEntity.setDateOfBirth(lookupTorchieBirthday(masterAccountId, torchieId));
+        torchieTombstoneEntity.setDateOfBirth(lookupTorchieBirthday(rootAccountId, torchieId));
 
         torchieTombstoneRepository.save(torchieTombstoneEntity);
 
@@ -193,7 +193,7 @@ public class SpiritService {
         return torchieTombstoneMapper.toApiList(tombstoneEntities);
     }
 
-    private LocalDateTime lookupTorchieBirthday(UUID masterAccountId, UUID spiritId) {
+    private LocalDateTime lookupTorchieBirthday(UUID rootAccountId, UUID spiritId) {
         LocalDateTime birthday = null;
 
         TorchieTombstoneEntity lastTombstone = torchieTombstoneRepository.findLatestByTorchieId(spiritId);
@@ -201,7 +201,7 @@ public class SpiritService {
         if (lastTombstone != null) {
             birthday = lastTombstone.getDateOfDeath();
         } else {
-            birthday = accountService.getActivationDate(masterAccountId);
+            birthday = accountService.getActivationDate(rootAccountId);
         }
         return birthday;
     }

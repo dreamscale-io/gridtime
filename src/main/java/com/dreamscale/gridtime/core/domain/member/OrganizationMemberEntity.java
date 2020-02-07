@@ -20,8 +20,10 @@ public class OrganizationMemberEntity {
     private UUID id;
     private String email;
 
-    @Column(name = "master_account_id")
-    private UUID masterAccountId;
+    private String username;
+
+    @Column(name = "root_account_id")
+    private UUID rootAccountId;
 
     @Column(name = "external_id")
     private String externalId;

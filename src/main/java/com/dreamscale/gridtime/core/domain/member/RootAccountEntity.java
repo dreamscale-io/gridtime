@@ -8,23 +8,20 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "master_account")
+@Entity(name = "root_account")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MasterAccountEntity {
+public class RootAccountEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    @Column(name = "master_email")
-    private String masterEmail;
-
-    @Column(name = "short_name")
-    private String shortName;
+    @Column(name = "root_email")
+    private String rootEmail;
 
     @Column(name = "full_name")
     private String fullName;

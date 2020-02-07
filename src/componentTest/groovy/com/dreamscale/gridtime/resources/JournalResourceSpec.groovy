@@ -13,11 +13,11 @@ import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskRepository
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,7 +59,7 @@ class JournalResourceSpec extends Specification {
     TimeService mockTimeService
 
     @Autowired
-    MasterAccountEntity loggedInUser
+    RootAccountEntity loggedInUser
 
     def "should save new intention"() {
         given:
@@ -163,7 +163,7 @@ class JournalResourceSpec extends Specification {
     def "get historical intentions before date"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        OrganizationMemberEntity membership = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -183,7 +183,7 @@ class JournalResourceSpec extends Specification {
         String beforeDateStr = DateTimeAPITranslator.convertToString(LocalDateTime.now().minusDays(1))
 
         when:
-        List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(beforeDateStr, 5)
+        List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(membership.getUsername(), beforeDateStr, 5)
 
         then:
         assert intentions != null
@@ -288,7 +288,7 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         when:
-        List<JournalEntryDto> intentions = journalClient.getRecentJournalForMember(memberWithIntentions.getId().toString()).recentIntentions
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalForUser(memberWithIntentions.getUsername()).recentIntentions
 
         then:
         assert intentions != null
@@ -311,8 +311,8 @@ class JournalResourceSpec extends Specification {
         OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
 
         when:
-        List<JournalEntryDto> intentions = journalClient.getRecentJournalForMemberWithLimit(
-                memberWithIntentions.getId().toString(), 1).recentIntentions
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalForUserWithLimit(
+                memberWithIntentions.getUsername(), 1).recentIntentions
 
         then:
         assert intentions != null
@@ -337,7 +337,7 @@ class JournalResourceSpec extends Specification {
     private OrganizationMemberEntity createMembership(UUID organizationId, UUID masterAccountId) {
         OrganizationMemberEntity member = aRandom.memberEntity()
                 .organizationId(organizationId)
-                .masterAccountId(masterAccountId)
+                .rootAccountId(masterAccountId)
                 .save()
 
         return member

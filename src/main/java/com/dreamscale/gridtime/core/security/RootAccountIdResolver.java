@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.security;
 
 import java.util.UUID;
 
-public interface MasterAccountIdResolver {
+public interface RootAccountIdResolver {
 
 	UUID findAccountIdByApiKey(String apiKey);
 

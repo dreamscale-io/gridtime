@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
-import com.dreamscale.gridtime.core.security.MasterAccountIdResolver;
+import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +20,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class AccountService implements MasterAccountIdResolver {
+public class AccountService implements RootAccountIdResolver {
 
     @Autowired
-    private MasterAccountRepository masterAccountRepository;
+    private RootAccountRepository rootAccountRepository;
 
     @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
@@ -42,24 +42,24 @@ public class AccountService implements MasterAccountIdResolver {
 
 
     public AccountActivationDto activate(String activationCode) {
-        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByActivationCode(activationCode);
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findByActivationCode(activationCode);
 
         AccountActivationDto accountActivationDto = new AccountActivationDto();
 
-        if (masterAccountEntity == null) {
+        if (rootAccountEntity == null) {
             accountActivationDto.setMessage("Activation code not found.");
             accountActivationDto.setStatus(Status.FAILED);
         } else {
 
             String apiKey = generateAPIKey();
-            masterAccountEntity.setApiKey(apiKey);
-            masterAccountEntity.setActivationDate(LocalDateTime.now());
+            rootAccountEntity.setApiKey(apiKey);
+            rootAccountEntity.setActivationDate(LocalDateTime.now());
 
-            masterAccountRepository.save(masterAccountEntity);
+            rootAccountRepository.save(rootAccountEntity);
 
             //TODO also clear activation code on successful activation so it's 1x use
 
-            accountActivationDto.setEmail(masterAccountEntity.getMasterEmail());
+            accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
             accountActivationDto.setApiKey(apiKey);
             accountActivationDto.setMessage("Your account has been successfully activated.");
             accountActivationDto.setStatus(Status.VALID);
@@ -68,11 +68,11 @@ public class AccountService implements MasterAccountIdResolver {
         return accountActivationDto;
     }
 
-    public ConnectionStatusDto login(UUID masterAccountId) {
+    public ConnectionStatusDto login(UUID rootAccountId) {
 
         UUID oldConnectionId = null;
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
@@ -84,9 +84,10 @@ public class AccountService implements MasterAccountIdResolver {
         statusDto.setStatus(Status.VALID);
         statusDto.setMessage("Successfully logged in");
 
-        OrganizationMemberEntity membership = organizationService.getDefaultMembership(masterAccountId);
+        OrganizationMemberEntity membership = organizationService.getDefaultMembership(rootAccountId);
         statusDto.setMemberId(membership.getId());
         statusDto.setOrganizationId(membership.getOrganizationId());
+        statusDto.setUserName(membership.getUsername());
 
         TeamDto team = teamService.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
 
@@ -99,9 +100,9 @@ public class AccountService implements MasterAccountIdResolver {
         return statusDto;
     }
 
-    public SimpleStatusDto logout(UUID masterAccountId) {
+    public SimpleStatusDto logout(UUID rootAccountId) {
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
 
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
 
@@ -114,22 +115,22 @@ public class AccountService implements MasterAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
-        updateOnlineStatus(masterAccountId, OnlineStatus.Offline);
+        updateOnlineStatus(rootAccountId, OnlineStatus.Offline);
 
         return new SimpleStatusDto(Status.VALID, "Successfully logged out");
     }
 
-    private void updateOnlineStatus(UUID masterAccountId, OnlineStatus onlineStatus) {
-        OrganizationMemberEntity membership = organizationService.getDefaultMembership(masterAccountId);
+    private void updateOnlineStatus(UUID rootAccountId, OnlineStatus onlineStatus) {
+        OrganizationMemberEntity membership = organizationService.getDefaultMembership(rootAccountId);
 
         activeStatusService.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
 
     }
 
-    public SimpleStatusDto heartbeat(UUID masterAccountId, HeartbeatDto heartbeat) {
+    public SimpleStatusDto heartbeat(UUID rootAccountId, HeartbeatDto heartbeat) {
         SimpleStatusDto heartBeatStatus;
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(masterAccountId);
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
 
         if (isNotOnline(accountStatusEntity)) {
             heartBeatStatus = new SimpleStatusDto(Status.FAILED, "Please login before updating heartbeat");
@@ -148,12 +149,12 @@ public class AccountService implements MasterAccountIdResolver {
                 || accountStatusEntity.getOnlineStatus() != OnlineStatus.Online);
     }
 
-    private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID masterAccountId) {
+    private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID rootAccountId) {
 
-        ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByMasterAccountId(masterAccountId);
+        ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByRootAccountId(rootAccountId);
         if (accountStatusEntity == null) {
             accountStatusEntity = new ActiveAccountStatusEntity();
-            accountStatusEntity.setMasterAccountId(masterAccountId);
+            accountStatusEntity.setRootAccountId(rootAccountId);
             accountStatusEntity.setLastActivity(LocalDateTime.now());
 
         } else {
@@ -164,29 +165,29 @@ public class AccountService implements MasterAccountIdResolver {
     }
 
     public UUID findAccountIdByApiKey(String apiKey) {
-        UUID masterAccountId = null;
+        UUID rootAccountId = null;
 
-        MasterAccountEntity masterAccountEntity = masterAccountRepository.findByApiKey(apiKey);
-        if (masterAccountEntity != null) {
-            masterAccountId = masterAccountEntity.getId();
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findByApiKey(apiKey);
+        if (rootAccountEntity != null) {
+            rootAccountId = rootAccountEntity.getId();
         }
-        return masterAccountId;
+        return rootAccountId;
     }
 
-    public LocalDateTime getActivationDate(UUID masterAccountId) {
-        MasterAccountEntity masterAccountEntity = masterAccountRepository.findById(masterAccountId);
-        return masterAccountEntity.getActivationDate();
+    public LocalDateTime getActivationDate(UUID rootAccountId) {
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+        return rootAccountEntity.getActivationDate();
     }
 
     @Override
     public UUID findAccountIdByConnectionId(String connectionId) {
-        UUID masterAccountId = null;
+        UUID rootAccountId = null;
         UUID connectUuid = UUID.fromString(connectionId);
         ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByConnectionId(connectUuid);
         if (accountStatusEntity != null) {
-            masterAccountId = accountStatusEntity.getMasterAccountId();
+            rootAccountId = accountStatusEntity.getRootAccountId();
         }
-        return masterAccountId;
+        return rootAccountId;
     }
 
     private String generateAPIKey() {

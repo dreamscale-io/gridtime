@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.project.TaskDto
 import com.dreamscale.gridtime.api.project.TaskInputDto
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.ProjectClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
@@ -45,7 +45,7 @@ class ProjectResourceSpec extends Specification {
     JiraService mockJiraService
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     def "should retrieve project list"() {
         given:

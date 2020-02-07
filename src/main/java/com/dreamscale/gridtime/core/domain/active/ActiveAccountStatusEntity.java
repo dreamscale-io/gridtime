@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity(name = "active_account_status")
 @Data
-@EqualsAndHashCode(of = "masterAccountId")
+@EqualsAndHashCode(of = "rootAccountId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,8 +19,8 @@ public class ActiveAccountStatusEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "master_account_id")
-    private UUID masterAccountId;
+    @Column(name = "root_account_id")
+    private UUID rootAccountId;
 
     @Column(name = "connection_id")
     private UUID connectionId;

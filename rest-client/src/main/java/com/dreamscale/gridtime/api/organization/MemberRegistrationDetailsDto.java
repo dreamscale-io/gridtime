@@ -16,7 +16,7 @@ public class MemberRegistrationDetailsDto {
     private String orgEmail;
     private String fullName;
 
-    private UUID masterAccountId;
+    private UUID rootAccountId;
     private String activationCode;
 
 }

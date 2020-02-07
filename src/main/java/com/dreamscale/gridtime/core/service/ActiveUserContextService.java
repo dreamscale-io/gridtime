@@ -37,16 +37,16 @@ public class ActiveUserContextService {
         activeUserContextMapper = mapperFactory.createDtoEntityMapper(UserContextDto.class, ActiveUserContextEntity.class);
     }
 
-    public UserContextDto getActiveUserContext(UUID masterAccountId) {
+    public UserContextDto getActiveUserContext(UUID rootAccountId) {
 
-        ActiveUserContextEntity userContext = activeUserContextRepository.findByMasterAccountId(masterAccountId);
+        ActiveUserContextEntity userContext = activeUserContextRepository.findByRootAccountId(rootAccountId);
 
         if (userContext == null) {
 
             userContext = new ActiveUserContextEntity();
-            userContext.setMasterAccountId(masterAccountId);
+            userContext.setRootAccountId(rootAccountId);
 
-            OrganizationMemberEntity defaultMembership = organizationService.getDefaultMembership(masterAccountId);
+            OrganizationMemberEntity defaultMembership = organizationService.getDefaultMembership(rootAccountId);
 
             if (defaultMembership != null) {
                 userContext.setOrganizationId(defaultMembership.getOrganizationId());

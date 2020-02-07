@@ -34,9 +34,9 @@ public class TalkToResource {
                                             @RequestBody ChatMessageInputDto chatMessageInputDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishChatToRoom, user={}", context.getMasterAccountId());
+        log.info("publishChatToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
@@ -48,9 +48,9 @@ public class TalkToResource {
     public TalkMessageDto publishSnippetToRoom(@PathVariable("roomName") String roomName, @RequestBody NewSnippetEventDto newSnippetEventDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishSnippetToRoom, user={}", context.getMasterAccountId());
+        log.info("publishSnippetToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
@@ -62,9 +62,9 @@ public class TalkToResource {
     public TalkMessageDto publishScreenshotToRoom(@PathVariable("roomName") String talkRoomId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishScreenshotToRoom, user={}", context.getMasterAccountId());
+        log.info("publishScreenshotToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId, screenshotReferenceInput);
     }
@@ -72,9 +72,9 @@ public class TalkToResource {
     @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}")
     List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("roomName") String talkRoomId) {
         RequestContext context = RequestContext.get();
-        log.info("getAllTalkMessagesFromRoom, user={}", context.getMasterAccountId());
+        log.info("getAllTalkMessagesFromRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId);
 
@@ -86,9 +86,9 @@ public class TalkToResource {
     public TalkMessageDto publishChatToActiveRoom(@RequestBody ChatMessageInputDto chatMessageInputDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishChatToActiveRoom, user={}", context.getMasterAccountId());
+        log.info("publishChatToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
@@ -100,9 +100,9 @@ public class TalkToResource {
     public TalkMessageDto publishSnippetToActiveRoom(@RequestBody NewSnippetEventDto newSnippetEventDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishSnippetToActiveRoom, user={}", context.getMasterAccountId());
+        log.info("publishSnippetToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
@@ -114,9 +114,9 @@ public class TalkToResource {
     public TalkMessageDto publishScreenshotToActiveRoom(@RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
 
         RequestContext context = RequestContext.get();
-        log.info("publishScreenshotToActiveRoom, user={}", context.getMasterAccountId());
+        log.info("publishScreenshotToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return circuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }

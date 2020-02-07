@@ -59,12 +59,12 @@ public class ProjectResource {
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {
         RequestContext context = RequestContext.get();
-        return taskService.createNewTask(getDefaultOrgId(), UUID.fromString(projectId), context.getMasterAccountId(), taskInputDto);
+        return taskService.createNewTask(getDefaultOrgId(), UUID.fromString(projectId), context.getRootAccountId(), taskInputDto);
     }
 
     private UUID getDefaultOrgId() {
         RequestContext context = RequestContext.get();
-        OrganizationDto org = organizationService.getDefaultOrganization(context.getMasterAccountId());
+        OrganizationDto org = organizationService.getDefaultOrganization(context.getRootAccountId());
         return org.getId();
     }
 

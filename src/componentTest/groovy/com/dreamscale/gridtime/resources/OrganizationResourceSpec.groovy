@@ -15,10 +15,10 @@ import com.dreamscale.gridtime.api.team.TeamMemberDto
 import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.OrganizationClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
-import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.member.TeamRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
@@ -44,7 +44,7 @@ class OrganizationResourceSpec extends Specification {
     OrganizationMemberRepository organizationMemberRepository
 
     @Autowired
-	MasterAccountRepository masterAccountRepository
+	RootAccountRepository masterAccountRepository
 
     @Autowired
     TeamRepository teamRepository
@@ -56,7 +56,7 @@ class OrganizationResourceSpec extends Specification {
     JiraService mockJiraService
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     def "should not create organization with failed Jira connect"() {
         given:
@@ -129,7 +129,7 @@ class OrganizationResourceSpec extends Specification {
         then:
         assert membershipDto != null
         assert membershipDto.getMemberId() != null
-        assert membershipDto.getMasterAccountId() != null
+        assert membershipDto.getRootAccountId() != null
         assert membershipDto.getOrgEmail() == membershipInputDto.getOrgEmail()
         assert membershipDto.getFullName() == jiraUserDto.displayName
         assert membershipDto.getActivationCode() != null
@@ -211,7 +211,7 @@ class OrganizationResourceSpec extends Specification {
         1 * mockJiraService.getUserByEmail(_, _) >> jiraUserDto
 
         when:
-        testUser.id = registration1.masterAccountId;
+        testUser.id = registration1.rootAccountId;
         MemberRegistrationDetailsDto registration2 = organizationClient.addMemberToMyTeam("kara@dreamscale.io")
 
         then:
@@ -243,7 +243,7 @@ class OrganizationResourceSpec extends Specification {
         organizationClient.addMembersToTeam(org.id.toString(), teamOther.id.toString(), otherTeamMembers)
 
         //active request coming from janelle
-        testUser.id = registration1.masterAccountId
+        testUser.id = registration1.rootAccountId
 
         when:
         List<TeamDto> myTeams = organizationClient.getMyTeams(org.id.toString())
@@ -292,7 +292,7 @@ class OrganizationResourceSpec extends Specification {
 
         organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
 
-        testUser.id = registration1.masterAccountId;
+        testUser.id = registration1.rootAccountId;
 
         when:
         TeamWithMembersDto meAndMyTeam = organizationClient.getMeAndMyTeam()

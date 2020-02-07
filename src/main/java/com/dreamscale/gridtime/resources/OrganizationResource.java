@@ -56,7 +56,7 @@ public class OrganizationResource {
 
     /**
      * Creates a new member within an organization associated with the specified Jira email
-     * A new master account will be created using the email, along with a product activation code
+     * A new root account will be created using the email, along with a product activation code
      */
     // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -97,7 +97,7 @@ public class OrganizationResource {
     @GetMapping(ResourcePaths.TEAM_PATH )
     public TeamWithMembersDto getMeAndMyTeam() {
         RequestContext context = RequestContext.get();
-        return teamService.getMeAndMyTeam(context.getMasterAccountId());
+        return teamService.getMeAndMyTeam(context.getRootAccountId());
     }
 
     /**
@@ -117,7 +117,7 @@ public class OrganizationResource {
     @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
     public List<TeamDto> getMyTeams(@PathVariable("orgId") String organizationId) {
         RequestContext context = RequestContext.get();
-        return teamService.getMyTeams(UUID.fromString(organizationId), context.getMasterAccountId());
+        return teamService.getMyTeams(UUID.fromString(organizationId), context.getRootAccountId());
     }
 
     /**
@@ -134,7 +134,7 @@ public class OrganizationResource {
     @PostMapping(ResourcePaths.TEAM_PATH + ResourcePaths.MEMBER_PATH )
     public MemberRegistrationDetailsDto addMemberToMyTeam(@RequestBody  String newMemberEmail) {
         RequestContext context = RequestContext.get();
-        return teamService.addMemberToMyTeam(context.getMasterAccountId(), newMemberEmail);
+        return teamService.addMemberToMyTeam(context.getRootAccountId(), newMemberEmail);
     }
 
 

@@ -11,6 +11,7 @@ import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.JournalService;
 import com.dreamscale.gridtime.core.service.OrganizationService;
 import com.dreamscale.gridtime.core.service.RecentActivityService;
+import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@Slf4j
 @RequestMapping(path = ResourcePaths.JOURNAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class JournalResource {
 
@@ -41,13 +43,14 @@ public class JournalResource {
      * Create a new Intention in the user's Journal
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.INTENTION_PATH )
+    @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH )
     JournalEntryDto createNewIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
+        log.info("createNewIntention, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return journalService.createIntention(memberEntity.getOrganizationId(), memberEntity.getId(), intentionInput);
+        return journalService.createIntention(invokingMember.getOrganizationId(), invokingMember.getId(), intentionInput);
     }
 
 
@@ -58,11 +61,12 @@ public class JournalResource {
      * @return JournalEntryDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
+    @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
     JournalEntryDto updateRetroFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
         RequestContext context = RequestContext.get();
+        log.info("updateRetroFlameRating, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return journalService.saveFlameRating(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId), flameRatingInputDto);
     }
@@ -74,12 +78,12 @@ public class JournalResource {
      * @return JournalEntryDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
+    @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
     JournalEntryDto finishIntention(@PathVariable("id") String intentionId, @RequestBody IntentionFinishInputDto intentionRefInputDto) {
         RequestContext context = RequestContext.get();
+        log.info("finishIntention, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
-
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         if (FinishStatus.done.equals(intentionRefInputDto.getFinishStatus())) {
             return journalService.finishIntention(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId));
@@ -96,51 +100,64 @@ public class JournalResource {
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping()
-    RecentJournalDto getRecentJournalForMember(@RequestParam("member") Optional<String> memberId, @RequestParam("limit") Optional<Integer> limit) {
+    @GetMapping(ResourcePaths.ME_PATH)
+    RecentJournalDto getRecentJournal( @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
+        log.info("getRecentJournal, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
-        RecentJournalDto recentJournalDto;
+        return journalService.getJournalForSelf(memberEntity.getOrganizationId(), memberEntity.getId(), effectiveLimit);
+    }
 
-        if (memberId.isPresent()) {
-            recentJournalDto = journalService.getJournalForMember(memberEntity.getOrganizationId(), UUID.fromString(memberId.get()), effectiveLimit);
-        } else {
-            recentJournalDto = journalService.getJournalForSelf(memberEntity.getOrganizationId(), memberEntity.getId(), effectiveLimit);
-        }
 
-        return recentJournalDto;
+    /**
+     * Get an overview of the recent Intentions in the Journal, ordered by time descending,
+     * either for the current user (if member not provided), or for another memberId within the org
+     * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{userName}")
+    RecentJournalDto getRecentJournalForUser(@PathVariable("userName") String userName, @RequestParam("limit") Optional<Integer> limit) {
+        RequestContext context = RequestContext.get();
+        log.info("getRecentJournalForUser, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
+
+        Integer effectiveLimit = getEffectiveLimit(limit);
+
+        return journalService.getJournalForUser(memberEntity.getOrganizationId(), userName, effectiveLimit);
+
     }
 
     /**
      * Get historical Intentions from the Journal before a specific date, ordered by time descending.
      * Can be retrieved for the current user (if member not provided), or for another memberId within the org
      * @param beforeDateStr yyyyMMdd_HHmmss
-     * @param memberId optional member within organization
+     * @param userName optional member within organization
      * @param limit number of records to retrieve
      * @return List<IntentionDto>
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH)
-    List<JournalEntryDto> getHistoricalIntentionsFeedBeforeDate(@RequestParam("before_date") String beforeDateStr,
-                                               @RequestParam("member") Optional<String> memberId,
-                                               @RequestParam("limit") Optional<Integer> limit) {
+    @GetMapping("/{userName}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH)
+    List<JournalEntryDto> getHistoricalIntentionsFeedBeforeDate(
+            @PathVariable("userName") String userName,
+            @RequestParam("before_date") String beforeDateStr,
+            @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
+        log.info("getHistoricalIntentionsFeedBeforeDate, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         Integer effectiveLimit = getEffectiveLimit(limit);
         LocalDateTime beforeDate = DateTimeAPITranslator.convertToDateTime(beforeDateStr);
 
-        if (memberId.isPresent()) {
-            return journalService.getHistoricalIntentionsForMember(memberEntity.getOrganizationId(), UUID.fromString(memberId.get()), beforeDate, effectiveLimit);
-        } else {
-            return journalService.getHistoricalIntentionsForMember(memberEntity.getOrganizationId(), memberEntity.getId(), beforeDate, effectiveLimit);
-        }
+        return journalService.getHistoricalIntentionsForUser(memberEntity.getOrganizationId(), userName, beforeDate, effectiveLimit);
+
     }
 
     /**
@@ -149,10 +166,13 @@ public class JournalResource {
      * in a summary
      */
 
-    @PostMapping(ResourcePaths.TASKREF_PATH)
+    @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReferenceInJournal(@RequestBody TaskReferenceInputDto taskReference) {
+
         RequestContext context = RequestContext.get();
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        log.info("createTaskReferenceInJournal, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return recentActivityService.createTaskReferenceInJournal(memberEntity.getOrganizationId(), memberEntity.getId(), taskReference.getTaskName());
     }
@@ -164,10 +184,12 @@ public class JournalResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
+    @GetMapping(ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksSummaryDto getRecentTaskReferencesSummary() {
         RequestContext context = RequestContext.get();
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+        log.info("getRecentTaskReferencesSummary, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return recentActivityService.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
     }
@@ -183,7 +205,7 @@ public class JournalResource {
 
     private UUID getDefaultOrgId() {
         RequestContext context = RequestContext.get();
-        OrganizationDto org = organizationService.getDefaultOrganization(context.getMasterAccountId());
+        OrganizationDto org = organizationService.getDefaultOrganization(context.getRootAccountId());
         return org.getId();
     }
 

@@ -8,12 +8,12 @@ import java.util.UUID;
 
 public class ApiKeyAuthenticationToken extends AbstractAuthenticationToken {
 
-    private UUID masterAccountId;
+    private UUID rootAccountId;
     private Object credentials;
 
-    public ApiKeyAuthenticationToken(UUID masterAccountId, Object credentials, Collection<? extends GrantedAuthority> authorities) {
+    public ApiKeyAuthenticationToken(UUID rootAccountId, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
-        this.masterAccountId = masterAccountId;
+        this.rootAccountId = rootAccountId;
         this.credentials = credentials;
         setAuthenticated(true);
     }
@@ -25,7 +25,7 @@ public class ApiKeyAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return masterAccountId;
+        return rootAccountId;
     }
 
 }

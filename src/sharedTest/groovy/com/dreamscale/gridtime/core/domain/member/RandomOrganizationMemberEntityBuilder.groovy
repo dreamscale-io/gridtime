@@ -10,9 +10,10 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 	RandomOrganizationMemberEntityBuilder(OrganizationMemberRepository organizationMemberRepository) {
 		this.organizationMemberRepository = organizationMemberRepository
 		id(aRandom.uuid())
-		.masterAccountId(aRandom.uuid())
+		.rootAccountId(aRandom.uuid())
 		.organizationId(aRandom.uuid())
 		.email(aRandom.email())
+		.username(aRandom.firstName().toLowerCase())
 		.externalId(aRandom.text(4))
 	}
 
@@ -21,12 +22,12 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 		return this
 	}
 
-	RandomOrganizationMemberEntityBuilder forAccount(MasterAccountEntity masterAccountEntity) {
-		masterAccountId(masterAccountEntity.getId())
+	RandomOrganizationMemberEntityBuilder forAccount(RootAccountEntity masterAccountEntity) {
+		rootAccountId(masterAccountEntity.getId())
 		return this
 	}
 
-	RandomOrganizationMemberEntityBuilder forOrgAndAccount(OrganizationEntity organization, MasterAccountEntity masterAccountEntity) {
+	RandomOrganizationMemberEntityBuilder forOrgAndAccount(OrganizationEntity organization, RootAccountEntity masterAccountEntity) {
 		forOrg(organization)
 		forAccount(masterAccountEntity)
 	}

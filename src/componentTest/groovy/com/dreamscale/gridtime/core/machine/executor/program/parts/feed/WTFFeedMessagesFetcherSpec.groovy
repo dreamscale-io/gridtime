@@ -2,9 +2,9 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.feed
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Bookmark
 import com.dreamscale.gridtime.core.service.CircuitOperator
 import com.dreamscale.gridtime.core.service.TimeService
@@ -25,7 +25,7 @@ class WTFFeedMessagesFetcherSpec extends Specification{
     TimeService mockTimeService
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     @Autowired
     WTFFeedMessagesFetcher circuitMessagesFetcher
@@ -37,9 +37,9 @@ class WTFFeedMessagesFetcherSpec extends Specification{
         LocalDateTime now = mockTimeService.now();
 
         OrganizationEntity organization = aRandom.organizationEntity().save()
-        MasterAccountEntity masterAccount = aRandom.masterAccountEntity().save()
+        RootAccountEntity masterAccount = aRandom.rootAccountEntity().save()
 
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(organization.id).masterAccountId(masterAccount.id).save();
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(organization.id).rootAccountId(masterAccount.id).save();
 
         LearningCircuitDto circuitDto = circuitService.createNewLearningCircuit(organization.id, member.id);
 

@@ -155,7 +155,7 @@ public class GridTimeResource {
 //
 //        RequestContext context = RequestContext.get();
 //
-//        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getMasterAccountId());
+//        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
 //
 //        UUID memberId = UUID.fromString(memberIdStr);
 //        organizationService.validateMemberWithinOrgByMemberId(memberEntity.getOrganizationId(), memberId);

@@ -22,4 +22,6 @@ public class ConnectionStatusDto {
     private UUID teamId;
     private UUID memberId;
 
+    private String userName;
+
 }

@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
 import com.dreamscale.gridtime.client.SpiritClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.SpiritXPEntity
@@ -27,7 +27,7 @@ class SpiritResourceSpec extends Specification {
     SpiritClient spiritClient
 
     @Autowired
-    MasterAccountEntity testUser
+    RootAccountEntity testUser
 
     @Autowired
     TimeService mockTimeService
@@ -50,7 +50,7 @@ class SpiritResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member.id).save()
 
-        testUser.setId(member.getMasterAccountId())
+        testUser.setId(member.getRootAccountId())
 
         when:
         SpiritDto spiritDto = spiritClient.getMyTorchie();
@@ -73,7 +73,7 @@ class SpiritResourceSpec extends Specification {
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
 
         when:
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
@@ -101,7 +101,7 @@ class SpiritResourceSpec extends Specification {
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
 
         when:
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
@@ -124,7 +124,7 @@ class SpiritResourceSpec extends Specification {
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
 
         when:
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
@@ -147,7 +147,7 @@ class SpiritResourceSpec extends Specification {
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
 
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
         ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
@@ -170,14 +170,14 @@ class SpiritResourceSpec extends Specification {
     def "RIP torchie should generate tombstones and reset XP"() {
         given:
 
-        MasterAccountEntity masterAccountEntity = aRandom.masterAccountEntity().save();
+        RootAccountEntity masterAccountEntity = aRandom.rootAccountEntity().save();
         OrganizationEntity org = aRandom.organizationEntity().save()
         OrganizationMemberEntity member1 = aRandom.memberEntity()
-                .masterAccountId(masterAccountEntity.id).organizationId(org.id).save()
+                .rootAccountId(masterAccountEntity.id).organizationId(org.id).save()
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
         TombstoneInputDto inputDto = new TombstoneInputDto(epitaph: "Here lies Torchie");
 
         when:
@@ -207,7 +207,7 @@ class SpiritResourceSpec extends Specification {
 
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member1.id).save()
 
-        testUser.setId(member1.getMasterAccountId())
+        testUser.setId(member1.getRootAccountId())
 
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
         ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())

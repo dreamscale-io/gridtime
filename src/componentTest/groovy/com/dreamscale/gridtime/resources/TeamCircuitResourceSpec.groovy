@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.circuit.*
 import com.dreamscale.gridtime.api.team.TeamCircuitDto
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto
 import com.dreamscale.gridtime.client.TeamCircuitClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
@@ -26,7 +26,7 @@ class TeamCircuitResourceSpec extends Specification {
     TeamCircuitClient teamCircuitClient
 
     @Autowired
-    MasterAccountEntity loggedInUser
+    RootAccountEntity loggedInUser
 
     @Autowired
     TeamService teamService
@@ -41,10 +41,10 @@ class TeamCircuitResourceSpec extends Specification {
 
     def 'should retrieve team circuit'() {
         given:
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        loggedInUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
 
         TeamEntity team = aRandom.teamEntity().organizationId(org.id).save();
         TeamMemberEntity teamMember = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team.id).save();
@@ -62,10 +62,10 @@ class TeamCircuitResourceSpec extends Specification {
 
     def 'should spin up a new room on the team circuit'() {
         given:
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        loggedInUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
 
         TeamEntity team = aRandom.teamEntity().organizationId(org.id).save();
         TeamMemberEntity teamMember = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team.id).save();
@@ -90,10 +90,10 @@ class TeamCircuitResourceSpec extends Specification {
 
     def 'should close a room and remove from the team circuit'() {
         given:
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        loggedInUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
 
         TeamEntity team = aRandom.teamEntity().organizationId(org.id).save();
         TeamMemberEntity teamMember = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team.id).save();
@@ -121,10 +121,10 @@ class TeamCircuitResourceSpec extends Specification {
 
     def 'should add properties to a circuit room'() {
         given:
-        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-        loggedInUser.setId(member.getMasterAccountId())
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
 
         TeamEntity team = aRandom.teamEntity().organizationId(org.id).save();
         TeamMemberEntity teamMember = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team.id).save();

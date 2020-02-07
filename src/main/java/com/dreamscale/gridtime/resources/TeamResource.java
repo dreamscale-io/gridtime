@@ -30,7 +30,7 @@ public class TeamResource {
     public TeamDto getMyTeam() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getMasterAccountId());
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
         return teamService.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
     }

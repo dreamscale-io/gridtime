@@ -1,14 +1,14 @@
 package com.dreamscale.gridtime.core.security;
 
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity;
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
 public class AuthorizationRequestInterceptor implements RequestInterceptor {
 
-    private final MasterAccountEntity activeAccount;
+    private final RootAccountEntity activeAccount;
 
-    public AuthorizationRequestInterceptor(MasterAccountEntity activeAccount) {
+    public AuthorizationRequestInterceptor(RootAccountEntity activeAccount) {
         this.activeAccount = activeAccount;
     }
 

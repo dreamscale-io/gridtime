@@ -19,7 +19,7 @@ import java.util.UUID;
 public class AuthorizationFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private MasterAccountIdResolver masterAccountIdResolver;
+	private RootAccountIdResolver rootAccountIdResolver;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -29,14 +29,14 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		ApiKeyAuthenticationToken authentication = null;
 
 		if (apiKey != null || connectionId != null) {
-			UUID masterAccountId = lookupAccount(apiKey, connectionId);
-			if (masterAccountId == null) {
+			UUID rootAccountId = lookupAccount(apiKey, connectionId);
+			if (rootAccountId == null) {
 				throw new ForbiddenException(SecurityErrorCodes.NOT_AUTHORIZED, "Failed to resolve user with apiKey=" + apiKey + " or connectId="+connectionId);
 			}
-			log.debug("Resolved user with apiKey={}, connectionId={}, masterAccountId={}", apiKey, connectionId, masterAccountId);
-			authentication = createAuthenticationToken(apiKey, connectionId, masterAccountId);
+			log.debug("Resolved user with apiKey={}, connectionId={}, rootAccountId={}", apiKey, connectionId, rootAccountId);
+			authentication = createAuthenticationToken(apiKey, connectionId, rootAccountId);
 			context = RequestContext.builder()
-					.masterAccountId(masterAccountId)
+					.rootAccountId(rootAccountId)
 					.build();
 		}
 
@@ -53,7 +53,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private ApiKeyAuthenticationToken createAuthenticationToken(String apiKey, String connectionId, UUID masterAccountId) {
+	private ApiKeyAuthenticationToken createAuthenticationToken(String apiKey, String connectionId, UUID rootAccountId) {
 		String credential = apiKey != null ? apiKey : connectionId;
 		AuthorityList authorities = new AuthorityList();
 		// TODO: figure out how to determine user/org admin
@@ -65,19 +65,19 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 		if (isOrgAdmin) {
 			authorities.addRole(StandardRole.ORG_ADMIN);
 		}
-		return new ApiKeyAuthenticationToken(masterAccountId, credential, authorities);
+		return new ApiKeyAuthenticationToken(rootAccountId, credential, authorities);
 	}
 
 	private UUID lookupAccount(String apiKey, String connectionId) {
-		UUID masterAccountId = null;
+		UUID rootAccountId = null;
 
 		if (apiKey != null) {
-			masterAccountId = masterAccountIdResolver.findAccountIdByApiKey(apiKey);
+			rootAccountId = rootAccountIdResolver.findAccountIdByApiKey(apiKey);
 		} else if (connectionId != null) {
-			masterAccountId = masterAccountIdResolver.findAccountIdByConnectionId(connectionId);
+			rootAccountId = rootAccountIdResolver.findAccountIdByConnectionId(connectionId);
 		}
 
-		return masterAccountId;
+		return rootAccountId;
 	}
 
 }

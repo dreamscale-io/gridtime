@@ -37,7 +37,7 @@ public class OrganizationService {
     private OrganizationMemberRepository memberRepository;
 
     @Autowired
-    private MasterAccountRepository masterAccountRepository;
+    private RootAccountRepository rootAccountRepository;
 
     @Autowired
     private ActiveAccountStatusRepository activeAccountStatusRepository;
@@ -167,25 +167,25 @@ public class OrganizationService {
         //if user is invalid, this will throw a 404
         JiraUserDto jiraUser = jiraService.getUserByEmail(orgEntity.getId(), membershipInputDto.getOrgEmail());
 
-        MasterAccountEntity masterAccountEntity = new MasterAccountEntity();
-        masterAccountEntity.setId(UUID.randomUUID());
-        masterAccountEntity.setFullName(jiraUser.getDisplayName());
-        masterAccountEntity.setMasterEmail(jiraUser.getEmailAddress());
-        masterAccountEntity.setActivationCode(generateToken());
+        RootAccountEntity rootAccountEntity = new RootAccountEntity();
+        rootAccountEntity.setId(UUID.randomUUID());
+        rootAccountEntity.setFullName(jiraUser.getDisplayName());
+        rootAccountEntity.setRootEmail(jiraUser.getEmailAddress());
+        rootAccountEntity.setActivationCode(generateToken());
 
-        masterAccountRepository.save(masterAccountEntity);
+        rootAccountRepository.save(rootAccountEntity);
 
         OrganizationMemberEntity memberEntity = new OrganizationMemberEntity();
         memberEntity.setId(UUID.randomUUID());
         memberEntity.setOrganizationId(orgEntity.getId());
         memberEntity.setEmail(jiraUser.getEmailAddress());
         memberEntity.setExternalId(jiraUser.getKey());
-        memberEntity.setMasterAccountId(masterAccountEntity.getId());
+        memberEntity.setRootAccountId(rootAccountEntity.getId());
 
         memberRepository.save(memberEntity);
 
         ActiveAccountStatusEntity accountStatusEntity = new ActiveAccountStatusEntity();
-        accountStatusEntity.setMasterAccountId(masterAccountEntity.getId());
+        accountStatusEntity.setRootAccountId(rootAccountEntity.getId());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
 
         activeAccountStatusRepository.save(accountStatusEntity);
@@ -194,16 +194,16 @@ public class OrganizationService {
         MemberRegistrationDetailsDto membership = new MemberRegistrationDetailsDto();
         membership.setMemberId(memberEntity.getId());
         membership.setOrgEmail(memberEntity.getEmail());
-        membership.setMasterAccountId(masterAccountEntity.getId());
-        membership.setFullName(masterAccountEntity.getFullName());
-        membership.setActivationCode(masterAccountEntity.getActivationCode());
+        membership.setRootAccountId(rootAccountEntity.getId());
+        membership.setFullName(rootAccountEntity.getFullName());
+        membership.setActivationCode(rootAccountEntity.getActivationCode());
 
         return membership;
     }
 
 
-    public OrganizationMemberEntity getDefaultMembership(UUID masterAccountId) {
-        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+    public OrganizationMemberEntity getDefaultMembership(UUID rootAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByRootAccountId(rootAccountId);
 
         if (orgMemberships == null || orgMemberships.size() == 0) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
@@ -212,8 +212,8 @@ public class OrganizationService {
         return orgMemberships.get(0);
     }
 
-    public OrganizationDto getDefaultOrganization(UUID masterAccountId) {
-        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+    public OrganizationDto getDefaultOrganization(UUID rootAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByRootAccountId(rootAccountId);
 
         if (orgMemberships == null || orgMemberships.size() == 0) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
@@ -223,8 +223,8 @@ public class OrganizationService {
         return orgOutputMapper.toApi(organizationEntity);
     }
 
-    public OrganizationDto getDefaultOrganizationWithInvitation(UUID masterAccountId) {
-        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByMasterAccountId(masterAccountId);
+    public OrganizationDto getDefaultOrganizationWithInvitation(UUID rootAccountId) {
+        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByRootAccountId(rootAccountId);
 
         if (orgMemberships == null || orgMemberships.size() == 0) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
@@ -243,14 +243,18 @@ public class OrganizationService {
     }
 
     public void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
+        if (memberId == null) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
+        }
+
         OrganizationMemberEntity otherMember = organizationMemberRepository.findById(memberId);
         if (otherMember == null || !otherMember.getOrganizationId().equals(organizationId)) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
         }
     }
 
-    public void validateMemberWithinOrg(UUID organizationId, UUID masterAccountId) {
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
+    public void validateMemberWithinOrg(UUID organizationId, UUID rootAccountId) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
 
         if (membership == null || !membership.getOrganizationId().equals(organizationId)) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership not found in organization");
@@ -258,5 +262,14 @@ public class OrganizationService {
     }
 
 
+    public UUID getMemberIdForUser(UUID organizationId, String userName) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, userName);
 
+        UUID memberId = null;
+        if (membership != null) {
+            return membership.getId();
+        }
+
+        return null;
+    }
 }

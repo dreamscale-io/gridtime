@@ -6,5 +6,5 @@ import java.util.UUID;
 
 public interface ActiveUserContextRepository extends CrudRepository<ActiveUserContextEntity, UUID> {
 
-    ActiveUserContextEntity findByMasterAccountId(UUID masterAccountId);
+    ActiveUserContextEntity findByRootAccountId(UUID rootAccountId);
 }

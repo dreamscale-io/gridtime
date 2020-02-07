@@ -46,11 +46,11 @@ public class TaskService {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-    public TaskDto createNewTask(UUID organizationId, UUID projectId, UUID masterAccountId, TaskInputDto taskInputDto) {
+    public TaskDto createNewTask(UUID organizationId, UUID projectId, UUID rootAccountId, TaskInputDto taskInputDto) {
         validateProjectWithinOrg(organizationId, projectId);
 
         ProjectEntity project = projectRepository.findById(projectId);
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndMasterAccountId(organizationId, masterAccountId);
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
 
         JiraTaskDto jiraTaskDto = jiraService.createNewTask(organizationId, project.getExternalId(), membership.getExternalId(), taskInputDto);
 

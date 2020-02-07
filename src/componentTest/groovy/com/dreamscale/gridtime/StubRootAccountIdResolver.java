@@ -1,15 +1,15 @@
 package com.dreamscale.gridtime;
 
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity;
-import com.dreamscale.gridtime.core.security.MasterAccountIdResolver;
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
+import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 
 import java.util.UUID;
 
-public class StubMasterAccountIdResolver implements MasterAccountIdResolver {
+public class StubRootAccountIdResolver implements RootAccountIdResolver {
 
-    private MasterAccountEntity user;
+    private RootAccountEntity user;
 
-    public StubMasterAccountIdResolver(MasterAccountEntity user) {
+    public StubRootAccountIdResolver(RootAccountEntity user) {
         this.user = user;
     }
 

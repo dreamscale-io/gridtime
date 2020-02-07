@@ -37,7 +37,7 @@ public class AccountResource {
     }
 
     /**
-     * Activate your master account to get a permanent API-Key to use for all future requests
+     * Activate your root account to get a permanent API-Key to use for all future requests
      * that will be tied to your account
      * @param activationCode Provided by /organization/{id}/member service registration
      * @return AccountActivationDto
@@ -57,7 +57,7 @@ public class AccountResource {
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
 
         RequestContext context = RequestContext.get();
-        return accountService.heartbeat(context.getMasterAccountId(), heartbeat);
+        return accountService.heartbeat(context.getRootAccountId(), heartbeat);
     }
 
     /**
@@ -69,7 +69,7 @@ public class AccountResource {
     ConnectionStatusDto login() {
 
         RequestContext context = RequestContext.get();
-        return accountService.login(context.getMasterAccountId());
+        return accountService.login(context.getRootAccountId());
     }
 
     /**
@@ -80,7 +80,7 @@ public class AccountResource {
     SimpleStatusDto logout() {
 
         RequestContext context = RequestContext.get();
-        return accountService.logout(context.getMasterAccountId());
+        return accountService.logout(context.getRootAccountId());
     }
 
 }

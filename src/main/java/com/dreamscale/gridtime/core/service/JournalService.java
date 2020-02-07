@@ -234,7 +234,9 @@ public class JournalService {
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-    public List<JournalEntryDto> getHistoricalIntentionsForMember(UUID organizationId, UUID memberId, LocalDateTime beforeDate, Integer limit) {
+    public List<JournalEntryDto> getHistoricalIntentionsForUser(UUID organizationId, String userName, LocalDateTime beforeDate, Integer limit) {
+        UUID memberId = organizationService.getMemberIdForUser(organizationId, userName);
+
         organizationService.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
@@ -313,7 +315,9 @@ public class JournalService {
     }
 
 
-    public RecentJournalDto getJournalForMember(UUID organizationId, UUID otherMemberId, Integer effectiveLimit) {
+    public RecentJournalDto getJournalForUser(UUID organizationId, String userName, Integer effectiveLimit) {
+
+        UUID otherMemberId = organizationService.getMemberIdForUser(organizationId, userName);
 
         organizationService.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
 

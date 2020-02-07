@@ -42,7 +42,7 @@ public class CoreRandomBuilderSupport {
     private WTFFeedMessageRepository wtfFeedMessageRepository;
 
     @Autowired
-    private MasterAccountRepository masterAccountRepository;
+    private RootAccountRepository rootAccountRepository;
 
     @Autowired
     private SpiritXPRepository spiritXPRepository;
@@ -69,8 +69,8 @@ public class CoreRandomBuilderSupport {
         return new RandomOrganizationEntityBuilder(organizationRepository);
     }
 
-    public RandomMasterAccountEntityBuilder masterAccountEntity() {
-        return new RandomMasterAccountEntityBuilder(masterAccountRepository);
+    public RandomRootAccountEntityBuilder rootAccountEntity() {
+        return new RandomRootAccountEntityBuilder(rootAccountRepository);
     }
 
     public RandomOrganizationMemberEntityBuilder memberEntity() {

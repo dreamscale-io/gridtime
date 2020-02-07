@@ -7,8 +7,8 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.TalkToClient
-import com.dreamscale.gridtime.core.domain.member.MasterAccountEntity
-import com.dreamscale.gridtime.core.domain.member.MasterAccountRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.service.TimeService
@@ -29,13 +29,13 @@ class TalkToResourceSpec extends Specification {
     TalkToClient talkClient
 
     @Autowired
-    MasterAccountEntity loggedInUser
+    RootAccountEntity loggedInUser
 
     @Autowired
     TimeService mockTimeService
 
     @Autowired
-    MasterAccountRepository masterAccountRepository;
+    RootAccountRepository masterAccountRepository;
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
@@ -47,7 +47,7 @@ class TalkToResourceSpec extends Specification {
 
         masterAccountRepository.save(loggedInUser);
         OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(loggedInUser.getId()).save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(loggedInUser.getId()).save()
 
         when:
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -71,7 +71,7 @@ class TalkToResourceSpec extends Specification {
 //        given:
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
-//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(testUser.getId()).save()
+//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.getId()).save()
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -106,7 +106,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-//        testUser.setId(member.getMasterAccountId())
+//        testUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -132,7 +132,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-//        testUser.setId(member.getMasterAccountId())
+//        testUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -157,10 +157,10 @@ class TalkToResourceSpec extends Specification {
 //
 //    def "should post a snippet to active circle feed"() {
 //        given:
-//        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+//        RootAccountEntity account = aRandom.rootAccountEntity().save()
 //        OrganizationEntity org = aRandom.organizationEntity().save()
-//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-//        testUser.setId(member.getMasterAccountId())
+//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+//        testUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -186,11 +186,11 @@ class TalkToResourceSpec extends Specification {
 //    def "should retrieve all messages posted to circle feed"() {
 //        given:
 //
-//        MasterAccountEntity account = aRandom.masterAccountEntity().save()
+//        RootAccountEntity account = aRandom.rootAccountEntity().save()
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
-//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).masterAccountId(account.id).save()
-//        testUser.setId(member.getMasterAccountId())
+//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+//        testUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");

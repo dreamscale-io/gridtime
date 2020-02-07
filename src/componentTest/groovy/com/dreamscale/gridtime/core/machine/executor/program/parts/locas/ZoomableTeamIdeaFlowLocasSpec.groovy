@@ -192,11 +192,11 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
 
     private OrganizationMemberEntity createMembership(UUID organizationId) {
-        def account = aRandom.masterAccountEntity().save()
+        def account = aRandom.rootAccountEntity().save()
 
         aRandom.memberEntity()
                 .organizationId(organizationId)
-                .masterAccountId(account.id)
+                .rootAccountId(account.id)
                 .save()
     }
 }
