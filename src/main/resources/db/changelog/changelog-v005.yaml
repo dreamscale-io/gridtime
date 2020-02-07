@@ -47,3 +47,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/refactor_journal_username.sql
+
+  - include:
+        file: db/v005/replace_member_status_view_add_username.sql

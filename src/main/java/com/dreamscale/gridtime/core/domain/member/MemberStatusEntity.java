@@ -25,6 +25,8 @@ public class MemberStatusEntity {
     @Column(name = "full_name")
     private String fullName;
 
+    String username;
+
     @Column(name = "last_activity")
     private LocalDateTime lastActivity;
 

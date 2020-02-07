@@ -18,7 +18,9 @@ public class MemberWorkStatusDto {
 
     private String email;
     private String fullName;
-    private String shortName;
+    private String displayName;
+
+    private String username;
 
     private XPSummaryDto xpSummary;
     private LearningCircuitDto activeCircuit;

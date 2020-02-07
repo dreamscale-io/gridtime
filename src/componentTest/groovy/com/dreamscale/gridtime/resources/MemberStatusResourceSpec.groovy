@@ -48,6 +48,7 @@ class MemberStatusResourceSpec extends Specification {
 
         then:
         assert memberWorkStatusDto != null
+        assert memberWorkStatusDto.getUsername() != null;
 
     }
 
@@ -68,6 +69,8 @@ class MemberStatusResourceSpec extends Specification {
         then:
         assert members != null
         assert members.size() > 0
+
+        assert members.get(0).getUsername() != null;
 
     }
 

@@ -85,7 +85,7 @@ public class MemberStatusService {
 
         XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
         memberStatusDto.setXpSummary(xpSummary);
-        memberStatusDto.setShortName(createShortName(memberStatusEntity.getFullName()));
+        memberStatusDto.setDisplayName(createDisplayName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircuitId() != null) {
             LearningCircuitDto circuitDto = circuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
@@ -99,7 +99,7 @@ public class MemberStatusService {
 
 
 
-    private String createShortName(String fullName) {
+    private String createDisplayName(String fullName) {
         String shortName = fullName;
         if (fullName != null && fullName.contains(" ")) {
             shortName = fullName.substring(0, fullName.indexOf(" "));
@@ -118,8 +118,8 @@ public class MemberStatusService {
 
                 compare = orderMember1.compareTo(orderMember2);
             }
-            if (compare == 0 && member1.getShortName() != null && member2.getShortName() != null) {
-                compare = member1.getShortName().compareTo(member2.getShortName());
+            if (compare == 0 && member1.getDisplayName() != null && member2.getDisplayName() != null) {
+                compare = member1.getDisplayName().compareTo(member2.getDisplayName());
             }
             return compare;
         });
