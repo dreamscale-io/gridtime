@@ -71,7 +71,6 @@ class MemberStatusResourceSpec extends Specification {
         assert members.size() > 0
 
         assert members.get(0).getUsername() != null;
-
     }
 
 }

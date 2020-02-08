@@ -1,9 +1,6 @@
 package com.dreamscale.gridtime.core.hooks.talk.dto;
 
-import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto;
-import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
-import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
-import com.dreamscale.gridtime.api.circuit.SnippetMessageDetailsDto;
+import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
 import lombok.Getter;
 
@@ -19,7 +16,8 @@ public enum CircuitMessageType {
     CIRCUIT_CLOSED("circuit-closed", "Circuit is closed.", CircuitStatusDto.class),
     CIRCUIT_ONHOLD("circuit-onhold", "Circuit is on hold.", CircuitStatusDto.class),
     CIRCUIT_RESUMED("circuit-resume", "Circuit is resumed.", CircuitStatusDto.class),
-    CIRCUIT_RETRO_STARTED("circuit-retro", "Circuit retro is started.", CircuitStatusDto.class);
+    CIRCUIT_RETRO_STARTED("circuit-retro", "Circuit retro is started.", CircuitStatusDto.class),
+    INTENTION_STARTED("intention-started", "Intention started.", IntentionStartedDetailsDto.class);
 
     private final String talkMessageType;
     private final Class<?> messageClazz;

@@ -11,7 +11,7 @@ import java.util.Set;
 
 public enum IdeaFlowStateType implements FeatureType {
 
-    WTF_STATE("/wtf", "/wtf/{circleId}", CircuitDetails.class),
+    WTF_STATE("/wtf", "/wtf/{circuitId}", CircuitDetails.class),
     LEARNING_STATE("/learn", "/learn", null),
     PROGRESS_STATE("/progress", "/progress", null);
 
@@ -70,6 +70,6 @@ public enum IdeaFlowStateType implements FeatureType {
     }
 
     public static class TemplateVariable {
-        public static String CIRCLE_ID = "circleId";
+        public static String CIRCLE_ID = "circuitId";
     }
 }

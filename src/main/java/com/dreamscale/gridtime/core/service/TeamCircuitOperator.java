@@ -1,15 +1,18 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.circuit.DescriptionInputDto;
-import com.dreamscale.gridtime.api.circuit.TagsInputDto;
+import com.dreamscale.gridtime.api.circuit.*;
+import com.dreamscale.gridtime.api.journal.IntentionDto;
+import com.dreamscale.gridtime.api.journal.JournalEntryDto;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.circuit.*;
-import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
+import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
@@ -52,6 +55,12 @@ public class TeamCircuitOperator {
 
     @Autowired
     private TimeService timeService;
+
+    @Autowired
+    private GridTalkRouter talkRouter;
+
+    @Autowired
+    private TalkRoomMessageRepository talkRoomMessageRepository;
 
     private static final String TEAM_ROOM_PREFIX = "team-";
     private static final String TEAM_ROOM_DEFAULT_NAME = "home";
@@ -97,7 +106,42 @@ public class TeamCircuitOperator {
         return teamCircuitDto;
     }
 
+    public void notifyTeamOfIntention(String userName, UUID memberFromId, LocalDateTime now, Long nanoTime, UUID roomId, JournalEntryDto journalEntryDto) {
 
+        IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(roomId);
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.INTENTION_STARTED);
+        messageEntity.setJsonBody(JSONTransformer.toJson(intentionStartedDetails));
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+
+        talkRoomMessageRepository.save(messageEntity);
+
+    }
+
+    private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity) {
+
+        TalkMessageDto messageDto = new TalkMessageDto();
+        messageDto.setId(messageEntity.getId());
+        messageDto.setUri(messageEntity.getToRoomId().toString());
+        messageDto.setJsonBody(messageEntity.getJsonBody());
+
+        messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
+
+        messageDto.setMessageTime(messageEntity.getPosition());
+        messageDto.setNanoTime(messageEntity.getNanoTime());
+        messageDto.setMessageType(messageEntity.getMessageType().getSimpleClassName());
+
+        return messageDto;
+    }
 
     public TeamCircuitRoomDto createTeamCircuitRoom(UUID organizationId, String teamName, String roomName) {
 

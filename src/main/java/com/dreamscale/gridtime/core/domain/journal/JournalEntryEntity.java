@@ -51,9 +51,6 @@ public class JournalEntryEntity {
 
     String journalEntryType;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID circleId;
-
     private String linkedMembers;
 
     public List<Member> getLinkedMembers() {

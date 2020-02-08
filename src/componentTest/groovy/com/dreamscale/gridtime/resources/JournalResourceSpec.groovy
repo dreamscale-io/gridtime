@@ -18,6 +18,9 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,6 +59,9 @@ class JournalResourceSpec extends Specification {
     RecentTaskRepository recentTaskRepository
 
     @Autowired
+    RootAccountRepository rootAccountRepository;
+
+    @Autowired
     TimeService mockTimeService
 
     @Autowired
@@ -63,8 +69,15 @@ class JournalResourceSpec extends Specification {
 
     def "should save new intention"() {
         given:
+        2 * mockTimeService.now() >> LocalDateTime.now()
+        1 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+
+        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
 
@@ -81,8 +94,14 @@ class JournalResourceSpec extends Specification {
 
     def "should update flame rating"() {
         given:
+        2 * mockTimeService.now() >> LocalDateTime.now()
+        1 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
         JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
@@ -100,13 +119,17 @@ class JournalResourceSpec extends Specification {
 
     def "should finish intention"() {
         given:
+        3 * mockTimeService.now() >> LocalDateTime.now()
+
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
         JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
 
-        1 * mockTimeService.now() >> LocalDateTime.now()
         when:
         JournalEntryDto result = journalClient.finishIntention(intention.getId().toString(), new IntentionFinishInputDto(FinishStatus.done));
 
@@ -119,8 +142,14 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions"() {
         given:
+        3 * mockTimeService.now() >> LocalDateTime.now()
+        2 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -138,8 +167,14 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions with limit"() {
         given:
+        5 * mockTimeService.now() >> LocalDateTime.now()
+        4 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -163,20 +198,25 @@ class JournalResourceSpec extends Specification {
     def "get historical intentions before date"() {
         given:
         TaskEntity task = createOrganizationAndTask()
-        OrganizationMemberEntity membership = createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+
+        rootAccountRepository.save(loggedInUser)
+        OrganizationMemberEntity membership = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build()
 
-        3 * mockTimeService.now() >> LocalDateTime.now().minusDays(5)
+        4 * mockTimeService.now() >> LocalDateTime.now().minusDays(5)
+        3 * mockTimeService.nanoTime() >> System.nanoTime()
 
         journalClient.createIntention(intention1)
         journalClient.createIntention(intention2)
         journalClient.createIntention(intention3)
 
         1 * mockTimeService.now() >> LocalDateTime.now()
+        1 * mockTimeService.nanoTime() >> System.nanoTime()
 
         journalClient.createIntention(intention4)
 
@@ -193,9 +233,14 @@ class JournalResourceSpec extends Specification {
 
     def "get recent tasks summary"() {
         given:
-        OrganizationEntity organization = aRandom.organizationEntity().save()
+        5 * mockTimeService.now() >> LocalDateTime.now()
+        4 * mockTimeService.nanoTime() >> System.nanoTime()
 
-        createMembership(organization.getId(), loggedInUser.getId())
+        OrganizationEntity organization = aRandom.organizationEntity().save()
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(organization.getId()).save()
+        rootAccountRepository.save(loggedInUser)
+
+        createMembership(organization.getId(), loggedInUser.getId(), teamEntity.getId())
 
         ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).save()
         ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).save()
@@ -236,7 +281,10 @@ class JournalResourceSpec extends Specification {
         OrganizationEntity organization = aRandom.organizationEntity().build()
         organizationRepository.save(organization)
 
-        createMembership(organization.getId(), loggedInUser.getId());
+        rootAccountRepository.save(loggedInUser)
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(organization.getId()).save()
+
+        createMembership(organization.getId(), loggedInUser.getId(), teamEntity.getId());
 
         ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
         projectRepository.save(project1)
@@ -274,8 +322,13 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions for other member"() {
         given:
+        3 * mockTimeService.now() >> LocalDateTime.now()
+        2 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId())
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        rootAccountRepository.save(loggedInUser)
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -285,7 +338,7 @@ class JournalResourceSpec extends Specification {
 
         //change active logged in user to a different user within same organization
         loggedInUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
+        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalForUser(memberWithIntentions.getUsername()).recentIntentions
@@ -297,8 +350,14 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions for other member with limit"() {
         given:
+        3 * mockTimeService.now() >> LocalDateTime.now()
+        2 * mockTimeService.nanoTime() >> System.nanoTime()
+
         TaskEntity task = createOrganizationAndTask()
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId())
+
+        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        rootAccountRepository.save(loggedInUser)
+        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
         IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
@@ -308,7 +367,7 @@ class JournalResourceSpec extends Specification {
 
         //change active logged in user to a different user within same organization
         loggedInUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId())
+        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalForUserWithLimit(
@@ -320,7 +379,6 @@ class JournalResourceSpec extends Specification {
     }
 
     private JournalEntryDto createIntentionWithClient(IntentionInputDto intentionInputDto) {
-        1 * mockTimeService.now() >> LocalDateTime.now()
         return journalClient.createIntention(intentionInputDto)
     }
 
@@ -334,10 +392,17 @@ class JournalResourceSpec extends Specification {
         return task
     }
 
-    private OrganizationMemberEntity createMembership(UUID organizationId, UUID masterAccountId) {
+    private OrganizationMemberEntity createMembership(UUID organizationId, UUID rootAccountId, UUID teamId) {
+
         OrganizationMemberEntity member = aRandom.memberEntity()
                 .organizationId(organizationId)
-                .rootAccountId(masterAccountId)
+                .rootAccountId(rootAccountId)
+                .save()
+
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity()
+                .organizationId(organizationId)
+                .memberId(member.getId())
+                .teamId(teamId)
                 .save()
 
         return member

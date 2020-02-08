@@ -44,7 +44,7 @@ public class ActiveStatusService {
         teamMemberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberWorkStatusDto.class, TeamMemberWorkStatusEntity.class);
     }
 
-    //rename circleId to circuitId
+    //rename circuitId to circuitId
 
     //when team member pushes WTF, notify room
     //when team member resolves WTF, notify room

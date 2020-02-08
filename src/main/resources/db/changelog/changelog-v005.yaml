@@ -50,3 +50,6 @@ databaseChangeLog:
 
   - include:
         file: db/v005/replace_member_status_view_add_username.sql
+
+  - include:
+        file: db/v005/replace_journal_entry_view_with_no_circuit_id.sql

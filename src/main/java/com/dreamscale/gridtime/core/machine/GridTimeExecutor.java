@@ -41,9 +41,9 @@ public class GridTimeExecutor {
 
     private boolean hasPoolCapacityForMoreWork() {
 
-        log.info("executor tasks  = "+executorPool.getTaskCount());
-        log.info("executor active = "+executorPool.getActiveCount());
-        log.info("executor queue = "+executorPool.getQueue().size());
+//        log.info("executor tasks  = "+executorPool.getTaskCount());
+//        log.info("executor active = "+executorPool.getActiveCount());
+//        log.info("executor queue = "+executorPool.getQueue().size());
 
         return executorPool.getActiveCount() <= MAX_WORK_CAPACITY;
     }
@@ -57,7 +57,7 @@ public class GridTimeExecutor {
                 while (isGameLoopRunning.get()) {
                     //fairly round robin with all active torchies,
                     //whenever there is room in the executor pool
-                    log.info("tick");
+                    //log.info("tick");
                     while (hasPoolCapacityForMoreWork() && workerPool.hasWork()) {
                         TileInstructions instruction = workerPool.whatsNext();
 
@@ -70,7 +70,7 @@ public class GridTimeExecutor {
                             workerPool.evictLastWorker();
                         }
                     }
-                    log.info("sleeping");
+                    //log.info("sleeping");
                     Thread.sleep(LOOK_FOR_MORE_WORK_DELAY);
                 }
             } catch (InterruptedException ex) {

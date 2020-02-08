@@ -272,4 +272,15 @@ public class OrganizationService {
 
         return null;
     }
+
+    public String getUsernameForMemberId(UUID memberId) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findById(memberId);
+
+        String userName = null;
+        if (membership != null) {
+            return membership.getUsername();
+        }
+
+        return userName;
+    }
 }

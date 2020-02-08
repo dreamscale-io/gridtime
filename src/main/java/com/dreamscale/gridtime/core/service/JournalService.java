@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.journal.*;
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
+import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.json.Member;
@@ -61,6 +62,9 @@ public class JournalService {
     private SpiritService spiritService;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
+
+    @Autowired
+    private TeamCircuitOperator teamCircuitOperator;
 
 
     @Autowired
@@ -163,9 +167,12 @@ public class JournalService {
     }
 
     private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
+
         spiritService.grantXP(organizationId, memberId, 10);
 
+        log.info("Time access");
         LocalDateTime creationTime = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
         IntentionEntity lastIntention = closeLastIntention(memberId, creationTime);
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
@@ -180,14 +187,20 @@ public class JournalService {
         intentionEntity.setOrganizationId(organizationId);
         intentionEntity.setLinked(isLinked);
         intentionEntity.setMemberId(memberId);
-
         intentionRepository.save(intentionEntity);
+
+        String userName = organizationService.getUsernameForMemberId(memberId);
+        TeamCircuitDto teamCircuit = teamCircuitOperator.getMyPrimaryTeamCircuit(organizationId, memberId);
+
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+        JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
+
+        teamCircuitOperator.notifyTeamOfIntention(userName, memberId, creationTime, nanoTime, teamCircuit.getDefaultRoom().getTalkRoomId(), journalEntryDto);
 
         recentActivityService.updateRecentProjects(intentionEntity);
         recentActivityService.updateRecentTasks(intentionEntity);
 
         return intentionEntity;
-
 
     }
 

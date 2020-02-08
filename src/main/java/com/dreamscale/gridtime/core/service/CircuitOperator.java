@@ -40,6 +40,7 @@ public class CircuitOperator {
 
     public static final String RETRO_ROOM_SUFFIX = "-retro";
     public static final String WTF_ROOM_SUFFIX = "-wtf";
+
     SillyNameGenerator sillyNameGenerator;
 
     @Autowired
