@@ -202,6 +202,27 @@ public class LearningCircuitResource {
         return circuitOperator.closeExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+
+    /**
+     * Aborts an existing Learning Circuit owned by the invoking team member.
+     *
+     * This causes circuits to disappear from the "My Circuits" list, without having to finish the WTF
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
+    public LearningCircuitDto abortExistingCircuit(@PathVariable("name") String circuitName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("abortExistingCircuit, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+
+        return circuitOperator.abortExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+
     /**
      * Changes the status of an active Learning Circuit to the "Do It Later" status.
      *

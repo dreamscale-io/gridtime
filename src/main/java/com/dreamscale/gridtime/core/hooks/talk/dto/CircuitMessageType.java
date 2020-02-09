@@ -17,6 +17,7 @@ public enum CircuitMessageType {
     CIRCUIT_ONHOLD("circuit-onhold", "Circuit is on hold.", CircuitStatusDto.class),
     CIRCUIT_RESUMED("circuit-resume", "Circuit is resumed.", CircuitStatusDto.class),
     CIRCUIT_RETRO_STARTED("circuit-retro", "Circuit retro is started.", CircuitStatusDto.class),
+    CIRCUIT_ABORTED("circuit-aborted", "Circuit is aborted", CircuitStatusDto.class),
     INTENTION_STARTED("intention-started", "Intention started.", IntentionStartedDetailsDto.class);
 
     private final String talkMessageType;

@@ -364,6 +364,13 @@ public class CircuitOperator {
         }
     }
 
+    private void validateCircuitIsActiveOrOnHold(String circuitName, LearningCircuitEntity learningCircuitEntity) {
+        if (!(learningCircuitEntity.getCircuitStatus() == CircuitStatus.ACTIVE
+                || learningCircuitEntity.getCircuitStatus() == CircuitStatus.ONHOLD)) {
+            throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or OnHold: " + circuitName);
+        }
+    }
+
     private void validateCircuitIsOnHold(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getCircuitStatus() != CircuitStatus.ONHOLD) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be OnHold: " + circuitName);
@@ -500,6 +507,32 @@ public class CircuitOperator {
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
         return toDto(learningCircuitEntity);
+    }
+
+
+    public LearningCircuitDto abortExistingCircuit(UUID organizationId, UUID ownerId, String circuitName) {
+
+        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
+
+        validateCircuitExists(circuitName, learningCircuitEntity);
+        validateCircuitIsActiveOrOnHold(circuitName, learningCircuitEntity);
+
+        LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
+
+        sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_ABORTED);
+
+        learningCircuitEntity.setCloseTime(now);
+        learningCircuitEntity.setCircuitStatus(CircuitStatus.ABORTED);
+
+        learningCircuitRepository.save(learningCircuitEntity);
+
+        activeStatusService.resolveWTFWithAbort(organizationId, ownerId);
+
+        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
+
+        return toDto(learningCircuitEntity);
+
     }
 
     @Transactional

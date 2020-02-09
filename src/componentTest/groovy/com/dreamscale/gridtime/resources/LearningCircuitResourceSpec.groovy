@@ -155,6 +155,26 @@ class LearningCircuitResourceSpec extends Specification {
         assert activeCircuit == null
     }
 
+    def 'should abort a circuit'() {
+        given:
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+
+        when:
+
+        LearningCircuitDto abortedCircuit = circuitClient.abortExistingCircuit(circuit.getCircuitName());
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
+
+        then:
+        assert abortedCircuit != null
+        assert abortedCircuit.circuitStatus == CircuitStatus.ABORTED.name()
+        assert activeCircuit == null
+    }
+
 
     def "should shelf a circuit with do it later"() {
         given:
