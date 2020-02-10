@@ -91,7 +91,7 @@ class FlowResourceSpec extends Specification {
         NewSnippetEventDto snippet = aRandom.snippetEvent().build()
 
         when:
-        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startWTF()
         flowClient.publishSnippet(snippet)
 
         then:

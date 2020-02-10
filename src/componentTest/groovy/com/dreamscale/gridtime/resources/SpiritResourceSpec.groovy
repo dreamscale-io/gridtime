@@ -1,17 +1,21 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto
 import com.dreamscale.gridtime.api.spirit.SpiritDto
 import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
+import com.dreamscale.gridtime.api.spirit.XPDto
+import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.SpiritClient
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.SpiritXPEntity
-
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -32,6 +36,11 @@ class SpiritResourceSpec extends Specification {
     @Autowired
     TimeService mockTimeService
 
+    @Autowired
+    LearningCircuitClient circuitClient
+
+    OrganizationEntity org
+
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
@@ -41,13 +50,14 @@ class SpiritResourceSpec extends Specification {
         keys.put("key", "key2")
         keys.put("secretKey", "key3")
 
+        org = aRandom.organizationEntity().save()
+
     }
 
     def "should get the xp for the Torchie spirit"() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member.id).save()
 
         testUser.setId(member.getRootAccountId())
@@ -62,6 +72,58 @@ class SpiritResourceSpec extends Specification {
 
     }
 
+    def "should grant xp to the Torchie spirit"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member.id).save()
+
+        testUser.setId(member.getRootAccountId())
+
+        when:
+        SpiritDto spiritBefore = spiritClient.getMyTorchie();
+
+        spiritClient.grantXP(new XPDto(50));
+
+        SpiritDto spiritAfter = spiritClient.getMyTorchie();
+
+        then:
+        assert spiritAfter != null
+        assert spiritBefore.xpSummary.totalXP + 50 == spiritAfter.xpSummary.totalXP
+    }
+
+    def "should grant xp to the Torchie group members"() {
+        given:
+
+        OrganizationMemberEntity member1 = createMemberWithOrgAndTeam();
+        OrganizationMemberEntity member2 = createMemberWithOrgAndTeam();
+
+        aRandom.spiritXPEntity().memberId(member1.id).save()
+        aRandom.spiritXPEntity().memberId(member2.id).save()
+
+        testUser.setId(member1.getRootAccountId())
+
+        when:
+        SpiritDto spirit1Before = spiritClient.getMyTorchie();
+        SpiritDto spirit2Before = spiritClient.getFriendTorchie(member2.id.toString())
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        testUser.setId(member2.getRootAccountId())
+        circuitClient.joinExistingCircuit(circuit.getCircuitName())
+
+        testUser.setId(member1.getRootAccountId())
+
+        spiritClient.grantGroupXP(new XPDto(50));
+
+        SpiritDto spirit1After = spiritClient.getMyTorchie();
+        SpiritDto spirit2After = spiritClient.getFriendTorchie(member2.id.toString())
+
+        then:
+        assert spirit1Before.xpSummary.totalXP + 50 == spirit1After.xpSummary.totalXP
+        assert spirit2Before.xpSummary.totalXP + 50 == spirit2After.xpSummary.totalXP
+
+    }
 
     def "should link to another spirit"() {
         given:
@@ -78,7 +140,6 @@ class SpiritResourceSpec extends Specification {
         when:
         ActiveLinksNetworkDto activeLinksNetworkDto1 = spiritClient.linkToTorchie(member2.getId().toString())
         ActiveLinksNetworkDto activeLinksNetworkDto2 = spiritClient.linkToTorchie(member3.getId().toString())
-
 
         then:
         assert activeLinksNetworkDto1 != null
@@ -225,4 +286,15 @@ class SpiritResourceSpec extends Specification {
 
     }
 
+    private OrganizationMemberEntity createMemberWithOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamEntity team = aRandom.teamEntity().organizationId(org.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
+
+        return member;
+
+    }
 }

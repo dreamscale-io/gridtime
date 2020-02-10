@@ -38,7 +38,7 @@ public class LearningCircuitResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH)
-    public LearningCircuitDto createLearningCircuitForWTF() {
+    public LearningCircuitDto startWTF() {
         RequestContext context = RequestContext.get();
         log.info("startLearningCircuitForWTF, user={}", context.getRootAccountId());
 
@@ -62,9 +62,9 @@ public class LearningCircuitResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.WTF_PATH + "/{name}")
-    public LearningCircuitDto createLearningCircuitForWTFWithCustomName(@PathVariable("name") String circuitName) {
+    public LearningCircuitDto startWTFWithCustomCircuitName(@PathVariable("name") String circuitName) {
         RequestContext context = RequestContext.get();
-        log.info("createLearningCircuitForWTFWithCustomName, user={}", context.getRootAccountId());
+        log.info("startWTFWithCustomCircuitName, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 

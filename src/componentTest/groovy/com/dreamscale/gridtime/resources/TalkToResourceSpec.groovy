@@ -51,7 +51,7 @@ class TalkToResourceSpec extends Specification {
         loggedInUser.setId(member.getRootAccountId())
 
         when:
-        LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
+        LearningCircuitDto circuit = circuitClient.startWTF()
         //should add me to the room?
 
         LearningCircuitWithMembersDto details = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());

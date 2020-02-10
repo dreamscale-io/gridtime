@@ -1,5 +1,8 @@
 package com.dreamscale.gridtime.core.service;
 
+import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkRepository;
@@ -156,6 +159,21 @@ public class SpiritService {
     }
 
 
+    public void giveGroupXP(UUID organizationId, UUID ownerMember, int xpAmount) {
+        LearningCircuitDto activeCircuit = learningCircuitOperator.getMyActiveWTFCircuit(organizationId, ownerMember);
+
+        if (activeCircuit != null) {
+            LearningCircuitWithMembersDto circuitDetails =
+                    learningCircuitOperator.getCircuitWithAllDetails(organizationId, activeCircuit.getCircuitName());
+
+            List<CircuitMemberStatusDto> members = circuitDetails.getCircuitMembers();
+
+            for (CircuitMemberStatusDto member : members) {
+                grantXP(organizationId, member.getMemberId(), xpAmount);
+            }
+        }
+    }
+
     public SpiritNetworkDto getSpiritNetwork(UUID organizationId, UUID torchieId) {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
@@ -234,14 +252,14 @@ public class SpiritService {
     }
 
 
-    public void grantXP(UUID organizationId, UUID torchieId, int xpAmount) {
-        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByMemberId(torchieId);
+    public void grantXP(UUID organizationId, UUID memberId, int xpAmount) {
+        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByMemberId(memberId);
 
         if (spiritXPEntity == null) {
             spiritXPEntity = new SpiritXPEntity();
             spiritXPEntity.setId(UUID.randomUUID());
             spiritXPEntity.setOrganizationId(organizationId);
-            spiritXPEntity.setMemberId(torchieId);
+            spiritXPEntity.setMemberId(memberId);
             spiritXPEntity.setTotalXp(xpAmount);
 
         } else {
@@ -325,6 +343,8 @@ public class SpiritService {
         }
 
     }
+
+
 
 
     @Builder

@@ -16,10 +16,10 @@ public interface LearningCircuitClient {
 
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
-    LearningCircuitDto startLearningCircuitForWTF();
+    LearningCircuitDto startWTF();
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}")
-    LearningCircuitDto createLearningCircuitWithCustomName(@Param("name") String customCircuitName);
+    LearningCircuitDto startWTFWithCustomCircuitName(@Param("name") String customCircuitName);
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
     LearningCircuitDto saveDescriptionForLearningCircuit(@Param("name") String customCircuitName, DescriptionInputDto descriptionInputDto);

@@ -39,6 +39,42 @@ public class SpiritResource {
         return spiritService.getTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
+
+    /**
+     * Gives torchie XP in the specified amount
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.XP_PATH)
+    public XPDto giveXP(@RequestBody XPDto xpAmount) {
+        RequestContext context = RequestContext.get();
+        log.info("giveXP, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getRootAccountId());
+
+        spiritService.grantXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
+
+        return xpAmount;
+    }
+
+
+    /**
+     * Gives torchie XP in the specified amount
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.GROUP_PATH + ResourcePaths.XP_PATH)
+    public XPDto giveGroupXP(@RequestBody XPDto xpAmount) {
+        RequestContext context = RequestContext.get();
+        log.info("giveGroupXP, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getRootAccountId());
+
+        spiritService.giveGroupXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
+
+        return xpAmount;
+    }
+
+
+
     /**
      * Queries for active spirit network, within 1 hop reach by default
      * @return SpiritNetworkDto
