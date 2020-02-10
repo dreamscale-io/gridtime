@@ -32,6 +32,9 @@ public class SpiritService {
     LearningCircuitOperator learningCircuitOperator;
 
     @Autowired
+    TeamCircuitOperator teamCircuitOperator;
+
+    @Autowired
     ActiveSpiritLinkRepository activeSpiritLinkRepository;
 
     @Autowired
@@ -158,8 +161,8 @@ public class SpiritService {
         }
     }
 
+    public void grantGroupXP(UUID organizationId, UUID ownerMember, int xpAmount) {
 
-    public void giveGroupXP(UUID organizationId, UUID ownerMember, int xpAmount) {
         LearningCircuitDto activeCircuit = learningCircuitOperator.getMyActiveWTFCircuit(organizationId, ownerMember);
 
         if (activeCircuit != null) {
@@ -168,8 +171,11 @@ public class SpiritService {
 
             List<CircuitMemberStatusDto> members = circuitDetails.getCircuitMembers();
 
+            LocalDateTime now = timeService.now();
+            Long nanoTime = timeService.nanoTime();
+
             for (CircuitMemberStatusDto member : members) {
-                grantXP(organizationId, member.getMemberId(), xpAmount);
+                grantXP(organizationId, ownerMember, member.getMemberId(), now, nanoTime, xpAmount);
             }
         }
     }
@@ -251,22 +257,38 @@ public class SpiritService {
         return networkId;
     }
 
+    public void grantXPNow(UUID organizationId, UUID fromMemberId, UUID forMemberId, int xpAmount) {
+        LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
 
-    public void grantXP(UUID organizationId, UUID memberId, int xpAmount) {
-        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByMemberId(memberId);
+        grantXP(organizationId, fromMemberId, forMemberId, now, nanoTime, xpAmount);
+    }
+
+    public void grantXP(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, int xpAmount) {
+
+        SpiritXPEntity spiritXPEntity = spiritXPRepository.findByMemberId(forMemberId);
+
+        int oldXP = 0;
 
         if (spiritXPEntity == null) {
             spiritXPEntity = new SpiritXPEntity();
             spiritXPEntity.setId(UUID.randomUUID());
             spiritXPEntity.setOrganizationId(organizationId);
-            spiritXPEntity.setMemberId(memberId);
+            spiritXPEntity.setMemberId(forMemberId);
             spiritXPEntity.setTotalXp(xpAmount);
 
         } else {
+            oldXP = spiritXPEntity.getTotalXp();
+
             spiritXPEntity.setTotalXp(spiritXPEntity.getTotalXp() + xpAmount);
         }
 
         spiritXPRepository.save(spiritXPEntity);
+
+        XPSummaryDto oldXPSummary = createXpSummary(oldXP);
+        XPSummaryDto newXPSummary = createXpSummary(spiritXPEntity.getTotalXp());
+
+        teamCircuitOperator.notifyTeamOfXPUpdate(organizationId, fromMemberId, forMemberId, now, nanoTime, oldXPSummary, newXPSummary);
     }
 
     private XPSummaryDto getLatestXPForSpirit(UUID torchidId) {
@@ -274,13 +296,13 @@ public class SpiritService {
         SpiritXPEntity memberXPEntity = spiritXPRepository.findByMemberId(torchidId);
 
         if (memberXPEntity != null) {
-            return calculateCurrentXpState(memberXPEntity.getTotalXp());
+            return createXpSummary(memberXPEntity.getTotalXp());
         } else {
             return createDefaultXpSummary();
         }
     }
 
-    private XPSummaryDto calculateCurrentXpState(Integer totalXp) {
+    private XPSummaryDto createXpSummary(Integer totalXp) {
 
         Map<Integer, Level> levels = new TreeMap<>();
 
@@ -337,7 +359,7 @@ public class SpiritService {
 
     public XPSummaryDto translateToXPSummary(Integer totalXp) {
         if (totalXp != null) {
-            return calculateCurrentXpState(totalXp);
+            return createXpSummary(totalXp);
         } else {
             return createDefaultXpSummary();
         }

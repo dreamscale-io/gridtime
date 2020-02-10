@@ -168,10 +168,10 @@ public class JournalService {
 
     private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
 
-        spiritService.grantXP(organizationId, memberId, 10);
-
         LocalDateTime now = timeService.now();
         Long nanoTime = timeService.nanoTime();
+
+        spiritService.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
         IntentionEntity lastIntention = closeLastIntention(memberId, now);
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {

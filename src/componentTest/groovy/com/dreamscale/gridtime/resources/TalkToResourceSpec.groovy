@@ -59,7 +59,6 @@ class TalkToResourceSpec extends Specification {
         talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(), new ChatMessageInputDto("hello world"))
         talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(), new ChatMessageInputDto("hello 2"))
 
-
         List<TalkMessageDto> messages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
 
         then:

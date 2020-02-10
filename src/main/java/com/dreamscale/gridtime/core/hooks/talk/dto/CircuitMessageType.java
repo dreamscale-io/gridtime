@@ -24,7 +24,9 @@ public enum CircuitMessageType {
     TEAM_WTF_STOPPED("wtf-started", "WTF stopped.", WTFStatusUpdateDto.class),
     TEAM_WTF_RESUMED("wtf-resumed", "WTF resumed.", WTFStatusUpdateDto.class),
     TEAM_RETRO_STARTED("wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
-    TEAM_MEMBER_STATUS_UPDATE("member-status-update", "Member status updated.", MemberWorkStatusDto.class);
+    TEAM_MEMBER_STATUS_UPDATE("member-status-update", "Member status updated.", MemberWorkStatusDto.class),
+    TEAM_MEMBER_XP_UPDATE("member-xp-update", "Member XP updated.", XPStatusUpdateDto.class);
+
 
     private final String talkMessageType;
     private final Class<?> messageClazz;

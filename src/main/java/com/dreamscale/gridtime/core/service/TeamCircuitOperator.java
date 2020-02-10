@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
+import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
@@ -66,6 +67,20 @@ public class TeamCircuitOperator {
 
     private static final String TEAM_ROOM_PREFIX = "team-";
     private static final String TEAM_ROOM_DEFAULT_NAME = "home";
+
+
+    public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
+
+        TeamDto teamDto = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
+
+        if (circuit != null) {
+            return circuit.getTeamRoomId();
+        } else {
+            TeamCircuitDto circuitWithDetails = getMyPrimaryTeamCircuit(organizationId, memberId);
+            return circuitWithDetails.getDefaultRoom().getTalkRoomId();
+        }
+    }
 
     public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
 
@@ -193,6 +208,28 @@ public class TeamCircuitOperator {
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
         talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+
+        talkRoomMessageRepository.save(messageEntity);
+    }
+
+    public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {
+        UUID talkRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
+
+        String userName = organizationService.getUsernameForMemberId(forMemberId);
+        XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(userName, forMemberId, oldXPSummary, newXPSummary);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(fromMemberId);
+        messageEntity.setToRoomId(talkRoomId);
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_XP_UPDATE);
+        messageEntity.setJsonBody(JSONTransformer.toJson(xpStatusUpdateDto));
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(talkRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }

@@ -31,14 +31,13 @@ public class SpiritResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.ME_PATH )
-    public SpiritDto getMySpirit() {
+    public SpiritDto getMyTorchie() {
         RequestContext context = RequestContext.get();
-        log.info("getTorchie, user={}", context.getRootAccountId());
+        log.info("getMyTorchie, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getRootAccountId());
         return spiritService.getTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
-
 
     /**
      * Gives torchie XP in the specified amount
@@ -47,11 +46,11 @@ public class SpiritResource {
     @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.XP_PATH)
     public XPDto giveXP(@RequestBody XPDto xpAmount) {
         RequestContext context = RequestContext.get();
-        log.info("giveXP, user={}", context.getRootAccountId());
+        log.info("grantXPNow, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        spiritService.grantXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
+        spiritService.grantXPNow(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), invokingSpirit.getId(), xpAmount.getXpAmount());
 
         return xpAmount;
     }
@@ -64,11 +63,11 @@ public class SpiritResource {
     @PostMapping(ResourcePaths.GROUP_PATH + ResourcePaths.XP_PATH)
     public XPDto giveGroupXP(@RequestBody XPDto xpAmount) {
         RequestContext context = RequestContext.get();
-        log.info("giveGroupXP, user={}", context.getRootAccountId());
+        log.info("grantGroupXP, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingSpirit = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        spiritService.giveGroupXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
+        spiritService.grantGroupXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
 
         return xpAmount;
     }
