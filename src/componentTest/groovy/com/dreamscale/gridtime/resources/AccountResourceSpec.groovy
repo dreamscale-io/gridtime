@@ -21,6 +21,8 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.service.JiraService
 import org.springframework.beans.factory.annotation.Autowired
@@ -103,9 +105,8 @@ class AccountResourceSpec extends Specification {
     def "should create a circuit then logout & login again"() {
         given:
 
-        masterAccountRepository.save(testUser)
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
 
         when:
 
@@ -120,7 +121,7 @@ class AccountResourceSpec extends Specification {
         then:
         assert newConnectionStatus != null
         assert newConnectionStatus.connectionId != connectionStatusDto.connectionId
-        assert newConnectionStatus.organizationId == org.id
+        assert newConnectionStatus.organizationId == member.getOrganizationId()
         assert newConnectionStatus.memberId == member.id
         assert newConnectionStatus.status == Status.VALID
     }
@@ -166,4 +167,18 @@ class AccountResourceSpec extends Specification {
         return organization
     }
 
+
+    private OrganizationMemberEntity createMemberWithOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamEntity team = aRandom.teamEntity().organizationId(org.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
+
+        return member;
+
+    }
 }

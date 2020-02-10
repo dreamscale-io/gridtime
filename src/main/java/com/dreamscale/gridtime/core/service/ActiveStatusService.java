@@ -1,10 +1,13 @@
 package com.dreamscale.gridtime.core.service;
 
+import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.organization.TeamMemberWorkStatusDto;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusRepository;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
@@ -29,6 +32,9 @@ public class ActiveStatusService {
     TeamMemberWorkStatusRepository teamMemberWorkStatusRepository;
 
     @Autowired
+    private MemberStatusService memberStatusService;
+
+    @Autowired
     TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
@@ -38,6 +44,7 @@ public class ActiveStatusService {
     private MapperFactory mapperFactory;
 
     private DtoEntityMapper<TeamMemberWorkStatusDto, TeamMemberWorkStatusEntity> teamMemberStatusMapper;
+
 
     @PostConstruct
     private void init() {
@@ -52,11 +59,9 @@ public class ActiveStatusService {
     //when team member goes online/offline, notify room
 
     @Transactional
-    public TeamMemberWorkStatusDto pushWTFStatus(UUID organizationId, UUID memberId, UUID circuitId) {
+    public void pushWTFStatus(UUID organizationId, UUID memberId, UUID circuitId, LocalDateTime now, Long nanoTime) {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
-
-        LocalDateTime now = timeService.now();
 
         if (activeWorkStatusEntity == null) {
             activeWorkStatusEntity = new ActiveWorkStatusEntity();
@@ -70,24 +75,25 @@ public class ActiveStatusService {
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
+        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(organizationId, memberId);
 
-        TeamMemberWorkStatusEntity myStatusEntity = teamMemberWorkStatusRepository.findOne(memberId);
-        return teamMemberStatusMapper.toApi(myStatusEntity);
+        teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
     }
 
-    public TeamMemberWorkStatusDto resolveWTFWithYay(UUID organizationId, UUID memberId) {
+    public void resolveWTFWithYay(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
-        return pushResolveStatus(memberId, "Solved", "YAY!");
+        pushResolveStatus(organizationId, memberId, now, nanoTime);
     }
 
-    public TeamMemberWorkStatusDto resolveWTFWithAbort(UUID organizationId, UUID memberId) {
+    public void resolveWTFWithAbort(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
-        return pushResolveStatus(memberId, "Aborted", "...");
+        pushResolveStatus(organizationId, memberId, now, nanoTime);
     }
 
     @Transactional
-    private TeamMemberWorkStatusDto pushResolveStatus(UUID memberId, String resolution, String newStatus) {
+    private void pushResolveStatus(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
+
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
         if (activeWorkStatusEntity != null && activeWorkStatusEntity.getActiveCircuitId() != null) {
@@ -96,13 +102,15 @@ public class ActiveStatusService {
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
 
-        TeamMemberWorkStatusEntity myStatusEntity = teamMemberWorkStatusRepository.findOne(memberId);
-        return teamMemberStatusMapper.toApi(myStatusEntity);
+        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(organizationId, memberId);
+
+        teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
+
     }
 
 
     @Transactional
-    public void pushMemberWorkStatus(IntentionEntity activeIntention) {
+    public void pushMemberWorkStatus(IntentionEntity activeIntention, LocalDateTime now, Long nanoTime) {
 
         ActiveWorkStatusEntity workStatus = activeWorkStatusRepository.findByMemberId(activeIntention.getMemberId());
 
@@ -118,6 +126,10 @@ public class ActiveStatusService {
         workStatus.setWorkingOn(activeIntention.getDescription());
 
         activeWorkStatusRepository.save(workStatus);
+
+        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
+
+        teamCircuitOperator.notifyTeamOfMemberStatusUpdate(activeIntention.getOrganizationId(), activeIntention.getMemberId(), now, nanoTime, memberStatus);
     }
 
     public void updateOnlineStatus(UUID organizationId, UUID memberId, OnlineStatus onlineStatus) {

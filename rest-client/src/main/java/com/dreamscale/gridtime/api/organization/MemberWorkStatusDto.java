@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.api.organization;
 
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
+import com.dreamscale.gridtime.api.circuit.MessageDetailsBody;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberWorkStatusDto {
+public class MemberWorkStatusDto implements MessageDetailsBody {
     private UUID id;
 
     private String email;

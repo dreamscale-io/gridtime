@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.hooks.talk.dto;
 
 import com.dreamscale.gridtime.api.circuit.*;
+import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
 import lombok.Getter;
 
@@ -18,7 +19,12 @@ public enum CircuitMessageType {
     CIRCUIT_RESUMED("circuit-resume", "Circuit is resumed.", CircuitStatusDto.class),
     CIRCUIT_RETRO_STARTED("circuit-retro", "Circuit retro is started.", CircuitStatusDto.class),
     CIRCUIT_ABORTED("circuit-aborted", "Circuit is aborted", CircuitStatusDto.class),
-    INTENTION_STARTED("intention-started", "Intention started.", IntentionStartedDetailsDto.class);
+    TEAM_INTENTION_STARTED("intention-started", "Intention started.", IntentionStartedDetailsDto.class),
+    TEAM_WTF_STARTED("wtf-started", "WTF started.", WTFStatusUpdateDto.class),
+    TEAM_WTF_STOPPED("wtf-started", "WTF stopped.", WTFStatusUpdateDto.class),
+    TEAM_WTF_RESUMED("wtf-resumed", "WTF resumed.", WTFStatusUpdateDto.class),
+    TEAM_RETRO_STARTED("wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
+    TEAM_MEMBER_STATUS_UPDATE("member-status-update", "Member status updated.", MemberWorkStatusDto.class);
 
     private final String talkMessageType;
     private final Class<?> messageClazz;

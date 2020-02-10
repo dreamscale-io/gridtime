@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.CircuitOperator;
+import com.dreamscale.gridtime.core.service.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.service.OrganizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class TalkToResource {
     OrganizationService organizationService;
 
     @Autowired
-    CircuitOperator circuitOperator;
+    LearningCircuitOperator learningCircuitOperator;
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -38,7 +38,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
+        return learningCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
 
     }
@@ -52,7 +52,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
+        return learningCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
 
     }
@@ -66,7 +66,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId, screenshotReferenceInput);
+        return learningCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId, screenshotReferenceInput);
     }
 
     @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}")
@@ -76,7 +76,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId);
+        return learningCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId);
 
     }
 
@@ -90,7 +90,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
+        return learningCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
 
     }
@@ -104,7 +104,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
+        return learningCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
 
     }
@@ -118,7 +118,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
+        return learningCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }
 
 

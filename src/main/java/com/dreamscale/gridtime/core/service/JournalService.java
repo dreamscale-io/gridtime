@@ -170,35 +170,31 @@ public class JournalService {
 
         spiritService.grantXP(organizationId, memberId, 10);
 
-        log.info("Time access");
-        LocalDateTime creationTime = timeService.now();
+        LocalDateTime now = timeService.now();
         Long nanoTime = timeService.nanoTime();
 
-        IntentionEntity lastIntention = closeLastIntention(memberId, creationTime);
+        IntentionEntity lastIntention = closeLastIntention(memberId, now);
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
             TaskSwitchEventEntity taskSwitchEventEntity =
-                    createTaskSwitchJournalEntry(organizationId, memberId, creationTime, intentionInputDto);
+                    createTaskSwitchJournalEntry(organizationId, memberId, now, intentionInputDto);
             taskSwitchEventRepository.save(taskSwitchEventEntity);
         }
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
-        intentionEntity.setPosition(creationTime);
+        intentionEntity.setPosition(now);
         intentionEntity.setOrganizationId(organizationId);
         intentionEntity.setLinked(isLinked);
         intentionEntity.setMemberId(memberId);
         intentionRepository.save(intentionEntity);
 
-        String userName = organizationService.getUsernameForMemberId(memberId);
-        TeamCircuitDto teamCircuit = teamCircuitOperator.getMyPrimaryTeamCircuit(organizationId, memberId);
-
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
         JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
 
-        teamCircuitOperator.notifyTeamOfIntention(userName, memberId, creationTime, nanoTime, teamCircuit.getDefaultRoom().getTalkRoomId(), journalEntryDto);
+        teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
 
         recentActivityService.updateRecentProjects(intentionEntity);
-        recentActivityService.updateRecentTasks(intentionEntity);
+        recentActivityService.updateRecentTasks(intentionEntity, now, nanoTime);
 
         return intentionEntity;
 

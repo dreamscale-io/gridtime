@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.CircuitOperator;
+import com.dreamscale.gridtime.core.service.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.service.OrganizationService;
 import feign.RequestLine;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class LearningCircuitResource {
     OrganizationService organizationService;
 
     @Autowired
-    CircuitOperator circuitOperator;
+    LearningCircuitOperator learningCircuitOperator;
 
     /**
      * Pulls the "Global Andon Cord" to generate a new "Learning Circuit" that can be joined by
@@ -44,7 +44,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.createNewLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+        return learningCircuitOperator.createNewLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -68,7 +68,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.createNewLearningCircuitWithCustomName(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.createNewLearningCircuitWithCustomName(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -86,7 +86,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.saveDescriptionForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, descriptionInputDto);
+        return learningCircuitOperator.saveDescriptionForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, descriptionInputDto);
     }
 
     /**
@@ -104,7 +104,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.saveTagsForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, tagsInputDto);
+        return learningCircuitOperator.saveTagsForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, tagsInputDto);
     }
 
     /**
@@ -122,7 +122,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.startRetroForCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.startRetroForCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
 
@@ -140,7 +140,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
+        return learningCircuitOperator.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
     }
 
     /**
@@ -159,7 +159,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.joinExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.joinExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -178,7 +178,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.leaveExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.leaveExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -199,7 +199,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.closeExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.closeExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
 
@@ -219,7 +219,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.abortExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.abortExistingCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
 
@@ -241,7 +241,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.putCircuitOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.putCircuitOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -262,7 +262,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.resumeCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.resumeCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
 
@@ -279,7 +279,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.getMyActiveWTFCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+        return learningCircuitOperator.getMyActiveWTFCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -295,7 +295,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.getMyDoItLaterCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+        return learningCircuitOperator.getMyDoItLaterCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -314,7 +314,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
 
-        return circuitOperator.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+        return learningCircuitOperator.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -335,7 +335,7 @@ public class LearningCircuitResource {
 
         UUID otherMemberId = UUID.fromString(memberId);
 
-        return circuitOperator.getAllParticipatingCircuitsForOtherMember(invokingMember.getOrganizationId(), invokingMember.getId(), otherMemberId);
+        return learningCircuitOperator.getAllParticipatingCircuitsForOtherMember(invokingMember.getOrganizationId(), invokingMember.getId(), otherMemberId);
     }
 
 }

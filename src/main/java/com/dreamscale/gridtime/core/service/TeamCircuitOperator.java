@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.circuit.*;
-import com.dreamscale.gridtime.api.journal.IntentionDto;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
@@ -60,6 +59,9 @@ public class TeamCircuitOperator {
     private GridTalkRouter talkRouter;
 
     @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
 
     private static final String TEAM_ROOM_PREFIX = "team-";
@@ -106,25 +108,93 @@ public class TeamCircuitOperator {
         return teamCircuitDto;
     }
 
-    public void notifyTeamOfIntention(String userName, UUID memberFromId, LocalDateTime now, Long nanoTime, UUID roomId, JournalEntryDto journalEntryDto) {
+    public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
+
+        String userName = organizationService.getUsernameForMemberId(memberFromId);
+        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
 
         IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(memberFromId);
-        messageEntity.setToRoomId(roomId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
-        messageEntity.setMessageType(CircuitMessageType.INTENTION_STARTED);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_INTENTION_STARTED);
         messageEntity.setJsonBody(JSONTransformer.toJson(intentionStartedDetails));
-
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
-
-        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+    }
+
+    public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        CircuitMessageType messageType = CircuitMessageType.TEAM_WTF_STARTED;
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, messageType);
+    }
+
+    public void notifyTeamOfWTFResumed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        CircuitMessageType messageType = CircuitMessageType.TEAM_WTF_RESUMED;
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, messageType);
+    }
+
+    private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
+        String userName = organizationService.getUsernameForMemberId(memberFromId);
+        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
+
+        WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(messageType);
+        messageEntity.setJsonBody(JSONTransformer.toJson(wtfStatusUpdateDto));
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+
+        talkRoomMessageRepository.save(messageEntity);
+    }
+
+
+    public void notifyTeamOfWTFStopped(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STOPPED);
+    }
+
+    public void notifyTeamOfRetroStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED);
+    }
+
+    public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, MemberWorkStatusDto memberStatusDto) {
+
+        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_STATUS_UPDATE);
+        messageEntity.setJsonBody(JSONTransformer.toJson(memberStatusDto));
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+
+        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+
+        talkRoomMessageRepository.save(messageEntity);
     }
 
     private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity) {
@@ -436,6 +506,7 @@ public class TeamCircuitOperator {
     private String deriveDefaultTeamRoom(String teamName) {
         return TEAM_ROOM_PREFIX + teamName + "-"+TEAM_ROOM_DEFAULT_NAME;
     }
+
 
 
 }

@@ -2,8 +2,6 @@ package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsRepository;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
@@ -36,7 +34,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class CircuitOperator {
+public class LearningCircuitOperator {
 
     public static final String RETRO_ROOM_SUFFIX = "-retro";
     public static final String WTF_ROOM_SUFFIX = "-wtf";
@@ -60,6 +58,9 @@ public class CircuitOperator {
 
     @Autowired
     ActiveStatusService activeStatusService;
+
+    @Autowired
+    private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
     private TimeService timeService;
@@ -174,11 +175,15 @@ public class CircuitOperator {
         talkRouter.joinRoom(organizationId, memberId, wtfRoomEntity.getId());
         //then update active status
 
-        activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId());
+        activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_OPEN);
 
-        return toDto(learningCircuitEntity);
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
+
+        return circuitDto;
 
     }
 
@@ -222,7 +227,6 @@ public class CircuitOperator {
 
         log.info("inside getCircuitWithAllDetails");
 
-
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
 
         validateCircuitExists(circuitName, circuitEntity);
@@ -239,7 +243,6 @@ public class CircuitOperator {
                 fullDto.addCircuitMember(memberStatusDto);
             }
         }
-
 
         return fullDto;
     }
@@ -348,7 +351,11 @@ public class CircuitOperator {
 
         sendStatusMessageToRetroRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_RETRO_STARTED);
 
-        return toDto(learningCircuitEntity);
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfRetroStarted(organizationId, memberId, now, nanoTime, circuitDto);
+
+        return circuitDto;
 
     }
 
@@ -500,13 +507,17 @@ public class CircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeStatusService.resolveWTFWithYay(organizationId, ownerId);
+        activeStatusService.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
 
         //retro room is still open
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
-        return toDto(learningCircuitEntity);
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        return circuitDto;
     }
 
 
@@ -527,11 +538,15 @@ public class CircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeStatusService.resolveWTFWithAbort(organizationId, ownerId);
+        activeStatusService.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
-        return toDto(learningCircuitEntity);
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        return circuitDto;
 
     }
 
@@ -561,11 +576,15 @@ public class CircuitOperator {
             talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
-        activeStatusService.resolveWTFWithAbort(organizationId, ownerId);
+        activeStatusService.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_ONHOLD);
 
-        return toDto(learningCircuitEntity);
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        return circuitDto;
     }
 
     public LearningCircuitDto resumeCircuit(UUID organizationId, UUID ownerId, String circuitName) {
@@ -592,13 +611,15 @@ public class CircuitOperator {
             talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
-        activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId());
+        activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         circuitDto.setSecondsBeforeOnHold(calculateEffectiveDuration(circuitDto));
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_RESUMED);
+
+        teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
 
         return circuitDto;
     }
@@ -707,7 +728,7 @@ public class CircuitOperator {
         return talkMessageDto;
     }
 
-    private TalkMessageDto sendMemberStatusMessage(UUID circuitOwnerId, UUID memberId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
+    private TalkMessageDto sendMemberRoomStatusMessage(UUID circuitOwnerId, UUID memberId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
 
         RoomMemberStatusEventDto statusDto = new RoomMemberStatusEventDto(memberId, messageType.name(), messageType.getStatusMessage());
 
@@ -838,7 +859,7 @@ public class CircuitOperator {
 
                 updateRoomMemberToInactive(memberConnection.getOrganizationId(), memberConnection.getMemberId(), timeService.now(), circuitRoom.getRoomId());
 
-                sendMemberStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_INACTIVE);
+                sendMemberRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_INACTIVE);
             }
         }
     }

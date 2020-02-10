@@ -14,6 +14,8 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository
 import com.dreamscale.gridtime.core.domain.flow.FlowEventRepository
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.service.RecentActivityService
 import com.dreamscale.gridtime.core.service.TimeService
 import org.dreamscale.exception.ForbiddenException
@@ -61,14 +63,13 @@ class FlowResourceSpec extends Specification {
     JournalClient journalClient
 
 
-    OrganizationEntity org
     OrganizationMemberEntity member
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
 
-        org = aRandom.organizationEntity().save()
-        member = createMembership(org.getId(), testUser.getId())
+        member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
     }
 
 
@@ -121,4 +122,18 @@ class FlowResourceSpec extends Specification {
                 .save()
     }
 
+
+    private OrganizationMemberEntity createMemberWithOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamEntity team = aRandom.teamEntity().organizationId(org.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
+
+        return member;
+
+    }
 }

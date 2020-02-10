@@ -47,6 +47,9 @@ public class RecentActivityService {
     private JiraService jiraService;
 
     @Autowired
+    private TimeService timeService;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
     private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
@@ -74,7 +77,7 @@ public class RecentActivityService {
 
     }
 
-    public void updateRecentTasks(IntentionEntity activeIntention) {
+    public void updateRecentTasks(IntentionEntity activeIntention, LocalDateTime now, Long nanoTime) {
 
         List<RecentTaskEntity> recentTasks = recentTaskRepository.findByMemberIdAndProjectId(activeIntention.getMemberId(), activeIntention.getProjectId());
 
@@ -90,7 +93,7 @@ public class RecentActivityService {
             recentTaskRepository.save(recentTask);
         }
 
-        activeStatusService.pushMemberWorkStatus(activeIntention);
+        activeStatusService.pushMemberWorkStatus(activeIntention, now, nanoTime);
 
     }
 

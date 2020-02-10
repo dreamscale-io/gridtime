@@ -29,7 +29,7 @@ public class AccountService implements RootAccountIdResolver {
     private ActiveAccountStatusRepository accountStatusRepository;
 
     @Autowired
-    private CircuitOperator circuitOperator;
+    private LearningCircuitOperator learningCircuitOperator;
 
     @Autowired
     private ActiveStatusService activeStatusService;
@@ -107,7 +107,7 @@ public class AccountService implements RootAccountIdResolver {
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
 
         if (oldConnectionId != null) {
-            circuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
+            learningCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
         }
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);

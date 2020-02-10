@@ -12,6 +12,9 @@ import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.service.TeamService
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,21 +34,27 @@ class LearningCircuitResourceSpec extends Specification {
     RootAccountEntity loggedInUser
 
     @Autowired
+    RootAccountRepository rootAccountRepository
+
+    @Autowired
     TeamService teamService
 
     @Autowired
     TimeService mockTimeService
+    OrganizationEntity org
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
+
+        org = aRandom.organizationEntity().save()
     }
 
 
     def 'should create a circuit'() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
         loggedInUser.setId(member.getRootAccountId())
 
         when:
@@ -59,11 +68,12 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+
+
     def 'should update description of a circuit'() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         when:
@@ -80,8 +90,7 @@ class LearningCircuitResourceSpec extends Specification {
     def 'should update tags of a circuit'() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         when:
@@ -98,8 +107,7 @@ class LearningCircuitResourceSpec extends Specification {
     def "should return active circuit"() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit1 = circuitClient.startLearningCircuitForWTF()
@@ -117,8 +125,7 @@ class LearningCircuitResourceSpec extends Specification {
     def "should return all shelved do it later circuits"() {
         given:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit1 = circuitClient.startLearningCircuitForWTF()
@@ -138,9 +145,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should close a circuit'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -157,9 +162,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should abort a circuit'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -178,9 +181,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def "should shelf a circuit with do it later"() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -196,9 +197,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should resume a circuit from do it later'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -215,9 +214,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should start a retro'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -232,16 +229,15 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'join another persons chat room'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         //change active logged in user to a different user within same organization
-        RootAccountEntity otherAccount = aRandom.rootAccountEntity().save()
-        OrganizationMemberEntity otherMember =  aRandom.memberEntity().organizationId(org.id).rootAccountId(otherAccount.id).save()
+
+        OrganizationMemberEntity otherMember =  createMemberWithOrgAndTeam();
         loggedInUser.setId(otherMember.getRootAccountId())
 
         when:
@@ -258,16 +254,13 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'join and leave another persons chat room to update room status'() {
         given:
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity me = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
-        loggedInUser.setId(me.getRootAccountId())
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
 
         //change active logged in user to a different user within same organization
-        RootAccountEntity otherAccount = aRandom.rootAccountEntity().save()
-        OrganizationMemberEntity otherMember =  aRandom.memberEntity().organizationId(org.id).rootAccountId(otherAccount.id).save()
+        OrganizationMemberEntity otherMember =  createMemberWithOrgAndTeam();
         loggedInUser.setId(otherMember.getRootAccountId())
 
         when:
@@ -281,7 +274,7 @@ class LearningCircuitResourceSpec extends Specification {
         assert fullDetailsDto != null
         assert fullDetailsDto.getCircuitMembers().size() == 2
 
-        CircuitMemberStatusDto memberMe = getMemberStatusById(fullDetailsDto.getCircuitMembers(), me.id);
+        CircuitMemberStatusDto memberMe = getMemberStatusById(fullDetailsDto.getCircuitMembers(), member.id);
         CircuitMemberStatusDto memberOther = getMemberStatusById(fullDetailsDto.getCircuitMembers(), otherMember.id);
 
 
@@ -294,7 +287,19 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
-    CircuitMemberStatusDto getMemberStatusById(List<CircuitMemberStatusDto> members, UUID memberId) {
+    private OrganizationMemberEntity createMemberWithOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamEntity team = aRandom.teamEntity().organizationId(org.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
+
+        return member;
+
+    }
+
+    private CircuitMemberStatusDto getMemberStatusById(List<CircuitMemberStatusDto> members, UUID memberId) {
         for (CircuitMemberStatusDto memberStatus: members) {
             if (memberStatus.memberId == memberId) {
                 return memberStatus;

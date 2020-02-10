@@ -44,7 +44,6 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
     LearningCircuitDto abortExistingCircuit(@Param("name") String circuitName);
 
-
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
     LearningCircuitDto putCircuitOnHoldWithDoItLater(@Param("name") String circuitName);
 

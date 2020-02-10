@@ -11,6 +11,8 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -45,9 +47,8 @@ class TalkToResourceSpec extends Specification {
     def "should post a message to WTF room"() {
         given:
 
-        masterAccountRepository.save(loggedInUser);
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(loggedInUser.getId()).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        loggedInUser.setId(member.getRootAccountId())
 
         when:
         LearningCircuitDto circuit = circuitClient.startLearningCircuitForWTF()
@@ -64,6 +65,20 @@ class TalkToResourceSpec extends Specification {
         then:
         assert messages != null
         assert messages.size() == 3
+
+    }
+
+    private OrganizationMemberEntity createMemberWithOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamEntity team = aRandom.teamEntity().organizationId(org.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
+
+        return member;
 
     }
 //

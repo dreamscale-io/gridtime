@@ -3,13 +3,12 @@ package com.dreamscale.gridtime.core.service;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
-import com.dreamscale.gridtime.core.domain.member.TeamEntity;
-import com.dreamscale.gridtime.core.domain.member.TeamRepository;
+import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +25,7 @@ public class MemberStatusService {
     private SpiritService xpService;
 
     @Autowired
-    private CircuitOperator circuitOperator;
+    private LearningCircuitOperator learningCircuitOperator;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -80,6 +79,14 @@ public class MemberStatusService {
         return memberWorkStatusDtos;
     }
 
+    public MemberWorkStatusDto getStatusOfMember(UUID organizationId, UUID memberId) {
+
+        MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+        return toDtoWithDetails(memberStatusEntity);
+    }
+
+
     private MemberWorkStatusDto toDtoWithDetails(MemberStatusEntity memberStatusEntity) {
         MemberWorkStatusDto memberStatusDto = memberStatusMapper.toApi(memberStatusEntity);
 
@@ -88,7 +95,7 @@ public class MemberStatusService {
         memberStatusDto.setDisplayName(createDisplayName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircuitId() != null) {
-            LearningCircuitDto circuitDto = circuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
+            LearningCircuitDto circuitDto = learningCircuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
                     memberStatusEntity.getActiveCircuitId());
 
             memberStatusDto.setActiveCircuit(circuitDto);
@@ -125,6 +132,7 @@ public class MemberStatusService {
         });
 
     }
+
 
 
 }

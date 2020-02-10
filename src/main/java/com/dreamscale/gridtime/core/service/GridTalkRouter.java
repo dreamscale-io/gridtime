@@ -19,9 +19,6 @@ public class GridTalkRouter {
     private MemberConnectionRepository memberConnectionRepository;
 
     @Autowired
-    private TalkRoomMemberRepository talkRoomMemberRepository;
-
-    @Autowired
     private TalkConnectionFactory talkConnectionFactory;
 
     public void sendAsyncRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {

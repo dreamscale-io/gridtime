@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.CircuitOperator;
+import com.dreamscale.gridtime.core.service.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.service.FlowService;
 import com.dreamscale.gridtime.core.service.OrganizationService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class FlowResource {
     @Autowired
     OrganizationService organizationService;
     @Autowired
-    CircuitOperator circuitOperator;
+    LearningCircuitOperator learningCircuitOperator;
 
 
     /**
@@ -55,7 +55,7 @@ public class FlowResource {
 
         flowService.saveSnippetEvent(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
 
-        circuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
+        learningCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
 
     }
 
