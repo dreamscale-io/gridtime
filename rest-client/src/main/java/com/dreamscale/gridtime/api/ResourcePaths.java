@@ -130,4 +130,15 @@ public class ResourcePaths {
 
     public static final String HOME_PATH = "/home";
 
+    public static final String DICTIONARY_PATH = "/dictionary";
+    public static final String PROMOTE_PATH = "/promote";
+    public static final String COMMUNITY_PATH = "/community";
+    public static final String PENDING_PATH = "/pending";
+    public static final String APPROVE_PATH = "/approve";
+    public static final String DECLINE_PATH = "/decline";
+    public static final String UNDEFINED_PATH = "/undefined";
+    public static final String BOOK_PATH = "/book";
+    public static final String ACCEPT_PATH = "/accept";
+    public static final String REJECT_PATH = "/reject";
+    public static final String PULL_PATH = "/pull";
 }

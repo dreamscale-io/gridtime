@@ -90,6 +90,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
+    DictionaryClient dictionaryClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, DictionaryClient.class);
+    }
+
+    @Bean
     FlowClient flowClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, FlowClient.class);
     }
