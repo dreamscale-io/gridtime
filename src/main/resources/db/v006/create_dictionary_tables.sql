@@ -9,7 +9,7 @@ create table team_dictionary_tag (
    tag_name text,
    description text,
    creation_date timestamp,
-   modification_date timestamp,
+   last_modified_date timestamp,
    constraint team_tag_unique_key unique (team_id, tag_name)
  );
 
@@ -41,10 +41,11 @@ create table team_book_tag (
 );
 
 create table team_book_override (
-  team_book_tag_id primary key not null,
+  team_book_tag_id uuid primary key not null,
   tag_name text,
   description text,
-  modified_date timestamp
+  override_date timestamp,
+  last_modified_date timestamp
 );
 
 create table community_book (
@@ -59,7 +60,7 @@ create table community_book_tag (
   id uuid primary key not null,
   community_book_id uuid,
   community_tag_id uuid,
-  pull_date timestamp
+  pull_date timestamp,
   constraint community_book_tag_unique_key unique (community_book_id, community_tag_id)
 );
 
@@ -79,7 +80,7 @@ create table community_book_tag (
    tag_name text,
    description text,
    creation_date timestamp,
-   modification_date timestamp,
+   last_modified_date timestamp,
    constraint community_tag_unique_key unique (tag_name)
  );
 
