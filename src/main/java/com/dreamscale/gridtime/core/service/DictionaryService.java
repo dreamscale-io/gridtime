@@ -77,7 +77,6 @@ public class DictionaryService {
 
     public void rejectPendingTag(UUID organizationId, UUID id, PendingTagReferenceDto pendingTagReferenceDto) {
 
-
     }
 
     public DictionaryBookDto createTeamDictionaryBook(UUID organizationId, UUID id, String bookName) {
@@ -87,7 +86,6 @@ public class DictionaryService {
     public DictionaryBookDto createCommunityDictionaryBook(UUID organizationId, UUID id, String bookName) {
         return null;
     }
-
 
     public List<TagDefinitionDto> getTeamBook(UUID organizationId, UUID id, String bookName) {
         return null;
@@ -106,7 +104,6 @@ public class DictionaryService {
     }
 
     public TagDefinitionDto refactorTeamBookDefinition(UUID organizationId, UUID id, String bookName, String tagName, TagRefactorInputDto tagRefactorInputDto) {
-
         return null;
     }
 }

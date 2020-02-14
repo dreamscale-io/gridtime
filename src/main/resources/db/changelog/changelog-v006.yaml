@@ -1,0 +1,4 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v006/create_dictionary_tables.sql
