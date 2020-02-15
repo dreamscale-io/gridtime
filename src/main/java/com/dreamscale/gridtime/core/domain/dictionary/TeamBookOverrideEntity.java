@@ -23,7 +23,7 @@ public class TeamBookOverrideEntity {
 
     private String tagName;
 
-    private String description;
+    private String definition;
 
     private LocalDateTime overrideDate;
 

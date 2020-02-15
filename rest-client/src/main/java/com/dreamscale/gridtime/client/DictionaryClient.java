@@ -1,10 +1,7 @@
 package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.dictionary.DictionaryBookDto;
-import com.dreamscale.gridtime.api.dictionary.PendingTagReferenceDto;
-import com.dreamscale.gridtime.api.dictionary.TagDefinitionDto;
-import com.dreamscale.gridtime.api.dictionary.TagRefactorInputDto;
+import com.dreamscale.gridtime.api.dictionary.*;
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import feign.Headers;
@@ -22,7 +19,7 @@ public interface DictionaryClient {
     //operates in global space across all scopes
 
     @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}")
-    TagDefinitionDto getDefinition(@Param("tagName") String tagName);
+    TagDefinitionWithDetailsDto getDefinition(@Param("tagName") String tagName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}")
     TagDefinitionDto refactorDefinition(@Param("tagName") String tagName, TagRefactorInputDto tagRefactorInputDto);

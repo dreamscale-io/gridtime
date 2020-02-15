@@ -29,7 +29,7 @@ public class TeamDictionaryPromotionEntity {
 
     private String tagName;
 
-    private String description;
+    private String definition;
 
     @Enumerated(EnumType.STRING)
     private PromotionStatus promotionStatus;

@@ -1,10 +1,7 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.dictionary.DictionaryBookDto;
-import com.dreamscale.gridtime.api.dictionary.PendingTagReferenceDto;
-import com.dreamscale.gridtime.api.dictionary.TagDefinitionDto;
-import com.dreamscale.gridtime.api.dictionary.TagRefactorInputDto;
+import com.dreamscale.gridtime.api.dictionary.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.DictionaryService;
@@ -34,7 +31,7 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto getDefinition(@PathVariable("tagName") String tagName) {
+    public TagDefinitionWithDetailsDto getDefinition(@PathVariable("tagName") String tagName) {
         RequestContext context = RequestContext.get();
         log.info("getDefinition, user={}", context.getRootAccountId());
 

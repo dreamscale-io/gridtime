@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface TeamDictionaryTagRepository extends CrudRepository<TeamDictionaryTagEntity, UUID> {
 
+    TeamDictionaryTagEntity findByTeamIdAndTagName(UUID teamId, String tagName);
 }

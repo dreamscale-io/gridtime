@@ -21,7 +21,7 @@ public class CommunityDictionaryTombstoneEntity {
 
     private String deadTagName;
 
-    private String deadDescription;
+    private String deadDefinition;
 
     private LocalDateTime ripDate;
 

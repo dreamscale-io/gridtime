@@ -21,7 +21,7 @@ public class CommunityDictionaryTagEntity {
 
     private String tagName;
 
-    private String description;
+    private String definition;
 
     private LocalDateTime creationDate;
 

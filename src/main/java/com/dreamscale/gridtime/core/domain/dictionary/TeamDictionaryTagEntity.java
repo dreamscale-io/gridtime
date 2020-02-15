@@ -1,10 +1,12 @@
 package com.dreamscale.gridtime.core.domain.dictionary;
 
+import com.dreamscale.gridtime.api.dictionary.TagTombstoneDto;
 import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity(name = "team_dictionary_tag")
@@ -27,7 +29,7 @@ public class TeamDictionaryTagEntity {
 
     private String tagName;
 
-    private String description;
+    private String definition;
 
     private LocalDateTime creationDate;
 
