@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JiraAssigneeUpdateDto {
-    private String name;
+    private String accountId;
 }

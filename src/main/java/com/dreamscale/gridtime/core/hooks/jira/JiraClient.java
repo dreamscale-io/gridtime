@@ -27,16 +27,16 @@ public interface JiraClient {
                                         @Param("start") int startAt,
                                         @Param("max") int maxResults);
 
-    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
-            "?username=%25&includeActive=true&includeInactive=false")
+    @RequestLine("GET " + JiraPaths.NEW_API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
+            "?query=&includeActive=true&includeInactive=false")
     List<JiraUserDto> getUsers();
 
     @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + JiraPaths.SEARCH_PATH +
             "?username={email}&includeActive=true&includeInactive=false")
     List<JiraUserDto> findUserByEmail(@Param("email") String email);
 
-    @RequestLine("GET " + JiraPaths.API_PATH + JiraPaths.USER_PATH + "?key={user}")
-    JiraUserDto getUser(@Param("user") String userKey);
+    @RequestLine("GET " + JiraPaths.NEW_API_PATH + JiraPaths.USER_PATH + "?accountId={accountId}")
+    JiraUserDto getUser(@Param("accountId") String accountId);
 
     @RequestLine("POST "+ JiraPaths.API_PATH + JiraPaths.ISSUE_PATH)
     JiraTaskDto createTask(JiraNewTaskFields fields);

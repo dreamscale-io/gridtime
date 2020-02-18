@@ -48,12 +48,12 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto refactorDefinition(@PathVariable("tagName") String tagName, @RequestBody TagRefactorInputDto tagRefactorInputDto) {
+    public TagDefinitionDto createOrRefactorDefinition(@PathVariable("tagName") String tagName, @RequestBody TagDefinitionInputDto tagDefinitionInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("refactorDefinition, user={}", context.getRootAccountId());
+        log.info("createOrRefactorDefinition, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.refactorDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName, tagRefactorInputDto);
+        return dictionaryService.refactorDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName, tagDefinitionInputDto);
     }
 
     /**
@@ -180,12 +180,12 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto refactorTeamBookDefinition(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName, @RequestBody TagRefactorInputDto tagRefactorInputDto) {
+    public TagDefinitionDto refactorTeamBookDefinition(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName, @RequestBody TagDefinitionInputDto tagDefinitionInputDto) {
         RequestContext context = RequestContext.get();
         log.info("refactorTeamBookDefinition, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.refactorTeamBookDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName, tagRefactorInputDto);
+        return dictionaryService.refactorTeamBookDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName, tagDefinitionInputDto);
     }
 
     /**

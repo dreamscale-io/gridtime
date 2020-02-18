@@ -29,6 +29,8 @@ public class TeamDictionaryTagEntity {
 
     private String tagName;
 
+    private String lowerCaseTagName;
+
     private String definition;
 
     private LocalDateTime creationDate;

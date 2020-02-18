@@ -126,7 +126,7 @@ public class JiraService {
 
         JiraConnection connection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
 
-        JiraUserDto jiraUserDto = connection.getUserByKey(externalUserKey);
+        JiraUserDto jiraUserDto = connection.getUserByAccountId(externalUserKey);
 
         if (jiraUserDto == null) {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_USER, "Jira user not found");
@@ -197,6 +197,20 @@ public class JiraService {
         }
 
         return selectedUser;
+    }
+
+    public List<JiraUserDto> getUsers(UUID organizationId) {
+
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        if (org == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
+        }
+
+        JiraConnection jiraConnection = jiraConnectionFactory.connect(org.getJiraSiteUrl(), org.getJiraUser(), org.getJiraApiKey());
+
+        List<JiraUserDto> users = jiraConnection.getUsers();
+
+        return users;
     }
 
     public ConnectionResultDto validateJiraConnection(OrganizationEntity orgEntity) {

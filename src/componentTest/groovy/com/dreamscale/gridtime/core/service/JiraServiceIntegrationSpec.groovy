@@ -61,6 +61,19 @@ public class JiraServiceIntegrationSpec extends Specification {
 	}
 
 
+	def "should get all users"() {
+		given:
+		OrganizationEntity validOrg = createValidOrganization()
+		organizationRepository.save(validOrg)
+
+		when:
+		List<JiraUserDto> jiraUsers = jiraService.getUsers(validOrg.getId())
+
+		then:
+		assert jiraUsers != null
+		assert jiraUsers.size() > 5
+	}
+
 	def "should fetch a user by email"() {
 		given:
 		OrganizationEntity validOrg = createValidOrganization()
@@ -121,7 +134,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 		List<JiraTaskDto> openTasks = jiraService.getOpenTasksForProject(validOrg.id, project.id)
 
 		then:
-		assert openTasks.size() == 8
+		assert openTasks.size() == 11
 	}
 
 	def "should page through all tasks for project"() {
@@ -147,17 +160,17 @@ public class JiraServiceIntegrationSpec extends Specification {
 		organizationRepository.save(validOrg)
 		
 		JiraProjectDto project = jiraService.getProjectByName(validOrg.getId(), "dummy-test")
-		JiraUserDto jiraUser = jiraService.getUserByEmail(validOrg.getId(), "arty@dreamscale.io")
+		JiraUserDto jiraUser = jiraService.getUserByEmail(validOrg.getId(), "zoe@dreamscale.io")
 
 		TaskInputDto taskInputDto = new TaskInputDto("Hello summary!", "description!!")
 
 		when:
-		JiraTaskDto newTask = jiraService.createNewTask(validOrg.id, project.id, jiraUser.key, taskInputDto)
+		JiraTaskDto newTask = jiraService.createNewTask(validOrg.id, project.id, jiraUser.accountId, taskInputDto)
 
 		then:
 		assert newTask.key != null
 		assert newTask.status == "In Progress"
-		assert newTask.assignee == "arty@dreamscale.io"
+		assert newTask.assignee == "zoe"
 
 		when:
 		JiraTaskDto closedTask = jiraService.closeTask(validOrg.id, newTask.key)

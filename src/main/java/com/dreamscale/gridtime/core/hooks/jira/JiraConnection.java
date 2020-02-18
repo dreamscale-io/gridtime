@@ -30,7 +30,7 @@ public class JiraConnection {
         List<JiraUserDto> allUsers = jiraClient.getUsers();
         List<JiraUserDto> filteredUsers = new ArrayList<>();
         for (JiraUserDto user: allUsers) {
-            if (!user.getKey().startsWith("addon_")) {
+            if (user.getAccountType() != null && user.getAccountType().equals("atlassian")) {
                 filteredUsers.add(user);
             }
         }
@@ -57,8 +57,8 @@ public class JiraConnection {
         return jiraClient.createTask(fields);
     }
 
-    public void updateAssignee(String taskName, String jiraUserName) {
-        JiraAssigneeUpdateDto jiraAssigneeUpdateDto = new JiraAssigneeUpdateDto(jiraUserName);
+    public void updateAssignee(String taskName, String accountId) {
+        JiraAssigneeUpdateDto jiraAssigneeUpdateDto = new JiraAssigneeUpdateDto(accountId);
         jiraClient.updateAssignee(taskName, jiraAssigneeUpdateDto);
     }
 
@@ -100,8 +100,8 @@ public class JiraConnection {
         return jiraClient.getTransitions(taskName);
     }
 
-    public JiraUserDto getUserByKey(String userKey) {
-        return jiraClient.getUser(userKey);
+    public JiraUserDto getUserByAccountId(String accountId) {
+        return jiraClient.getUser(accountId);
     }
 
     public void deleteTask(String taskKey) {

@@ -19,11 +19,19 @@ public class TeamDictionaryTombstoneEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
+    private UUID organizationId;
+
+    private UUID teamId;
+
+    private String lowerCaseTagName;
+
     private String deadTagName;
 
     private String deadDefinition;
 
     private LocalDateTime ripDate;
+
+    private LocalDateTime reviveDate;
 
     private UUID forwardTo;
 

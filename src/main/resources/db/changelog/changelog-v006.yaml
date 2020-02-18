@@ -2,3 +2,9 @@ databaseChangeLog:
 
   - include:
         file: db/v006/create_dictionary_tables.sql
+
+  - include:
+        file: db/v006/alter_team_dictionary_tag_add_case_insensitive_search.sql
+
+  - include:
+        file: db/v006/alter_team_dictionary_tombstone_add_revive_date.sql

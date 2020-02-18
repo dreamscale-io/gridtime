@@ -7,5 +7,7 @@ import java.util.UUID;
 
 public interface TeamDictionaryTombstoneRepository extends CrudRepository<TeamDictionaryTombstoneEntity, UUID> {
 
-    List<TeamDictionaryTombstoneEntity> findByForwardToOrderByRipDate(UUID id);
+    List<TeamDictionaryTombstoneEntity> findByForwardToOrderByRipDate(UUID tagId);
+
+    List<TeamDictionaryTombstoneEntity> findByTeamIdAndLowerCaseTagName(UUID teamId, String lowerCaseTag);
 }

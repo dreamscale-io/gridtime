@@ -2,8 +2,6 @@ package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.dictionary.*;
-import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
-import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -22,7 +20,7 @@ public interface DictionaryClient {
     TagDefinitionWithDetailsDto getDefinition(@Param("tagName") String tagName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}")
-    TagDefinitionDto refactorDefinition(@Param("tagName") String tagName, TagRefactorInputDto tagRefactorInputDto);
+    TagDefinitionDto createOrRefactorDefinition(@Param("tagName") String tagName, TagDefinitionInputDto tagDefinitionInputDto);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PROMOTE_PATH)
     TagDefinitionDto promoteDefinition(@Param("tagName") String tagName);
@@ -77,7 +75,7 @@ public interface DictionaryClient {
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}")
     TagDefinitionDto refactorTeamBookDefinition(@Param("bookName") String bookName, @Param("tagName") String tagName,
-                                                TagRefactorInputDto tagRefactorInputDto);
+                                                TagDefinitionInputDto tagDefinitionInputDto);
 
 
 }

@@ -24,6 +24,8 @@ public class JiraTaskDto {
     private static final String JIRA_STATUS_NAME = "name";
 
     private static final String JIRA_ASSIGNEE = "assignee";
+    private static final String JIRA_ASSIGNEE_ACCOUNT_ID = "accountId";
+    private static final String JIRA_ASSIGNEE_DISPLAY_NAME = "displayName";
     private static final String JIRA_ASSIGNEE_EMAIL = "emailAddress";
 
     private static final String JIRA_PROJECT = "project";
@@ -57,7 +59,7 @@ public class JiraTaskDto {
     public String getAssignee() {
         String assignee = null;
         if (getFields().get(JIRA_STATUS) != null) {
-            assignee = ((Map) getFields().get(JIRA_ASSIGNEE)).get(JIRA_ASSIGNEE_EMAIL).toString();
+            assignee = ((Map) getFields().get(JIRA_ASSIGNEE)).get(JIRA_ASSIGNEE_DISPLAY_NAME).toString();
         }
         return assignee;
     }

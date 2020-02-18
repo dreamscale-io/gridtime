@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagRefactorInputDto {
+public class TagDefinitionInputDto {
 
     private String tagName;
     private String definition;

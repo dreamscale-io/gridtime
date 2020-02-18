@@ -57,9 +57,9 @@ public class DictionaryService {
 
         //get all definitions, across all scopes, and then all tombstone references that are forwarded here
 
-        TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndTagName(myTeam.getId(), tagName);
+        TeamDictionaryTagEntity existingTag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), tagName);
 
-        TagDefinitionWithDetailsDto tagDefinition = tagDefinitionMapper.toApi(existingTag);;
+        TagDefinitionWithDetailsDto tagDefinition = tagDefinitionMapper.toApi(existingTag);
 
         if (existingTag != null) {
 
@@ -72,6 +72,7 @@ public class DictionaryService {
                 tombstoneDto.setDeadTagName(tombstone.getDeadTagName());
                 tombstoneDto.setDeadDefinition(tombstone.getDeadDefinition());
                 tombstoneDto.setRipDate(tombstone.getRipDate());
+                tombstoneDto.setReviveDate(tombstone.getReviveDate());
 
                 tombstoneDtos.add(tombstoneDto);
             }
@@ -82,21 +83,41 @@ public class DictionaryService {
         return tagDefinition;
     }
 
-    public TagDefinitionDto refactorDefinition(UUID organizationId, UUID memberId, String originalTagName, TagRefactorInputDto tagRefactorInputDto) {
+    private void validateTagNotNull(String tagName) {
+        if (tagName == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag name cant be null.");
+        }
+    }
+
+    private TeamDictionaryTagEntity findByTeamAndCaseInsensitiveTag(UUID teamId, String tagName) {
+
+        String lowerCaseTag = tagName.toLowerCase();
+
+        return teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(teamId, lowerCaseTag);
+    }
+
+    public TagDefinitionDto refactorDefinition(UUID organizationId, UUID memberId, String originalTagName, TagDefinitionInputDto tagDefinitionInputDto) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
+        validateTagNotNull(originalTagName);
+        validateTagNotNull(tagDefinitionInputDto.getTagName());
 
-        TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndTagName(myTeam.getId(), originalTagName);
+        TeamDictionaryTagEntity existingTag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), originalTagName);
 
         LocalDateTime now = timeService.now();
 
         TeamDictionaryTagEntity updatedTag = null;
         if (existingTag != null) {
-            updatedTag = refactorExistingTag(now, existingTag, tagRefactorInputDto);
+            updatedTag = refactorExistingTag(now, existingTag, tagDefinitionInputDto);
         } else {
-            updatedTag = createNewTag(now, myTeam, tagRefactorInputDto);
+            updatedTag = createNewTag(now, myTeam, tagDefinitionInputDto);
         }
+
+        //what happens if an existing tag, is a tombstone?
+
+        //what happens if a tombstone is revived?
+
 
         return toDto(updatedTag);
     }
@@ -112,35 +133,64 @@ public class DictionaryService {
         return tagDefinitionDto;
     }
 
-    private TeamDictionaryTagEntity createNewTag(LocalDateTime now, TeamDto myTeam, TagRefactorInputDto tagRefactorInputDto) {
+    private TeamDictionaryTagEntity createNewTag(LocalDateTime now, TeamDto myTeam, TagDefinitionInputDto tagDefinitionInputDto) {
+
+        //first check for existing tombstones by the same name, resurrect if needed
+
+        resurrectTombstoneTagsWithSameName(now, myTeam, tagDefinitionInputDto);
+
         TeamDictionaryTagEntity newTag = new TeamDictionaryTagEntity();
+        newTag.setId(UUID.randomUUID());
         newTag.setOrganizationId(myTeam.getOrganizationId());
         newTag.setTeamId(myTeam.getId());
         newTag.setCreationDate(now);
         newTag.setLastModifiedDate(now);
-        newTag.setTagName(tagRefactorInputDto.getTagName());
-        newTag.setDefinition(tagRefactorInputDto.getDefinition());
+        newTag.setLowerCaseTagName(tagDefinitionInputDto.getTagName().toLowerCase());
+        newTag.setTagName(tagDefinitionInputDto.getTagName());
+        newTag.setDefinition(tagDefinitionInputDto.getDefinition());
 
         teamDictionaryTagRepository.save(newTag);
 
         return newTag;
     }
 
-    private TeamDictionaryTagEntity refactorExistingTag(LocalDateTime now, TeamDictionaryTagEntity existingTag, TagRefactorInputDto tagRefactorInputDto) {
+    private void resurrectTombstoneTagsWithSameName(LocalDateTime now, TeamDto myTeam, TagDefinitionInputDto tagDefinitionInputDto) {
 
-        if (existingTag.getTagName().equals(tagRefactorInputDto.getTagName())) {
-            //definition change only, just update it
+        List<TeamDictionaryTombstoneEntity> matchingTombstones = teamDictionaryTombstoneRepository.findByTeamIdAndLowerCaseTagName(
+                myTeam.getId(), tagDefinitionInputDto.getTagName().toLowerCase());
 
-            existingTag.setDefinition(tagRefactorInputDto.getDefinition());
+        for (TeamDictionaryTombstoneEntity tombstoneEntity : matchingTombstones) {
+            tombstoneEntity.setReviveDate(now);
+        }
+
+        teamDictionaryTombstoneRepository.save(matchingTombstones);
+
+    }
+
+    private TeamDictionaryTagEntity refactorExistingTag(LocalDateTime now, TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
+
+        if (hasTagCaseChange(existingTag, tagDefinitionInputDto)) {
+
+            existingTag.setTagName(tagDefinitionInputDto.getTagName());
+            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
+            existingTag.setLastModifiedDate(now);
+
+            teamDictionaryTagRepository.save(existingTag);
+        } else if (hasDefinitionChangeOnly(existingTag, tagDefinitionInputDto)) {
+            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
             existingTag.setLastModifiedDate(now);
 
             teamDictionaryTagRepository.save(existingTag);
         } else {
+
             //name change, create a tombstone link
 
             TeamDictionaryTombstoneEntity teamDictionaryTombstoneEntity = new TeamDictionaryTombstoneEntity();
 
             teamDictionaryTombstoneEntity.setId(UUID.randomUUID());
+            teamDictionaryTombstoneEntity.setTeamId(existingTag.getTeamId());
+            teamDictionaryTombstoneEntity.setOrganizationId(existingTag.getOrganizationId());
+            teamDictionaryTombstoneEntity.setLowerCaseTagName(existingTag.getLowerCaseTagName());
             teamDictionaryTombstoneEntity.setDeadTagName(existingTag.getTagName());
             teamDictionaryTombstoneEntity.setDeadDefinition(existingTag.getDefinition());
 
@@ -151,8 +201,9 @@ public class DictionaryService {
 
             //then edit the original
 
-            existingTag.setTagName(tagRefactorInputDto.getTagName());
-            existingTag.setDefinition(tagRefactorInputDto.getDefinition());
+            existingTag.setTagName(tagDefinitionInputDto.getTagName());
+            existingTag.setLowerCaseTagName(tagDefinitionInputDto.getTagName().toLowerCase());
+            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
             existingTag.setLastModifiedDate(now);
 
             teamDictionaryTagRepository.save(existingTag);
@@ -162,12 +213,23 @@ public class DictionaryService {
         return existingTag;
     }
 
+    private boolean hasDefinitionChangeOnly(TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
+        return existingTag.getTagName().equals(tagDefinitionInputDto.getTagName());
+    }
+
+    private boolean hasTagCaseChange(TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
+        String existingTagKey = existingTag.getLowerCaseTagName();
+        String newTagKey = tagDefinitionInputDto.getTagName().toLowerCase();
+
+        return existingTagKey.equals(newTagKey) && !existingTag.getTagName().equals(tagDefinitionInputDto.getTagName());
+    }
+
     public void touchBlankDefinition(UUID organizationId, UUID memberId, String tag) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
-        TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndTagName(myTeam.getId(), tag);
+        TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(myTeam.getId(), tag);
 
         LocalDateTime now = timeService.now();
 
@@ -193,7 +255,7 @@ public class DictionaryService {
         List<TeamDictionaryTagEntity> newTagEntries = new ArrayList<>();
 
         for (String tag : tags) {
-            TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndTagName(myTeam.getId(), tag);
+            TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(myTeam.getId(), tag);
 
             if (existingTag == null) {
                 TeamDictionaryTagEntity newTag = new TeamDictionaryTagEntity();
@@ -244,8 +306,23 @@ public class DictionaryService {
         return null;
     }
 
-    public List<TagDefinitionDto> getUndefinedTeamDictionaryTerms(UUID organizationId, UUID id) {
-        return null;
+    public List<TagDefinitionDto> getUndefinedTeamDictionaryTerms(UUID organizationId, UUID memberId) {
+
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+
+        List<TeamDictionaryTagEntity> undefinedTerms = teamDictionaryTagRepository.findByTeamIdAndBlankDefinition(myTeam.getId());
+
+        List<TagDefinitionDto> blankDefs = new ArrayList<>();
+
+        for (TeamDictionaryTagEntity undefinedTerm : undefinedTerms) {
+            TagDefinitionDto blankTag = new TagDefinitionDto(undefinedTerm.getId(), undefinedTerm.getTagName(), null);
+
+            blankDefs.add(blankTag);
+        }
+
+        return blankDefs;
     }
 
     public List<TagDefinitionDto> getPendingTeamDictionaryTerms(UUID organizationId, UUID id) {
@@ -289,7 +366,7 @@ public class DictionaryService {
         return null;
     }
 
-    public TagDefinitionDto refactorTeamBookDefinition(UUID organizationId, UUID id, String bookName, String tagName, TagRefactorInputDto tagRefactorInputDto) {
+    public TagDefinitionDto refactorTeamBookDefinition(UUID organizationId, UUID id, String bookName, String tagName, TagDefinitionInputDto tagDefinitionInputDto) {
         return null;
     }
 }

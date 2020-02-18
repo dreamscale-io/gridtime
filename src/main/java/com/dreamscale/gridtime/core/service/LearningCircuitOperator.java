@@ -66,6 +66,9 @@ public class LearningCircuitOperator {
     private TimeService timeService;
 
     @Autowired
+    private DictionaryService dictionaryService;
+
+    @Autowired
     private GridTalkRouter talkRouter;
     @Autowired
     private CircuitMemberStatusRepository circuitMemberStatusRepository;
@@ -886,6 +889,8 @@ public class LearningCircuitOperator {
         circuitEntity.setJsonTags(JSONTransformer.toJson(tagsInputDto));
 
         learningCircuitRepository.save(circuitEntity);
+
+        dictionaryService.touchBlankDefinitions(organizationId, ownerId, tagsInputDto.getTags());
 
         return toDto(circuitEntity);
     }

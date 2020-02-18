@@ -18,6 +18,7 @@ public class TagTombstoneDto {
     private String deadDefinition;
 
     private LocalDateTime ripDate;
+    private LocalDateTime reviveDate;
 
 }
 

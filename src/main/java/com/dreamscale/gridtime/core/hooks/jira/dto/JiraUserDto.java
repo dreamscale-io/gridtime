@@ -13,9 +13,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class JiraUserDto {
     String self;
-    String key;
     String accountId;
-    String name;
+    String accountType;
     String emailAddress;
     Map<String, String> avatarUrls;
 
