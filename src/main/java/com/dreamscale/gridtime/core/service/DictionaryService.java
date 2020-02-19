@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,8 @@ public class DictionaryService {
     @Autowired
     TeamBookWordOverrideRepository teamBookWordOverrideRepository;
 
+    @Autowired
+    TeamBookWordTombstoneRepository teamBookWordTombstoneRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -131,6 +134,12 @@ public class DictionaryService {
         }
     }
 
+    private void validateBookWordNotNull(TeamBookWordEntity bookWord) {
+        if (bookWord == null ) {
+            throw new BadRequestException(ValidationErrorCodes.WORD_NOT_FOUND_IN_BOOK, "Word not found in Book");
+        }
+    }
+
 
     private TeamDictionaryWordEntity findByTeamAndCaseInsensitiveWord(UUID teamId, String wordName) {
 
@@ -213,6 +222,72 @@ public class DictionaryService {
         return wordDefinitionMapper.toApi(word);
     }
 
+    @Transactional
+    public WordDefinitionDto refactorWordInsideTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName, WordDefinitionInputDto wordDefinitionInputDto) {
+
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+        validateWordNotNull(wordName);
+
+        TeamDictionaryWordEntity globalWord = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
+
+        TeamBookWordEntity bookWord = teamBookWordRepository.findByTeamBookNameAndWordId(myTeam.getId(), bookName.toLowerCase(), globalWord.getId());
+
+        validateWordNotNull(globalWord);
+        validateBookWordNotNull(bookWord);
+
+        LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
+
+        TeamBookWordOverrideEntity override = teamBookWordOverrideRepository.findWordOverrideByBookIdAndWordId(bookWord.getTeamBookId(), globalWord.getId());
+
+        if (override == null) {
+            //this is the first modification, create the first override
+
+            override = new TeamBookWordOverrideEntity();
+            override.setTeamBookWordId(bookWord.getId());
+            override.setOverrideDate(now);
+            override.setLastModifiedDate(now);
+            override.setWordName(wordDefinitionInputDto.getWordName());
+            override.setDefinition(wordDefinitionInputDto.getDefinition());
+
+            teamBookWordOverrideRepository.save(override);
+
+            bookWord.setModifiedStatus(WordModifiedStatus.MODIFIED);
+
+            teamBookWordRepository.save(bookWord);
+
+
+        } else {
+            //existing override, so tombstone the last definition, then change
+
+            TeamBookWordTombstoneEntity tombstone = new TeamBookWordTombstoneEntity();
+            tombstone.setId(UUID.randomUUID());
+            tombstone.setDeadWordName(override.getWordName());
+            tombstone.setLowerCaseWordName(override.getWordName().toLowerCase());
+            tombstone.setDeadDefinition(override.getDefinition());
+            tombstone.setOrganizationId(organizationId);
+            tombstone.setTeamId(myTeam.getId());
+            tombstone.setRipDate(now);
+
+            teamBookWordTombstoneRepository.save(tombstone);
+
+            override.setWordName(wordDefinitionInputDto.getWordName());
+            override.setDefinition(wordDefinitionInputDto.getDefinition());
+            override.setLastModifiedDate(now);
+
+            teamBookWordOverrideRepository.save(override);
+        }
+
+
+        return toDto(override);
+    }
+
+
+
+
     private TeamBookWordEntity pullWordInsideBook(UUID teamId, String bookName, UUID wordId) {
 
         String lowerCaseBook = bookName.toLowerCase();
@@ -289,12 +364,23 @@ public class DictionaryService {
 
     private WordDefinitionDto toDto(TeamDictionaryWordEntity dictionaryWord) {
 
+        return wordDefinitionMapper.toApi(dictionaryWord);
+
+    }
+
+    private WordDefinitionDto toDto(TeamBookWordOverrideEntity overrideWord) {
+
+        WordDefinitionDto dto = wordDefinitionOverrideMapper.toApi(overrideWord);
+        dto.setCreatedDate(overrideWord.getOverrideDate());
+        dto.setOverride(true);
+
         WordDefinitionDto wordDefinitionDto = new WordDefinitionDto();
-        wordDefinitionDto.setWordName(dictionaryWord.getWordName());
-        wordDefinitionDto.setDefinition(dictionaryWord.getDefinition());
+        wordDefinitionDto.setWordName(overrideWord.getWordName());
+        wordDefinitionDto.setDefinition(overrideWord.getDefinition());
 
         return wordDefinitionDto;
     }
+
 
     private TeamDictionaryWordEntity createNewTeamWord(LocalDateTime now, TeamDto myTeam, WordDefinitionInputDto wordDefinitionInputDto) {
 
@@ -375,6 +461,8 @@ public class DictionaryService {
 
         return existingWord;
     }
+
+
 
     private boolean hasDefinitionChangeOnly(TeamDictionaryWordEntity existingWod, WordDefinitionInputDto wordDefinitionInputDto) {
         return existingWod.getWordName().equals(wordDefinitionInputDto.getWordName());
@@ -512,7 +600,5 @@ public class DictionaryService {
         return null;
     }
 
-    public WordDefinitionDto refactorWordInsideTeamBook(UUID organizationId, UUID id, String bookName, String wordName, WordDefinitionInputDto wordDefinitionInputDto) {
-        return null;
-    }
+
 }

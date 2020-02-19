@@ -35,6 +35,7 @@ class DictionaryResourceSpec extends Specification {
     TimeService mockTimeService
     OrganizationEntity org
 
+
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
 
@@ -194,7 +195,43 @@ class DictionaryResourceSpec extends Specification {
         assert bookDto.getDefinitions().size() == 1
     }
 
+    def 'should refactor words inside a book without affecting global word scope'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(member.getRootAccountId())
+
+        dictionaryClient.createOrRefactorWord("tag1", new WordDefinitionInputDto("tag1", "def"))
+        BookReferenceDto bookRef = dictionaryClient.createTeamBook("mybook")
+
+        WordDefinitionDto wordInBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag1")
+
+        when:
+        dictionaryClient.refactorWordInsideTeamBook("mybook", "tag1", new WordDefinitionInputDto("tag1", "newdef"))
+
+        WordDefinitionWithDetailsDto globalDefinition = dictionaryClient.getWord("tag1")
+
+        BookDto bookDto = dictionaryClient.getTeamBook("mybook")
+
+        then:
+        assert bookRef != null
+        assert wordInBook != null
+        assert globalDefinition != null
+        assert bookDto != null
+        assert bookDto.getDefinitions().size() == 1
+
+        assert globalDefinition.definition == "def"
+        assert bookDto.getDefinitions().get(0).definition == "newdef"
+
+    }
+
+
     //TODO next is refactoring a word in a book
+
+    //then I should end up with book word tombstones, but these ones never get revived.  It's just history.
+
+
 
     //TODO next is promoting words into community dictionary
 

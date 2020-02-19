@@ -17,4 +17,10 @@ public interface TeamBookWordOverrideRepository extends CrudRepository<TeamBookW
     List<TeamBookWordOverrideEntity> findWordOverridesByBookId(@Param("bookId") UUID bookId);
 
 
+    @Query(nativeQuery = true, value = "select wo.* from team_book_word bw, team_book_word_override wo " +
+            "where bw.team_book_id = (:teamBookId) "+
+            "and bw.id = wo.team_book_word_id "+
+            "and bw.team_word_id = (:teamWordId)")
+    TeamBookWordOverrideEntity findWordOverrideByBookIdAndWordId(@Param("teamBookId") UUID teamBookId,
+                                                         @Param("teamWordId") UUID teamWordId);
 }

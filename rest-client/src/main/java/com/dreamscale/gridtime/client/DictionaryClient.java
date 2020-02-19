@@ -72,7 +72,7 @@ public interface DictionaryClient {
 
     //refactor definitions inside of books
 
-    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
+    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}")
     WordDefinitionDto refactorWordInsideTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName,
                                                  WordDefinitionInputDto wordDefinitionInputDto);
