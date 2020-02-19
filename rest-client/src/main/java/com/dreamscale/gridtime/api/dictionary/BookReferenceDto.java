@@ -6,19 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagDefinitionDto {
+public class BookReferenceDto {
 
-    private String tagName;
-    private String definition;
+    UUID id;
+    UUID teamId;
+    String bookName;
 
-    private LocalDateTime createdDate;
-    private LocalDateTime lastModifiedDate;
+    LocalDateTime creationDate;
 
-    private boolean isOverride;
+    LocalDateTime lastModifiedDate;
+
 }
+

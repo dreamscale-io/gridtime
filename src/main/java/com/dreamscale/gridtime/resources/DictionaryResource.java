@@ -53,7 +53,7 @@ public class DictionaryResource {
         log.info("createOrRefactorDefinition, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.refactorDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName, tagDefinitionInputDto);
+        return dictionaryService.createOrRefactorDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName, tagDefinitionInputDto);
     }
 
     /**
@@ -103,12 +103,12 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public DictionaryBookDto createTeamDictionaryBook(@PathVariable("bookName") String bookName) {
+    public BookReferenceDto createTeamDictionaryBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
-        log.info("createTeamDictionaryBook, user={}", context.getRootAccountId());
+        log.info("createTeamBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createTeamDictionaryBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        return dictionaryService.createTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
     /**
@@ -122,9 +122,9 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public DictionaryBookDto createCommunityDictionaryBook(@PathVariable("bookName") String bookName) {
+    public BookReferenceDto createCommunityDictionaryBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
-        log.info("createCommunityDictionaryBook, user={}", context.getRootAccountId());
+        log.info("createCommunityBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
         return dictionaryService.createCommunityDictionaryBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
@@ -137,7 +137,7 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public List<TagDefinitionDto> getTeamBook(@PathVariable("bookName") String bookName) {
+    public BookDto getTeamBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
         log.info("getTeamBook, user={}", context.getRootAccountId());
 

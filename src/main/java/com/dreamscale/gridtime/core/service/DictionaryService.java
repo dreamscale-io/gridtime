@@ -3,10 +3,7 @@ package com.dreamscale.gridtime.core.service;
 import com.dreamscale.gridtime.api.dictionary.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitEntity;
-import com.dreamscale.gridtime.core.domain.dictionary.TeamDictionaryTagEntity;
-import com.dreamscale.gridtime.core.domain.dictionary.TeamDictionaryTagRepository;
-import com.dreamscale.gridtime.core.domain.dictionary.TeamDictionaryTombstoneEntity;
-import com.dreamscale.gridtime.core.domain.dictionary.TeamDictionaryTombstoneRepository;
+import com.dreamscale.gridtime.core.domain.dictionary.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
@@ -39,13 +36,34 @@ public class DictionaryService {
     TeamDictionaryTombstoneRepository teamDictionaryTombstoneRepository;
 
     @Autowired
+    TeamBookRepository teamBookRepository;
+
+    @Autowired
+    TeamBookTagRepository teamBookTagRepository;
+
+    @Autowired
+    TeamBookOverrideRepository teamBookOverrideRepository;
+
+
+    @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<TagDefinitionWithDetailsDto, TeamDictionaryTagEntity> tagDefinitionMapper;
+    private DtoEntityMapper<TagDefinitionWithDetailsDto, TeamDictionaryTagEntity> tagDefinitionWithDetailsMapper;
+    private DtoEntityMapper<BookReferenceDto, TeamBookEntity> teamBookReferenceMapper;
+    private DtoEntityMapper<BookDto, TeamBookEntity> teamBookMapper;
+    private DtoEntityMapper<TagDefinitionDto, TeamDictionaryTagEntity> tagDefinitionMapper;
+    private DtoEntityMapper<TagDefinitionDto, TeamBookOverrideEntity> tagOverrideMapper;
+
 
     @PostConstruct
     private void init() {
-        tagDefinitionMapper = mapperFactory.createDtoEntityMapper(TagDefinitionWithDetailsDto.class, TeamDictionaryTagEntity.class);
+        tagDefinitionMapper = mapperFactory.createDtoEntityMapper(TagDefinitionDto.class, TeamDictionaryTagEntity.class);
+        tagOverrideMapper = mapperFactory.createDtoEntityMapper(TagDefinitionDto.class, TeamBookOverrideEntity.class);
+
+        tagDefinitionWithDetailsMapper = mapperFactory.createDtoEntityMapper(TagDefinitionWithDetailsDto.class, TeamDictionaryTagEntity.class);
+        teamBookReferenceMapper = mapperFactory.createDtoEntityMapper(BookReferenceDto.class, TeamBookEntity.class );
+        teamBookMapper = mapperFactory.createDtoEntityMapper(BookDto.class, TeamBookEntity.class);
     }
+
 
     public TagDefinitionWithDetailsDto getDefinition(UUID organizationId, UUID memberId, String tagName) {
 
@@ -59,7 +77,7 @@ public class DictionaryService {
 
         TeamDictionaryTagEntity existingTag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), tagName);
 
-        TagDefinitionWithDetailsDto tagDefinition = tagDefinitionMapper.toApi(existingTag);
+        TagDefinitionWithDetailsDto tagDefinition = tagDefinitionWithDetailsMapper.toApi(existingTag);
 
         if (existingTag != null) {
 
@@ -83,11 +101,36 @@ public class DictionaryService {
         return tagDefinition;
     }
 
-    private void validateTagNotNull(String tagName) {
-        if (tagName == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag name cant be null.");
+    private void validateBookNotNull(String bookName) {
+        if (bookName == null || bookName.length() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_BOOK, "Book name cant be blank.");
         }
     }
+
+    private void validateBookNotNull(TeamBookEntity book) {
+        if (book == null ) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_BOOK, "Book not found.");
+        }
+    }
+
+    private void validateTagNotNull(String tagName) {
+        if (tagName == null || tagName.length() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag name cant be blank.");
+        }
+    }
+
+    private void validateTagNotNull(TeamDictionaryTagEntity tagEntity) {
+        if (tagEntity == null ) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag could not be found.");
+        }
+    }
+
+    private void validatBookNotNull(TeamBookEntity book) {
+        if (book == null ) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_BOOK, "Book not found");
+        }
+    }
+
 
     private TeamDictionaryTagEntity findByTeamAndCaseInsensitiveTag(UUID teamId, String tagName) {
 
@@ -96,7 +139,7 @@ public class DictionaryService {
         return teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(teamId, lowerCaseTag);
     }
 
-    public TagDefinitionDto refactorDefinition(UUID organizationId, UUID memberId, String originalTagName, TagDefinitionInputDto tagDefinitionInputDto) {
+    public TagDefinitionDto createOrRefactorDefinition(UUID organizationId, UUID memberId, String originalTagName, TagDefinitionInputDto tagDefinitionInputDto) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
@@ -122,11 +165,131 @@ public class DictionaryService {
         return toDto(updatedTag);
     }
 
+    public BookReferenceDto createTeamBook(UUID organizationId, UUID memberId, String bookName) {
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+
+        TeamBookEntity existingBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), bookName);
+
+        LocalDateTime now = timeService.now();
+        Long nanoTime = timeService.nanoTime();
+
+        if (existingBook == null) {
+            //create a new book
+
+            TeamBookEntity bookEntity = new TeamBookEntity();
+            bookEntity.setId(UUID.randomUUID());
+            bookEntity.setBookName(bookName);
+            bookEntity.setLowerCaseBookName(bookName.toLowerCase());
+            bookEntity.setOrganizationId(organizationId);
+            bookEntity.setTeamId(myTeam.getId());
+            bookEntity.setCreationDate(now);
+            bookEntity.setLastModifiedDate(now);
+
+            teamBookRepository.save(bookEntity);
+
+            existingBook = bookEntity;
+
+        }
+
+        return teamBookReferenceMapper.toApi(existingBook);
+    }
+
+    public TagDefinitionDto pullDefinitionIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String tagName) {
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+        validateTagNotNull(tagName);
+
+        TeamDictionaryTagEntity tag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), tagName);
+
+        validateTagNotNull(tag);
+
+        TeamBookTagEntity existingTag = pullTagInsideBook(myTeam.getId(), bookName, tag.getId());
+
+        return tagDefinitionMapper.toApi(tag);
+    }
+
+    private TeamBookTagEntity pullTagInsideBook(UUID teamId, String bookName, UUID tagId) {
+
+        String lowerCaseBook = bookName.toLowerCase();
+
+        TeamBookEntity book = teamBookRepository.findByTeamIdAndLowerCaseBookName(teamId, bookName.toLowerCase());
+
+        validateBookNotNull(book);
+
+        TeamBookTagEntity bookTag = teamBookTagRepository.findByTeamBookNameAndTagId(teamId, lowerCaseBook, tagId);
+
+        if (bookTag == null) {
+            bookTag = new TeamBookTagEntity();
+            bookTag.setId(UUID.randomUUID());
+            bookTag.setTeamBookId(book.getId());
+            bookTag.setTeamTagId(tagId);
+            bookTag.setModifiedStatus(TagModifiedStatus.UNCHANGED);
+            bookTag.setPullDate(timeService.now());
+
+            teamBookTagRepository.save(bookTag);
+        }
+
+        return bookTag;
+    }
+
+    public BookDto getTeamBook(UUID organizationId, UUID memberId, String bookName) {
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+
+        TeamBookEntity existingBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), bookName);
+
+        validatBookNotNull(existingBook);
+
+        BookDto bookDto = teamBookMapper.toApi(existingBook);
+
+        //so I actually need a view here, that pulls definitions, based on their presence in the team book references
+
+        //I can actually pull the definitions here, need a different query.
+
+        //then I can pull override definitions, I really oughta make a view.
+
+        List<TagDefinitionDto> tagDefinitionDtos = new ArrayList<>();
+
+        List<TeamDictionaryTagEntity> wordsInBook = teamDictionaryTagRepository.findDefinitionsByBookId(existingBook.getId());
+        List<TeamBookOverrideEntity> overrides = teamBookOverrideRepository.findDefinitionsByBookId(existingBook.getId());
+
+        for (TeamDictionaryTagEntity word : wordsInBook) {
+
+            TagDefinitionDto bookTag = tagDefinitionMapper.toApi(word);
+            tagDefinitionDtos.add(bookTag);
+        }
+
+        for (TeamBookOverrideEntity override : overrides) {
+
+            TagDefinitionDto overrideTag = tagOverrideMapper.toApi(override);
+            overrideTag.setCreatedDate(override.getOverrideDate());
+            overrideTag.setOverride(true);
+
+            tagDefinitionDtos.add(overrideTag);
+        }
+
+        bookDto.setDefinitions(tagDefinitionDtos);
+
+        return bookDto;
+    }
+
+
+    public BookReferenceDto createCommunityDictionaryBook(UUID organizationId, UUID memberId, String bookName) {
+        return null;
+    }
+
+
+
     private TagDefinitionDto toDto(TeamDictionaryTagEntity dictionaryTag) {
 
         TagDefinitionDto tagDefinitionDto = new TagDefinitionDto();
-
-        tagDefinitionDto.setId(dictionaryTag.getId());
         tagDefinitionDto.setTagName(dictionaryTag.getTagName());
         tagDefinitionDto.setDefinition(dictionaryTag.getDefinition());
 
@@ -317,7 +480,8 @@ public class DictionaryService {
         List<TagDefinitionDto> blankDefs = new ArrayList<>();
 
         for (TeamDictionaryTagEntity undefinedTerm : undefinedTerms) {
-            TagDefinitionDto blankTag = new TagDefinitionDto(undefinedTerm.getId(), undefinedTerm.getTagName(), null);
+            TagDefinitionDto blankTag = new TagDefinitionDto(undefinedTerm.getTagName(), null,
+                    undefinedTerm.getCreationDate(), undefinedTerm.getLastModifiedDate(), false);
 
             blankDefs.add(blankTag);
         }
@@ -334,25 +498,13 @@ public class DictionaryService {
 
     }
 
-    public TagDefinitionDto pullDefinitionIntoTeamBook(UUID organizationId, UUID id, String bookName, String tagName) {
-        return null;
-    }
+
 
     public void rejectPendingTag(UUID organizationId, UUID id, PendingTagReferenceDto pendingTagReferenceDto) {
 
     }
 
-    public DictionaryBookDto createTeamDictionaryBook(UUID organizationId, UUID id, String bookName) {
-        return null;
-    }
 
-    public DictionaryBookDto createCommunityDictionaryBook(UUID organizationId, UUID id, String bookName) {
-        return null;
-    }
-
-    public List<TagDefinitionDto> getTeamBook(UUID organizationId, UUID id, String bookName) {
-        return null;
-    }
 
     public List<TagDefinitionDto> getCommunityBook(UUID organizationId, UUID id, String bookName) {
         return null;

@@ -3,6 +3,8 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
+import com.dreamscale.gridtime.api.dictionary.BookDto
+import com.dreamscale.gridtime.api.dictionary.BookReferenceDto
 import com.dreamscale.gridtime.api.dictionary.TagDefinitionDto
 import com.dreamscale.gridtime.api.dictionary.TagDefinitionInputDto
 import com.dreamscale.gridtime.api.dictionary.TagDefinitionWithDetailsDto
@@ -52,7 +54,6 @@ class DictionaryResourceSpec extends Specification {
 
         then:
         assert newDefinition != null
-        assert newDefinition.id != null
         assert newDefinition.tagName == "test"
         assert newDefinition.definition == "def"
 
@@ -74,7 +75,6 @@ class DictionaryResourceSpec extends Specification {
 
         then:
         assert newDefinition != null
-        assert newDefinition.id != null
         assert newDefinition.tagName == "test2"
         assert newDefinition.definition == "def2"
 
@@ -167,6 +167,31 @@ class DictionaryResourceSpec extends Specification {
         assert undefinedTerms != null
         assert undefinedTerms.size() == 1
         assert undefinedTerms.get(0).tagName == "tag2"
+    }
+
+    def 'should pull words into a book'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(member.getRootAccountId())
+
+        when:
+        dictionaryClient.createOrRefactorDefinition("tag1", new TagDefinitionInputDto("tag1", "def"))
+        dictionaryClient.createOrRefactorDefinition("tag2", new TagDefinitionInputDto("tag2", "def2"))
+
+
+        BookReferenceDto bookRef = dictionaryClient.createTeamBook("mybook")
+
+        TagDefinitionDto tag1 = dictionaryClient.pullDefinitionIntoTeamBook("mybook", "tag1")
+
+        BookDto bookDto = dictionaryClient.getTeamBook("mybook")
+
+        then:
+        assert bookRef != null
+        assert tag1 != null
+        assert bookDto != null
+        assert bookDto.getDefinitions().size() == 1
     }
 
 

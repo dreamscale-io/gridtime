@@ -51,24 +51,24 @@ public interface DictionaryClient {
     //organization dictionaries into books
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    DictionaryBookDto createTeamDictionaryBook(@Param("bookName") String bookName);
+    BookReferenceDto createTeamBook(@Param("bookName") String bookName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    DictionaryBookDto createCommunityDictionaryBook(@Param("bookName") String bookName);
+    BookReferenceDto createCommunityBook(@Param("bookName") String bookName);
 
     @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    List<TagDefinitionDto> getTeamBook(@Param("bookName") String bookName);
+    BookDto getTeamBook(@Param("bookName") String bookName);
 
     @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    List<TagDefinitionDto> getCommunityBook(@Param("bookName") String bookName);
+    BookDto getCommunityBook(@Param("bookName") String bookName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    DictionaryBookDto pullDefinitionIntoTeamBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
+    TagDefinitionDto pullDefinitionIntoTeamBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    DictionaryBookDto pullDefinitionIntoCommunityBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
+    TagDefinitionDto pullDefinitionIntoCommunityBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
 
     //refactor definitions inside of books
 

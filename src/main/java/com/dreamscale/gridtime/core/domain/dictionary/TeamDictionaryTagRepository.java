@@ -16,4 +16,15 @@ public interface TeamDictionaryTagRepository extends CrudRepository<TeamDictiona
             "where team_id = (:teamId) "+
             "and definition is null ")
     List<TeamDictionaryTagEntity> findByTeamIdAndBlankDefinition(@Param("teamId") UUID teamId);
+
+
+
+    @Query(nativeQuery = true, value = "select t.* from team_dictionary_tag t, team_book_tag bt " +
+            "where bt.team_tag_id = t.id " +
+            "and bt.team_book_id = (:bookId) "+
+            "and bt.modified_status = 'UNCHANGED' ")
+    List<TeamDictionaryTagEntity> findDefinitionsByBookId(@Param("bookId") UUID bookId);
+
+
+
 }

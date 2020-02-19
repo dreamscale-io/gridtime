@@ -27,6 +27,8 @@ public class TeamBookEntity {
 
     private String bookName;
 
+    private String lowerCaseBookName;
+
     private LocalDateTime creationDate;
 
     private LocalDateTime lastModifiedDate;
