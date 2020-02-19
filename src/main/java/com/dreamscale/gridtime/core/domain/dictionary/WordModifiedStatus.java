@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.domain.dictionary;
 
-public enum TagModifiedStatus {
+public enum WordModifiedStatus {
     UNCHANGED,
     MODIFIED
 }

@@ -22,7 +22,7 @@ public class BookDto {
     LocalDateTime creationDate;
     LocalDateTime lastModifiedDate;
 
-    List<TagDefinitionDto> definitions;
+    List<WordDefinitionDto> definitions;
 
 }
 

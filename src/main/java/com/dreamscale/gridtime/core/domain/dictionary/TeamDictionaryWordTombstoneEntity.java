@@ -7,13 +7,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "team_dictionary_tombstone")
+@Entity(name = "team_dictionary_word_tombstone")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamDictionaryTombstoneEntity {
+public class TeamDictionaryWordTombstoneEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -23,9 +23,9 @@ public class TeamDictionaryTombstoneEntity {
 
     private UUID teamId;
 
-    private String lowerCaseTagName;
+    private String lowerCaseWordName;
 
-    private String deadTagName;
+    private String deadWordName;
 
     private String deadDefinition;
 

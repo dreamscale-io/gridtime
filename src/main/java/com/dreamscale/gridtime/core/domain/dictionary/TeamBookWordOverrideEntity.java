@@ -9,19 +9,19 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "team_book_override")
+@Entity(name = "team_book_word_override")
 @Data
-@EqualsAndHashCode(of = "teamBookTagId")
+@EqualsAndHashCode(of = "teamBookWordId")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamBookOverrideEntity {
+public class TeamBookWordOverrideEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamBookTagId;
+    private UUID teamBookWordId;
 
-    private String tagName;
+    private String wordName;
 
     private String definition;
 

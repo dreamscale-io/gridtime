@@ -5,9 +5,9 @@ import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.dictionary.BookDto
 import com.dreamscale.gridtime.api.dictionary.BookReferenceDto
-import com.dreamscale.gridtime.api.dictionary.TagDefinitionDto
-import com.dreamscale.gridtime.api.dictionary.TagDefinitionInputDto
-import com.dreamscale.gridtime.api.dictionary.TagDefinitionWithDetailsDto
+import com.dreamscale.gridtime.api.dictionary.WordDefinitionDto
+import com.dreamscale.gridtime.api.dictionary.WordDefinitionInputDto
+import com.dreamscale.gridtime.api.dictionary.WordDefinitionWithDetailsDto
 import com.dreamscale.gridtime.client.DictionaryClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.core.domain.member.*
@@ -50,11 +50,11 @@ class DictionaryResourceSpec extends Specification {
         loggedInUser.setId(member.getRootAccountId())
 
         when:
-        TagDefinitionDto newDefinition = dictionaryClient.createOrRefactorDefinition("test", new TagDefinitionInputDto("test", "def"))
+        WordDefinitionDto newDefinition = dictionaryClient.createOrRefactorWord("test", new WordDefinitionInputDto("test", "def"))
 
         then:
         assert newDefinition != null
-        assert newDefinition.tagName == "test"
+        assert newDefinition.wordName == "test"
         assert newDefinition.definition == "def"
 
     }
@@ -65,26 +65,26 @@ class DictionaryResourceSpec extends Specification {
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
-        TagDefinitionDto initialDef = dictionaryClient.createOrRefactorDefinition("test", new TagDefinitionInputDto("test", "def"))
+        WordDefinitionDto initialDef = dictionaryClient.createOrRefactorWord("test", new WordDefinitionInputDto("test", "def"))
 
         when:
 
-        TagDefinitionDto newDefinition = dictionaryClient.createOrRefactorDefinition("test", new TagDefinitionInputDto("test2", "def2"))
+        WordDefinitionDto newWord = dictionaryClient.createOrRefactorWord("test", new WordDefinitionInputDto("test2", "def2"))
 
-        TagDefinitionWithDetailsDto newDefinitionDetails = dictionaryClient.getDefinition("test2")
+        WordDefinitionWithDetailsDto newWordetails = dictionaryClient.getWord("test2")
 
         then:
-        assert newDefinition != null
-        assert newDefinition.tagName == "test2"
-        assert newDefinition.definition == "def2"
+        assert newWord != null
+        assert newWord.wordName == "test2"
+        assert newWord.definition == "def2"
 
-        assert newDefinitionDetails != null
-        assert newDefinitionDetails.tagName == "test2"
-        assert newDefinitionDetails.definition == "def2"
+        assert newWordetails != null
+        assert newWordetails.wordName == "test2"
+        assert newWordetails.definition == "def2"
 
-        assert newDefinitionDetails.tombstones.size() == 1
-        assert newDefinitionDetails.tombstones.get(0).deadTagName == "test"
-        assert newDefinitionDetails.tombstones.get(0).deadDefinition == "def"
+        assert newWordetails.tombstones.size() == 1
+        assert newWordetails.tombstones.get(0).deadWordName == "test"
+        assert newWordetails.tombstones.get(0).deadDefinition == "def"
 
     }
 
@@ -96,39 +96,39 @@ class DictionaryResourceSpec extends Specification {
 
         //refactor definition
 
-        TagDefinitionDto initialDef = dictionaryClient.createOrRefactorDefinition("old", new TagDefinitionInputDto("old", "olddef"))
-        TagDefinitionDto newDefinition = dictionaryClient.createOrRefactorDefinition("old", new TagDefinitionInputDto("new", "newdef"))
+        WordDefinitionDto initialWord = dictionaryClient.createOrRefactorWord("old", new WordDefinitionInputDto("old", "olddef"))
+        WordDefinitionDto renamedWord = dictionaryClient.createOrRefactorWord("old", new WordDefinitionInputDto("new", "newdef"))
 
         when:
 
-        TagDefinitionDto reviveDef = dictionaryClient.createOrRefactorDefinition("old", new TagDefinitionInputDto("old", "revive"))
+        WordDefinitionDto revivedDeadWord = dictionaryClient.createOrRefactorWord("old", new WordDefinitionInputDto("old", "revive"))
 
 
-        TagDefinitionWithDetailsDto revivedDef = dictionaryClient.getDefinition("old")
-        TagDefinitionWithDetailsDto renamedDef = dictionaryClient.getDefinition("new")
+        WordDefinitionWithDetailsDto revivedWithDetails = dictionaryClient.getWord("old")
+        WordDefinitionWithDetailsDto renamedWithDetails = dictionaryClient.getWord("new")
 
 
         then:
-        assert revivedDef != null
-        assert renamedDef != null
+        assert revivedWithDetails != null
+        assert renamedWithDetails != null
 
-        assert revivedDef != null
-        assert revivedDef.tagName == "old"
-        assert revivedDef.definition == "revive"
+        assert revivedWithDetails != null
+        assert revivedWithDetails.wordName == "old"
+        assert revivedWithDetails.definition == "revive"
 
-        assert renamedDef != null
-        assert renamedDef.tagName == "new"
-        assert renamedDef.definition == "newdef"
+        assert renamedWithDetails != null
+        assert renamedWithDetails.wordName == "new"
+        assert renamedWithDetails.definition == "newdef"
 
 
-        assert renamedDef.tombstones.size() == 1
-        assert renamedDef.tombstones.get(0).deadTagName == "old"
-        assert renamedDef.tombstones.get(0).deadDefinition == "olddef"
-        assert renamedDef.tombstones.get(0).reviveDate != null
+        assert renamedWithDetails.tombstones.size() == 1
+        assert renamedWithDetails.tombstones.get(0).deadWordName == "old"
+        assert renamedWithDetails.tombstones.get(0).deadDefinition == "olddef"
+        assert renamedWithDetails.tombstones.get(0).reviveDate != null
 
     }
 
-    def 'should create new blank tags when tagging objects and tags dont exist'() {
+    def 'should create new blank definition words when tagging objects and tags dont exist'() {
         given:
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
@@ -140,14 +140,14 @@ class DictionaryResourceSpec extends Specification {
 
         circuitClient.saveTagsForLearningCircuit(circuit.getCircuitName(), new TagsInputDto("tag1", "tag2"))
 
-        List<TagDefinitionDto> undefinedTerms = dictionaryClient.getUndefinedTeamDictionaryTerms();
+        List<WordDefinitionDto> undefinedWords = dictionaryClient.getUndefinedTeamWords();
 
         then:
-        assert undefinedTerms != null
-        assert undefinedTerms.size() == 2
+        assert undefinedWords != null
+        assert undefinedWords.size() == 2
     }
 
-    def 'should create new blank tags only when tags dont exist'() {
+    def 'should create new blank definition words only when tags dont exist'() {
         given:
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
@@ -157,16 +157,16 @@ class DictionaryResourceSpec extends Specification {
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
-        dictionaryClient.createOrRefactorDefinition("tag1", new TagDefinitionInputDto("tag1", "def"))
+        dictionaryClient.createOrRefactorWord("tag1", new WordDefinitionInputDto("tag1", "def"))
 
         circuitClient.saveTagsForLearningCircuit(circuit.getCircuitName(), new TagsInputDto("tag1", "tag2"))
 
-        List<TagDefinitionDto> undefinedTerms = dictionaryClient.getUndefinedTeamDictionaryTerms();
+        List<WordDefinitionDto> undefinedWords = dictionaryClient.getUndefinedTeamWords();
 
         then:
-        assert undefinedTerms != null
-        assert undefinedTerms.size() == 1
-        assert undefinedTerms.get(0).tagName == "tag2"
+        assert undefinedWords != null
+        assert undefinedWords.size() == 1
+        assert undefinedWords.get(0).wordName == "tag2"
     }
 
     def 'should pull words into a book'() {
@@ -177,22 +177,26 @@ class DictionaryResourceSpec extends Specification {
         loggedInUser.setId(member.getRootAccountId())
 
         when:
-        dictionaryClient.createOrRefactorDefinition("tag1", new TagDefinitionInputDto("tag1", "def"))
-        dictionaryClient.createOrRefactorDefinition("tag2", new TagDefinitionInputDto("tag2", "def2"))
+        dictionaryClient.createOrRefactorWord("tag1", new WordDefinitionInputDto("tag1", "def"))
+        dictionaryClient.createOrRefactorWord("tag2", new WordDefinitionInputDto("tag2", "def2"))
 
 
         BookReferenceDto bookRef = dictionaryClient.createTeamBook("mybook")
 
-        TagDefinitionDto tag1 = dictionaryClient.pullDefinitionIntoTeamBook("mybook", "tag1")
+        WordDefinitionDto wordInBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag1")
 
         BookDto bookDto = dictionaryClient.getTeamBook("mybook")
 
         then:
         assert bookRef != null
-        assert tag1 != null
+        assert wordInBook != null
         assert bookDto != null
         assert bookDto.getDefinitions().size() == 1
     }
+
+    //TODO next is refactoring a word in a book
+
+    //TODO next is promoting words into community dictionary
 
 
     private OrganizationMemberEntity createMemberWithOrgAndTeam() {

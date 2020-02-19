@@ -23,7 +23,11 @@ public class CommunityDictionaryTombstoneEntity {
 
     private String deadDefinition;
 
+    private String lowerCaseWordName;
+
     private LocalDateTime ripDate;
+
+    private LocalDateTime reviveDate;
 
     private UUID forwardTo;
 

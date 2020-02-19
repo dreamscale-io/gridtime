@@ -7,24 +7,30 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "community_dictionary_tag")
+@Entity(name = "team_book_word_tombstone")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommunityDictionaryTagEntity {
+public class TeamBookWordTombstoneEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    private String tagName;
+    private UUID organizationId;
 
-    private String definition;
+    private UUID teamId;
 
-    private LocalDateTime creationDate;
+    private String lowerCaseWordName;
 
-    private LocalDateTime lastModifiedDate;
+    private String deadWordName;
+
+    private String deadDefinition;
+
+    private LocalDateTime ripDate;
 
 }
+
+

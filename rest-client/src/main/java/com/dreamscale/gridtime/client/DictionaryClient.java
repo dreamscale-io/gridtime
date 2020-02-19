@@ -16,37 +16,37 @@ public interface DictionaryClient {
 
     //operates in global space across all scopes
 
-    @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}")
-    TagDefinitionWithDetailsDto getDefinition(@Param("tagName") String tagName);
+    @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.WORD_PATH + "/{wordName}")
+    WordDefinitionWithDetailsDto getWord(@Param("wordName") String wordName);
 
-    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}")
-    TagDefinitionDto createOrRefactorDefinition(@Param("tagName") String tagName, TagDefinitionInputDto tagDefinitionInputDto);
+    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.WORD_PATH + "/{wordName}")
+    WordDefinitionDto createOrRefactorWord(@Param("wordName") String wordName, WordDefinitionInputDto wordDefinitionInputDto);
 
-    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PROMOTE_PATH)
-    TagDefinitionDto promoteDefinition(@Param("tagName") String tagName);
+    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PROMOTE_PATH)
+    WordDefinitionDto promoteWordToCommunityScope(@Param("wordName") String wordName);
 
     @RequestLine("GET "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.UNDEFINED_PATH)
-    List<TagDefinitionDto> getUndefinedTeamDictionaryTerms();
+    List<WordDefinitionDto> getUndefinedTeamWords();
 
     @RequestLine("GET "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.PENDING_PATH)
-    List<TagDefinitionDto> getPendingTeamDictionaryTerms();
+    List<WordDefinitionDto> getPromotionPendingTeamWords();
 
     //team dictionary promotion
 
     @RequestLine("GET "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH)
-    List<TagDefinitionDto> getTeamDictionary();
+    List<WordDefinitionDto> getGlobalTeamDictionary();
 
     @RequestLine("GET "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH)
-    List<TagDefinitionDto> getCommunityDictionary();
+    List<WordDefinitionDto> getGlobalCommunityDictionary();
 
     @RequestLine("GET "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.PENDING_PATH)
-    List<PendingTagReferenceDto> getPendingCommunityDefinitions();
+    List<PendingWordReferenceDto> getPendingCommunityWords();
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.ACCEPT_PATH)
-    TagDefinitionDto acceptPendingTagIntoDictionary(PendingTagReferenceDto pendingTagReferenceDto);
+    WordDefinitionDto acceptPendingWordIntoCommunityScope(PendingWordReferenceDto pendingWordReferenceDto);
 
     @RequestLine("POST "  + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.REJECT_PATH)
-    void rejectPendingTag(PendingTagReferenceDto pendingTagReferenceDto);
+    void rejectPendingCommunityWord(PendingWordReferenceDto pendingWordReferenceDto);
 
     //organization dictionaries into books
 
@@ -63,19 +63,19 @@ public interface DictionaryClient {
     BookDto getCommunityBook(@Param("bookName") String bookName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
-            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    TagDefinitionDto pullDefinitionIntoTeamBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
+            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
+    WordDefinitionDto pullWordIntoTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
-            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    TagDefinitionDto pullDefinitionIntoCommunityBook(@Param("bookName") String bookName, @Param("tagName") String tagName);
+            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
+    WordDefinitionDto pullWordIntoCommunityBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
 
     //refactor definitions inside of books
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
-            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}")
-    TagDefinitionDto refactorTeamBookDefinition(@Param("bookName") String bookName, @Param("tagName") String tagName,
-                                                TagDefinitionInputDto tagDefinitionInputDto);
+            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}")
+    WordDefinitionDto refactorWordInsideTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName,
+                                                 WordDefinitionInputDto wordDefinitionInputDto);
 
 
 }

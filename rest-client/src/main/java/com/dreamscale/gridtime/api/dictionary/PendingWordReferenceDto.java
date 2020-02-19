@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.api.dictionary;
 
 import java.util.UUID;
 
-public class PendingTagReferenceDto {
+public class PendingWordReferenceDto {
 
     UUID tagId;
     String tag;

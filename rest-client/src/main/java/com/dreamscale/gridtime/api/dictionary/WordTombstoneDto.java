@@ -12,9 +12,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagTombstoneDto {
+public class WordTombstoneDto {
 
-    private String deadTagName;
+    private String deadWordName;
     private String deadDefinition;
 
     private LocalDateTime ripDate;

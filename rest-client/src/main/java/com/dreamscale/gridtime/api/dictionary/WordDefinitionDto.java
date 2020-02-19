@@ -5,12 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagDefinitionInputDto {
+public class WordDefinitionDto {
 
-    private String tagName;
+    private String wordName;
     private String definition;
+
+    private LocalDateTime createdDate;
+    private LocalDateTime lastModifiedDate;
+
+    private boolean isOverride;
 }

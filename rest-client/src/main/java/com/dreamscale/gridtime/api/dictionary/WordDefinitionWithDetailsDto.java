@@ -13,15 +13,15 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TagDefinitionWithDetailsDto {
+public class WordDefinitionWithDetailsDto {
 
     private UUID id;
-    private String tagName;
+    private String wordName;
     private String definition;
 
     private LocalDateTime creationDate;
     private LocalDateTime lastModifiedDate;
 
-    List<TagTombstoneDto> tombstones;
+    List<WordTombstoneDto> tombstones;
 
 }

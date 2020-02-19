@@ -74,32 +74,32 @@ public class GridTimeResource {
     }
 
 
-    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void watchThisOrganizationTagNow(@PathVariable("tagName") String tagName) {
 
     }
 
-    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void watchThisTeamTagNow(@PathVariable("tagName") String tagName) {
 
     }
 
-    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.WATCH_PATH + ResourcePaths.MY_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void watchMyTagNow(@PathVariable("tagName") String tagName) {
 
     }
 
-    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void clearThisOrganizationTagNow(@PathVariable("tagName") String tagName) {
 
     }
 
-    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void clearThisTeamTagNow(@PathVariable("tagName") String tagName) {
 
     }
 
-    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.TAG_PATH + "/{tagName}"  )
+    @PostMapping(ResourcePaths.CLEAR_PATH + ResourcePaths.MY_PATH + ResourcePaths.WORD_PATH + "/{tagName}"  )
     public void clearMyTagNow(@PathVariable("tagName") String tagName) {
 
     }

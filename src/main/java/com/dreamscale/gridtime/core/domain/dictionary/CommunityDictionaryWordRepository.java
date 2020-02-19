@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface CommunityDictionaryTagRepository extends CrudRepository<CommunityDictionaryTagEntity, UUID> {
+public interface CommunityDictionaryWordRepository extends CrudRepository<CommunityDictionaryWordEntity, UUID> {
 
 }

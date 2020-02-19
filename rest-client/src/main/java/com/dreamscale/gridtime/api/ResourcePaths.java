@@ -113,7 +113,7 @@ public class ResourcePaths {
     public static final String TO_PATH = "/to";
     public static final String CALENDAR_PATH = "/calendar";
     public static final String WATCH_PATH = "/watch";
-    public static final String TAG_PATH = "/tag";
+    public static final String WORD_PATH = "/word";
     public static final String CLEAR_PATH = "/clear";
     public static final String SCOPE_PATH = "/scope";
     public static final String LISTEN_PATH = "/listen";

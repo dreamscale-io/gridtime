@@ -1,35 +1,25 @@
 package com.dreamscale.gridtime.core.domain.dictionary;
 
-import com.dreamscale.gridtime.api.dictionary.TagTombstoneDto;
 import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
-@Entity(name = "team_dictionary_tag")
+@Entity(name = "community_dictionary_word")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamDictionaryTagEntity {
+public class CommunityDictionaryWordEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamId;
-
-    private String tagName;
-
-    private String lowerCaseTagName;
+    private String wordName;
 
     private String definition;
 
@@ -38,4 +28,3 @@ public class TeamDictionaryTagEntity {
     private LocalDateTime lastModifiedDate;
 
 }
-

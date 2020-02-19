@@ -25,85 +25,107 @@ public class DictionaryResource {
     OrganizationService organizationService;
 
     /**
-     * Retrieves the definition for a specified tag across all Scopes
+     * Retrieves the definition for a specified dictionary word across all Scopes
      *
-     * @return TagDefinitionDto
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionWithDetailsDto getDefinition(@PathVariable("tagName") String tagName) {
+    @GetMapping(ResourcePaths.WORD_PATH + "/{wordName}" )
+    public WordDefinitionWithDetailsDto getWord(@PathVariable("wordName") String wordName) {
         RequestContext context = RequestContext.get();
-        log.info("getDefinition, user={}", context.getRootAccountId());
+        log.info("getWord, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName);
+        return dictionaryService.getWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
     }
 
     /**
-     * Refactors the definition for a specified tag, and sends notifications to subscribers.
+     * Refactors the definition for a specified dictionary word, and sends notifications to subscribers.
      *
      * Always updates definition at team scope, without promoting the new version to community, and without updating any of the forks
      *
-     * @return TagDefinitionDto
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto createOrRefactorDefinition(@PathVariable("tagName") String tagName, @RequestBody TagDefinitionInputDto tagDefinitionInputDto) {
+    @PostMapping(ResourcePaths.WORD_PATH + "/{wordName}" )
+    public WordDefinitionDto createOrRefactorWord(@PathVariable("wordName") String wordName, @RequestBody WordDefinitionInputDto wordDefinitionInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("createOrRefactorDefinition, user={}", context.getRootAccountId());
+        log.info("createOrRefactorWord, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createOrRefactorDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName, tagDefinitionInputDto);
+        return dictionaryService.createOrRefactorWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName, wordDefinitionInputDto);
     }
 
     /**
-     * Promotes the existing team definition to community scope, and sends a notification to community.
+     * Promotes the existing team word definition to community scope, and sends a notification to community.
      *
-     * These new definitions can be accepted or rejected by the community, and will be pending until approved..
+     * These new definitions can be accepted or rejected by the community, and will be pending until approved.
      *
-     * @return TagDefinitionDto
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PROMOTE_PATH)
-    public TagDefinitionDto promoteDefinition(@PathVariable("tagName") String tagName) {
+    @PostMapping(ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PROMOTE_PATH)
+    public WordDefinitionDto promoteWordToCommunityScope(@PathVariable("wordName") String wordName) {
         RequestContext context = RequestContext.get();
-        log.info("promoteDefinition, user={}", context.getRootAccountId());
+        log.info("promoteWordToCommunityScope, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.promoteDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), tagName);
+        return dictionaryService.promoteWordToCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
     }
 
     /**
-     * Retrieves the team scope dictionary
+     * Retrieves all word definitions within the team's scope
      *
      * Intended to be locally cached, and used as a reference for autocomplete
      *
      * Dictionary updates will be pushed over talk
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH )
-    public List<TagDefinitionDto> getTeamDictionary() {
+    public List<WordDefinitionDto> getGlobalTeamDictionary() {
         RequestContext context = RequestContext.get();
-        log.info("getTeamDictionary, user={}", context.getRootAccountId());
+        log.info("getGlobalTeamDictionary, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getTeamDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
+        return dictionaryService.getGlobalTeamDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
-     * Creates a new "Book" editable scope for pulling in existing definitions.
+     * Retrieves the community scope dictionary
      *
-     * Teams can organize their definitions into groups.  The same tags can exist in multiple books.
+     * Intended to be locally cached, and used as a reference for autocomplete
      *
-     * New Book scopes can be edited without affecting the primary definitions.
+     * Dictionary updates will be pushed over talk
+     *
+     * @return List<WordDefinitionDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH )
+    public List<WordDefinitionDto> getGlobalCommunityDictionary() {
+        RequestContext context = RequestContext.get();
+        log.info("getGlobalCommunityDictionary, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        return dictionaryService.getGlobalCommunityDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    /**
+     * Creates a new "Book", with an editable scope, for pulling in existing word definitions.
+     *
+     * Teams can organize their definitions into groups.  The same word definitions can exist in multiple books.
+     *
+     * New Book scopes allow edited of words without affecting the global definitions.
+     *
+     * Each new {bookName} must be unique.
      *
      * @return DictionaryBookDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public BookReferenceDto createTeamDictionaryBook(@PathVariable("bookName") String bookName) {
+    public BookReferenceDto createTeamBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
         log.info("createTeamBook, user={}", context.getRootAccountId());
 
@@ -122,18 +144,18 @@ public class DictionaryResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public BookReferenceDto createCommunityDictionaryBook(@PathVariable("bookName") String bookName) {
+    public BookReferenceDto createCommunityBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
         log.info("createCommunityBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createCommunityDictionaryBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        return dictionaryService.createCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
     /**
-     * Retrieves all the definitions for the specified Book
+     * Retrieves all word definitions for the specified Book
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
@@ -145,14 +167,15 @@ public class DictionaryResource {
         return dictionaryService.getTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
+
     /**
      * Retrieves all the definitions for the specified Book
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    public List<TagDefinitionDto> getCommunityBook(@PathVariable("bookName") String bookName) {
+    public BookDto getCommunityBook(@PathVariable("bookName") String bookName) {
         RequestContext context = RequestContext.get();
         log.info("getCommunityBook, user={}", context.getRootAccountId());
 
@@ -160,60 +183,48 @@ public class DictionaryResource {
         return dictionaryService.getCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
+
     /**
-     * Retrieves a single definition for a specified tag within a book
-     * @return TagDefinitionDto
+     * Refactors the specified definition for a word, within the scope of a book, but not for the global team scope
+     *
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto getDefinitionWithinTeamBook(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName) {
+    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" )
+    public WordDefinitionDto refactorWordInsideTeamBook(@PathVariable("bookName") String bookName, @PathVariable("wordName") String wordName, @RequestBody WordDefinitionInputDto wordDefinitionInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("getBookDefinition, user={}", context.getRootAccountId());
+        log.info("refactorWordInsideTeamBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getDefinitionWithinTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName);
+        return dictionaryService.refactorWordInsideTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName, wordDefinitionInputDto);
     }
 
     /**
-     * Refactors the specified definition for a tag, within the scope of a book, but not for the global team
-     * @return TagDefinitionDto
+     * Pulls the global team definition for a specified word into the specified Team Book
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" )
-    public TagDefinitionDto refactorTeamBookDefinition(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName, @RequestBody TagDefinitionInputDto tagDefinitionInputDto) {
+    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
+    public WordDefinitionDto pullWordIntoTeamBook(@PathVariable("bookName") String bookName, @PathVariable("wordName") String wordName) {
         RequestContext context = RequestContext.get();
-        log.info("refactorTeamBookDefinition, user={}", context.getRootAccountId());
+        log.info("pullWordIntoTeamBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.refactorTeamBookDefinition(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName, tagDefinitionInputDto);
+        return dictionaryService.pullWordIntoTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
     /**
-     * Pulls the global team definition for a specified tag into the specified book
-     * @return TagDefinitionDto
+     * Pulls the global community definition for a specified word into the specified Community Book
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    public TagDefinitionDto pullDefinitionIntoTeamBook(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName) {
+    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
+    public WordDefinitionDto pullWordIntoCommunityBook(@PathVariable("bookName") String bookName, @PathVariable("wordName") String wordName) {
         RequestContext context = RequestContext.get();
-        log.info("pullDefinitionIntoTeamBook, user={}", context.getRootAccountId());
+        log.info("pullWordIntoCommunityBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.pullDefinitionIntoTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName);
-    }
-
-    /**
-     * Pulls the global team definition for a specified tag into the specified book
-     * @return TagDefinitionDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.TAG_PATH + "/{tagName}" + ResourcePaths.PULL_PATH)
-    public TagDefinitionDto pullDefinitionIntoCommunityBook(@PathVariable("bookName") String bookName, @PathVariable("tagName") String tagName) {
-        RequestContext context = RequestContext.get();
-        log.info("pullDefinitionIntoCommunityBook, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.pullDefinitionIntoCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, tagName);
+        return dictionaryService.pullWordIntoCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
     /**
@@ -221,92 +232,76 @@ public class DictionaryResource {
      *
      * So you know which new words need to be filled in
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.UNDEFINED_PATH )
-    public List<TagDefinitionDto> getUndefinedTeamDictionaryTerms() {
+    public List<WordDefinitionDto> getUndefinedTeamWords() {
         RequestContext context = RequestContext.get();
-        log.info("getUndefinedTeamDictionaryTerms, user={}", context.getRootAccountId());
+        log.info("getUndefinedTeamWords, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getUndefinedTeamDictionaryTerms(invokingMember.getOrganizationId(), invokingMember.getId());
+        return dictionaryService.getUndefinedTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
      * Retrieves the team scope dictionary where definitions are promoted and still pending
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.PENDING_PATH )
-    public List<TagDefinitionDto> getPendingTeamDictionaryTerms() {
+    public List<WordDefinitionDto> getPromotionPendingTeamWords() {
         RequestContext context = RequestContext.get();
-        log.info("getPendingTeamDictionaryTerms, user={}", context.getRootAccountId());
+        log.info("getPromotionPendingTeamWords, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getPendingTeamDictionaryTerms(invokingMember.getOrganizationId(), invokingMember.getId());
+        return dictionaryService.getPromotionPendingTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
-    /**
-     * Retrieves the community scope dictionary
-     *
-     * Intended to be locally cached, and used as a reference for autocomplete
-     *
-     * @return List<TagDefinitionDto>
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH )
-    public List<TagDefinitionDto> getCommunityDictionary() {
-        RequestContext context = RequestContext.get();
-        log.info("getCommunityDictionary, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getCommunityDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
-    }
 
     /**
      * Retrieves the list of pending community definitions
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.PENDING_PATH)
-    public List<PendingTagReferenceDto> getPendingCommunityDefinitions() {
+    public List<PendingWordReferenceDto> getPendingCommunityWords() {
         RequestContext context = RequestContext.get();
-        log.info("getPendingCommunityDefinitions, user={}", context.getRootAccountId());
+        log.info("getPendingCommunityWords, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getPendingCommunityDefinitions(invokingMember.getOrganizationId(), invokingMember.getId());
+        return dictionaryService.getPendingCommunityWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
      * Accepts the specified definition, and merges it into the community library
      *
-     * @return TagDefinitionDto
+     * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.ACCEPT_PATH)
-    public TagDefinitionDto acceptPendingTagIntoDictionary(@RequestBody PendingTagReferenceDto pendingTagReferenceDto) {
+    public WordDefinitionDto acceptPendingWordIntoCommunityScope(@RequestBody PendingWordReferenceDto pendingWordReferenceDto) {
         RequestContext context = RequestContext.get();
-        log.info("acceptPendingTagIntoDictionary, user={}", context.getRootAccountId());
+        log.info("acceptPendingWordIntoCommunityScope, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.acceptPendingTagIntoDictionary(invokingMember.getOrganizationId(), invokingMember.getId(), pendingTagReferenceDto);
+        return dictionaryService.acceptPendingWordIntoCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
     }
 
     /**
      * Retrieves the list of pending community definitions
      *
-     * @return List<TagDefinitionDto>
+     * @return List<WordDefinitionDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.REJECT_PATH)
-    public void rejectPendingTag(@RequestBody PendingTagReferenceDto pendingTagReferenceDto) {
+    public void rejectPendingCommunityWord(@RequestBody PendingWordReferenceDto pendingWordReferenceDto) {
         RequestContext context = RequestContext.get();
-        log.info("acceptPendingTagIntoDictionary, user={}", context.getRootAccountId());
+        log.info("rejectPendingCommunityWord, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        dictionaryService.rejectPendingTag(invokingMember.getOrganizationId(), invokingMember.getId(), pendingTagReferenceDto);
+        dictionaryService.rejectPendingCommunityWord(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
     }
 }

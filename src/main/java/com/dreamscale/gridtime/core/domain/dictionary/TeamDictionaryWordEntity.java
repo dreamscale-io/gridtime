@@ -3,30 +3,37 @@ package com.dreamscale.gridtime.core.domain.dictionary;
 import lombok.*;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "community_book_tag")
+@Entity(name = "team_dictionary_word")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommunityBookTagEntity {
+public class TeamDictionaryWordEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID communityBookId;
+    private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID communittyTagId;
+    private UUID teamId;
 
-    private LocalDateTime pullDate;
+    private String wordName;
+
+    private String lowerCaseWordName;
+
+    private String definition;
+
+    private LocalDateTime creationDate;
+
+    private LocalDateTime lastModifiedDate;
 
 }
+

@@ -9,27 +9,24 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "team_book_tag")
+@Entity(name = "community_book_word")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamBookTagEntity {
+public class CommunityBookWordEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamBookId;
+    private UUID communityBookId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamTagId;
+    private UUID communityWordId;
 
     private LocalDateTime pullDate;
-
-    @Enumerated(EnumType.STRING)
-    private TagModifiedStatus modifiedStatus;
 
 }

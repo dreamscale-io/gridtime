@@ -30,42 +30,42 @@ public class DictionaryService {
     TeamService teamService;
 
     @Autowired
-    TeamDictionaryTagRepository teamDictionaryTagRepository;
+    TeamDictionaryWordRepository teamDictionaryWordRepository;
 
     @Autowired
-    TeamDictionaryTombstoneRepository teamDictionaryTombstoneRepository;
+    TeamDictionaryWordTombstoneRepository teamDictionaryWordTombstoneRepository;
 
     @Autowired
     TeamBookRepository teamBookRepository;
 
     @Autowired
-    TeamBookTagRepository teamBookTagRepository;
+    TeamBookWordRepository teamBookWordRepository;
 
     @Autowired
-    TeamBookOverrideRepository teamBookOverrideRepository;
+    TeamBookWordOverrideRepository teamBookWordOverrideRepository;
 
 
     @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<TagDefinitionWithDetailsDto, TeamDictionaryTagEntity> tagDefinitionWithDetailsMapper;
+    private DtoEntityMapper<WordDefinitionWithDetailsDto, TeamDictionaryWordEntity> wordDefinitionWithDetailsMapper;
     private DtoEntityMapper<BookReferenceDto, TeamBookEntity> teamBookReferenceMapper;
     private DtoEntityMapper<BookDto, TeamBookEntity> teamBookMapper;
-    private DtoEntityMapper<TagDefinitionDto, TeamDictionaryTagEntity> tagDefinitionMapper;
-    private DtoEntityMapper<TagDefinitionDto, TeamBookOverrideEntity> tagOverrideMapper;
+    private DtoEntityMapper<WordDefinitionDto, TeamDictionaryWordEntity> wordDefinitionMapper;
+    private DtoEntityMapper<WordDefinitionDto, TeamBookWordOverrideEntity> wordDefinitionOverrideMapper;
 
 
     @PostConstruct
     private void init() {
-        tagDefinitionMapper = mapperFactory.createDtoEntityMapper(TagDefinitionDto.class, TeamDictionaryTagEntity.class);
-        tagOverrideMapper = mapperFactory.createDtoEntityMapper(TagDefinitionDto.class, TeamBookOverrideEntity.class);
+        wordDefinitionMapper = mapperFactory.createDtoEntityMapper(WordDefinitionDto.class, TeamDictionaryWordEntity.class);
+        wordDefinitionOverrideMapper = mapperFactory.createDtoEntityMapper(WordDefinitionDto.class, TeamBookWordOverrideEntity.class);
 
-        tagDefinitionWithDetailsMapper = mapperFactory.createDtoEntityMapper(TagDefinitionWithDetailsDto.class, TeamDictionaryTagEntity.class);
+        wordDefinitionWithDetailsMapper = mapperFactory.createDtoEntityMapper(WordDefinitionWithDetailsDto.class, TeamDictionaryWordEntity.class);
         teamBookReferenceMapper = mapperFactory.createDtoEntityMapper(BookReferenceDto.class, TeamBookEntity.class );
         teamBookMapper = mapperFactory.createDtoEntityMapper(BookDto.class, TeamBookEntity.class);
     }
 
 
-    public TagDefinitionWithDetailsDto getDefinition(UUID organizationId, UUID memberId, String tagName) {
+    public WordDefinitionWithDetailsDto getWord(UUID organizationId, UUID memberId, String wordName) {
 
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
@@ -75,19 +75,19 @@ public class DictionaryService {
 
         //get all definitions, across all scopes, and then all tombstone references that are forwarded here
 
-        TeamDictionaryTagEntity existingTag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), tagName);
+        TeamDictionaryWordEntity existingWord = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
 
-        TagDefinitionWithDetailsDto tagDefinition = tagDefinitionWithDetailsMapper.toApi(existingTag);
+        WordDefinitionWithDetailsDto wordDefinition = wordDefinitionWithDetailsMapper.toApi(existingWord);
 
-        if (existingTag != null) {
+        if (existingWord != null) {
 
-            List<TeamDictionaryTombstoneEntity> tombstones = teamDictionaryTombstoneRepository.findByForwardToOrderByRipDate(existingTag.getId());
+            List<TeamDictionaryWordTombstoneEntity> tombstones = teamDictionaryWordTombstoneRepository.findByForwardToOrderByRipDate(existingWord.getId());
 
-            List<TagTombstoneDto> tombstoneDtos = new ArrayList<>();
+            List<WordTombstoneDto> tombstoneDtos = new ArrayList<>();
 
-            for (TeamDictionaryTombstoneEntity tombstone: tombstones) {
-                TagTombstoneDto tombstoneDto = new TagTombstoneDto();
-                tombstoneDto.setDeadTagName(tombstone.getDeadTagName());
+            for (TeamDictionaryWordTombstoneEntity tombstone: tombstones) {
+                WordTombstoneDto tombstoneDto = new WordTombstoneDto();
+                tombstoneDto.setDeadWordName(tombstone.getDeadWordName());
                 tombstoneDto.setDeadDefinition(tombstone.getDeadDefinition());
                 tombstoneDto.setRipDate(tombstone.getRipDate());
                 tombstoneDto.setReviveDate(tombstone.getReviveDate());
@@ -95,10 +95,10 @@ public class DictionaryService {
                 tombstoneDtos.add(tombstoneDto);
             }
 
-            tagDefinition.setTombstones(tombstoneDtos);
+            wordDefinition.setTombstones(tombstoneDtos);
         }
 
-        return tagDefinition;
+        return wordDefinition;
     }
 
     private void validateBookNotNull(String bookName) {
@@ -113,15 +113,15 @@ public class DictionaryService {
         }
     }
 
-    private void validateTagNotNull(String tagName) {
-        if (tagName == null || tagName.length() == 0) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag name cant be blank.");
+    private void validateWordNotNull(String wordName) {
+        if (wordName == null || wordName.length() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_WORD, "Word name cant be blank.");
         }
     }
 
-    private void validateTagNotNull(TeamDictionaryTagEntity tagEntity) {
-        if (tagEntity == null ) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TAG, "Tag could not be found.");
+    private void validateWordNotNull(TeamDictionaryWordEntity wordEntity) {
+        if (wordEntity == null ) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_WORD, "Word could not be found.");
         }
     }
 
@@ -132,29 +132,29 @@ public class DictionaryService {
     }
 
 
-    private TeamDictionaryTagEntity findByTeamAndCaseInsensitiveTag(UUID teamId, String tagName) {
+    private TeamDictionaryWordEntity findByTeamAndCaseInsensitiveWord(UUID teamId, String wordName) {
 
-        String lowerCaseTag = tagName.toLowerCase();
+        String lowerCaseWord = wordName.toLowerCase();
 
-        return teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(teamId, lowerCaseTag);
+        return teamDictionaryWordRepository.findByTeamIdAndLowerCaseWordName(teamId, lowerCaseWord);
     }
 
-    public TagDefinitionDto createOrRefactorDefinition(UUID organizationId, UUID memberId, String originalTagName, TagDefinitionInputDto tagDefinitionInputDto) {
+    public WordDefinitionDto createOrRefactorWord(UUID organizationId, UUID memberId, String originalWordName, WordDefinitionInputDto wordDefinitionInputDto) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
-        validateTagNotNull(originalTagName);
-        validateTagNotNull(tagDefinitionInputDto.getTagName());
+        validateWordNotNull(originalWordName);
+        validateWordNotNull(wordDefinitionInputDto.getWordName());
 
-        TeamDictionaryTagEntity existingTag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), originalTagName);
+        TeamDictionaryWordEntity existingWord = findByTeamAndCaseInsensitiveWord(myTeam.getId(), originalWordName);
 
         LocalDateTime now = timeService.now();
 
-        TeamDictionaryTagEntity updatedTag = null;
-        if (existingTag != null) {
-            updatedTag = refactorExistingTag(now, existingTag, tagDefinitionInputDto);
+        TeamDictionaryWordEntity updatedWord = null;
+        if (existingWord != null) {
+            updatedWord = refactorExistingTeamWord(now, existingWord, wordDefinitionInputDto);
         } else {
-            updatedTag = createNewTag(now, myTeam, tagDefinitionInputDto);
+            updatedWord = createNewTeamWord(now, myTeam, wordDefinitionInputDto);
         }
 
         //what happens if an existing tag, is a tombstone?
@@ -162,7 +162,7 @@ public class DictionaryService {
         //what happens if a tombstone is revived?
 
 
-        return toDto(updatedTag);
+        return toDto(updatedWord);
     }
 
     public BookReferenceDto createTeamBook(UUID organizationId, UUID memberId, String bookName) {
@@ -197,23 +197,23 @@ public class DictionaryService {
         return teamBookReferenceMapper.toApi(existingBook);
     }
 
-    public TagDefinitionDto pullDefinitionIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String tagName) {
+    public WordDefinitionDto pullWordIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
-        validateTagNotNull(tagName);
+        validateWordNotNull(wordName);
 
-        TeamDictionaryTagEntity tag = findByTeamAndCaseInsensitiveTag(myTeam.getId(), tagName);
+        TeamDictionaryWordEntity word = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
 
-        validateTagNotNull(tag);
+        validateWordNotNull(word);
 
-        TeamBookTagEntity existingTag = pullTagInsideBook(myTeam.getId(), bookName, tag.getId());
+        TeamBookWordEntity existingWord = pullWordInsideBook(myTeam.getId(), bookName, word.getId());
 
-        return tagDefinitionMapper.toApi(tag);
+        return wordDefinitionMapper.toApi(word);
     }
 
-    private TeamBookTagEntity pullTagInsideBook(UUID teamId, String bookName, UUID tagId) {
+    private TeamBookWordEntity pullWordInsideBook(UUID teamId, String bookName, UUID wordId) {
 
         String lowerCaseBook = bookName.toLowerCase();
 
@@ -221,20 +221,20 @@ public class DictionaryService {
 
         validateBookNotNull(book);
 
-        TeamBookTagEntity bookTag = teamBookTagRepository.findByTeamBookNameAndTagId(teamId, lowerCaseBook, tagId);
+        TeamBookWordEntity wordInBook = teamBookWordRepository.findByTeamBookNameAndWordId(teamId, lowerCaseBook, wordId);
 
-        if (bookTag == null) {
-            bookTag = new TeamBookTagEntity();
-            bookTag.setId(UUID.randomUUID());
-            bookTag.setTeamBookId(book.getId());
-            bookTag.setTeamTagId(tagId);
-            bookTag.setModifiedStatus(TagModifiedStatus.UNCHANGED);
-            bookTag.setPullDate(timeService.now());
+        if (wordInBook == null) {
+            wordInBook = new TeamBookWordEntity();
+            wordInBook.setId(UUID.randomUUID());
+            wordInBook.setTeamBookId(book.getId());
+            wordInBook.setTeamWordId(wordId);
+            wordInBook.setModifiedStatus(WordModifiedStatus.UNCHANGED);
+            wordInBook.setPullDate(timeService.now());
 
-            teamBookTagRepository.save(bookTag);
+            teamBookWordRepository.save(wordInBook);
         }
 
-        return bookTag;
+        return wordInBook;
     }
 
     public BookDto getTeamBook(UUID organizationId, UUID memberId, String bookName) {
@@ -255,186 +255,187 @@ public class DictionaryService {
 
         //then I can pull override definitions, I really oughta make a view.
 
-        List<TagDefinitionDto> tagDefinitionDtos = new ArrayList<>();
+        List<WordDefinitionDto> wordDefinitionDtos = new ArrayList<>();
 
-        List<TeamDictionaryTagEntity> wordsInBook = teamDictionaryTagRepository.findDefinitionsByBookId(existingBook.getId());
-        List<TeamBookOverrideEntity> overrides = teamBookOverrideRepository.findDefinitionsByBookId(existingBook.getId());
+        List<TeamDictionaryWordEntity> wordsInBook = teamDictionaryWordRepository.findWordsByBookId(existingBook.getId());
+        List<TeamBookWordOverrideEntity> overrides = teamBookWordOverrideRepository.findWordOverridesByBookId(existingBook.getId());
 
-        for (TeamDictionaryTagEntity word : wordsInBook) {
+        for (TeamDictionaryWordEntity word : wordsInBook) {
 
-            TagDefinitionDto bookTag = tagDefinitionMapper.toApi(word);
-            tagDefinitionDtos.add(bookTag);
+            WordDefinitionDto wordInBook = wordDefinitionMapper.toApi(word);
+            wordDefinitionDtos.add(wordInBook);
         }
 
-        for (TeamBookOverrideEntity override : overrides) {
+        for (TeamBookWordOverrideEntity override : overrides) {
 
-            TagDefinitionDto overrideTag = tagOverrideMapper.toApi(override);
-            overrideTag.setCreatedDate(override.getOverrideDate());
-            overrideTag.setOverride(true);
+            WordDefinitionDto overrideWord = wordDefinitionOverrideMapper.toApi(override);
+            overrideWord.setCreatedDate(override.getOverrideDate());
+            overrideWord.setOverride(true);
 
-            tagDefinitionDtos.add(overrideTag);
+            wordDefinitionDtos.add(overrideWord);
         }
 
-        bookDto.setDefinitions(tagDefinitionDtos);
+        bookDto.setDefinitions(wordDefinitionDtos);
 
         return bookDto;
     }
 
 
-    public BookReferenceDto createCommunityDictionaryBook(UUID organizationId, UUID memberId, String bookName) {
+    public BookReferenceDto createCommunityBook(UUID organizationId, UUID memberId, String bookName) {
         return null;
     }
 
 
 
-    private TagDefinitionDto toDto(TeamDictionaryTagEntity dictionaryTag) {
+    private WordDefinitionDto toDto(TeamDictionaryWordEntity dictionaryWord) {
 
-        TagDefinitionDto tagDefinitionDto = new TagDefinitionDto();
-        tagDefinitionDto.setTagName(dictionaryTag.getTagName());
-        tagDefinitionDto.setDefinition(dictionaryTag.getDefinition());
+        WordDefinitionDto wordDefinitionDto = new WordDefinitionDto();
+        wordDefinitionDto.setWordName(dictionaryWord.getWordName());
+        wordDefinitionDto.setDefinition(dictionaryWord.getDefinition());
 
-        return tagDefinitionDto;
+        return wordDefinitionDto;
     }
 
-    private TeamDictionaryTagEntity createNewTag(LocalDateTime now, TeamDto myTeam, TagDefinitionInputDto tagDefinitionInputDto) {
+    private TeamDictionaryWordEntity createNewTeamWord(LocalDateTime now, TeamDto myTeam, WordDefinitionInputDto wordDefinitionInputDto) {
 
         //first check for existing tombstones by the same name, resurrect if needed
 
-        resurrectTombstoneTagsWithSameName(now, myTeam, tagDefinitionInputDto);
+        resurrectTeamTombstoneWordsWithSameName(now, myTeam, wordDefinitionInputDto);
 
-        TeamDictionaryTagEntity newTag = new TeamDictionaryTagEntity();
-        newTag.setId(UUID.randomUUID());
-        newTag.setOrganizationId(myTeam.getOrganizationId());
-        newTag.setTeamId(myTeam.getId());
-        newTag.setCreationDate(now);
-        newTag.setLastModifiedDate(now);
-        newTag.setLowerCaseTagName(tagDefinitionInputDto.getTagName().toLowerCase());
-        newTag.setTagName(tagDefinitionInputDto.getTagName());
-        newTag.setDefinition(tagDefinitionInputDto.getDefinition());
+        TeamDictionaryWordEntity newWord = new TeamDictionaryWordEntity();
+        newWord.setId(UUID.randomUUID());
+        newWord.setOrganizationId(myTeam.getOrganizationId());
+        newWord.setTeamId(myTeam.getId());
+        newWord.setCreationDate(now);
+        newWord.setLastModifiedDate(now);
+        newWord.setLowerCaseWordName(wordDefinitionInputDto.getWordName().toLowerCase());
+        newWord.setWordName(wordDefinitionInputDto.getWordName());
+        newWord.setDefinition(wordDefinitionInputDto.getDefinition());
 
-        teamDictionaryTagRepository.save(newTag);
+        teamDictionaryWordRepository.save(newWord);
 
-        return newTag;
+        return newWord;
     }
 
-    private void resurrectTombstoneTagsWithSameName(LocalDateTime now, TeamDto myTeam, TagDefinitionInputDto tagDefinitionInputDto) {
+    private void resurrectTeamTombstoneWordsWithSameName(LocalDateTime now, TeamDto myTeam, WordDefinitionInputDto wordDefinitionInputDto) {
 
-        List<TeamDictionaryTombstoneEntity> matchingTombstones = teamDictionaryTombstoneRepository.findByTeamIdAndLowerCaseTagName(
-                myTeam.getId(), tagDefinitionInputDto.getTagName().toLowerCase());
+        List<TeamDictionaryWordTombstoneEntity> matchingTombstones = teamDictionaryWordTombstoneRepository.findByTeamIdAndLowerCaseWordName(
+                myTeam.getId(), wordDefinitionInputDto.getWordName().toLowerCase());
 
-        for (TeamDictionaryTombstoneEntity tombstoneEntity : matchingTombstones) {
+        for (TeamDictionaryWordTombstoneEntity tombstoneEntity : matchingTombstones) {
             tombstoneEntity.setReviveDate(now);
         }
 
-        teamDictionaryTombstoneRepository.save(matchingTombstones);
+        teamDictionaryWordTombstoneRepository.save(matchingTombstones);
 
     }
 
-    private TeamDictionaryTagEntity refactorExistingTag(LocalDateTime now, TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
+    private TeamDictionaryWordEntity refactorExistingTeamWord(LocalDateTime now, TeamDictionaryWordEntity existingWord, WordDefinitionInputDto wordDefinitionInputDto) {
 
-        if (hasTagCaseChange(existingTag, tagDefinitionInputDto)) {
+        if (hasWordCaseChange(existingWord, wordDefinitionInputDto)) {
 
-            existingTag.setTagName(tagDefinitionInputDto.getTagName());
-            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
-            existingTag.setLastModifiedDate(now);
+            existingWord.setWordName(wordDefinitionInputDto.getWordName());
+            existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
+            existingWord.setLastModifiedDate(now);
 
-            teamDictionaryTagRepository.save(existingTag);
-        } else if (hasDefinitionChangeOnly(existingTag, tagDefinitionInputDto)) {
-            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
-            existingTag.setLastModifiedDate(now);
+            teamDictionaryWordRepository.save(existingWord);
+        } else if (hasDefinitionChangeOnly(existingWord, wordDefinitionInputDto)) {
+            existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
+            existingWord.setLastModifiedDate(now);
 
-            teamDictionaryTagRepository.save(existingTag);
+            teamDictionaryWordRepository.save(existingWord);
         } else {
 
             //name change, create a tombstone link
 
-            TeamDictionaryTombstoneEntity teamDictionaryTombstoneEntity = new TeamDictionaryTombstoneEntity();
+            TeamDictionaryWordTombstoneEntity teamDictionaryWordTombstoneEntity = new TeamDictionaryWordTombstoneEntity();
 
-            teamDictionaryTombstoneEntity.setId(UUID.randomUUID());
-            teamDictionaryTombstoneEntity.setTeamId(existingTag.getTeamId());
-            teamDictionaryTombstoneEntity.setOrganizationId(existingTag.getOrganizationId());
-            teamDictionaryTombstoneEntity.setLowerCaseTagName(existingTag.getLowerCaseTagName());
-            teamDictionaryTombstoneEntity.setDeadTagName(existingTag.getTagName());
-            teamDictionaryTombstoneEntity.setDeadDefinition(existingTag.getDefinition());
+            teamDictionaryWordTombstoneEntity.setId(UUID.randomUUID());
+            teamDictionaryWordTombstoneEntity.setTeamId(existingWord.getTeamId());
+            teamDictionaryWordTombstoneEntity.setOrganizationId(existingWord.getOrganizationId());
+            teamDictionaryWordTombstoneEntity.setLowerCaseWordName(existingWord.getLowerCaseWordName());
+            teamDictionaryWordTombstoneEntity.setDeadWordName(existingWord.getWordName());
+            teamDictionaryWordTombstoneEntity.setDeadDefinition(existingWord.getDefinition());
 
-            teamDictionaryTombstoneEntity.setRipDate(now);
-            teamDictionaryTombstoneEntity.setForwardTo(existingTag.getId());
+            teamDictionaryWordTombstoneEntity.setRipDate(now);
+            teamDictionaryWordTombstoneEntity.setForwardTo(existingWord.getId());
 
-            teamDictionaryTombstoneRepository.save(teamDictionaryTombstoneEntity);
+            teamDictionaryWordTombstoneRepository.save(teamDictionaryWordTombstoneEntity);
 
             //then edit the original
 
-            existingTag.setTagName(tagDefinitionInputDto.getTagName());
-            existingTag.setLowerCaseTagName(tagDefinitionInputDto.getTagName().toLowerCase());
-            existingTag.setDefinition(tagDefinitionInputDto.getDefinition());
-            existingTag.setLastModifiedDate(now);
+            existingWord.setWordName(wordDefinitionInputDto.getWordName());
+            existingWord.setLowerCaseWordName(wordDefinitionInputDto.getWordName().toLowerCase());
+            existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
+            existingWord.setLastModifiedDate(now);
 
-            teamDictionaryTagRepository.save(existingTag);
+            teamDictionaryWordRepository.save(existingWord);
 
         }
 
-        return existingTag;
+        return existingWord;
     }
 
-    private boolean hasDefinitionChangeOnly(TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
-        return existingTag.getTagName().equals(tagDefinitionInputDto.getTagName());
+    private boolean hasDefinitionChangeOnly(TeamDictionaryWordEntity existingWod, WordDefinitionInputDto wordDefinitionInputDto) {
+        return existingWod.getWordName().equals(wordDefinitionInputDto.getWordName());
     }
 
-    private boolean hasTagCaseChange(TeamDictionaryTagEntity existingTag, TagDefinitionInputDto tagDefinitionInputDto) {
-        String existingTagKey = existingTag.getLowerCaseTagName();
-        String newTagKey = tagDefinitionInputDto.getTagName().toLowerCase();
+    private boolean hasWordCaseChange(TeamDictionaryWordEntity existingWord, WordDefinitionInputDto wordDefinitionInputDto) {
+        String existingWordKey = existingWord.getLowerCaseWordName();
+        String newWordKey = wordDefinitionInputDto.getWordName().toLowerCase();
 
-        return existingTagKey.equals(newTagKey) && !existingTag.getTagName().equals(tagDefinitionInputDto.getTagName());
+        return existingWordKey.equals(newWordKey) && !existingWord.getWordName().equals(wordDefinitionInputDto.getWordName());
     }
 
-    public void touchBlankDefinition(UUID organizationId, UUID memberId, String tag) {
+    public void touchBlankDefinition(UUID organizationId, UUID memberId, String wordName) {
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateWordNotNull(wordName);
+
+        TeamDictionaryWordEntity existingWord = teamDictionaryWordRepository.findByTeamIdAndLowerCaseWordName(myTeam.getId(), wordName);
+
+        if (existingWord == null) {
+            LocalDateTime now = timeService.now();
+
+            TeamDictionaryWordEntity newWord = new TeamDictionaryWordEntity();
+            newWord.setOrganizationId(organizationId);
+            newWord.setTeamId(myTeam.getId());
+            newWord.setCreationDate(now);
+            newWord.setLastModifiedDate(now);
+            newWord.setWordName(wordName);
+            newWord.setLowerCaseWordName(wordName.toLowerCase());
+            teamDictionaryWordRepository.save(newWord);
+        }
+    }
+
+    public void touchBlankDefinitions(UUID organizationId, UUID memberId, List<String> words) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
-        TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(myTeam.getId(), tag);
-
         LocalDateTime now = timeService.now();
 
-        if (existingTag == null) {
-            TeamDictionaryTagEntity newTag = new TeamDictionaryTagEntity();
-            newTag.setOrganizationId(organizationId);
-            newTag.setTeamId(myTeam.getId());
-            newTag.setCreationDate(now);
-            newTag.setLastModifiedDate(now);
-            newTag.setTagName(tag);
+        List<TeamDictionaryWordEntity> newWordEntries = new ArrayList<>();
 
-            teamDictionaryTagRepository.save(newTag);
-        }
-    }
+        for (String word : words) {
+            TeamDictionaryWordEntity existingWord = teamDictionaryWordRepository.findByTeamIdAndLowerCaseWordName(myTeam.getId(), word);
 
-    public void touchBlankDefinitions(UUID organizationId, UUID memberId, List<String> tags) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
-
-        validateTeamExists(myTeam);
-
-        LocalDateTime now = timeService.now();
-
-        List<TeamDictionaryTagEntity> newTagEntries = new ArrayList<>();
-
-        for (String tag : tags) {
-            TeamDictionaryTagEntity existingTag = teamDictionaryTagRepository.findByTeamIdAndLowerCaseTagName(myTeam.getId(), tag);
-
-            if (existingTag == null) {
-                TeamDictionaryTagEntity newTag = new TeamDictionaryTagEntity();
-                newTag.setId(UUID.randomUUID());
-                newTag.setOrganizationId(organizationId);
-                newTag.setTeamId(myTeam.getId());
-                newTag.setCreationDate(now);
-                newTag.setLastModifiedDate(now);
-                newTag.setTagName(tag);
-
-                newTagEntries.add(newTag);
+            if (existingWord == null) {
+                TeamDictionaryWordEntity newWord = new TeamDictionaryWordEntity();
+                newWord.setId(UUID.randomUUID());
+                newWord.setOrganizationId(organizationId);
+                newWord.setTeamId(myTeam.getId());
+                newWord.setCreationDate(now);
+                newWord.setLastModifiedDate(now);
+                newWord.setWordName(word);
+                newWord.setLowerCaseWordName(word.toLowerCase());
+                newWordEntries.add(newWord);
             }
         }
 
-        if (newTagEntries.size() > 0) {
-            teamDictionaryTagRepository.save(newTagEntries);
+        if (newWordEntries.size() > 0) {
+            teamDictionaryWordRepository.save(newWordEntries);
         }
     }
 
@@ -444,81 +445,74 @@ public class DictionaryService {
         }
     }
 
-    private void validateCircuitExists(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_CIRCUIT, "Unable to find: " + circuitName);
-        }
-    }
 
-
-
-    public TagDefinitionDto promoteDefinition(UUID organizationId, UUID id, String tagName) {
+    public WordDefinitionDto promoteWordToCommunityScope(UUID organizationId, UUID id, String tagName) {
         return null;
     }
 
 
-    public List<TagDefinitionDto> getTeamDictionary(UUID organizationId, UUID memberId) {
+    public List<WordDefinitionDto> getGlobalTeamDictionary(UUID organizationId, UUID memberId) {
         return null;
     }
 
-    public List<TagDefinitionDto> getCommunityDictionary(UUID organizationId, UUID memberId) {
+    public List<WordDefinitionDto> getGlobalCommunityDictionary(UUID organizationId, UUID memberId) {
         return null;
     }
 
-    public List<PendingTagReferenceDto> getPendingCommunityDefinitions(UUID organizationId, UUID id) {
+    public List<PendingWordReferenceDto> getPendingCommunityWords(UUID organizationId, UUID id) {
         return null;
     }
 
-    public List<TagDefinitionDto> getUndefinedTeamDictionaryTerms(UUID organizationId, UUID memberId) {
+    public List<WordDefinitionDto> getUndefinedTeamWords(UUID organizationId, UUID memberId) {
 
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
-        List<TeamDictionaryTagEntity> undefinedTerms = teamDictionaryTagRepository.findByTeamIdAndBlankDefinition(myTeam.getId());
+        List<TeamDictionaryWordEntity> undefinedWords = teamDictionaryWordRepository.findByTeamIdAndBlankDefinition(myTeam.getId());
 
-        List<TagDefinitionDto> blankDefs = new ArrayList<>();
+        List<WordDefinitionDto> blankDefs = new ArrayList<>();
 
-        for (TeamDictionaryTagEntity undefinedTerm : undefinedTerms) {
-            TagDefinitionDto blankTag = new TagDefinitionDto(undefinedTerm.getTagName(), null,
-                    undefinedTerm.getCreationDate(), undefinedTerm.getLastModifiedDate(), false);
+        for (TeamDictionaryWordEntity undefinedWord : undefinedWords) {
+            WordDefinitionDto blankDefinition = new WordDefinitionDto(undefinedWord.getWordName(), null,
+                    undefinedWord.getCreationDate(), undefinedWord.getLastModifiedDate(), false);
 
-            blankDefs.add(blankTag);
+            blankDefs.add(blankDefinition);
         }
 
         return blankDefs;
     }
 
-    public List<TagDefinitionDto> getPendingTeamDictionaryTerms(UUID organizationId, UUID id) {
+    public List<WordDefinitionDto> getPromotionPendingTeamWords(UUID organizationId, UUID id) {
         return null;
     }
 
-    public TagDefinitionDto acceptPendingTagIntoDictionary(UUID organizationId, UUID id, PendingTagReferenceDto pendingTagReferenceDto) {
+    public WordDefinitionDto acceptPendingWordIntoCommunityScope(UUID organizationId, UUID id, PendingWordReferenceDto pendingWordReferenceDto) {
         return null;
 
     }
 
 
 
-    public void rejectPendingTag(UUID organizationId, UUID id, PendingTagReferenceDto pendingTagReferenceDto) {
+    public void rejectPendingCommunityWord(UUID organizationId, UUID id, PendingWordReferenceDto pendingWordReferenceDto) {
 
     }
 
 
 
-    public List<TagDefinitionDto> getCommunityBook(UUID organizationId, UUID id, String bookName) {
+    public BookDto getCommunityBook(UUID organizationId, UUID id, String bookName) {
         return null;
     }
 
-    public TagDefinitionDto getDefinitionWithinTeamBook(UUID organizationId, UUID id, String bookName, String tagName) {
+    public WordDefinitionDto getDefinitionWithinTeamBook(UUID organizationId, UUID id, String bookName, String wordName) {
         return null;
     }
 
-    public TagDefinitionDto pullDefinitionIntoCommunityBook(UUID organizationId, UUID id, String bookName, String tagName) {
+    public WordDefinitionDto pullWordIntoCommunityBook(UUID organizationId, UUID id, String bookName, String wordName) {
         return null;
     }
 
-    public TagDefinitionDto refactorTeamBookDefinition(UUID organizationId, UUID id, String bookName, String tagName, TagDefinitionInputDto tagDefinitionInputDto) {
+    public WordDefinitionDto refactorWordInsideTeamBook(UUID organizationId, UUID id, String bookName, String wordName, WordDefinitionInputDto wordDefinitionInputDto) {
         return null;
     }
 }
