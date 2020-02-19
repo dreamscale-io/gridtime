@@ -226,6 +226,24 @@ class DictionaryResourceSpec extends Specification {
 
     }
 
+    def 'should get a list of available team books'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        when:
+
+        BookReferenceDto book1Ref = dictionaryClient.createTeamBook("book1")
+        BookReferenceDto book2Ref = dictionaryClient.createTeamBook("book2")
+
+        List<BookReferenceDto> bookRefs = dictionaryClient.getTeamBooks()
+
+        then:
+        assert bookRefs != null
+        assert bookRefs.size() == 2
+    }
+
 
     //TODO next is refactoring a word in a book
 

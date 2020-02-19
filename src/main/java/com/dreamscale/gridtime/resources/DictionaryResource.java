@@ -153,6 +153,36 @@ public class DictionaryResource {
     }
 
     /**
+     * Retrieves all the available book references within team scope
+     *
+     * @return List<BookReferenceDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH)
+    public List<BookReferenceDto> getTeamBooks() {
+        RequestContext context = RequestContext.get();
+        log.info("getTeamBooks, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        return dictionaryService.getAllTeamBooks(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
+     * Retrieves all the available book references within community scope
+     *
+     * @return List<BookReferenceDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH)
+    public List<BookReferenceDto> getCommunityBooks() {
+        RequestContext context = RequestContext.get();
+        log.info("getCommunityBooks, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        return dictionaryService.getAllCommunityBooks(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
      * Retrieves all word definitions for the specified Book
      *
      * @return List<WordDefinitionDto>

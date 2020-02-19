@@ -355,6 +355,17 @@ public class DictionaryService {
         return bookDto;
     }
 
+    public List<BookReferenceDto> getAllTeamBooks(UUID organizationId, UUID memberId) {
+
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+
+        List<TeamBookEntity> teamBooks = teamBookRepository.findByTeamId(myTeam.getId());
+
+        return teamBookReferenceMapper.toApiList(teamBooks);
+    }
+
 
     public BookReferenceDto createCommunityBook(UUID organizationId, UUID memberId, String bookName) {
         return null;
@@ -601,4 +612,8 @@ public class DictionaryService {
     }
 
 
+
+    public List<BookReferenceDto> getAllCommunityBooks(UUID organizationId, UUID memberId) {
+        return null;
+    }
 }
