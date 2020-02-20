@@ -20,7 +20,5 @@ public class WordTombstoneDto {
     private LocalDateTime ripDate;
     private LocalDateTime reviveDate;
 
-    private UUID ripByMemberId;
-
 }
 

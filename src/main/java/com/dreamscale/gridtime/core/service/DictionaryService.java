@@ -311,6 +311,29 @@ public class DictionaryService {
         return wordDefinitionMapper.toApi(word);
     }
 
+
+    public WordDefinitionDto removeWordFromTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+        validateWordNotNull(wordName);
+
+        //TODO remove word from Book...
+
+        //I really should remove these by Id?  Except...
+
+        //find the last override, or the global
+
+        TeamDictionaryWordEntity word = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
+
+        validateWordNotNull(word);
+
+        TeamBookWordEntity existingWord = pullWordInsideBook(myTeam.getId(), memberId, bookName, word.getId());
+
+        return wordDefinitionMapper.toApi(word);
+    }
+
     @Transactional
     public WordDefinitionDto refactorWordInsideTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName, WordDefinitionInputDto wordDefinitionInputDto) {
 
@@ -693,8 +716,7 @@ public class DictionaryService {
 
         for (TeamDictionaryWordEntity undefinedWord : undefinedWords) {
             WordDefinitionDto blankDefinition = new WordDefinitionDto(undefinedWord.getWordName(), null,
-                    undefinedWord.getCreationDate(), undefinedWord.getLastModifiedDate(),
-                    undefinedWord.getCreatedByMemberId(), undefinedWord.getLastModifiedByMemberId(), false);
+                    undefinedWord.getCreationDate(), undefinedWord.getLastModifiedDate(), false);
 
             blankDefs.add(blankDefinition);
         }
@@ -736,7 +758,6 @@ public class DictionaryService {
     public List<BookReferenceDto> getAllCommunityBooks(UUID organizationId, UUID memberId) {
         return null;
     }
-
 
 
 }

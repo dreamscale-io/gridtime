@@ -324,6 +324,10 @@ class DictionaryResourceSpec extends Specification {
 
     }
 
+    //TODO forget about community dictionary for now, lets just get the team one working
+    //implement actual deletion of words in books
+    //actual deletion of books
+    //words archive?
 
     //TODO next is promoting words into community dictionary
 

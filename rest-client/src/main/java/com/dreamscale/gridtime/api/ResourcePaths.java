@@ -141,4 +141,5 @@ public class ResourcePaths {
     public static final String ACCEPT_PATH = "/accept";
     public static final String REJECT_PATH = "/reject";
     public static final String PULL_PATH = "/pull";
+    public static final String REMOVE_PATH = "/remove";
 }

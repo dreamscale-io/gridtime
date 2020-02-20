@@ -20,8 +20,5 @@ public class WordDefinitionDto {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 
-    private UUID createdByMemberId;
-    private UUID lastModifiedByMemberId;
-
     private boolean isOverride;
 }
