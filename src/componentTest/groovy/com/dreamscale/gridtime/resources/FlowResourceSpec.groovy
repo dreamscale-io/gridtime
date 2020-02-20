@@ -16,7 +16,7 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository
 import com.dreamscale.gridtime.core.domain.flow.FlowEventRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.service.RecentActivityService
+import com.dreamscale.gridtime.core.capability.active.RecentActivityManager
 import com.dreamscale.gridtime.core.service.TimeService
 import org.dreamscale.exception.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,7 +57,7 @@ class FlowResourceSpec extends Specification {
     TimeService mockTimeService
 
     @Autowired
-    RecentActivityService recentActivityService
+    RecentActivityManager recentActivityService
 
     @Autowired
     JournalClient journalClient

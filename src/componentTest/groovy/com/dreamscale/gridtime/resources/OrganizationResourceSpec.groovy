@@ -22,7 +22,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.member.TeamRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
-import com.dreamscale.gridtime.core.service.JiraService
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -53,7 +53,7 @@ class OrganizationResourceSpec extends Specification {
     TeamMemberRepository teamMemberRepository
 
     @Autowired
-    JiraService mockJiraService
+    JiraCapability mockJiraService
 
     @Autowired
     RootAccountEntity testUser

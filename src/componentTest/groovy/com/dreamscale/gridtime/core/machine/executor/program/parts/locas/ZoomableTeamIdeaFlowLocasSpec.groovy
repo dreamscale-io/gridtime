@@ -24,7 +24,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
-import com.dreamscale.gridtime.core.service.TeamService
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -46,7 +46,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     CalendarService calendarService;
 
     @Autowired
-    TeamService teamService
+    TeamDirectoryCapability teamService
 
     @Autowired
     OrganizationRepository organizationRepository

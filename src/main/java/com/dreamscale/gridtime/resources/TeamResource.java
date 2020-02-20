@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.OrganizationService;
-import com.dreamscale.gridtime.core.service.TeamService;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class TeamResource {
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private TeamService teamService;
+    private TeamDirectoryCapability teamDirectoryCapability;
 
     /**
      * Get the active status of me
@@ -30,9 +30,9 @@ public class TeamResource {
     public TeamDto getMyTeam() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
-        return teamService.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamDirectoryCapability.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 

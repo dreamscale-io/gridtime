@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.service
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
@@ -34,7 +35,7 @@ public class JiraSyncServiceSpec extends Specification {
 	JiraSyncService jiraSyncService
 
 	@Autowired
-	JiraService mockJiraService
+    JiraCapability mockJiraService
 
 	def "should update task status if updated in Jira"() {
 		given:

@@ -1,8 +1,9 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.domain.active.*;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity;
@@ -11,6 +12,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class RecentActivityService {
+public class RecentActivityManager {
 
     private static final int MAX_RECENT = 5;
 
@@ -41,10 +43,10 @@ public class RecentActivityService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private ActiveStatusService activeStatusService;
+    private ActiveWorkStatusManager activeWorkStatusManager;
 
     @Autowired
-    private JiraService jiraService;
+    private JiraCapability jiraCapability;
 
     @Autowired
     private TimeService timeService;
@@ -93,7 +95,7 @@ public class RecentActivityService {
             recentTaskRepository.save(recentTask);
         }
 
-        activeStatusService.pushMemberWorkStatus(activeIntention, now, nanoTime);
+        activeWorkStatusManager.pushMemberWorkStatus(activeIntention, now, nanoTime);
 
     }
 
@@ -187,7 +189,7 @@ public class RecentActivityService {
         OrganizationEntity org = organizationRepository.findById(organizationId);
         if (org != null) {
 
-            JiraTaskDto jiraTask = jiraService.getTask(organizationId, taskName);
+            JiraTaskDto jiraTask = jiraCapability.getTask(organizationId, taskName);
             if (jiraTask != null) {
 
                 ProjectEntity projectEntity = projectRepository.findByExternalId(jiraTask.getProjectId());

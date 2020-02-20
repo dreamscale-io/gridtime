@@ -1,8 +1,9 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
+import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus;
 import com.dreamscale.gridtime.core.domain.circuit.RoomType;
@@ -16,6 +17,8 @@ import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
+import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -57,7 +60,7 @@ public class LearningCircuitOperator {
     private LearningCircuitRoomRepository learningCircuitRoomRepository;
 
     @Autowired
-    ActiveStatusService activeStatusService;
+    ActiveWorkStatusManager activeWorkStatusManager;
 
     @Autowired
     private TeamCircuitOperator teamCircuitOperator;
@@ -66,7 +69,7 @@ public class LearningCircuitOperator {
     private TimeService timeService;
 
     @Autowired
-    private DictionaryService dictionaryService;
+    private DictionaryCapability dictionaryCapability;
 
     @Autowired
     private GridTalkRouter talkRouter;
@@ -178,7 +181,7 @@ public class LearningCircuitOperator {
         talkRouter.joinRoom(organizationId, memberId, wtfRoomEntity.getId());
         //then update active status
 
-        activeStatusService.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
+        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_OPEN);
 
@@ -510,7 +513,7 @@ public class LearningCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeStatusService.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
+        activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
 
         //retro room is still open
 
@@ -541,7 +544,7 @@ public class LearningCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeStatusService.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
+        activeWorkStatusManager.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
@@ -579,7 +582,7 @@ public class LearningCircuitOperator {
             talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
-        activeStatusService.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
+        activeWorkStatusManager.resolveWTFWithAbort(organizationId, ownerId, now, nanoTime);
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_ONHOLD);
 
@@ -614,7 +617,7 @@ public class LearningCircuitOperator {
             talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         }
 
-        activeStatusService.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), now, nanoTime);
+        activeWorkStatusManager.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -890,7 +893,7 @@ public class LearningCircuitOperator {
 
         learningCircuitRepository.save(circuitEntity);
 
-        dictionaryService.touchBlankDefinitions(organizationId, ownerId, tagsInputDto.getTags());
+        dictionaryCapability.touchBlankDefinitions(organizationId, ownerId, tagsInputDto.getTags());
 
         return toDto(circuitEntity);
     }

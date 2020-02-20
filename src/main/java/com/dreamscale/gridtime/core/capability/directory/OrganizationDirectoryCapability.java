@@ -1,9 +1,10 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
 import com.dreamscale.gridtime.api.status.Status;
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class OrganizationService {
+public class OrganizationDirectoryCapability {
     @Autowired
     private OrganizationRepository organizationRepository;
 
@@ -44,7 +45,7 @@ public class OrganizationService {
 
 
     @Autowired
-    private JiraService jiraService;
+    private JiraCapability jiraCapability;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -65,7 +66,7 @@ public class OrganizationService {
     public OrganizationDto createOrganization(OrganizationInputDto orgInputDto) {
 
         OrganizationEntity inputOrgEntity = orgInputMapper.toEntity(orgInputDto);
-        ConnectionResultDto connectionResult = jiraService.validateJiraConnection(inputOrgEntity);
+        ConnectionResultDto connectionResult = jiraCapability.validateJiraConnection(inputOrgEntity);
 
         OrganizationDto outputDto = null;
 
@@ -165,7 +166,7 @@ public class OrganizationService {
         OrganizationEntity orgEntity = organizationRepository.findById(organizationDto.getId());
 
         //if user is invalid, this will throw a 404
-        JiraUserDto jiraUser = jiraService.getUserByEmail(orgEntity.getId(), membershipInputDto.getOrgEmail());
+        JiraUserDto jiraUser = jiraCapability.getUserByEmail(orgEntity.getId(), membershipInputDto.getOrgEmail());
 
         RootAccountEntity rootAccountEntity = new RootAccountEntity();
         rootAccountEntity.setId(UUID.randomUUID());

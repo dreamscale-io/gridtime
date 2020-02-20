@@ -14,7 +14,7 @@ import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository
 import com.dreamscale.gridtime.core.domain.journal.TaskRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto
-import com.dreamscale.gridtime.core.service.JiraService
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -42,7 +42,7 @@ class ProjectResourceSpec extends Specification {
     OrganizationMemberRepository organizationMemberRepository
 
     @Autowired
-    JiraService mockJiraService
+    JiraCapability mockJiraService
 
     @Autowired
     RootAccountEntity testUser

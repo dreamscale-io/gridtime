@@ -1,14 +1,15 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
+import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
-import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class MemberStatusService {
+public class MemberStatusCapability {
 
     @Autowired
-    private SpiritService xpService;
+    private SpiritNetworkOperator xpService;
 
     @Autowired
     private LearningCircuitOperator learningCircuitOperator;

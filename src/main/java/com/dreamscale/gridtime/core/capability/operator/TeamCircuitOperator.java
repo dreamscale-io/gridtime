@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
@@ -8,12 +8,16 @@ import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +49,10 @@ public class TeamCircuitOperator {
     private TeamCircuitTalkRoomRepository teamCircuitTalkRoomRepository;
 
     @Autowired
-    private TeamService teamService;
+    private TeamDirectoryCapability teamDirectoryCapability;
 
     @Autowired
-    private MemberStatusService memberStatusService;
+    private MemberStatusCapability memberStatusCapability;
 
     @Autowired
     private MemberDetailsService memberDetailsService;
@@ -60,7 +64,7 @@ public class TeamCircuitOperator {
     private GridTalkRouter talkRouter;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
@@ -71,7 +75,7 @@ public class TeamCircuitOperator {
 
     public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
         TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
 
         if (circuit != null) {
@@ -84,9 +88,9 @@ public class TeamCircuitOperator {
 
     public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
-        List<MemberWorkStatusDto> members = memberStatusService.getStatusOfMeAndMyTeam(organizationId, memberId);
+        List<MemberWorkStatusDto> members = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, memberId);
 
        TeamCircuitEntity teamCircuitEntity = findOrCreateTeamCircuit(teamDto, members);
 
@@ -125,7 +129,7 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
 
-        String userName = organizationService.getUsernameForMemberId(memberFromId);
+        String userName = organizationDirectoryCapability.getUsernameForMemberId(memberFromId);
         TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
 
         IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
@@ -161,7 +165,7 @@ public class TeamCircuitOperator {
     }
 
     private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
-        String userName = organizationService.getUsernameForMemberId(memberFromId);
+        String userName = organizationDirectoryCapability.getUsernameForMemberId(memberFromId);
         TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
 
         WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
@@ -215,7 +219,7 @@ public class TeamCircuitOperator {
     public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {
         UUID talkRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
 
-        String userName = organizationService.getUsernameForMemberId(forMemberId);
+        String userName = organizationDirectoryCapability.getUsernameForMemberId(forMemberId);
         XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(userName, forMemberId, oldXPSummary, newXPSummary);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();

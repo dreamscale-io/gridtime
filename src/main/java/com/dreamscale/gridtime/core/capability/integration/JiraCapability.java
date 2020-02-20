@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.integration;
 
 import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class JiraService {
+public class JiraCapability {
 
     @Autowired
     OrganizationRepository organizationRepository;

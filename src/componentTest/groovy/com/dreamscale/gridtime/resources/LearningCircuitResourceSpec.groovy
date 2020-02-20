@@ -15,7 +15,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.service.TeamService
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -37,7 +37,7 @@ class LearningCircuitResourceSpec extends Specification {
     RootAccountRepository rootAccountRepository
 
     @Autowired
-    TeamService teamService
+    TeamDirectoryCapability teamService
 
     @Autowired
     TimeService mockTimeService

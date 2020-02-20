@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.service
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.project.TaskInputDto
 import com.dreamscale.gridtime.client.OrganizationClient
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.hooks.jira.JiraConnectionFactory
@@ -15,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 @ComponentTest
-public class JiraServiceIntegrationSpec extends Specification {
+public class JiraCapabilitySpec extends Specification {
 
-	JiraService jiraService
+	JiraCapability jiraService
 
 	@Autowired
 	OrganizationClient organizationClient
@@ -30,7 +31,7 @@ public class JiraServiceIntegrationSpec extends Specification {
 
 
 	def setup() {
-		jiraService = new JiraService()
+		jiraService = new JiraCapability()
 		jiraService.organizationRepository = organizationRepository
 		jiraService.jiraConnectionFactory = jiraConnectionFactory
 	}

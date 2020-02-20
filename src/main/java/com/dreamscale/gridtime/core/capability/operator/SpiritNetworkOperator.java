@@ -1,14 +1,20 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
+import com.dreamscale.gridtime.core.capability.operator.RootAccountCapabilitty;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
+import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +26,13 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class SpiritService {
+public class SpiritNetworkOperator {
 
     @Autowired
-    OrganizationService organizationService;
+    OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    AccountService accountService;
+    RootAccountCapabilitty rootAccountCapabilitty;
 
     @Autowired
     LearningCircuitOperator learningCircuitOperator;
@@ -225,7 +231,7 @@ public class SpiritService {
         if (lastTombstone != null) {
             birthday = lastTombstone.getDateOfDeath();
         } else {
-            birthday = accountService.getActivationDate(rootAccountId);
+            birthday = rootAccountCapabilitty.getActivationDate(rootAccountId);
         }
         return birthday;
     }

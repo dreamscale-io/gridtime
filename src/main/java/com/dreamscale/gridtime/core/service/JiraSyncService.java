@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.service;
 
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
@@ -21,7 +22,7 @@ public class JiraSyncService {
     ConfigProjectSyncRepository configProjectSyncRepository;
 
     @Autowired
-    JiraService jiraService;
+    JiraCapability jiraCapability;
 
 
     public void synchronizeProjectsWithJira(UUID organizationId) {
@@ -29,7 +30,7 @@ public class JiraSyncService {
         List<ConfigProjectSyncEntity> projectsToSync = configProjectSyncRepository.findByOrganizationId(organizationId);
         List<String> externalIds = extractExternalIds(projectsToSync);
 
-        List<JiraProjectDto> jiraProjects = jiraService.getFilteredProjects(organizationId, externalIds);
+        List<JiraProjectDto> jiraProjects = jiraCapability.getFilteredProjects(organizationId, externalIds);
         List<ProjectEntity> dbProjects = projectRepository.findByOrganizationId(organizationId);
 
         saveProjectAndTaskUpdates(organizationId, dbProjects, jiraProjects);
@@ -69,7 +70,7 @@ public class JiraSyncService {
 
         List<TaskEntity> dbTasks = taskRepository.findByProjectId(dbProject.getId());
 
-        List<JiraTaskDto> jiraTasks = jiraService.getOpenTasksForProject(organizationId, dbProject.getExternalId());
+        List<JiraTaskDto> jiraTasks = jiraCapability.getOpenTasksForProject(organizationId, dbProject.getExternalId());
 
         saveTaskUpdates(organizationId, dbProject, dbTasks, jiraTasks);
 

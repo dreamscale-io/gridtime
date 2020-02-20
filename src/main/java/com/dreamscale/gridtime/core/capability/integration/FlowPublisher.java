@@ -1,10 +1,10 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.integration;
 
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchEventDto;
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.flow.activity.*;
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
+import com.dreamscale.gridtime.core.service.TimeService;
 import com.dreamscale.gridtime.core.domain.flow.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class FlowService {
+public class FlowPublisher {
 
 
     @Autowired

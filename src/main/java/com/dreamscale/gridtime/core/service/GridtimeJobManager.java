@@ -4,7 +4,6 @@ import com.dreamscale.gridtime.api.job.JobDescriptorDto;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class JobService {
+public class GridtimeJobManager {
 
     @Autowired
     GridTimeEngine gridTimeEngine;

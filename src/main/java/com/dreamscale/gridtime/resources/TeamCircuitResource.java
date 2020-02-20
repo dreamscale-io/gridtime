@@ -7,8 +7,8 @@ import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.OrganizationService;
-import com.dreamscale.gridtime.core.service.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class TeamCircuitResource {
 
     @Autowired
-    OrganizationService organizationService;
+    OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
     TeamCircuitOperator teamCircuitOperator;
@@ -39,7 +39,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getMyTeamCircuit, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getMyPrimaryTeamCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -57,7 +57,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getTeamCircuitByName, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getTeamCircuitByOrganizationAndName(invokingMember.getOrganizationId(), teamName);
     }
@@ -73,7 +73,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("createTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.createTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -90,7 +90,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.getTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -106,7 +106,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("closeTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.closeTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName);
     }
@@ -122,7 +122,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("saveDescriptionForTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.saveDescriptionForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, descriptionInputDto);
     }
@@ -138,7 +138,7 @@ public class TeamCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("saveTagsForTeamCircuitRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         return teamCircuitOperator.saveTagsForTeamCircuitRoom(invokingMember.getOrganizationId(), teamName, roomName, tagsInputDto);
     }

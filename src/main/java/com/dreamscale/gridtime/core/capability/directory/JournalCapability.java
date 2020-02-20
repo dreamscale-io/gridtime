@@ -1,10 +1,11 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.journal.*;
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
-import com.dreamscale.gridtime.api.team.TeamCircuitDto;
+import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
+import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.json.Member;
@@ -12,6 +13,8 @@ import com.dreamscale.gridtime.core.domain.member.json.PairingMemberList;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
+import com.dreamscale.gridtime.core.service.TimeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +32,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class JournalService {
+public class JournalCapability {
 
     @Autowired
     private IntentionRepository intentionRepository;
@@ -47,10 +50,10 @@ public class JournalService {
     private JournalLinkEventRepository journalLinkEventRepository;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private RecentActivityService recentActivityService;
+    private RecentActivityManager recentActivityManager;
 
     @Autowired
     private TimeService timeService;
@@ -59,7 +62,7 @@ public class JournalService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private SpiritService spiritService;
+    private SpiritNetworkOperator spiritNetworkOperator;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -83,7 +86,7 @@ public class JournalService {
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
-        ActiveLinksNetworkDto activeLinksNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+        ActiveLinksNetworkDto activeLinksNetwork = spiritNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
 
         boolean isLinked = false;
         if (!activeLinksNetwork.isEmpty()) {
@@ -171,7 +174,7 @@ public class JournalService {
         LocalDateTime now = timeService.now();
         Long nanoTime = timeService.nanoTime();
 
-        spiritService.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
+        spiritNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
         IntentionEntity lastIntention = closeLastIntention(memberId, now);
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
@@ -193,8 +196,8 @@ public class JournalService {
 
         teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
 
-        recentActivityService.updateRecentProjects(intentionEntity);
-        recentActivityService.updateRecentTasks(intentionEntity, now, nanoTime);
+        recentActivityManager.updateRecentProjects(intentionEntity);
+        recentActivityManager.updateRecentTasks(intentionEntity, now, nanoTime);
 
         return intentionEntity;
 
@@ -235,7 +238,7 @@ public class JournalService {
     }
 
     public List<JournalEntryDto> getRecentIntentionsForMember(UUID organizationId, UUID memberId, int limit) {
-        organizationService.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -244,9 +247,9 @@ public class JournalService {
     }
 
     public List<JournalEntryDto> getHistoricalIntentionsForUser(UUID organizationId, String userName, LocalDateTime beforeDate, Integer limit) {
-        UUID memberId = organizationService.getMemberIdForUser(organizationId, userName);
+        UUID memberId = organizationDirectoryCapability.getMemberIdForUser(organizationId, userName);
 
-        organizationService.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -295,7 +298,7 @@ public class JournalService {
     }
 
     private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
-        ActiveLinksNetworkDto spiritNetwork = spiritService.getActiveLinksNetwork(organizationId, memberId);
+        ActiveLinksNetworkDto spiritNetwork = spiritNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
         for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
             List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {
@@ -326,12 +329,12 @@ public class JournalService {
 
     public RecentJournalDto getJournalForUser(UUID organizationId, String userName, Integer effectiveLimit) {
 
-        UUID otherMemberId = organizationService.getMemberIdForUser(organizationId, userName);
+        UUID otherMemberId = organizationDirectoryCapability.getMemberIdForUser(organizationId, userName);
 
-        organizationService.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
+        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
 
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, otherMemberId, effectiveLimit);
-        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(organizationId, otherMemberId);
+        RecentTasksSummaryDto recentActivity = recentActivityManager.getRecentTasksByProject(organizationId, otherMemberId);
 
         RecentJournalDto recentJournalDto = new RecentJournalDto();
         recentJournalDto.setRecentIntentions(journalEntries);
@@ -345,7 +348,7 @@ public class JournalService {
     public RecentJournalDto getJournalForSelf(UUID organizationId, UUID memberId, Integer effectiveLimit) {
 
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, memberId, effectiveLimit);
-        RecentTasksSummaryDto recentActivity = recentActivityService.getRecentTasksByProject(organizationId, memberId);
+        RecentTasksSummaryDto recentActivity = recentActivityManager.getRecentTasksByProject(organizationId, memberId);
 
         RecentJournalDto recentJournalDto = new RecentJournalDto();
         recentJournalDto.setRecentIntentions(journalEntries);

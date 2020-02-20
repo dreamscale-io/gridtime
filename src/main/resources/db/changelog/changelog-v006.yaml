@@ -20,3 +20,6 @@ databaseChangeLog:
 
   - include:
         file: db/v006/alter_team_book_add_creator.sql
+
+  - include:
+        file: db/v006/create_gridtime_job_manager_tables.sql

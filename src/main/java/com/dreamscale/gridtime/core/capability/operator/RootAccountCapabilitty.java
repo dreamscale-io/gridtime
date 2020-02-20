@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.account.AccountActivationDto;
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto;
@@ -7,10 +7,13 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
+import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class AccountService implements RootAccountIdResolver {
+public class RootAccountCapabilitty implements RootAccountIdResolver {
 
     @Autowired
     private RootAccountRepository rootAccountRepository;
@@ -32,13 +35,13 @@ public class AccountService implements RootAccountIdResolver {
     private LearningCircuitOperator learningCircuitOperator;
 
     @Autowired
-    private ActiveStatusService activeStatusService;
+    private ActiveWorkStatusManager activeWorkStatusManager;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private TeamService teamService;
+    private TeamDirectoryCapability teamDirectoryCapability;
 
 
     public AccountActivationDto activate(String activationCode) {
@@ -84,18 +87,18 @@ public class AccountService implements RootAccountIdResolver {
         statusDto.setStatus(Status.VALID);
         statusDto.setMessage("Successfully logged in");
 
-        OrganizationMemberEntity membership = organizationService.getDefaultMembership(rootAccountId);
+        OrganizationMemberEntity membership = organizationDirectoryCapability.getDefaultMembership(rootAccountId);
         statusDto.setMemberId(membership.getId());
         statusDto.setOrganizationId(membership.getOrganizationId());
         statusDto.setUserName(membership.getUsername());
 
-        TeamDto team = teamService.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
+        TeamDto team = teamDirectoryCapability.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
 
         if (team != null) {
             statusDto.setTeamId(team.getId());
         }
 
-        activeStatusService.updateOnlineStatus(statusDto.getOrganizationId(), statusDto.getMemberId(), accountStatusEntity.getOnlineStatus());
+        activeWorkStatusManager.updateOnlineStatus(statusDto.getOrganizationId(), statusDto.getMemberId(), accountStatusEntity.getOnlineStatus());
 
         return statusDto;
     }
@@ -121,9 +124,9 @@ public class AccountService implements RootAccountIdResolver {
     }
 
     private void updateOnlineStatus(UUID rootAccountId, OnlineStatus onlineStatus) {
-        OrganizationMemberEntity membership = organizationService.getDefaultMembership(rootAccountId);
+        OrganizationMemberEntity membership = organizationDirectoryCapability.getDefaultMembership(rootAccountId);
 
-        activeStatusService.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
+        activeWorkStatusManager.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
 
     }
 

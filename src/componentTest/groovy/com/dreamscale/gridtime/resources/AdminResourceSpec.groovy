@@ -13,7 +13,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraProjectDto
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto
-import com.dreamscale.gridtime.core.service.JiraService
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -27,7 +27,7 @@ public class AdminResourceSpec extends Specification {
     AdminClient adminClient
 
     @Autowired
-    JiraService mockJiraService
+    JiraCapability mockJiraService
 
     @Autowired
     OrganizationRepository organizationRepository

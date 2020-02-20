@@ -1,7 +1,8 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.project.TaskInputDto;
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository;
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class TaskService {
+public class TaskDirectoryCapability {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -35,7 +36,7 @@ public class TaskService {
     private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
-    private JiraService jiraService;
+    private JiraCapability jiraCapability;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -52,7 +53,7 @@ public class TaskService {
         ProjectEntity project = projectRepository.findById(projectId);
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
 
-        JiraTaskDto jiraTaskDto = jiraService.createNewTask(organizationId, project.getExternalId(), membership.getExternalId(), taskInputDto);
+        JiraTaskDto jiraTaskDto = jiraCapability.createNewTask(organizationId, project.getExternalId(), membership.getExternalId(), taskInputDto);
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());

@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.AccountService;
+import com.dreamscale.gridtime.core.capability.operator.RootAccountCapabilitty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ import javax.annotation.PostConstruct;
 public class AccountResource {
 
     @Autowired
-    private AccountService accountService;
+    private RootAccountCapabilitty rootAccountCapabilitty;
 
 
     @Autowired
@@ -45,7 +45,7 @@ public class AccountResource {
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
 
-        return accountService.activate(activationCode.getActivationCode());
+        return rootAccountCapabilitty.activate(activationCode.getActivationCode());
     }
 
     /**
@@ -57,7 +57,7 @@ public class AccountResource {
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
 
         RequestContext context = RequestContext.get();
-        return accountService.heartbeat(context.getRootAccountId(), heartbeat);
+        return rootAccountCapabilitty.heartbeat(context.getRootAccountId(), heartbeat);
     }
 
     /**
@@ -69,7 +69,7 @@ public class AccountResource {
     ConnectionStatusDto login() {
 
         RequestContext context = RequestContext.get();
-        return accountService.login(context.getRootAccountId());
+        return rootAccountCapabilitty.login(context.getRootAccountId());
     }
 
     /**
@@ -80,7 +80,7 @@ public class AccountResource {
     SimpleStatusDto logout() {
 
         RequestContext context = RequestContext.get();
-        return accountService.logout(context.getRootAccountId());
+        return rootAccountCapabilitty.logout(context.getRootAccountId());
     }
 
 }

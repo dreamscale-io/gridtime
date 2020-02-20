@@ -1,17 +1,18 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.organization.TeamMemberWorkStatusDto;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
+import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusRepository;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class ActiveStatusService {
+public class ActiveWorkStatusManager {
 
     @Autowired
     ActiveWorkStatusRepository activeWorkStatusRepository;
@@ -32,7 +33,7 @@ public class ActiveStatusService {
     TeamMemberWorkStatusRepository teamMemberWorkStatusRepository;
 
     @Autowired
-    private MemberStatusService memberStatusService;
+    private MemberStatusCapability memberStatusCapability;
 
     @Autowired
     TeamCircuitOperator teamCircuitOperator;
@@ -75,7 +76,7 @@ public class ActiveStatusService {
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
-        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(organizationId, memberId);
+        MemberWorkStatusDto memberStatus = memberStatusCapability.getStatusOfMember(organizationId, memberId);
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
@@ -102,7 +103,7 @@ public class ActiveStatusService {
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
 
-        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(organizationId, memberId);
+        MemberWorkStatusDto memberStatus = memberStatusCapability.getStatusOfMember(organizationId, memberId);
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
@@ -127,7 +128,7 @@ public class ActiveStatusService {
 
         activeWorkStatusRepository.save(workStatus);
 
-        MemberWorkStatusDto memberStatus = memberStatusService.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
+        MemberWorkStatusDto memberStatus = memberStatusCapability.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(activeIntention.getOrganizationId(), activeIntention.getMemberId(), now, nanoTime, memberStatus);
     }

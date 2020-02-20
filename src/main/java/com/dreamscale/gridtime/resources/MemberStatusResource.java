@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.MemberStatusService;
-import com.dreamscale.gridtime.core.service.OrganizationService;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +17,10 @@ import java.util.List;
 public class MemberStatusResource {
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private MemberStatusService memberStatusService;
+    private MemberStatusCapability memberStatusCapability;
 
     /**
      * Get the active status of me
@@ -30,9 +30,9 @@ public class MemberStatusResource {
     public MemberWorkStatusDto getMyCurrentStatus() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
-        return memberStatusService.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
+        return memberStatusCapability.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
 
@@ -44,9 +44,9 @@ public class MemberStatusResource {
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
-        return memberStatusService.getStatusOfMeAndMyTeam(memberEntity.getOrganizationId(), memberEntity.getId());
+        return memberStatusCapability.getStatusOfMeAndMyTeam(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
 

@@ -1,8 +1,8 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.core.service.FlowService;
-import com.dreamscale.gridtime.core.service.OrganizationService;
+import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 public class GridTimeResource {
 
     @Autowired
-    FlowService flowService;
+    FlowPublisher flowService;
 
     @Autowired
-    OrganizationService organizationService;
+    OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @GetMapping(ResourcePaths.CALENDAR_PATH )
     public void getCalendarJobStatus() {

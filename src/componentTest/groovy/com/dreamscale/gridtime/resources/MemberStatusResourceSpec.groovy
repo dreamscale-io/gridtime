@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.client.MemberStatusClient
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
-import com.dreamscale.gridtime.core.service.TeamService
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -26,7 +26,7 @@ class MemberStatusResourceSpec extends Specification {
     RootAccountEntity testUser
 
     @Autowired
-    TeamService teamService
+    TeamDirectoryCapability teamService
 
     @Autowired
     TimeService mockTimeService

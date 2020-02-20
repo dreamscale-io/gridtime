@@ -1,11 +1,13 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.dictionary.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.dictionary.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +22,14 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class DictionaryService {
+public class DictionaryCapability {
 
 
     @Autowired
     TimeService timeService;
 
     @Autowired
-    TeamService teamService;
+    TeamDirectoryCapability teamDirectoryCapability;
 
     @Autowired
     TeamDictionaryWordRepository teamDictionaryWordRepository;
@@ -79,7 +81,7 @@ public class DictionaryService {
 
     public WordDefinitionWithDetailsDto getWord(UUID organizationId, UUID memberId, String wordName) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
@@ -116,7 +118,7 @@ public class DictionaryService {
 
     public WordDefinitionWithDetailsDto getTeamBookWord(UUID organizationId, UUID memberId, String bookName, String wordName) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -197,7 +199,7 @@ public class DictionaryService {
 
 
     public WordDefinitionDto createOrRefactorWord(UUID organizationId, UUID memberId, String originalWordName, WordDefinitionInputDto wordDefinitionInputDto) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateWordNotNull(originalWordName);
@@ -218,7 +220,7 @@ public class DictionaryService {
     }
 
     public BookReferenceDto createTeamBook(UUID organizationId, UUID memberId, String bookName) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -253,7 +255,7 @@ public class DictionaryService {
 
     public BookReferenceDto updateTeamBook(UUID organizationId, UUID memberId, String originalBookName, RefactorBookInputDto refactorBookInputDto) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(originalBookName);
@@ -276,7 +278,7 @@ public class DictionaryService {
 
     public BookReferenceDto archiveTeamBook(UUID organizationId, UUID memberId, String bookName) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -296,7 +298,7 @@ public class DictionaryService {
     }
 
     public WordDefinitionDto pullWordIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -313,7 +315,7 @@ public class DictionaryService {
 
     @Transactional
     public void deleteWordFromTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -351,7 +353,7 @@ public class DictionaryService {
     @Transactional
     public WordDefinitionDto refactorWordInsideTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName, WordDefinitionInputDto wordDefinitionInputDto) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -456,7 +458,7 @@ public class DictionaryService {
     }
 
     public BookDto getTeamBook(UUID organizationId, UUID memberId, String bookName) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
@@ -500,7 +502,7 @@ public class DictionaryService {
 
     public List<BookReferenceDto> getAllTeamBooks(UUID organizationId, UUID memberId) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
@@ -636,7 +638,7 @@ public class DictionaryService {
     }
 
     public void touchBlankDefinition(UUID organizationId, UUID memberId, String wordName) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateWordNotNull(wordName);
@@ -660,7 +662,7 @@ public class DictionaryService {
     }
 
     public void touchBlankDefinitions(UUID organizationId, UUID memberId, List<String> words) {
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 
@@ -717,7 +719,7 @@ public class DictionaryService {
 
     public List<WordDefinitionDto> getUndefinedTeamWords(UUID organizationId, UUID memberId) {
 
-        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto myTeam = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
 

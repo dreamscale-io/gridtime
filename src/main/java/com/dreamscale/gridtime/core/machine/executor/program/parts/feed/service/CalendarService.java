@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
-import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.domain.time.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;

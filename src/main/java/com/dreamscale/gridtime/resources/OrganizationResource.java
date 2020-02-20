@@ -7,8 +7,8 @@ import com.dreamscale.gridtime.api.team.TeamInputDto;
 import com.dreamscale.gridtime.api.team.TeamMemberDto;
 import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.OrganizationService;
-import com.dreamscale.gridtime.core.service.TeamService;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +21,10 @@ import java.util.UUID;
 public class OrganizationResource {
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private TeamService teamService;
+    private TeamDirectoryCapability teamDirectoryCapability;
 
     /**
      * Creates a new organization with the specified name, and Jira connection information
@@ -38,7 +38,7 @@ public class OrganizationResource {
     @PostMapping
     public OrganizationDto createOrganization(@RequestBody OrganizationInputDto orgInputDto) {
 
-        return organizationService.createOrganization(orgInputDto);
+        return organizationDirectoryCapability.createOrganization(orgInputDto);
     }
 
     /**
@@ -51,7 +51,7 @@ public class OrganizationResource {
     @GetMapping(ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH)
     public OrganizationDto decodeInvitation(@RequestParam("token") String inviteToken) {
 
-       return organizationService.decodeInvitation(inviteToken);
+       return organizationDirectoryCapability.decodeInvitation(inviteToken);
     }
 
     /**
@@ -64,7 +64,7 @@ public class OrganizationResource {
     public MemberRegistrationDetailsDto registerMember(@PathVariable("id") String organizationId,
                                                        @RequestBody MembershipInputDto membershipInputDto) {
 
-        return organizationService.registerMember(UUID.fromString(organizationId), membershipInputDto);
+        return organizationDirectoryCapability.registerMember(UUID.fromString(organizationId), membershipInputDto);
     }
 
     /**
@@ -75,7 +75,7 @@ public class OrganizationResource {
     @PostMapping("/{id}" + ResourcePaths.TEAM_PATH)
     public TeamDto createTeam(@PathVariable("id") String organizationId, @RequestBody TeamInputDto teamInputDto) {
 
-        return teamService.createTeam(UUID.fromString(organizationId), teamInputDto.getName());
+        return teamDirectoryCapability.createTeam(UUID.fromString(organizationId), teamInputDto.getName());
     }
 
     /**
@@ -87,7 +87,7 @@ public class OrganizationResource {
                                                @PathVariable("teamId") String teamId,
                                                @RequestBody TeamMembersToAddInputDto teamMemberInputDto) {
 
-        return teamService.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto.getMemberIds());
+        return teamDirectoryCapability.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto.getMemberIds());
     }
 
     /**
@@ -97,7 +97,7 @@ public class OrganizationResource {
     @GetMapping(ResourcePaths.TEAM_PATH )
     public TeamWithMembersDto getMeAndMyTeam() {
         RequestContext context = RequestContext.get();
-        return teamService.getMeAndMyTeam(context.getRootAccountId());
+        return teamDirectoryCapability.getMeAndMyTeam(context.getRootAccountId());
     }
 
     /**
@@ -107,7 +107,7 @@ public class OrganizationResource {
     @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH)
     public List<TeamDto> getTeams(@PathVariable("orgId") String organizationId) {
 
-        return teamService.getTeams(UUID.fromString(organizationId));
+        return teamDirectoryCapability.getTeams(UUID.fromString(organizationId));
     }
 
     /**
@@ -117,7 +117,7 @@ public class OrganizationResource {
     @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
     public List<TeamDto> getMyTeams(@PathVariable("orgId") String organizationId) {
         RequestContext context = RequestContext.get();
-        return teamService.getMyTeams(UUID.fromString(organizationId), context.getRootAccountId());
+        return teamDirectoryCapability.getMyTeams(UUID.fromString(organizationId), context.getRootAccountId());
     }
 
     /**
@@ -127,14 +127,14 @@ public class OrganizationResource {
     @GetMapping("/{orgId}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
     public List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@PathVariable("orgId") String organizationId,  @PathVariable("teamId") String teamId) {
 
-        return teamService.getStatusOfTeamMembers(UUID.fromString(organizationId), UUID.fromString(teamId));
+        return teamDirectoryCapability.getStatusOfTeamMembers(UUID.fromString(organizationId), UUID.fromString(teamId));
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TEAM_PATH + ResourcePaths.MEMBER_PATH )
     public MemberRegistrationDetailsDto addMemberToMyTeam(@RequestBody  String newMemberEmail) {
         RequestContext context = RequestContext.get();
-        return teamService.addMemberToMyTeam(context.getRootAccountId(), newMemberEmail);
+        return teamDirectoryCapability.addMemberToMyTeam(context.getRootAccountId(), newMemberEmail);
     }
 
 

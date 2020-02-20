@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.dictionary.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.DictionaryService;
-import com.dreamscale.gridtime.core.service.OrganizationService;
+import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,10 +19,10 @@ import java.util.List;
 public class DictionaryResource {
 
     @Autowired
-    DictionaryService dictionaryService;
+    DictionaryCapability dictionaryCapability;
 
     @Autowired
-    OrganizationService organizationService;
+    OrganizationDirectoryCapability organizationDirectoryCapability;
 
     /**
      * Retrieves the definition for a specified dictionary word across all Scopes
@@ -35,8 +35,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getWord, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
     }
 
     /**
@@ -52,8 +52,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("createOrRefactorWord, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createOrRefactorWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName, wordDefinitionInputDto);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.createOrRefactorWord(invokingMember.getOrganizationId(), invokingMember.getId(), wordName, wordDefinitionInputDto);
     }
 
     /**
@@ -69,8 +69,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("promoteWordToCommunityScope, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.promoteWordToCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.promoteWordToCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), wordName);
     }
 
     /**
@@ -88,8 +88,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getGlobalTeamDictionary, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getGlobalTeamDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getGlobalTeamDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -107,8 +107,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getGlobalCommunityDictionary, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getGlobalCommunityDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getGlobalCommunityDictionary(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 
@@ -129,8 +129,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("createTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.createTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
     /**
@@ -146,8 +146,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("updateTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.updateTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, refactorBookInputDto);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.updateTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, refactorBookInputDto);
     }
 
     /**
@@ -163,8 +163,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("archiveTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.archiveTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.archiveTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
 
@@ -183,8 +183,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("createCommunityBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.createCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.createCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
     /**
@@ -198,8 +198,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getTeamBooks, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getAllTeamBooks(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getAllTeamBooks(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -213,8 +213,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getCommunityBooks, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getAllCommunityBooks(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getAllCommunityBooks(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -228,8 +228,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
 
@@ -244,8 +244,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getCommunityBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
     }
 
 
@@ -260,8 +260,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("refactorWordInsideTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.refactorWordInsideTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName, wordDefinitionInputDto);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.refactorWordInsideTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName, wordDefinitionInputDto);
     }
 
     /**
@@ -274,8 +274,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("pullWordIntoTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.pullWordIntoTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.pullWordIntoTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
     /**
@@ -291,8 +291,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("deleteWordFromTeamBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        dictionaryService.deleteWordFromTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        dictionaryCapability.deleteWordFromTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
     /**
@@ -305,8 +305,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getTeamBookWord, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getTeamBookWord(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getTeamBookWord(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
 
@@ -320,8 +320,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("pullWordIntoCommunityBook, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.pullWordIntoCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.pullWordIntoCommunityBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
 
     /**
@@ -337,8 +337,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getUndefinedTeamWords, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getUndefinedTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getUndefinedTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -352,8 +352,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getPromotionPendingTeamWords, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getPromotionPendingTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getPromotionPendingTeamWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 
@@ -368,8 +368,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("getPendingCommunityWords, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.getPendingCommunityWords(invokingMember.getOrganizationId(), invokingMember.getId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.getPendingCommunityWords(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -383,8 +383,8 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("acceptPendingWordIntoCommunityScope, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.acceptPendingWordIntoCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        return dictionaryCapability.acceptPendingWordIntoCommunityScope(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
     }
 
     /**
@@ -398,7 +398,7 @@ public class DictionaryResource {
         RequestContext context = RequestContext.get();
         log.info("rejectPendingCommunityWord, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        dictionaryService.rejectPendingCommunityWord(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        dictionaryCapability.rejectPendingCommunityWord(invokingMember.getOrganizationId(), invokingMember.getId(), pendingWordReferenceDto);
     }
 }

@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.wires;
 
 import com.dreamscale.gridtime.core.domain.work.*;
-import com.dreamscale.gridtime.core.exception.UnableToLockException;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.LockManager;

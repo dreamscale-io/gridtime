@@ -4,6 +4,9 @@ import com.dreamscale.gridtime.api.admin.ProjectSyncInputDto;
 import com.dreamscale.gridtime.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
@@ -34,7 +37,7 @@ import java.util.UUID;
 public class AdminService {
 
     @Autowired
-    private JiraService jiraService;
+    private JiraCapability jiraCapability;
 
     @Autowired
     private JiraSyncService jiraSyncService;
@@ -49,10 +52,10 @@ public class AdminService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private TeamService teamService;
+    private TeamDirectoryCapability teamDirectoryCapability;
 
     @Autowired
     GridBoxBucketConfigRepository gridBoxBucketConfigRepository;
@@ -71,11 +74,11 @@ public class AdminService {
         String teamName = "CPG";
         String projectName = "NBCU CPG";
 
-        OrganizationDto organizationDto = organizationService.getOrganizationByDomainName(domainName);
+        OrganizationDto organizationDto = organizationDirectoryCapability.getOrganizationByDomainName(domainName);
 
         UUID orgId = organizationDto.getId();
 
-        TeamDto teamDto = teamService.getTeamByName(orgId, teamName);
+        TeamDto teamDto = teamDirectoryCapability.getTeamByName(orgId, teamName);
 
         ProjectEntity projectEntity = projectRepository.findByOrganizationIdAndName(orgId, projectName);
 
@@ -107,7 +110,7 @@ public class AdminService {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ORGANIZATION, "Organization not found");
         }
 
-        JiraProjectDto jiraProject = jiraService.getProjectByName(organizationEntity.getId(), projectSyncDto.getProjectName());
+        JiraProjectDto jiraProject = jiraCapability.getProjectByName(organizationEntity.getId(), projectSyncDto.getProjectName());
         if (jiraProject == null) {
             throw  new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_JIRA_PROJECT, "Jira project not found");
         }
@@ -151,7 +154,7 @@ public class AdminService {
         orgInput.setJiraUser("janelle@dreamscale.io");
         orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
 
-        OrganizationDto dreamScaleOrg = organizationService.createOrganization(orgInput);
+        OrganizationDto dreamScaleOrg = organizationDirectoryCapability.createOrganization(orgInput);
 
         configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-data-plugins"));
         configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-platform"));
@@ -166,10 +169,10 @@ public class AdminService {
         registrations.add(registerMember(dreamScaleOrg, "bethlrichardson@gmail.com"));
         registrations.add(registerMember(dreamScaleOrg, "tobias@davistobias.com"));
 
-        TeamDto team = teamService.createTeam(dreamScaleOrg.getId(), "Phoenix");
+        TeamDto team = teamDirectoryCapability.createTeam(dreamScaleOrg.getId(), "Phoenix");
 
         List<UUID> memberIds = extractMemberIds(registrations);
-        teamService.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
+        teamDirectoryCapability.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
 
         return registrations;
     }
@@ -184,7 +187,7 @@ public class AdminService {
         orgInput.setJiraUser("janelle_klein@onprem.com");
         orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
 
-        OrganizationDto onpremOrg = organizationService.createOrganization(orgInput);
+        OrganizationDto onpremOrg = organizationDirectoryCapability.createOrganization(orgInput);
 
         configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "Toyota"));
         configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "NBCU CPG"));
@@ -205,8 +208,8 @@ public class AdminService {
 
         List<UUID> toyotaMemberIds = extractMemberIds(toyotaRegistrations);
 
-        TeamDto toyotaTeam = teamService.createTeam(onpremOrg.getId(), "Toyota");
-        teamService.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
+        TeamDto toyotaTeam = teamDirectoryCapability.createTeam(onpremOrg.getId(), "Toyota");
+        teamDirectoryCapability.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
 
         //cpg team
 
@@ -228,8 +231,8 @@ public class AdminService {
 
         List<UUID> cpgMemberIds = extractMemberIds(cpgRegistrations);
 
-        TeamDto cpgTeam = teamService.createTeam(onpremOrg.getId(), "CPG");
-        teamService.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
+        TeamDto cpgTeam = teamDirectoryCapability.createTeam(onpremOrg.getId(), "CPG");
+        teamDirectoryCapability.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
 
         List<MemberRegistrationDetailsDto> allRegistrations = new ArrayList<>();
         allRegistrations.addAll(toyotaRegistrations);
@@ -251,7 +254,7 @@ public class AdminService {
         membership.setInviteToken(org.getInviteToken());
         membership.setOrgEmail(memberEmail);
 
-        return organizationService.registerMember(org.getId(), membership);
+        return organizationDirectoryCapability.registerMember(org.getId(), membership);
     }
 
 

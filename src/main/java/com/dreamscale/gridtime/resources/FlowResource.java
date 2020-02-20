@@ -5,9 +5,9 @@ import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.LearningCircuitOperator;
-import com.dreamscale.gridtime.core.service.FlowService;
-import com.dreamscale.gridtime.core.service.OrganizationService;
+import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
+import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.*;
 public class FlowResource {
 
     @Autowired
-    FlowService flowService;
+    FlowPublisher flowService;
 
     @Autowired
-    OrganizationService organizationService;
+    OrganizationDirectoryCapability organizationDirectoryCapability;
     @Autowired
     LearningCircuitOperator learningCircuitOperator;
 
@@ -37,7 +37,7 @@ public class FlowResource {
         RequestContext context = RequestContext.get();
         log.info("publishBatch, user={}, batch={}", context.getRootAccountId(), batch);
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         flowService.saveFlowBatch(invokingMember.getOrganizationId(), invokingMember.getId(), batch);
     }
@@ -51,7 +51,7 @@ public class FlowResource {
         RequestContext context = RequestContext.get();
         log.info("saveFlowSnippet, user={}, snippet={}", context.getRootAccountId(), snippet);
 
-        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
 
         flowService.saveSnippetEvent(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
 

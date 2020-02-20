@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.CoreRandomBuilderSupport;
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
 import com.dreamscale.gridtime.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
-import com.dreamscale.gridtime.core.service.JiraService;
+import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.service.TimeService;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.test.BaseTestConfig;
@@ -31,8 +31,8 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Bean
     @Primary
-    public JiraService mockJiraService() {
-        return detachedMockFactory().Mock(JiraService.class);
+    public JiraCapability mockJiraService() {
+        return detachedMockFactory().Mock(JiraCapability.class);
     }
 
     @Bean

@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Bookmark
-import com.dreamscale.gridtime.core.service.LearningCircuitOperator
+import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification

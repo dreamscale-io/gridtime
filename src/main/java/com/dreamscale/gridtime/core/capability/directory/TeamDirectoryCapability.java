@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
@@ -8,6 +8,8 @@ import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,16 +21,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class TeamService {
+public class TeamDirectoryCapability {
 
     @Autowired
-    private OrganizationService organizationService;
+    private OrganizationDirectoryCapability organizationDirectoryCapability;
 
     @Autowired
-    private SpiritService xpService;
+    private SpiritNetworkOperator xpService;
 
     @Autowired
-    private ActiveStatusService wtfService;
+    private ActiveWorkStatusManager wtfService;
 
     @Autowired
     private RootAccountRepository rootAccountRepository;
@@ -226,13 +228,13 @@ public class TeamService {
     }
 
     public MemberRegistrationDetailsDto addMemberToMyTeam(UUID rootAccountId, String newMemberEmail) {
-        OrganizationDto orgDto = organizationService.getDefaultOrganizationWithInvitation(rootAccountId);
+        OrganizationDto orgDto = organizationDirectoryCapability.getDefaultOrganizationWithInvitation(rootAccountId);
 
         MembershipInputDto membershipInputDto = new MembershipInputDto();
         membershipInputDto.setInviteToken(orgDto.getInviteToken());
         membershipInputDto.setOrgEmail(newMemberEmail);
 
-        MemberRegistrationDetailsDto registration = organizationService.registerMember(orgDto.getId(), membershipInputDto);
+        MemberRegistrationDetailsDto registration = organizationDirectoryCapability.registerMember(orgDto.getId(), membershipInputDto);
 
         List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
 
@@ -248,7 +250,7 @@ public class TeamService {
 
 
     public TeamWithMembersDto getMeAndMyTeam(UUID rootAccountId) {
-        OrganizationDto orgDto = organizationService.getDefaultOrganization(rootAccountId);
+        OrganizationDto orgDto = organizationDirectoryCapability.getDefaultOrganization(rootAccountId);
         RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 
         List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
