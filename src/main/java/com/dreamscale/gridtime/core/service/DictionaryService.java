@@ -253,6 +253,29 @@ public class DictionaryService {
         return teamBookReferenceMapper.toApi(existingBook);
     }
 
+    public BookReferenceDto updateTeamBook(UUID organizationId, UUID memberId, String originalBookName, RefactorBookInputDto refactorBookInputDto) {
+
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(originalBookName);
+        validateBookNotNull(refactorBookInputDto.getNewBookName());
+
+        TeamBookEntity existingBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), originalBookName.toLowerCase());
+
+        validateBookNotNull(existingBook);
+
+        LocalDateTime now = timeService.now();
+
+        existingBook.setBookName(refactorBookInputDto.getNewBookName());
+        existingBook.setLowerCaseBookName(refactorBookInputDto.getNewBookName().toLowerCase());
+        existingBook.setLastModifiedDate(now);
+
+        teamBookRepository.save(existingBook);
+
+        return teamBookReferenceMapper.toApi(existingBook);
+    }
+
     public WordDefinitionDto pullWordIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
@@ -679,6 +702,7 @@ public class DictionaryService {
     public List<BookReferenceDto> getAllCommunityBooks(UUID organizationId, UUID memberId) {
         return null;
     }
+
 
 
 }

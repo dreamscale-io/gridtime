@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.dictionary.BookDto
 import com.dreamscale.gridtime.api.dictionary.BookReferenceDto
+import com.dreamscale.gridtime.api.dictionary.RefactorBookInputDto
 import com.dreamscale.gridtime.api.dictionary.WordDefinitionDto
 import com.dreamscale.gridtime.api.dictionary.WordDefinitionInputDto
 import com.dreamscale.gridtime.api.dictionary.WordDefinitionWithDetailsDto
@@ -271,12 +272,30 @@ class DictionaryResourceSpec extends Specification {
         assert wordWithDetails.tombstones.size() == 3
     }
 
+    def 'should rename an existing book'() {
+        given:
 
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
 
-    //TODO next is refactoring a word in a book
+        BookReferenceDto bookRef = dictionaryClient.createTeamBook("book1")
 
-    //then I should end up with book word tombstones, but these ones never get revived.  It's just history.
+        when:
 
+        dictionaryClient.updateTeamBook("book1", new RefactorBookInputDto("renamedBook"))
+
+        List<BookReferenceDto> bookRefs = dictionaryClient.getTeamBooks()
+
+        BookDto renamedBook = dictionaryClient.getTeamBook("renamedBook")
+
+        then:
+        assert bookRefs != null
+        assert bookRefs.size() == 1
+        assert bookRefs.get(0).bookName == "renamedBook"
+
+        assert renamedBook != null
+
+    }
 
 
     //TODO next is promoting words into community dictionary
