@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface TeamBookWordTombstoneRepository extends CrudRepository<TeamBookWordTombstoneEntity, UUID> {
 
-    List<TeamBookWordTombstoneEntity> findByTeamIdAndLowerCaseWordName(UUID teamId, String lowerCaseWordName);
+    List<TeamBookWordTombstoneEntity> findByTeamBookWordIdOrderByRipDate(UUID teamBookWordId);
+
 }

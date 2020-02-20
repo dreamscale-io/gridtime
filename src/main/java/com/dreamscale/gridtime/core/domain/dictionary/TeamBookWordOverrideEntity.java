@@ -21,9 +21,13 @@ public class TeamBookWordOverrideEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID teamBookWordId;
 
+    private UUID teamBookId;
+
     private String wordName;
 
     private String definition;
+
+    private String lowerCaseWordName;
 
     private LocalDateTime overrideDate;
 

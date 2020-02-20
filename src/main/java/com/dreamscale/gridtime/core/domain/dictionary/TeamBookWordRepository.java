@@ -11,6 +11,9 @@ public interface TeamBookWordRepository extends CrudRepository<TeamBookWordEntit
 
     List<TeamBookWordEntity> findByTeamBookId(UUID bookId);
 
+
+    TeamBookWordEntity findByTeamBookIdAndTeamWordId(UUID teamBookId, UUID teamWordId);
+
     @Query(nativeQuery = true, value = "select bw.* from team_book_word bw, team_book b " +
             "where bw.team_book_id = b.id " +
             "and b.team_id = (:teamId) "+

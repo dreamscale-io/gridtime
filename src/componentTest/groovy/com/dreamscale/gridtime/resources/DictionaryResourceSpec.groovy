@@ -244,6 +244,34 @@ class DictionaryResourceSpec extends Specification {
         assert bookRefs.size() == 2
     }
 
+    def 'should get the detailed tombstone history for the refactorings of a book word'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        dictionaryClient.createOrRefactorWord("tag", new WordDefinitionInputDto("tag", "def"))
+
+        BookReferenceDto bookRef = dictionaryClient.createTeamBook("mybook")
+        WordDefinitionDto wordInBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag")
+
+        when:
+
+        dictionaryClient.refactorWordInsideTeamBook("mybook", "tag", new WordDefinitionInputDto("tag1", "newdef1"))
+        dictionaryClient.refactorWordInsideTeamBook("mybook", "tag1", new WordDefinitionInputDto("tag2", "newdef2"))
+        dictionaryClient.refactorWordInsideTeamBook("mybook", "tag2", new WordDefinitionInputDto("tag3", "newdef3"))
+
+
+        WordDefinitionWithDetailsDto wordWithDetails = dictionaryClient.getTeamBookWord("mybook", "tag3")
+
+        then:
+        assert wordWithDetails != null
+        assert wordWithDetails.wordName == "tag3"
+        assert wordWithDetails.definition == "newdef3"
+        assert wordWithDetails.tombstones.size() == 3
+    }
+
+
 
     //TODO next is refactoring a word in a book
 

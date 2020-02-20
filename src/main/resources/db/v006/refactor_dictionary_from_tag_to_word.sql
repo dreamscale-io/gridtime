@@ -68,14 +68,18 @@ create table community_book_word (
 
 create table team_book_word_override (
   team_book_word_id uuid primary key not null,
+  team_book_id uuid,
   word_name text,
   definition text,
+  lower_case_word_name text,
   override_date timestamp,
-  last_modified_date timestamp
+  last_modified_date timestamp,
+  constraint team_book_word_override_unique_key unique (team_book_id, lower_case_word_name)
 );
 
  create table team_book_word_tombstone (
     id uuid primary key not null,
+    team_book_word_id uuid,
     dead_word_name text,
     dead_definition text,
     lower_case_word_name text,

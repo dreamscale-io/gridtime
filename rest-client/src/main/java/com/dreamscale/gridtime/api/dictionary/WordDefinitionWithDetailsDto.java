@@ -15,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class WordDefinitionWithDetailsDto {
 
-    private UUID id;
     private String wordName;
     private String definition;
 

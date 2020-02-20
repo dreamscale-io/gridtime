@@ -19,6 +19,7 @@ public interface DictionaryClient {
     @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.WORD_PATH + "/{wordName}")
     WordDefinitionWithDetailsDto getWord(@Param("wordName") String wordName);
 
+
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.WORD_PATH + "/{wordName}")
     WordDefinitionDto createOrRefactorWord(@Param("wordName") String wordName, WordDefinitionInputDto wordDefinitionInputDto);
 
@@ -73,6 +74,11 @@ public interface DictionaryClient {
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
     WordDefinitionDto pullWordIntoTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
 
+    @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
+            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" )
+    WordDefinitionWithDetailsDto getTeamBookWord(@Param("bookName") String bookName, @Param("wordName") String wordName);
+
+
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH +
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.PULL_PATH)
     WordDefinitionDto pullWordIntoCommunityBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
@@ -83,6 +89,7 @@ public interface DictionaryClient {
             ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}")
     WordDefinitionDto refactorWordInsideTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName,
                                                  WordDefinitionInputDto wordDefinitionInputDto);
+
 
 
 }

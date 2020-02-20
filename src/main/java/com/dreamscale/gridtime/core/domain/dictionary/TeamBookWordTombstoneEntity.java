@@ -19,9 +19,7 @@ public class TeamBookWordTombstoneEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
-    private UUID organizationId;
-
-    private UUID teamId;
+    private UUID teamBookWordId;
 
     private String lowerCaseWordName;
 
