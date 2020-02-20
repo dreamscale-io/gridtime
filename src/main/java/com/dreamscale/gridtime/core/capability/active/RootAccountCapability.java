@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.account.AccountActivationDto;
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto;
@@ -8,7 +8,8 @@ import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class RootAccountCapabilitty implements RootAccountIdResolver {
+public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private RootAccountRepository rootAccountRepository;
@@ -41,7 +42,7 @@ public class RootAccountCapabilitty implements RootAccountIdResolver {
     private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    private TeamDirectoryCapability teamDirectoryCapability;
+    private TeamMembershipCapability teamMembership;
 
 
     public AccountActivationDto activate(String activationCode) {
@@ -92,7 +93,7 @@ public class RootAccountCapabilitty implements RootAccountIdResolver {
         statusDto.setOrganizationId(membership.getOrganizationId());
         statusDto.setUserName(membership.getUsername());
 
-        TeamDto team = teamDirectoryCapability.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
+        TeamDto team = teamMembership.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
 
         if (team != null) {
             statusDto.setTeamId(team.getId());

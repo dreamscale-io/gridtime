@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class TeamDirectoryCapability {
+public class TeamMembershipCapability {
 
     @Autowired
     private OrganizationMembershipCapability organizationMembership;

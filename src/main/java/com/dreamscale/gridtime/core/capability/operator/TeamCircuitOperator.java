@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
@@ -49,7 +49,7 @@ public class TeamCircuitOperator {
     private TeamCircuitTalkRoomRepository teamCircuitTalkRoomRepository;
 
     @Autowired
-    private TeamDirectoryCapability teamDirectoryCapability;
+    private TeamMembershipCapability teamMembership;
 
     @Autowired
     private MemberStatusCapability memberStatusCapability;
@@ -75,7 +75,7 @@ public class TeamCircuitOperator {
 
     public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamMembership.getMyPrimaryTeam(organizationId, memberId);
         TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
 
         if (circuit != null) {
@@ -88,7 +88,7 @@ public class TeamCircuitOperator {
 
     public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamDirectoryCapability.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamMembership.getMyPrimaryTeam(organizationId, memberId);
 
         List<MemberWorkStatusDto> members = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, memberId);
 

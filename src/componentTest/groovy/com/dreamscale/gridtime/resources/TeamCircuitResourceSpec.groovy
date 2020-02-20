@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
 import com.dreamscale.gridtime.core.service.TimeService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -29,7 +29,7 @@ class TeamCircuitResourceSpec extends Specification {
     RootAccountEntity loggedInUser
 
     @Autowired
-    TeamDirectoryCapability teamService
+    TeamMembershipCapability teamService
 
     @Autowired
     TimeService mockTimeService

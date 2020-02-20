@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.operator.RootAccountCapabilitty;
+import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ import javax.annotation.PostConstruct;
 public class AccountResource {
 
     @Autowired
-    private RootAccountCapabilitty rootAccountCapabilitty;
+    private RootAccountCapability rootAccountCapability;
 
 
     @Autowired
@@ -45,7 +45,7 @@ public class AccountResource {
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
 
-        return rootAccountCapabilitty.activate(activationCode.getActivationCode());
+        return rootAccountCapability.activate(activationCode.getActivationCode());
     }
 
     /**
@@ -57,7 +57,7 @@ public class AccountResource {
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapabilitty.heartbeat(context.getRootAccountId(), heartbeat);
+        return rootAccountCapability.heartbeat(context.getRootAccountId(), heartbeat);
     }
 
     /**
@@ -69,7 +69,7 @@ public class AccountResource {
     ConnectionStatusDto login() {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapabilitty.login(context.getRootAccountId());
+        return rootAccountCapability.login(context.getRootAccountId());
     }
 
     /**
@@ -80,7 +80,7 @@ public class AccountResource {
     SimpleStatusDto logout() {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapabilitty.logout(context.getRootAccountId());
+        return rootAccountCapability.logout(context.getRootAccountId());
     }
 
 }

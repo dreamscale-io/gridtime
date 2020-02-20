@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
@@ -55,7 +55,7 @@ public class AdminService {
     private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    private TeamDirectoryCapability teamDirectoryCapability;
+    private TeamMembershipCapability teamMembership;
 
     @Autowired
     GridBoxBucketConfigRepository gridBoxBucketConfigRepository;
@@ -78,7 +78,7 @@ public class AdminService {
 
         UUID orgId = organizationDto.getId();
 
-        TeamDto teamDto = teamDirectoryCapability.getTeamByName(orgId, teamName);
+        TeamDto teamDto = teamMembership.getTeamByName(orgId, teamName);
 
         ProjectEntity projectEntity = projectRepository.findByOrganizationIdAndName(orgId, projectName);
 
@@ -169,10 +169,10 @@ public class AdminService {
         registrations.add(registerMember(dreamScaleOrg, "bethlrichardson@gmail.com"));
         registrations.add(registerMember(dreamScaleOrg, "tobias@davistobias.com"));
 
-        TeamDto team = teamDirectoryCapability.createTeam(dreamScaleOrg.getId(), "Phoenix");
+        TeamDto team = teamMembership.createTeam(dreamScaleOrg.getId(), "Phoenix");
 
         List<UUID> memberIds = extractMemberIds(registrations);
-        teamDirectoryCapability.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
+        teamMembership.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
 
         return registrations;
     }
@@ -208,8 +208,8 @@ public class AdminService {
 
         List<UUID> toyotaMemberIds = extractMemberIds(toyotaRegistrations);
 
-        TeamDto toyotaTeam = teamDirectoryCapability.createTeam(onpremOrg.getId(), "Toyota");
-        teamDirectoryCapability.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
+        TeamDto toyotaTeam = teamMembership.createTeam(onpremOrg.getId(), "Toyota");
+        teamMembership.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
 
         //cpg team
 
@@ -231,8 +231,8 @@ public class AdminService {
 
         List<UUID> cpgMemberIds = extractMemberIds(cpgRegistrations);
 
-        TeamDto cpgTeam = teamDirectoryCapability.createTeam(onpremOrg.getId(), "CPG");
-        teamDirectoryCapability.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
+        TeamDto cpgTeam = teamMembership.createTeam(onpremOrg.getId(), "CPG");
+        teamMembership.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
 
         List<MemberRegistrationDetailsDto> allRegistrations = new ArrayList<>();
         allRegistrations.addAll(toyotaRegistrations);

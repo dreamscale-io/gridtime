@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.machine.memory.type.TypeRegistry;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class FeatureResolverService {
 
 
     @Autowired
-    TeamDirectoryCapability teamDirectoryCapability;
+    TeamMembershipCapability teamMembership;
 
     @Autowired
     GridFeatureRepository gridFeatureRepository;

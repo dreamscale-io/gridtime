@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ public class TeamResource {
     private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    private TeamDirectoryCapability teamDirectoryCapability;
+    private TeamMembershipCapability teamMembership;
 
     /**
      * Get the active status of me
@@ -32,7 +32,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return teamDirectoryCapability.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamMembership.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 

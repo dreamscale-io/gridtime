@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -19,7 +19,7 @@ class TeamResourceSpec extends Specification {
     TeamClient teamClient
 
     @Autowired
-    TeamDirectoryCapability teamService
+    TeamMembershipCapability teamService
 
     @Autowired
     RootAccountEntity testUser

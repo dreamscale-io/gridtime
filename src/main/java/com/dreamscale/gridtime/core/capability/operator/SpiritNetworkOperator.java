@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
+import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkRepository;
@@ -29,7 +30,7 @@ public class SpiritNetworkOperator {
     OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    RootAccountCapabilitty rootAccountCapabilitty;
+    RootAccountCapability rootAccountCapability;
 
     @Autowired
     LearningCircuitOperator learningCircuitOperator;
@@ -228,7 +229,7 @@ public class SpiritNetworkOperator {
         if (lastTombstone != null) {
             birthday = lastTombstone.getDateOfDeath();
         } else {
-            birthday = rootAccountCapabilitty.getActivationDate(rootAccountId);
+            birthday = rootAccountCapability.getActivationDate(rootAccountId);
         }
         return birthday;
     }

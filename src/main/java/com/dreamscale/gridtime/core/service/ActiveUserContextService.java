@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.service;
 import com.dreamscale.gridtime.api.account.UserContextDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextRepository;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
@@ -27,7 +27,7 @@ public class ActiveUserContextService {
     OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    TeamDirectoryCapability teamDirectoryCapability;
+    TeamMembershipCapability teamMembership;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -54,7 +54,7 @@ public class ActiveUserContextService {
                 userContext.setOrganizationId(defaultMembership.getOrganizationId());
                 userContext.setMemberId(defaultMembership.getId());
 
-                TeamDto defaultTeam = teamDirectoryCapability.getMyPrimaryTeam(defaultMembership.getOrganizationId(), defaultMembership.getId());
+                TeamDto defaultTeam = teamMembership.getMyPrimaryTeam(defaultMembership.getOrganizationId(), defaultMembership.getId());
                 if (defaultTeam != null) {
                     userContext.setTeamId(defaultTeam.getId());
                 }
