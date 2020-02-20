@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.spirit.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class SpiritResource {
     SpiritNetworkOperator spiritNetworkOperator;
 
     @Autowired
-    OrganizationDirectoryCapability organizationDirectoryCapability;
+    OrganizationMembershipCapability organizationMembership;
 
     /**
      * Gets the latest state for the user's spirit
@@ -35,7 +35,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("getMyTorchie, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
         return spiritNetworkOperator.getTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
@@ -48,7 +48,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("grantXPNow, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         spiritNetworkOperator.grantXPNow(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), invokingSpirit.getId(), xpAmount.getXpAmount());
 
@@ -65,7 +65,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("grantGroupXP, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         spiritNetworkOperator.grantGroupXP(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), xpAmount.getXpAmount());
 
@@ -84,7 +84,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("getMySpiritNetwork, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
         return spiritNetworkOperator.getSpiritNetwork(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
 
@@ -100,8 +100,8 @@ public class SpiritResource {
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        organizationMembership.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
         return spiritNetworkOperator.getTorchie(invokingSpirit.getOrganizationId(), friendSpiritId);
     }
@@ -118,8 +118,8 @@ public class SpiritResource {
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        organizationMembership.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
         return spiritNetworkOperator.getSpiritNetwork(invokingSpirit.getOrganizationId(), friendSpiritId);
     }
@@ -139,8 +139,8 @@ public class SpiritResource {
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        organizationMembership.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
         return spiritNetworkOperator.linkToTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
     }
@@ -162,8 +162,8 @@ public class SpiritResource {
 
         UUID friendSpiritId = UUID.fromString(spiritId);
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        organizationMembership.validateMemberWithinOrgByMemberId(invokingSpirit.getOrganizationId(), friendSpiritId);
 
         return spiritNetworkOperator.unlinkTorchie(invokingSpirit.getOrganizationId(), invokingSpirit.getId(), friendSpiritId);
     }
@@ -179,7 +179,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("unlinkMe, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         spiritNetworkOperator.unlinkMe(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
     }
@@ -199,7 +199,7 @@ public class SpiritResource {
         RequestContext context = RequestContext.get();
         log.info("restInPeace, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return spiritNetworkOperator.restInPeace(context.getRootAccountId(), invokingSpirit.getOrganizationId(), invokingSpirit.getId(), tombStoneInputDto.getEpitaph());
     }
@@ -211,7 +211,7 @@ public class SpiritResource {
     @GetMapping(ResourcePaths.ME_PATH + ResourcePaths.RIP_PATH)
     public List<TorchieTombstoneDto> getMyTombstones() {
         RequestContext context = RequestContext.get();
-        OrganizationMemberEntity invokingSpirit = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingSpirit = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return spiritNetworkOperator.getMyTombstones(invokingSpirit.getOrganizationId(), invokingSpirit.getId());
 

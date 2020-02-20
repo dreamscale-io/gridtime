@@ -142,4 +142,7 @@ public class ResourcePaths {
     public static final String REJECT_PATH = "/reject";
     public static final String PULL_PATH = "/pull";
     public static final String REMOVE_PATH = "/remove";
+
+    public static final String SYSTEM_PATH = "/system";
+    public static final String STOP_PATH = "/stop";
 }

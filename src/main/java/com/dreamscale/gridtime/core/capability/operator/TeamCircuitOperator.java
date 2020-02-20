@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
@@ -64,7 +64,7 @@ public class TeamCircuitOperator {
     private GridTalkRouter talkRouter;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
@@ -129,7 +129,7 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
 
-        String userName = organizationDirectoryCapability.getUsernameForMemberId(memberFromId);
+        String userName = organizationMembership.getUsernameForMemberId(memberFromId);
         TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
 
         IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
@@ -165,7 +165,7 @@ public class TeamCircuitOperator {
     }
 
     private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
-        String userName = organizationDirectoryCapability.getUsernameForMemberId(memberFromId);
+        String userName = organizationMembership.getUsernameForMemberId(memberFromId);
         TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
 
         WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
@@ -219,7 +219,7 @@ public class TeamCircuitOperator {
     public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {
         UUID talkRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
 
-        String userName = organizationDirectoryCapability.getUsernameForMemberId(forMemberId);
+        String userName = organizationMembership.getUsernameForMemberId(forMemberId);
         XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(userName, forMemberId, oldXPSummary, newXPSummary);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();

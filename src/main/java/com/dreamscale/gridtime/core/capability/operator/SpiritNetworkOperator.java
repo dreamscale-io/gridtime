@@ -4,10 +4,7 @@ import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
-import com.dreamscale.gridtime.core.capability.operator.RootAccountCapabilitty;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
-import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
-import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
@@ -29,7 +26,7 @@ import java.util.*;
 public class SpiritNetworkOperator {
 
     @Autowired
-    OrganizationDirectoryCapability organizationDirectoryCapability;
+    OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     RootAccountCapabilitty rootAccountCapabilitty;

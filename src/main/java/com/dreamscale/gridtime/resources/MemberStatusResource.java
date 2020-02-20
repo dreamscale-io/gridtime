@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.List;
 public class MemberStatusResource {
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private MemberStatusCapability memberStatusCapability;
@@ -30,7 +30,7 @@ public class MemberStatusResource {
     public MemberWorkStatusDto getMyCurrentStatus() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return memberStatusCapability.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
     }
@@ -44,7 +44,7 @@ public class MemberStatusResource {
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam() {
         RequestContext context = RequestContext.get();
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return memberStatusCapability.getStatusOfMeAndMyTeam(memberEntity.getOrganizationId(), memberEntity.getId());
     }

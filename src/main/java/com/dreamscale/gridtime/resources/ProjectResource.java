@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.service.ProjectService;
 import com.dreamscale.gridtime.core.capability.directory.TaskDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ProjectResource {
     private TaskDirectoryCapability taskDirectoryCapability;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
 
     /**
@@ -64,7 +64,7 @@ public class ProjectResource {
 
     private UUID getDefaultOrgId() {
         RequestContext context = RequestContext.get();
-        OrganizationDto org = organizationDirectoryCapability.getDefaultOrganization(context.getRootAccountId());
+        OrganizationDto org = organizationMembership.getDefaultOrganization(context.getRootAccountId());
         return org.getId();
     }
 

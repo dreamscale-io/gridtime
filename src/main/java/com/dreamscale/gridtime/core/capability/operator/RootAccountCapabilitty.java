@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
@@ -38,7 +38,7 @@ public class RootAccountCapabilitty implements RootAccountIdResolver {
     private ActiveWorkStatusManager activeWorkStatusManager;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private TeamDirectoryCapability teamDirectoryCapability;
@@ -87,7 +87,7 @@ public class RootAccountCapabilitty implements RootAccountIdResolver {
         statusDto.setStatus(Status.VALID);
         statusDto.setMessage("Successfully logged in");
 
-        OrganizationMemberEntity membership = organizationDirectoryCapability.getDefaultMembership(rootAccountId);
+        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
         statusDto.setMemberId(membership.getId());
         statusDto.setOrganizationId(membership.getOrganizationId());
         statusDto.setUserName(membership.getUsername());
@@ -124,7 +124,7 @@ public class RootAccountCapabilitty implements RootAccountIdResolver {
     }
 
     private void updateOnlineStatus(UUID rootAccountId, OnlineStatus onlineStatus) {
-        OrganizationMemberEntity membership = organizationDirectoryCapability.getDefaultMembership(rootAccountId);
+        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
 
         activeWorkStatusManager.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
 

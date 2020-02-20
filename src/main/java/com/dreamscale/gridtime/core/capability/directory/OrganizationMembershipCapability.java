@@ -24,7 +24,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class OrganizationDirectoryCapability {
+public class OrganizationMembershipCapability {
     @Autowired
     private OrganizationRepository organizationRepository;
 

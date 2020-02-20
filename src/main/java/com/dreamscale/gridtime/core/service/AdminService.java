@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository;
@@ -52,7 +52,7 @@ public class AdminService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private TeamDirectoryCapability teamDirectoryCapability;
@@ -74,7 +74,7 @@ public class AdminService {
         String teamName = "CPG";
         String projectName = "NBCU CPG";
 
-        OrganizationDto organizationDto = organizationDirectoryCapability.getOrganizationByDomainName(domainName);
+        OrganizationDto organizationDto = organizationMembership.getOrganizationByDomainName(domainName);
 
         UUID orgId = organizationDto.getId();
 
@@ -154,7 +154,7 @@ public class AdminService {
         orgInput.setJiraUser("janelle@dreamscale.io");
         orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
 
-        OrganizationDto dreamScaleOrg = organizationDirectoryCapability.createOrganization(orgInput);
+        OrganizationDto dreamScaleOrg = organizationMembership.createOrganization(orgInput);
 
         configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-data-plugins"));
         configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-platform"));
@@ -187,7 +187,7 @@ public class AdminService {
         orgInput.setJiraUser("janelle_klein@onprem.com");
         orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
 
-        OrganizationDto onpremOrg = organizationDirectoryCapability.createOrganization(orgInput);
+        OrganizationDto onpremOrg = organizationMembership.createOrganization(orgInput);
 
         configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "Toyota"));
         configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "NBCU CPG"));
@@ -254,7 +254,7 @@ public class AdminService {
         membership.setInviteToken(org.getInviteToken());
         membership.setOrgEmail(memberEmail);
 
-        return organizationDirectoryCapability.registerMember(org.getId(), membership);
+        return organizationMembership.registerMember(org.getId(), membership);
     }
 
 

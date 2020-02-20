@@ -50,7 +50,7 @@ public class JournalCapability {
     private JournalLinkEventRepository journalLinkEventRepository;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private RecentActivityManager recentActivityManager;
@@ -238,7 +238,7 @@ public class JournalCapability {
     }
 
     public List<JournalEntryDto> getRecentIntentionsForMember(UUID organizationId, UUID memberId, int limit) {
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -247,9 +247,9 @@ public class JournalCapability {
     }
 
     public List<JournalEntryDto> getHistoricalIntentionsForUser(UUID organizationId, String userName, LocalDateTime beforeDate, Integer limit) {
-        UUID memberId = organizationDirectoryCapability.getMemberIdForUser(organizationId, userName);
+        UUID memberId = organizationMembership.getMemberIdForUser(organizationId, userName);
 
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -329,9 +329,9 @@ public class JournalCapability {
 
     public RecentJournalDto getJournalForUser(UUID organizationId, String userName, Integer effectiveLimit) {
 
-        UUID otherMemberId = organizationDirectoryCapability.getMemberIdForUser(organizationId, userName);
+        UUID otherMemberId = organizationMembership.getMemberIdForUser(organizationId, userName);
 
-        organizationDirectoryCapability.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
+        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
 
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, otherMemberId, effectiveLimit);
         RecentTasksSummaryDto recentActivity = recentActivityManager.getRecentTasksByProject(organizationId, otherMemberId);

@@ -26,7 +26,7 @@ public class GridtimeSystemJobEntity {
 
     private String jobName;
 
-    private SystemJobType systemJobType;
+    private SystemJobType jobType;
 
     private String jobConfigJson;
 

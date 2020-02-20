@@ -24,7 +24,7 @@ import java.util.UUID;
 public class TeamDirectoryCapability {
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private SpiritNetworkOperator xpService;
@@ -228,13 +228,13 @@ public class TeamDirectoryCapability {
     }
 
     public MemberRegistrationDetailsDto addMemberToMyTeam(UUID rootAccountId, String newMemberEmail) {
-        OrganizationDto orgDto = organizationDirectoryCapability.getDefaultOrganizationWithInvitation(rootAccountId);
+        OrganizationDto orgDto = organizationMembership.getDefaultOrganizationWithInvitation(rootAccountId);
 
         MembershipInputDto membershipInputDto = new MembershipInputDto();
         membershipInputDto.setInviteToken(orgDto.getInviteToken());
         membershipInputDto.setOrgEmail(newMemberEmail);
 
-        MemberRegistrationDetailsDto registration = organizationDirectoryCapability.registerMember(orgDto.getId(), membershipInputDto);
+        MemberRegistrationDetailsDto registration = organizationMembership.registerMember(orgDto.getId(), membershipInputDto);
 
         List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
 
@@ -250,7 +250,7 @@ public class TeamDirectoryCapability {
 
 
     public TeamWithMembersDto getMeAndMyTeam(UUID rootAccountId) {
-        OrganizationDto orgDto = organizationDirectoryCapability.getDefaultOrganization(rootAccountId);
+        OrganizationDto orgDto = organizationMembership.getDefaultOrganization(rootAccountId);
         RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 
         List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);

@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.job.JobDescriptorDto;
+import com.dreamscale.gridtime.api.job.JobStatusDto;
+import com.dreamscale.gridtime.api.job.SystemJobStatusDto;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -54,7 +56,27 @@ public class GridtimeJobManager {
      */
 
 
-    public List<JobDescriptorDto> getAllTorchieJobs() {
+    public List<SystemJobStatusDto> getAllSystemJobs(UUID rootAccountId) {
+        return null;
+    }
+
+    public List<JobStatusDto> getAllJobsForOrganization(UUID organizationId) {
+        return null;
+    }
+
+    public List<JobStatusDto> getAllJobsForTeam(UUID organizationId, UUID memberId) {
+        return null;
+    }
+
+    public JobStatusDto startJob(UUID organizationId, UUID memberId, String jobId) {
+        return null;
+    }
+
+    public JobStatusDto stopJob(UUID organizationId, UUID memberId, String jobId) {
+        return null;
+    }
+
+    public JobStatusDto getJobStatus(UUID organizationId, UUID memberId, String jobId) {
         return null;
     }
 }

@@ -1,10 +1,16 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.job.JobDescriptorDto;
+import com.dreamscale.gridtime.api.job.JobDiagnosticStatsDto;
+import com.dreamscale.gridtime.api.job.JobStatusDto;
+import com.dreamscale.gridtime.api.job.SystemJobStatusDto;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
+import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.GridtimeJobManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,11 +23,74 @@ public class JobResource {
     @Autowired
     private GridtimeJobManager gridtimeJobManager;
 
+    @Autowired
+    private OrganizationMembershipCapability organizationMembership;
 
-    List<JobDescriptorDto> getAllJobs() {
-        return gridtimeJobManager.getAllTorchieJobs();
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.SYSTEM_PATH )
+    List<SystemJobStatusDto> getSystemJobs() {
+        RequestContext context = RequestContext.get();
+        log.info("getSystemJobs, user={}", context.getRootAccountId());
+
+        return gridtimeJobManager.getAllSystemJobs(context.getRootAccountId());
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH  )
+    List<JobStatusDto> getTeamJobs() {
+        RequestContext context = RequestContext.get();
+        log.info("getOrganizationJobs, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.getAllJobsForTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.ORGANIZATION_PATH  )
+    List<JobStatusDto> getOrganizationJobs() {
+        RequestContext context = RequestContext.get();
+        log.info("getOrganizationJobs, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.getAllJobsForOrganization(invokingMember.getOrganizationId());
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{jobId}" + ResourcePaths.START_PATH )
+    JobStatusDto startJob(@PathVariable("jobId") String jobId) {
+        RequestContext context = RequestContext.get();
+        log.info("startJob, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.startJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{jobId}" + ResourcePaths.STOP_PATH )
+    JobStatusDto stopJob(@PathVariable("jobId") String jobId) {
+        RequestContext context = RequestContext.get();
+        log.info("stopJob, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.stopJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/{jobId}"  )
+    JobStatusDto getJobStatus(@PathVariable("jobId") String jobId) {
+        RequestContext context = RequestContext.get();
+        log.info("getJobStatus, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.getJobStatus(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
+    }
 
     //so what I want to do, is be able to have a list of descriptive jobs
 

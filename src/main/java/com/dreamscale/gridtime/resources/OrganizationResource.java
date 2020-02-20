@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.team.TeamInputDto;
 import com.dreamscale.gridtime.api.team.TeamMemberDto;
 import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +21,7 @@ import java.util.UUID;
 public class OrganizationResource {
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private TeamDirectoryCapability teamDirectoryCapability;
@@ -38,7 +38,7 @@ public class OrganizationResource {
     @PostMapping
     public OrganizationDto createOrganization(@RequestBody OrganizationInputDto orgInputDto) {
 
-        return organizationDirectoryCapability.createOrganization(orgInputDto);
+        return organizationMembership.createOrganization(orgInputDto);
     }
 
     /**
@@ -51,7 +51,7 @@ public class OrganizationResource {
     @GetMapping(ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH)
     public OrganizationDto decodeInvitation(@RequestParam("token") String inviteToken) {
 
-       return organizationDirectoryCapability.decodeInvitation(inviteToken);
+       return organizationMembership.decodeInvitation(inviteToken);
     }
 
     /**
@@ -64,7 +64,7 @@ public class OrganizationResource {
     public MemberRegistrationDetailsDto registerMember(@PathVariable("id") String organizationId,
                                                        @RequestBody MembershipInputDto membershipInputDto) {
 
-        return organizationDirectoryCapability.registerMember(UUID.fromString(organizationId), membershipInputDto);
+        return organizationMembership.registerMember(UUID.fromString(organizationId), membershipInputDto);
     }
 
     /**

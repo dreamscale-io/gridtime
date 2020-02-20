@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.service;
 
 import com.dreamscale.gridtime.api.account.UserContextDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamDirectoryCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveUserContextRepository;
@@ -24,7 +24,7 @@ public class ActiveUserContextService {
     ActiveUserContextRepository activeUserContextRepository;
 
     @Autowired
-    OrganizationDirectoryCapability organizationDirectoryCapability;
+    OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     TeamDirectoryCapability teamDirectoryCapability;
@@ -48,7 +48,7 @@ public class ActiveUserContextService {
             userContext = new ActiveUserContextEntity();
             userContext.setRootAccountId(rootAccountId);
 
-            OrganizationMemberEntity defaultMembership = organizationDirectoryCapability.getDefaultMembership(rootAccountId);
+            OrganizationMemberEntity defaultMembership = organizationMembership.getDefaultMembership(rootAccountId);
 
             if (defaultMembership != null) {
                 userContext.setOrganizationId(defaultMembership.getOrganizationId());

@@ -28,6 +28,10 @@ public class GridtimeJobEntity {
 
     private JobType jobType;
 
+    private UUID ownerId;
+
+    private JobOwnerType jobOwnerType;
+
     private String jobConfigJson;
 
     LocalDateTime startedOn;

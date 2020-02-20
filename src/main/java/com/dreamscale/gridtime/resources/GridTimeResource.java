@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ public class GridTimeResource {
     FlowPublisher flowService;
 
     @Autowired
-    OrganizationDirectoryCapability organizationDirectoryCapability;
+    OrganizationMembershipCapability organizationMembership;
 
     @GetMapping(ResourcePaths.CALENDAR_PATH )
     public void getCalendarJobStatus() {

@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.JournalCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
@@ -32,7 +32,7 @@ public class JournalResource {
     private JournalCapability journalCapability;
 
     @Autowired
-    private OrganizationDirectoryCapability organizationDirectoryCapability;
+    private OrganizationMembershipCapability organizationMembership;
 
     @Autowired
     private RecentActivityManager recentActivityManager;
@@ -48,7 +48,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("createNewIntention, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return journalCapability.createIntention(invokingMember.getOrganizationId(), invokingMember.getId(), intentionInput);
     }
@@ -66,7 +66,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("updateRetroFlameRating, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return journalCapability.saveFlameRating(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId), flameRatingInputDto);
     }
@@ -83,7 +83,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("finishIntention, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         if (FinishStatus.done.equals(intentionRefInputDto.getFinishStatus())) {
             return journalCapability.finishIntention(memberEntity.getOrganizationId(), memberEntity.getId(), UUID.fromString(intentionId));
@@ -106,7 +106,7 @@ public class JournalResource {
         log.info("getRecentJournal, user={}", context.getRootAccountId());
 
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
@@ -125,7 +125,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("getRecentJournalForUser, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
@@ -151,7 +151,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("getHistoricalIntentionsFeedBeforeDate, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         Integer effectiveLimit = getEffectiveLimit(limit);
         LocalDateTime beforeDate = DateTimeAPITranslator.convertToDateTime(beforeDateStr);
@@ -172,7 +172,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("createTaskReferenceInJournal, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return recentActivityManager.createTaskReferenceInJournal(memberEntity.getOrganizationId(), memberEntity.getId(), taskReference.getTaskName());
     }
@@ -189,7 +189,7 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("getRecentTaskReferencesSummary, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationDirectoryCapability.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity memberEntity = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
         return recentActivityManager.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
     }
@@ -205,7 +205,7 @@ public class JournalResource {
 
     private UUID getDefaultOrgId() {
         RequestContext context = RequestContext.get();
-        OrganizationDto org = organizationDirectoryCapability.getDefaultOrganization(context.getRootAccountId());
+        OrganizationDto org = organizationMembership.getDefaultOrganization(context.getRootAccountId());
         return org.getId();
     }
 
