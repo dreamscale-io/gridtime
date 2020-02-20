@@ -25,6 +25,10 @@ public class TeamDictionaryWordEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID teamId;
 
+    private UUID createdByMemberId;
+
+    private UUID lastModifiedByMemberId;
+
     private String wordName;
 
     private String lowerCaseWordName;

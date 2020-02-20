@@ -27,6 +27,10 @@ public class TeamBookWordOverrideEntity {
 
     private String definition;
 
+    private UUID createdByMemberId;
+
+    private UUID lastModifiedByMemberId;
+
     private String lowerCaseWordName;
 
     private LocalDateTime overrideDate;

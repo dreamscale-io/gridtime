@@ -58,7 +58,7 @@ public interface DictionaryClient {
     BookReferenceDto updateTeamBook(@Param("bookName") String bookName, RefactorBookInputDto refactorBookInputDto );
 
     @RequestLine("DELETE " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
-    BookReferenceDto deleteTeamBook(@Param("bookName") String bookName);
+    BookReferenceDto archiveTeamBook(@Param("bookName") String bookName);
 
 
     @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.COMMUNITY_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")

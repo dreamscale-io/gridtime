@@ -151,6 +151,24 @@ public class DictionaryResource {
     }
 
     /**
+     * Updates an existing team book definition, with details such as changing the name
+     *
+     * Each new {bookName} must be unique.
+     *
+     * @return DictionaryBookDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @DeleteMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}")
+    public BookReferenceDto archiveTeamBook(@PathVariable("bookName") String bookName) {
+        RequestContext context = RequestContext.get();
+        log.info("archiveTeamBook, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
+        return dictionaryService.archiveTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName);
+    }
+
+
+    /**
      * Creates a new "Book" editable scope for pulling in existing definitions.
      *
      * Communities can organize their definitions into groups.  The same tags can exist in multiple books.

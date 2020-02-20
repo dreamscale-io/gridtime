@@ -297,6 +297,33 @@ class DictionaryResourceSpec extends Specification {
 
     }
 
+    def 'should archive an existing book on delete'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        BookReferenceDto book1Ref = dictionaryClient.createTeamBook("book1")
+        BookReferenceDto book2Ref = dictionaryClient.createTeamBook("book2")
+
+        when:
+
+        dictionaryClient.archiveTeamBook("book1")
+
+        List<BookReferenceDto> bookRefs = dictionaryClient.getTeamBooks()
+
+        BookDto archivedBook = dictionaryClient.getTeamBook("book1")
+
+        then:
+        assert bookRefs != null
+        assert bookRefs.size() == 1
+        assert bookRefs.get(0).bookName == "book2"
+
+        assert archivedBook != null
+        assert archivedBook.getBookStatus() == "ARCHIVED"
+
+    }
+
 
     //TODO next is promoting words into community dictionary
 

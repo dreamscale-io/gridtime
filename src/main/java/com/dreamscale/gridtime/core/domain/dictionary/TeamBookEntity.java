@@ -3,6 +3,8 @@ package com.dreamscale.gridtime.core.domain.dictionary;
 import lombok.*;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,6 +27,8 @@ public class TeamBookEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID teamId;
 
+    private UUID createdByMemberId;
+
     private String bookName;
 
     private String lowerCaseBookName;
@@ -32,5 +36,8 @@ public class TeamBookEntity {
     private LocalDateTime creationDate;
 
     private LocalDateTime lastModifiedDate;
+
+    @Enumerated(EnumType.STRING)
+    private BookStatus bookStatus;
 
 }

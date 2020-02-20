@@ -29,6 +29,8 @@ public class TeamBookWordEntity {
 
     private LocalDateTime pullDate;
 
+    private UUID pulledByMemberId;
+
     @Enumerated(EnumType.STRING)
     private WordModifiedStatus modifiedStatus;
 

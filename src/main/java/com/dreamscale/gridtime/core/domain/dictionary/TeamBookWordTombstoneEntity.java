@@ -29,6 +29,8 @@ public class TeamBookWordTombstoneEntity {
 
     private LocalDateTime ripDate;
 
+    private UUID ripByMemberId;
+
 }
 
 

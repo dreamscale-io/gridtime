@@ -19,10 +19,15 @@ public class BookDto {
     UUID teamId;
     String bookName;
 
+    UUID createdByMemberId;
+
+    String bookStatus;
+
     LocalDateTime creationDate;
     LocalDateTime lastModifiedDate;
 
     List<WordDefinitionDto> definitions;
+
 
 }
 

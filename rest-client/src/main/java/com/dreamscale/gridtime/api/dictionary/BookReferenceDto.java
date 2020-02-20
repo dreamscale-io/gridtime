@@ -19,6 +19,10 @@ public class BookReferenceDto {
     UUID teamId;
     String bookName;
 
+    UUID createdByMemberId;
+
+    String bookStatus;
+
     LocalDateTime creationDate;
 
     LocalDateTime lastModifiedDate;

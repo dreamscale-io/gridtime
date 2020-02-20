@@ -14,3 +14,9 @@ databaseChangeLog:
 
   - include:
         file: db/v006/refactor_dictionary_from_tag_to_word.sql
+
+  - include:
+        file: db/v006/alter_team_book_add_book_status.sql
+
+  - include:
+        file: db/v006/alter_team_book_add_creator.sql

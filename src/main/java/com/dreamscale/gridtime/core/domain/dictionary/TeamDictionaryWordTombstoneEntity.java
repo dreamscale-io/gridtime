@@ -23,6 +23,8 @@ public class TeamDictionaryWordTombstoneEntity {
 
     private UUID teamId;
 
+    private UUID ripByMemberId;
+
     private String lowerCaseWordName;
 
     private String deadWordName;

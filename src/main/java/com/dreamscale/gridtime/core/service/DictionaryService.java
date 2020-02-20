@@ -102,6 +102,7 @@ public class DictionaryService {
                 tombstoneDto.setDeadWordName(tombstone.getDeadWordName());
                 tombstoneDto.setDeadDefinition(tombstone.getDeadDefinition());
                 tombstoneDto.setRipDate(tombstone.getRipDate());
+                tombstone.setRipByMemberId(tombstone.getRipByMemberId());
                 tombstoneDto.setReviveDate(tombstone.getReviveDate());
 
                 tombstoneDtos.add(tombstoneDto);
@@ -208,15 +209,10 @@ public class DictionaryService {
 
         TeamDictionaryWordEntity updatedWord = null;
         if (existingWord != null) {
-            updatedWord = refactorExistingTeamWord(now, existingWord, wordDefinitionInputDto);
+            updatedWord = refactorExistingTeamWord(now, memberId, existingWord, wordDefinitionInputDto);
         } else {
-            updatedWord = createNewTeamWord(now, myTeam, wordDefinitionInputDto);
+            updatedWord = createNewTeamWord(now, myTeam, memberId, wordDefinitionInputDto);
         }
-
-        //what happens if an existing tag, is a tombstone?
-
-        //what happens if a tombstone is revived?
-
 
         return toDto(updatedWord);
     }
@@ -240,9 +236,11 @@ public class DictionaryService {
             bookEntity.setBookName(bookName);
             bookEntity.setLowerCaseBookName(bookName.toLowerCase());
             bookEntity.setOrganizationId(organizationId);
+            bookEntity.setCreatedByMemberId(memberId);
             bookEntity.setTeamId(myTeam.getId());
             bookEntity.setCreationDate(now);
             bookEntity.setLastModifiedDate(now);
+            bookEntity.setBookStatus(BookStatus.ACTIVE);
 
             teamBookRepository.save(bookEntity);
 
@@ -276,6 +274,27 @@ public class DictionaryService {
         return teamBookReferenceMapper.toApi(existingBook);
     }
 
+    public BookReferenceDto archiveTeamBook(UUID organizationId, UUID memberId, String bookName) {
+
+        TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
+
+        validateTeamExists(myTeam);
+        validateBookNotNull(bookName);
+
+        TeamBookEntity existingBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), bookName.toLowerCase());
+
+        validateBookNotNull(existingBook);
+
+        LocalDateTime now = timeService.now();
+
+        existingBook.setBookStatus(BookStatus.ARCHIVED);
+        existingBook.setLastModifiedDate(now);
+
+        teamBookRepository.save(existingBook);
+
+        return teamBookReferenceMapper.toApi(existingBook);
+    }
+
     public WordDefinitionDto pullWordIntoTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
@@ -287,7 +306,7 @@ public class DictionaryService {
 
         validateWordNotNull(word);
 
-        TeamBookWordEntity existingWord = pullWordInsideBook(myTeam.getId(), bookName, word.getId());
+        TeamBookWordEntity existingWord = pullWordInsideBook(myTeam.getId(), memberId, bookName, word.getId());
 
         return wordDefinitionMapper.toApi(word);
     }
@@ -324,6 +343,8 @@ public class DictionaryService {
             override = new TeamBookWordOverrideEntity();
             override.setTeamBookId(teamBook.getId());
             override.setTeamBookWordId(bookWord.getId());
+            override.setCreatedByMemberId(memberId);
+            override.setLastModifiedByMemberId(memberId);
             override.setOverrideDate(now);
             override.setLastModifiedDate(now);
             override.setWordName(wordDefinitionInputDto.getWordName());
@@ -343,6 +364,7 @@ public class DictionaryService {
             tombstone.setLowerCaseWordName(globalWord.getWordName().toLowerCase());
             tombstone.setDeadDefinition(globalWord.getDefinition());
             tombstone.setRipDate(now);
+            tombstone.setRipByMemberId(memberId);
 
             teamBookWordTombstoneRepository.save(tombstone);
 
@@ -357,6 +379,7 @@ public class DictionaryService {
             tombstone.setLowerCaseWordName(override.getWordName().toLowerCase());
             tombstone.setDeadDefinition(override.getDefinition());
             tombstone.setRipDate(now);
+            tombstone.setRipByMemberId(memberId);
 
             teamBookWordTombstoneRepository.save(tombstone);
 
@@ -364,6 +387,7 @@ public class DictionaryService {
             override.setLowerCaseWordName(wordDefinitionInputDto.getWordName().toLowerCase());
             override.setDefinition(wordDefinitionInputDto.getDefinition());
             override.setLastModifiedDate(now);
+            override.setLastModifiedByMemberId(memberId);
 
             teamBookWordOverrideRepository.save(override);
         }
@@ -374,15 +398,13 @@ public class DictionaryService {
 
 
 
-    private TeamBookWordEntity pullWordInsideBook(UUID teamId, String bookName, UUID wordId) {
-
-        String lowerCaseBook = bookName.toLowerCase();
+    private TeamBookWordEntity pullWordInsideBook(UUID teamId, UUID memberId, String bookName, UUID wordId) {
 
         TeamBookEntity book = teamBookRepository.findByTeamIdAndLowerCaseBookName(teamId, bookName.toLowerCase());
 
         validateBookNotNull(book);
 
-        TeamBookWordEntity wordInBook = teamBookWordRepository.findByTeamBookNameAndWordId(teamId, lowerCaseBook, wordId);
+        TeamBookWordEntity wordInBook = teamBookWordRepository.findByTeamBookIdAndTeamWordId(book.getId(), wordId);
 
         if (wordInBook == null) {
             wordInBook = new TeamBookWordEntity();
@@ -391,6 +413,7 @@ public class DictionaryService {
             wordInBook.setTeamWordId(wordId);
             wordInBook.setModifiedStatus(WordModifiedStatus.UNCHANGED);
             wordInBook.setPullDate(timeService.now());
+            wordInBook.setPulledByMemberId(memberId);
 
             teamBookWordRepository.save(wordInBook);
         }
@@ -479,7 +502,7 @@ public class DictionaryService {
     }
 
 
-    private TeamDictionaryWordEntity createNewTeamWord(LocalDateTime now, TeamDto myTeam, WordDefinitionInputDto wordDefinitionInputDto) {
+    private TeamDictionaryWordEntity createNewTeamWord(LocalDateTime now, TeamDto myTeam, UUID memberId, WordDefinitionInputDto wordDefinitionInputDto) {
 
         //first check for existing tombstones by the same name, resurrect if needed
 
@@ -489,6 +512,8 @@ public class DictionaryService {
         newWord.setId(UUID.randomUUID());
         newWord.setOrganizationId(myTeam.getOrganizationId());
         newWord.setTeamId(myTeam.getId());
+        newWord.setCreatedByMemberId(memberId);
+        newWord.setLastModifiedByMemberId(memberId);
         newWord.setCreationDate(now);
         newWord.setLastModifiedDate(now);
         newWord.setLowerCaseWordName(wordDefinitionInputDto.getWordName().toLowerCase());
@@ -513,18 +538,20 @@ public class DictionaryService {
 
     }
 
-    private TeamDictionaryWordEntity refactorExistingTeamWord(LocalDateTime now, TeamDictionaryWordEntity existingWord, WordDefinitionInputDto wordDefinitionInputDto) {
+    private TeamDictionaryWordEntity refactorExistingTeamWord(LocalDateTime now, UUID memberId, TeamDictionaryWordEntity existingWord, WordDefinitionInputDto wordDefinitionInputDto) {
 
         if (hasWordCaseChange(existingWord, wordDefinitionInputDto)) {
 
             existingWord.setWordName(wordDefinitionInputDto.getWordName());
             existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
             existingWord.setLastModifiedDate(now);
+            existingWord.setLastModifiedByMemberId(memberId);
 
             teamDictionaryWordRepository.save(existingWord);
         } else if (hasDefinitionChangeOnly(existingWord, wordDefinitionInputDto)) {
             existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
             existingWord.setLastModifiedDate(now);
+            existingWord.setLastModifiedByMemberId(memberId);
 
             teamDictionaryWordRepository.save(existingWord);
         } else {
@@ -539,6 +566,7 @@ public class DictionaryService {
             teamDictionaryWordTombstoneEntity.setLowerCaseWordName(existingWord.getLowerCaseWordName());
             teamDictionaryWordTombstoneEntity.setDeadWordName(existingWord.getWordName());
             teamDictionaryWordTombstoneEntity.setDeadDefinition(existingWord.getDefinition());
+            teamDictionaryWordTombstoneEntity.setRipByMemberId(memberId);
 
             teamDictionaryWordTombstoneEntity.setRipDate(now);
             teamDictionaryWordTombstoneEntity.setForwardTo(existingWord.getId());
@@ -551,6 +579,7 @@ public class DictionaryService {
             existingWord.setLowerCaseWordName(wordDefinitionInputDto.getWordName().toLowerCase());
             existingWord.setDefinition(wordDefinitionInputDto.getDefinition());
             existingWord.setLastModifiedDate(now);
+            existingWord.setLastModifiedByMemberId(memberId);
 
             teamDictionaryWordRepository.save(existingWord);
 
@@ -586,6 +615,8 @@ public class DictionaryService {
             TeamDictionaryWordEntity newWord = new TeamDictionaryWordEntity();
             newWord.setOrganizationId(organizationId);
             newWord.setTeamId(myTeam.getId());
+            newWord.setCreatedByMemberId(memberId);
+            newWord.setLastModifiedByMemberId(memberId);
             newWord.setCreationDate(now);
             newWord.setLastModifiedDate(now);
             newWord.setWordName(wordName);
@@ -611,6 +642,8 @@ public class DictionaryService {
                 newWord.setId(UUID.randomUUID());
                 newWord.setOrganizationId(organizationId);
                 newWord.setTeamId(myTeam.getId());
+                newWord.setCreatedByMemberId(memberId);
+                newWord.setLastModifiedByMemberId(memberId);
                 newWord.setCreationDate(now);
                 newWord.setLastModifiedDate(now);
                 newWord.setWordName(word);
@@ -660,7 +693,8 @@ public class DictionaryService {
 
         for (TeamDictionaryWordEntity undefinedWord : undefinedWords) {
             WordDefinitionDto blankDefinition = new WordDefinitionDto(undefinedWord.getWordName(), null,
-                    undefinedWord.getCreationDate(), undefinedWord.getLastModifiedDate(), false);
+                    undefinedWord.getCreationDate(), undefinedWord.getLastModifiedDate(),
+                    undefinedWord.getCreatedByMemberId(), undefinedWord.getLastModifiedByMemberId(), false);
 
             blankDefs.add(blankDefinition);
         }
