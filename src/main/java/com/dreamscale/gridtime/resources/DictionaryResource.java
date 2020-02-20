@@ -279,19 +279,21 @@ public class DictionaryResource {
     }
 
     /**
-     * Removes the definition for a specified word from the specified Team Book
+     * Removes the definition from the specified Team Book
+     *
+     * Does not affect the global dictionary words
+     *
      * @return WordDefinitionDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.REMOVE_PATH)
-    public WordDefinitionDto removeWordFromTeamBook(@PathVariable("bookName") String bookName, @PathVariable("wordName") String wordName) {
+    @DeleteMapping(ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}")
+    public void deleteWordFromTeamBook(@PathVariable("bookName") String bookName, @PathVariable("wordName") String wordName) {
         RequestContext context = RequestContext.get();
-        log.info("removeWordFromTeamBook, user={}", context.getRootAccountId());
+        log.info("deleteWordFromTeamBook, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationService.getDefaultMembership(context.getRootAccountId());
-        return dictionaryService.removeWordFromTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
+        dictionaryService.deleteWordFromTeamBook(invokingMember.getOrganizationId(), invokingMember.getId(), bookName, wordName);
     }
-
 
     /**
      * Retrieves the full history details definition of the specified word in the specified Team Book

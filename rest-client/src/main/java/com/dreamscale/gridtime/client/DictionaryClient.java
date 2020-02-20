@@ -82,9 +82,9 @@ public interface DictionaryClient {
     WordDefinitionDto pullWordIntoTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
 
 
-    @RequestLine("POST " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
-            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" + ResourcePaths.REMOVE_PATH)
-    WordDefinitionDto removeWordFromTeamBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
+    @RequestLine("DELETE " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +
+            ResourcePaths.BOOK_PATH + "/{bookName}" + ResourcePaths.WORD_PATH + "/{wordName}" )
+    WordDefinitionDto deleteWordFromBook(@Param("bookName") String bookName, @Param("wordName") String wordName);
 
 
     @RequestLine("GET " + ResourcePaths.DICTIONARY_PATH + ResourcePaths.SCOPE_PATH + ResourcePaths.TEAM_PATH +

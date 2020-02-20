@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -311,27 +311,41 @@ public class DictionaryService {
         return wordDefinitionMapper.toApi(word);
     }
 
-
-    public WordDefinitionDto removeWordFromTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
+    @Transactional
+    public void deleteWordFromTeamBook(UUID organizationId, UUID memberId, String bookName, String wordName) {
         TeamDto myTeam = teamService.getMyPrimaryTeam(organizationId, memberId);
 
         validateTeamExists(myTeam);
         validateBookNotNull(bookName);
         validateWordNotNull(wordName);
 
-        //TODO remove word from Book...
+        TeamBookEntity teamBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), bookName.toLowerCase());
 
-        //I really should remove these by Id?  Except...
+        validateBookNotNull(teamBook);
 
-        //find the last override, or the global
+        TeamBookWordOverrideEntity override = teamBookWordOverrideRepository.findWordOverrideByBookIdAndLowerCaseWordName(teamBook.getId(), wordName.toLowerCase());
 
-        TeamDictionaryWordEntity word = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
+        if (override == null) {
+            //this is the first modification, delete the link
 
-        validateWordNotNull(word);
+            TeamDictionaryWordEntity globalWord = findByTeamAndCaseInsensitiveWord(myTeam.getId(), wordName);
+            validateWordNotNull(globalWord);
 
-        TeamBookWordEntity existingWord = pullWordInsideBook(myTeam.getId(), memberId, bookName, word.getId());
+            TeamBookWordEntity bookWord = teamBookWordRepository.findByTeamBookIdAndTeamWordId(teamBook.getId(), globalWord.getId());
 
-        return wordDefinitionMapper.toApi(word);
+            teamBookWordRepository.delete(bookWord.getId());
+        } else {
+            //this is already an override, delete all the tombstones, and the override, and the link
+
+            List<TeamBookWordTombstoneEntity> tombstones = teamBookWordTombstoneRepository.findByTeamBookWordIdOrderByRipDate(override.getTeamBookWordId());
+
+            teamBookWordTombstoneRepository.delete(tombstones);
+
+            teamBookWordOverrideRepository.delete(override);
+
+            teamBookWordRepository.delete(override.getTeamBookWordId());
+        }
+
     }
 
     @Transactional
@@ -417,9 +431,6 @@ public class DictionaryService {
 
         return toDto(override);
     }
-
-
-
 
     private TeamBookWordEntity pullWordInsideBook(UUID teamId, UUID memberId, String bookName, UUID wordId) {
 

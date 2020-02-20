@@ -324,6 +324,35 @@ class DictionaryResourceSpec extends Specification {
 
     }
 
+    def 'should delete words from existing book'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        dictionaryClient.createOrRefactorWord("tag1", new WordDefinitionInputDto("tag1", "def"))
+        dictionaryClient.createOrRefactorWord("tag2", new WordDefinitionInputDto("tag2", "def"))
+        dictionaryClient.createOrRefactorWord("tag3", new WordDefinitionInputDto("tag3", "def"))
+
+        BookReferenceDto bookRef = dictionaryClient.createTeamBook("mybook")
+        WordDefinitionDto word1InBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag1")
+        WordDefinitionDto word2InBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag2")
+        WordDefinitionDto word3InBook = dictionaryClient.pullWordIntoTeamBook("mybook", "tag3")
+
+        when:
+
+        dictionaryClient.deleteWordFromBook("mybook", "tag1")
+
+        BookDto finalBook = dictionaryClient.getTeamBook("mybook")
+
+        then:
+
+        assert finalBook != null
+        assert finalBook.getDefinitions().size() == 2
+
+    }
+
+
     //TODO forget about community dictionary for now, lets just get the team one working
     //implement actual deletion of words in books
     //actual deletion of books
