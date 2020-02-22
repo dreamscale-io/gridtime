@@ -14,13 +14,13 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.GridTimeWorkerPool
+import com.dreamscale.gridtime.core.machine.GridTimeWorkPile
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
 import com.dreamscale.gridtime.core.machine.clock.Metronome
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
@@ -68,13 +68,13 @@ class ZoomableTeamBoxLocasSpec extends Specification {
     ProgramFactory programFactory
 
     @Autowired
-    WorkToDoQueueWire workToDoQueueWire
+    AggregateWorkToDoQueueWire workToDoQueueWire
 
     @Autowired
     FeatureCacheManager featureCacheManager
 
     @Autowired
-    GridTimeWorkerPool gridTimeWorkerPool
+    GridTimeWorkPile gridTimeWorkerPool
 
     LocalDateTime clockStart
     LocalDateTime wtfTime
@@ -173,7 +173,7 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         //last exec should call team tile
 
-        TileInstructions teamInstruction = gridTimeWorkerPool.whatsNext();
+        TickInstructions teamInstruction = gridTimeWorkerPool.whatsNext();
 
         println "RUNNING LAST: "+ teamInstruction.getCmdDescription()
         teamInstruction.call()

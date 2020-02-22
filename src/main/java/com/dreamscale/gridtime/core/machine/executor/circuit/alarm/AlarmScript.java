@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.alarm;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
@@ -37,7 +37,7 @@ public class AlarmScript implements ParallelProgram {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtTick(Metronome.TickScope tickScope) {
+    public List<TickInstructions> getInstructionsAtTick(Metronome.TickScope tickScope) {
         return null;
     }
 

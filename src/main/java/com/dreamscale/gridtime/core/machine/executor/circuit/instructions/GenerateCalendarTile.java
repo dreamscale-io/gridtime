@@ -1,11 +1,12 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.instructions;
 
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CoordinateResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class GenerateCalendarTile extends TileInstructions {
+public class GenerateCalendarTile extends TickInstructions {
 
 
     private final CalendarService calendarService;
@@ -23,6 +24,8 @@ public class GenerateCalendarTile extends TileInstructions {
     public void executeInstruction() throws InterruptedException {
 
         calendarService.saveCalendar(tileSequence, gridTime);
+
+        appendOutputResults(new CoordinateResults(gridTime));
     }
 
     @Override

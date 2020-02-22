@@ -1,9 +1,7 @@
 package com.dreamscale.gridtime.core.machine;
 
-import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.program.*;
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.BoxConfigurationLoaderService;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState;
 import com.dreamscale.gridtime.core.machine.memory.PerProcessTorchieState;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -34,7 +31,7 @@ public class TorchieFactory {
     private TileSearchService tileSearchService;
 
     @Autowired
-    private WorkToDoQueueWire workToDoQueueWire;
+    private AggregateWorkToDoQueueWire workToDoWire;
 
 
     @Autowired
@@ -58,7 +55,7 @@ public class TorchieFactory {
 
         Torchie torchie = new Torchie(memberId, torchieState, program);
 
-        torchie.configureOutputStreamEventWire(workToDoQueueWire);
+        torchie.configureOutputStreamEventWire(workToDoWire);
 
         return torchie;
 

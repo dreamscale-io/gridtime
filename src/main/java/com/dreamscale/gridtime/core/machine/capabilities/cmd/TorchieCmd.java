@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.executor.worker.LiveQueue;
 import com.dreamscale.gridtime.core.machine.memory.type.CmdType;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,24 +50,24 @@ public class TorchieCmd {
     }
 
     public void gotoTile(ZoomLevel zoom, LocalDateTime tileTime) {
-        TileInstructions instructions = torchie.getInstructionsBuilder().gotoTile(zoom, tileTime);
+        TickInstructions instructions = torchie.getInstructionsBuilder().gotoTile(zoom, tileTime);
         runInstructionAndWaitTilDone(instructions);
     }
 
     public void nextTile() {
-        TileInstructions instructions = torchie.getInstructionsBuilder().nextTile();
+        TickInstructions instructions = torchie.getInstructionsBuilder().nextTile();
         runInstructionAndWaitTilDone(instructions);
     }
 
     public MusicGridResults playTile() {
-        TileInstructions instructions = torchie.getInstructionsBuilder().playTile();
+        TickInstructions instructions = torchie.getInstructionsBuilder().playTile();
         runInstructionAndWaitTilDone(instructions);
 
         return (MusicGridResults) instructions.getOutputResult();
     }
 
     public MusicGridResults playTrack(TrackSetKey trackSetName) {
-        TileInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
+        TickInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
         runInstructionAndWaitTilDone(instructions);
 
         return (MusicGridResults) instructions.getOutputResult();
@@ -81,7 +81,7 @@ public class TorchieCmd {
         torchie.resumeProgram();
     }
 
-    private void runInstructionAndWaitTilDone(TileInstructions instructions) {
+    private void runInstructionAndWaitTilDone(TickInstructions instructions) {
         if (syncCommandInProgress == true) {
             log.error("Already in progress!");
         }
@@ -108,27 +108,27 @@ public class TorchieCmd {
 
         syncCommandInProgress = true;
 
-        TileInstructions tileInstructions = generateTileInstructions(cmdType, templateParameters);
-        tileInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
+        TickInstructions tickInstructions = generateTileInstructions(cmdType, templateParameters);
+        tickInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
 
 
-        scheduleInstruction(tileInstructions);
+        scheduleInstruction(tickInstructions);
 
         waitForCommandToFinish();
 
-        return tileInstructions.getAllOutputResults();
+        return tickInstructions.getAllOutputResults();
     }
 
     public void runCommand(NotifyTrigger notify, CmdType cmdType, Map<String, String> templateParameters) {
 
-        TileInstructions tileInstructions = generateTileInstructions(cmdType, templateParameters);
-        tileInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
-        tileInstructions.addTriggerToNotifyList(notify);
+        TickInstructions tickInstructions = generateTileInstructions(cmdType, templateParameters);
+        tickInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
+        tickInstructions.addTriggerToNotifyList(notify);
 
-        scheduleInstruction(tileInstructions);
+        scheduleInstruction(tickInstructions);
     }
 
-    private void scheduleInstruction(TileInstructions instructions) {
+    private void scheduleInstruction(TickInstructions instructions) {
         torchie.scheduleInstruction(instructions);
         liveTorchieQueue.submit(torchie.getTorchieId(), torchie);
     }
@@ -154,7 +154,7 @@ public class TorchieCmd {
 
     }
 
-    private TileInstructions generateTileInstructions(CmdType cmdType, Map<String, String> templateParameters) {
+    private TickInstructions generateTileInstructions(CmdType cmdType, Map<String, String> templateParameters) {
         //TODO need to be able to parse commands, and then be able to run sync commands from the UI
 
         return null;
@@ -165,7 +165,7 @@ public class TorchieCmd {
 
     private class UpdateCommandInProgressTrigger implements NotifyTrigger {
         @Override
-        public void notifyWhenDone(TileInstructions instructions, List<Results> results) {
+        public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.debug("Setting cmd in progress to false");
             syncCommandInProgress = false;
         }
@@ -174,7 +174,7 @@ public class TorchieCmd {
     private class LogExecutionDoneTrigger implements NotifyTrigger {
 
         @Override
-        public void notifyWhenDone(TileInstructions instructions, List<Results> results) {
+        public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.info("Torchie "+torchie.getTorchieId() + " completed command `" + instructions.getCmdDescription() +
                     "` in "+instructions.getExecutionDuration()
                     + " with queue time: "+ instructions.getQueueDuration());

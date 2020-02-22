@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class NoOpProgram implements Program {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtActiveTick() {
+    public List<TickInstructions> getInstructionsAtActiveTick() {
         return DefaultCollections.emptyList();
     }
 

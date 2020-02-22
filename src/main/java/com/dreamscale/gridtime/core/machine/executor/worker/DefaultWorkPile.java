@@ -1,21 +1,21 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.Torchie;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 
 import java.util.UUID;
 
-public class DefaultWorkerPool implements WorkerPool, LiveQueue {
+public class DefaultWorkPile implements WorkPile, LiveQueue {
 
-    WhatsNextWheel<TileInstructions> whatsNextWheel = new WhatsNextWheel<>();
+    WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
 
-    private TileInstructions peekInstruction;
+    private TickInstructions peekInstruction;
 
     public void addTorchie(Torchie torchie) {
         whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
     }
 
-    public void addWorker(UUID workerId, Worker<TileInstructions> worker) {
+    public void addWorker(UUID workerId, Worker<TickInstructions> worker) {
         whatsNextWheel.addWorker(workerId, worker);
     }
 
@@ -39,13 +39,13 @@ public class DefaultWorkerPool implements WorkerPool, LiveQueue {
 
 
     @Override
-    public TileInstructions whatsNext() {
+    public TickInstructions whatsNext() {
 
         if (peekInstruction == null) {
             peek();
         }
 
-        TileInstructions nextInstruction = peekInstruction;
+        TickInstructions nextInstruction = peekInstruction;
 
         peekInstruction = null;
 
@@ -67,7 +67,7 @@ public class DefaultWorkerPool implements WorkerPool, LiveQueue {
     }
 
     @Override
-    public void submit(UUID workerId, Worker<TileInstructions> worker) {
+    public void submit(UUID workerId, Worker<TickInstructions> worker) {
         whatsNextWheel.submit(workerId, worker);
     }
 }

@@ -1,10 +1,12 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.job.JobStatusDto;
 import com.dreamscale.gridtime.api.job.SystemJobStatusDto;
+import com.dreamscale.gridtime.api.job.WatchConfigurationDto;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory;
+import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,39 @@ public class GridtimeJobManager {
     @Autowired
     TorchieFactory torchieFactory;
 
+    public List<SystemJobStatusDto> getAllSystemJobs(UUID rootAccountId) {
+
+        //set up structure for system jobs, these are jobs that run on one host,
+        //and use the system job lock, to claim the job
+
+        //not all gridtime instances will try to run system jobs.
+
+        //first system job is the calendar generator, that needs to run nightly to generate the
+
+        return null;
+    }
+
+    public List<JobStatusDto> getAllJobsForOrganization(UUID organizationId) {
+        return null;
+    }
+
+    public List<JobStatusDto> getAllJobsForTeam(UUID organizationId, UUID memberId) {
+        return null;
+    }
+
+    public JobStatusDto startJob(UUID organizationId, UUID memberId, String jobId) {
+        return null;
+    }
+
+    public JobStatusDto stopJob(UUID organizationId, UUID memberId, String jobId) {
+        return null;
+    }
+
+    public JobStatusDto getJobStatus(UUID organizationId, UUID memberId, String jobId) {
+        return null;
+    }
+
+
     public void generateCalendar() {
 
         LocalDateTime calendarUntil = timeService.now().plusDays(90);
@@ -33,6 +68,11 @@ public class GridtimeJobManager {
         Torchie torchie = torchieFactory.wireUpCalendarTorchieToRunUntil(calendarUntil);
         gridTimeEngine.submitJob(torchie);
 
+    }
+
+    public JobStatusDto watchJob(UUID organizationId, UUID id, String jobId, WatchConfigurationDto watchConfigurationDto) {
+
+        return null;
     }
     
 
@@ -56,27 +96,5 @@ public class GridtimeJobManager {
      */
 
 
-    public List<SystemJobStatusDto> getAllSystemJobs(UUID rootAccountId) {
-        return null;
-    }
 
-    public List<JobStatusDto> getAllJobsForOrganization(UUID organizationId) {
-        return null;
-    }
-
-    public List<JobStatusDto> getAllJobsForTeam(UUID organizationId, UUID memberId) {
-        return null;
-    }
-
-    public JobStatusDto startJob(UUID organizationId, UUID memberId, String jobId) {
-        return null;
-    }
-
-    public JobStatusDto stopJob(UUID organizationId, UUID memberId, String jobId) {
-        return null;
-    }
-
-    public JobStatusDto getJobStatus(UUID organizationId, UUID memberId, String jobId) {
-        return null;
-    }
 }

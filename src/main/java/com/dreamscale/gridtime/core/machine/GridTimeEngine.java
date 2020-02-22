@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.core.capability.operator.GridtimeJobManager;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,17 +12,34 @@ import java.util.UUID;
 public class GridTimeEngine {
 
     @Autowired
-    private GridTimeWorkerPool gridTimeWorkerPool;
+    private GridtimeJobManager gridtimeJobManager;
+
+    @Autowired
+    private GridTimeWorkPile gridTimeWorkerPool;
 
     private GridTimeExecutor gridTimeExecutor;
 
     @PostConstruct
     void init() {
+        this.start();
+    }
+
+    public void start() {
         this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkerPool);
 
         gridTimeExecutor.start();
+    }
+
+    public void destroy() {
+        if (this.gridTimeExecutor != null) {
+            this.gridTimeExecutor.shutdown();
+        }
+    }
+
+    public void getJobs() {
 
     }
+
 
     public TorchieCmd getTorchieCmd(UUID torchieId) {
         return gridTimeWorkerPool.getTorchieCmd(torchieId);

@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.GenerateTeamTile;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateStreamEvent;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.Locas;
@@ -54,8 +54,8 @@ public class AggregateWorkerProgram implements Program {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtActiveTick() {
-        List<TileInstructions> instructions = new ArrayList<>();
+    public List<TickInstructions> getInstructionsAtActiveTick() {
+        List<TickInstructions> instructions = new ArrayList<>();
 
         if (activeTick != null) {
             instructions.add(generateAggregateTickInstructions(activeTick));
@@ -69,7 +69,7 @@ public class AggregateWorkerProgram implements Program {
         return latestQueueDepth;
     }
 
-    private TileInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
+    private TickInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
 
         FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(activeEvent.getTeamId());
 

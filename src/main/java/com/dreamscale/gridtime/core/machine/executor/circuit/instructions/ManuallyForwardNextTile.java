@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ManuallyForwardNextTile extends TileInstructions {
+public class ManuallyForwardNextTile extends TickInstructions {
 
     private final TorchieState torchieState;
 

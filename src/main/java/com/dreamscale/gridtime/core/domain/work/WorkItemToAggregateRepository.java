@@ -36,10 +36,5 @@ public interface WorkItemToAggregateRepository extends CrudRepository<WorkItemTo
             "and processing_state = 'InProgress' ")
     void finishInProgressWorkItems(@Param("workerId") String workerId);
 
-    @Query(nativeQuery = true, value = "select pg_try_advisory_lock((:key)) ")
-    boolean tryToAcquireLock(@Param("key") Long lockNumber);
-
-    @Query(nativeQuery = true, value = "select pg_advisory_unlock((:key)) ")
-    boolean releaseLock(@Param("key") Long lockNumber);
 
 }

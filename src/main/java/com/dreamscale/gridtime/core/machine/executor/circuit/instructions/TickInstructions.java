@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public abstract class TileInstructions implements Callable<TileInstructions> {
+public abstract class TickInstructions implements Callable<TickInstructions> {
 
     private GridTile outputTile;
     private List<Results> outputResults = DefaultCollections.list();
@@ -29,12 +29,12 @@ public abstract class TileInstructions implements Callable<TileInstructions> {
     private Duration queueDuration;
     private Duration executionDuration;
 
-    TileInstructions() {
+    TickInstructions() {
         momentOfCreation = LocalDateTime.now();
     }
 
     @Override
-    public TileInstructions call() {
+    public TickInstructions call() {
         log.debug("Running instruction: "+getCmdDescription());
         try {
             momentOfExecution = LocalDateTime.now();

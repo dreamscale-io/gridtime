@@ -1,13 +1,13 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.job.JobDiagnosticStatsDto;
 import com.dreamscale.gridtime.api.job.JobStatusDto;
 import com.dreamscale.gridtime.api.job.SystemJobStatusDto;
+import com.dreamscale.gridtime.api.job.WatchConfigurationDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.GridtimeJobManager;
+import com.dreamscale.gridtime.core.capability.operator.GridtimeJobManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,6 +80,18 @@ public class JobResource {
 
         return gridtimeJobManager.stopJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
     }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{jobId}" + ResourcePaths.WATCH_PATH )
+    JobStatusDto watchJob(@PathVariable("jobId") String jobId, @RequestBody WatchConfigurationDto watchConfigurationDto) {
+        RequestContext context = RequestContext.get();
+        log.info("watchJob, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return gridtimeJobManager.watchJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId, watchConfigurationDto);
+    }
+
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/{jobId}"  )

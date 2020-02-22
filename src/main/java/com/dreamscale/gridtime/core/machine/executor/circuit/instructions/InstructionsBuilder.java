@@ -17,21 +17,21 @@ public class InstructionsBuilder {
         this.torchieState = torchieState;
     }
 
-    public TileInstructions gotoTile(ZoomLevel zoomLevel, LocalDateTime clockPosition) {
+    public TickInstructions gotoTile(ZoomLevel zoomLevel, LocalDateTime clockPosition) {
         GeometryClock.GridTime gotoGridTime = GeometryClock.createGridTime(zoomLevel, clockPosition);
 
         return new GotoTile(torchieState, gotoGridTime);
     }
 
-    public TileInstructions playTrack(TrackSetKey trackSetName) {
+    public TickInstructions playTrack(TrackSetKey trackSetName) {
         return new PlayTrack(torchieState, trackSetName);
     }
 
-    public TileInstructions playTile() {
+    public TickInstructions playTile() {
         return new PlayTile(torchieState);
     }
 
-    public TileInstructions nextTile() {
+    public TickInstructions nextTile() {
         return new ManuallyForwardNextTile(torchieState);
     }
 

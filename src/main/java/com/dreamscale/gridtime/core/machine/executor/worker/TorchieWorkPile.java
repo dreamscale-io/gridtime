@@ -11,8 +11,8 @@ import com.dreamscale.gridtime.core.machine.TorchieFactory;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.LockManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
 import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +27,10 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-public class TorchieWorkerPool implements WorkerPool {
+public class TorchieWorkPile implements WorkPile {
 
     @Autowired
-    private LockManager lockManager;
+    private GridtimeLockManager gridtimeLockManager;
 
     @Autowired
     private TimeService timeService;
@@ -48,10 +48,9 @@ public class TorchieWorkerPool implements WorkerPool {
     private TorchieFactory torchieFactory;
 
     private LocalDateTime lastSyncCheck;
-    private TileInstructions peekInstruction;
+    private TickInstructions peekInstruction;
 
-    private final WhatsNextWheel<TileInstructions> whatsNextWheel = new WhatsNextWheel<>();
-
+    private final WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
 
     private Duration syncInterval = Duration.ofMinutes(20);
     private Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
@@ -63,13 +62,13 @@ public class TorchieWorkerPool implements WorkerPool {
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
-            lockManager.tryToAcquireTorchieExclusiveLock();
+            gridtimeLockManager.tryToAcquireTorchieExclusiveLock();
 
             initializeMissingTorchies(now);
             claimTorchiesReadyForProcessing();
             expireZombieTorchies();
 
-            lockManager.releaseTorchieExclusiveLock();
+            gridtimeLockManager.releaseTorchieExclusiveLock();
         }
     }
 
@@ -216,13 +215,13 @@ public class TorchieWorkerPool implements WorkerPool {
     }
 
     @Override
-    public TileInstructions whatsNext() {
+    public TickInstructions whatsNext() {
 
         if (peekInstruction == null) {
             peek();
         }
 
-        TileInstructions nextInstruction = peekInstruction;
+        TickInstructions nextInstruction = peekInstruction;
 
         peekInstruction = null;
 

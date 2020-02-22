@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
@@ -12,15 +11,16 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEve
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
+import com.dreamscale.gridtime.core.machine.executor.worker.SystemWorkPile;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 
 import java.util.*;
 
-public class TwilightCircuit implements Worker<TileInstructions> {
+public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     private Program program;
     private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
@@ -30,20 +30,21 @@ public class TwilightCircuit implements Worker<TileInstructions> {
 
     private Eye eye;
 
-    private LinkedList<TileInstructions> instructionsToExecuteQueue;
-    private LinkedList<TileInstructions> highPriorityInstructionQueue;
-    private TileInstructions lastInstruction;
+    private LinkedList<TickInstructions> instructionsToExecuteQueue;
+    private LinkedList<TickInstructions> highPriorityInstructionQueue;
+    private TickInstructions lastInstruction;
 
     private LinkedList<TimeBomb> activeTimeBombMonitors;
 
     //circuit coordinator
 
     private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+
     private boolean isProgramHalted;
 
     private Wire outputStreamEventWire;
 
-    public TwilightCircuit(CircuitMonitor circuitMonitor, Program program) {
+    public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
         this.circuitMonitor = circuitMonitor;
         this.program = program;
 
@@ -79,9 +80,9 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         parallelPrograms.remove(programId);
     }
 
-    public TileInstructions whatsNext() {
+    public TickInstructions whatsNext() {
 
-        TileInstructions nextInstruction = null;
+        TickInstructions nextInstruction = null;
 
         if (highPriorityInstructionQueue.size() > 0) {
             nextInstruction = highPriorityInstructionQueue.removeFirst();
@@ -118,8 +119,8 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         return nextInstruction;
     }
 
-    private List<TileInstructions> getParallelProgramInstructions(Metronome.TickScope activeTickScope) {
-        List<TileInstructions> instructionsToExecute = new ArrayList<>();
+    private List<TickInstructions> getParallelProgramInstructions(Metronome.TickScope activeTickScope) {
+        List<TickInstructions> instructionsToExecute = new ArrayList<>();
 
         for (ParallelProgram parallelProgram : parallelPrograms.values()) {
             instructionsToExecute.addAll(parallelProgram.getInstructionsAtTick(activeTickScope));
@@ -129,11 +130,16 @@ public class TwilightCircuit implements Worker<TileInstructions> {
     }
 
     private void fireProgramDoneTriggers() {
-        for (NotifyTrigger trigger: notifyWhenProgramDoneTriggers) {
+        fireTriggers(notifyWhenProgramDoneTriggers);
+    }
+
+    private void fireTriggers(List<NotifyTrigger> triggers) {
+        for (NotifyTrigger trigger: triggers) {
             trigger.notifyWhenDone(lastInstruction, lastInstruction.getAllOutputResults());
         }
-        notifyWhenProgramDoneTriggers.clear();
+        triggers.clear();
     }
+
 
     public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
         this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
@@ -147,7 +153,7 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         return circuitMonitor.isReady();
     }
 
-    public TileInstructions getLastInstruction() {
+    public TickInstructions getLastInstruction() {
         return lastInstruction;
     }
 
@@ -155,7 +161,7 @@ public class TwilightCircuit implements Worker<TileInstructions> {
     private class EvaluateOutputTrigger implements NotifyTrigger {
 
         @Override
-        public void notifyWhenDone(TileInstructions finishedInstruction, List<Results> results) {
+        public void notifyWhenDone(TickInstructions finishedInstruction, List<Results> results) {
 
             IdeaFlowMetrics ideaFlowMetrics = getOutputIdeaFlowMetrics(finishedInstruction);
             updateFitnessMatrixAndTriggerAlarms(ideaFlowMetrics);
@@ -184,7 +190,7 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         }
     }
 
-    private IdeaFlowMetrics getOutputIdeaFlowMetrics(TileInstructions finishedInstruction) {
+    private IdeaFlowMetrics getOutputIdeaFlowMetrics(TickInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();
 
         if (output != null) {
@@ -193,11 +199,11 @@ public class TwilightCircuit implements Worker<TileInstructions> {
         return null;
     }
 
-    public void scheduleInstruction(TileInstructions instructions) {
+    public void scheduleInstruction(TickInstructions instructions) {
         instructionsToExecuteQueue.push(instructions);
     }
 
-    public void scheduleHighPriorityInstruction(TileInstructions instructions) {
+    public void scheduleHighPriorityInstruction(TickInstructions instructions) {
         highPriorityInstructionQueue.push(instructions);
     }
 

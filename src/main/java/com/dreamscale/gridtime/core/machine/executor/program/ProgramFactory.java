@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.program;
 
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.LocasFactory;
@@ -8,7 +8,6 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.observer.Flow
 import com.dreamscale.gridtime.core.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.transform.FlowTransformFactory;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +37,7 @@ public class ProgramFactory {
     private CalendarService calendarService;
 
     @Autowired
-    WorkToDoQueueWire workToDoQueueWire;
+    AggregateWorkToDoQueueWire workToDoWire;
 
     public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
@@ -81,7 +80,7 @@ public class ProgramFactory {
     }
 
     public AggregateWorkerProgram createAggregateWorkerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
-        return new AggregateWorkerProgram(workerId, workToDoQueueWire, locasFactory, featureCacheManager);
+        return new AggregateWorkerProgram(workerId, workToDoWire, locasFactory, featureCacheManager);
     }
 
 

@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
-import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkerPool
+import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkPile
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
@@ -54,7 +54,7 @@ class TorchieCmdSpec extends Specification {
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);
 
-        DefaultWorkerPool workerPool = new DefaultWorkerPool()
+        DefaultWorkPile workerPool = new DefaultWorkPile()
         gridTimeExecutor = new GridTimeExecutor(workerPool);
         gridTimeExecutor.start()
 

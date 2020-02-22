@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.GenerateCalendarTile;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 
 import java.time.LocalDateTime;
@@ -69,10 +69,10 @@ public class CalendarGeneratorProgram implements Program {
     }
 
     @Override
-    public List<TileInstructions> getInstructionsAtActiveTick() {
+    public List<TickInstructions> getInstructionsAtActiveTick() {
         Metronome.TickScope tick = metronome.getActiveTick();
 
-        List<TileInstructions> instructions = new ArrayList<>();
+        List<TickInstructions> instructions = new ArrayList<>();
 
         if (!isDone()) {
             instructions.add(baseTick(tick.getFrom(), tick.getTo()));
@@ -135,7 +135,7 @@ public class CalendarGeneratorProgram implements Program {
     }
 
 
-    public TileInstructions baseTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
+    public TickInstructions baseTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
         GenerateCalendarTile instruction = new GenerateCalendarTile(calendarService, fromGridTime, twentiesSequence);
         twentiesSequence++;
         tilesGenerated++;
@@ -143,7 +143,7 @@ public class CalendarGeneratorProgram implements Program {
         return instruction;
     }
 
-    public TileInstructions aggregateTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
+    public TickInstructions aggregateTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
         GenerateCalendarTile instruction = null;
 
         switch (fromGridTime.getZoomLevel()) {

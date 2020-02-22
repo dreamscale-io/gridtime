@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -54,11 +54,11 @@ class TorchieSpec extends Specification {
         createEvent(torchieId, time2_0)
         createEvent(torchieId, time2_5)
 
-        List<TileInstructions> allInstructions = new ArrayList<>()
+        List<TickInstructions> allInstructions = new ArrayList<>()
 
         when:
         for (int i = 0; i < 15; i++) {
-            TileInstructions instructions = torchie.whatsNext();
+            TickInstructions instructions = torchie.whatsNext();
             instructions.call()
 
             allInstructions.add(instructions);
@@ -67,7 +67,7 @@ class TorchieSpec extends Specification {
         then:
         assert allInstructions.size() == 15
 
-        for (TileInstructions instruction : allInstructions) {
+        for (TickInstructions instruction : allInstructions) {
             assert instruction.isSuccessful()
         }
 

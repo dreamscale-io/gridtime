@@ -1,12 +1,11 @@
 package com.dreamscale.gridtime.core.machine;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
@@ -18,13 +17,13 @@ import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
-public class Torchie implements Worker<TileInstructions> {
+public class Torchie implements Worker<TickInstructions> {
 
     private final UUID torchieId;
 
     private final TorchieState torchieState;
 
-    private TwilightCircuit twilightCircuit;
+    private IdeaFlowCircuit ideaFlowCircuit;
 
     private CircuitMonitor circuitMonitor;
 
@@ -34,7 +33,7 @@ public class Torchie implements Worker<TileInstructions> {
         this.torchieState = torchieState;
 
         this.circuitMonitor = new CircuitMonitor(torchieId);
-        this.twilightCircuit = new TwilightCircuit(circuitMonitor, program);
+        this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, program);
     }
 
     public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
@@ -62,21 +61,21 @@ public class Torchie implements Worker<TileInstructions> {
         return new InstructionsBuilder(torchieId, torchieState);
     }
 
-    public void scheduleInstruction(TileInstructions instructions) {
-        twilightCircuit.scheduleHighPriorityInstruction(instructions);
+    public void scheduleInstruction(TickInstructions instructions) {
+        ideaFlowCircuit.scheduleHighPriorityInstruction(instructions);
     }
 
     public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
-        twilightCircuit.notifyWhenProgramDone(notifyTrigger);
+        ideaFlowCircuit.notifyWhenProgramDone(notifyTrigger);
     }
 
 
-    public TileInstructions whatsNext() {
-        return twilightCircuit.whatsNext();
+    public TickInstructions whatsNext() {
+        return ideaFlowCircuit.whatsNext();
     }
 
     public boolean isWorkerReady() {
-        return twilightCircuit.isWorkerReady();
+        return ideaFlowCircuit.isWorkerReady();
     }
 
     public CircuitMonitor getCircuitMonitor() {
@@ -92,19 +91,19 @@ public class Torchie implements Worker<TileInstructions> {
     }
 
     public void haltProgram() {
-        twilightCircuit.haltProgram();
+        ideaFlowCircuit.haltProgram();
     }
 
     public void resumeProgram() {
-        twilightCircuit.resumeProgram();
+        ideaFlowCircuit.resumeProgram();
     }
 
     public Metronome.TickScope getActiveTick() {
-        return twilightCircuit.getActiveTick();
+        return ideaFlowCircuit.getActiveTick();
     }
 
     public String getLastOutput() {
-        TileInstructions lastInstruction = twilightCircuit.getLastInstruction();
+        TickInstructions lastInstruction = ideaFlowCircuit.getLastInstruction();
         if (lastInstruction != null) {
             return lastInstruction.getOutputResultString();
         }
@@ -114,7 +113,7 @@ public class Torchie implements Worker<TileInstructions> {
 
 
     public void configureOutputStreamEventWire(Wire outputWire) {
-        twilightCircuit.configureOutputStreamEventWire(outputWire);
+        ideaFlowCircuit.configureOutputStreamEventWire(outputWire);
     }
 
 }

@@ -19,11 +19,11 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class WorkToDoQueueWireSpec extends Specification {
+class AggregateWorkToDoWireSpec extends Specification {
 
 
     @Autowired
-    WorkToDoQueueWire queuedWorkToDoWire
+    AggregateWorkToDoQueueWire queuedWorkToDoWire
 
     @Autowired
     WorkItemToAggregateRepository workItemToAggregateRepository

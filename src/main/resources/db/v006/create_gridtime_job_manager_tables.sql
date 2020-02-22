@@ -2,6 +2,19 @@
 
 --changeset dreamscale:4
 
+-- how should I manifest
+
+create table gridtime_system_running_job (
+   job_id uuid primary key not null,
+   job_type text,
+   job_params text,
+   started_on timestamp ,
+   last_heartbeat timestamp ,
+   last_exit_status text ,
+   run_status text ,
+   claiming_worker_id uuid
+);
+
 create table gridtime_job (
    id uuid primary key not null,
    organization_id uuid,

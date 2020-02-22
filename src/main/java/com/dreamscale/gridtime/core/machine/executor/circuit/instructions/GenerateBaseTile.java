@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class GenerateBaseTile extends TileInstructions {
+public class GenerateBaseTile extends TickInstructions {
 
     private final List<Flow> pullChain;
     private final TorchieState torchieState;

@@ -1,9 +1,9 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
-import com.dreamscale.gridtime.core.machine.executor.circuit.TwilightCircuit;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TileInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.WorkToDoQueueWire;
+import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +14,13 @@ import java.util.UUID;
 
 
 @Component
-public class AggregationWorkerPool implements WorkerPool {
+public class AggregationWorkPile implements WorkPile {
 
     @Autowired
     ProgramFactory programFactory;
 
     @Autowired
-    WorkToDoQueueWire workToDoWire;
+    AggregateWorkToDoQueueWire workToDoWire;
 
     @Autowired
     FeatureCacheManager featureCacheManager;
@@ -29,7 +29,7 @@ public class AggregationWorkerPool implements WorkerPool {
     private static final int DEFAULT_NUMBER_AGGREGATE_WORKERS = 5;
 
     private int currentPoolSize;
-    private WhatsNextWheel<TileInstructions> whatsNextWheel;
+    private WhatsNextWheel<TickInstructions> whatsNextWheel;
 
     @PostConstruct
     public void init() {
@@ -37,14 +37,14 @@ public class AggregationWorkerPool implements WorkerPool {
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
 
-    private WhatsNextWheel<TileInstructions> createWhatsNextWheel(int initialPoolSize) {
+    private WhatsNextWheel<TickInstructions> createWhatsNextWheel(int initialPoolSize) {
 
-        WhatsNextWheel whatsNextWheel = new WhatsNextWheel<TileInstructions>();
+        WhatsNextWheel whatsNextWheel = new WhatsNextWheel<TickInstructions>();
 
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
-            TwilightCircuit circuit = new TwilightCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
+            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
 
             whatsNextWheel.addWorker(workerId, circuit);
         }
@@ -53,22 +53,10 @@ public class AggregationWorkerPool implements WorkerPool {
     }
 
     public boolean hasWork() {
-        //TODO need to check the DB, wired in here, should call the actual DB,
-        //but then the work items, saving the events, should mark when all are ready
-
-
-
-        //so if I've got all the work items for the team, then I can grab it
-        //if I have some of the work items, then process after a delay
-
-        //group by count on the queue table, checks the actual work...
-
-        //then if I try to actually get the work, and there is no work,
-
         return workToDoWire.getQueueDepth() > 0;
     }
 
-    public TileInstructions whatsNext() {
+    public TickInstructions whatsNext() {
        return whatsNextWheel.whatsNext();
     }
 
