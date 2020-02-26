@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.cell;
 
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
+import org.apache.commons.lang3.StringUtils;
 
 public class CellSize {
 
@@ -12,6 +13,7 @@ public class CellSize {
     private static final int DEFAULT_CELL_SIZE_FOR_SUMMARY = 10;
     private static final int DEFAULT_CELL_SIZE_FOR_FIXED = 8;
 
+    private static final String TRUNCATED_INDICATOR = "*";
 
 
     public static int calculateCellSizeWithSummaryCell(RelativeBeat beat, int numberSummaryColumns) {
@@ -41,4 +43,6 @@ public class CellSize {
     public static int calculateFixedCellSize() {
         return DEFAULT_CELL_SIZE_FOR_FIXED;
     }
+
+
 }

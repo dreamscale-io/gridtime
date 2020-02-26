@@ -11,7 +11,6 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEve
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
-import com.dreamscale.gridtime.core.machine.executor.worker.SystemWorkPile;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
@@ -157,6 +156,9 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         return lastInstruction;
     }
 
+    public CircuitMonitor getCircuitMonitor() {
+        return circuitMonitor;
+    }
 
     private class EvaluateOutputTrigger implements NotifyTrigger {
 
@@ -169,7 +171,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
             List<TileStreamEvent> tileStreamEvents = finishedInstruction.getOutputTileStreamEvents();
             outputStreamEventWire.pushAll(tileStreamEvents);
 
-            circuitMonitor.finishInstruction(finishedInstruction.getQueueDuration(), finishedInstruction.getExecutionDuration());
+            circuitMonitor.finishInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
 
         }
 

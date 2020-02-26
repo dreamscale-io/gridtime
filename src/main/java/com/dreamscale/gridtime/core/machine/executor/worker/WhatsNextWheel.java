@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
-import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 
 import java.util.LinkedList;
@@ -52,7 +51,8 @@ public class WhatsNextWheel<T> implements LiveQueue {
 
     public void evictWorker(UUID workerId) {
         nextWorkerQueue.remove(workerId);
-        workerMap.remove(workerId);
+        Worker<T> worker = workerMap.remove(workerId);
+
     }
 
     public int size() {

@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.worker.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,9 @@ import java.util.UUID;
 
 @Component
 public class GridTimeWorkPile implements WorkPile {
+
+    @Autowired
+    CircuitActivityDashboard circuitActivityDashboard;
 
     //these are system base jobs, that are prioritized over all other work, like generating calendar
     @Autowired
@@ -23,7 +27,7 @@ public class GridTimeWorkPile implements WorkPile {
     //these are a fixed pool of workers that handle all aggregation related work, triggered off of events
 
     @Autowired
-    private AggregationWorkPile aggregateWorkPile;
+    private PlexerWorkPile plexerWorkPile;
 
     private boolean lastInstructionIsTorchie = false;
 
@@ -33,7 +37,7 @@ public class GridTimeWorkPile implements WorkPile {
 
         torchieWorkPile.sync();
 
-        return systemWorkPile.hasWork() || torchieWorkPile.hasWork() || aggregateWorkPile.hasWork();
+        return systemWorkPile.hasWork() || torchieWorkPile.hasWork() || plexerWorkPile.hasWork();
     }
 
     public TorchieCmd getTorchieCmd(UUID torchieId) {
@@ -45,6 +49,11 @@ public class GridTimeWorkPile implements WorkPile {
 
         TickInstructions instructions = null;
 
+        if (circuitActivityDashboard.tickAndCheckIfNeedsRefresh()) {
+            instructions = circuitActivityDashboard.generateRefreshTick();
+            lastInstructionIsTorchie = false;
+        }
+
         if (systemWorkPile.hasWork()) {
             instructions = systemWorkPile.whatsNext();
             if (instructions != null) {
@@ -52,8 +61,8 @@ public class GridTimeWorkPile implements WorkPile {
             }
         }
 
-        if (aggregateWorkPile.hasWork()) {
-            instructions = aggregateWorkPile.whatsNext();
+        if (plexerWorkPile.hasWork()) {
+            instructions = plexerWorkPile.whatsNext();
             if (instructions != null) {
                 lastInstructionIsTorchie = false;
             }
@@ -75,7 +84,7 @@ public class GridTimeWorkPile implements WorkPile {
 
     @Override
     public int size() {
-        return systemWorkPile.size() + torchieWorkPile.size() + aggregateWorkPile.size();
+        return systemWorkPile.size() + torchieWorkPile.size() + plexerWorkPile.size();
     }
 
     public TorchieCmd submitJob(Torchie torchie) {

@@ -4,6 +4,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
+import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,10 @@ import java.util.UUID;
 
 
 @Component
-public class AggregationWorkPile implements WorkPile {
+public class PlexerWorkPile implements WorkPile {
+
+    @Autowired
+    private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
     ProgramFactory programFactory;
@@ -26,14 +31,14 @@ public class AggregationWorkPile implements WorkPile {
     FeatureCacheManager featureCacheManager;
 
 
-    private static final int DEFAULT_NUMBER_AGGREGATE_WORKERS = 5;
+    private static final int DEFAULT_NUMBER_PLEXER_WORKERS = 5;
 
     private int currentPoolSize;
     private WhatsNextWheel<TickInstructions> whatsNextWheel;
 
     @PostConstruct
     public void init() {
-        this.currentPoolSize = DEFAULT_NUMBER_AGGREGATE_WORKERS;
+        this.currentPoolSize = DEFAULT_NUMBER_PLEXER_WORKERS;
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
 
@@ -45,6 +50,8 @@ public class AggregationWorkPile implements WorkPile {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
             IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
+
+            circuitActivityDashboard.addMonitor(MonitorType.PLEXER_WORKER, workerId, circuitMonitor);
 
             whatsNextWheel.addWorker(workerId, circuit);
         }

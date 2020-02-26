@@ -1,30 +1,25 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Slf4j
+@Data
 public class CircuitMonitor {
 
     private UUID torchieId;
     private LocalDateTime jobStartTime;
     private LocalDateTime lastStatusUpdate;
 
-    //TODO eventually will turn these to candle stick monitors
-    private Duration lastExecutionDuration;
-    private Duration lastQueueDuration;
+    private WindowMetric executionTimeMetric = new WindowMetric(10);
+    private WindowMetric queueTimeMetric = new WindowMetric(10);
+
+    private long lastExecutionDuration;
+    private long lastQueueDuration;
     private int instructionsProcessed;
     private int ticksProcessed;
 
@@ -32,7 +27,6 @@ public class CircuitMonitor {
     private int queueDepth;
 
     private State state;
-
 
 
     public CircuitMonitor(UUID torchieId) {
@@ -51,11 +45,14 @@ public class CircuitMonitor {
         updateStatusTimestamp();
     }
 
-    public void finishInstruction(Duration queueDuration, Duration executionDuration) {
+    public void finishInstruction(long queueDurationMillis, long executionDurationMillis) {
         log.debug("Setting circuit state to ready!");
         state = State.Ready;
-        lastQueueDuration = queueDuration;
-        lastExecutionDuration = executionDuration;
+        lastQueueDuration = queueDurationMillis;
+        lastExecutionDuration = executionDurationMillis;
+
+        executionTimeMetric.addSample(lastExecutionDuration);
+        queueTimeMetric.addSample(lastQueueDuration);
 
         updateStatusTimestamp();
     }
@@ -85,6 +82,8 @@ public class CircuitMonitor {
     public int getQueueDepth() {
         return queueDepth;
     }
+
+
 
     public enum State {
         Ready,

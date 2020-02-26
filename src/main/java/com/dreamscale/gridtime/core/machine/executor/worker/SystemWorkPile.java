@@ -8,6 +8,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemJobClaimManager;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarGeneratorJob;
+import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ import java.util.*;
 
 @Component
 public class SystemWorkPile implements WorkPile {
+
+    @Autowired
+    private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
     private GridtimeLockManager gridtimeLockManager;
@@ -36,13 +41,10 @@ public class SystemWorkPile implements WorkPile {
 
     private final WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
 
-    List<WorkerClaim> activeClaims = new ArrayList<>();
-
     private LocalDateTime lastSyncCheck;
     private TickInstructions peekInstruction;
 
     private Duration syncInterval = Duration.ofMinutes(20);
-    private Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
 
     public void sync() {
         LocalDateTime now = timeService.now();
@@ -50,6 +52,15 @@ public class SystemWorkPile implements WorkPile {
             lastSyncCheck = now;
 
             systemJobClaimManager.cleanUpStaleClaims(now);
+
+            //so if I have a job that is running for an hour, how long since my last update?
+
+            //check the circuit monitors for each job...
+
+            //in a loop, get the workers, check if they're moving...
+
+            //what if the process died and I've got a stale thing in the DB?
+
 
             gridtimeLockManager.tryToAcquireSystemJobLock();
 
@@ -69,7 +80,7 @@ public class SystemWorkPile implements WorkPile {
 
                     circuit.notifyWhenProgramDone(new SystemJobDoneTrigger(workerClaim));
 
-                    activeClaims.add(workerClaim);
+                    circuitActivityDashboard.addMonitor(MonitorType.SYSTEM_WORKER, workerId, circuitMonitor);
 
                     whatsNextWheel.addWorker(workerId, circuit);
 
@@ -82,8 +93,6 @@ public class SystemWorkPile implements WorkPile {
     }
 
     //TODO what if this job fails, how does it recover?
-
-    //TODO how do I monitor this job while it's running?
 
     public boolean hasWork() {
 
@@ -100,7 +109,7 @@ public class SystemWorkPile implements WorkPile {
 
             while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
 
-                whatsNextWheel.evictLastWorker();
+                evictLastWorker();
                 peekInstruction = whatsNextWheel.whatsNext();
 
             }
@@ -114,6 +123,7 @@ public class SystemWorkPile implements WorkPile {
     @Override
     public void evictLastWorker() {
         //no-op, workers can't be evicted for now
+
     }
 
     @Override
@@ -133,9 +143,10 @@ public class SystemWorkPile implements WorkPile {
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
            systemJobClaimManager.finishClaim(workerClaim);
-           activeClaims.remove(workerClaim);
 
-           whatsNextWheel.evictWorker(workerClaim.getWorkerId());
+           circuitActivityDashboard.evictMonitor(MonitorType.SYSTEM_WORKER, workerClaim.getWorkerId());
+
+            whatsNextWheel.evictWorker(workerClaim.getWorkerId());
         }
     }
 

@@ -13,6 +13,8 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
+import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
 import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class TorchieWorkPile implements WorkPile {
+
+    @Autowired
+    private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
     private GridtimeLockManager gridtimeLockManager;
@@ -89,6 +94,7 @@ public class TorchieWorkPile implements WorkPile {
 
         for (Torchie torchie : torchies) {
             whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
+            circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchie.getTorchieId(), torchie.getCircuitMonitor());
         }
     }
 
@@ -207,6 +213,8 @@ public class TorchieWorkPile implements WorkPile {
         expire(torchieId);
 
         whatsNextWheel.evictWorker(torchieId);
+
+        circuitActivityDashboard.evictMonitor(MonitorType.TORCHIE_WORKER, torchieId);
     }
 
     @Override
@@ -235,7 +243,7 @@ public class TorchieWorkPile implements WorkPile {
 
             while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
 
-                whatsNextWheel.evictLastWorker();
+                evictLastWorker();
                 peekInstruction = whatsNextWheel.whatsNext();
 
             }

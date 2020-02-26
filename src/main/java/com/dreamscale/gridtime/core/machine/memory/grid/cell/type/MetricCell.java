@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.cell.type;
 
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellSize;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.AggregateType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.MetricDistribution;
@@ -51,7 +52,7 @@ public class MetricCell implements GridCell {
     }
 
     public String toHeaderCell(int overrideCellSize) {
-        return toRightSizedCell(headerStr, overrideCellSize);
+        return CellFormat.toRightSizedCell(headerStr, overrideCellSize);
     }
 
     public String toValueCell() {
@@ -59,7 +60,7 @@ public class MetricCell implements GridCell {
     }
 
     public String toValueCell(int overrideCellSize) {
-        return toRightSizedCell(toDisplayString(), overrideCellSize);
+        return CellFormat.toRightSizedCell(toDisplayString(), overrideCellSize);
     }
 
     @Override
@@ -102,16 +103,6 @@ public class MetricCell implements GridCell {
 
     public String toString() {
         return toValueCell();
-    }
-
-    private String toRightSizedCell(String cellContents, int cellSize) {
-        String fittedContent;
-        if (cellContents.length() > cellSize ) {
-            fittedContent = cellContents.substring(0, cellSize - 1) + TRUNCATED_INDICATOR;
-        } else {
-            fittedContent = StringUtils.rightPad(cellContents, cellSize);
-        }
-        return fittedContent;
     }
 
 

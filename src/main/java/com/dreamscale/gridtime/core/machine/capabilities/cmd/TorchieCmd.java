@@ -176,8 +176,8 @@ public class TorchieCmd {
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.info("Torchie "+torchie.getTorchieId() + " completed command `" + instructions.getCmdDescription() +
-                    "` in "+instructions.getExecutionDuration()
-                    + " with queue time: "+ instructions.getQueueDuration());
+                    "` in "+instructions.getExecutionDurationMillis()
+                    + " with queue time: "+ instructions.getQueueDurationMillis());
         }
     }
 }

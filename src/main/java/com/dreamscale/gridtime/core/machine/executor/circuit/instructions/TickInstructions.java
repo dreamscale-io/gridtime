@@ -23,25 +23,26 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
     private List<NotifyTrigger> notifyList = DefaultCollections.list();
 
-    private LocalDateTime momentOfCreation;
-    private LocalDateTime momentOfExecution;
+    private long momentOfCreation;
+    private long momentOfExecution;
 
-    private Duration queueDuration;
-    private Duration executionDuration;
+    private long queueDurationMillis;
+    private long executionDurationMillis;
 
     TickInstructions() {
-        momentOfCreation = LocalDateTime.now();
+        momentOfCreation = System.currentTimeMillis();
     }
 
     @Override
     public TickInstructions call() {
         log.debug("Running instruction: "+getCmdDescription());
         try {
-            momentOfExecution = LocalDateTime.now();
+            momentOfExecution = System.currentTimeMillis();
+
             executeInstruction();
 
-            queueDuration = Duration.between(momentOfCreation, momentOfExecution);
-            executionDuration = Duration.between(momentOfExecution, LocalDateTime.now());
+            queueDurationMillis = momentOfCreation - momentOfExecution;
+            executionDurationMillis = System.currentTimeMillis() - momentOfExecution;
 
         } catch (Exception ex) {
             log.error("Exception during instruction execution", ex);
@@ -122,12 +123,12 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
     public abstract String getCmdDescription();
 
-    public Duration getExecutionDuration() {
-        return executionDuration;
+    public long getExecutionDurationMillis() {
+        return executionDurationMillis;
     }
 
-    public Duration getQueueDuration() {
-        return queueDuration;
+    public long getQueueDurationMillis() {
+        return queueDurationMillis;
     }
 
 
