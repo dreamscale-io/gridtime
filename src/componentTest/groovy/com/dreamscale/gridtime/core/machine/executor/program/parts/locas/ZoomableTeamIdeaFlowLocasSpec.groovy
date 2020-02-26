@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.GridTimeWorkPile
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
@@ -156,7 +156,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         teamInstruction.call()
 
         then:
-        MusicGridResults results = (MusicGridResults) teamInstruction.getOutputResult()
+        GridTableResults results = (GridTableResults) teamInstruction.getOutputResult()
         println results
         assert results != null
         assert results.getCell("@zoom/wtf", "Calc[Avg]") == "0.68"

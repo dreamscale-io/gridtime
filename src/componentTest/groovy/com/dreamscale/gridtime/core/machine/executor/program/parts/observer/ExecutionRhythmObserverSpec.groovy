@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityType
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
@@ -61,7 +61,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
 
         when:
         executionRhythmObserver.see(window, gridTile)
-        MusicGridResults results = gridTile.playTrack(TrackSetKey.Executions);
+        GridTableResults results = gridTile.playTrack(TrackSetKey.Executions);
         println results
 
         then:

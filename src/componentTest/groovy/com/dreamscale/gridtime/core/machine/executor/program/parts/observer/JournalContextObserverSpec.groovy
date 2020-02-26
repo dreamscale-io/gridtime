@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
@@ -59,7 +59,7 @@ public class JournalContextObserverSpec extends Specification {
 
         torchieState.getActiveTile().finishAfterLoad()
 
-        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
+        GridTableResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:
@@ -100,7 +100,7 @@ public class JournalContextObserverSpec extends Specification {
 
         when:
         journalContextObserver.see(nextWindow, torchieState.getActiveTile())
-        MusicGridResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
+        GridTableResults tileOutput = torchieState.getActiveTile().playTrack(TrackSetKey.WorkContext)
         print tileOutput
 
         then:

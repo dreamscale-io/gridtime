@@ -13,8 +13,8 @@ import java.util.Set;
 
 public enum CmdType implements FeatureType {
 
-    PLAY_TRACK("play", "/track/{trackName}", MusicGridResults.class),
-    PLAY_BEAT("play", "/beat/{beatNumber}", MusicGridResults.class),
+    PLAY_TRACK("play", "/track/{trackName}", GridTableResults.class),
+    PLAY_BEAT("play", "/beat/{beatNumber}", GridTableResults.class),
     PLAY_TILE("play", "/tile/{gridtime}", GridTileResults.class),
 
     GOTO_TILE("goto", "/tile/{gridtime}", GridTileResults.class),

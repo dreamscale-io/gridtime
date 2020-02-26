@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
@@ -63,7 +63,7 @@ public class WTFStateObserverSpec extends Specification {
         wtfStateObserver.see(window, gridTile)
         gridTile.finishAfterLoad()
 
-        MusicGridResults tileOutput = gridTile.playTrack(TrackSetKey.IdeaFlow)
+        GridTableResults tileOutput = gridTile.playTrack(TrackSetKey.IdeaFlow)
         print tileOutput
 
         then:

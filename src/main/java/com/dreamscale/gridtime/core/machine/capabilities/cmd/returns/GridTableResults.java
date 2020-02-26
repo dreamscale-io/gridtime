@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 @AllArgsConstructor
-public class MusicGridResults implements Results {
+public class GridTableResults implements Results {
 
     String title;
     List<String> headers;

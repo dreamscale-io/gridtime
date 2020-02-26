@@ -1,13 +1,12 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
-import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.TeamZoomGrid;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +60,7 @@ public abstract class ZoomableTeamLocas<T> implements Locas {
     }
 
     @Override
-    public MusicGridResults playAllTracks() {
+    public GridTableResults playAllTracks() {
         return teamZoomGrid.playAllTracks();
     }
 

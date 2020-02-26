@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 public class CircuitMonitor {
 
-    private UUID torchieId;
+    private UUID workerId;
     private LocalDateTime jobStartTime;
     private LocalDateTime lastStatusUpdate;
 
@@ -20,8 +20,8 @@ public class CircuitMonitor {
 
     private long lastExecutionDuration;
     private long lastQueueDuration;
-    private int instructionsProcessed;
     private int ticksProcessed;
+    private int metronomeTicksProcessed;
 
     private Metronome.TickScope activeTickScopePosition;
     private int queueDepth;
@@ -29,8 +29,8 @@ public class CircuitMonitor {
     private State state;
 
 
-    public CircuitMonitor(UUID torchieId) {
-        this.torchieId = torchieId;
+    public CircuitMonitor(UUID workerId) {
+        this.workerId = workerId;
         this.jobStartTime = LocalDateTime.now();
         this.state = State.Ready;
 
@@ -40,7 +40,7 @@ public class CircuitMonitor {
     public void startInstruction() {
         log.debug("Setting circuit state to busy!");
         state = State.Busy;
-        instructionsProcessed++;
+        ticksProcessed++;
 
         updateStatusTimestamp();
     }
@@ -60,7 +60,7 @@ public class CircuitMonitor {
     public void updateTickPosition(Metronome.TickScope activeTickScopePosition) {
         this.activeTickScopePosition = activeTickScopePosition;
 
-        ticksProcessed++;
+        metronomeTicksProcessed++;
     }
 
     private void updateStatusTimestamp() {

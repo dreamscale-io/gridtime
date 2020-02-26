@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.clock.Metronome
@@ -94,7 +94,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
         when:
         ideaflowAggregatorLocas.runProgram(aggregateTick)
 
-        MusicGridResults results = ideaflowAggregatorLocas.playAllTracks();
+        GridTableResults results = ideaflowAggregatorLocas.playAllTracks();
         println results
 
         then:

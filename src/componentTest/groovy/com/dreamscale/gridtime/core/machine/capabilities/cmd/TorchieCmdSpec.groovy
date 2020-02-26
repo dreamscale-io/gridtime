@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.domain.member.json.Member
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
 import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkPile
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
@@ -83,7 +83,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().finishAfterLoad()
 
         when:
-        MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.IdeaFlow)
+        GridTableResults trackOutput = cmd.playTrack(TrackSetKey.IdeaFlow)
         print trackOutput;
 
         then:
@@ -138,7 +138,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().finishAfterLoad()
 
         when:
-        MusicGridResults trackOutput = cmd.playTrack(TrackSetKey.Navigations)
+        GridTableResults trackOutput = cmd.playTrack(TrackSetKey.Navigations)
         print trackOutput;
 
         then:
@@ -231,7 +231,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().finishAfterLoad()
 
         when:
-        MusicGridResults firstTile = cmd.playTile()
+        GridTableResults firstTile = cmd.playTile()
         print firstTile;
 
         cmd.nextTile();
@@ -240,7 +240,7 @@ class TorchieCmdSpec extends Specification {
                 new ExecutionEvent(5, time2.plusMinutes(20), Duration.ofSeconds(5), "JUnit", -2))
         torchieState.getActiveTile().finishAfterLoad()
 
-        MusicGridResults secondTile = cmd.playTile()
+        GridTableResults secondTile = cmd.playTile()
         print secondTile;
 
         then:
@@ -267,7 +267,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().finishAfterLoad()
 
         when:
-        MusicGridResults firstTile = cmd.playTile()
+        GridTableResults firstTile = cmd.playTile()
         print firstTile;
 
         cmd.nextTile();
@@ -275,7 +275,7 @@ class TorchieCmdSpec extends Specification {
         torchieState.getActiveTile().clearWTF(time3.plusMinutes(20), FinishTypeTag.DoItLater)
         torchieState.getActiveTile().finishAfterLoad()
 
-        MusicGridResults secondTile = cmd.playTile()
+        GridTableResults secondTile = cmd.playTile()
         print secondTile
 
         then:

@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.monitor;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.RefreshDashboardTick;
@@ -67,11 +67,11 @@ public class CircuitActivityDashboard {
         dashboard.update(MonitorType.TORCHIE_WORKER, createSummary(MonitorType.TORCHIE_WORKER));
     }
 
-    private CircuitActivitySummary createSummary(MonitorType monitorType) {
+    private CircuitActivitySummaryRow createSummary(MonitorType monitorType) {
 
         Map<UUID, CircuitMonitor> monitorMap = getCircuitMonitorMap(monitorType);
 
-        CircuitActivitySummary summary = new CircuitActivitySummary();
+        CircuitActivitySummaryRow summary = new CircuitActivitySummaryRow();
 
         for (CircuitMonitor monitor : monitorMap.values()) {
 
@@ -87,12 +87,12 @@ public class CircuitActivityDashboard {
 
 
     private class Dashboard {
-        CircuitActivitySummary evictedSystemActivity = new CircuitActivitySummary();
-        CircuitActivitySummary evictedTorchieActivity = new CircuitActivitySummary();
+        CircuitActivitySummaryRow evictedSystemActivity = new CircuitActivitySummaryRow();
+        CircuitActivitySummaryRow evictedTorchieActivity = new CircuitActivitySummaryRow();
 
-        CircuitActivitySummary activeSystemActivity = new CircuitActivitySummary();
-        CircuitActivitySummary activePlexerActivity = new CircuitActivitySummary();
-        CircuitActivitySummary activeTorchieActivity = new CircuitActivitySummary();
+        CircuitActivitySummaryRow activeSystemActivity = new CircuitActivitySummaryRow();
+        CircuitActivitySummaryRow activePlexerActivity = new CircuitActivitySummaryRow();
+        CircuitActivitySummaryRow activeTorchieActivity = new CircuitActivitySummaryRow();
 
         void updateEvicted(MonitorType monitorType, CircuitMonitor evictedMonitor) {
             if (monitorType == MonitorType.TORCHIE_WORKER) {
@@ -102,7 +102,7 @@ public class CircuitActivityDashboard {
             }
         }
 
-        void update(MonitorType monitorType, CircuitActivitySummary activeSummary) {
+        void update(MonitorType monitorType, CircuitActivitySummaryRow activeSummary) {
 
             if (monitorType == MonitorType.TORCHIE_WORKER) {
                 activeTorchieActivity = activeSummary;
@@ -113,20 +113,50 @@ public class CircuitActivityDashboard {
             }
          }
 
-         MusicGridResults toRows() {
+         GridTableResults toSummaryGridTableResults() {
              List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
              rowsOfPaddedCells.add(activeSystemActivity.toRow("@proc/system.now"));
              rowsOfPaddedCells.add(evictedSystemActivity.toRow("@proc/system.done"));
 
-             rowsOfPaddedCells.add(activePlexerActivity.toRow("@proc/plexer"));
+             rowsOfPaddedCells.add(activePlexerActivity.toRow("@proc/plexer.now"));
 
              rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
              rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
 
-             return new MusicGridResults("Circuit Dashboard", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+             return new GridTableResults("Gridtime Circuit Activity Summary", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
 
          }
+
+        GridTableResults toTorchieTopGridTableResults() {
+            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+
+            //so this one, we've gotta go back, and create records for each circuit monitor, so I should have another class
+
+            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
+            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
+
+            return new GridTableResults("Gridtime Torchie Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+
+        }
+
+        GridTableResults toPlexerTopGridTableResults() {
+            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+
+            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
+            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
+
+            return new GridTableResults("Gridtime Plexer Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+        }
+
+        GridTableResults toSystemTopGridTableResults() {
+            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+
+            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
+            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
+
+            return new GridTableResults("Gridtime System Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+        }
 
     }
 }

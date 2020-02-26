@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.instructions;
 
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +18,7 @@ public class PlayTrack extends TickInstructions {
 
     @Override
     protected void executeInstruction() throws InterruptedException {
-        MusicGridResults results = this.torchieState.getActiveTile().playTrack(trackToPlay);
+        GridTableResults results = this.torchieState.getActiveTile().playTrack(trackToPlay);
         appendOutputResults(results);
     }
 

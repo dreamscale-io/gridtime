@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CircuitActivitySummary {
+public class CircuitActivitySummaryRow {
 
     private int numberWorkers;
 
@@ -27,7 +27,7 @@ public class CircuitActivitySummary {
 
     public void aggregateMonitor(CircuitMonitor circuitMonitor) {
 
-        ticksProcessed += circuitMonitor.getTicksProcessed();
+        ticksProcessed += circuitMonitor.getMetronomeTicksProcessed();
 
         lastUpdated = maxDate(lastUpdated, circuitMonitor.getLastStatusUpdate());
 
@@ -42,7 +42,7 @@ public class CircuitActivitySummary {
         numberWorkers++;
     }
 
-    public void aggregate(CircuitActivitySummary activitySummary) {
+    public void aggregate(CircuitActivitySummaryRow activitySummary) {
         ticksProcessed += activitySummary.getTicksProcessed();
 
         lastUpdated = maxDate(lastUpdated, activitySummary.getLastUpdated());
@@ -96,9 +96,9 @@ public class CircuitActivitySummary {
     }
 
 
-    public CircuitActivitySummary clone() {
+    public CircuitActivitySummaryRow clone() {
         try {
-            return (CircuitActivitySummary) super.clone();
+            return (CircuitActivitySummaryRow) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

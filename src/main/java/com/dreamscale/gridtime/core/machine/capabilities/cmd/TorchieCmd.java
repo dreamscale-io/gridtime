@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.capabilities.cmd;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.Torchie;
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.executor.worker.LiveQueue;
@@ -59,18 +59,18 @@ public class TorchieCmd {
         runInstructionAndWaitTilDone(instructions);
     }
 
-    public MusicGridResults playTile() {
+    public GridTableResults playTile() {
         TickInstructions instructions = torchie.getInstructionsBuilder().playTile();
         runInstructionAndWaitTilDone(instructions);
 
-        return (MusicGridResults) instructions.getOutputResult();
+        return (GridTableResults) instructions.getOutputResult();
     }
 
-    public MusicGridResults playTrack(TrackSetKey trackSetName) {
+    public GridTableResults playTrack(TrackSetKey trackSetName) {
         TickInstructions instructions = torchie.getInstructionsBuilder().playTrack(trackSetName);
         runInstructionAndWaitTilDone(instructions);
 
-        return (MusicGridResults) instructions.getOutputResult();
+        return (GridTableResults) instructions.getOutputResult();
     }
 
     public void haltProgram() {

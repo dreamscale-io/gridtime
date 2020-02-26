@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.tile;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
@@ -234,11 +234,11 @@ public class GridTile {
         return musicGrid.getAllFeatures();
     }
 
-    public MusicGridResults playAllTracks() {
+    public GridTableResults playAllTracks() {
         return musicGrid.playAllTracks();
     }
 
-    public MusicGridResults playTrack(TrackSetKey trackToPlay) {
+    public GridTableResults playTrack(TrackSetKey trackToPlay) {
         return musicGrid.playTrack(trackToPlay);
     }
 

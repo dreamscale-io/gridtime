@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.grid;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.MusicGridResults;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
@@ -104,11 +104,11 @@ public class ZoomGrid implements IMusicGrid {
         return exportedRows;
     }
 
-    public MusicGridResults playAllTracks() {
+    public GridTableResults playAllTracks() {
         return toMusicGridResults(exportedRows);
     }
 
-    private MusicGridResults toMusicGridResults(List<GridRow> gridRows) {
+    private GridTableResults toMusicGridResults(List<GridRow> gridRows) {
 
         List<String> headerRow = new ArrayList<>();
         List<List<String>> valueRows = new ArrayList<>();
@@ -123,7 +123,7 @@ public class ZoomGrid implements IMusicGrid {
             }
         }
 
-        return new MusicGridResults(groupTitle, headerRow, valueRows);
+        return new GridTableResults(groupTitle, headerRow, valueRows);
     }
 
     private void exportGridRows() {

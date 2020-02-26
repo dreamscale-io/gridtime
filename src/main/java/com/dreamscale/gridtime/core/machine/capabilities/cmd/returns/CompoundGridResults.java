@@ -1,10 +1,7 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd.returns;
 
-import com.dreamscale.gridtime.core.machine.memory.grid.ZoomGrid;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +11,7 @@ import java.util.List;
 public class CompoundGridResults implements Results {
 
     String title;
-    List<MusicGridResults> gridResultGroups;
+    List<GridTableResults> gridResultGroups;
 
     public CompoundGridResults(String title) {
         this.title = title;
@@ -25,7 +22,7 @@ public class CompoundGridResults implements Results {
         return gridResultGroups.size();
     }
 
-    public MusicGridResults getResultGroup(int index) {
+    public GridTableResults getResultGroup(int index) {
         return gridResultGroups.get(index);
     }
 
@@ -37,7 +34,7 @@ public class CompoundGridResults implements Results {
 
         for (int i = 0; i < gridResultGroups.size(); i++) {
 
-            MusicGridResults group = gridResultGroups.get(i);
+            GridTableResults group = gridResultGroups.get(i);
             gridOutput += group.toDisplayString();
 
             if (i < gridResultGroups.size() - 1) {
@@ -53,7 +50,7 @@ public class CompoundGridResults implements Results {
         return toDisplayString();
     }
 
-    public void addGrid(MusicGridResults grid) {
+    public void addGrid(GridTableResults grid) {
         gridResultGroups.add(grid);
     }
 }
