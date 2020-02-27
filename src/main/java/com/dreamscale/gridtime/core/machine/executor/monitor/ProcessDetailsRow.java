@@ -79,9 +79,9 @@ public class ProcessDetailsRow {
         row.add(CellFormat.toRightSizedCell("LastUpdate", 10));
         row.add(CellFormat.toRightSizedCell("Ticks", 5));
         row.add(CellFormat.toRightSizedCell("Metronome", 5));
-        row.add(CellFormat.toRightSizedCell("Gridtime", 7));
-        row.add(CellFormat.toRightSizedCell("ExecSeconds", 10));
-        row.add(CellFormat.toRightSizedCell("QSeconds", 10));
+        row.add(CellFormat.toRightSizedCell("Cursor", 7));
+        row.add(CellFormat.toRightSizedCell("TotalExec", 10));
+        row.add(CellFormat.toRightSizedCell("TotalQ", 10));
         row.add(CellFormat.toRightSizedCell("ExecMax", 7));
         row.add(CellFormat.toRightSizedCell("ExecAvg", 7));
         row.add(CellFormat.toRightSizedCell("QAvg", 5));
