@@ -73,17 +73,17 @@ public class ProcessDetailsRow {
     List<String> toHeaderRow() {
         List<String> row = new ArrayList<>();
 
-        row.add(CellFormat.toRightSizedCell("", 10));
+        row.add(CellFormat.toRightSizedCell("", 14));
         row.add(CellFormat.toRightSizedCell("ID", 8));
         row.add(CellFormat.toRightSizedCell("StartedOn", 10));
         row.add(CellFormat.toRightSizedCell("LastUpdate", 10));
-        row.add(CellFormat.toRightSizedCell("Ticks", 5));
-        row.add(CellFormat.toRightSizedCell("Metronome", 5));
-        row.add(CellFormat.toRightSizedCell("Cursor", 7));
+        row.add(CellFormat.toRightSizedCell("Metronome", 7));
+        row.add(CellFormat.toRightSizedCell("Ticks", 7));
+        row.add(CellFormat.toRightSizedCell("Cursor", 10));
         row.add(CellFormat.toRightSizedCell("TotalExec", 10));
         row.add(CellFormat.toRightSizedCell("TotalQ", 10));
-        row.add(CellFormat.toRightSizedCell("ExecMax", 7));
-        row.add(CellFormat.toRightSizedCell("ExecAvg", 7));
+        row.add(CellFormat.toRightSizedCell("ExecMax", 5));
+        row.add(CellFormat.toRightSizedCell("ExecAvg", 5));
         row.add(CellFormat.toRightSizedCell("QAvg", 5));
         row.add(CellFormat.toRightSizedCell("QMax", 5));
         row.add(CellFormat.toRightSizedCell("QDepth", 5));
@@ -94,13 +94,13 @@ public class ProcessDetailsRow {
     List<String> toRow(String rowKey) {
         List<String> row = new ArrayList<>();
 
-        row.add(CellFormat.toRightSizedCell(rowKey, 10));
-        row.add(CellFormat.toCell(workerId, 7));
-        row.add(CellFormat.toCell(jobStartTime, 5));
+        row.add(CellFormat.toRightSizedCell(rowKey, 14));
+        row.add(CellFormat.toCell(workerId, 8));
+        row.add(CellFormat.toCell(jobStartTime, 10));
         row.add(CellFormat.toCell(lastStatusUpdate, 10));
-        row.add(CellFormat.toCell(ticksProcessed, 7));
         row.add(CellFormat.toCell(metronomeTicksProcessed, 7));
-        row.add(CellFormat.toCell(gridtime, 5));
+        row.add(CellFormat.toCell(ticksProcessed, 7));
+        row.add(CellFormat.toCell(gridtime, 10));
 
         row.add(CellFormat.toDurationCell(totalExec, 10));
         row.add(CellFormat.toDurationCell(totalQueue, 10));
