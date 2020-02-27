@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.monitor;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class ProcessDetailsRow {
 
 
+    private final ProcessType processType;
     private UUID workerId;
 
     private LocalDateTime jobStartTime;
@@ -41,6 +43,8 @@ public class ProcessDetailsRow {
 
 
     ProcessDetailsRow(CircuitMonitor circuitMonitor) {
+
+        processType = circuitMonitor.getProcessType();
         workerId = circuitMonitor.getWorkerId();
 
         jobStartTime = circuitMonitor.getJobStartTime();
@@ -74,6 +78,7 @@ public class ProcessDetailsRow {
         List<String> row = new ArrayList<>();
 
         row.add(CellFormat.toRightSizedCell("", 14));
+        row.add(CellFormat.toRightSizedCell("Type", 8));
         row.add(CellFormat.toRightSizedCell("ID", 8));
         row.add(CellFormat.toRightSizedCell("StartedOn", 10));
         row.add(CellFormat.toRightSizedCell("LastUpdate", 10));
@@ -95,6 +100,7 @@ public class ProcessDetailsRow {
         List<String> row = new ArrayList<>();
 
         row.add(CellFormat.toRightSizedCell(rowKey, 14));
+        row.add(CellFormat.toCell(processType, 8));
         row.add(CellFormat.toCell(workerId, 8));
         row.add(CellFormat.toCell(jobStartTime, 10));
         row.add(CellFormat.toCell(lastStatusUpdate, 10));

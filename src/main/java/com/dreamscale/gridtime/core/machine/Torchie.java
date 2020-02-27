@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
@@ -32,7 +33,7 @@ public class Torchie implements Worker<TickInstructions> {
 
         this.torchieState = torchieState;
 
-        this.circuitMonitor = new CircuitMonitor(torchieId);
+        this.circuitMonitor = new CircuitMonitor(ProcessType.Torchie, torchieId);
         this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, program);
     }
 

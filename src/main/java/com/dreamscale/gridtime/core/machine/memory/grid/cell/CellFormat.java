@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.cell;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
@@ -15,6 +16,10 @@ public class CellFormat {
 
     private static final String TRUNCATED_INDICATOR = "*";
 
+
+    public static String toCell(ProcessType value, int cellSize) {
+        return toRightSizedCell(toCellValue(value), cellSize);
+    }
 
     public static String toCell(GeometryClock.GridTime value, int cellSize) {
         return toRightSizedCell(toCellValue(value), cellSize);
@@ -53,6 +58,9 @@ public class CellFormat {
         return value.name();
     }
 
+    public static String toCellValue(ProcessType value) {
+        return value.name();
+    }
 
     public static String toCellValue(GeometryClock.GridTime value) {
         return value.toDisplayString();

@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
@@ -75,7 +76,7 @@ public class SystemWorkPile implements WorkPile {
                 if (workerClaim != null) {
                     Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(now);
 
-                    CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
+                    CircuitMonitor circuitMonitor = new CircuitMonitor(ProcessType.Calendar, workerId);
                     IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, calendarProgram);
 
                     circuit.notifyWhenProgramDone(new SystemJobDoneTrigger(workerClaim));

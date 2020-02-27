@@ -11,6 +11,8 @@ import java.util.UUID;
 @Data
 public class CircuitMonitor {
 
+    private ProcessType processType;
+
     private UUID workerId;
     private LocalDateTime jobStartTime;
     private LocalDateTime lastStatusUpdate;
@@ -32,7 +34,8 @@ public class CircuitMonitor {
     private State state;
 
 
-    public CircuitMonitor(UUID workerId) {
+    public CircuitMonitor(ProcessType processType, UUID workerId) {
+        this.processType = processType;
         this.workerId = workerId;
         this.jobStartTime = LocalDateTime.now();
         this.state = State.Ready;

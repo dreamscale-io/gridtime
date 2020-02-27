@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -48,7 +49,7 @@ public class PlexerWorkPile implements WorkPile {
 
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
-            CircuitMonitor circuitMonitor = new CircuitMonitor(workerId);
+            CircuitMonitor circuitMonitor = new CircuitMonitor(ProcessType.Plexer, workerId);
             IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
 
             circuitActivityDashboard.addMonitor(MonitorType.PLEXER_WORKER, workerId, circuitMonitor);
