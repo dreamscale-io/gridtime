@@ -14,6 +14,7 @@ import java.util.UUID;
 @Data
 public class ProcessDetailsRow {
 
+
     private UUID workerId;
 
     private LocalDateTime jobStartTime;
@@ -32,6 +33,10 @@ public class ProcessDetailsRow {
     private double queueTimeAvg;
     private double queueTimeMax;
 
+    private long totalExec;
+    private long totalQueue;
+
+
     private int queueDepth;
 
 
@@ -49,13 +54,20 @@ public class ProcessDetailsRow {
             gridtime = circuitMonitor.getActiveTickScopePosition().getFrom();
         }
 
-        executionTimeAvg = circuitMonitor.getExecutionTimeMetric().getAvg();
-        executionTimeMax = circuitMonitor.getExecutionTimeMetric().getMax();
+        executionTimeAvg = circuitMonitor.getRecentExecutionTimeMetric().getAvg();
+        executionTimeMax = circuitMonitor.getRecentExecutionTimeMetric().getMax();
 
-        queueTimeAvg = circuitMonitor.getQueueTimeMetric().getAvg();
-        queueTimeAvg = circuitMonitor.getQueueTimeMetric().getMax();
+        queueTimeAvg = circuitMonitor.getRecentQueueTimeMetric().getAvg();
+        queueTimeAvg = circuitMonitor.getRecentQueueTimeMetric().getMax();
+
+        totalExec = circuitMonitor.getTotalExecutionTime();
+        totalQueue = circuitMonitor.getTotalQueueTime();
 
         queueDepth = circuitMonitor.getQueueDepth();
+    }
+
+    public String getProcessId() {
+        return CellFormat.toCellValue(workerId);
     }
 
     List<String> toHeaderRow() {
@@ -67,8 +79,9 @@ public class ProcessDetailsRow {
         row.add(CellFormat.toRightSizedCell("LastUpdate", 10));
         row.add(CellFormat.toRightSizedCell("Ticks", 5));
         row.add(CellFormat.toRightSizedCell("Metronome", 5));
-        row.add(CellFormat.toRightSizedCell("Zoom", 10));
-        row.add(CellFormat.toRightSizedCell("Time", 7));
+        row.add(CellFormat.toRightSizedCell("Gridtime", 7));
+        row.add(CellFormat.toRightSizedCell("ExecSeconds", 10));
+        row.add(CellFormat.toRightSizedCell("QSeconds", 10));
         row.add(CellFormat.toRightSizedCell("ExecMax", 7));
         row.add(CellFormat.toRightSizedCell("ExecAvg", 7));
         row.add(CellFormat.toRightSizedCell("QAvg", 5));
@@ -87,8 +100,10 @@ public class ProcessDetailsRow {
         row.add(CellFormat.toCell(lastStatusUpdate, 10));
         row.add(CellFormat.toCell(ticksProcessed, 7));
         row.add(CellFormat.toCell(metronomeTicksProcessed, 7));
-        row.add(CellFormat.toCell(zoomLevel, 5));
         row.add(CellFormat.toCell(gridtime, 5));
+
+        row.add(CellFormat.toDurationCell(totalExec, 10));
+        row.add(CellFormat.toDurationCell(totalQueue, 10));
         row.add(CellFormat.toCell(executionTimeAvg, 5));
         row.add(CellFormat.toCell(executionTimeMax, 5));
         row.add(CellFormat.toCell(queueTimeAvg, 5));
@@ -98,8 +113,6 @@ public class ProcessDetailsRow {
         return row;
     }
 
-
-
     public ProcessDetailsRow clone() {
         try {
             return (ProcessDetailsRow) super.clone();
@@ -108,7 +121,6 @@ public class ProcessDetailsRow {
         }
         return null;
     }
-
 
     private LocalDateTime maxDate(LocalDateTime date1, LocalDateTime date2) {
         if (date1 == null) {
@@ -124,6 +136,7 @@ public class ProcessDetailsRow {
             return date2;
         }
     }
+
 
 
 }

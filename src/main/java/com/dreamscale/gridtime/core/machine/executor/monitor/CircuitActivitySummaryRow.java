@@ -31,11 +31,11 @@ public class CircuitActivitySummaryRow {
 
         lastUpdated = maxDate(lastUpdated, circuitMonitor.getLastStatusUpdate());
 
-        executionTimeAvg = ((numberWorkers * executionTimeAvg ) + circuitMonitor.getExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
-        executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getExecutionTimeMetric().getMax());
+        executionTimeAvg = ((numberWorkers * executionTimeAvg ) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
+        executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getRecentExecutionTimeMetric().getMax());
 
-        queueTimeAvg = ((numberWorkers * queueTimeAvg ) + circuitMonitor.getExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
-        queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getQueueTimeMetric().getMax());
+        queueTimeAvg = ((numberWorkers * queueTimeAvg ) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
+        queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMax());
 
         queueDepth += circuitMonitor.getQueueDepth();
 

@@ -15,13 +15,16 @@ public class CircuitMonitor {
     private LocalDateTime jobStartTime;
     private LocalDateTime lastStatusUpdate;
 
-    private WindowMetric executionTimeMetric = new WindowMetric(10);
-    private WindowMetric queueTimeMetric = new WindowMetric(10);
+    private WindowMetric recentExecutionTimeMetric = new WindowMetric(10);
+    private WindowMetric recentQueueTimeMetric = new WindowMetric(10);
 
     private long lastExecutionDuration;
     private long lastQueueDuration;
     private int ticksProcessed;
     private int metronomeTicksProcessed;
+
+    private long totalExecutionTime;
+    private long totalQueueTime;
 
     private Metronome.TickScope activeTickScopePosition;
     private int queueDepth;
@@ -51,13 +54,16 @@ public class CircuitMonitor {
         lastQueueDuration = queueDurationMillis;
         lastExecutionDuration = executionDurationMillis;
 
-        executionTimeMetric.addSample(lastExecutionDuration);
-        queueTimeMetric.addSample(lastQueueDuration);
+        totalExecutionTime += lastExecutionDuration;
+        totalQueueTime += lastQueueDuration;
+
+        recentExecutionTimeMetric.addSample(lastExecutionDuration);
+        recentQueueTimeMetric.addSample(lastQueueDuration);
 
         updateStatusTimestamp();
     }
 
-    public void updateTickPosition(Metronome.TickScope activeTickScopePosition) {
+    public void updateMetronomeTickPosition(Metronome.TickScope activeTickScopePosition) {
         this.activeTickScopePosition = activeTickScopePosition;
 
         metronomeTicksProcessed++;

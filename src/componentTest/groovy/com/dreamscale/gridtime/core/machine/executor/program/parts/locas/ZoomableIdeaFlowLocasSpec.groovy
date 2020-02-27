@@ -71,7 +71,6 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
 
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
-
     }
 
 

@@ -37,7 +37,6 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
         return whatsNextWheel.size();
     }
 
-
     @Override
     public TickInstructions whatsNext() {
 

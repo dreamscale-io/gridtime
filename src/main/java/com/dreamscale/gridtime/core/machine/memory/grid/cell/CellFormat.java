@@ -15,6 +15,7 @@ public class CellFormat {
 
     private static final String TRUNCATED_INDICATOR = "*";
 
+
     public static String toCell(GeometryClock.GridTime value, int cellSize) {
         return toRightSizedCell(toCellValue(value), cellSize);
     }
@@ -39,6 +40,14 @@ public class CellFormat {
         return toRightSizedCell(toCellValue(value), cellSize);
     }
 
+
+    public static String toDurationCell(long totalMillis, int cellSize) {
+        return toRightSizedCell(toDurationCellValue(totalMillis), cellSize);
+    }
+
+    private static String toDurationCellValue(long totalMillis) {
+        return Long.toString(Math.round(totalMillis / 1000.0));
+    }
 
     public static String toCellValue(ZoomLevel value) {
         return value.name();
@@ -76,4 +85,5 @@ public class CellFormat {
         }
         return fittedContent;
     }
+
 }

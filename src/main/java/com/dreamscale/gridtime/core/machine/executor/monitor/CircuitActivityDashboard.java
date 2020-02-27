@@ -7,10 +7,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.Refres
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class CircuitActivityDashboard {
@@ -87,14 +84,14 @@ public class CircuitActivityDashboard {
 
 
     private class Dashboard {
-        CircuitActivitySummaryRow evictedSystemActivity = new CircuitActivitySummaryRow();
-        CircuitActivitySummaryRow evictedTorchieActivity = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow evictedSystemActivity = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow evictedTorchieActivity = new CircuitActivitySummaryRow();
 
-        CircuitActivitySummaryRow activeSystemActivity = new CircuitActivitySummaryRow();
-        CircuitActivitySummaryRow activePlexerActivity = new CircuitActivitySummaryRow();
-        CircuitActivitySummaryRow activeTorchieActivity = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow activeSystemActivity = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow activePlexerActivity = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow activeTorchieActivity = new CircuitActivitySummaryRow();
 
-        void updateEvicted(MonitorType monitorType, CircuitMonitor evictedMonitor) {
+        public void updateEvicted(MonitorType monitorType, CircuitMonitor evictedMonitor) {
             if (monitorType == MonitorType.TORCHIE_WORKER) {
                 evictedTorchieActivity.aggregateMonitor(evictedMonitor);
             } else if (monitorType == MonitorType.SYSTEM_WORKER) {
@@ -102,7 +99,7 @@ public class CircuitActivityDashboard {
             }
         }
 
-        void update(MonitorType monitorType, CircuitActivitySummaryRow activeSummary) {
+        public void update(MonitorType monitorType, CircuitActivitySummaryRow activeSummary) {
 
             if (monitorType == MonitorType.TORCHIE_WORKER) {
                 activeTorchieActivity = activeSummary;
@@ -113,7 +110,7 @@ public class CircuitActivityDashboard {
             }
          }
 
-         GridTableResults toSummaryGridTableResults() {
+         public GridTableResults toSummaryGridTableResults() {
              List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
              rowsOfPaddedCells.add(activeSystemActivity.toRow("@proc/system.now"));
@@ -124,39 +121,54 @@ public class CircuitActivityDashboard {
              rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
              rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
 
-             return new GridTableResults("Gridtime Circuit Activity Summary", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+             return new GridTableResults("Gridtime Activity Summary", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
 
          }
 
-        GridTableResults toTorchieTopGridTableResults() {
+        public GridTableResults toPlexerTopGridTableResults() {
+            return toProcessTopTable("Gridtime Plexer Activity", plexerMonitors.values());
+        }
+
+        public GridTableResults toSystemTopGridTableResults() {
+            return toProcessTopTable("Gridtime System Activity", systemMonitors.values());
+        }
+
+        public GridTableResults toTorchieTopGridTableResults() {
+            return toProcessTopTable("Gridtime Torchie Activity", torchieMonitors.values());
+        }
+
+        private GridTableResults toProcessTopTable(String title, Collection<CircuitMonitor> monitors) {
             List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
             //so this one, we've gotta go back, and create records for each circuit monitor, so I should have another class
 
-            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
-            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
+            List<ProcessDetailsRow> processRows = createProcessRowsSortedByTop(monitors);
 
-            return new GridTableResults("Gridtime Torchie Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+            List<String> headers = Collections.emptyList();
 
+            if (processRows.size() > 0) {
+                for (ProcessDetailsRow processRow : processRows) {
+                    rowsOfPaddedCells.add(processRow.toRow("@proc/"+processRow.getProcessId()));
+                }
+                headers = processRows.get(0).toHeaderRow();
+            }
+
+            return new GridTableResults(title, headers, rowsOfPaddedCells);
         }
 
-        GridTableResults toPlexerTopGridTableResults() {
-            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+        private List<ProcessDetailsRow> createProcessRowsSortedByTop(Collection<CircuitMonitor> monitors) {
+            List<ProcessDetailsRow> processRows = new ArrayList<>();
 
-            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
-            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
+            for (CircuitMonitor monitor: monitors) {
+                processRows.add(new ProcessDetailsRow(monitor));
+            }
 
-            return new GridTableResults("Gridtime Plexer Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
+            processRows.sort((proc1, proc2) -> Integer.compare(proc2.getTicksProcessed(), proc1.getTicksProcessed()));
+
+            return processRows;
         }
 
-        GridTableResults toSystemTopGridTableResults() {
-            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
-            rowsOfPaddedCells.add(activeTorchieActivity.toRow("@proc/torchie.now"));
-            rowsOfPaddedCells.add(evictedTorchieActivity.toRow("@proc/torchie.done"));
-
-            return new GridTableResults("Gridtime System Circuit Activity", activeTorchieActivity.toHeaderRow(), rowsOfPaddedCells);
-        }
 
     }
 }
