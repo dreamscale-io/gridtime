@@ -9,6 +9,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.now.TwilightOrangeM
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
+import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
@@ -16,12 +17,15 @@ import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+@Slf4j
 public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     private Program program;
+    private Program nextProgram;
     private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
 
     private final CircuitMonitor circuitMonitor;
@@ -43,6 +47,10 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     private Wire outputStreamEventWire;
 
+    public IdeaFlowCircuit(CircuitMonitor circuitMonitor) {
+        this(circuitMonitor, null);
+    }
+
     public IdeaFlowCircuit(CircuitMonitor circuitMonitor, Program program) {
         this.circuitMonitor = circuitMonitor;
         this.program = program;
@@ -62,6 +70,23 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     public void fireTriggersForActiveWaits() {
         //generates instructions for actively firing triggers
+    }
+
+    public void runProgram(Program program) {
+        if (program == null) {
+            this.program = program;
+            log.debug("Running program: "+program.getName());
+        } else if (nextProgram == null) {
+            log.debug("Assigning next program: "+program.getName());
+
+            this.nextProgram = program;
+        } else {
+            throw new RuntimeException("Can't start program while another is in progress. There is a nextProgram already waiting.");
+        }
+    }
+
+    public boolean isProgramRunning() {
+        return program != null;
     }
 
     public void haltProgram() {
@@ -88,7 +113,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
             nextInstruction = highPriorityInstructionQueue.removeFirst();
         } else if (instructionsToExecuteQueue.size() > 0) {
             nextInstruction = instructionsToExecuteQueue.removeFirst();
-        } else if (!isProgramHalted && !program.isDone()) {
+        } else if (program != null && !isProgramHalted && !program.isDone()) {
 
             program.tick();
 
@@ -103,6 +128,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
         } else {
             fireProgramDoneTriggers();
+            gotoNextProgram();
         }
 
         if (nextInstruction != null) {
@@ -110,13 +136,32 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
             nextInstruction.addTriggerToNotifyList(new EvaluateOutputTrigger());
         }
 
-
-        circuitMonitor.updateQueueDepth(
-                highPriorityInstructionQueue.size() +
-                instructionsToExecuteQueue.size() + program.getInputQueueDepth() );
+        updateQueueDepth();
 
         lastInstruction = nextInstruction;
         return nextInstruction;
+    }
+
+    private void gotoNextProgram() {
+        program = null;
+
+        if (nextProgram != null) {
+            program = nextProgram;
+            nextProgram = null;
+        }
+    }
+
+    private void updateQueueDepth() {
+        int programQueueDepth = 0;
+
+        if (program != null) {
+            programQueueDepth = program.getInputQueueDepth();
+        }
+
+
+        circuitMonitor.updateQueueDepth(
+                highPriorityInstructionQueue.size() +
+                instructionsToExecuteQueue.size() + programQueueDepth );
     }
 
     private List<TickInstructions> getParallelProgramInstructions(Metronome.TickScope activeTickScope) {

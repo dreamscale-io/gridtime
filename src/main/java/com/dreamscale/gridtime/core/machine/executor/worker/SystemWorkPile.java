@@ -6,8 +6,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemJobClaimManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemExclusiveJobClaimManager;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarGeneratorJob;
 import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
@@ -16,6 +16,7 @@ import com.dreamscale.gridtime.core.service.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,10 +29,10 @@ public class SystemWorkPile implements WorkPile {
     private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
-    private GridtimeLockManager gridtimeLockManager;
+    private GridSyncLockManager gridSyncLockManager;
 
     @Autowired
-    private SystemJobClaimManager systemJobClaimManager;
+    private SystemExclusiveJobClaimManager systemExclusiveJobClaimManager;
 
     @Autowired
     private TimeService timeService;
@@ -47,12 +48,34 @@ public class SystemWorkPile implements WorkPile {
 
     private Duration syncInterval = Duration.ofMinutes(20);
 
+
+    private IdeaFlowCircuit calendarProcessCircuit;
+    private IdeaFlowCircuit dashboardProcessCircuit;
+
+    @PostConstruct
+    private void init() {
+        createSystemWorkers();
+    }
+
+    private void createSystemWorkers() {
+        //create one per process type
+
+        UUID calendarWorkerId = UUID.randomUUID();
+
+        CircuitMonitor calendarProcessMonitor = new CircuitMonitor(ProcessType.Calendar, calendarWorkerId);
+        calendarProcessCircuit = new IdeaFlowCircuit(calendarProcessMonitor);
+
+        UUID refreshWorkerId = UUID.randomUUID();
+
+        CircuitMonitor refreshProcessMonitor = new CircuitMonitor(ProcessType.Dashboard, refreshWorkerId);
+        dashboardProcessCircuit = new IdeaFlowCircuit(refreshProcessMonitor);
+
+    }
+
     public void sync() {
         LocalDateTime now = timeService.now();
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
-
-            systemJobClaimManager.cleanUpStaleClaims(now);
 
             //so if I have a job that is running for an hour, how long since my last update?
 
@@ -63,7 +86,11 @@ public class SystemWorkPile implements WorkPile {
             //what if the process died and I've got a stale thing in the DB?
 
 
-            gridtimeLockManager.tryToAcquireSystemJobLock();
+            gridSyncLockManager.tryToAcquireSystemJobSyncLock();
+
+
+            systemExclusiveJobClaimManager.cleanUpStaleClaims(now);
+
 
             //see if I need to be doing any calendar generation, spin up a job if needed.
 
@@ -71,15 +98,18 @@ public class SystemWorkPile implements WorkPile {
 
                 UUID workerId = UUID.randomUUID();
 
-                WorkerClaim workerClaim = systemJobClaimManager.claimIfNotRunning(workerId, calendarGeneratorJob.getJobClaim(now));
+                SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(workerId, calendarGeneratorJob.createJobClaim(now));
 
-                if (workerClaim != null) {
+                if (systemJobClaim != null) {
                     Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(now);
+
+                    calendarProcessCircuit.notifyWhenProgramDone(new SystemJobDoneTrigger(systemJobClaim));
+                    calendarProcessCircuit.runProgram(calendarProgram);
 
                     CircuitMonitor circuitMonitor = new CircuitMonitor(ProcessType.Calendar, workerId);
                     IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, calendarProgram);
 
-                    circuit.notifyWhenProgramDone(new SystemJobDoneTrigger(workerClaim));
+
 
                     circuitActivityDashboard.addMonitor(MonitorType.SYSTEM_WORKER, workerId, circuitMonitor);
 
@@ -88,7 +118,7 @@ public class SystemWorkPile implements WorkPile {
                 }
             }
 
-            gridtimeLockManager.releaseSystemJobLock();
+            gridSyncLockManager.releaseSystemJobLock();
 
         }
     }
@@ -132,22 +162,30 @@ public class SystemWorkPile implements WorkPile {
         return whatsNextWheel.size();
     }
 
+    public void submitWork(ProcessType processType, TickInstructions instruction) {
+        if (processType == ProcessType.Calendar) {
+            calendarProcessCircuit.scheduleHighPriorityInstruction(instruction);
+        }
+        if (processType == ProcessType.Dashboard) {
+            dashboardProcessCircuit.scheduleHighPriorityInstruction(instruction);
+        }
+    }
 
     private class SystemJobDoneTrigger implements NotifyTrigger {
 
-        private final WorkerClaim workerClaim;
+        private final SystemJobClaim systemJobClaim;
 
-        SystemJobDoneTrigger(WorkerClaim workerClaim) {
-            this.workerClaim = workerClaim;
+        SystemJobDoneTrigger(SystemJobClaim systemJobClaim) {
+            this.systemJobClaim = systemJobClaim;
         }
 
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
-           systemJobClaimManager.finishClaim(workerClaim);
+           systemExclusiveJobClaimManager.finishClaim(systemJobClaim);
 
-           circuitActivityDashboard.evictMonitor(MonitorType.SYSTEM_WORKER, workerClaim.getWorkerId());
+           circuitActivityDashboard.evictMonitor(MonitorType.SYSTEM_WORKER, systemJobClaim.getWorkerId());
 
-            whatsNextWheel.evictWorker(workerClaim.getWorkerId());
+            whatsNextWheel.evictWorker(systemJobClaim.getWorkerId());
         }
     }
 

@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface Program {
 
+    String getName();
+
     void tick();
 
     Metronome.TickScope getActiveTick();

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AggregateWorkerProgram implements Program {
+public class AggregatePlexerProgram implements Program {
 
     private final UUID workerId;
 
@@ -27,11 +27,17 @@ public class AggregateWorkerProgram implements Program {
 
     private int latestQueueDepth;
 
-    public AggregateWorkerProgram(UUID workerId, Wire inputWire, LocasFactory locasFactory, FeatureCacheManager featureCacheManager) {
+    public AggregatePlexerProgram(UUID workerId, Wire inputWire, LocasFactory locasFactory, FeatureCacheManager featureCacheManager) {
         this.workerId = workerId;
         this.inputWire = inputWire;
         this.locasFactory = locasFactory;
         this.featureCacheManager = featureCacheManager;
+    }
+
+
+    @Override
+    public String getName() {
+        return "AggregatePlexer";
     }
 
     @Override

@@ -8,6 +8,10 @@ import java.util.List;
 
 public class NoOpProgram implements Program {
 
+    @Override
+    public String getName() {
+        return "NoOp";
+    }
 
     @Override
     public void tick() {

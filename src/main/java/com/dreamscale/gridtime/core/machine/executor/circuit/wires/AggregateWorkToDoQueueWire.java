@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.wires;
 import com.dreamscale.gridtime.core.domain.work.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.service.TimeService;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     private static final Duration DELAY_BEFORE_PROCESSING_PARTIAL_WORK = Duration.ofMinutes(30);
 
     @Autowired
-    private GridtimeLockManager gridtimeLockManager;
+    private GridSyncLockManager gridSyncLockManager;
 
     @Autowired
     private WorkItemToAggregateRepository workItemToAggregateRepository;
@@ -73,7 +73,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
 
         AggregateStreamEvent nextEvent = null;
 
-        gridtimeLockManager.tryToAcquireWorkerExclusiveLock();
+        gridSyncLockManager.tryToAcquirePlexerSyncLock();
 
         WorkToDo workToDo = getNextWorkToDo();
 
@@ -85,7 +85,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
             workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
         }
 
-        gridtimeLockManager.releaseWorkerExclusiveLock();
+        gridSyncLockManager.releasePlexerSyncLock();
 
 
         return nextEvent;

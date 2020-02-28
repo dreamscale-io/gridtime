@@ -45,6 +45,10 @@ public class CalendarGeneratorProgram implements Program {
         this.isInitialized = false;
     }
 
+    @Override
+    public String getName() {
+        return "CalendarGenerator";
+    }
 
     @Override
     public void tick() {

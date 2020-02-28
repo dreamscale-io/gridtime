@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
+import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.worker.*;
@@ -49,23 +50,17 @@ public class GridTimeWorkPile implements WorkPile {
 
         TickInstructions instructions = null;
 
-        //TODO this should submit the work to the systems work thing,
-        // as opposed to running this instruction outside the context of any circuit
+        //TODO create a history table, so all evicted processes, write their process stats, above detail row can be persisted
 
-        //if I've got any sort of system work, should be pushed into the work pile
-        //submitWork, process has a job name, Torchie/Plexer/Calendar/Dashboard
-
-        //create a history table, so all evicted processes, write their process stats, above detail row can be persisted
-
-        //query history table and make grid results, for a certain torchie proc.
+        //TODO query history table and make grid results, for a certain torchie proc.
 
         //once I get the system calendar job done, write an integration test at the engine level
 
-        //create the ability to kill jobs
+        //TODO create the ability to kill jobs
+        
 
         if (circuitActivityDashboard.tickAndCheckIfNeedsRefresh()) {
-            instructions = circuitActivityDashboard.generateRefreshTick();
-            lastInstructionIsTorchie = false;
+            systemWorkPile.submitWork(ProcessType.Dashboard, circuitActivityDashboard.generateRefreshTick());
         }
 
         if (systemWorkPile.hasWork()) {

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class WorkerClaim {
+public class SystemJobClaim {
 
     private UUID workerId;
 }

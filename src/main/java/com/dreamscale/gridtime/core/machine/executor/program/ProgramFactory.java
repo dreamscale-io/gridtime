@@ -41,7 +41,7 @@ public class ProgramFactory {
 
     public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
 
-        TileGeneratorProgram program = new TileGeneratorProgram(torchieId, torchieState, startPosition);
+        SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition);
 
         program.addFlowSourceToPullChain(
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.JOURNAL_FEED),
@@ -79,8 +79,8 @@ public class ProgramFactory {
         return program;
     }
 
-    public AggregateWorkerProgram createAggregateWorkerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
-        return new AggregateWorkerProgram(workerId, workToDoWire, locasFactory, featureCacheManager);
+    public AggregatePlexerProgram createAggregateWorkerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
+        return new AggregatePlexerProgram(workerId, workToDoWire, locasFactory, featureCacheManager);
     }
 
 

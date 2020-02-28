@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-public class TileGeneratorProgram implements Program {
+public class SourceTileGeneratorProgram implements Program {
 
 
     private final List<Flow> pullChain = DefaultCollections.list();
@@ -34,10 +34,15 @@ public class TileGeneratorProgram implements Program {
 
     private final Metronome metronome;
 
-    public TileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
+    public SourceTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
         this.torchieId = torchieId;
         this.torchieState = torchieState;
         this.metronome = new Metronome(startPosition);
+    }
+
+    @Override
+    public String getName() {
+        return "SourceTileGenerator";
     }
 
     public void tick() {

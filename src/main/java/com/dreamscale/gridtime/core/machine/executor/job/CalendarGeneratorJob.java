@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.job;
 
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class CalendarGeneratorJob implements JobCapability {
 
     @Autowired
-    GridtimeLockManager gridtimeLockManager;
+    GridSyncLockManager gridSyncLockManager;
 
     @Autowired
     ProgramFactory programFactory;
@@ -53,7 +53,7 @@ public class CalendarGeneratorJob implements JobCapability {
         return null;
     }
 
-    public Object getJobClaim(LocalDateTime now) {
+    public Object createJobClaim(LocalDateTime now) {
         return null;
     }
 }

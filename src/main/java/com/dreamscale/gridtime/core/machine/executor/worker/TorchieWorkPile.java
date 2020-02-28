@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridtimeLockManager;
+import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
 import com.dreamscale.gridtime.core.service.TimeService;
@@ -35,7 +35,7 @@ public class TorchieWorkPile implements WorkPile {
     private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
-    private GridtimeLockManager gridtimeLockManager;
+    private GridSyncLockManager gridSyncLockManager;
 
     @Autowired
     private TimeService timeService;
@@ -67,13 +67,13 @@ public class TorchieWorkPile implements WorkPile {
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
-            gridtimeLockManager.tryToAcquireTorchieExclusiveLock();
+            gridSyncLockManager.tryToAcquireTorchieSyncLock();
 
             initializeMissingTorchies(now);
             claimTorchiesReadyForProcessing();
             expireZombieTorchies();
 
-            gridtimeLockManager.releaseTorchieExclusiveLock();
+            gridSyncLockManager.releaseTorchieSyncLock();
         }
     }
 
