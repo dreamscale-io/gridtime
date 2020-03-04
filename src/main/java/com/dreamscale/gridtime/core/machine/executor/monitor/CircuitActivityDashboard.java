@@ -47,7 +47,7 @@ public class CircuitActivityDashboard {
     }
 
     private Map<UUID, CircuitMonitor> getCircuitMonitorMap(MonitorType monitorType) {
-        if (monitorType == MonitorType.SYSTEM_WORKER) {
+        if (monitorType == MonitorType.SYS_WORKER) {
             return systemMonitors;
         } else if (monitorType == MonitorType.PLEXER_WORKER) {
             return plexerMonitors;
@@ -59,7 +59,7 @@ public class CircuitActivityDashboard {
 
     public void refreshDashboard() {
 
-        dashboard.update(MonitorType.SYSTEM_WORKER, createSummary(MonitorType.SYSTEM_WORKER));
+        dashboard.update(MonitorType.SYS_WORKER, createSummary(MonitorType.SYS_WORKER));
         dashboard.update(MonitorType.PLEXER_WORKER, createSummary(MonitorType.PLEXER_WORKER));
         dashboard.update(MonitorType.TORCHIE_WORKER, createSummary(MonitorType.TORCHIE_WORKER));
     }
@@ -94,7 +94,7 @@ public class CircuitActivityDashboard {
         public void updateEvicted(MonitorType monitorType, CircuitMonitor evictedMonitor) {
             if (monitorType == MonitorType.TORCHIE_WORKER) {
                 evictedTorchieActivity.aggregateMonitor(evictedMonitor);
-            } else if (monitorType == MonitorType.SYSTEM_WORKER) {
+            } else if (monitorType == MonitorType.SYS_WORKER) {
                 evictedSystemActivity.aggregateMonitor(evictedMonitor);
             }
         }
@@ -105,7 +105,7 @@ public class CircuitActivityDashboard {
                 activeTorchieActivity = activeSummary;
             } else if (monitorType == MonitorType.PLEXER_WORKER) {
                 activePlexerActivity = activeSummary;
-            } else if (monitorType == MonitorType.SYSTEM_WORKER) {
+            } else if (monitorType == MonitorType.SYS_WORKER) {
                 activeSystemActivity = activeSummary;
             }
          }
@@ -113,8 +113,8 @@ public class CircuitActivityDashboard {
          public GridTableResults toSummaryGridTableResults() {
              List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
-             rowsOfPaddedCells.add(activeSystemActivity.toRow("@proc/system.now"));
-             rowsOfPaddedCells.add(evictedSystemActivity.toRow("@proc/system.done"));
+             rowsOfPaddedCells.add(activeSystemActivity.toRow("@proc/sys.now"));
+             rowsOfPaddedCells.add(evictedSystemActivity.toRow("@proc/sys.done"));
 
              rowsOfPaddedCells.add(activePlexerActivity.toRow("@proc/plexer.now"));
 
@@ -167,8 +167,6 @@ public class CircuitActivityDashboard {
 
             return processRows;
         }
-
-
 
     }
 }

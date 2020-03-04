@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.machine.capabilities.cmd;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
-import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.executor.worker.LiveQueue;
 import com.dreamscale.gridtime.core.machine.memory.type.CmdType;
@@ -23,8 +23,8 @@ public class TorchieCmd {
 
     private boolean syncCommandInProgress;
 
-    private final NotifyTrigger NOTIFY_WHEN_DONE;
-    private final NotifyTrigger LOG_EXECUTION_DONE;
+    private final NotifyDoneTrigger NOTIFY_WHEN_DONE;
+    private final NotifyDoneTrigger LOG_EXECUTION_DONE;
 
     private static final int MAX_WAIT_LOOPS = 10;
 
@@ -88,7 +88,7 @@ public class TorchieCmd {
 
         syncCommandInProgress = true;
 
-        instructions.addTriggerToNotifyList(NOTIFY_WHEN_DONE);
+        instructions.addNotifyOnDoneTrigger(NOTIFY_WHEN_DONE);
 
         torchie.scheduleInstruction(instructions);
         liveTorchieQueue.submit(torchie.getTorchieId(), torchie);
@@ -109,7 +109,7 @@ public class TorchieCmd {
         syncCommandInProgress = true;
 
         TickInstructions tickInstructions = generateTileInstructions(cmdType, templateParameters);
-        tickInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
+        tickInstructions.addNotifyOnDoneTrigger(LOG_EXECUTION_DONE);
 
 
         scheduleInstruction(tickInstructions);
@@ -119,11 +119,11 @@ public class TorchieCmd {
         return tickInstructions.getAllOutputResults();
     }
 
-    public void runCommand(NotifyTrigger notify, CmdType cmdType, Map<String, String> templateParameters) {
+    public void runCommand(NotifyDoneTrigger notify, CmdType cmdType, Map<String, String> templateParameters) {
 
         TickInstructions tickInstructions = generateTileInstructions(cmdType, templateParameters);
-        tickInstructions.addTriggerToNotifyList(LOG_EXECUTION_DONE);
-        tickInstructions.addTriggerToNotifyList(notify);
+        tickInstructions.addNotifyOnDoneTrigger(LOG_EXECUTION_DONE);
+        tickInstructions.addNotifyOnDoneTrigger(notify);
 
         scheduleInstruction(tickInstructions);
     }
@@ -163,7 +163,7 @@ public class TorchieCmd {
 
 
 
-    private class UpdateCommandInProgressTrigger implements NotifyTrigger {
+    private class UpdateCommandInProgressTrigger implements NotifyDoneTrigger {
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.debug("Setting cmd in progress to false");
@@ -171,7 +171,7 @@ public class TorchieCmd {
         }
     }
 
-    private class LogExecutionDoneTrigger implements NotifyTrigger {
+    private class LogExecutionDoneTrigger implements NotifyDoneTrigger {
 
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {

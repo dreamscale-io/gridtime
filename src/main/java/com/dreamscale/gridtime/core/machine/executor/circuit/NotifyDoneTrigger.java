@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickIn
 
 import java.util.List;
 
-public interface NotifyTrigger {
+public interface NotifyDoneTrigger {
 
     void notifyWhenDone(TickInstructions instructions, List<Results> results);
 }

@@ -57,7 +57,7 @@ public class GridTimeWorkPile implements WorkPile {
         //once I get the system calendar job done, write an integration test at the engine level
 
         //TODO create the ability to kill jobs
-        
+
 
         if (circuitActivityDashboard.tickAndCheckIfNeedsRefresh()) {
             systemWorkPile.submitWork(ProcessType.Dashboard, circuitActivityDashboard.generateRefreshTick());

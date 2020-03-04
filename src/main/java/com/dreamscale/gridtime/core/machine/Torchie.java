@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
-import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -66,7 +66,7 @@ public class Torchie implements Worker<TickInstructions> {
         ideaFlowCircuit.scheduleHighPriorityInstruction(instructions);
     }
 
-    public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
+    public void notifyWhenProgramDone(NotifyDoneTrigger notifyTrigger) {
         ideaFlowCircuit.notifyWhenProgramDone(notifyTrigger);
     }
 

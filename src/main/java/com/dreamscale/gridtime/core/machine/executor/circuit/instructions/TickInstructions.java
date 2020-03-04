@@ -1,14 +1,13 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.instructions;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
-import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyFailureTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -21,7 +20,8 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
     private Exception exceptionResult;
 
-    private List<NotifyTrigger> notifyList = DefaultCollections.list();
+    private List<NotifyDoneTrigger> notifyDoneTriggers = DefaultCollections.list();
+    private List<NotifyFailureTrigger> notifyOnFailureTriggers = DefaultCollections.list();
 
     private long momentOfCreation;
     private long momentOfExecution;
@@ -47,16 +47,29 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
         } catch (Exception ex) {
             log.error("Exception during instruction execution", ex);
             this.exceptionResult = ex;
+            notifyAllCircuitParticipantsOnError();
         } finally {
             notifyAllCircuitParticipantsOnDone();
         }
         return this;
     }
 
+    private void notifyAllCircuitParticipantsOnError() {
+        log.debug("Notify on error: "+getCmdDescription());
+
+        for (NotifyFailureTrigger notifyTrigger : notifyOnFailureTriggers) {
+            try {
+                notifyTrigger.notifyOnFailure(this, exceptionResult);
+            } catch (Exception ex) {
+                log.error("notify failed", ex);
+            }
+        }
+    }
+
     private void notifyAllCircuitParticipantsOnDone() {
         log.debug("Notify when done: "+getCmdDescription());
 
-        for (NotifyTrigger notifyTrigger : notifyList) {
+        for (NotifyDoneTrigger notifyTrigger : notifyDoneTriggers) {
             try {
                 notifyTrigger.notifyWhenDone(this, outputResults);
             } catch (Exception ex) {
@@ -65,8 +78,12 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
         }
     }
 
-    public void addTriggerToNotifyList(NotifyTrigger notifyTrigger) {
-        this.notifyList.add(notifyTrigger);
+    public void addNotifyOnDoneTrigger(NotifyDoneTrigger notifyTrigger) {
+        this.notifyDoneTriggers.add(notifyTrigger);
+    }
+
+    public void addNotifyOnErrorTrigger(NotifyFailureTrigger notifyTrigger) {
+        this.notifyOnFailureTriggers.add(notifyTrigger);
     }
 
     protected abstract void executeInstruction() throws InterruptedException;
@@ -115,6 +132,15 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
     public boolean isSuccessful() {
         return exceptionResult == null;
+    }
+
+    public boolean isFailure() {
+        return exceptionResult != null;
+    }
+
+
+    public Exception getExceptionResult() {
+        return exceptionResult;
     }
 
     public GridTile getOutputTile() {

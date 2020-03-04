@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.now;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.Locas;
@@ -23,7 +23,7 @@ public class Eye {
     private List<FeatureReference> watchForFeaturesMissing = DefaultCollections.list();
 
     private List<FeatureReference> wtfMarkers = DefaultCollections.list();
-    private List<NotifyTrigger> notifyTriggers = DefaultCollections.list();
+    private List<NotifyDoneTrigger> notifyTriggers = DefaultCollections.list();
 
     private double watchForPainAboveThreshold = -3;
     private double watchForJoyAboveThreshold = 3;
@@ -98,7 +98,7 @@ public class Eye {
         this.wtfMarkers.add(featureReference);
     }
 
-    public void onThresholdTrigger(NotifyTrigger notifyTrigger) {
+    public void onThresholdTrigger(NotifyDoneTrigger notifyTrigger) {
         this.notifyTriggers.add(notifyTrigger);
     }
 

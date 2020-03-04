@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.now.TwilightOrangeM
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.DevNullWire;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
-import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
@@ -41,7 +40,8 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     //circuit coordinator
 
-    private List<NotifyTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+    private List<NotifyDoneTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+    private List<NotifyFailureTrigger> notifyWhenProgramFailsTriggers = DefaultCollections.list();
 
     private boolean isProgramHalted;
 
@@ -73,7 +73,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
     }
 
     public void runProgram(Program program) {
-        if (program == null) {
+        if (this.program == null) {
             this.program = program;
             log.debug("Running program: "+program.getName());
         } else if (nextProgram == null) {
@@ -133,7 +133,8 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
         if (nextInstruction != null) {
             circuitMonitor.startInstruction();
-            nextInstruction.addTriggerToNotifyList(new EvaluateOutputTrigger());
+            nextInstruction.addNotifyOnDoneTrigger(new EvaluateOutputTrigger());
+            nextInstruction.addNotifyOnErrorTrigger(new TerminateProgramTrigger());
         }
 
         updateQueueDepth();
@@ -175,19 +176,32 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
     }
 
     private void fireProgramDoneTriggers() {
-        fireTriggers(notifyWhenProgramDoneTriggers);
+        if (program != null) {
+            notifyAllProgramIsDone();
+
+            notifyWhenProgramDoneTriggers.clear();
+            notifyWhenProgramFailsTriggers.clear();
+        }
     }
 
-    private void fireTriggers(List<NotifyTrigger> triggers) {
-        for (NotifyTrigger trigger: triggers) {
+    private void notifyAllProgramIsDone() {
+        for (NotifyDoneTrigger trigger: notifyWhenProgramDoneTriggers) {
             trigger.notifyWhenDone(lastInstruction, lastInstruction.getAllOutputResults());
         }
-        triggers.clear();
     }
 
+    private void notifyAllProgramHasFailed() {
+        for (NotifyFailureTrigger trigger: notifyWhenProgramFailsTriggers) {
+            trigger.notifyOnFailure(lastInstruction, lastInstruction.getExceptionResult());
+        }
+    }
 
-    public void notifyWhenProgramDone(NotifyTrigger notifyTrigger) {
+    public void notifyWhenProgramDone(NotifyDoneTrigger notifyTrigger) {
         this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
+    }
+
+    public void notifyWhenProgramFails(NotifyFailureTrigger notifyTrigger) {
+        this.notifyWhenProgramFailsTriggers.add(notifyTrigger);
     }
 
     public Metronome.TickScope getActiveTick() {
@@ -206,7 +220,26 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         return circuitMonitor;
     }
 
-    private class EvaluateOutputTrigger implements NotifyTrigger {
+    public UUID getWorkerId() {
+        return circuitMonitor.getWorkerId();
+    }
+
+    private class TerminateProgramTrigger implements NotifyFailureTrigger {
+
+        @Override
+        public void notifyOnFailure(TickInstructions finishedInstruction, Exception ex) {
+
+            circuitMonitor.finishInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
+            circuitMonitor.failInstruction();
+
+            log.error("Terminating program because of failed intruction:" + ex);
+
+            gotoNextProgram();
+            notifyAllProgramHasFailed();
+        }
+    }
+
+    private class EvaluateOutputTrigger implements NotifyDoneTrigger {
 
         @Override
         public void notifyWhenDone(TickInstructions finishedInstruction, List<Results> results) {
@@ -237,6 +270,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
             }
         }
     }
+
 
     private IdeaFlowMetrics getOutputIdeaFlowMetrics(TickInstructions finishedInstruction) {
         GridTile output = finishedInstruction.getOutputTile();

@@ -23,6 +23,7 @@ public class CircuitMonitor {
     private long lastExecutionDuration;
     private long lastQueueDuration;
     private int ticksProcessed;
+    private int ticksFailed;
     private int metronomeTicksProcessed;
 
     private long totalExecutionTime;
@@ -48,6 +49,7 @@ public class CircuitMonitor {
         state = State.Busy;
         ticksProcessed++;
 
+
         updateStatusTimestamp();
     }
 
@@ -72,6 +74,10 @@ public class CircuitMonitor {
         metronomeTicksProcessed++;
     }
 
+    public void failInstruction() {
+        ticksFailed++;
+    }
+
     private void updateStatusTimestamp() {
         lastStatusUpdate = LocalDateTime.now();
     }
@@ -91,6 +97,7 @@ public class CircuitMonitor {
     public int getQueueDepth() {
         return queueDepth;
     }
+
 
 
 

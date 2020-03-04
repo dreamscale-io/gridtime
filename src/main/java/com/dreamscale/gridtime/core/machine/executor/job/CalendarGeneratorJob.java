@@ -1,59 +1,65 @@
 package com.dreamscale.gridtime.core.machine.executor.job;
 
-import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Component
-public class CalendarGeneratorJob implements JobCapability {
-
-    @Autowired
-    GridSyncLockManager gridSyncLockManager;
+public class CalendarGeneratorJob {
 
     @Autowired
     ProgramFactory programFactory;
 
     @Autowired
-    FeatureCacheManager featureCacheManager;
-
-    @Override
-    public void start() {
-
-        //everyday, I'm going to generate enough tiles for stay 1 week ahead
+    CalendarService calendarService;
 
 
-        //when I wake up, get the lock for my job, and the configuration for my job,
-        //configure myself.
+    private static final int DAYS_TO_KEEP_AHEAD = 30;
 
-        //if the lock is already taken, go into a job state, of JOB_RUNNING_ON_ANOTHER_SERVER
+    public CalendarJobDescriptor createJobDescriptor(LocalDateTime now) {
+        LocalDateTime runUntilDate = calculateRunUntilDate(now);
 
-        //get the bookmark position for where my job left off processing.
-
+        return new CalendarJobDescriptor(runUntilDate);
     }
 
-    @Override
-    public void destroy() {
+    public Program createStayAheadProgram(CalendarJobDescriptor jobDescriptor) {
 
+        return programFactory.createCalendarGenerator(jobDescriptor.getRunUntilDate());
+    }
+
+    private LocalDateTime calculateRunUntilDate(LocalDateTime now) {
+        LocalDateTime runUntilDate = now.plusDays(DAYS_TO_KEEP_AHEAD);
+
+        return runUntilDate.truncatedTo(ChronoUnit.DAYS);
     }
 
     public boolean hasWorkToDo(LocalDateTime now) {
-        return false;
+
+        GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
+
+        boolean hasWork = false;
+
+        if (lastTwenty == null) {
+            hasWork = true;
+        } else {
+            LocalDateTime locationOfLastTile = lastTwenty.getGridTime().getClockTime();
+
+            LocalDateTime runUntilDate = calculateRunUntilDate(now);
+
+            if (locationOfLastTile.isBefore(runUntilDate)) {
+                hasWork = true;
+            }
+
+        }
+
+        return hasWork;
     }
 
-    public Program createStayAheadProgram(LocalDateTime now) {
-        return null;
-    }
-
-    public Object getJobType() {
-        return null;
-    }
-
-    public Object createJobClaim(LocalDateTime now) {
-        return null;
-    }
 }
