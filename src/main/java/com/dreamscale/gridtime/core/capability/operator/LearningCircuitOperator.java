@@ -18,7 +18,7 @@ import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -66,7 +66,7 @@ public class LearningCircuitOperator {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     private DictionaryCapability dictionaryCapability;
@@ -146,8 +146,8 @@ public class LearningCircuitOperator {
 
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
@@ -323,8 +323,8 @@ public class LearningCircuitOperator {
 
         //update circuit with the new room
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         learningCircuitEntity.setRetroStartedTime(now);
         learningCircuitEntity.setRetroRoomId(retroRoomEntity.getId());
@@ -411,8 +411,8 @@ public class LearningCircuitOperator {
 
         validateCircuitExists(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
         UUID wtfRoomId = learningCircuitEntity.getWtfRoomId();
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
@@ -459,8 +459,8 @@ public class LearningCircuitOperator {
 
         validateCircuitExists(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
         UUID wtfRoomId = learningCircuitEntity.getWtfRoomId();
         UUID retroRoomId = learningCircuitEntity.getRetroRoomId();
 
@@ -503,8 +503,8 @@ public class LearningCircuitOperator {
         validateCircuitExists(circuitName, learningCircuitEntity);
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_CLOSED);
 
@@ -534,8 +534,8 @@ public class LearningCircuitOperator {
         validateCircuitExists(circuitName, learningCircuitEntity);
         validateCircuitIsActiveOrOnHold(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         sendStatusMessageToWTFRoom(learningCircuitEntity, now, nanoTime, CircuitMessageType.CIRCUIT_ABORTED);
 
@@ -563,8 +563,8 @@ public class LearningCircuitOperator {
         validateCircuitExists(circuitName, learningCircuitEntity);
         validateCircuitIsActive(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         long durationInSeconds = calculateSecondsBeforeOnHold(learningCircuitEntity, now);
         learningCircuitEntity.setSecondsBeforeOnHold(durationInSeconds);
@@ -600,8 +600,8 @@ public class LearningCircuitOperator {
         validateCircuitExists(circuitName, learningCircuitEntity);
         validateCircuitIsOnHold(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         learningCircuitEntity.setLastResumeTime(now);
         learningCircuitEntity.setLastOnHoldTime(null);
@@ -656,7 +656,7 @@ public class LearningCircuitOperator {
             startTimer = circuitDto.getLastResumeTime();
         }
 
-        long seconds = startTimer.until(timeService.now(), ChronoUnit.SECONDS);
+        long seconds = startTimer.until(gridClock.now(), ChronoUnit.SECONDS);
         seconds += circuitDto.getSecondsBeforeOnHold();
 
         return seconds;
@@ -671,8 +671,8 @@ public class LearningCircuitOperator {
 
         validateMemberInRoom(organizationId, fromMemberId, talkRoomName);
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
         UUID messageId = UUID.randomUUID();
 
         UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomName);
@@ -856,14 +856,14 @@ public class LearningCircuitOperator {
 
         if (memberConnection != null) {
 
-            LocalDateTime now = timeService.now();
-            Long nanoTime = timeService.nanoTime();
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
 
             List<LearningCircuitRoomEntity> circuitRooms = learningCircuitRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
 
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
-                updateRoomMemberToInactive(memberConnection.getOrganizationId(), memberConnection.getMemberId(), timeService.now(), circuitRoom.getRoomId());
+                updateRoomMemberToInactive(memberConnection.getOrganizationId(), memberConnection.getMemberId(), gridClock.now(), circuitRoom.getRoomId());
 
                 sendMemberRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_INACTIVE);
             }
@@ -904,8 +904,8 @@ public class LearningCircuitOperator {
         TalkMessageDto messageDto = null;
         if (learningCircuitDto != null) {
 
-            LocalDateTime now = timeService.now();
-            Long nanoTime = timeService.nanoTime();
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
             UUID messageId = UUID.randomUUID();
 
             messageDto = sendSnippetMessage(messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), newSnippetEventDto);

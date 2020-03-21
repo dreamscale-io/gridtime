@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickIn
 
 public interface WorkPile {
 
+    void reset();
 
     TickInstructions whatsNext();
 

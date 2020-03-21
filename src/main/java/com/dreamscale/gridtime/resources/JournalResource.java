@@ -166,6 +166,7 @@ public class JournalResource {
      * in a summary
      */
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReferenceInJournal(@RequestBody TaskReferenceInputDto taskReference) {
 

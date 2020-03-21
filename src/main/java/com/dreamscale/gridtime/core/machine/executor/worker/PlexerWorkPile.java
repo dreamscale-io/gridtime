@@ -5,8 +5,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
-import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
-import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class PlexerWorkPile implements WorkPile {
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(ProcessType.Plexer, workerId);
-            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregateWorkerProgram(workerId, featureCacheManager));
+            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregatePlexerProgram(workerId, featureCacheManager));
 
             circuitActivityDashboard.addMonitor(MonitorType.PLEXER_WORKER, workerId, circuitMonitor);
 
@@ -62,6 +62,12 @@ public class PlexerWorkPile implements WorkPile {
 
     public boolean hasWork() {
         return workToDoWire.getQueueDepth() > 0;
+    }
+
+    @Override
+    public void reset() {
+        whatsNextWheel.clear();
+        whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
 
     public TickInstructions whatsNext() {

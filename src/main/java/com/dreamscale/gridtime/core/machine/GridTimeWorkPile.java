@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.machine;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
-import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.worker.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,6 +44,15 @@ public class GridTimeWorkPile implements WorkPile {
     public TorchieCmd getTorchieCmd(UUID torchieId) {
 
         return torchieWorkPile.getTorchieCmd(torchieId);
+    }
+
+    @Override
+    public void reset() {
+        systemWorkPile.reset();
+        torchieWorkPile.reset();
+        plexerWorkPile.reset();
+
+        circuitActivityDashboard.clear();
     }
 
     public TickInstructions whatsNext() {

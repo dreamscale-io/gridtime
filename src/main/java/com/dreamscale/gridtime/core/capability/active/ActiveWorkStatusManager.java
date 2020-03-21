@@ -3,7 +3,6 @@ package com.dreamscale.gridtime.core.capability.active;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.organization.TeamMemberWorkStatusDto;
-import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
 import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
@@ -12,7 +11,7 @@ import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusRepository;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,7 @@ public class ActiveWorkStatusManager {
     TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     private MapperFactory mapperFactory;

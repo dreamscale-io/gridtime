@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.domain.time.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class CalendarService {
     GridTimeCalendarRepository gridTimeCalendarRepository;
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     IntentionRepository intentionRepository;

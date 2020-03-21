@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -29,7 +29,7 @@ class MemberStatusResourceSpec extends Specification {
     TeamMembershipCapability teamService
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()

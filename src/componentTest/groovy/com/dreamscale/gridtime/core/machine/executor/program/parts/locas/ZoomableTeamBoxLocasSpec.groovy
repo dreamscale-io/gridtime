@@ -32,7 +32,7 @@ import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -62,7 +62,7 @@ class ZoomableTeamBoxLocasSpec extends Specification {
     TorchieFactory torchieFactory
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
 
     @Autowired
     ProgramFactory programFactory

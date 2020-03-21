@@ -1,17 +1,19 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd.returns;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import lombok.Getter;
 
+@Getter
 public class CoordinateResults implements Results {
 
-    private final String gridtimeCoords;
+    private final GeometryClock.GridTime gridtime;
 
     public CoordinateResults(GeometryClock.GridTime gridTime) {
-        this.gridtimeCoords = gridTime.toDisplayString();
+        this.gridtime = gridTime;
     }
 
     @Override
     public String toDisplayString() {
-        return gridtimeCoords;
+        return gridtime.toDisplayString();
     }
 }

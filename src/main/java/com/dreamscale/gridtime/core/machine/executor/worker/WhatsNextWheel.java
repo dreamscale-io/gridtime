@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class WhatsNextWheel<T> implements LiveQueue {
@@ -47,6 +48,10 @@ public class WhatsNextWheel<T> implements LiveQueue {
     public void evictLastWorker() {
         UUID lastWorkerId = getLastWorker();
         evictWorker(lastWorkerId);
+    }
+
+    public Set<UUID> getWorkerKeys() {
+        return workerMap.keySet();
     }
 
     public void evictWorker(UUID workerId) {

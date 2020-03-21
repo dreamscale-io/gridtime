@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.executor.monitor;
+package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;

@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class SpiritNetworkOperator {
     MemberDetailsService memberDetailsService;
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -175,8 +175,8 @@ public class SpiritNetworkOperator {
 
             List<CircuitMemberStatusDto> members = circuitDetails.getCircuitMembers();
 
-            LocalDateTime now = timeService.now();
-            Long nanoTime = timeService.nanoTime();
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
 
             for (CircuitMemberStatusDto member : members) {
                 grantXP(organizationId, ownerMember, member.getMemberId(), now, nanoTime, xpAmount);
@@ -203,7 +203,7 @@ public class SpiritNetworkOperator {
         torchieTombstoneEntity.setTitle(xpSummaryDto.getTitle());
         torchieTombstoneEntity.setTotalXp(xpSummaryDto.getTotalXP());
         torchieTombstoneEntity.setEpitaph(epitaph);
-        torchieTombstoneEntity.setDateOfDeath(timeService.now());
+        torchieTombstoneEntity.setDateOfDeath(gridClock.now());
         torchieTombstoneEntity.setDateOfBirth(lookupTorchieBirthday(rootAccountId, torchieId));
 
         torchieTombstoneRepository.save(torchieTombstoneEntity);
@@ -262,8 +262,8 @@ public class SpiritNetworkOperator {
     }
 
     public void grantXPNow(UUID organizationId, UUID fromMemberId, UUID forMemberId, int xpAmount) {
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         grantXP(organizationId, fromMemberId, forMemberId, now, nanoTime, xpAmount);
     }

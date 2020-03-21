@@ -58,7 +58,7 @@ public class TeamCircuitOperator {
     private MemberDetailsService memberDetailsService;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     private GridTalkRouter talkRouter;
@@ -339,7 +339,7 @@ public class TeamCircuitOperator {
 
         validateRoomExists(roomName, teamRoom);
 
-        teamRoom.setCloseTime(timeService.now());
+        teamRoom.setCloseTime(gridClock.now());
         teamRoom.setCircuitStatus(CircuitStatus.CLOSED);
 
         teamCircuitRoomRepository.save(teamRoom);
@@ -451,7 +451,7 @@ public class TeamCircuitOperator {
 
         talkRoomRepository.save(talkRoomEntity);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         TeamCircuitRoomEntity teamRoom = new TeamCircuitRoomEntity();
         teamRoom.setId(UUID.randomUUID());
@@ -505,7 +505,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRepository.save(teamCircuitEntity);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         List<TalkRoomMemberEntity> talkRoomMembers = new ArrayList<>();
 

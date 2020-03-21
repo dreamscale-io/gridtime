@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.job.WatchConfigurationDto;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class GridtimeJobManager {
     GridTimeEngine gridTimeEngine;
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     TorchieFactory torchieFactory;
@@ -63,7 +63,7 @@ public class GridtimeJobManager {
 
     public void generateCalendar() {
 
-        LocalDateTime calendarUntil = timeService.now().plusDays(90);
+        LocalDateTime calendarUntil = gridClock.now().plusDays(90);
 
         Torchie torchie = torchieFactory.wireUpCalendarTorchieToRunUntil(calendarUntil);
         gridTimeEngine.submitJob(torchie);

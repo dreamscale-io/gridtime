@@ -16,7 +16,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.SpiritXPEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -34,7 +34,7 @@ class SpiritResourceSpec extends Specification {
     RootAccountEntity testUser
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
 
     @Autowired
     LearningCircuitClient circuitClient

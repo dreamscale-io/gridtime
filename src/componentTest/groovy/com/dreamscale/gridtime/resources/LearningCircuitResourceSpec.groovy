@@ -16,7 +16,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -40,7 +40,7 @@ class LearningCircuitResourceSpec extends Specification {
     TeamMembershipCapability teamService
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
     OrganizationEntity org
 
     def setup() {

@@ -79,7 +79,7 @@ public class ProgramFactory {
         return program;
     }
 
-    public AggregatePlexerProgram createAggregateWorkerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
+    public AggregatePlexerProgram createAggregatePlexerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
         return new AggregatePlexerProgram(workerId, workToDoWire, locasFactory, featureCacheManager);
     }
 

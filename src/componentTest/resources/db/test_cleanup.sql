@@ -23,6 +23,7 @@ truncate table work_item_to_aggregate cascade ;
 
 truncate table grid_idea_flow_metrics cascade ;
 truncate table grid_box_metrics cascade ;
+truncate table gridtime_system_job_claim cascade ;
 
 
 

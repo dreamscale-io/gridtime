@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.core.domain.work.WorkItemToAggregateRepository
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -37,7 +37,7 @@ class AggregateWorkToDoWireSpec extends Specification {
     UUID workerId
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
 
     def setup() {
         //random builder for work item

@@ -38,6 +38,11 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
+    public void reset() {
+        //no op
+    }
+
+    @Override
     public TickInstructions whatsNext() {
 
         if (peekInstruction == null) {

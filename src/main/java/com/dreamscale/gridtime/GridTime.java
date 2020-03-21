@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Import;
 @Slf4j
 public class GridTime {
 
-
     public static void main(String[] args) {
 
         SpringApplication.run(GridTime.class, args);

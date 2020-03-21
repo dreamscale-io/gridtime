@@ -59,7 +59,7 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
         for (NotifyFailureTrigger notifyTrigger : notifyOnFailureTriggers) {
             try {
-                notifyTrigger.notifyOnFailure(this, exceptionResult);
+                notifyTrigger.notifyOnAbortOrFailure(this, exceptionResult);
             } catch (Exception ex) {
                 log.error("notify failed", ex);
             }

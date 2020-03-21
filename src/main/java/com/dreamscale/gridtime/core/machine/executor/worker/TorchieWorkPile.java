@@ -13,9 +13,9 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
-import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
-import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -38,7 +39,7 @@ public class TorchieWorkPile implements WorkPile {
     private GridSyncLockManager gridSyncLockManager;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     private TorchieFeedCursorRepository torchieFeedCursorRepository;
@@ -63,7 +64,7 @@ public class TorchieWorkPile implements WorkPile {
     private static final int MAX_TORCHIES = 10;
 
     public void sync() {
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
@@ -193,7 +194,7 @@ public class TorchieWorkPile implements WorkPile {
 
     public void expireZombieTorchies() {
 
-        LocalDateTime expireBeforeDate = timeService.now().minus(expireWhenStaleMoreThan);
+        LocalDateTime expireBeforeDate = gridClock.now().minus(expireWhenStaleMoreThan);
 
         torchieFeedCursorRepository.expireZombieTorchies(Timestamp.valueOf(expireBeforeDate));
 
@@ -217,9 +218,31 @@ public class TorchieWorkPile implements WorkPile {
         circuitActivityDashboard.evictMonitor(MonitorType.TORCHIE_WORKER, torchieId);
     }
 
+
+
     @Override
     public int size() {
         return whatsNextWheel.size();
+    }
+
+    @Override
+    public void reset() {
+        evictAll();
+    }
+
+    private void evictAll() {
+        Set<UUID> workerKeys = whatsNextWheel.getWorkerKeys();
+
+        for (UUID workerId : workerKeys) {
+            evictWorker(workerId);
+        }
+    }
+
+    private void evictWorker(UUID workerId) {
+        expire(workerId);
+
+        whatsNextWheel.evictWorker(workerId);
+        circuitActivityDashboard.evictMonitor(MonitorType.TORCHIE_WORKER, workerId);
     }
 
     @Override

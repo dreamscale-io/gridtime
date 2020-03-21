@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Service
-public class TimeService {
+public class GridClock {
 
     public LocalDateTime now() {
         return LocalDateTime.now();

@@ -7,10 +7,11 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockMa
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemExclusiveJobClaimManager;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarGeneratorJob;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarJobDescriptor;
-import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
-import com.dreamscale.gridtime.core.machine.executor.monitor.MonitorType;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 
+@Slf4j
 @Component
 public class SystemWorkPile implements WorkPile {
 
@@ -33,7 +35,7 @@ public class SystemWorkPile implements WorkPile {
     private SystemExclusiveJobClaimManager systemExclusiveJobClaimManager;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     CalendarGeneratorJob calendarGeneratorJob;
@@ -56,79 +58,105 @@ public class SystemWorkPile implements WorkPile {
     }
 
     private void createSystemWorkers() {
-        //create one per process type
+        //create one per process type, these never get evicted
 
         UUID calendarWorkerId = UUID.randomUUID();
 
         CircuitMonitor calendarProcessMonitor = new CircuitMonitor(ProcessType.Calendar, calendarWorkerId);
         calendarCircuit = new IdeaFlowCircuit(calendarProcessMonitor);
 
-        UUID refreshWorkerId = UUID.randomUUID();
+        activityDashboard.addMonitor(MonitorType.SYS_WORKER, calendarCircuit.getWorkerId(), calendarCircuit.getCircuitMonitor());
+        whatsNextWheel.addWorker(calendarWorkerId, calendarCircuit);
 
-        CircuitMonitor refreshProcessMonitor = new CircuitMonitor(ProcessType.Dashboard, refreshWorkerId);
-        dashboardCircuit = new IdeaFlowCircuit(refreshProcessMonitor);
+        UUID dashboardWorkerId = UUID.randomUUID();
+
+        CircuitMonitor dashboardProcessMonitor = new CircuitMonitor(ProcessType.Dashboard, dashboardWorkerId);
+        dashboardCircuit = new IdeaFlowCircuit(dashboardProcessMonitor);
+
+        activityDashboard.addMonitor(MonitorType.SYS_WORKER, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
+        whatsNextWheel.addWorker(dashboardWorkerId, dashboardCircuit);
 
     }
 
     public void sync() {
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
             gridSyncLockManager.tryToAcquireSystemJobSyncLock();
 
-            if ( calendarGeneratorJob.hasWorkToDo(now) ) {
-
-                UUID workerId = calendarCircuit.getWorkerId();
-
-                CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now);
-                SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(workerId, jobDescriptor);
-
-
-                if (systemJobClaim != null) {
-                    Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(jobDescriptor);
-
-                    calendarCircuit.notifyWhenProgramDone(new SystemJobDoneTrigger(systemJobClaim));
-                    calendarCircuit.notifyWhenProgramFails(new SystemJobFailedTrigger(systemJobClaim));
-                    calendarCircuit.runProgram(calendarProgram);
-
-                    activityDashboard.addMonitor(MonitorType.SYS_WORKER, calendarCircuit.getWorkerId(), calendarCircuit.getCircuitMonitor());
-
-
-                    whatsNextWheel.addWorker(workerId, calendarCircuit);
-
-                }
+            try {
+                spinUpCalendarProgramIfNeeded(now);
+            } finally {
+                gridSyncLockManager.releaseSystemJobLock();
             }
+        }
+    }
 
-            gridSyncLockManager.releaseSystemJobLock();
+    @Override
+    public void reset() {
+        calendarCircuit.clearProgram();
+        dashboardCircuit.clearProgram();
 
+        lastSyncCheck = null;
+    }
+
+    private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
+
+        if ( calendarGeneratorJob.hasWorkToDo(now) ) {
+
+            UUID workerId = calendarCircuit.getWorkerId();
+
+            CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now);
+            SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(workerId, jobDescriptor);
+
+            if (systemJobClaim != null) {
+                Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(jobDescriptor);
+
+                log.info("Starting program {}", jobDescriptor.getJobType().name());
+
+                calendarCircuit.notifyWhenProgramDone(new SystemJobDoneTrigger(systemJobClaim));
+                calendarCircuit.notifyWhenProgramFails(new SystemJobFailedTrigger(systemJobClaim));
+
+                calendarCircuit.runProgram(calendarProgram);
+            }
+        } else {
+            log.warn("Calendar program already running, unable to acquire job claim.");
         }
     }
 
     public boolean hasWork() {
 
-        if (peekInstruction == null) {
-            peek();
-        }
+        peek();
+
         return peekInstruction != null;
     }
 
     private void peek() {
-
         if (peekInstruction == null) {
-            peekInstruction = whatsNextWheel.whatsNext();
 
-            while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
+            for (int i = 0; i < whatsNextWheel.size(); i++) {
 
-                evictLastWorker();
-                peekInstruction = whatsNextWheel.whatsNext();
+                if (peekInstruction == null) {
+                    peekInstruction = whatsNextWheel.whatsNext();
 
+                    if (peekInstruction != null) {
+                        break;
+                    }
+                }
             }
         }
     }
 
+
+
     public TickInstructions whatsNext() {
-       return whatsNextWheel.whatsNext();
+        peek();
+
+        TickInstructions nextInstruction = peekInstruction;
+        peekInstruction = null;
+
+        return nextInstruction;
     }
 
     @Override
@@ -143,6 +171,7 @@ public class SystemWorkPile implements WorkPile {
     }
 
     public void submitWork(ProcessType processType, TickInstructions instruction) {
+        log.debug("Submitting work for {}", processType.name());
         if (processType == ProcessType.Calendar) {
             calendarCircuit.scheduleHighPriorityInstruction(instruction);
         }
@@ -161,11 +190,8 @@ public class SystemWorkPile implements WorkPile {
 
         @Override
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
+            log.info("Finished program {}", systemJobClaim.getJobType().name());
            systemExclusiveJobClaimManager.finishClaim(systemJobClaim);
-
-           activityDashboard.evictMonitor(MonitorType.SYS_WORKER, systemJobClaim.getWorkerId());
-
-            whatsNextWheel.evictWorker(systemJobClaim.getWorkerId());
         }
     }
 
@@ -178,12 +204,17 @@ public class SystemWorkPile implements WorkPile {
         }
 
         @Override
-        public void notifyOnFailure(TickInstructions instructions, Exception ex) {
-            systemExclusiveJobClaimManager.failClaim(systemJobClaim, ex.getMessage());
+        public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
+            if (ex != null) {
+                log.error("Failing program "+systemJobClaim.getJobType().name(), ex);
+                systemExclusiveJobClaimManager.failClaim(systemJobClaim, ex.getMessage());
+            } else {
 
-            activityDashboard.evictMonitor(MonitorType.SYS_WORKER, systemJobClaim.getWorkerId());
+                log.warn("Aborting program {}", systemJobClaim.getJobType().name());
+                systemExclusiveJobClaimManager.abortClaim(systemJobClaim);
+            }
 
-            whatsNextWheel.evictWorker(systemJobClaim.getWorkerId());
+
         }
     }
 

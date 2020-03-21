@@ -14,7 +14,7 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class JournalCapability {
     private RecentActivityManager recentActivityManager;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -171,8 +171,8 @@ public class JournalCapability {
 
     private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         spiritNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
@@ -316,7 +316,7 @@ public class JournalCapability {
             validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
 
             intentionEntity.setFinishStatus(finishStatus.name());
-            intentionEntity.setFinishTime(timeService.now());
+            intentionEntity.setFinishTime(gridClock.now());
 
             intentionRepository.save(intentionEntity);
         }

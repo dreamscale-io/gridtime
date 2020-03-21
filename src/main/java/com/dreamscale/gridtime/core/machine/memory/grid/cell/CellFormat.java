@@ -80,7 +80,11 @@ public class CellFormat {
     }
 
     public static String toCellValue(LocalDateTime dateTime) {
-        return dateTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
+        if (dateTime != null) {
+            return dateTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
+        } else {
+            return "";
+        }
     }
 
 

@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.executor.monitor;
+package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
@@ -57,12 +57,37 @@ public class CircuitActivityDashboard {
         return systemMonitors;
     }
 
-    public void refreshDashboard() {
+    public void clear() {
+        systemMonitors.clear();
+        plexerMonitors.clear();
+        torchieMonitors.clear();
+
+        refresh();
+    }
+
+    public void refresh() {
 
         dashboard.update(MonitorType.SYS_WORKER, createSummary(MonitorType.SYS_WORKER));
         dashboard.update(MonitorType.PLEXER_WORKER, createSummary(MonitorType.PLEXER_WORKER));
         dashboard.update(MonitorType.TORCHIE_WORKER, createSummary(MonitorType.TORCHIE_WORKER));
     }
+
+
+    public GridTableResults getDashboardStatus(DashboardActivityScope dashboardActivityScope) {
+        switch (dashboardActivityScope) {
+            case GRID_SUMMARY:
+                return dashboard.toSummaryGridTableResults();
+            case SYSTEM_DETAIL:
+                return dashboard.toSystemTopGridTableResults();
+            case PLEXER_DETAIL:
+                return dashboard.toPlexerTopGridTableResults();
+            case TORCHIE_DETAIL:
+                return dashboard.toTorchieTopGridTableResults();
+            default:
+        }
+        return null;
+    }
+
 
     private CircuitActivitySummaryRow createSummary(MonitorType monitorType) {
 

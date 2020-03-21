@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,7 @@ public class RecentActivityManager {
     private JiraCapability jiraCapability;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Autowired
     private MapperFactory mapperFactory;

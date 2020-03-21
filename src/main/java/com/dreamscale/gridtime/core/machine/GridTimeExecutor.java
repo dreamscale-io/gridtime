@@ -13,10 +13,14 @@ public class GridTimeExecutor {
     private WorkPile workPile;
     private ThreadPoolExecutor executorPool;
 
+    private int ticks = 0;
+
     private AtomicBoolean isGameLoopRunning;
 
     private static final int LOOK_FOR_MORE_WORK_DELAY = 100;
     private static final int MAX_WORK_CAPACITY = 10;
+
+    private static final int MAX_WAIT_LOOPS = 10;
 
     public GridTimeExecutor(WorkPile workPile) {
         this.workPile = workPile;
@@ -37,7 +41,6 @@ public class GridTimeExecutor {
         }
     }
 
-
     private boolean hasPoolCapacityForMoreWork() {
 
 //        log.info("executor tasks  = "+executorPool.getTaskCount());
@@ -46,6 +49,31 @@ public class GridTimeExecutor {
 
         return executorPool.getActiveCount() <= MAX_WORK_CAPACITY;
     }
+
+    public int getTicks() {
+        return ticks;
+    }
+
+    public void waitForTicks(int ticksToWait) {
+
+        int ticksToReach = ticks + ticksToWait;
+
+        int waitLoopCounter = MAX_WAIT_LOOPS;
+        try {
+            while (ticks < ticksToReach && waitLoopCounter > 0) {
+                log.info("Waiting for ticks to finish!");
+                Thread.sleep(100);
+                waitLoopCounter--;
+            }
+            if (waitLoopCounter == 0) {
+                log.error("Wait loop count exceeded");
+            }
+        } catch (InterruptedException ex) {
+            log.error("Interrupted", ex);
+        }
+    }
+
+
 
     private class GameLoopRunner implements Runnable {
 
@@ -63,6 +91,7 @@ public class GridTimeExecutor {
                         if (instruction != null) {
                             log.info("Submitting instruction: "+instruction.getCmdDescription());
 
+                            ticks++;
                             executorPool.submit(instruction);
                         } else {
                             log.warn("Null instruction");

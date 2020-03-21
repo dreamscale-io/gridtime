@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface NotifyFailureTrigger {
 
-    void notifyOnFailure(TickInstructions instructions, Exception ex);
+    void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex);
 }

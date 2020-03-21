@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.machine.executor.monitor;
+package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
 public enum MonitorType {
 

@@ -97,6 +97,20 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         isProgramHalted = false;
     }
 
+    public void clearProgram() {
+        program = null;
+        nextProgram = null;
+
+        highPriorityInstructionQueue.clear();
+        instructionsToExecuteQueue.clear();
+
+        notifyAllProgramAborted();
+
+        notifyWhenProgramDoneTriggers.clear();
+        notifyWhenProgramFailsTriggers.clear();
+    }
+
+
     public void runParallelProgram(UUID programId, ParallelProgram parallelProgram) {
         parallelPrograms.put(programId, parallelProgram);
     }
@@ -152,6 +166,8 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         }
     }
 
+
+
     private void updateQueueDepth() {
         int programQueueDepth = 0;
 
@@ -190,9 +206,16 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         }
     }
 
-    private void notifyAllProgramHasFailed() {
+    private void notifyAllProgramAborted() {
         for (NotifyFailureTrigger trigger: notifyWhenProgramFailsTriggers) {
-            trigger.notifyOnFailure(lastInstruction, lastInstruction.getExceptionResult());
+
+            Exception ex = null;
+
+            if (lastInstruction != null) {
+                ex = lastInstruction.getExceptionResult();
+            }
+
+            trigger.notifyOnAbortOrFailure(lastInstruction, ex);
         }
     }
 
@@ -224,10 +247,11 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         return circuitMonitor.getWorkerId();
     }
 
+
     private class TerminateProgramTrigger implements NotifyFailureTrigger {
 
         @Override
-        public void notifyOnFailure(TickInstructions finishedInstruction, Exception ex) {
+        public void notifyOnAbortOrFailure(TickInstructions finishedInstruction, Exception ex) {
 
             circuitMonitor.finishInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
             circuitMonitor.failInstruction();
@@ -235,7 +259,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
             log.error("Terminating program because of failed intruction:" + ex);
 
             gotoNextProgram();
-            notifyAllProgramHasFailed();
+            notifyAllProgramAborted();
         }
     }
 

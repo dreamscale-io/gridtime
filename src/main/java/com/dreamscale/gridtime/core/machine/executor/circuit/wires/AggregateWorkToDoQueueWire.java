@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     private CalendarService calendarService;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @Override
     public void pushAll(List<TileStreamEvent> tileStreamEvents) {
@@ -55,7 +55,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
 
         WorkItemToAggregateEntity workItem = new WorkItemToAggregateEntity();
         workItem.setId(UUID.randomUUID());
-        workItem.setEventTime(timeService.now());
+        workItem.setEventTime(gridClock.now());
         workItem.setProcessingState(ProcessingState.Ready);
         workItem.setZoomLevel(event.getGridTime().getZoomLevel());
         workItem.setTileSeq(tileSeq);
@@ -106,7 +106,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
 
         //if there's no complete stuff, then we can also process incomplete stuff after a delay
 
-        LocalDateTime partialWorkReadyDate = timeService.now().minus(DELAY_BEFORE_PROCESSING_PARTIAL_WORK);
+        LocalDateTime partialWorkReadyDate = gridClock.now().minus(DELAY_BEFORE_PROCESSING_PARTIAL_WORK);
 
          workItem = workReadyByTeamViewRepository.findOldestPartialTeamWorkItemOlderThan(Timestamp.valueOf(partialWorkReadyDate));
 

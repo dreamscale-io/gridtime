@@ -17,7 +17,7 @@ import com.dreamscale.gridtime.core.domain.flow.FlowEventRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager
-import com.dreamscale.gridtime.core.service.TimeService
+import com.dreamscale.gridtime.core.service.GridClock
 import org.dreamscale.exception.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -54,7 +54,7 @@ class FlowResourceSpec extends Specification {
     RootAccountEntity testUser
 
     @Autowired
-    TimeService mockTimeService
+    GridClock mockTimeService
 
     @Autowired
     RecentActivityManager recentActivityService

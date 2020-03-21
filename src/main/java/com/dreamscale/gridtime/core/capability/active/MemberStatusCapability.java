@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class MemberStatusCapability {
     private DtoEntityMapper<MemberWorkStatusDto, MemberStatusEntity> memberStatusMapper;
 
     @Autowired
-    private TimeService timeService;
+    private GridClock gridClock;
 
     @PostConstruct
     private void init() {

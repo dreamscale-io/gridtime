@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.domain.dictionary.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class DictionaryCapability {
 
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     TeamMembershipCapability teamMembership;
@@ -84,7 +84,7 @@ public class DictionaryCapability {
 
         validateTeamExists(myTeam);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         //get all definitions, across all scopes, and then all tombstone references that are forwarded here
 
@@ -206,7 +206,7 @@ public class DictionaryCapability {
 
         TeamDictionaryWordEntity existingWord = findByTeamAndCaseInsensitiveWord(myTeam.getId(), originalWordName);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         TeamDictionaryWordEntity updatedWord = null;
         if (existingWord != null) {
@@ -226,8 +226,8 @@ public class DictionaryCapability {
 
         TeamBookEntity existingBook = teamBookRepository.findByTeamIdAndLowerCaseBookName(myTeam.getId(), bookName.toLowerCase());
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         if (existingBook == null) {
             //create a new book
@@ -264,7 +264,7 @@ public class DictionaryCapability {
 
         validateBookNotNull(existingBook);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         existingBook.setBookName(refactorBookInputDto.getNewBookName());
         existingBook.setLowerCaseBookName(refactorBookInputDto.getNewBookName().toLowerCase());
@@ -286,7 +286,7 @@ public class DictionaryCapability {
 
         validateBookNotNull(existingBook);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         existingBook.setBookStatus(BookStatus.ARCHIVED);
         existingBook.setLastModifiedDate(now);
@@ -365,8 +365,8 @@ public class DictionaryCapability {
 
         TeamBookWordOverrideEntity override = teamBookWordOverrideRepository.findWordOverrideByBookIdAndLowerCaseWordName(teamBook.getId(), wordName.toLowerCase());
 
-        LocalDateTime now = timeService.now();
-        Long nanoTime = timeService.nanoTime();
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         if (override == null) {
             //this is the first modification, create the first override
@@ -447,7 +447,7 @@ public class DictionaryCapability {
             wordInBook.setTeamBookId(book.getId());
             wordInBook.setTeamWordId(wordId);
             wordInBook.setModifiedStatus(WordModifiedStatus.UNCHANGED);
-            wordInBook.setPullDate(timeService.now());
+            wordInBook.setPullDate(gridClock.now());
             wordInBook.setPulledByMemberId(memberId);
 
             teamBookWordRepository.save(wordInBook);
@@ -645,7 +645,7 @@ public class DictionaryCapability {
         TeamDictionaryWordEntity existingWord = teamDictionaryWordRepository.findByTeamIdAndLowerCaseWordName(myTeam.getId(), wordName);
 
         if (existingWord == null) {
-            LocalDateTime now = timeService.now();
+            LocalDateTime now = gridClock.now();
 
             TeamDictionaryWordEntity newWord = new TeamDictionaryWordEntity();
             newWord.setOrganizationId(organizationId);
@@ -665,7 +665,7 @@ public class DictionaryCapability {
 
         validateTeamExists(myTeam);
 
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         List<TeamDictionaryWordEntity> newWordEntries = new ArrayList<>();
 

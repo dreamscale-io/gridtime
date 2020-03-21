@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
 import com.dreamscale.gridtime.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import org.dreamscale.feign.JacksonFeignBuilder;
 import org.dreamscale.test.BaseTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Bean
     @Primary
-    public TimeService mockTimeService() {
-        return detachedMockFactory().Mock(TimeService.class);
+    public GridClock mockTimeService() {
+        return detachedMockFactory().Mock(GridClock.class);
     }
 
 

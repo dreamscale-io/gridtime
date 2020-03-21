@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchEventDto;
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.flow.activity.*;
-import com.dreamscale.gridtime.core.service.TimeService;
+import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.domain.flow.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class FlowPublisher {
 
 
     @Autowired
-    TimeService timeService;
+    GridClock gridClock;
 
     @Autowired
     FlowActivityRepository flowActivityRepository;
@@ -185,7 +185,7 @@ public class FlowPublisher {
     }
 
     private Duration calculateTimeAdjustment(LocalDateTime messageSentAt) {
-        LocalDateTime now = timeService.now();
+        LocalDateTime now = gridClock.now();
 
         return Duration.between(messageSentAt, now);
     }

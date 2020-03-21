@@ -1,11 +1,12 @@
 package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
-import com.dreamscale.gridtime.core.machine.executor.monitor.CircuitActivityDashboard;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 @Component
@@ -19,16 +20,21 @@ public class GridTimeEngine {
 
     private GridTimeExecutor gridTimeExecutor;
 
-    @PostConstruct
-    void init() {
-        this.start();
-    }
 
     public void start() {
         this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkPile);
 
         gridTimeExecutor.start();
     }
+
+    public void waitForTicks(int tickCount) {
+        gridTimeExecutor.waitForTicks(tickCount);
+    }
+
+    public GridTableResults getDashboardStatus(DashboardActivityScope dashboardActivityScope) {
+        return circuitActivityDashboard.getDashboardStatus(dashboardActivityScope);
+    }
+
 
     public void destroy() {
         if (this.gridTimeExecutor != null) {
@@ -55,5 +61,7 @@ public class GridTimeEngine {
     public TorchieCmd submitJob(Torchie torchie) {
         return gridTimeWorkPile.submitJob(torchie);
     }
+
+
 
 }

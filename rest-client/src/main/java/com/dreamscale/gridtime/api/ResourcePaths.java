@@ -39,7 +39,14 @@ public class ResourcePaths {
     public static final String INVITATION_PATH = "/invitation";
     public static final String TEAM_PATH = "/team";
     public static final String TORCHIE_PATH = "/torchie";
-    public static final String GRIDTIME_PATH = "/gridtime";
+    public static final String PLEXER_PATH = "/plexer";
+
+    public static final String TERMINAL_PATH = "/terminal";
+    public static final String GRID_PATH = "/grid";
+    public static final String TOP_PATH = "/top";
+    public static final String PROCESS_PATH = "/process";
+    public static final String HALT_PATH = "/halt";
+
 
     public static final String FLOW_PATH = "/flow";
     public static final String START_PATH = "/start";
