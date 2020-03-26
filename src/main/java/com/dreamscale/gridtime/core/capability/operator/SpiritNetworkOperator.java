@@ -173,7 +173,7 @@ public class SpiritNetworkOperator {
             LearningCircuitWithMembersDto circuitDetails =
                     learningCircuitOperator.getCircuitWithAllDetails(organizationId, activeCircuit.getCircuitName());
 
-            List<CircuitMemberStatusDto> members = circuitDetails.getCircuitMembers();
+            List<CircuitMemberStatusDto> members = circuitDetails.getCircuitParticipants();
 
             LocalDateTime now = gridClock.now();
             Long nanoTime = gridClock.nanoTime();

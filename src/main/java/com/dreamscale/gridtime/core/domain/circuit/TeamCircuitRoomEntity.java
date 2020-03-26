@@ -43,7 +43,7 @@ public class TeamCircuitRoomEntity {
     private LocalDateTime closeTime;
 
     @Enumerated(EnumType.STRING)
-    private CircuitStatus circuitStatus;
+    private CircuitState circuitState;
 
     private String description;
 

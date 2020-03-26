@@ -26,6 +26,9 @@ public class RootAccountEntity {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "display_name")
+    private String displayName;
+
     @Column(name = "activation_code")
     private String activationCode;
 

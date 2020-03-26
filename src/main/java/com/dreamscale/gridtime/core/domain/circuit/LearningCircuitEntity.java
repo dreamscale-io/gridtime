@@ -38,12 +38,14 @@ public class LearningCircuitEntity {
     private UUID wtfRoomId;
     private UUID retroRoomId;
 
+    private UUID statusRoomId;
+
     private LocalDateTime openTime;
     private LocalDateTime closeTime;
     private LocalDateTime retroStartedTime;
 
     @Enumerated(EnumType.STRING)
-    private CircuitStatus circuitStatus;
+    private CircuitState circuitState;
 
     private LocalDateTime lastOnHoldTime;
     private LocalDateTime lastResumeTime;

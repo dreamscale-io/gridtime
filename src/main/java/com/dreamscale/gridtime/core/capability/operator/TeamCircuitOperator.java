@@ -3,7 +3,6 @@ package com.dreamscale.gridtime.core.capability.operator;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
 import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
-import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
@@ -118,7 +117,7 @@ public class TeamCircuitOperator {
         defaultRoom.setModeratorId(teamCircuitEntity.getModeratorId());
         defaultRoom.setOwnerName(ownerName);
         defaultRoom.setModeratorName(moderatorName);
-        defaultRoom.setCircuitStatus(CircuitStatus.ACTIVE.name());
+        defaultRoom.setCircuitStatus(CircuitState.TROUBLESHOOT.name());
 
         teamCircuitDto.setDefaultRoom(defaultRoom);
 
@@ -275,7 +274,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomDto.setOwnerName(ownerName);
         teamCircuitRoomDto.setModeratorName(moderatorName);
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
 
         return teamCircuitRoomDto;
     }
@@ -327,7 +326,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
 
         return teamCircuitRoomDto;
     }
@@ -340,7 +339,7 @@ public class TeamCircuitOperator {
         validateRoomExists(roomName, teamRoom);
 
         teamRoom.setCloseTime(gridClock.now());
-        teamRoom.setCircuitStatus(CircuitStatus.CLOSED);
+        teamRoom.setCircuitState(CircuitState.CLOSED);
 
         teamCircuitRoomRepository.save(teamRoom);
 
@@ -363,7 +362,7 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setModeratorName(moderatorName);
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitStatus().name());
+        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
         return teamCircuitRoomDto;
     }
 
@@ -416,7 +415,7 @@ public class TeamCircuitOperator {
             teamCircuitRoomDto.setModeratorName(room.getModeratorName());
             teamCircuitRoomDto.setDescription(room.getDescription());
             teamCircuitRoomDto.setJsonTags(room.getJsonTags());
-            teamCircuitRoomDto.setCircuitStatus(room.getCircuitStatus().name());
+            teamCircuitRoomDto.setCircuitStatus(room.getCircuitState().name());
 
             teamCircuitRoomDtos.add(teamCircuitRoomDto);
         }
@@ -461,7 +460,7 @@ public class TeamCircuitOperator {
         teamRoom.setTalkRoomId(talkRoomEntity.getId());
         teamRoom.setOwnerId(teamCircuit.getOwnerId());
         teamRoom.setModeratorId(teamCircuit.getModeratorId());
-        teamRoom.setCircuitStatus(CircuitStatus.ACTIVE);
+        teamRoom.setCircuitState(CircuitState.TROUBLESHOOT);
         teamRoom.setOpenTime(now);
 
         teamCircuitRoomRepository.save(teamRoom);
@@ -471,9 +470,7 @@ public class TeamCircuitOperator {
         talkRoomMember.setOrganizationId(teamCircuit.getOrganizationId());
         talkRoomMember.setMemberId(teamCircuit.getOwnerId());
         talkRoomMember.setRoomId(talkRoomEntity.getId());
-        talkRoomMember.setLastActive(now);
         talkRoomMember.setJoinTime(now);
-        talkRoomMember.setRoomStatus(RoomMemberStatus.INACTIVE);
 
         talkRoomMemberRepository.save(talkRoomMember);
 
@@ -516,15 +513,7 @@ public class TeamCircuitOperator {
             talkRoomMember.setOrganizationId(team.getOrganizationId());
             talkRoomMember.setMemberId(teamMember.getId());
             talkRoomMember.setRoomId(defaultTalkRoom.getId());
-            talkRoomMember.setLastActive(now);
             talkRoomMember.setJoinTime(now);
-
-            if (teamMember.getOnlineStatus() == OnlineStatus.Online) {
-                talkRoomMember.setRoomStatus(RoomMemberStatus.ACTIVE);
-            }
-            else {
-                talkRoomMember.setRoomStatus(RoomMemberStatus.INACTIVE);
-            }
 
             talkRoomMembers.add(talkRoomMember);
         }

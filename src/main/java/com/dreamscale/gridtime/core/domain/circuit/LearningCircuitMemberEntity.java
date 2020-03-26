@@ -6,35 +6,31 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "learning_circuit_room_view")
+@Entity(name = "learning_circuit_member")
 @Data
-@EqualsAndHashCode(of = "roomId")
+@EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningCircuitRoomEntity {
+public class LearningCircuitMemberEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID roomId;
-
-    private String roomName;
+    private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID circuitId;
 
-    private String circuitName;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
 
-    private UUID circuitOwnerId;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID memberId;
 
-    private UUID circuitModeratorId;
+    private LocalDateTime joinTime;
 
-    @Enumerated(EnumType.STRING)
-    private CircuitState circuitState;
 
 }

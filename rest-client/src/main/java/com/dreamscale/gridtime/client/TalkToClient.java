@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
@@ -35,6 +36,17 @@ public interface TalkToClient {
             ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SCREENSHOT_PATH)
     TalkMessageDto publishScreenshotToRoom(@Param("roomName") String roomName,
                                            ScreenshotReferenceInputDto screenshotReferenceInput);
+
+
+    @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
+            ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.JOIN_PATH)
+    TalkMessageDto joinExistingRoom(@Param("roomName") String roomName);
+
+    @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
+            ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.LEAVE_PATH)
+    TalkMessageDto leaveExistingRoom(@Param("roomName") String roomName);
+
+
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH +
             ResourcePaths.ACTIVE_PATH + ResourcePaths.CHAT_PATH)

@@ -3,13 +3,8 @@ package com.dreamscale.gridtime.core.machine.executor.worker
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.GridTimeWorkPile
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
-import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.RefreshDashboardTick
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard
-import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
@@ -101,7 +96,7 @@ class SystemWorkPileSpec extends Specification {
 
     def generateWTFStart(LocalDateTime startTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_OPEN)
+        wtfMessage.setMessageType(CircuitMessageType.WTF_STARTED)
         wtfMessage.setPosition(startTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 
@@ -110,7 +105,7 @@ class SystemWorkPileSpec extends Specification {
 
     def generateWTFEnd(LocalDateTime endTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_CLOSED)
+        wtfMessage.setMessageType(CircuitMessageType.WTF_SOLVED)
         wtfMessage.setPosition(endTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 

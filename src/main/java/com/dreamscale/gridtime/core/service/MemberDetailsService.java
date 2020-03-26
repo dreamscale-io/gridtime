@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.api.circuit.CircuitMemberDto;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsRepository;
 import lombok.extern.slf4j.Slf4j;

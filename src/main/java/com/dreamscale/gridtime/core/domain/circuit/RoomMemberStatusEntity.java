@@ -1,40 +1,43 @@
 package com.dreamscale.gridtime.core.domain.circuit;
 
+import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "learning_circuit_room_view")
+@Entity(name = "room_member_status_view")
 @Data
-@EqualsAndHashCode(of = "roomId")
 @Builder
+@EqualsAndHashCode(of = "id")
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningCircuitRoomEntity {
+public class RoomMemberStatusEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationId;
+    private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID roomId;
 
-    private String roomName;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID circuitId;
+    private UUID memberId;
 
-    private String circuitName;
+    private String username;
 
-    private UUID circuitOwnerId;
+    private String fullName;
 
-    private UUID circuitModeratorId;
+    private LocalDateTime lastActivity;
 
     @Enumerated(EnumType.STRING)
-    private CircuitState circuitState;
+    private OnlineStatus onlineStatus;
 
 }

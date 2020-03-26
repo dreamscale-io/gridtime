@@ -28,6 +28,60 @@ public class TalkToResource {
     LearningCircuitOperator learningCircuitOperator;
 
 
+    /**
+     * The invoking member joins the specified "-wtf" or "-retro" talk room.
+     *
+     * The circuit's corresponding "-status" room will automatically be joined.
+     *
+     * The invoking member will also become a circuit participant.
+     *
+     * @param roomName
+     * @return TalkMessageDto (the notification message sent to the room)
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.JOIN_PATH )
+    public TalkMessageDto joinRoom(@PathVariable("roomName") String roomName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("joinRoom, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return learningCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
+                invokingMember.getId(), roomName);
+
+    }
+
+    /**
+     * The invoking member leaves the specified "-wtf" or "-retro" talk room.
+     *
+     * The circuit's corresponding "-status" room will automatically be left.
+     *
+     * @param roomName
+     * @return TalkMessageDto (the notification message sent to the room)
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.LEAVE_PATH )
+    public TalkMessageDto leaveRoom(@PathVariable("roomName") String roomName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("leaveRoom, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return learningCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
+                invokingMember.getId(), roomName);
+
+    }
+
+    /**
+     * Send a chat message to the specified talk room.
+     *
+     * @param roomName
+     * @param chatMessageInputDto
+     *
+     * @return TalkMessageDto (the chat message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CHAT_PATH )
     public TalkMessageDto publishChatToRoom(@PathVariable("roomName") String roomName,
@@ -43,6 +97,14 @@ public class TalkToResource {
 
     }
 
+    /**
+     * Send a text snippet to the specified talk room (used from the IDE plugin).
+     *
+     * @param roomName
+     * @param newSnippetEventDto
+     *
+     * @return TalkMessageDto (the snippet message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH )
     public TalkMessageDto publishSnippetToRoom(@PathVariable("roomName") String roomName, @RequestBody NewSnippetEventDto newSnippetEventDto) {
@@ -57,30 +119,54 @@ public class TalkToResource {
 
     }
 
+    /**
+     * Send a screenshot to the specified talk room
+     *
+     * @param roomName
+     * @param screenshotReferenceInput
+     *
+     * @return TalkMessageDto (the screenshot message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SCREENSHOT_PATH )
-    public TalkMessageDto publishScreenshotToRoom(@PathVariable("roomName") String talkRoomId, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
+    public TalkMessageDto publishScreenshotToRoom(@PathVariable("roomName") String roomName, @RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {
 
         RequestContext context = RequestContext.get();
         log.info("publishScreenshotToRoom, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId, screenshotReferenceInput);
+        return learningCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
     }
 
+
+    /**
+     * Retrieve all the talk messages for a room.
+     *
+     * //TODO This needs to be a paged interface
+     *
+     * @param roomName
+     *
+     * @return List<TalkMessageDto>
+     */
     @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}")
-    List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("roomName") String talkRoomId) {
+    List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("roomName") String roomName) {
         RequestContext context = RequestContext.get();
         log.info("getAllTalkMessagesFromRoom, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), talkRoomId);
+        return learningCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
 
     }
 
-
+    /**
+     * Send a chat message to the member's active talk room, useful if sending from an external context
+     *
+     * @param chatMessageInputDto
+     *
+     * @return TalkMessageDto (the chat message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + ResourcePaths.ACTIVE_PATH + ResourcePaths.CHAT_PATH )
     public TalkMessageDto publishChatToActiveRoom(@RequestBody ChatMessageInputDto chatMessageInputDto) {
@@ -95,6 +181,13 @@ public class TalkToResource {
 
     }
 
+    /**
+     * Send a snippet message to the member's active talk room, useful if sending from an external context
+     *
+     * @param newSnippetEventDto
+     *
+     * @return TalkMessageDto (the snippet message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + ResourcePaths.ACTIVE_PATH + ResourcePaths.SNIPPET_PATH )
     public TalkMessageDto publishSnippetToActiveRoom(@RequestBody NewSnippetEventDto newSnippetEventDto) {
@@ -109,6 +202,13 @@ public class TalkToResource {
 
     }
 
+    /**
+     * Send a screenshot message to the member's active talk room, useful if sending from an external context
+     *
+     * @param screenshotReferenceInput
+     *
+     * @return TalkMessageDto (the screenshot message sent to the room)
+     */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + ResourcePaths.ACTIVE_PATH + ResourcePaths.SCREENSHOT_PATH )
     public TalkMessageDto publishScreenshotToActiveRoom(@RequestBody ScreenshotReferenceInputDto screenshotReferenceInput) {

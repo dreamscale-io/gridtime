@@ -91,6 +91,10 @@ public class ResourcePaths {
     public static final String DO_IT_LATER_PATH = "/doitlater";
     public static final String CLOSE_PATH = "/close";
     public static final String RESUME_PATH = "/resume";
+    public static final String DONE_PATH = "/done";
+    public static final String REOPEN_PATH = "/reopen";
+    public static final String SOLVE_PATH = "/solve";
+
 
     public static final String ACTIVE_PATH = "/active";
 

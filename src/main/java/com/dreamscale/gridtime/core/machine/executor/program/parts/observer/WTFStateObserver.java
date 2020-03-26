@@ -39,18 +39,18 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
 
 
     private StartTypeTag decodeStartTag(CircuitMessageType messageType) {
-        if (messageType.equals(CircuitMessageType.CIRCUIT_OPEN)) {
+        if (messageType.equals(CircuitMessageType.WTF_STARTED)) {
             return StartTypeTag.Start;
-        } else if (messageType.equals(CircuitMessageType.CIRCUIT_RESUMED)) {
+        } else if (messageType.equals(CircuitMessageType.WTF_RESUMED)) {
             return StartTypeTag.Resume;
         }
         return StartTypeTag.Start;
     }
 
     private FinishTypeTag decodeFinishTag(CircuitMessageType messageType) {
-        if (messageType.equals(CircuitMessageType.CIRCUIT_CLOSED)) {
+        if (messageType.equals(CircuitMessageType.WTF_SOLVED)) {
             return FinishTypeTag.Success;
-        } else if (messageType.equals(CircuitMessageType.CIRCUIT_ONHOLD)) {
+        } else if (messageType.equals(CircuitMessageType.WTF_ONHOLD)) {
             return FinishTypeTag.DoItLater;
         }
         return FinishTypeTag.Success;
@@ -58,12 +58,12 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
 
 
     private boolean isCircuitBeginningEvent(CircuitMessageType messageType) {
-        return messageType.equals(CircuitMessageType.CIRCUIT_OPEN)
-                || messageType.equals(CircuitMessageType.CIRCUIT_RESUMED);
+        return messageType.equals(CircuitMessageType.WTF_STARTED)
+                || messageType.equals(CircuitMessageType.WTF_RESUMED);
     }
 
     private boolean isCircleEndingEvent(CircuitMessageType messageType) {
-        return messageType.equals(CircuitMessageType.CIRCUIT_CLOSED)
-                || messageType.equals(CircuitMessageType.CIRCUIT_ONHOLD);
+        return messageType.equals(CircuitMessageType.WTF_SOLVED)
+                || messageType.equals(CircuitMessageType.WTF_ONHOLD);
     }
 }

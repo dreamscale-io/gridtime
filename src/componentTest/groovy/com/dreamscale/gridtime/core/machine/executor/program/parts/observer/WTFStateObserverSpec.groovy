@@ -49,10 +49,10 @@ public class WTFStateObserverSpec extends Specification {
 
         UUID circuitId = UUID.randomUUID()
 
-        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", CircuitMessageType.CIRCUIT_OPEN)
-        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", CircuitMessageType.CIRCUIT_ONHOLD)
-        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", CircuitMessageType.CIRCUIT_RESUMED)
-        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", CircuitMessageType.CIRCUIT_CLOSED)
+        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", CircuitMessageType.WTF_STARTED)
+        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", CircuitMessageType.WTF_ONHOLD)
+        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", CircuitMessageType.WTF_RESUMED)
+        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", CircuitMessageType.WTF_SOLVED)
 
 
         def flowables = [circuitEvent1, circuitEvent2, circuitEvent3, circuitEvent4] as List

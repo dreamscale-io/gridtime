@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.api.circuit;
 
+
+import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,14 +17,11 @@ import java.util.UUID;
 public class CircuitMemberStatusDto {
 
     UUID memberId;
-
-    String shortName;
     String fullName;
+    String displayName;
 
-    LocalDateTime wtfJoinTime;
-    String wtfRoomStatus;
+    String username;
 
-    LocalDateTime retroJoinTime;
-    String retroRoomStatus;
-
+    LocalDateTime lastActive;
+    OnlineStatus onlineStatus;
 }

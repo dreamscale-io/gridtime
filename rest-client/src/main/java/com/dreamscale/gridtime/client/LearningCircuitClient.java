@@ -14,6 +14,7 @@ import java.util.List;
 })
 public interface LearningCircuitClient {
 
+    //create circuits
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
     LearningCircuitDto startWTF();
@@ -24,34 +25,34 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
     LearningCircuitDto saveDescriptionForLearningCircuit(@Param("name") String customCircuitName, DescriptionInputDto descriptionInputDto);
 
-
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.PROPERTY_PATH + ResourcePaths.TAGS_PATH)
     LearningCircuitDto saveTagsForLearningCircuit(@Param("name") String customCircuitName, TagsInputDto tagsInputDto);
 
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" )
+    LearningCircuitWithMembersDto getCircuitWithAllDetails(@Param("name") String circuitName);
+
+    //workflow transitions
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.FINISH_PATH)
+    LearningCircuitDto finishWTF(@Param("name") String circuitName);
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
+    LearningCircuitDto abortWTF(@Param("name") String circuitName);
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
+    LearningCircuitDto putWTFOnHoldWithDoItLater(@Param("name") String circuitName);
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
+    LearningCircuitDto resumeWTF(@Param("name") String circuitName);
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
     LearningCircuitDto startRetroForWTF(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
-    LearningCircuitDto joinExistingCircuit(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
-    LearningCircuitDto leaveExistingCircuit(@Param("name") String circuitName);
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.SOLVE_PATH)
+    LearningCircuitDto reopenWTF(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
-    LearningCircuitDto closeExistingCircuit(@Param("name") String circuitName);
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
-    LearningCircuitDto abortExistingCircuit(@Param("name") String circuitName);
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
-    LearningCircuitDto putCircuitOnHoldWithDoItLater(@Param("name") String circuitName);
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
-    LearningCircuitDto resumeCircuit(@Param("name") String circuitName);
-
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" )
-    LearningCircuitWithMembersDto getCircuitWithAllDetails(@Param("name") String circuitName);
+    //query circuits
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH )
     LearningCircuitDto getActiveCircuit();
@@ -62,6 +63,11 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     List<LearningCircuitDto> getAllMyParticipatingCircuits();
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" )
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
     List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@Param("id") String memberId);
+
+
+
 }
+
+

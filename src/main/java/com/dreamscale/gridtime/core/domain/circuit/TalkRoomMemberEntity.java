@@ -32,23 +32,4 @@ public class TalkRoomMemberEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    private LocalDateTime lastActive;
-
-    @Enumerated(EnumType.STRING)
-    private RoomMemberStatus roomStatus;
-
-
-
 }
-
-//    create table talk_room_member (
-//        id uuid primary key not null,
-//        room_id uuid,
-//        join_time timestamp,
-//        organization_id uuid,
-//        team_id uuid,
-//        member_id uuid,
-//        last_active timestamp,
-//        active_status text,
-//        unique (room_id, member_id)
-//);

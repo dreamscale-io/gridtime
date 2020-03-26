@@ -107,7 +107,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
 
     def generateWTFStart(LocalDateTime startTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_OPEN)
+        wtfMessage.setMessageType(CircuitMessageType.WTF_STARTED)
         wtfMessage.setPosition(startTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 
@@ -116,7 +116,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
 
     def generateWTFEnd(LocalDateTime endTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.CIRCUIT_CLOSED)
+        wtfMessage.setMessageType(CircuitMessageType.WTF_SOLVED)
         wtfMessage.setPosition(endTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 

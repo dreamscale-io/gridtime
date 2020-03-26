@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.domain.circuit;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +25,8 @@ public interface TalkRoomMemberRepository extends CrudRepository<TalkRoomMemberE
                                                @Param("memberId") UUID memberId,
                                                @Param("talkRoomName") String talkRoomId);
 
-
-
-
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from talk_room_member trm " +
+            "where trm.room_id = (:roomId) ")
+    void deleteMembersInRoom(UUID roomId);
 }

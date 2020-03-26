@@ -15,7 +15,7 @@ class RandomWTFCircuitMessageEntityBuilder extends WTFFeedMessageEntity.WTFFeedM
                 .circleId(aRandom.uuid())
                 .torchieId(aRandom.uuid())
                 .position(aRandom.localDateTimeInFuture())
-                .messageType(CircuitMessageType.CIRCUIT_OPEN)
+                .messageType(CircuitMessageType.WTF_STARTED)
     }
 
     WTFFeedMessageEntity save() {

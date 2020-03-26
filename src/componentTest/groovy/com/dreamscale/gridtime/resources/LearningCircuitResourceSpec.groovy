@@ -1,13 +1,13 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
+
 import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.client.LearningCircuitClient
-import com.dreamscale.gridtime.core.domain.circuit.CircuitStatus
+import com.dreamscale.gridtime.core.domain.circuit.CircuitState
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -63,7 +63,7 @@ class LearningCircuitResourceSpec extends Specification {
         then:
         assert circuit != null
         assert circuit.circuitName != null
-        assert circuit.circuitStatus != null
+        assert circuit.getCircuitState != null
         assert circuit.openTimeStr != null
 
     }
@@ -129,10 +129,10 @@ class LearningCircuitResourceSpec extends Specification {
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit1 = circuitClient.startWTF()
-        circuitClient.putCircuitOnHoldWithDoItLater(circuit1.getCircuitName())
+        circuitClient.putWTFOnHoldWithDoItLater(circuit1.getCircuitName())
 
         LearningCircuitDto circuit2 = circuitClient.startWTF()
-        circuitClient.putCircuitOnHoldWithDoItLater(circuit2.getCircuitName())
+        circuitClient.putWTFOnHoldWithDoItLater(circuit2.getCircuitName())
 
         when:
         List<LearningCircuitDto> circuits = circuitClient.getAllMyDoItLaterCircuits()
@@ -152,7 +152,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitDto closedCircuit = circuitClient.closeExistingCircuit(circuit.getCircuitName());
+        LearningCircuitDto closedCircuit = circuitClient.finishWTF(circuit.getCircuitName());
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
@@ -169,12 +169,12 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitDto abortedCircuit = circuitClient.abortExistingCircuit(circuit.getCircuitName());
+        LearningCircuitDto abortedCircuit = circuitClient.abortWTF(circuit.getCircuitName());
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
         assert abortedCircuit != null
-        assert abortedCircuit.circuitStatus == CircuitStatus.ABORTED.name()
+        assert abortedCircuit.getCircuitState == CircuitState.ABORTED.name()
         assert activeCircuit == null
     }
 
@@ -188,11 +188,11 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitDto circuitDto = circuitClient.putCircuitOnHoldWithDoItLater(circuit.getCircuitName());
+        LearningCircuitDto circuitDto = circuitClient.putWTFOnHoldWithDoItLater(circuit.getCircuitName());
 
         then:
         assert circuitDto != null
-        assert circuitDto.circuitStatus == CircuitStatus.ONHOLD.name()
+        assert circuitDto.getCircuitState == CircuitState.ONHOLD.name()
     }
 
     def 'should resume a circuit from do it later'() {
@@ -202,14 +202,14 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
-        LearningCircuitDto circuitShelved = circuitClient.putCircuitOnHoldWithDoItLater(circuit.getCircuitName());
+        LearningCircuitDto circuitShelved = circuitClient.putWTFOnHoldWithDoItLater(circuit.getCircuitName());
 
         when:
-        LearningCircuitDto resumedCircuit = circuitClient.resumeCircuit(circuit.getCircuitName());
+        LearningCircuitDto resumedCircuit = circuitClient.resumeWTF(circuit.getCircuitName());
 
         then:
         assert resumedCircuit != null
-        assert resumedCircuit.circuitStatus == CircuitStatus.ACTIVE.name()
+        assert resumedCircuit.getCircuitState == CircuitState.TROUBLESHOOT.name()
     }
 
     def 'should start a retro'() {

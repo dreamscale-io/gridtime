@@ -27,53 +27,32 @@ public class LearningCircuitDto {
     String retroTalkRoomName;
     UUID retroTalkRoomId;
 
+    String statusTalkRoomName;
+    UUID statusTalkRoomId;
+
     private UUID ownerId;
     private String ownerName;
 
     private UUID moderatorId;
     private String moderatorName;
 
-    LocalDateTime retroStartedTime;
-    String retroStartedTimeStr;
-
     LocalDateTime openTime;
     String openTimeStr;
 
-    LocalDateTime closeTime;
-    String closeTimeStr;
+    String circuitState;
 
-    String circuitStatus;
+    LocalDateTime startTimerFromTime;
+    String startTimerFromTimeStr;
 
-    LocalDateTime lastOnHoldTime;
-    String lastOnHoldTimeStr;
-
-    LocalDateTime lastResumeTime;
-    String lastResumeTimeStr;
-
-    Long secondsBeforeOnHold;
-
-    public void setRetroStartedTime(LocalDateTime retroStartedTime) {
-        this.retroStartedTime = retroStartedTime;
-        this.retroStartedTimeStr = TimeFormatter.format(retroStartedTime);
-    }
+    Long startTimerSecondsOffset;
 
     public void setOpenTime(LocalDateTime openTime) {
         this.openTime = openTime;
         this.openTimeStr = TimeFormatter.format(openTime);
     }
 
-    public void setCloseTime(LocalDateTime closeTime) {
-        this.closeTime = closeTime;
-        this.closeTimeStr = TimeFormatter.format(closeTime);
-    }
-
-    public void setLastOnHoldTime(LocalDateTime lastOnHoldTime) {
-        this.lastOnHoldTime = lastOnHoldTime;
-        this.lastOnHoldTimeStr = TimeFormatter.format(lastOnHoldTime);
-    }
-
-    public void setLastResumeTime(LocalDateTime lastResumeTime) {
-        this.lastResumeTime = lastResumeTime;
-        this.lastResumeTimeStr = TimeFormatter.format(lastResumeTime);
+    public void setStartTimerFromTime(LocalDateTime startTimerFromTime) {
+        this.startTimerFromTime = startTimerFromTime;
+        this.startTimerFromTimeStr = TimeFormatter.format(startTimerFromTime);
     }
 }

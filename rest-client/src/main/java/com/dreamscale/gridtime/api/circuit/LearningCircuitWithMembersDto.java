@@ -1,55 +1,47 @@
 package com.dreamscale.gridtime.api.circuit;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningCircuitWithMembersDto {
+public class LearningCircuitWithMembersDto extends LearningCircuitDto {
 
-    UUID id;
-    String circuitName;
 
-    UUID wtfTalkRoomId;
-    String wtfTalkRoomName;
+    List<CircuitMemberStatusDto> circuitParticipants;
 
-    UUID retroTalkRoomId;
-    String retroTalkRoomName;
+    List<CircuitMemberStatusDto> activeWtfRoomMembers;
 
-    UUID ownerId;
-    String ownerName;
+    List<CircuitMemberStatusDto> activeRetroRoomMembers;
 
-    UUID moderatorId;
-    String moderatorName;
 
-    LocalDateTime openTime;
-    String openTimeStr;
+    public void addCircuitParticipant(CircuitMemberStatusDto circuitMemberStatus) {
+        if (circuitParticipants == null) {
+            circuitParticipants = new ArrayList<>();
+        }
 
-    LocalDateTime closeTime;
-    String closeTimeStr;
+        circuitParticipants.add(circuitMemberStatus);
+    }
 
-    String circuitStatus;
+    public void addActiveWTFRoomMember(CircuitMemberStatusDto circuitMemberStatus) {
+        if (activeWtfRoomMembers == null) {
+            activeWtfRoomMembers = new ArrayList<>();
+        }
 
-    LocalDateTime lastOnHoldTime;
-    String lastOnHoldTimeStr;
+        activeWtfRoomMembers.add(circuitMemberStatus);
+    }
 
-    LocalDateTime lastResumeTime;
-    String lastResumeTimeStr;
+    public void addActiveRetroRoomMember(CircuitMemberStatusDto circuitMemberStatus) {
+        if (activeRetroRoomMembers == null) {
+            activeRetroRoomMembers = new ArrayList<>();
+        }
 
-    Long secondsBeforeOnHold;
-
-    List<CircuitMemberStatusDto> circuitMembers = new ArrayList<>();
-
-    public void addCircuitMember(CircuitMemberStatusDto circuitMemberStatus) {
-        circuitMembers.add(circuitMemberStatus);
+        activeRetroRoomMembers.add(circuitMemberStatus);
     }
 
 }
