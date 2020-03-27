@@ -86,7 +86,7 @@ public class ActiveWorkStatusManager {
         pushResolveStatus(organizationId, memberId, now, nanoTime);
     }
 
-    public void resolveWTFWithAbort(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
+    public void resolveWTFWithCancel(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
         pushResolveStatus(organizationId, memberId, now, nanoTime);
     }

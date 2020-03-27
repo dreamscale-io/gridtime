@@ -36,23 +36,24 @@ public class LearningCircuitDto {
     private UUID moderatorId;
     private String moderatorName;
 
+    private Long totalCircuitElapsedNanoTime;
+    private Long totalCircuitPausedNanoTime;
+
+    private Long startCircuitNanoTime;
+    private Long wtfOpenNanoTime;
+    private Long retroOpenNanoTime;
+    private Long closeCircuitNanoTime;
+    private Long pauseCircuitNanoTime;
+    private Long resumeCircuitNanoTime;
+    private Long cancelCircuitNanoTime;
+
     LocalDateTime openTime;
     String openTimeStr;
 
     String circuitState;
 
-    LocalDateTime startTimerFromTime;
-    String startTimerFromTimeStr;
-
-    Long startTimerSecondsOffset;
-
     public void setOpenTime(LocalDateTime openTime) {
         this.openTime = openTime;
         this.openTimeStr = TimeFormatter.format(openTime);
-    }
-
-    public void setStartTimerFromTime(LocalDateTime startTimerFromTime) {
-        this.startTimerFromTime = startTimerFromTime;
-        this.startTimerFromTimeStr = TimeFormatter.format(startTimerFromTime);
     }
 }

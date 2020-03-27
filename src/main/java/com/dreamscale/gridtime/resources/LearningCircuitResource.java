@@ -6,7 +6,6 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
-import feign.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -150,27 +149,27 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Aborts an existing WTF, the circuit must be owned by the invoking member.
+     * Cancels an existing WTF, the circuit must be owned by the invoking member.
      *
      * This causes circuits to disappear from the "My Circuits" list, without having to finish the WTF
      *
-     * Aborting a WTF is a final state, and does not need to be closed.
+     * Canceling a WTF is a final state, and does not need to be closed.
      *
-     * Input States: TROUBLESHOOT
-     * Ouput State: ABORTED
+     * Input States: TROUBLESHOOT or ONHOLD
+     * Ouput State: CANCELED
      *
      * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
-    public LearningCircuitDto abortWTF(@PathVariable("name") String circuitName) {
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CANCEL_PATH)
+    public LearningCircuitDto cancelWTF(@PathVariable("name") String circuitName) {
 
         RequestContext context = RequestContext.get();
-        log.info("abortWTF, user={}", context.getRootAccountId());
+        log.info("cancelWTF, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.abortWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.cancelWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -188,11 +187,11 @@ public class LearningCircuitResource {
     public LearningCircuitDto putWTFOnHoldWithDoItLater(@PathVariable("name") String circuitName) {
 
         RequestContext context = RequestContext.get();
-        log.info("putWTFOnHoldWithDoItLater, user={}", context.getRootAccountId());
+        log.info("pauseWTFWithDoItLater, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.putWTFOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.pauseWTFWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**

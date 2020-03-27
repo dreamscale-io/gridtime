@@ -17,6 +17,39 @@ alter table talk_room_member
  drop column room_status;
 
 
+delete from talk_room where room_type = 'WTF_ROOM';
+
+delete from talk_room_member rm where exists (select 1 from talk_room r where r.id = rm.room_id and r.room_type = 'WTF_ROOM');
+
+truncate table talk_room_message;
+
+truncate table learning_circuit;
+
+truncate table learning_circuit_participant;
+
+drop table learning_circuit;
+
+create table learning_circuit (
+ id uuid primary key not null,
+ organization_id uuid,
+ owner_id uuid,
+ moderator_id uuid,
+ circuit_name text,
+ wtf_room_id uuid,
+ retro_room_id uuid,
+ open_time timestamp,
+ circuit_status text,
+ total_circuit_elapsed_nano_time bigint,
+ total_circuit_paused_nano_time bigint,
+ wtf_open_nano_time bigint,
+ retro_open_nano_time bigint,
+ solved_circuit_nano_time bigint,
+ close_circuit_nano_time bigint,
+ pause_circuit_nano_time bigint,
+ resume_circuit_nano_time bigint,
+ cancel_circuit_nano_time bigint,
+ unique (organization_id, circuit_name)
+);
 
 --we need to remove refs to this first
 --drop view member_details_view;

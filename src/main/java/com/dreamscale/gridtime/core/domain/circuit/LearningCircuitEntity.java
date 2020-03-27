@@ -41,15 +41,21 @@ public class LearningCircuitEntity {
     private UUID statusRoomId;
 
     private LocalDateTime openTime;
-    private LocalDateTime closeTime;
-    private LocalDateTime retroStartedTime;
 
     @Enumerated(EnumType.STRING)
     private CircuitState circuitState;
 
-    private LocalDateTime lastOnHoldTime;
-    private LocalDateTime lastResumeTime;
+    private Long totalCircuitElapsedNanoTime;
+    private Long totalCircuitPausedNanoTime;
 
-    private Long secondsBeforeOnHold;
+    private Long wtfOpenNanoTime;
+    private Long retroOpenNanoTime;
+    private Long solvedCircuitNanoTime;
+    private Long pauseCircuitNanoTime;
+    private Long resumeCircuitNanoTime;
+    private Long cancelCircuitNanoTime;
+    private Long closeCircuitNanoTime;
 
 }
+
+

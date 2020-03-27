@@ -152,7 +152,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitDto closedCircuit = circuitClient.finishWTF(circuit.getCircuitName());
+        LearningCircuitDto closedCircuit = circuitClient.solveWTF(circuit.getCircuitName());
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
@@ -174,7 +174,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert abortedCircuit != null
-        assert abortedCircuit.getCircuitState == CircuitState.ABORTED.name()
+        assert abortedCircuit.getCircuitState == CircuitState.CANCELED.name()
         assert activeCircuit == null
     }
 

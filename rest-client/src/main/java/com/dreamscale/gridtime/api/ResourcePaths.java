@@ -79,7 +79,7 @@ public class ResourcePaths {
     public static final String STATUS_PATH = "/status";
     public static final String WTF_PATH = "/wtf";
     public static final String YAY_PATH = "/yay";
-    public static final String ABORT_PATH = "/abort";
+    public static final String CANCEL_PATH = "/abort";
     public static final String XP_PATH = "/xp";
     public static final String GROUP_PATH = "/group";
 

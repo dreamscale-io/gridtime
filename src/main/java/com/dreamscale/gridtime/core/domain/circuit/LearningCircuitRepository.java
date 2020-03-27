@@ -21,7 +21,7 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
             "and c.owner_id = (:memberId) "+
-            "and c.circuit_status = 'ONHOLD' " +
+            "and c.circuit_status = PAUSED " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findAllOnHoldCircuitsOwnedBy(@Param("organizationId") UUID organizationId,
                                                              @Param("memberId") UUID memberId);

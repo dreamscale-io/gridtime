@@ -18,7 +18,7 @@ public enum CircuitMessageType {
     WTF_ONHOLD("wtf-onhold", "WTF is on hold.", CircuitStatusDto.class),
     WTF_RESUMED("wtf-resumed", "WTF is resumed.", CircuitStatusDto.class),
     WTF_RETRO_STARTED("wtf-retro-started", "WTF retro is started.", CircuitStatusDto.class),
-    WTF_ABORTED("wtf-aborted", "Circuit is aborted", CircuitStatusDto.class),
+    WTF_CANCELED("wtf-aborted", "Circuit is aborted", CircuitStatusDto.class),
     TEAM_INTENTION_STARTED("team-intention-started", "Intention started.", IntentionStartedDetailsDto.class),
     TEAM_WTF_STARTED("team-wtf-started", "WTF started.", WTFStatusUpdateDto.class),
     TEAM_WTF_STOPPED("team-wtf-stopped", "WTF stopped.", WTFStatusUpdateDto.class),

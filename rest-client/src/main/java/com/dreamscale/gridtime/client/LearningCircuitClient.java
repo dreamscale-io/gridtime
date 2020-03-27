@@ -33,10 +33,10 @@ public interface LearningCircuitClient {
 
     //workflow transitions
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.FINISH_PATH)
-    LearningCircuitDto finishWTF(@Param("name") String circuitName);
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.SOLVE_PATH)
+    LearningCircuitDto solveWTF(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.ABORT_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CANCEL_PATH)
     LearningCircuitDto abortWTF(@Param("name") String circuitName);
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
@@ -48,8 +48,10 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
     LearningCircuitDto startRetroForWTF(@Param("name") String circuitName);
 
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
+    LearningCircuitDto closeWTF(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.SOLVE_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.REOPEN_PATH)
     LearningCircuitDto reopenWTF(@Param("name") String circuitName);
 
     //query circuits
