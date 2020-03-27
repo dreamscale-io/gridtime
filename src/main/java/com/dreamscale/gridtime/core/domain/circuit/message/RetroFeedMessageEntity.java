@@ -33,9 +33,11 @@ public class RetroFeedMessageEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID fromId;
 
-    private String fromShortName;
+    private String fromDisplayName;
 
     private String fromFullName;
+
+    private String fromUsername;
 
     private LocalDateTime position;
 
