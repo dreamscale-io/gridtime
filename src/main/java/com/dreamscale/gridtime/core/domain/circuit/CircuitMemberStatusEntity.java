@@ -37,7 +37,6 @@ public class CircuitMemberStatusEntity {
 
     private LocalDateTime lastActivity;
 
-    @Enumerated(EnumType.STRING)
     private OnlineStatus onlineStatus;
 
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,5 +29,5 @@ public interface TalkRoomMemberRepository extends CrudRepository<TalkRoomMemberE
     @Modifying
     @Query(nativeQuery = true, value = "delete from talk_room_member trm " +
             "where trm.room_id = (:roomId) ")
-    void deleteMembersInRoom(UUID roomId);
+    void deleteMembersInRoom(@Param("roomId") UUID roomId);
 }

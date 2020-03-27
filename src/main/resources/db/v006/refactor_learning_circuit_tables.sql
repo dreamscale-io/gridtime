@@ -2,11 +2,12 @@
 
 --changeset dreamscale:4
 
-create table learning_circuit_participant (
+create table learning_circuit_member (
  id uuid primary key not null,
  circuit_id uuid,
  organization_id uuid,
  member_id uuid,
+ join_time timestamp,
  unique (circuit_id, member_id)
 );
 
@@ -43,7 +44,7 @@ truncate table talk_room_message;
 
 truncate table learning_circuit;
 
-truncate table learning_circuit_participant;
+truncate table learning_circuit_member;
 
 drop table learning_circuit;
 
@@ -53,8 +54,11 @@ create table learning_circuit (
  owner_id uuid,
  moderator_id uuid,
  circuit_name text,
+  json_tags text,
+ description text,
  wtf_room_id uuid,
  retro_room_id uuid,
+ status_room_id uuid,
  open_time timestamp,
  circuit_state text,
  total_circuit_elapsed_nano_time bigint,
@@ -83,9 +87,9 @@ os.username, os.full_name, os.display_name, os.last_activity, os.online_status
 from talk_room_member rm, online_status_view os where rm.member_id = os.member_id;
 
 create view circuit_member_status_view as
-select p.id, p.circuit_id, p.organization_id, p.member_id,
+select lcm.id, lcm.circuit_id, lcm.organization_id, lcm.member_id,
 os.username, os.full_name, os.display_name, os.last_activity, os.online_status
-from learning_circuit_participant p, online_status_view os where p.member_id = os.member_id;
+from learning_circuit_member lcm, online_status_view os where lcm.member_id = os.member_id;
 
 create view member_details_view as
  select om.organization_id, om.id member_id, om.username, r.display_name, r.full_name

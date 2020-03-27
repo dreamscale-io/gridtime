@@ -6,7 +6,11 @@ import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto
+import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
+import com.dreamscale.gridtime.client.TalkToClient
+import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity
 import com.dreamscale.gridtime.core.domain.circuit.CircuitState
 import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
@@ -31,6 +35,12 @@ class LearningCircuitResourceSpec extends Specification {
     LearningCircuitClient circuitClient
 
     @Autowired
+    AccountClient accountClient
+
+    @Autowired
+    TalkToClient talkClient
+
+    @Autowired
     RootAccountEntity loggedInUser
 
     @Autowired
@@ -45,6 +55,7 @@ class LearningCircuitResourceSpec extends Specification {
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
+        mockTimeService.nanoTime() >> System.nanoTime();
 
         org = aRandom.organizationEntity().save()
     }
@@ -63,7 +74,7 @@ class LearningCircuitResourceSpec extends Specification {
         then:
         assert circuit != null
         assert circuit.circuitName != null
-        assert circuit.getCircuitState != null
+        assert circuit.circuitState != null
         assert circuit.openTimeStr != null
 
     }
@@ -143,7 +154,7 @@ class LearningCircuitResourceSpec extends Specification {
     }
 
 
-    def 'should close a circuit'() {
+    def 'should solve a WTF circuit'() {
         given:
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
@@ -160,7 +171,7 @@ class LearningCircuitResourceSpec extends Specification {
         assert activeCircuit == null
     }
 
-    def 'should abort a circuit'() {
+    def 'should cancel a WTF circuit'() {
         given:
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
@@ -174,7 +185,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert abortedCircuit != null
-        assert abortedCircuit.getCircuitState == CircuitState.CANCELED.name()
+        assert abortedCircuit.circuitState == CircuitState.CANCELED.name()
         assert activeCircuit == null
     }
 
@@ -192,7 +203,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert circuitDto != null
-        assert circuitDto.getCircuitState == CircuitState.ONHOLD.name()
+        assert circuitDto.circuitState == CircuitState.ONHOLD.name()
     }
 
     def 'should resume a circuit from do it later'() {
@@ -209,7 +220,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert resumedCircuit != null
-        assert resumedCircuit.getCircuitState == CircuitState.TROUBLESHOOT.name()
+        assert resumedCircuit.circuitState == CircuitState.TROUBLESHOOT.name()
     }
 
     def 'should start a retro'() {
@@ -224,7 +235,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
 
-        assert circuitWithRetroStarted.getRetroStartedTime() != null
+        assert circuitWithRetroStarted.getRetroOpenNanoTime() != null
     }
 
     def 'join another persons chat room'() {
@@ -240,14 +251,17 @@ class LearningCircuitResourceSpec extends Specification {
         OrganizationMemberEntity otherMember =  createMemberWithOrgAndTeam();
         loggedInUser.setId(otherMember.getRootAccountId())
 
+        LearningCircuitDto otherMemberCircuit = circuitClient.startWTF()
         when:
 
-        LearningCircuitDto myOwnCircuit = circuitClient.startWTF()
-        LearningCircuitDto circuitJoined = circuitClient.joinExistingCircuit(circuit.getCircuitName())
+        TalkMessageDto joinMessage = talkClient.joinExistingRoom(circuit.getWtfTalkRoomName())
 
         List<LearningCircuitDto> participatingCircuits = circuitClient.getAllMyParticipatingCircuits();
 
         then:
+
+        assert joinMessage != null
+
         assert participatingCircuits != null
         assert participatingCircuits.size() == 2
     }
@@ -256,34 +270,27 @@ class LearningCircuitResourceSpec extends Specification {
         given:
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+        accountClient.login()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
         //change active logged in user to a different user within same organization
         OrganizationMemberEntity otherMember =  createMemberWithOrgAndTeam();
         loggedInUser.setId(otherMember.getRootAccountId())
+        accountClient.login()
 
         when:
 
-        LearningCircuitDto circuitJoined = circuitClient.joinExistingCircuit(circuit.getCircuitName())
-        LearningCircuitDto circuitLeft = circuitClient.leaveExistingCircuit(circuit.getCircuitName())
+        TalkMessageDto joinMessage  = talkClient.joinExistingRoom(circuit.getWtfTalkRoomName())
+        TalkMessageDto leaveMessage  = talkClient.leaveExistingRoom(circuit.getWtfTalkRoomName())
 
         LearningCircuitWithMembersDto fullDetailsDto = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
 
         then:
         assert fullDetailsDto != null
-        assert fullDetailsDto.getCircuitMembers().size() == 2
+        assert fullDetailsDto.getCircuitParticipants().size() == 2
 
-        CircuitMemberStatusDto memberMe = getMemberStatusById(fullDetailsDto.getCircuitMembers(), member.id);
-        CircuitMemberStatusDto memberOther = getMemberStatusById(fullDetailsDto.getCircuitMembers(), otherMember.id);
-
-
-        assert memberMe != null
-        assert memberOther != null
-
-        assert memberMe.wtfRoomStatus == RoomMemberStatus.ACTIVE.name()
-        assert memberOther.wtfRoomStatus == RoomMemberStatus.INACTIVE.name()
-
+        assert fullDetailsDto.getActiveWtfRoomMembers().size() == 1
 
     }
 

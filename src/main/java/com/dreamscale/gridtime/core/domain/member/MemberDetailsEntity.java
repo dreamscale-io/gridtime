@@ -20,7 +20,7 @@ public class MemberDetailsEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    private String shortName;
+    private String displayName;
     private String fullName;
 
 }

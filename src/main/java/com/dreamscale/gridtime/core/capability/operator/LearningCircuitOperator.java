@@ -18,6 +18,7 @@ import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -88,6 +89,9 @@ public class LearningCircuitOperator {
     @Autowired
     private MapperFactory mapperFactory;
 
+    @Autowired
+    private MemberDetailsService memberDetailsService;
+
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
@@ -104,16 +108,17 @@ public class LearningCircuitOperator {
         circuitDtoMapper = mapperFactory.createDtoEntityMapper(LearningCircuitDto.class, LearningCircuitEntity.class);
         circuitFullDtoMapper = mapperFactory.createDtoEntityMapper(LearningCircuitWithMembersDto.class, LearningCircuitEntity.class);
         roomMemberStatusDtoMapper = mapperFactory.createDtoEntityMapper(CircuitMemberStatusDto.class, RoomMemberStatusEntity.class);
+        circuitMemberStatusDtoMapper = mapperFactory.createDtoEntityMapper(CircuitMemberStatusDto.class, CircuitMemberStatusEntity.class);
 
         sillyNameGenerator = new SillyNameGenerator();
     }
 
     @Transactional
-    public LearningCircuitDto createNewLearningCircuit(UUID organizationId, UUID memberId) {
+    public LearningCircuitDto startWTF(UUID organizationId, UUID memberId) {
         String circuitName = sillyNameGenerator.random();
 
         log.info("Creating new circuit : " + circuitName);
-        return createNewLearningCircuitWithCustomName(organizationId, memberId, circuitName);
+        return startWTFWithCustomName(organizationId, memberId, circuitName);
     }
 
 
@@ -140,8 +145,8 @@ public class LearningCircuitOperator {
 
     }
 
-
-    public LearningCircuitDto createNewLearningCircuitWithCustomName(UUID organizationId, UUID memberId, String circuitName) {
+    @Transactional
+    public LearningCircuitDto startWTFWithCustomName(UUID organizationId, UUID memberId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = new LearningCircuitEntity();
         learningCircuitEntity.setId(UUID.randomUUID());
@@ -318,6 +323,11 @@ public class LearningCircuitOperator {
                 circuitDto.setTags(tagsInput.getTags());
             }
 
+            String ownerName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
+            circuitDto.setOwnerName(ownerName);
+
+            String moderatorName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
+            circuitDto.setModeratorName(moderatorName);
         }
     }
 
@@ -371,9 +381,9 @@ public class LearningCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
-        talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
+        closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
+        //reset talk room members in room
         List<LearningCircuitMemberEntity> circuitMembers = learningCircuitMemberRepository.findByCircuitId(learningCircuitEntity.getId());
 
         talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getRetroRoomId());
@@ -482,6 +492,7 @@ public class LearningCircuitOperator {
 
     }
 
+    @Transactional
     public LearningCircuitDto solveWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
@@ -518,7 +529,7 @@ public class LearningCircuitOperator {
         return circuitDto;
     }
 
-
+    @Transactional
     public LearningCircuitDto cancelWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
@@ -562,7 +573,7 @@ public class LearningCircuitOperator {
     }
 
     @Transactional
-    public LearningCircuitDto pauseWTFWithDoItLater(UUID organizationId, UUID ownerId, String circuitName) {
+    public LearningCircuitDto putWTFOnHoldWithDoItLater(UUID organizationId, UUID ownerId, String circuitName) {
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
         validateCircuitExists(circuitName, learningCircuitEntity);
@@ -609,6 +620,7 @@ public class LearningCircuitOperator {
         return circuitDto;
     }
 
+    @Transactional
     public LearningCircuitDto resumeCircuit(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
@@ -675,6 +687,7 @@ public class LearningCircuitOperator {
         talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), roomId);
     }
 
+    @Transactional
     public LearningCircuitDto reopenSolvedWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
@@ -716,6 +729,7 @@ public class LearningCircuitOperator {
         return circuitDto;
     }
 
+    @Transactional
     public LearningCircuitDto closeWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
@@ -748,6 +762,7 @@ public class LearningCircuitOperator {
 
     }
 
+    @Transactional
     public TalkMessageDto joinRoom(UUID organizationId, UUID memberId, String roomName) {
 
         //another person joining a room, should add that person as a member.
@@ -771,16 +786,44 @@ public class LearningCircuitOperator {
 
             talkRoomMemberRepository.save(roomMemberEntity);
 
+
         }
 
         talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
+        validateCircuitExists("Circuit for room "+roomName, circuitEntity);
+
+        LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuitEntity.getId(), memberId);
+
+        if (circuitMember == null) {
+            circuitMember = new LearningCircuitMemberEntity();
+            circuitMember.setId(UUID.randomUUID());
+            circuitMember.setCircuitId(circuitEntity.getId());
+            circuitMember.setOrganizationId(organizationId);
+            circuitMember.setMemberId(memberId);
+            circuitMember.setJoinTime(now);
+
+            log.debug("Saving circuit member on join");
+            learningCircuitMemberRepository.save(circuitMember);
+
+            TalkRoomMemberEntity statusRoomMemberEntity = new TalkRoomMemberEntity();
+            statusRoomMemberEntity.setId(UUID.randomUUID());
+            statusRoomMemberEntity.setRoomId(circuitEntity.getStatusRoomId());
+            statusRoomMemberEntity.setOrganizationId(organizationId);
+            statusRoomMemberEntity.setMemberId(memberId);
+            statusRoomMemberEntity.setJoinTime(now);
+
+            talkRoomMemberRepository.save(statusRoomMemberEntity);
+
+            talkRouter.joinRoom(organizationId, memberId, circuitEntity.getStatusRoomId());
+        }
+
         return sendRoomStatusMessage(circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
     }
 
-
+    @Transactional
     public TalkMessageDto leaveRoom(UUID organizationId, UUID memberId, String roomName) {
 
         TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
@@ -803,7 +846,17 @@ public class LearningCircuitOperator {
 
         validateCircuitExists("Circuit for room "+roomName, circuitEntity);
 
-        return sendRoomStatusMessage(circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
+        TalkRoomMemberEntity statusRoomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuitEntity.getStatusRoomId(), memberId);
+
+        if (statusRoomMemberEntity != null) {
+
+            talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
+
+            talkRoomMemberRepository.delete(roomMemberEntity);
+        }
+
+
+        return sendRoomStatusMessage(circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
     }
 
     private long calculateActiveNanoElapsedTime(LearningCircuitEntity circuitEntity, Long nanoPauseTime) {
@@ -1044,7 +1097,7 @@ public class LearningCircuitOperator {
 
                 deleteRoomMember(memberConnection.getOrganizationId(), memberConnection.getMemberId(), gridClock.now(), circuitRoom.getRoomId());
 
-                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_INACTIVE);
+                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
             }
         }
     }

@@ -16,7 +16,7 @@ public interface TeamCircuitTalkRoomRepository extends CrudRepository<TeamCircui
     @Query(nativeQuery = true, value = "select * from team_circuit_talk_room_view  " +
             "where organization_id = (:organizationId) " +
             "and team_id = (:teamId) "+
-            "and circuit_status = 'ACTIVE' "+
+            "and circuit_state = 'ACTIVE' "+
             "order by circuit_room_name ")
     List<TeamCircuitTalkRoomEntity> findByOrganizationIdAndTeamId(@Param("organizationId")UUID organizationId, @Param("teamId")UUID teamId);
 }

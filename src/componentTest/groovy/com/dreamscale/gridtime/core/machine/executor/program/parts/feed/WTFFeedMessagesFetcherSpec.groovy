@@ -40,7 +40,7 @@ class WTFFeedMessagesFetcherSpec extends Specification{
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
-        LearningCircuitDto circuitDto = circuitService.createNewLearningCircuit(member.getOrganizationId(), member.id);
+        LearningCircuitDto circuitDto = circuitService.startWTF(member.getOrganizationId(), member.id);
 
         when:
         Batch batch = circuitMessagesFetcher.fetchNextBatch(member.id, new Bookmark(now.minusDays(2)), 100)

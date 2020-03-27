@@ -27,7 +27,6 @@ public class TalkToResource {
     @Autowired
     LearningCircuitOperator learningCircuitOperator;
 
-
     /**
      * The invoking member joins the specified "-wtf" or "-retro" talk room.
      *

@@ -39,11 +39,11 @@ public class LearningCircuitResource {
     @PostMapping(ResourcePaths.WTF_PATH)
     public LearningCircuitDto startWTF() {
         RequestContext context = RequestContext.get();
-        log.info("startLearningCircuitForWTF, user={}", context.getRootAccountId());
+        log.info("startWTF, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.createNewLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+        return learningCircuitOperator.startWTF(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -67,7 +67,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.createNewLearningCircuitWithCustomName(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.startWTFWithCustomName(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -187,11 +187,11 @@ public class LearningCircuitResource {
     public LearningCircuitDto putWTFOnHoldWithDoItLater(@PathVariable("name") String circuitName) {
 
         RequestContext context = RequestContext.get();
-        log.info("pauseWTFWithDoItLater, user={}", context.getRootAccountId());
+        log.info("putWTFOnHoldWithDoItLater, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.pauseWTFWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.putWTFOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
