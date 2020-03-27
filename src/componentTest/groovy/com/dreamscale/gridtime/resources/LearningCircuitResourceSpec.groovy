@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-
+import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
