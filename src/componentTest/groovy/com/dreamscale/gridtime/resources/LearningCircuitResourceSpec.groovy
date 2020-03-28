@@ -10,9 +10,7 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.TalkToClient
-import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity
 import com.dreamscale.gridtime.core.domain.circuit.CircuitState
-import com.dreamscale.gridtime.core.domain.circuit.RoomMemberStatus
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
@@ -220,7 +218,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert resumedCircuit != null
-        assert resumedCircuit.circuitState == CircuitState.TROUBLESHOOT.name()
+        assert resumedCircuit.circuitState == CircuitState.ACTIVE.name()
     }
 
     def 'should start a retro'() {

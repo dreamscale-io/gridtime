@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.domain.circuit;
 
 public enum CircuitState {
-    TROUBLESHOOT,
+    ACTIVE,
     ONHOLD,
     CANCELED,
     SOLVED,

@@ -8,8 +8,10 @@ import com.dreamscale.gridtime.api.spirit.SpiritNetworkDto
 import com.dreamscale.gridtime.api.spirit.TombstoneInputDto
 import com.dreamscale.gridtime.api.spirit.TorchieTombstoneDto
 import com.dreamscale.gridtime.api.spirit.XPDto
+import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.SpiritClient
+import com.dreamscale.gridtime.client.TalkToClient
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -29,6 +31,12 @@ class SpiritResourceSpec extends Specification {
 
     @Autowired
     SpiritClient spiritClient
+
+    @Autowired
+    TalkToClient talkToClient;
+
+    @Autowired
+    AccountClient accountClient;
 
     @Autowired
     RootAccountEntity testUser
@@ -102,6 +110,7 @@ class SpiritResourceSpec extends Specification {
         aRandom.spiritXPEntity().memberId(member2.id).save()
 
         testUser.setId(member1.getRootAccountId())
+        accountClient.login()
 
         when:
         SpiritDto spirit1Before = spiritClient.getMyTorchie();
@@ -110,7 +119,9 @@ class SpiritResourceSpec extends Specification {
         LearningCircuitDto circuit = circuitClient.startWTF()
 
         testUser.setId(member2.getRootAccountId())
-        circuitClient.joinExistingCircuit(circuit.getCircuitName())
+        accountClient.login()
+
+        talkToClient.joinExistingRoom(circuit.getWtfTalkRoomName())
 
         testUser.setId(member1.getRootAccountId())
 

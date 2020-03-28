@@ -25,7 +25,10 @@ truncate table grid_idea_flow_metrics cascade ;
 truncate table grid_box_metrics cascade ;
 truncate table gridtime_system_job_claim cascade ;
 
-
+truncate table learning_circuit;
+truncate table team_circuit;
+truncate table learning_circuit_member;
+truncate table team_circuit_room;
 
 
 

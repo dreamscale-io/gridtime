@@ -117,7 +117,7 @@ public class TeamCircuitOperator {
         defaultRoom.setModeratorId(teamCircuitEntity.getModeratorId());
         defaultRoom.setOwnerName(ownerName);
         defaultRoom.setModeratorName(moderatorName);
-        defaultRoom.setCircuitStatus(CircuitState.TROUBLESHOOT.name());
+        defaultRoom.setCircuitState(CircuitState.ACTIVE.name());
 
         teamCircuitDto.setDefaultRoom(defaultRoom);
 
@@ -274,7 +274,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomDto.setOwnerName(ownerName);
         teamCircuitRoomDto.setModeratorName(moderatorName);
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
+        teamCircuitRoomDto.setCircuitState(teamRoom.getCircuitState().name());
 
         return teamCircuitRoomDto;
     }
@@ -326,7 +326,7 @@ public class TeamCircuitOperator {
 
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
+        teamCircuitRoomDto.setCircuitState(teamRoom.getCircuitState().name());
 
         return teamCircuitRoomDto;
     }
@@ -362,7 +362,7 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setModeratorName(moderatorName);
         teamCircuitRoomDto.setDescription(teamRoom.getDescription());
         teamCircuitRoomDto.setJsonTags(teamRoom.getJsonTags());
-        teamCircuitRoomDto.setCircuitStatus(teamRoom.getCircuitState().name());
+        teamCircuitRoomDto.setCircuitState(teamRoom.getCircuitState().name());
         return teamCircuitRoomDto;
     }
 
@@ -415,7 +415,7 @@ public class TeamCircuitOperator {
             teamCircuitRoomDto.setModeratorName(room.getModeratorName());
             teamCircuitRoomDto.setDescription(room.getDescription());
             teamCircuitRoomDto.setJsonTags(room.getJsonTags());
-            teamCircuitRoomDto.setCircuitStatus(room.getCircuitState().name());
+            teamCircuitRoomDto.setCircuitState(room.getCircuitState().name());
 
             teamCircuitRoomDtos.add(teamCircuitRoomDto);
         }
@@ -460,7 +460,7 @@ public class TeamCircuitOperator {
         teamRoom.setTalkRoomId(talkRoomEntity.getId());
         teamRoom.setOwnerId(teamCircuit.getOwnerId());
         teamRoom.setModeratorId(teamCircuit.getModeratorId());
-        teamRoom.setCircuitState(CircuitState.TROUBLESHOOT);
+        teamRoom.setCircuitState(CircuitState.ACTIVE);
         teamRoom.setOpenTime(now);
 
         teamCircuitRoomRepository.save(teamRoom);

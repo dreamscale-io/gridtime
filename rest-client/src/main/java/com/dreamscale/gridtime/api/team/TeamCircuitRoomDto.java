@@ -27,6 +27,6 @@ public class TeamCircuitRoomDto {
     private String description;
     private String jsonTags;
 
-    private String circuitStatus;
+    private String circuitState;
 
 }

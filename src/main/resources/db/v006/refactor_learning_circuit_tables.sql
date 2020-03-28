@@ -78,18 +78,18 @@ create table learning_circuit (
 
 create view online_status_view as
 select om.organization_id, om.id member_id, om.username, r.full_name, r.display_name, a.last_activity, a.online_status
- from organization_member om, root_account r, active_account_status a
- where om.root_account_id = r.id and r.id = a.root_account_id;
+ from organization_member om join root_account r on om.root_account_id = r.id
+  left join active_account_status a on r.id = a.root_account_id;
 
 create view room_member_status_view as
 select rm.id, rm.room_id, rm.organization_id, rm.member_id,
 os.username, os.full_name, os.display_name, os.last_activity, os.online_status
-from talk_room_member rm, online_status_view os where rm.member_id = os.member_id;
+from talk_room_member rm left join online_status_view os on rm.member_id = os.member_id;
 
 create view circuit_member_status_view as
 select lcm.id, lcm.circuit_id, lcm.organization_id, lcm.member_id,
 os.username, os.full_name, os.display_name, os.last_activity, os.online_status
-from learning_circuit_member lcm, online_status_view os where lcm.member_id = os.member_id;
+from learning_circuit_member lcm left join online_status_view os on lcm.member_id = os.member_id;
 
 create view member_details_view as
  select om.organization_id, om.id member_id, om.username, r.display_name, r.full_name
@@ -104,18 +104,8 @@ create view wtf_feed_message_view as
       talk_room tr,
       talk_room_message trm,
       member_details_view md
-   where c.wtf_room_id = tr.id and tr.id = trm.to_room_id and trm.from_id = md.member_id;
+   where c.status_room_id = tr.id and tr.id = trm.to_room_id and trm.from_id = md.member_id;
 
-
-create view retro_feed_message_view as
- select trm.id message_id, c.id circuit_id, tr.id room_id, c.circuit_name, trm.from_id,
-        md.display_name from_display_name, md.full_name from_full_name, md.username from_username,
-        trm.position, trm.message_type, json_body
- from learning_circuit c,
-      talk_room tr,
-      talk_room_message trm,
-      member_details_view md
- where c.retro_room_id = tr.id and tr.id = trm.to_room_id and trm.from_id = md.member_id;
 
 create view team_circuit_talk_room_view as
   select  tcr.id,  tcr.organization_id, t.id team_id, t.name team_name, tcr.local_name circuit_room_name,

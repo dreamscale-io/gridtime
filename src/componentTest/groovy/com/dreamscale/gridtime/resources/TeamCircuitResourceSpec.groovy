@@ -115,7 +115,7 @@ class TeamCircuitResourceSpec extends Specification {
         then:
         assert circuit.getTeamRooms().size() == 1
 
-        assert closedRoom.circuitStatus == "FINISHED"
+        assert closedRoom.circuitState == "CLOSED"
 
     }
 

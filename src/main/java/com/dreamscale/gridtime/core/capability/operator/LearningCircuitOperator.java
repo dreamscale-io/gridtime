@@ -184,12 +184,15 @@ public class LearningCircuitOperator {
         learningCircuitEntity.setStatusRoomId(statusRoomEntity.getId());
         learningCircuitEntity.setOpenTime(now);
         learningCircuitEntity.setWtfOpenNanoTime(nanoTime);
-        learningCircuitEntity.setCircuitState(CircuitState.TROUBLESHOOT);
+        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
         learningCircuitEntity.setTotalCircuitElapsedNanoTime(0L);
         learningCircuitEntity.setTotalCircuitPausedNanoTime(0L);
+
         learningCircuitRepository.save(learningCircuitEntity);
 
         //then I need to join this new person in the room...
+
+        log.debug("Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
 
         LearningCircuitMemberEntity circuitMemberEntity = new LearningCircuitMemberEntity();
 
@@ -254,7 +257,10 @@ public class LearningCircuitOperator {
 
         LearningCircuitDto circuitDto = null;
         if (activeCircuits != null && activeCircuits.size() > 0) {
-            log.warn("Member {} has multiple active circuits, should only be one", memberId);
+            if (activeCircuits.size() > 1) {
+                log.warn("Member {} has multiple active circuits, should only be one", memberId);
+            }
+
             LearningCircuitEntity activeCircuit = activeCircuits.get(0);
 
             circuitDto = toDto(activeCircuit);
@@ -356,7 +362,7 @@ public class LearningCircuitOperator {
         Long nanoTime = gridClock.nanoTime();
 
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.TROUBLESHOOT) {
+        if (learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE) {
 
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
@@ -430,20 +436,20 @@ public class LearningCircuitOperator {
     }
 
     private void validateCircuitIsActive(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity.getCircuitState() != CircuitState.TROUBLESHOOT) {
+        if (learningCircuitEntity.getCircuitState() != CircuitState.ACTIVE) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active: " + circuitName);
         }
     }
 
     private void validateCircuitIsActiveOrOnHold(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (!(learningCircuitEntity.getCircuitState() == CircuitState.TROUBLESHOOT
+        if (!(learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE
                 || learningCircuitEntity.getCircuitState() == CircuitState.ONHOLD)) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or OnHold: " + circuitName);
         }
     }
 
     private void validateCircuitIsActiveOrSolved(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (!(learningCircuitEntity.getCircuitState() == CircuitState.TROUBLESHOOT
+        if (!(learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE
                 || learningCircuitEntity.getCircuitState() == CircuitState.SOLVED)) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or Solved: " + circuitName);
         }
@@ -543,7 +549,7 @@ public class LearningCircuitOperator {
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.TROUBLESHOOT) {
+        if (learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE) {
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
         }
@@ -637,7 +643,7 @@ public class LearningCircuitOperator {
         learningCircuitEntity.setTotalCircuitPausedNanoTime(nanoElapsedTime);
         learningCircuitEntity.setResumeCircuitNanoTime(nanoTime);
 
-        learningCircuitEntity.setCircuitState(CircuitState.TROUBLESHOOT);
+        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -716,7 +722,7 @@ public class LearningCircuitOperator {
 
         learningCircuitEntity.setResumeCircuitNanoTime(nanoTime);
         learningCircuitEntity.setSolvedCircuitNanoTime(null);
-        learningCircuitEntity.setCircuitState(CircuitState.TROUBLESHOOT);
+        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -765,6 +771,7 @@ public class LearningCircuitOperator {
     @Transactional
     public TalkMessageDto joinRoom(UUID organizationId, UUID memberId, String roomName) {
 
+        log.debug("Member {} joining room {}", memberId, roomName);
         //another person joining a room, should add that person as a member.
 
         TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
@@ -786,18 +793,23 @@ public class LearningCircuitOperator {
 
             talkRoomMemberRepository.save(roomMemberEntity);
 
-
+            talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
+        } else {
+            log.debug("Member already joined {}", roomName);
         }
-
-        talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
         validateCircuitExists("Circuit for room "+roomName, circuitEntity);
 
+        //if this is the first time I've joined the circuit, join the status room too, and as a participant
+
         LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuitEntity.getId(), memberId);
 
         if (circuitMember == null) {
+
+            log.debug("Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
+
             circuitMember = new LearningCircuitMemberEntity();
             circuitMember.setId(UUID.randomUUID());
             circuitMember.setCircuitId(circuitEntity.getId());
@@ -805,9 +817,10 @@ public class LearningCircuitOperator {
             circuitMember.setMemberId(memberId);
             circuitMember.setJoinTime(now);
 
-            log.debug("Saving circuit member on join");
+
             learningCircuitMemberRepository.save(circuitMember);
 
+            log.debug("Member joining status room");
             TalkRoomMemberEntity statusRoomMemberEntity = new TalkRoomMemberEntity();
             statusRoomMemberEntity.setId(UUID.randomUUID());
             statusRoomMemberEntity.setRoomId(circuitEntity.getStatusRoomId());

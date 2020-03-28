@@ -21,7 +21,7 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class WTFFeedMessagesFetcherSpec extends Specification{
 
     @Autowired
-    LearningCircuitOperator circuitService
+    LearningCircuitOperator circuitOperator
 
     @Autowired
     GridClock mockTimeService
@@ -40,7 +40,7 @@ class WTFFeedMessagesFetcherSpec extends Specification{
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
-        LearningCircuitDto circuitDto = circuitService.startWTF(member.getOrganizationId(), member.id);
+        LearningCircuitDto circuitDto = circuitOperator.startWTF(member.getOrganizationId(), member.id);
 
         when:
         Batch batch = circuitMessagesFetcher.fetchNextBatch(member.id, new Bookmark(now.minusDays(2)), 100)
