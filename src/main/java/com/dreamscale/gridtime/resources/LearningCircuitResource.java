@@ -131,7 +131,7 @@ public class LearningCircuitResource {
      *
      * All members will be automatically removed the WTF talk room.
      *
-     * Input States: ACTIVE
+     * Input States: TROUBLESHOOT
      * Ouput State: SOLVED
      *
      * @return LearningCircuitDto
@@ -155,7 +155,7 @@ public class LearningCircuitResource {
      *
      * Canceling a WTF is a final state, and does not need to be closed.
      *
-     * Input States: ACTIVE or ONHOLD
+     * Input States: TROUBLESHOOT or ONHOLD
      * Ouput State: CANCELED
      *
      * @return LearningCircuitDto
@@ -177,7 +177,7 @@ public class LearningCircuitResource {
      *
      * Circuits in this state will still appear on the "My Circuits" list, and also the "Do It Later" list.
      *
-     * Input States: ACTIVE
+     * Input States: TROUBLESHOOT
      * Ouput State: ONHOLD
      *
      * @return LearningCircuitDto
@@ -187,11 +187,11 @@ public class LearningCircuitResource {
     public LearningCircuitDto putWTFOnHoldWithDoItLater(@PathVariable("name") String circuitName) {
 
         RequestContext context = RequestContext.get();
-        log.info("putWTFOnHoldWithDoItLater, user={}", context.getRootAccountId());
+        log.info("pauseWTFWithDoItLater, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.putWTFOnHoldWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.pauseWTFWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -202,7 +202,7 @@ public class LearningCircuitResource {
      * Only circuits owned by the invoking member can be changed to a different status.
      *
      * Input States: ONHOLD
-     * Ouput State: ACTIVE
+     * Ouput State: TROUBLESHOOT
      *
      * @return LearningCircuitDto
      */
@@ -215,7 +215,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.resumeCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return learningCircuitOperator.resumeWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**
@@ -227,7 +227,7 @@ public class LearningCircuitResource {
      *
      * All members in the WTF room, will be moved to the Retro room.
      *
-     * Input States: ACTIVE or SOLVED
+     * Input States: TROUBLESHOOT or SOLVED
      * Ouput State: RETRO
      *
      * @return LearningCircuitDto
@@ -249,7 +249,7 @@ public class LearningCircuitResource {
      * the owner can choose to re-open the WTF, moving all the people in the retro, back to the WTF room.
      *
      * Input States: SOLVED or RETRO
-     * Ouput State: ACTIVE
+     * Ouput State: TROUBLESHOOT
      *
      * @return LearningCircuitDto
      */
@@ -292,7 +292,7 @@ public class LearningCircuitResource {
      *
      * Once a WTF is solved (even if no Retro has been run yet), it will no longer be the active circuit
      *
-     * All circuits return will be in "ACTIVE" state.
+     * All circuits return will be in "TROUBLESHOOT" state.
      *
      *
      * @return LearningCircuitDto
@@ -325,12 +325,12 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Retrieves the list of Learning Circuits that are in "ACTIVE" or "RETRO" state that the invoking member has also joined.
+     * Retrieves the list of Learning Circuits that are in "TROUBLESHOOT" or "RETRO" state that the invoking member has also joined.
      *
      * When joining and leaving another team member's Learning Circuits, the invoking member is still considered
      * to be "participating" unless they explicitly leave the circuit room.
      *
-     * All circuits listed will be in "ACTIVE" or "RETRO" state.
+     * All circuits listed will be in "TROUBLESHOOT" or "RETRO" state.
      *
      * @return List<LearningCircuitDto>
      */
@@ -346,12 +346,12 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Retrieves the list of Learning Circuits that are in "ACTIVE" or "RETRO" state that the specifed member has also joined.
+     * Retrieves the list of Learning Circuits that are in "TROUBLESHOOT" or "RETRO" state that the specifed member has also joined.
      *
      * When joining and leaving another team member's Learning Circuits, the invoking member is still considered
      * to be "participating" unless they explicitly leave the circuit room.
      *
-     * All circuits listed will be in "ACTIVE" or "RETRO" state.
+     * All circuits listed will be in "TROUBLESHOOT" or "RETRO" state.
      *
      * @return List<LearningCircuitDto>
      */

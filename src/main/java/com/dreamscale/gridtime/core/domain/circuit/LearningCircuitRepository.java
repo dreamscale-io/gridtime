@@ -12,7 +12,7 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
             "and c.owner_id = (:memberId) "+
-            "and c.circuit_state = 'ACTIVE' " +
+            "and c.circuit_state = 'TROUBLESHOOT' " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findAllActiveCircuitsOwnedBy(@Param("organizationId") UUID organizationId,
                                                              @Param("memberId") UUID memberId);
@@ -50,7 +50,7 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "where tm.id = trm.room_id " +
             "and (c.wtf_room_id = tm.id or c.retro_room_id = tm.id) " +
             "and trm.member_id = (:memberId)) " +
-            "and (c.circuit_state = 'ACTIVE' or c.circuit_state = 'RETRO') " +
+            "and (c.circuit_state = 'TROUBLESHOOT' or c.circuit_state = 'RETRO') " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findAllParticipatingCircuits(@Param("organizationId") UUID organizationId,
                                                              @Param("memberId") UUID memberId);

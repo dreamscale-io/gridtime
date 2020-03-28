@@ -35,6 +35,6 @@ public class LearningCircuitRoomEntity {
     private UUID circuitModeratorId;
 
     @Enumerated(EnumType.STRING)
-    private CircuitState circuitState;
+    private LearningCircuitState circuitState;
 
 }

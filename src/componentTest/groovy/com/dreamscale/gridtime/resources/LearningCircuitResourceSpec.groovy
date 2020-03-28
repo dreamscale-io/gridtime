@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.TalkToClient
-import com.dreamscale.gridtime.core.domain.circuit.CircuitState
+import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitState
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
@@ -51,9 +51,13 @@ class LearningCircuitResourceSpec extends Specification {
     GridClock mockTimeService
     OrganizationEntity org
 
+    LocalDateTime time
+    Long timeNano
+
     def setup() {
-        mockTimeService.now() >> LocalDateTime.now()
-        mockTimeService.nanoTime() >> System.nanoTime();
+
+        time = LocalDateTime.now()
+        timeNano = System.nanoTime()
 
         org = aRandom.organizationEntity().save()
     }
@@ -61,6 +65,8 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should create a circuit'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
@@ -81,6 +87,8 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should update description of a circuit'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
@@ -99,6 +107,9 @@ class LearningCircuitResourceSpec extends Specification {
     def 'should update tags of a circuit'() {
         given:
 
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
@@ -115,6 +126,9 @@ class LearningCircuitResourceSpec extends Specification {
 
     def "should return active circuit"() {
         given:
+
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
@@ -134,14 +148,17 @@ class LearningCircuitResourceSpec extends Specification {
     def "should return all shelved do it later circuits"() {
         given:
 
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit1 = circuitClient.startWTF()
-        circuitClient.putWTFOnHoldWithDoItLater(circuit1.getCircuitName())
+        circuitClient.pauseWTFWithDoItLater(circuit1.getCircuitName())
 
         LearningCircuitDto circuit2 = circuitClient.startWTF()
-        circuitClient.putWTFOnHoldWithDoItLater(circuit2.getCircuitName())
+        circuitClient.pauseWTFWithDoItLater(circuit2.getCircuitName())
 
         when:
         List<LearningCircuitDto> circuits = circuitClient.getAllMyDoItLaterCircuits()
@@ -154,23 +171,29 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should solve a WTF circuit'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
         when:
-
-        LearningCircuitDto closedCircuit = circuitClient.solveWTF(circuit.getCircuitName());
+        LearningCircuitDto solvedCircuit = circuitClient.solveWTF(circuit.getCircuitName());
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
-        assert closedCircuit != null
+        assert solvedCircuit != null
+        assert solvedCircuit.circuitState == LearningCircuitState.SOLVED.name()
         assert activeCircuit == null
     }
 
     def 'should cancel a WTF circuit'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
@@ -183,46 +206,68 @@ class LearningCircuitResourceSpec extends Specification {
 
         then:
         assert abortedCircuit != null
-        assert abortedCircuit.circuitState == CircuitState.CANCELED.name()
+        assert abortedCircuit.circuitState == LearningCircuitState.CANCELED.name()
         assert activeCircuit == null
     }
 
 
     def "should shelf a circuit with do it later"() {
         given:
+
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
         when:
+        LearningCircuitDto circuitDto = circuitClient.pauseWTFWithDoItLater(circuit.getCircuitName());
 
-        LearningCircuitDto circuitDto = circuitClient.putWTFOnHoldWithDoItLater(circuit.getCircuitName());
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
         then:
         assert circuitDto != null
-        assert circuitDto.circuitState == CircuitState.ONHOLD.name()
+        assert circuitDto.circuitState == LearningCircuitState.ONHOLD.name()
+        assert circuitDto.getPauseCircuitNanoTime() != null
+
+        assert activeCircuit == null
     }
 
     def 'should resume a circuit from do it later'() {
         given:
+
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
-        LearningCircuitDto circuitShelved = circuitClient.putWTFOnHoldWithDoItLater(circuit.getCircuitName());
+        LearningCircuitDto pausedCircuit = circuitClient.pauseWTFWithDoItLater(circuit.getCircuitName());
 
         when:
         LearningCircuitDto resumedCircuit = circuitClient.resumeWTF(circuit.getCircuitName());
 
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
+
         then:
+        assert pausedCircuit != null
+        assert pausedCircuit.circuitState == LearningCircuitState.ONHOLD.name()
+
         assert resumedCircuit != null
-        assert resumedCircuit.circuitState == CircuitState.ACTIVE.name()
+        assert resumedCircuit.circuitState == LearningCircuitState.TROUBLESHOOT.name()
+
+        assert activeCircuit != null
     }
 
     def 'should start a retro'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
@@ -230,14 +275,160 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
         LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
-
         then:
 
+        assert circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
+
+        assert circuitWithRetroStarted.getSolvedCircuitNanoTime() != null
         assert circuitWithRetroStarted.getRetroOpenNanoTime() != null
     }
 
+    def 'should start a retro with already solved circuit'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+        LearningCircuitDto solvedCircuit = circuitClient.solveWTF(circuit.circuitName)
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+
+        then:
+        assert  solvedCircuit.circuitState == LearningCircuitState.SOLVED.name()
+        assert  circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
+
+        assert circuitWithRetroStarted.getSolvedCircuitNanoTime() != null
+        assert circuitWithRetroStarted.getRetroOpenNanoTime() != null
+    }
+
+    def 'should close a circuit with a retro started'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+
+        LearningCircuitDto closedWTF = circuitClient.closeWTF(circuit.circuitName)
+
+        then:
+        assert  circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
+        assert  closedWTF.circuitState == LearningCircuitState.CLOSED.name()
+
+        assert closedWTF.getSolvedCircuitNanoTime() != null
+        assert closedWTF.getRetroOpenNanoTime() != null
+        assert closedWTF.getCloseCircuitNanoTime() != null
+
+    }
+
+
+    def 'should reopen a circuit with a retro started'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+
+        LearningCircuitDto reopenWTF = circuitClient.reopenWTF(circuit.circuitName)
+
+        then:
+        assert  circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
+        assert  reopenWTF.circuitState == LearningCircuitState.TROUBLESHOOT.name()
+
+        assert reopenWTF.getSolvedCircuitNanoTime() == null
+        assert reopenWTF.getRetroOpenNanoTime() == null
+        assert reopenWTF.getCloseCircuitNanoTime() == null
+
+    }
+
+    def 'should calculate cumulative time'() {
+        given:
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        2 * mockTimeService.now() >> time
+        1 * mockTimeService.nanoTime() >> timeNano
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        1 * mockTimeService.now() >> time.plusMinutes(5)
+        1 * mockTimeService.nanoTime() >> timeNano.plus(30000000000)
+
+        LearningCircuitDto onHoldCircuit = circuitClient.pauseWTFWithDoItLater(circuit.circuitName)
+
+        1 * mockTimeService.now() >> time.plusMinutes(10)
+        1 * mockTimeService.nanoTime() >> timeNano.plus(60000000000)
+
+        LearningCircuitDto resumedCircuit = circuitClient.resumeWTF(circuit.circuitName)
+
+        1 * mockTimeService.now() >> time.plusMinutes(15)
+        1 * mockTimeService.nanoTime() >> timeNano.plus(90000000000)
+
+        LearningCircuitDto solveWTF = circuitClient.solveWTF(circuit.circuitName)
+
+        then:
+        assert  onHoldCircuit.circuitState == LearningCircuitState.ONHOLD.name()
+        assert  resumedCircuit.circuitState == LearningCircuitState.TROUBLESHOOT.name()
+        assert  solveWTF.circuitState == LearningCircuitState.SOLVED.name()
+
+        assert solveWTF.getTotalCircuitElapsedNanoTime() == 60000000000
+        assert solveWTF.getTotalCircuitPausedNanoTime() == 30000000000
+
+    }
+
+
+    def 'should close a circuit thats been solved with no retro'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        LearningCircuitDto solvedWTF = circuitClient.solveWTF(circuit.circuitName)
+
+        LearningCircuitDto closedWTF = circuitClient.closeWTF(circuit.circuitName)
+
+        then:
+        assert  solvedWTF.circuitState == LearningCircuitState.SOLVED.name()
+        assert  closedWTF.circuitState == LearningCircuitState.CLOSED.name()
+
+        assert closedWTF.getSolvedCircuitNanoTime() != null
+        assert closedWTF.getRetroOpenNanoTime() == null
+        assert closedWTF.getCloseCircuitNanoTime() != null
+
+    }
+
+
     def 'join another persons chat room'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
         loggedInUser.setId(member.getRootAccountId())
@@ -266,6 +457,9 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'join and leave another persons chat room to update room status'() {
         given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
         accountClient.login()

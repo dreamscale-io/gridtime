@@ -117,7 +117,7 @@ public class TeamCircuitOperator {
         defaultRoom.setModeratorId(teamCircuitEntity.getModeratorId());
         defaultRoom.setOwnerName(ownerName);
         defaultRoom.setModeratorName(moderatorName);
-        defaultRoom.setCircuitState(CircuitState.ACTIVE.name());
+        defaultRoom.setCircuitState(TeamCircuitState.ACTIVE.name());
 
         teamCircuitDto.setDefaultRoom(defaultRoom);
 
@@ -339,7 +339,7 @@ public class TeamCircuitOperator {
         validateRoomExists(roomName, teamRoom);
 
         teamRoom.setCloseTime(gridClock.now());
-        teamRoom.setCircuitState(CircuitState.CLOSED);
+        teamRoom.setCircuitState(TeamCircuitState.CLOSED);
 
         teamCircuitRoomRepository.save(teamRoom);
 
@@ -460,7 +460,7 @@ public class TeamCircuitOperator {
         teamRoom.setTalkRoomId(talkRoomEntity.getId());
         teamRoom.setOwnerId(teamCircuit.getOwnerId());
         teamRoom.setModeratorId(teamCircuit.getModeratorId());
-        teamRoom.setCircuitState(CircuitState.ACTIVE);
+        teamRoom.setCircuitState(TeamCircuitState.ACTIVE);
         teamRoom.setOpenTime(now);
 
         teamCircuitRoomRepository.save(teamRoom);

@@ -13,7 +13,7 @@ public interface LearningCircuitRoomRepository extends CrudRepository<LearningCi
             "where r.organization_id = (:organizationId) " +
             "and r.room_id = trm.room_id "+
             "and trm.member_id = (:memberId) "+
-            "and r.circuit_state = 'ACTIVE' ")
+            "and r.circuit_state = 'TROUBLESHOOT' ")
     List<LearningCircuitRoomEntity> findRoomsByMembership(@Param("organizationId") UUID organizationId,
                                                           @Param("memberId") UUID memberId);
 

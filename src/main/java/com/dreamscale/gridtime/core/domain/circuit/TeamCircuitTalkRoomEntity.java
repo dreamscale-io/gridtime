@@ -59,7 +59,7 @@ public class TeamCircuitTalkRoomEntity {
     private LocalDateTime closeTime;
 
     @Enumerated(EnumType.STRING)
-    private CircuitState circuitState;
+    private TeamCircuitState circuitState;
 
     private String description;
 

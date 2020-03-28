@@ -162,6 +162,8 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Creating WTF circuit {} at {}", circuitName, nanoTime);
+
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
         wtfRoomEntity.setOrganizationId(organizationId);
@@ -184,7 +186,7 @@ public class LearningCircuitOperator {
         learningCircuitEntity.setStatusRoomId(statusRoomEntity.getId());
         learningCircuitEntity.setOpenTime(now);
         learningCircuitEntity.setWtfOpenNanoTime(nanoTime);
-        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.TROUBLESHOOT);
         learningCircuitEntity.setTotalCircuitElapsedNanoTime(0L);
         learningCircuitEntity.setTotalCircuitPausedNanoTime(0L);
 
@@ -361,8 +363,9 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE) {
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
 
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
@@ -382,7 +385,7 @@ public class LearningCircuitOperator {
             learningCircuitEntity.setRetroRoomId(retroRoomEntity.getId());
         }
 
-        learningCircuitEntity.setCircuitState(CircuitState.RETRO);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.RETRO);
         learningCircuitEntity.setRetroOpenNanoTime(nanoTime);
 
         learningCircuitRepository.save(learningCircuitEntity);
@@ -436,33 +439,33 @@ public class LearningCircuitOperator {
     }
 
     private void validateCircuitIsActive(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity.getCircuitState() != CircuitState.ACTIVE) {
+        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.TROUBLESHOOT) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active: " + circuitName);
         }
     }
 
     private void validateCircuitIsActiveOrOnHold(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (!(learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE
-                || learningCircuitEntity.getCircuitState() == CircuitState.ONHOLD)) {
+        if (!(learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT
+                || learningCircuitEntity.getCircuitState() == LearningCircuitState.ONHOLD)) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or OnHold: " + circuitName);
         }
     }
 
     private void validateCircuitIsActiveOrSolved(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (!(learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE
-                || learningCircuitEntity.getCircuitState() == CircuitState.SOLVED)) {
+        if (!(learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT
+                || learningCircuitEntity.getCircuitState() == LearningCircuitState.SOLVED)) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or Solved: " + circuitName);
         }
     }
 
     private void validateCircuitIsOnHold(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity.getCircuitState() != CircuitState.ONHOLD) {
+        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.ONHOLD) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be OnHold: " + circuitName);
         }
     }
 
     private void validateCircuitIsSolvedOrRetro(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity.getCircuitState() != CircuitState.SOLVED && learningCircuitEntity.getCircuitState() != CircuitState.RETRO ) {
+        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.SOLVED && learningCircuitEntity.getCircuitState() != LearningCircuitState.RETRO ) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Solved or in Retro: " + circuitName);
         }
     }
@@ -509,6 +512,8 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Solving WTF circuit {} at {}", circuitName, nanoTime);
+
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_SOLVED);
 
         long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -516,7 +521,7 @@ public class LearningCircuitOperator {
 
         learningCircuitEntity.setSolvedCircuitNanoTime(nanoTime);
 
-        learningCircuitEntity.setCircuitState(CircuitState.SOLVED);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.SOLVED);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -546,21 +551,23 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Cancel WTF circuit {} at {}", circuitName, nanoTime);
+
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.ACTIVE) {
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
         }
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.ONHOLD) {
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.ONHOLD) {
             long nanoElapsedTime = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitPausedNanoTime(nanoElapsedTime);
         }
 
         learningCircuitEntity.setCancelCircuitNanoTime(nanoTime);
-        learningCircuitEntity.setCircuitState(CircuitState.CANCELED);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.CANCELED);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -579,7 +586,7 @@ public class LearningCircuitOperator {
     }
 
     @Transactional
-    public LearningCircuitDto putWTFOnHoldWithDoItLater(UUID organizationId, UUID ownerId, String circuitName) {
+    public LearningCircuitDto pauseWTFWithDoItLater(UUID organizationId, UUID ownerId, String circuitName) {
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
         validateCircuitExists(circuitName, learningCircuitEntity);
@@ -588,12 +595,14 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Pause WTF circuit {} at {}", circuitName, nanoTime);
+
         //every time I put it on hold, I calculate the seconds before on hold
         long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
 
         learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
         learningCircuitEntity.setPauseCircuitNanoTime(nanoTime);
-        learningCircuitEntity.setCircuitState(CircuitState.ONHOLD);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.ONHOLD);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -627,7 +636,7 @@ public class LearningCircuitOperator {
     }
 
     @Transactional
-    public LearningCircuitDto resumeCircuit(UUID organizationId, UUID ownerId, String circuitName) {
+    public LearningCircuitDto resumeWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
@@ -637,13 +646,15 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Resume WTF circuit {} at {}", circuitName, nanoTime);
+
         //every time I resume a circuit, calculate how long I've been paused
         long nanoElapsedTime = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
 
         learningCircuitEntity.setTotalCircuitPausedNanoTime(nanoElapsedTime);
         learningCircuitEntity.setResumeCircuitNanoTime(nanoTime);
 
-        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.TROUBLESHOOT);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -704,8 +715,10 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        log.debug("Reopen WTF circuit {} at {}", circuitName, nanoTime);
 
-        if (learningCircuitEntity.getCircuitState() == CircuitState.RETRO) {
+
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
 
             talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
 
@@ -722,7 +735,7 @@ public class LearningCircuitOperator {
 
         learningCircuitEntity.setResumeCircuitNanoTime(nanoTime);
         learningCircuitEntity.setSolvedCircuitNanoTime(null);
-        learningCircuitEntity.setCircuitState(CircuitState.ACTIVE);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.TROUBLESHOOT);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -751,7 +764,7 @@ public class LearningCircuitOperator {
         closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         learningCircuitEntity.setCloseCircuitNanoTime(nanoTime);
-        learningCircuitEntity.setCircuitState(CircuitState.CLOSED);
+        learningCircuitEntity.setCircuitState(LearningCircuitState.CLOSED);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
@@ -771,7 +784,6 @@ public class LearningCircuitOperator {
     @Transactional
     public TalkMessageDto joinRoom(UUID organizationId, UUID memberId, String roomName) {
 
-        log.debug("Member {} joining room {}", memberId, roomName);
         //another person joining a room, should add that person as a member.
 
         TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
@@ -780,6 +792,8 @@ public class LearningCircuitOperator {
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
+
+        log.debug("Member {} joining room {} at {}", memberId, roomName, nanoTime);
 
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 
@@ -795,7 +809,7 @@ public class LearningCircuitOperator {
 
             talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
         } else {
-            log.debug("Member already joined {}", roomName);
+            log.warn("Member already joined {}", roomName);
         }
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
@@ -820,7 +834,6 @@ public class LearningCircuitOperator {
 
             learningCircuitMemberRepository.save(circuitMember);
 
-            log.debug("Member joining status room");
             TalkRoomMemberEntity statusRoomMemberEntity = new TalkRoomMemberEntity();
             statusRoomMemberEntity.setId(UUID.randomUUID());
             statusRoomMemberEntity.setRoomId(circuitEntity.getStatusRoomId());
@@ -845,6 +858,8 @@ public class LearningCircuitOperator {
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
+
+        log.debug("Member {} leaving room {} at {}", memberId, roomName, nanoTime);
 
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 

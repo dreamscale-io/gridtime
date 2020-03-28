@@ -40,7 +40,7 @@ public interface LearningCircuitClient {
     LearningCircuitDto abortWTF(@Param("name") String circuitName);
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.DO_IT_LATER_PATH)
-    LearningCircuitDto putWTFOnHoldWithDoItLater(@Param("name") String circuitName);
+    LearningCircuitDto pauseWTFWithDoItLater(@Param("name") String circuitName);
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
     LearningCircuitDto resumeWTF(@Param("name") String circuitName);

@@ -39,10 +39,10 @@ public class LearningCircuitDto {
     private Long totalCircuitElapsedNanoTime;
     private Long totalCircuitPausedNanoTime;
 
-    private Long startCircuitNanoTime;
     private Long wtfOpenNanoTime;
     private Long retroOpenNanoTime;
     private Long closeCircuitNanoTime;
+    private Long solvedCircuitNanoTime;
     private Long pauseCircuitNanoTime;
     private Long resumeCircuitNanoTime;
     private Long cancelCircuitNanoTime;

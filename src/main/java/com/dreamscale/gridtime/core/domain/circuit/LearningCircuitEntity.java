@@ -41,7 +41,7 @@ public class LearningCircuitEntity {
     private LocalDateTime openTime;
 
     @Enumerated(EnumType.STRING)
-    private CircuitState circuitState;
+    private LearningCircuitState circuitState;
 
     private Long totalCircuitElapsedNanoTime;
     private Long totalCircuitPausedNanoTime;
