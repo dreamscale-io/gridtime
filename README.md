@@ -79,6 +79,18 @@ Deploy the application on heroku
 
 `git push heroku master`
 
+If the server crashes:
+
+`heroku restart`
+
+If you need to access the server's database:
+
+`heroku psql`
+
+To tail the server logs:
+
+`heroku logs --tail`
+
 ### How to Troubleshooting Heroku DB specific Issue
 
 `heroku pg:backups:capture`
