@@ -36,16 +36,6 @@ alter table talk_room_member
 alter table team_circuit_room
  rename column circuit_status to circuit_state;
 
-delete from talk_room where room_type = 'WTF_ROOM';
-
-delete from talk_room_member rm where exists (select 1 from talk_room r where r.id = rm.room_id and r.room_type = 'WTF_ROOM');
-
-truncate table talk_room_message;
-
-truncate table learning_circuit;
-
-truncate table learning_circuit_member;
-
 drop table learning_circuit;
 
 create table learning_circuit (

@@ -28,4 +28,7 @@ databaseChangeLog:
         file: db/v006/alter_learning_circuit_add_status_room.sql
 
   - include:
+        file: db/v006/truncate_tables.sql
+
+  - include:
         file: db/v006/refactor_learning_circuit_tables.sql
