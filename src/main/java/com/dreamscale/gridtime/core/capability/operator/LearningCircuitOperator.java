@@ -853,11 +853,20 @@ public class LearningCircuitOperator {
     public TalkMessageDto leaveRoom(UUID organizationId, UUID memberId, String roomName) {
 
         TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
+        LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
         validateRoomIsFound(roomEntity, roomName);
+        validateCircuitExists("Circuit for room "+roomName, circuitEntity);
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
+
+
+        if (circuitEntity.getOwnerId() == memberId) {
+            log.warn("Unable to leave the room as the owner. No op.");
+
+            return null;
+        }
 
         log.debug("Member {} leaving room {} at {}", memberId, roomName, nanoTime);
 
@@ -870,9 +879,6 @@ public class LearningCircuitOperator {
             talkRoomMemberRepository.delete(roomMemberEntity);
         }
 
-        LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
-
-        validateCircuitExists("Circuit for room "+roomName, circuitEntity);
 
         TalkRoomMemberEntity statusRoomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuitEntity.getStatusRoomId(), memberId);
 

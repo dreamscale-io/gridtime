@@ -25,7 +25,7 @@ public interface TalkToClient {
 
     @RequestLine("GET " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
             ResourcePaths.ROOM_PATH + "/{roomName}")
-    List<TalkMessageDto> getAllTalkMessagesFromRoom(@Param("roomName") String talkRoomId);
+    List<TalkMessageDto> getAllTalkMessagesFromRoom(@Param("roomName") String roomName);
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
             ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.SNIPPET_PATH)
