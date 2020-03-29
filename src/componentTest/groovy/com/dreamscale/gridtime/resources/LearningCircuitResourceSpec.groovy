@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
@@ -395,6 +396,29 @@ class LearningCircuitResourceSpec extends Specification {
         assert solveWTF.getTotalCircuitPausedNanoTime() == 30000000000
 
     }
+
+    def 'should be able to create WTF circuit and retrieve talk messages'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+        accountClient.login()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(), new ChatMessageInputDto("hi"))
+
+        List<TalkMessageDto> wtfMessages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
+
+        then:
+        assert wtfMessages.size() == 1
+
+    }
+
 
 
     def 'should close a circuit thats been solved with no retro'() {

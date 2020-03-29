@@ -1088,7 +1088,7 @@ public class LearningCircuitOperator {
 
     public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
 
-        validateMemberInRoom(organizationId, invokingMemberId, talkRoomName);
+        //validateMemberInRoom(organizationId, invokingMemberId, talkRoomName);
 
         List<TalkRoomMessageEntity> talkMessages = talkRoomMessageRepository.findByTalkRoomName(talkRoomName);
 
