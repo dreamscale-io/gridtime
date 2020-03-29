@@ -148,6 +148,7 @@ public class TalkToResource {
      *
      * @return List<TalkMessageDto>
      */
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}")
     List<TalkMessageDto> getAllTalkMessagesFromRoom(@PathVariable("roomName") String roomName) {
         RequestContext context = RequestContext.get();
