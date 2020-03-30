@@ -90,8 +90,8 @@ class AccountResourceSpec extends Specification {
 
         when:
 
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
@@ -129,9 +129,8 @@ class AccountResourceSpec extends Specification {
     def "should logout"() {
         given:
 
-        masterAccountRepository.save(testUser)
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
 
         when:
         SimpleStatusDto statusDto = accountClient.logout()
@@ -143,12 +142,13 @@ class AccountResourceSpec extends Specification {
 
     def "should update heartbeat"() {
         given:
-        masterAccountRepository.save(testUser)
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.id).save()
 
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
 
         HeartbeatDto heartbeatDto = new HeartbeatDto()
+        heartbeatDto.setDeltaTime(30);
+
         accountClient.login()
 
         when:

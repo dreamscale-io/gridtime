@@ -14,7 +14,7 @@ import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
-import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +43,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private TeamMembershipCapability teamMembership;
+
+    @Autowired
+    private GridClock gridClock;
 
 
     public AccountActivationDto activate(String activationCode) {
@@ -74,9 +77,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public ConnectionStatusDto login(UUID rootAccountId) {
 
-        UUID oldConnectionId = null;
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
@@ -99,46 +103,50 @@ public class RootAccountCapability implements RootAccountIdResolver {
             statusDto.setTeamId(team.getId());
         }
 
-        activeWorkStatusManager.updateOnlineStatus(statusDto.getOrganizationId(), statusDto.getMemberId(), accountStatusEntity.getOnlineStatus());
+        learningCircuitOperator.notifyRoomsOfMemberReconnect(accountStatusEntity.getConnectionId());
+
+        activeWorkStatusManager.pushTeamMemberStatusUpdate(statusDto.getOrganizationId(), statusDto.getMemberId(), now, nanoTime);
 
         return statusDto;
     }
 
     public SimpleStatusDto logout(UUID rootAccountId) {
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
-
-        if (oldConnectionId != null) {
-            learningCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
-        }
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
         accountStatusEntity.setConnectionId(null);
 
         accountStatusRepository.save(accountStatusEntity);
 
-        updateOnlineStatus(rootAccountId, OnlineStatus.Offline);
+        if (oldConnectionId != null) {
+            learningCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
+        }
+
+        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
+
+        activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
 
         return new SimpleStatusDto(Status.VALID, "Successfully logged out");
     }
 
-    private void updateOnlineStatus(UUID rootAccountId, OnlineStatus onlineStatus) {
-        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
-
-        activeWorkStatusManager.updateOnlineStatus(membership.getOrganizationId(), membership.getId(), onlineStatus);
-
-    }
 
     public SimpleStatusDto heartbeat(UUID rootAccountId, HeartbeatDto heartbeat) {
         SimpleStatusDto heartBeatStatus;
 
-        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(rootAccountId);
+        LocalDateTime now = gridClock.now();
+
+        ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         if (isNotOnline(accountStatusEntity)) {
             heartBeatStatus = new SimpleStatusDto(Status.FAILED, "Please login before updating heartbeat");
         } else {
+            accountStatusEntity.setLastActivity(now);
             accountStatusEntity.setDeltaTime(heartbeat.getDeltaTime());
             accountStatusRepository.save(accountStatusEntity);
 
@@ -153,16 +161,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 || accountStatusEntity.getOnlineStatus() != OnlineStatus.Online);
     }
 
-    private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(UUID rootAccountId) {
+    private ActiveAccountStatusEntity findOrCreateActiveAccountStatus(LocalDateTime now, UUID rootAccountId) {
 
         ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByRootAccountId(rootAccountId);
         if (accountStatusEntity == null) {
             accountStatusEntity = new ActiveAccountStatusEntity();
             accountStatusEntity.setRootAccountId(rootAccountId);
-            accountStatusEntity.setLastActivity(LocalDateTime.now());
+            accountStatusEntity.setLastActivity(now);
 
         } else {
-            accountStatusEntity.setLastActivity(LocalDateTime.now());
+            accountStatusEntity.setLastActivity(now);
         }
 
         return accountStatusEntity;

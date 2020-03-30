@@ -108,7 +108,6 @@ public class ActiveWorkStatusManager {
 
     }
 
-
     @Transactional
     public void pushMemberWorkStatus(IntentionEntity activeIntention, LocalDateTime now, Long nanoTime) {
 
@@ -132,7 +131,11 @@ public class ActiveWorkStatusManager {
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(activeIntention.getOrganizationId(), activeIntention.getMemberId(), now, nanoTime, memberStatus);
     }
 
-    public void updateOnlineStatus(UUID organizationId, UUID memberId, OnlineStatus onlineStatus) {
+    public void pushTeamMemberStatusUpdate(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
+
+        MemberWorkStatusDto memberStatus = memberStatusCapability.getStatusOfMember(organizationId, memberId);
+
+        teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
     }
 }

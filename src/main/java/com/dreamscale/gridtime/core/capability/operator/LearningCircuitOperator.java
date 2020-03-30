@@ -482,12 +482,12 @@ public class LearningCircuitOperator {
         }
     }
 
-    private void validateMemberInRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
-        log.info("org={}, member={}, room={}", organizationId, invokingMemberId, talkRoomName);
+    private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
+        log.debug("validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
-        TalkRoomMemberEntity foundRoomMember = talkRoomMemberRepository.findByOrganizationMemberAndTalkRoomId(organizationId, invokingMemberId, talkRoomName);
+        LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Unable to access talk room: " + talkRoomName);
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member "+ invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
         }
     }
 
@@ -936,7 +936,7 @@ public class LearningCircuitOperator {
         validateCircuitExists(talkRoomName, learningCircuitEntity);
         validateCircuitIsActive(talkRoomName, learningCircuitEntity);
 
-        validateMemberInRoom(organizationId, fromMemberId, talkRoomName);
+        validateMemberIsCircuitParticipant(learningCircuitEntity, fromMemberId);
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -1094,7 +1094,10 @@ public class LearningCircuitOperator {
 
     public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
 
-        //validateMemberInRoom(organizationId, invokingMemberId, talkRoomName);
+        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
+
+        validateCircuitExists(talkRoomName, learningCircuitEntity);
+        validateMemberIsCircuitParticipant(learningCircuitEntity, invokingMemberId);
 
         List<TalkRoomMessageEntity> talkMessages = talkRoomMessageRepository.findByTalkRoomName(talkRoomName);
 
@@ -1129,10 +1132,33 @@ public class LearningCircuitOperator {
 
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
+                talkRouter.leaveRoom(circuitRoom.getOrganizationId(), memberConnection.getMemberId(), circuitRoom.getRoomId());
                 sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_OFFLINE);
+            }
+
+
+        }
+    }
+
+    public void notifyRoomsOfMemberReconnect(UUID newConnectionId) {
+
+        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(newConnectionId);
+
+        if (memberConnection != null) {
+
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
+
+            List<LearningCircuitRoomEntity> circuitRooms = learningCircuitRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
+
+            for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
+
+                talkRouter.joinRoom(circuitRoom.getOrganizationId(), memberConnection.getMemberId(), circuitRoom.getRoomId());
+                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_ONLINE);
             }
         }
     }
+
 
     public LearningCircuitDto saveDescriptionForLearningCircuit(UUID organizationId, UUID ownerId, String circuitName, DescriptionInputDto descriptionInputDto) {
 
