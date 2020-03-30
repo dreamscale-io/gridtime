@@ -12,6 +12,7 @@ public enum CircuitMessageType {
     SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
     ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatus.class),
     ROOM_MEMBER_LEAVE("room-member-inactive", "Member has left.", RoomMemberStatus.class),
+    ROOM_MEMBER_OFFLINE("room-member-offline", "Member is offline.", RoomMemberStatus.class),
     WTF_STARTED("wtf-started", "WTF is started.", CircuitStatusDto.class),
     WTF_SOLVED("wtf-solved", "WTF is solved.", CircuitStatusDto.class),
     WTF_ONHOLD("wtf-onhold", "WTF is on hold.", CircuitStatusDto.class),

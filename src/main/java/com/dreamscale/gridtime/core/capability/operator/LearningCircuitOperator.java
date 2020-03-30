@@ -1129,9 +1129,7 @@ public class LearningCircuitOperator {
 
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
-                deleteRoomMember(memberConnection.getOrganizationId(), memberConnection.getMemberId(), gridClock.now(), circuitRoom.getRoomId());
-
-                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
+                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_OFFLINE);
             }
         }
     }
