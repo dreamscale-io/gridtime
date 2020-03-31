@@ -807,10 +807,11 @@ public class LearningCircuitOperator {
 
             talkRoomMemberRepository.save(roomMemberEntity);
 
-            talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
         } else {
-            log.warn("Member already joined {}", roomName);
+            log.warn("Member {} already joined {}", memberId, roomName);
         }
+
+        talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
