@@ -43,6 +43,8 @@ public class AccountResource {
      * @param activationCode Provided by /organization/{id}/member service registration
      * @return AccountActivationDto
      */
+
+    @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
 
@@ -99,9 +101,12 @@ public class AccountResource {
      *
      * @return RoomConnectionScopeDto
      */
+
+    @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.CONNECT_PATH)
     RoomConnectionScopeDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
 
+        RequestContext context = RequestContext.get();
         return rootAccountCapability.connect(connectionInputDto.getConnectionId());
     }
 
