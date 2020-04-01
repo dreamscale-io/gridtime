@@ -16,4 +16,6 @@ public interface TeamCircuitRepository extends CrudRepository<TeamCircuitEntity,
             "and t.name = (:teamName) ")
     public TeamCircuitEntity findByOrganizationIdAndTeamName(@Param("organizationId") UUID organizationId,
                                                 @Param("teamName") String teamName);
+
+    TeamCircuitEntity findByOrganizationIdAndTeamId(UUID organizationId, UUID teamId);
 }

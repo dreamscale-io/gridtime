@@ -1,17 +1,23 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.organization.TeamWithMembersDto;
+import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamMemberDto;
+import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@Slf4j
 @RestController
 @RequestMapping(path = ResourcePaths.TEAM_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class TeamResource {
@@ -22,18 +28,128 @@ public class TeamResource {
     @Autowired
     private TeamMembershipCapability teamMembership;
 
+    @Autowired
+    private TeamCircuitOperator teamCircuitOperator;
+
     /**
-     * Get the active status of me
+     * Get all the teams for the Organization
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping()
-    public TeamDto getMyTeam() {
+    public List<TeamDto> getAllTeams() {
+
         RequestContext context = RequestContext.get();
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return teamMembership.getMyPrimaryTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamMembership.getAllTeams(invokingMember.getOrganizationId());
     }
 
+    /**
+     * Creates the team specified by the team name, that includes one member, the creator of the team.
+     *
+     * Creates a new TeamCircuit for the team to coordinate work, that will be accessible at /circuit/{teamName}
+     *
+     * Additional members can be invited with their username once the team is created
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping( "/{teamName}")
+    public TeamDto createTeam(@PathVariable("teamName") String teamName) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.createTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+    }
+
+
+    /**
+     * Retrieves a team and all it's members.
+     *
+     * You can only get the list of team members if you are a member of the team.
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping( "/{teamName}")
+    public TeamWithMembersDto getTeam(@PathVariable("teamName") String teamName) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.getTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+    }
+
+    /**
+     * Retrieves the currently configured default home team
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.HOME_PATH)
+    public TeamDto getMyHomeTeam() {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.getMyHomeTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
+     * Sets the currently configured default home team
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.HOME_PATH )
+    public TeamDto setMyHomeTeam(@RequestBody HomeTeamConfigInputDto homeTeamConfigInputDto) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.setMyHomeTeam(invokingMember.getOrganizationId(), invokingMember.getId(), homeTeamConfigInputDto.getHomeTeam());
+    }
+
+
+    /**
+     * Gets all the teams the invoking member is a participating in
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH )
+    public List<TeamDto> getMyParticipatingTeams() {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.getMyParticipatingTeams(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
+     * Adds an existing member to the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}")
+
+    public TeamMemberDto addMemberToTeam(@PathVariable("teamName") String teamName,
+                                         @PathVariable("userName") String userName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("addMemberToTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.addMemberToTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+    }
+
+    /**
+     * Removes the specified member from the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH)
+
+    public TeamMemberDto removeMemberFromTeam(@PathVariable("teamName") String teamName,
+                                         @PathVariable("userName") String userName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("removeMemberFromTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.removeMemberFromTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+    }
 
 }

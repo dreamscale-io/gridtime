@@ -38,3 +38,9 @@ databaseChangeLog:
 
   - include:
         file: db/v006/alter_member_connection_view_add_root_account_id.sql
+
+  - include:
+        file: db/v006/create_team_member_home.sql
+
+  - include:
+        file: db/v006/alter_team_add_unique_constraint.sql

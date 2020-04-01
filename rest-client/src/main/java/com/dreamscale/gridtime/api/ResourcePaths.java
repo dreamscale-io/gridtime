@@ -141,6 +141,7 @@ public class ResourcePaths {
 
 
     public static final String HOME_PATH = "/home";
+    public static final String USERNAME_PATH = "/username";
 
     public static final String DICTIONARY_PATH = "/dictionary";
     public static final String PROMOTE_PATH = "/promote";

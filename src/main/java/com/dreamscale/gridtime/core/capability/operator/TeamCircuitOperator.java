@@ -13,6 +13,7 @@ import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapabilit
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
@@ -74,7 +75,7 @@ public class TeamCircuitOperator {
 
     public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamMembership.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamMembership.getMyHomeTeam(organizationId, memberId);
         TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
 
         if (circuit != null) {
@@ -85,9 +86,56 @@ public class TeamCircuitOperator {
         }
     }
 
+
+    public void validateMemberIsOwnerOrModeratorOfTeam(UUID organizationId, UUID teamId, UUID invokingMemberId) {
+
+        TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
+
+        validateCircuitExists("[team circuit]", circuit);
+
+        if ((!circuit.getOwnerId().equals(invokingMemberId) && !circuit.getModeratorId().equals(invokingMemberId))) {
+            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_MODERATOR_OF_TEAM,
+                    "Member must be the owner or moderator of this team");
+        }
+    }
+
+    public void addMemberToTeamCircuit(UUID organizationId, UUID teamId, UUID memberId) {
+
+        TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
+
+        validateCircuitExists("[team circuit]", circuit);
+
+        TalkRoomMemberEntity talkRoomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuit.getTeamRoomId(), memberId);
+
+        if (talkRoomMember == null) {
+
+            talkRoomMember = new TalkRoomMemberEntity();
+            talkRoomMember.setId(UUID.randomUUID());
+            talkRoomMember.setOrganizationId(organizationId);
+            talkRoomMember.setRoomId(circuit.getTeamRoomId());
+            talkRoomMember.setMemberId(memberId);
+            talkRoomMember.setJoinTime(gridClock.now());
+
+            talkRoomMemberRepository.save(talkRoomMember);
+        }
+    }
+
+    public void removeMemberFromTeamCircuit(UUID organizationId, UUID teamId, UUID memberId) {
+        TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
+
+        validateCircuitExists("[team circuit]", circuit);
+
+        TalkRoomMemberEntity talkRoomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuit.getTeamRoomId(), memberId);
+
+        if (talkRoomMember != null) {
+
+            talkRoomMemberRepository.delete(talkRoomMember);
+        }
+    }
+
     public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamMembership.getMyPrimaryTeam(organizationId, memberId);
+        TeamDto teamDto = teamMembership.getMyHomeTeam(organizationId, memberId);
 
         List<MemberWorkStatusDto> members = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, memberId);
 
@@ -481,6 +529,39 @@ public class TeamCircuitOperator {
         return TEAM_ROOM_PREFIX + teamName + "-" + roomName;
     }
 
+
+    public TeamCircuitEntity createTeamCircuit(TeamDto team, UUID ownerId) {
+        TalkRoomEntity defaultTalkRoom = new TalkRoomEntity();
+        defaultTalkRoom.setId(UUID.randomUUID());
+        defaultTalkRoom.setOrganizationId(team.getOrganizationId());
+        defaultTalkRoom.setRoomType(RoomType.TEAM_ROOM);
+        defaultTalkRoom.setRoomName(deriveDefaultTeamRoom(team.getName()));
+
+        talkRoomRepository.save(defaultTalkRoom);
+
+        TeamCircuitEntity teamCircuitEntity = new TeamCircuitEntity();
+        teamCircuitEntity.setId(UUID.randomUUID());
+        teamCircuitEntity.setOrganizationId(team.getOrganizationId());
+        teamCircuitEntity.setTeamId(team.getId());
+        teamCircuitEntity.setTeamRoomId(defaultTalkRoom.getId());
+        teamCircuitEntity.setOwnerId(ownerId);
+        teamCircuitEntity.setModeratorId(ownerId);
+
+        teamCircuitRepository.save(teamCircuitEntity);
+
+        LocalDateTime now = gridClock.now();
+
+        TalkRoomMemberEntity talkRoomMember = new TalkRoomMemberEntity();
+        talkRoomMember.setId(UUID.randomUUID());
+        talkRoomMember.setOrganizationId(team.getOrganizationId());
+        talkRoomMember.setMemberId(ownerId);
+        talkRoomMember.setRoomId(defaultTalkRoom.getId());
+        talkRoomMember.setJoinTime(now);
+
+        talkRoomMemberRepository.save(talkRoomMember);
+
+        return teamCircuitEntity;
+    }
 
     @Transactional
     private TeamCircuitEntity createTeamCircuit(TeamDto team, List<MemberWorkStatusDto> teamMembers) {

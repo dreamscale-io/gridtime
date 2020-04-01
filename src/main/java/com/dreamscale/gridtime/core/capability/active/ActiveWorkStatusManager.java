@@ -40,16 +40,6 @@ public class ActiveWorkStatusManager {
     @Autowired
     GridClock gridClock;
 
-    @Autowired
-    private MapperFactory mapperFactory;
-
-    private DtoEntityMapper<TeamMemberWorkStatusDto, TeamMemberWorkStatusEntity> teamMemberStatusMapper;
-
-
-    @PostConstruct
-    private void init() {
-        teamMemberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberWorkStatusDto.class, TeamMemberWorkStatusEntity.class);
-    }
 
     //rename circuitId to circuitId
 

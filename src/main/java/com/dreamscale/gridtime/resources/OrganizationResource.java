@@ -42,16 +42,16 @@ public class OrganizationResource {
     }
 
     /**
-     * Use an invitation token to decode the organization associated with the invite,
-     * if the token is valid, the organization object will be returned, otherwise 404
+     * Use an invitation key to decode the organization associated with the invite,
+     * if the key is valid, the organization object will be returned, otherwise 404
      *
-     * @param inviteToken
+     * @param invitationKey
      * @return
      */
     @GetMapping(ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH)
-    public OrganizationDto decodeInvitation(@RequestParam("token") String inviteToken) {
+    public OrganizationDto decodeInvitation(@RequestParam("invitationKey") String invitationKey) {
 
-       return organizationMembership.decodeInvitation(inviteToken);
+       return organizationMembership.decodeInvitation(invitationKey);
     }
 
     /**
@@ -67,75 +67,6 @@ public class OrganizationResource {
         return organizationMembership.registerMember(UUID.fromString(organizationId), membershipInputDto);
     }
 
-    /**
-     * Creates a new team for organizing members, affecting what members you see on your side panel
-     */
-    // TODO: @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{id}" + ResourcePaths.TEAM_PATH)
-    public TeamDto createTeam(@PathVariable("id") String organizationId, @RequestBody TeamInputDto teamInputDto) {
-
-        return teamMembership.createTeam(UUID.fromString(organizationId), teamInputDto.getName());
-    }
-
-    /**
-     * Add one or more members to an existing team
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{orgId}" + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
-    public List<TeamMemberDto> addMemberToTeam(@PathVariable("orgId") String organizationId,
-                                               @PathVariable("teamId") String teamId,
-                                               @RequestBody TeamMembersToAddInputDto teamMemberInputDto) {
-
-        return teamMembership.addMembersToTeam(UUID.fromString(organizationId), UUID.fromString(teamId), teamMemberInputDto.getMemberIds());
-    }
-
-    /**
-     * Get status of Me, and all my team members
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.TEAM_PATH )
-    public TeamWithMembersDto getMeAndMyTeam() {
-        RequestContext context = RequestContext.get();
-        return teamMembership.getMeAndMyTeam(context.getRootAccountId());
-    }
-
-    /**
-     * Get all the teams for the Organization
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH)
-    public List<TeamDto> getTeams(@PathVariable("orgId") String organizationId) {
-
-        return teamMembership.getTeams(UUID.fromString(organizationId));
-    }
-
-    /**
-     * Get all my teams within the Organization
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{orgId}" + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
-    public List<TeamDto> getMyTeams(@PathVariable("orgId") String organizationId) {
-        RequestContext context = RequestContext.get();
-        return teamMembership.getMyTeams(UUID.fromString(organizationId), context.getRootAccountId());
-    }
-
-    /**
-     * Get all my team members within a team, and their status
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{orgId}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
-    public List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@PathVariable("orgId") String organizationId,  @PathVariable("teamId") String teamId) {
-
-        return teamMembership.getStatusOfTeamMembers(UUID.fromString(organizationId), UUID.fromString(teamId));
-    }
-
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TEAM_PATH + ResourcePaths.MEMBER_PATH )
-    public MemberRegistrationDetailsDto addMemberToMyTeam(@RequestBody  String newMemberEmail) {
-        RequestContext context = RequestContext.get();
-        return teamMembership.addMemberToMyTeam(context.getRootAccountId(), newMemberEmail);
-    }
 
 
 }

@@ -19,10 +19,10 @@ public class TeamWithMembersDto {
     private UUID teamId;
     private String teamName;
 
-    private TeamMemberWorkStatusDto me;
-    private List<TeamMemberWorkStatusDto> teamMembers;
+    private MemberWorkStatusDto me;
+    private List<MemberWorkStatusDto> teamMembers;
 
-    public void addMember(TeamMemberWorkStatusDto teamMember) {
+    public void addMember(MemberWorkStatusDto teamMember) {
         if (teamMembers == null) {
             teamMembers = new ArrayList<>();
         }

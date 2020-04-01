@@ -54,7 +54,7 @@ public class ActiveUserContextService {
                 userContext.setOrganizationId(defaultMembership.getOrganizationId());
                 userContext.setMemberId(defaultMembership.getId());
 
-                TeamDto defaultTeam = teamMembership.getMyPrimaryTeam(defaultMembership.getOrganizationId(), defaultMembership.getId());
+                TeamDto defaultTeam = teamMembership.getMyHomeTeam(defaultMembership.getOrganizationId(), defaultMembership.getId());
                 if (defaultTeam != null) {
                     userContext.setTeamId(defaultTeam.getId());
                 }

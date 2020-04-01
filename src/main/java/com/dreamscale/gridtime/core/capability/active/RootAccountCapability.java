@@ -9,8 +9,6 @@ import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapabilit
 import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
-import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitEntity;
-import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
 import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -102,7 +100,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         statusDto.setOrganizationId(membership.getOrganizationId());
         statusDto.setUserName(membership.getUsername());
 
-        TeamDto team = teamMembership.getMyPrimaryTeam(membership.getOrganizationId(), membership.getId());
+        TeamDto team = teamMembership.getMyHomeTeam(membership.getOrganizationId(), membership.getId());
 
         if (team != null) {
             statusDto.setTeamId(team.getId());

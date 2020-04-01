@@ -169,7 +169,7 @@ public class AdminService {
         registrations.add(registerMember(dreamScaleOrg, "bethlrichardson@gmail.com"));
         registrations.add(registerMember(dreamScaleOrg, "tobias@davistobias.com"));
 
-        TeamDto team = teamMembership.createTeam(dreamScaleOrg.getId(), "Phoenix");
+        TeamDto team = teamMembership.createTeam(dreamScaleOrg.getId(), registrations.get(0).getMemberId(), "Phoenix");
 
         List<UUID> memberIds = extractMemberIds(registrations);
         teamMembership.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
@@ -208,7 +208,7 @@ public class AdminService {
 
         List<UUID> toyotaMemberIds = extractMemberIds(toyotaRegistrations);
 
-        TeamDto toyotaTeam = teamMembership.createTeam(onpremOrg.getId(), "Toyota");
+        TeamDto toyotaTeam = teamMembership.createTeam(onpremOrg.getId(), toyotaRegistrations.get(0).getMemberId(), "Toyota");
         teamMembership.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
 
         //cpg team
@@ -231,7 +231,7 @@ public class AdminService {
 
         List<UUID> cpgMemberIds = extractMemberIds(cpgRegistrations);
 
-        TeamDto cpgTeam = teamMembership.createTeam(onpremOrg.getId(), "CPG");
+        TeamDto cpgTeam = teamMembership.createTeam(onpremOrg.getId(), cpgRegistrations.get(0).getMemberId(), "CPG");
         teamMembership.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
 
         List<MemberRegistrationDetailsDto> allRegistrations = new ArrayList<>();

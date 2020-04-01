@@ -61,6 +61,21 @@ public class MemberStatusCapability {
 
     }
 
+    public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId, UUID teamId) {
+
+        LinkedList<MemberWorkStatusDto> memberWorkStatusDtos = new LinkedList<>();
+
+        List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
+        for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
+            memberWorkStatusDtos.add(toDtoWithDetails(memberStatusEntity));
+        }
+        sortMembers(memberWorkStatusDtos);
+
+        memberWorkStatusDtos.addFirst(getMyCurrentStatus(organizationId, memberId));
+
+        return memberWorkStatusDtos;
+    }
+
     public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId) {
 
         List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);

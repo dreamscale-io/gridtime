@@ -11,11 +11,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamMemberDto {
+public class HomeTeamConfigInputDto {
 
-    private UUID organizationId;
-    private UUID teamId;
-    private UUID memberId;
+    private String homeTeam;
 
-    private String userName;
 }

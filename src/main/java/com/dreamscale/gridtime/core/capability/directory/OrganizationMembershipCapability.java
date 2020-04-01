@@ -43,6 +43,9 @@ public class OrganizationMembershipCapability {
     @Autowired
     private ActiveAccountStatusRepository activeAccountStatusRepository;
 
+    @Autowired
+    private TeamMembershipCapability teamMembershipCapability;
+
 
     @Autowired
     private JiraCapability jiraCapability;
@@ -102,6 +105,8 @@ public class OrganizationMembershipCapability {
             orgEntity.setId(UUID.randomUUID());
 
             organizationRepository.save(orgEntity);
+
+            teamMembershipCapability.createEveryoneTeam(orgEntity.getId());
 
             OrganizationInviteTokenEntity inviteToken = createInviteToken(orgEntity.getId());
             inviteTokenRepository.save(inviteToken);
@@ -184,6 +189,8 @@ public class OrganizationMembershipCapability {
         memberEntity.setRootAccountId(rootAccountEntity.getId());
 
         memberRepository.save(memberEntity);
+
+        teamMembershipCapability.addMemberToEveryone(orgEntity.getId(), memberEntity.getId());
 
         ActiveAccountStatusEntity accountStatusEntity = new ActiveAccountStatusEntity();
         accountStatusEntity.setRootAccountId(rootAccountEntity.getId());

@@ -27,7 +27,7 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
             "where t.id = tm.team_id " +
             "and tm.member_id = om.id "+
             "and om.organization_id = (:orgId) "+
-            "and om.id =(:memberId) ")
+            "and om.id =(:memberId) order by t.name")
     List<TeamEntity> findMyTeamsByOrgMembership(@Param("orgId") UUID orgId, @Param("memberId") UUID memberId);
 
 
