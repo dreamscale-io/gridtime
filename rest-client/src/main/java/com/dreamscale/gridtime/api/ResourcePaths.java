@@ -33,6 +33,7 @@ public class ResourcePaths {
     public static final String HEARTBEAT_PATH = "/heartbeat";
     public static final String LOGIN_PATH = "/login";
     public static final String LOGOUT_PATH = "/logout";
+    public static final String CONNECT_PATH = "/connect";
 
     public static final String ORGANIZATION_PATH = "/organization";
     public static final String MEMBER_PATH = "/member";

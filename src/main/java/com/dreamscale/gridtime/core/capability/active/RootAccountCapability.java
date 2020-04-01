@@ -1,9 +1,6 @@
 package com.dreamscale.gridtime.core.capability.active;
 
-import com.dreamscale.gridtime.api.account.AccountActivationDto;
-import com.dreamscale.gridtime.api.account.ConnectionStatusDto;
-import com.dreamscale.gridtime.api.account.HeartbeatDto;
-import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.*;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
@@ -207,5 +204,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-
+    public TalkConnectionDto connect(UUID rootAccountId, UUID connectionId) {
+        //validate or throw an exception
+        return null;
+    }
 }

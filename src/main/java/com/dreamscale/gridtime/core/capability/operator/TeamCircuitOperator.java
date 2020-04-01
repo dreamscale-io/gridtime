@@ -242,7 +242,7 @@ public class TeamCircuitOperator {
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
         messageDto.setUri(messageEntity.getToRoomId().toString());
-        messageDto.setJsonBody(messageEntity.getJsonBody());
+        messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 

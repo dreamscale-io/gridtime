@@ -83,4 +83,16 @@ public class AccountResource {
         return rootAccountCapability.logout(context.getRootAccountId());
     }
 
+    /**
+     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
+     * for the duration of the session
+     * @return ConnectionStatusDto
+     */
+    @PostMapping(ResourcePaths.CONNECT_PATH)
+    TalkConnectionDto connect(@RequestBody TalkConnectionInputDto talkConnectionInput) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.connect(context.getRootAccountId(), talkConnectionInput.getConnectionId());
+    }
+
 }

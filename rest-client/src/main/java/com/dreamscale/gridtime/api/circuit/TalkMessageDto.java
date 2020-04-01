@@ -24,7 +24,7 @@ public class TalkMessageDto {
     private Map<String, String> metaProps;
 
     private String messageType;
-    private String jsonBody;
+    private String data;
 
     public void addMetaProp(String propName, String value) {
         if (metaProps == null) {
