@@ -3,8 +3,10 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.ActivationCodeDto
 import com.dreamscale.gridtime.api.account.AccountActivationDto
+import com.dreamscale.gridtime.api.account.ConnectionInputDto
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.HeartbeatDto
+import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
@@ -102,6 +104,24 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto.status == Status.VALID
     }
 
+    def "on talk connect should resume rooms"() {
+        given:
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        when:
+
+        LearningCircuitDto circuitDto = circuitClient.startWTF()
+
+        ConnectionStatusDto connectionStatusDto = accountClient.login()
+
+        RoomConnectionScopeDto roomConnections = accountClient.connect(new ConnectionInputDto(connectionStatusDto.getConnectionId()));
+
+        then:
+        assert roomConnections != null
+        assert roomConnections.roomIdsToJoin.size() == 2
+    }
+
     def "should create a circuit then logout & login again"() {
         given:
 
@@ -149,7 +169,8 @@ class AccountResourceSpec extends Specification {
         HeartbeatDto heartbeatDto = new HeartbeatDto()
         heartbeatDto.setDeltaTime(30);
 
-        accountClient.login()
+        ConnectionStatusDto connect = accountClient.login()
+        accountClient.connect(new ConnectionInputDto(connect.getConnectionId()));
 
         when:
         SimpleStatusDto statusDto = accountClient.heartbeat(heartbeatDto)

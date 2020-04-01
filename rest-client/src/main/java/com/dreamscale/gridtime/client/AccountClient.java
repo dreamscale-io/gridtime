@@ -23,4 +23,6 @@ public interface AccountClient {
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout();
 
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.CONNECT_PATH)
+    RoomConnectionScopeDto connect(ConnectionInputDto connectionInputDto );
 }

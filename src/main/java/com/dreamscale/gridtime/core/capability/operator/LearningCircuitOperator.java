@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.capability.operator;
 
+import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
@@ -1141,7 +1142,10 @@ public class LearningCircuitOperator {
         }
     }
 
-    public void notifyRoomsOfMemberReconnect(UUID newConnectionId) {
+    public RoomConnectionScopeDto notifyRoomsOfMemberReconnect(UUID newConnectionId) {
+
+        RoomConnectionScopeDto talkConnectionScope = new RoomConnectionScopeDto();
+        talkConnectionScope.setConnectionId(newConnectionId);
 
         MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(newConnectionId);
 
@@ -1154,10 +1158,11 @@ public class LearningCircuitOperator {
 
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
-                talkRouter.joinRoom(circuitRoom.getOrganizationId(), memberConnection.getMemberId(), circuitRoom.getRoomId());
+                talkConnectionScope.addRoomId(circuitRoom.getRoomId());
                 sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_ONLINE);
             }
         }
+        return talkConnectionScope;
     }
 
 

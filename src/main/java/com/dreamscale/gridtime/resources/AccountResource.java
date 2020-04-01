@@ -12,6 +12,7 @@ import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -53,6 +54,8 @@ public class AccountResource {
      * @param heartbeat delta is the lag time between pings
      * @return SimpleStatusDto
      */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
 
@@ -63,8 +66,12 @@ public class AccountResource {
     /**
      * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
      * for the duration of the session
+     *
+     * To login completely, talk has to handshake via the /connect API or the user isnt fully logged in
      * @return ConnectionStatusDto
      */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login() {
 
@@ -76,6 +83,8 @@ public class AccountResource {
      * Logout the user so the temporary connectionId expires
      * @return SimpleStatusDto
      */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout() {
 
@@ -84,15 +93,16 @@ public class AccountResource {
     }
 
     /**
-     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
-     * for the duration of the session
-     * @return ConnectionStatusDto
+     * Handshake connectionId method used by talk, to get all the rooms needing to be reconnected.
+     *
+     * The user will be "Online" once this handshake is complete
+     *
+     * @return RoomConnectionScopeDto
      */
     @PostMapping(ResourcePaths.CONNECT_PATH)
-    TalkConnectionDto connect(@RequestBody TalkConnectionInputDto talkConnectionInput) {
+    RoomConnectionScopeDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
 
-        RequestContext context = RequestContext.get();
-        return rootAccountCapability.connect(context.getRootAccountId(), talkConnectionInput.getConnectionId());
+        return rootAccountCapability.connect(connectionInputDto.getConnectionId());
     }
 
 }

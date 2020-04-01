@@ -22,12 +22,15 @@ public class MemberConnectionEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
+    private UUID rootAccountId;
+
     private UUID connectionId;
 
     private LocalDateTime lastActivity;
     private LocalDateTime lastHeartbeat;
 
-    private String shortName;
+    private String username;
+    private String displayName;
     private String fullName;
 
 }

@@ -9,10 +9,15 @@ import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapabilit
 import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
+import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitEntity;
+import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
+import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +45,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private TeamMembershipCapability teamMembership;
+
+    @Autowired
+    private MemberConnectionRepository memberConnectionRepository;
 
     @Autowired
     private GridClock gridClock;
@@ -80,7 +88,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
-        accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
+        accountStatusEntity.setOnlineStatus(OnlineStatus.Connecting);
 
         accountStatusRepository.save(accountStatusEntity);
 
@@ -100,12 +108,35 @@ public class RootAccountCapability implements RootAccountIdResolver {
             statusDto.setTeamId(team.getId());
         }
 
-        learningCircuitOperator.notifyRoomsOfMemberReconnect(accountStatusEntity.getConnectionId());
-
-        activeWorkStatusManager.pushTeamMemberStatusUpdate(statusDto.getOrganizationId(), statusDto.getMemberId(), now, nanoTime);
-
         return statusDto;
     }
+
+    public RoomConnectionScopeDto connect(UUID connectionId) {
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        ActiveAccountStatusEntity accountStatusEntity = accountStatusRepository.findByConnectionId(connectionId);
+
+        validateConnectionExists(connectionId, accountStatusEntity);
+
+        accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
+        accountStatusRepository.save(accountStatusEntity);
+
+        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(accountStatusEntity.getRootAccountId());
+
+        activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
+
+        return learningCircuitOperator.notifyRoomsOfMemberReconnect(connectionId);
+
+    }
+
+    private void validateConnectionExists(UUID connectionId, ActiveAccountStatusEntity accountStatusEntity) {
+        if (accountStatusEntity == null) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_CONNECTION, "Unable to find connection " + connectionId);
+        }
+    }
+
 
     public SimpleStatusDto logout(UUID rootAccountId) {
 
@@ -204,8 +235,5 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    public TalkConnectionDto connect(UUID rootAccountId, UUID connectionId) {
-        //validate or throw an exception
-        return null;
-    }
+
 }
