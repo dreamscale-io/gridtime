@@ -45,13 +45,13 @@ public class OrganizationResource {
      * Use an invitation key to decode the organization associated with the invite,
      * if the key is valid, the organization object will be returned, otherwise 404
      *
-     * @param invitationKey
+     * @param token
      * @return
      */
     @GetMapping(ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH)
-    public OrganizationDto decodeInvitation(@RequestParam("invitationKey") String invitationKey) {
+    public OrganizationDto decodeInvitation(@RequestParam("token") String token) {
 
-       return organizationMembership.decodeInvitation(invitationKey);
+       return organizationMembership.decodeInvitation(token);
     }
 
     /**

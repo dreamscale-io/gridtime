@@ -32,7 +32,7 @@ class TeamResourceSpec extends Specification {
 
     }
 
-    def "should return team with hypercore configured"() {
+    def "should return team with new home configured"() {
         given:
 
         RootAccountEntity account = aRandom.rootAccountEntity().save()
@@ -40,14 +40,14 @@ class TeamResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
         testUser.setId(member.getRootAccountId())
 
-        TeamDto team = teamService.createTeam(org.id, "myTeam")
-        teamService.addMembersToTeam(org.id, team.id, Arrays.asList(member.id))
+        TeamDto team = teamService.createTeam(org.id, member.getId(), "myTeam")
 
         when:
-        TeamDto teamDto = teamClient.getMyPrimaryTeam()
+        TeamDto teamDto = teamClient.getMyHomeTeam()
 
         then:
         assert teamDto != null
+        assert teamDto.getName() == "myTeam"
 
     }
 

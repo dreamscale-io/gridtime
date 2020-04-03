@@ -33,11 +33,18 @@ public interface TeamClient {
     @RequestLine("POST " + ResourcePaths.TEAM_PATH + ResourcePaths.HOME_PATH )
     TeamDto setMyHomeTeam(HomeTeamConfigInputDto homeTeamConfigInputDto);
 
-    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}" )
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}" )
     TeamMemberDto addMemberToTeam(@Param("teamName") String teamName, @Param("userName") String userName);
 
-    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH )
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH )
     void removeMemberFromTeam(@Param("teamName") String teamName, @Param("userName") String userName);
+
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}" )
+    TeamMemberDto addMemberToTeamWithMemberId(@Param("teamName") String teamName, @Param("memberId") String memberId);
+
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH  + "/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH )
+    void removeMemberFromTeamWithMemberId(@Param("teamName") String teamName, @Param("memberId") String memberId);
+
 
     @RequestLine("GET " + ResourcePaths.TEAM_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     List<TeamDto> getAllMyParticipatingTeams();

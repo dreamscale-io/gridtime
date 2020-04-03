@@ -171,8 +171,9 @@ public class AdminService {
 
         TeamDto team = teamMembership.createTeam(dreamScaleOrg.getId(), registrations.get(0).getMemberId(), "Phoenix");
 
-        List<UUID> memberIds = extractMemberIds(registrations);
-        teamMembership.addMembersToTeam(dreamScaleOrg.getId(), team.getId(), memberIds);
+        for (MemberRegistrationDetailsDto registration : registrations) {
+            teamMembership.addMemberToTeamWithMemberId(dreamScaleOrg.getId(), registrations.get(0).getMemberId(), "Phoenix", registration.getMemberId());
+        }
 
         return registrations;
     }
@@ -206,10 +207,12 @@ public class AdminService {
         toyotaRegistrations.add(registerMember(onpremOrg, "joegarcia@onprem.com"));
         toyotaRegistrations.add(registerMember(onpremOrg, "joshdeford@onprem.com"));
 
-        List<UUID> toyotaMemberIds = extractMemberIds(toyotaRegistrations);
 
         TeamDto toyotaTeam = teamMembership.createTeam(onpremOrg.getId(), toyotaRegistrations.get(0).getMemberId(), "Toyota");
-        teamMembership.addMembersToTeam(onpremOrg.getId(), toyotaTeam.getId(), toyotaMemberIds);
+
+        for (MemberRegistrationDetailsDto registration : toyotaRegistrations) {
+            teamMembership.addMemberToTeamWithMemberId(onpremOrg.getId(), toyotaRegistrations.get(0).getMemberId(), "Toyota", registration.getMemberId());
+        }
 
         //cpg team
 
@@ -229,10 +232,12 @@ public class AdminService {
         cpgRegistrations.add(registerMember(onpremOrg, "christophe@onprem.com"));
         cpgRegistrations.add(registerMember(onpremOrg, "jeremy@onprem.com"));
 
-        List<UUID> cpgMemberIds = extractMemberIds(cpgRegistrations);
 
         TeamDto cpgTeam = teamMembership.createTeam(onpremOrg.getId(), cpgRegistrations.get(0).getMemberId(), "CPG");
-        teamMembership.addMembersToTeam(onpremOrg.getId(), cpgTeam.getId(), cpgMemberIds);
+
+        for (MemberRegistrationDetailsDto registration : toyotaRegistrations) {
+            teamMembership.addMemberToTeamWithMemberId(onpremOrg.getId(), cpgRegistrations.get(0).getMemberId(), "CPG", registration.getMemberId());
+        }
 
         List<MemberRegistrationDetailsDto> allRegistrations = new ArrayList<>();
         allRegistrations.addAll(toyotaRegistrations);

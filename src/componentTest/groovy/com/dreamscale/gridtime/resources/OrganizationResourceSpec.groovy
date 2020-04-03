@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto
 import com.dreamscale.gridtime.api.organization.MembershipInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationInputDto
@@ -15,6 +16,8 @@ import com.dreamscale.gridtime.api.team.TeamMemberDto
 import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.OrganizationClient
+import com.dreamscale.gridtime.client.TeamClient
+import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
@@ -33,6 +36,9 @@ class OrganizationResourceSpec extends Specification {
 
     @Autowired
     OrganizationClient organizationClient
+
+    @Autowired
+    TeamClient teamClient
 
     @Autowired
     AccountClient accountClient
@@ -141,8 +147,11 @@ class OrganizationResourceSpec extends Specification {
         given:
         OrganizationDto org = createOrganizationWithClient()
 
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getRootAccountId())
+
         when:
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
+        TeamDto team = teamClient.createTeam( "unicorn")
 
         then:
         assert team != null
@@ -154,15 +163,19 @@ class OrganizationResourceSpec extends Specification {
         given:
         OrganizationDto org = createOrganizationWithClient()
 
-        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
-        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("lightning"))
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getRootAccountId())
+
+
+        TeamDto team1 = teamClient.createTeam("unicorn")
+        TeamDto team2 = teamClient.createTeam("lightning")
 
         when:
-        List<TeamDto> teams = organizationClient.getTeams(org.id.toString())
+        List<TeamDto> teams = teamClient.getAllTeams() //everyone team is here too
 
         then:
         assert teams != null
-        assert teams.size() == 2
+        assert teams.size() == 3
     }
 
 
@@ -171,54 +184,25 @@ class OrganizationResourceSpec extends Specification {
 
         OrganizationDto org = createOrganizationWithClient()
 
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getRootAccountId())
+
+
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
 
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
+        TeamDto team = teamClient.createTeam("unicorn")
 
         TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
 
         when:
-        List<TeamMemberDto> teamMembers = organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
+        TeamMemberDto member1 = teamClient.addMemberToTeamWithMemberId("unicorn", registration1.memberId.toString())
+        TeamMemberDto member2 = teamClient.addMemberToTeamWithMemberId("unicorn", registration2.memberId.toString())
 
         then:
-        assert teamMembers != null
-        assert teamMembers.size() == 2
-        assert teamMembers.get(0).memberId == registration1.memberId
-        assert teamMembers.get(0).memberName == registration1.fullName
-        assert teamMembers.get(0).memberEmail == registration1.orgEmail
-        assert teamMembers.get(0).teamName == team.name
+        assert member1.memberId == registration1.memberId
 
-        assert teamMembers.get(1).memberId == registration2.memberId
-        assert teamMembers.get(1).memberName == registration2.fullName
-        assert teamMembers.get(1).memberEmail == registration2.orgEmail
-
-    }
-
-    def "should add member to my team with email"() {
-        given:
-
-        OrganizationDto org = createOrganizationWithClient()
-
-        MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("unicorn"))
-
-        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId])
-
-        List<TeamMemberDto> teamMembers = organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
-
-        JiraUserDto jiraUserDto = aRandom.jiraUserDto().emailAddress("kara@dreamscale.io").build()
-        1 * mockJiraService.getUserByEmail(_, _) >> jiraUserDto
-
-        when:
-        testUser.id = registration1.rootAccountId;
-        MemberRegistrationDetailsDto registration2 = organizationClient.addMemberToMyTeam("kara@dreamscale.io")
-
-        then:
-        assert registration2 != null
-        assert registration2.orgEmail == "kara@dreamscale.io"
-        assert registration2.activationCode != null
-
+        assert member2.memberId == registration2.memberId
     }
 
 
@@ -227,30 +211,33 @@ class OrganizationResourceSpec extends Specification {
 
         OrganizationDto org = createOrganizationWithClient()
 
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
+        testUser.setId(member.getRootAccountId())
+
+
         MemberRegistrationDetailsDto registration1 = registerMemberWithClient(org, "janelle@dreamscale.io")
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
 
-        TeamDto team1 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team1"))
-        TeamDto team2 = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team2"))
-        TeamDto teamOther = organizationClient.createTeam(org.id.toString(), new TeamInputDto("other"))
+        TeamDto team1 = teamClient.createTeam("Team1")
+        TeamDto team2 = teamClient.createTeam("Team2")
+        TeamDto teamOther = teamClient.createTeam("other")
 
-        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId])
+        teamClient.addMemberToTeamWithMemberId("Team1", registration1.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Team1", registration2.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Team2", registration1.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Team2", registration2.memberId.toString())
 
-        organizationClient.addMembersToTeam(org.id.toString(), team1.id.toString(), teamMembersToAdd)
-        organizationClient.addMembersToTeam(org.id.toString(), team2.id.toString(), teamMembersToAdd)
-
-        TeamMembersToAddInputDto otherTeamMembers = new TeamMembersToAddInputDto([registration2.memberId])
-        organizationClient.addMembersToTeam(org.id.toString(), teamOther.id.toString(), otherTeamMembers)
+        teamClient.addMemberToTeamWithMemberId("other", registration2.memberId.toString())
 
         //active request coming from janelle
         testUser.id = registration1.rootAccountId
 
         when:
-        List<TeamDto> myTeams = organizationClient.getMyTeams(org.id.toString())
+        List<TeamDto> myTeams = teamClient.getAllMyParticipatingTeams()
 
         then:
-        assert myTeams != null
-        assert myTeams.size() == 2
+        assert myTeams != null //everyone here too
+        assert myTeams.size() == 3
 
     }
 
@@ -263,18 +250,27 @@ class OrganizationResourceSpec extends Specification {
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
         MemberRegistrationDetailsDto registration3 = registerMemberWithClient(org, "mike@dreamscale.io")
 
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        testUser.setId(registration1.getRootAccountId())
 
-        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId, registration3.memberId])
+        //login cant find home team, so this dont work, should be able to login without a team.
+        accountClient.login()
 
-        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
+        TeamDto team = teamClient.createTeam("Unicorn")
+
+        println registration1.memberId
+        println registration2.memberId
+        println registration3.memberId
+
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration1.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration2.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration3.memberId.toString())
 
         when:
-        List<TeamMemberWorkStatusDto> teamMemberStatusList = organizationClient.getStatusOfTeamMembers(org.id.toString(), team.id.toString())
+        TeamWithMembersDto teamWithMembers = teamClient.getTeam("Unicorn")
 
         then:
-        assert teamMemberStatusList != null
-        assert teamMemberStatusList.size() == 3
+        assert teamWithMembers.me.id == registration1.memberId
+        assert teamWithMembers.teamMembers.size() == 2
     }
 
     def "should retrieve team member status of me and my team"() {
@@ -286,16 +282,18 @@ class OrganizationResourceSpec extends Specification {
         MemberRegistrationDetailsDto registration2 = registerMemberWithClient(org, "kara@dreamscale.io")
         MemberRegistrationDetailsDto registration3 = registerMemberWithClient(org, "mike@dreamscale.io")
 
-        TeamDto team = organizationClient.createTeam(org.id.toString(), new TeamInputDto("Team Unicorn"))
+        testUser.setId(registration1.getRootAccountId())
 
-        TeamMembersToAddInputDto teamMembersToAdd = new TeamMembersToAddInputDto([registration1.memberId, registration2.memberId, registration3.memberId])
+        accountClient.login()
 
-        organizationClient.addMembersToTeam(org.id.toString(), team.id.toString(), teamMembersToAdd)
+        TeamDto team = teamClient.createTeam("Unicorn")
 
-        testUser.id = registration1.rootAccountId;
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration1.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration2.memberId.toString())
+        teamClient.addMemberToTeamWithMemberId("Unicorn", registration3.memberId.toString())
 
         when:
-        TeamWithMembersDto meAndMyTeam = organizationClient.getMeAndMyTeam()
+        TeamWithMembersDto meAndMyTeam = teamClient.getTeam("Unicorn")
 
         then:
         assert meAndMyTeam != null

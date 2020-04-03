@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface OrganizationMemberRepository extends CrudRepository<OrganizationMemberEntity, UUID> {
 
+    OrganizationMemberEntity findByOrganizationIdAndId(UUID organizationId, UUID id);
+
     OrganizationMemberEntity findById(UUID id);
 
     List<OrganizationMemberEntity> findByRootAccountId(UUID rootAccountId);

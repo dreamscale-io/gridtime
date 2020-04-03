@@ -60,8 +60,9 @@ class MemberStatusResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
         testUser.setId(member.getRootAccountId())
 
-        TeamDto team = teamService.createTeam(org.id, "myTeam")
-        teamService.addMembersToTeam(org.id, team.id, Arrays.asList(member.id))
+        TeamDto team = teamService.createTeam(org.id,  member.getId(), "myTeam")
+
+        //teamService.addMemberToTeamWithMemberId(org.getId(), member.getId(), "myTeam", member.getId())
 
         when:
         List<MemberWorkStatusDto> members = memberStatusClient.getStatusOfMeAndMyTeam()

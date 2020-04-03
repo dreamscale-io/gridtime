@@ -13,7 +13,7 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
 
     List<TeamEntity> findByOrganizationId(UUID orgId);
 
-    TeamEntity findByOrganizationIdAndName(UUID organizationId, String name);
+    TeamEntity findByOrganizationIdAndLowerCaseName(UUID organizationId, String name);
 
         @Query(nativeQuery = true, value = "select t.* from team t, team_member tm, organization_member om " +
             "where t.id = tm.team_id " +

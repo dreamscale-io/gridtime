@@ -69,7 +69,8 @@ public class TeamMembershipCapability {
     @Autowired
     GridClock gridClock;
 
-    private static final String EVERYONE_TEAM = "everyone";
+    private static final String EVERYONE = "Everyone";
+    private static final String LOWER_CASE_EVERYONE = "everyone";
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -89,16 +90,18 @@ public class TeamMembershipCapability {
     @Transactional
     public TeamDto createTeam(UUID organizationId, UUID memberId, String teamName) {
 
-        String standardizedTeamName = standardizeTeamName(teamName);
+        String teamWithNoSpaces = stripSpaces(teamName);
+        String standardizedTeamName = standardizeForSearch(teamName);
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, standardizedTeamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
-        validateTeamDoesntAlreadyExist(standardizedTeamName, teamEntity);
+        validateTeamDoesntAlreadyExist(teamWithNoSpaces, teamEntity);
 
         teamEntity = new TeamEntity();
         teamEntity.setId(UUID.randomUUID());
         teamEntity.setOrganizationId(organizationId);
-        teamEntity.setName(standardizedTeamName);
+        teamEntity.setName(teamWithNoSpaces);
+        teamEntity.setLowerCaseName(standardizedTeamName);
         teamEntity.setCreatorId(memberId);
         teamRepository.save(teamEntity);
 
@@ -120,14 +123,15 @@ public class TeamMembershipCapability {
     @Transactional
     public void createEveryoneTeam(UUID organizationId) {
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, EVERYONE_TEAM);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
 
-        validateTeamDoesntAlreadyExist(EVERYONE_TEAM, teamEntity);
+        validateTeamDoesntAlreadyExist(EVERYONE, teamEntity);
 
         teamEntity = new TeamEntity();
         teamEntity.setId(UUID.randomUUID());
         teamEntity.setOrganizationId(organizationId);
-        teamEntity.setName(EVERYONE_TEAM);
+        teamEntity.setName(EVERYONE);
+        teamEntity.setLowerCaseName(LOWER_CASE_EVERYONE);
         teamRepository.save(teamEntity);
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
@@ -138,9 +142,9 @@ public class TeamMembershipCapability {
     @Transactional
     public void addMemberToEveryone(UUID organizationId, UUID memberId) {
 
-        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndName(organizationId, EVERYONE_TEAM);
+        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
 
-        validateTeamExists(EVERYONE_TEAM, everyoneTeam);
+        validateTeamExists(EVERYONE, everyoneTeam);
 
         TeamMemberEntity teamMemberEntity = new TeamMemberEntity();
         teamMemberEntity.setId(UUID.randomUUID());
@@ -175,50 +179,20 @@ public class TeamMembershipCapability {
         }
     }
 
-    private String standardizeTeamName(String teamName) {
-        return teamName.replace(" ", "_").toLowerCase();
+    private String stripSpaces(String name) {
+        return name.replace(" ", "_");
+    }
+
+    private String standardizeForSearch(String name) {
+        return name.replace(" ", "_").toLowerCase();
     }
 
     public TeamDto getTeamByName(UUID organizationId, String teamName) {
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, teamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, teamName);
         return teamOutputMapper.toApi(teamEntity);
     }
 
-    public List<TeamMemberDto> addMembersToTeam(UUID orgId, UUID teamId, List<UUID> membersToAdd) {
-        OrganizationEntity org = findAndValidateOrganization(orgId);
-        TeamEntity team = validateTeam(orgId, teamId);
-
-        validateNotEmpty(membersToAdd);
-
-        List<TeamMemberDto> teamMembers = new ArrayList<>();
-
-        for (UUID memberId : membersToAdd) {
-            validateMember(memberId, orgId);
-
-            TeamMemberEntity teamMemberEntity = new TeamMemberEntity();
-            teamMemberEntity.setId(UUID.randomUUID());
-            teamMemberEntity.setOrganizationId(orgId);
-            teamMemberEntity.setTeamId(teamId);
-            teamMemberEntity.setMemberId(memberId);
-
-            teamMemberRepository.save(teamMemberEntity);
-
-            TeamMemberDto teamMemberDto = new TeamMemberDto();
-            teamMemberDto.setOrganizationId(orgId);
-            teamMemberDto.setMemberId(memberId);
-            teamMemberDto.setTeamId(teamId);
-
-            MemberStatusEntity memberStatus = memberStatusRepository.findOne(memberId);
-            if (memberStatus != null) {
-                teamMemberDto.setUserName(memberStatus.getUsername());
-            }
-
-            teamMembers.add(teamMemberDto);
-        }
-
-        return teamMembers;
-    }
 
     private void validateMember(UUID memberId, UUID orgId) {
         OrganizationMemberEntity member = organizationMemberRepository.findById(memberId);
@@ -301,15 +275,15 @@ public class TeamMembershipCapability {
 
             defaultTeam = chooseDefaultTeam(teamEntities);
 
-            validateTeamExists("[default home team]", defaultTeam);
+            if (defaultTeam != null) {
+                teamMemberHomeConfig = new TeamMemberHomeEntity();
+                teamMemberHomeConfig.setId(UUID.randomUUID());
+                teamMemberHomeConfig.setOrganizationId(orgId);
+                teamMemberHomeConfig.setMemberId(memberId);
+                teamMemberHomeConfig.setHomeTeamId(defaultTeam.getId());
 
-            teamMemberHomeConfig = new TeamMemberHomeEntity();
-            teamMemberHomeConfig.setId(UUID.randomUUID());
-            teamMemberHomeConfig.setOrganizationId(orgId);
-            teamMemberHomeConfig.setMemberId(memberId);
-            teamMemberHomeConfig.setHomeTeamId(defaultTeam.getId());
-
-            teamMemberHomeRepository.save(teamMemberHomeConfig);
+                teamMemberHomeRepository.save(teamMemberHomeConfig);
+            }
         } else {
 
             defaultTeam = teamRepository.findById(teamMemberHomeConfig.getHomeTeamId());
@@ -317,6 +291,7 @@ public class TeamMembershipCapability {
 
         return teamOutputMapper.toApi(defaultTeam);
     }
+
 
     private TeamEntity chooseDefaultTeam(List<TeamEntity> teamEntities) {
 
@@ -326,7 +301,7 @@ public class TeamMembershipCapability {
             defaultTeam = teamEntities.get(0);
         } else if (teamEntities.size() > 1) {
             for (TeamEntity team : teamEntities) {
-                if (!team.getName().equals(EVERYONE_TEAM)) {
+                if (!team.getName().equals(EVERYONE)) {
                     defaultTeam = team;
                     break;
                 }
@@ -343,33 +318,11 @@ public class TeamMembershipCapability {
 
 
 
-    public MemberRegistrationDetailsDto addMemberToMyTeam(UUID rootAccountId, String newMemberEmail) {
-        OrganizationDto orgDto = organizationMembership.getDefaultOrganizationWithInvitation(rootAccountId);
-
-        MembershipInputDto membershipInputDto = new MembershipInputDto();
-        membershipInputDto.setInviteToken(orgDto.getInviteToken());
-        membershipInputDto.setOrgEmail(newMemberEmail);
-
-        MemberRegistrationDetailsDto registration = organizationMembership.registerMember(orgDto.getId(), membershipInputDto);
-
-        List<TeamDto> teams = getMyTeams(orgDto.getId(), rootAccountId);
-
-        if (teams.size() > 0) {
-            TeamDto team = teams.get(0);
-
-            this.addMembersToTeam(orgDto.getId(), team.getId(), Arrays.asList(registration.getMemberId()));
-
-        }
-
-        return registration;
-    }
-
-
     public TeamWithMembersDto getTeam(UUID organizationId, UUID invokingMemberId, String teamName) {
 
-        String standardizeTeamName = standardizeTeamName(teamName);
+        String standardizeTeamName = standardizeForSearch(teamName);
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, standardizeTeamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizeTeamName);
 
         validateTeamFound(standardizeTeamName, teamEntity);
 
@@ -384,15 +337,21 @@ public class TeamMembershipCapability {
         teamWithMembersDto.setOrganizationId(organizationId);
         teamWithMembersDto.setTeamName(teamEntity.getName());
         teamWithMembersDto.setMe(memberStatusList.get(0));
-        teamWithMembersDto.setTeamMembers(memberStatusList);
+        if (memberStatusList.size() > 1) {
+            teamWithMembersDto.setTeamMembers(memberStatusList.subList(1, memberStatusList.size()));
+        } else {
+            teamWithMembersDto.setTeamMembers(Collections.emptyList());
+        }
+
+
         return teamWithMembersDto;
     }
 
     public TeamDto setMyHomeTeam(UUID organizationId, UUID memberId, String homeTeamName) {
 
-        String standardizedTeamName = standardizeTeamName(homeTeamName);
+        String standardizedTeamName = standardizeForSearch(homeTeamName);
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, standardizedTeamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
         validateTeamFound(standardizedTeamName, teamEntity);
 
@@ -415,14 +374,13 @@ public class TeamMembershipCapability {
 
     public TeamMemberDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
 
-        String standardizedTeamName = standardizeTeamName(teamName);
+        String standardizedTeamName = standardizeForSearch(teamName);
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, standardizedTeamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
         validateTeamFound(standardizedTeamName, teamEntity);
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
-
 
         OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, userName);
 
@@ -445,12 +403,47 @@ public class TeamMembershipCapability {
         return toDto(userName, teamMembership);
     }
 
+    public TeamMemberDto addMemberToTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
+        String standardizedTeamName = standardizeForSearch(teamName);
+
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
+
+        validateTeamFound(standardizedTeamName, teamEntity);
+
+        teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
+
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+        validateMemberFound(memberId.toString(), memberEntity);
+
+        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
+
+        if (teamMembership == null) {
+            log.debug("Adding member {} to team {}", memberEntity.getEmail(), standardizedTeamName);
+
+            teamMembership = new TeamMemberEntity();
+            teamMembership.setId(UUID.randomUUID());
+            teamMembership.setOrganizationId(organizationId);
+            teamMembership.setTeamId(teamEntity.getId());
+            teamMembership.setMemberId(memberEntity.getId());
+
+            teamMemberRepository.save(teamMembership);
+
+            teamCircuitOperator.addMemberToTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
+
+        } else {
+            log.warn("Member {} already added to team {}", memberEntity.getEmail(), standardizedTeamName);
+        }
+        return toDto(memberEntity.getUsername(), teamMembership);
+    }
+
+
     @Transactional
     public TeamMemberDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
 
-        String standardizedTeamName = standardizeTeamName(teamName);
+        String standardizedTeamName = standardizeForSearch(teamName);
 
-        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndName(organizationId, standardizedTeamName);
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
         validateTeamFound(standardizedTeamName, teamEntity);
 
@@ -469,6 +462,31 @@ public class TeamMembershipCapability {
 
         }
         return toDto(userName, teamMembership);
+    }
+
+    public TeamMemberDto removeMemberFromTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
+
+        String standardizedTeamName = standardizeForSearch(teamName);
+
+        TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
+
+        validateTeamFound(standardizedTeamName, teamEntity);
+
+        teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
+
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+        validateMemberFound(memberId.toString(), memberEntity);
+
+        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
+
+        if (teamMembership != null) {
+            teamMemberRepository.delete(teamMembership);
+
+            teamCircuitOperator.removeMemberFromTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
+
+        }
+        return toDto(memberEntity.getUsername(), teamMembership);
     }
 
     private TeamMemberDto toDto(String userName, TeamMemberEntity teamMembership) {
@@ -497,7 +515,7 @@ public class TeamMembershipCapability {
         TeamDto everyoneTeam = null;
 
         for (TeamDto teamDto : teamDtos) {
-            if (teamDto.getName().equals(EVERYONE_TEAM)) {
+            if (teamDto.getName().equals(LOWER_CASE_EVERYONE)) {
                 everyoneTeam = teamDto;
                 break;
             }
@@ -528,6 +546,7 @@ public class TeamMembershipCapability {
     private boolean isSame(TeamDto team1, TeamDto team2) {
         return (team1 != null && team2 != null && team1.getId().equals(team2.getId()));
     }
+
 
 
 }

@@ -95,9 +95,11 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         member2 = createMembership(org.getId())
         member3 = createMembership(org.getId())
 
-        team = teamService.createTeam(org.getId(), "Team23")
+        team = teamService.createTeam(org.getId(), member1.getId(), "Team23")
 
-        teamService.addMembersToTeam(org.getId(), team.getId(), extractMemberIds(member1, member2, member3))
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
 
         ideaFlowTeamAggregatorLocas = locasFactory.createIdeaFlowTeamAggregatorLocas(team.getId());
 

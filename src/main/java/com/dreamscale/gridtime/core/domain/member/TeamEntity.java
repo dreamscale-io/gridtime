@@ -20,6 +20,8 @@ public class TeamEntity {
 
     private String name;
 
+    private String lowerCaseName;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 

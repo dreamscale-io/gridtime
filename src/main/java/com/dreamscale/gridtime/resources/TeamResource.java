@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -122,7 +123,7 @@ public class TeamResource {
      * Adds an existing member to the team using their username
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}")
+    @PostMapping("/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}")
 
     public TeamMemberDto addMemberToTeam(@PathVariable("teamName") String teamName,
                                          @PathVariable("userName") String userName) {
@@ -136,10 +137,30 @@ public class TeamResource {
     }
 
     /**
+     * Adds an existing member to the team using their memberId
+     *
+     * This API can be used, even when no username has been configured on the account
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}")
+
+    public TeamMemberDto addMemberToTeamWithMemberId(@PathVariable("teamName") String teamName,
+                                         @PathVariable("memberId") String memberId) {
+
+        RequestContext context = RequestContext.get();
+        log.info("addMemberToTeamWithMemberId, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.addMemberToTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
+    }
+
+
+    /**
      * Removes the specified member from the team using their username
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH)
+    @PostMapping("/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH)
 
     public TeamMemberDto removeMemberFromTeam(@PathVariable("teamName") String teamName,
                                          @PathVariable("userName") String userName) {
@@ -152,4 +173,21 @@ public class TeamResource {
         return teamMembership.removeMemberFromTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
     }
 
+
+    /**
+     * Removes the specified member from the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
+
+    public TeamMemberDto removeMemberFromTeamWithMemberId(@PathVariable("teamName") String teamName,
+                                              @PathVariable("memberId") String memberId) {
+
+        RequestContext context = RequestContext.get();
+        log.info("removeMemberFromTeamWithMemberId, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+
+        return teamMembership.removeMemberFromTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
+    }
 }

@@ -44,3 +44,6 @@ databaseChangeLog:
 
   - include:
         file: db/v006/alter_team_add_unique_constraint.sql
+
+  - include:
+        file: db/v006/alter_team_add_name_lower_case.sql

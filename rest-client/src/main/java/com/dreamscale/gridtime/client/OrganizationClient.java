@@ -28,27 +28,5 @@ public interface OrganizationClient {
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
     MemberRegistrationDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
 
-    @RequestLine("POST "+ResourcePaths.ORGANIZATION_PATH + "/{orgId}"  + ResourcePaths.TEAM_PATH  + "/{id}"
-            + ResourcePaths.MEMBER_PATH)
-    List<TeamMemberDto> addMembersToTeam(@Param("orgId") String organizationId, @Param("id") String teamId,
-                                         TeamMembersToAddInputDto teamMemberInputDto);
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH)
-    List<TeamDto> getTeams(@Param("id") String organizationId);
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH + ResourcePaths.ME_PATH)
-    List<TeamDto> getMyTeams(@Param("id") String organizationId);
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.TEAM_PATH + "/{teamId}" + ResourcePaths.MEMBER_PATH)
-    List<TeamMemberWorkStatusDto> getStatusOfTeamMembers(@Param("id") String organizationId, @Param("teamId") String teamId);
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH )
-    TeamWithMembersDto getMeAndMyTeam();
-
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH +  ResourcePaths.TEAM_PATH +  ResourcePaths.MEMBER_PATH )
-    MemberRegistrationDetailsDto addMemberToMyTeam(String memberEmail);
-
-//    private String inviteToken;
-//    private String orgEmail;
 
 }

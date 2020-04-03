@@ -103,9 +103,11 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         projectId = UUID.randomUUID()
 
-        team = teamService.createTeam(org.getId(), "Team23")
+        team = teamService.createTeam(org.getId(), member1.getId(), "Team23")
 
-        teamService.addMembersToTeam(org.getId(), team.getId(), extractMemberIds(member1, member2, member3))
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
+        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         time1 = clockStart.plusMinutes(1)
