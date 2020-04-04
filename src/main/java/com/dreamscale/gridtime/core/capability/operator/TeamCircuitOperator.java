@@ -78,12 +78,11 @@ public class TeamCircuitOperator {
         TeamDto teamDto = teamMembership.getMyHomeTeam(organizationId, memberId);
         TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
 
-        if (circuit != null) {
-            return circuit.getTeamRoomId();
-        } else {
-            TeamCircuitDto circuitWithDetails = getMyPrimaryTeamCircuit(organizationId, memberId);
-            return circuitWithDetails.getDefaultRoom().getTalkRoomId();
+        if (circuit == null) {
+            circuit = createTeamCircuit(teamDto, memberId);
         }
+
+       return circuit.getTeamRoomId();
     }
 
 
@@ -213,14 +212,15 @@ public class TeamCircuitOperator {
 
     private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
         String userName = organizationMembership.getUsernameForMemberId(memberFromId);
-        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
+
+        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
         WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(memberFromId);
-        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setToRoomId(teamRoomId);
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(messageType);
@@ -228,7 +228,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }
@@ -245,12 +245,12 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, MemberWorkStatusDto memberStatusDto) {
 
-        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
+        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(memberFromId);
-        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setToRoomId(teamRoomId);
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_STATUS_UPDATE);
@@ -258,21 +258,22 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }
 
     public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {
-        UUID talkRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
 
         String userName = organizationMembership.getUsernameForMemberId(forMemberId);
         XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(userName, forMemberId, oldXPSummary, newXPSummary);
 
+        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
+
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(fromMemberId);
-        messageEntity.setToRoomId(talkRoomId);
+        messageEntity.setToRoomId(teamRoomId);
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_XP_UPDATE);
@@ -280,7 +281,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(talkRoomId, talkMessageDto);
+        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }

@@ -18,12 +18,12 @@ public class LearningCircuitRoomEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID roomId;
 
     private String roomName;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID circuitId;

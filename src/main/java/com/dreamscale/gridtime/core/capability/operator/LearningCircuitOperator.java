@@ -1159,7 +1159,6 @@ public class LearningCircuitOperator {
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
                 talkConnectionScope.addRoomId(circuitRoom.getRoomId());
-                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_ONLINE);
             }
         }
         return talkConnectionScope;
