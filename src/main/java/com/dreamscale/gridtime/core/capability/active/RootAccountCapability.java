@@ -11,11 +11,14 @@ import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.exception.ConflictErrorCodeGroups;
+import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
+import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -234,22 +237,85 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
 
     public UserProfileDto getProfile(UUID rootAccountId) {
-        return null;
+
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        return toDto(rootAccountEntity);
+    }
+
+    private UserProfileDto toDto(RootAccountEntity rootAccount) {
+        UserProfileDto userProfileDto = new UserProfileDto();
+        userProfileDto.setRootId(rootAccount.getId());
+        userProfileDto.setFullName(rootAccount.getFullName());
+        userProfileDto.setDisplayName(rootAccount.getDisplayName());
+        userProfileDto.setEmail(rootAccount.getRootEmail());
+        userProfileDto.setUserName(rootAccount.getRootUsername());
+
+        return userProfileDto;
     }
 
     public UserProfileDto updateProfileUserName(UUID rootAccountId, String username) {
-        return null;
+
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        String oldUserName = rootAccountEntity.getRootUsername();
+
+        rootAccountEntity.setRootUsername(username);
+        rootAccountEntity.setLowerCaseRootUserName(standarizeToLowerCase(username));
+        rootAccountEntity.setLastUpdated(gridClock.now());
+
+        try {
+            rootAccountRepository.save(rootAccountEntity);
+        } catch (Exception ex) {
+            String conflictMsg = "Unable to change root account username from "+oldUserName+" to "+ username;
+            log.warn(conflictMsg);
+
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
+        }
+
+        return toDto(rootAccountEntity);
     }
 
     public UserProfileDto updateProfileEmail(UUID rootAccountId, String email) {
-        return null;
+
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        rootAccountEntity.setRootEmail(standarizeToLowerCase(email));
+        rootAccountEntity.setLastUpdated(gridClock.now());
+
+        rootAccountRepository.save(rootAccountEntity);
+
+        return toDto(rootAccountEntity);
     }
 
     public UserProfileDto updateProfileFullName(UUID rootAccountId, String fullName) {
-        return null;
+
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        rootAccountEntity.setFullName(fullName);
+        rootAccountEntity.setLastUpdated(gridClock.now());
+
+        rootAccountRepository.save(rootAccountEntity);
+
+        return toDto(rootAccountEntity);
     }
 
     public UserProfileDto updateProfileDisplayName(UUID rootAccountId, String displayName) {
+        RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        rootAccountEntity.setDisplayName(displayName);
+        rootAccountEntity.setLastUpdated(gridClock.now());
+
+        rootAccountRepository.save(rootAccountEntity);
+
+        return toDto(rootAccountEntity);
+    }
+
+    private String standarizeToLowerCase(String name) {
+        return name.toLowerCase();
+    }
+
+    public SimpleStatusDto registerAccount(String rootEmail) {
         return null;
     }
 }

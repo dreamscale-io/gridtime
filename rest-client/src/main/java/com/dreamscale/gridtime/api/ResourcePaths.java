@@ -30,6 +30,7 @@ public class ResourcePaths {
 
     public static final String ACCOUNT_PATH = "/account";
     public static final String ACTIVATE_PATH = "/activate";
+    public static final String REGISTER_PATH = "/register";
     public static final String HEARTBEAT_PATH = "/heartbeat";
     public static final String LOGIN_PATH = "/login";
     public static final String LOGOUT_PATH = "/logout";

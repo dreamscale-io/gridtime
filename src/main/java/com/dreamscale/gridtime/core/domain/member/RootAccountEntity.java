@@ -23,6 +23,12 @@ public class RootAccountEntity {
     @Column(name = "root_email")
     private String rootEmail;
 
+    @Column(name = "root_user_name")
+    private String rootUsername;
+
+    @Column(name = "lower_case_root_user_name")
+    private String lowerCaseRootUserName;
+
     @Column(name = "full_name")
     private String fullName;
 
@@ -34,6 +40,11 @@ public class RootAccountEntity {
 
     @Column(name = "activation_date")
     private LocalDateTime activationDate;
+
+    @Column(name = "last_updated")
+    private LocalDateTime lastUpdated;
+
+    private boolean isEmailValidated;
 
     @Column(name = "api_key")
     private String apiKey;

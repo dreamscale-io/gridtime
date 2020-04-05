@@ -37,6 +37,22 @@ public class AccountResource {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
+
+    /**
+     * Register your root account using an email address, will cause a validation email to be sent
+     *
+     * @param rootAccountEmailInputDto provide email to attach to your account
+     *
+     * @return SimpleStatusDto
+     */
+
+    @PreAuthorize("permitAll")
+    @PostMapping(ResourcePaths.REGISTER_PATH)
+    SimpleStatusDto register(@RequestBody RootAccountEmailInputDto rootAccountEmailInputDto) {
+
+        return rootAccountCapability.registerAccount(rootAccountEmailInputDto.getRootEmail());
+    }
+
     /**
      * Activate your root account to get a permanent API-Key to use for all future requests
      * that will be tied to your account
@@ -50,6 +66,7 @@ public class AccountResource {
 
         return rootAccountCapability.activate(activationCode.getActivationCode());
     }
+
 
     /**
      * Keep alive signal so we can tell when the user's go offline
@@ -114,8 +131,8 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateProfileUserName(UserNameInputDto userProfileInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.updateProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
@@ -127,8 +144,8 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
-    UserProfileDto updateProfileEmail(EmailInputDto emailInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateProfileEmail(@RequestBody EmailInputDto emailInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.updateProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
@@ -140,8 +157,8 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
-    UserProfileDto updateProfileFullName(FullNameInputDto fullNameInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
+    UserProfileDto updateProfileFullName(@RequestBody FullNameInputDto fullNameInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.updateProfileFullName(context.getRootAccountId(), fullNameInputDto.getFullName());
@@ -153,8 +170,8 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
-    UserProfileDto updateProfileDisplayName(DisplayNameInputDto displayNameInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
+    UserProfileDto updateProfileDisplayName(@RequestBody DisplayNameInputDto displayNameInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.updateProfileDisplayName(context.getRootAccountId(), displayNameInputDto.getDisplayName());

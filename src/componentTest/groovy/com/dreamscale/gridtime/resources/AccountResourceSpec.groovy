@@ -5,9 +5,14 @@ import com.dreamscale.gridtime.api.account.ActivationCodeDto
 import com.dreamscale.gridtime.api.account.AccountActivationDto
 import com.dreamscale.gridtime.api.account.ConnectionInputDto
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto
+import com.dreamscale.gridtime.api.account.DisplayNameInputDto
+import com.dreamscale.gridtime.api.account.EmailInputDto
+import com.dreamscale.gridtime.api.account.FullNameInputDto
 import com.dreamscale.gridtime.api.account.HeartbeatDto
 import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
+import com.dreamscale.gridtime.api.account.UserNameInputDto
+import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.gridtime.api.organization.MembershipInputDto
@@ -144,6 +149,29 @@ class AccountResourceSpec extends Specification {
         assert newConnectionStatus.organizationId == member.getOrganizationId()
         assert newConnectionStatus.memberId == member.id
         assert newConnectionStatus.status == Status.VALID
+    }
+
+    def "should update profile properties"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        when:
+
+        UserProfileDto profile = accountClient.updateProfileUserName(new UserNameInputDto("joeblow"))
+
+        profile = accountClient.updateProfileDisplayName(new DisplayNameInputDto("Joe"))
+        profile = accountClient.updateProfileFullName(new FullNameInputDto("Joe Blow"))
+        profile = accountClient.updateProfileEmail(new EmailInputDto("joe@blow.com"))
+
+        then:
+        assert profile != null
+        assert profile.getRootId() != null
+        assert profile.getDisplayName() == "Joe"
+        assert profile.getFullName() == "Joe Blow"
+        assert profile.getUserName() == "joeblow"
+        assert profile.getEmail() == "joe@blow.com"
     }
 
     def "should logout"() {

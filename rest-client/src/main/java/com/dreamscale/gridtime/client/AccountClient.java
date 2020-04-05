@@ -40,5 +40,5 @@ public interface AccountClient {
     UserProfileDto updateProfileFullName(FullNameInputDto fullNameInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
-    UserProfileDto updateProfileDisplayName(FullNameInputDto fullNameInputDto );
+    UserProfileDto updateProfileDisplayName(DisplayNameInputDto displayNameInputDto );
 }

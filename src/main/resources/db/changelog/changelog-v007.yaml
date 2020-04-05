@@ -1,0 +1,4 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v007/alter_root_account_create_username.sql
