@@ -94,6 +94,72 @@ public class AccountResource {
         return rootAccountCapability.logout(context.getRootAccountId());
     }
 
+
+    /**
+     * Retrieves the users profile information, their full name, username, email etc
+     * @return AccountActivationDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROFILE_PATH)
+    UserProfileDto getProfile() {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.getProfile(context.getRootAccountId());
+    }
+
+    /**
+     * Updates the user's root account profile username (must be unique)
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateProfileUserName(UserNameInputDto userProfileInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
+    }
+
+    /**
+     * Updates the user's root account profile email
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateProfileEmail(EmailInputDto emailInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
+    }
+
+    /**
+     * Updates the user's root account full name
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
+    UserProfileDto updateProfileFullName(FullNameInputDto fullNameInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateProfileFullName(context.getRootAccountId(), fullNameInputDto.getFullName());
+    }
+
+    /**
+     * Updates the user's root account profile display name (usually first name)
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
+    UserProfileDto updateProfileDisplayName(DisplayNameInputDto displayNameInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateProfileDisplayName(context.getRootAccountId(), displayNameInputDto.getDisplayName());
+    }
+
     /**
      * Handshake connectionId method used by talk, to get all the rooms needing to be reconnected.
      *

@@ -233,5 +233,23 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
+    public UserProfileDto getProfile(UUID rootAccountId) {
+        return null;
+    }
 
+    public UserProfileDto updateProfileUserName(UUID rootAccountId, String username) {
+        return null;
+    }
+
+    public UserProfileDto updateProfileEmail(UUID rootAccountId, String email) {
+        return null;
+    }
+
+    public UserProfileDto updateProfileFullName(UUID rootAccountId, String fullName) {
+        return null;
+    }
+
+    public UserProfileDto updateProfileDisplayName(UUID rootAccountId, String displayName) {
+        return null;
+    }
 }

@@ -11,12 +11,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileDto {
+public class UserNameInputDto {
 
-    private UUID rootId;
-    private String email;
-    private String userName;
-    private String fullName;
-    private String displayName;
+    private String username;
 
 }
