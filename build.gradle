@@ -30,6 +30,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.postgresql:postgresql:42.2.5"
     compile "org.liquibase:liquibase-core"
+    compile 'com.sendgrid:sendgrid-java:3.0.9'
 
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
 

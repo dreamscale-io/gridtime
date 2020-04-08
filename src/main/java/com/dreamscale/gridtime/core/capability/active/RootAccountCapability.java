@@ -1,11 +1,13 @@
 package com.dreamscale.gridtime.core.capability.active;
 
+import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.*;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
@@ -53,6 +55,39 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private GridClock gridClock;
 
+    @Autowired
+    private EmailCapability emailCapability;
+
+
+    public SimpleStatusDto registerAccount(String rootEmail) {
+
+        //so if I register an account, with just an email, and that's it
+
+        //then I get an email with an activation token, to paste into my tool.
+
+        //the activation token must come from the email, and will link to that email.
+
+        //so I need to create a root account, in the invalidated state.
+
+        //we should only let the activation tokens work 1x.
+
+        //unless the account is reset, in which case, you can send a new activation token
+
+        //emailCapability.sendDownloadAndActivationEmail(rootEmail);
+
+        return null;
+    }
+
+    private String generateToken() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+
+
+    private String constructInvitationLink(String inviteToken) {
+        String baseInviteLink = ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH;
+        return baseInviteLink + "?token=" + inviteToken;
+    }
 
     public AccountActivationDto activate(String activationCode) {
         RootAccountEntity rootAccountEntity = rootAccountRepository.findByActivationCode(activationCode);
@@ -315,7 +350,4 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return name.toLowerCase();
     }
 
-    public SimpleStatusDto registerAccount(String rootEmail) {
-        return null;
-    }
 }
