@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
 import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
+import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.domain.circuit.RoomType;
 import com.dreamscale.gridtime.core.domain.circuit.*;
@@ -966,6 +967,13 @@ public class LearningCircuitOperator {
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
+
+        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
+
+        if (memberDetails != null) {
+            messageDto.addMetaProp(TalkMessageMetaProps.FROM_USERNAME, memberDetails.getUsername());
+            messageDto.addMetaProp(TalkMessageMetaProps.FROM_FULLNAME, memberDetails.getFullName());
+        }
 
         messageDto.setMessageTime(messageEntity.getPosition());
         messageDto.setNanoTime(messageEntity.getNanoTime());

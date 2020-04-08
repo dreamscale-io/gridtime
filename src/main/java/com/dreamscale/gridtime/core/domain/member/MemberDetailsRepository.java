@@ -18,4 +18,6 @@ public interface MemberDetailsRepository extends CrudRepository<MemberDetailsEnt
 
     MemberDetailsEntity findByOrganizationIdAndMemberId(UUID organizationId, UUID memberId);
 
+    MemberDetailsEntity findByMemberId(UUID memberId);
+
 }

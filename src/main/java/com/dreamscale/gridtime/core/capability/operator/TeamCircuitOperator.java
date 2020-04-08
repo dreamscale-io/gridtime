@@ -13,6 +13,7 @@ import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapabilit
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
+import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
@@ -294,6 +295,13 @@ public class TeamCircuitOperator {
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
+
+        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
+
+        if (memberDetails != null) {
+            messageDto.addMetaProp(TalkMessageMetaProps.FROM_USERNAME, memberDetails.getUsername());
+            messageDto.addMetaProp(TalkMessageMetaProps.FROM_FULLNAME, memberDetails.getFullName());
+        }
 
         messageDto.setMessageTime(messageEntity.getPosition());
         messageDto.setNanoTime(messageEntity.getNanoTime());
