@@ -10,5 +10,6 @@ public interface RootAccountRepository extends CrudRepository<RootAccountEntity,
 
     RootAccountEntity findByApiKey(String apiKey);
 
-    RootAccountEntity findByActivationCode(String activationCode);
+    RootAccountEntity findByRootEmail(String standarizedEmail);
+
 }

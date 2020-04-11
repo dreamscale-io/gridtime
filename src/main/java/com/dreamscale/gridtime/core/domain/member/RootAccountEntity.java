@@ -35,8 +35,8 @@ public class RootAccountEntity {
     @Column(name = "display_name")
     private String displayName;
 
-    @Column(name = "activation_code")
-    private String activationCode;
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate;
 
     @Column(name = "activation_date")
     private LocalDateTime activationDate;

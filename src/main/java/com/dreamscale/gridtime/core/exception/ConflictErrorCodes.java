@@ -11,7 +11,8 @@ public enum ConflictErrorCodes implements ErrorCodes {
     RETRO_ALREADY_STARTED(2, CONFLICT),
     CIRCUIT_IN_WRONG_STATE(3, CONFLICT),
     CONFLICTING_TEAM_NAME(4, CONFLICT),
-    CONFLICTING_USER_NAME(5, CONFLICT);
+    CONFLICTING_USER_NAME(5, CONFLICT),
+    EMAIL_ALREADY_IN_USE(6, CONFLICT);
 
     private int subcode;
     private ConflictErrorCodeGroups errorCodeGroup;

@@ -122,14 +122,14 @@ public class OrganizationMembershipCapability {
             OrganizationInviteTokenEntity inviteToken = new OrganizationInviteTokenEntity();
             inviteToken.setOrganizationId(organizationId);
             inviteToken.setId(UUID.randomUUID());
-            inviteToken.setToken(generateToken());
+            inviteToken.setToken(generateActivationToken());
             inviteToken.setExpirationDate(LocalDateTime.now().plusWeeks(2));
 
         return inviteToken;
     }
 
 
-    private String generateToken() {
+    private String generateActivationToken() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -159,7 +159,9 @@ public class OrganizationMembershipCapability {
         return organizationDto;
     }
 
+
     public MemberRegistrationDetailsDto registerMember(UUID organizationId, MembershipInputDto membershipInputDto) {
+        //TODO this needs to be rethought in light of refactoring
 
         //if invitation is invalid, this will throw a 404
         OrganizationDto organizationDto = decodeInvitation(membershipInputDto.getInviteToken());
@@ -177,7 +179,7 @@ public class OrganizationMembershipCapability {
         rootAccountEntity.setId(UUID.randomUUID());
         rootAccountEntity.setFullName(jiraUser.getDisplayName());
         rootAccountEntity.setRootEmail(jiraUser.getEmailAddress());
-        rootAccountEntity.setActivationCode(generateToken());
+        //rootAccountEntity.setActivationCode(generateActivationToken());
 
         rootAccountRepository.save(rootAccountEntity);
 
@@ -204,7 +206,7 @@ public class OrganizationMembershipCapability {
         membership.setOrgEmail(memberEntity.getEmail());
         membership.setRootAccountId(rootAccountEntity.getId());
         membership.setFullName(rootAccountEntity.getFullName());
-        membership.setActivationCode(rootAccountEntity.getActivationCode());
+        //membership.setActivationCode(rootAccountEntity.getActivationCode());
 
         return membership;
     }

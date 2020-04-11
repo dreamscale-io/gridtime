@@ -31,11 +31,15 @@ public class ResourcePaths {
     public static final String ACCOUNT_PATH = "/account";
     public static final String ACTIVATE_PATH = "/activate";
     public static final String REGISTER_PATH = "/register";
+    public static final String CYCLE_PATH = "/cycle";
+    public static final String KEYS_PATH = "/keys";
+    public static final String RESET_PATH = "/reset";
     public static final String HEARTBEAT_PATH = "/heartbeat";
     public static final String LOGIN_PATH = "/login";
     public static final String LOGOUT_PATH = "/logout";
     public static final String CONNECT_PATH = "/connect";
     public static final String PROFILE_PATH = "/profile";
+    public static final String VALIDATE_PATH = "/validate";
 
     public static final String ORGANIZATION_PATH = "/organization";
     public static final String MEMBER_PATH = "/member";

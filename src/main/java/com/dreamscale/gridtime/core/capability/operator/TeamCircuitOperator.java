@@ -572,7 +572,6 @@ public class TeamCircuitOperator {
         return teamCircuitEntity;
     }
 
-    @Transactional
     private TeamCircuitEntity createTeamCircuit(TeamDto team, List<MemberWorkStatusDto> teamMembers) {
         TalkRoomEntity defaultTalkRoom = new TalkRoomEntity();
         defaultTalkRoom.setId(UUID.randomUUID());

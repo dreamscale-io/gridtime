@@ -84,6 +84,26 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+    def 'should start a WTF that becomes the active WTF'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(member.getRootAccountId())
+
+        when:
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
+
+        then:
+        assert activeCircuit != null
+        assert activeCircuit.circuitName == circuit.circuitName
+        assert activeCircuit.circuitState == "TROUBLESHOOT"
+
+    }
 
 
     def 'should update description of a circuit'() {

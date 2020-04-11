@@ -12,8 +12,8 @@ class RandomRootAccountEntityBuilder extends RootAccountEntity.RootAccountEntity
 		id(aRandom.uuid())
 				.rootEmail(aRandom.email())
 				.fullName(aRandom.name())
-				.activationCode(aRandom.text(15))
 				.activationDate(aRandom.localDateTime())
+				.isEmailValidated(true)
 				.apiKey(aRandom.text(15))
 	}
 

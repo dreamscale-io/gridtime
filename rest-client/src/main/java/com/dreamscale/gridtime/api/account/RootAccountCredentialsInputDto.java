@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RootAccountEmailInputDto {
+public class RootAccountCredentialsInputDto {
 
     private String email;
+    private String password;
 }

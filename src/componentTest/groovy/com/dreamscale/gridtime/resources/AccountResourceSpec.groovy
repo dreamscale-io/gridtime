@@ -65,7 +65,7 @@ class AccountResourceSpec extends Specification {
     def "should activate account and create APIKey"() {
         given:
         OrganizationInputDto organization = createValidOrganization()
-        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, null)
+        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.SUCCESS, null)
 
         OrganizationDto organizationDto = organizationClient.createOrganization(organization)
 
@@ -106,7 +106,7 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto != null
         assert connectionStatusDto.organizationId != null
         assert connectionStatusDto.memberId != null
-        assert connectionStatusDto.status == Status.VALID
+        assert connectionStatusDto.status == Status.SUCCESS
     }
 
     def "on talk connect should resume rooms"() {
@@ -148,7 +148,7 @@ class AccountResourceSpec extends Specification {
         assert newConnectionStatus.connectionId != connectionStatusDto.connectionId
         assert newConnectionStatus.organizationId == member.getOrganizationId()
         assert newConnectionStatus.memberId == member.id
-        assert newConnectionStatus.status == Status.VALID
+        assert newConnectionStatus.status == Status.SUCCESS
     }
 
     def "should update profile properties"() {
@@ -185,7 +185,7 @@ class AccountResourceSpec extends Specification {
 
         then:
         assert statusDto != null
-        assert statusDto.status == Status.VALID
+        assert statusDto.status == Status.SUCCESS
     }
 
     def "should update heartbeat"() {
@@ -205,7 +205,7 @@ class AccountResourceSpec extends Specification {
 
         then:
         assert statusDto != null
-        assert statusDto.status == Status.VALID
+        assert statusDto.status == Status.SUCCESS
     }
 
     private OrganizationInputDto createValidOrganization() {

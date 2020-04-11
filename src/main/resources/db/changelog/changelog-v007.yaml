@@ -2,3 +2,12 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_root_account_create_username.sql
+
+  - include:
+        file: db/v007/alter_root_account_fields.sql
+
+  - include:
+        file: db/v007/alter_team_move_unique_constraint.sql
+
+  - include:
+        file: db/v007/create_one_time_ticket.sql
