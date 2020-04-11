@@ -22,10 +22,6 @@ public interface AccountClient {
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.RESET_PATH)
     SimpleStatusDto reset(RootAccountEmailInputDto accountEmailInputDto);
 
-
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.HEARTBEAT_PATH)
-    SimpleStatusDto heartbeat(HeartbeatDto accountKey);
-
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login();
 
@@ -34,6 +30,9 @@ public interface AccountClient {
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.CONNECT_PATH)
     RoomConnectionScopeDto connect(ConnectionInputDto connectionInputDto );
+
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.HEARTBEAT_PATH)
+    SimpleStatusDto heartbeat(HeartbeatDto accountKey);
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.CYCLE_PATH + ResourcePaths.KEYS_PATH)
     AccountActivationDto cycleKeys();
