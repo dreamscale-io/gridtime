@@ -10,6 +10,7 @@ import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.FullNameInputDto
 import com.dreamscale.gridtime.api.account.HeartbeatDto
 import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto
+import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserNameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
@@ -23,6 +24,7 @@ import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
+import com.dreamscale.gridtime.core.capability.integration.EmailCapability
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -32,8 +34,11 @@ import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+
+import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
@@ -62,32 +67,39 @@ class AccountResourceSpec extends Specification {
     @Autowired
     JiraCapability mockJiraService
 
+    @Autowired
+    EmailCapability mockEmailCapability;
+
+    @Autowired
+    GridClock mockTimeService
+
+    String activationToken = null;
+
+    def setup() {
+        mockTimeService.now() >> LocalDateTime.now()
+        mockTimeService.nanoTime() >> System.nanoTime()
+    }
+
     def "should activate account and create APIKey"() {
         given:
-        OrganizationInputDto organization = createValidOrganization()
-        mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.SUCCESS, null)
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail("janelle@dreamscale.io")
 
-        OrganizationDto organizationDto = organizationClient.createOrganization(organization)
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> activationToken = token; return null}
 
-        MembershipInputDto membershipInputDto = new MembershipInputDto()
-        membershipInputDto.setInviteToken(organizationDto.getInviteToken())
-        membershipInputDto.setOrgEmail("janelle@dreamscale.io")
-
-        JiraUserDto janelleUser = aRandom.jiraUserDto().emailAddress(membershipInputDto.orgEmail).build()
-        mockJiraService.getUserByEmail(_, _) >> janelleUser
-
-        MemberRegistrationDetailsDto membershipDto = organizationClient.registerMember(organizationDto.getId().toString(), membershipInputDto)
-
-        ActivationCodeDto activationCode = new ActivationCodeDto()
-        activationCode.setActivationCode(membershipDto.getActivationCode())
+        SimpleStatusDto registerStatus = accountClient.register(rootAccountInput)
 
         when:
-        AccountActivationDto activationDto = unauthenticatedAccountClient.activate(activationCode)
+
+        AccountActivationDto activationDto = accountClient.activate(new ActivationCodeDto(activationToken))
 
         then:
+
+        assert registerStatus.status == Status.SUCCESS
+
         assert activationDto != null
         assert activationDto.apiKey != null
-        assert activationDto.email == membershipDto.orgEmail
+        assert activationDto.email == rootAccountInput.email
     }
 
     //25050596-d768-4492-b8e5-256a3c05fe1f - orgId
@@ -106,7 +118,7 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto != null
         assert connectionStatusDto.organizationId != null
         assert connectionStatusDto.memberId != null
-        assert connectionStatusDto.status == Status.SUCCESS
+        assert connectionStatusDto.status == Status.VALID
     }
 
     def "on talk connect should resume rooms"() {
@@ -148,7 +160,7 @@ class AccountResourceSpec extends Specification {
         assert newConnectionStatus.connectionId != connectionStatusDto.connectionId
         assert newConnectionStatus.organizationId == member.getOrganizationId()
         assert newConnectionStatus.memberId == member.id
-        assert newConnectionStatus.status == Status.SUCCESS
+        assert newConnectionStatus.status == Status.VALID
     }
 
     def "should update profile properties"() {
@@ -171,7 +183,7 @@ class AccountResourceSpec extends Specification {
         assert profile.getDisplayName() == "Joe"
         assert profile.getFullName() == "Joe Blow"
         assert profile.getUserName() == "joeblow"
-        assert profile.getEmail() == "joe@blow.com"
+        assert profile.getEmail() == "joe@blow.com (pending validation)"
     }
 
     def "should logout"() {

@@ -3,6 +3,7 @@ package com.dreamscale.gridtime;
 import com.dreamscale.gridtime.client.*;
 import com.dreamscale.gridtime.core.CoreARandom;
 import com.dreamscale.gridtime.core.CoreRandomBuilderSupport;
+import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity;
 import com.dreamscale.gridtime.core.security.AuthorizationRequestInterceptor;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
@@ -39,6 +40,12 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Primary
     public GridClock mockTimeService() {
         return detachedMockFactory().Mock(GridClock.class);
+    }
+
+    @Bean
+    @Primary
+    public EmailCapability mockEmailCapability() {
+        return detachedMockFactory().Mock(EmailCapability.class);
     }
 
 
