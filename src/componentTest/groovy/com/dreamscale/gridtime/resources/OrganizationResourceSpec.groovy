@@ -27,6 +27,7 @@ import com.dreamscale.gridtime.core.domain.member.TeamRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
@@ -114,6 +115,7 @@ class OrganizationResourceSpec extends Specification {
         assert inviteOrg.getInviteLink() != null
     }
 
+    @Ignore
     def "should add member to organization if valid user"() {
         given:
         OrganizationInputDto organization = createValidOrganization()
