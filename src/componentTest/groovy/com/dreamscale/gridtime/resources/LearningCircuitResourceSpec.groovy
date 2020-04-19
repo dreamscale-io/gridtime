@@ -20,6 +20,7 @@ import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
 import com.dreamscale.gridtime.core.service.GridClock
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -27,6 +28,7 @@ import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
+@Slf4j
 @ComponentTest
 class LearningCircuitResourceSpec extends Specification {
 
@@ -439,6 +441,51 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+
+    def 'should be able to create WTF circuit, post a chat, logout & login, post another chat, and retrieve all messages'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+        accountClient.login()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+
+        TalkMessageDto firstMessage = talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(),
+                new ChatMessageInputDto("hi"))
+
+        List<TalkMessageDto> messagesBeforeLogout = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
+
+        accountClient.logout();
+
+        accountClient.login();
+
+        List<TalkMessageDto> messagesAfterLogin = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
+
+        TalkMessageDto secondMessage = talkClient.publishChatToRoom(circuit.getWtfTalkRoomName(),
+                new ChatMessageInputDto("there"))
+
+        List<TalkMessageDto> messagesAfterSecondMessage = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
+
+        then:
+        log.info("firstMessage = {}", firstMessage)
+        log.info("messagesBeforeLogout = {}", messagesBeforeLogout);
+        log.info("messagesAfterLogin = {}", messagesAfterLogin);
+        log.info("secondMessage = {}", secondMessage);
+
+        log.info("messagesAfterSecondMessage = {}", messagesAfterSecondMessage)
+
+        assert firstMessage != null
+        assert messagesBeforeLogout.size() == 1
+        assert messagesAfterLogin.size() == 1
+        assert secondMessage != null
+        assert messagesAfterSecondMessage.size() == 2
+
+    }
 
 
     def 'should close a circuit thats been solved with no retro'() {

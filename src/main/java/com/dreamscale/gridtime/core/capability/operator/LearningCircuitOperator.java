@@ -1122,6 +1122,16 @@ public class LearningCircuitOperator {
             dto.setMessageType(message.getMessageType().getSimpleClassName());
             dto.setData(message.getJsonBody());
 
+            //TODO this needs to be joined in a view
+            dto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, message.getFromId().toString());
+
+            MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(message.getFromId());
+
+            if (memberDetails != null) {
+                dto.addMetaProp(TalkMessageMetaProps.FROM_USERNAME, memberDetails.getUsername());
+                dto.addMetaProp(TalkMessageMetaProps.FROM_FULLNAME, memberDetails.getFullName());
+            }
+
             talkMessageDtos.add(dto);
         }
 
