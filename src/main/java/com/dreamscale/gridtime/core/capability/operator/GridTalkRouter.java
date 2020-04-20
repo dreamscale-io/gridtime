@@ -41,6 +41,17 @@ public class GridTalkRouter {
 
     }
 
+    public void joinAllRooms(UUID connectionId, List<UUID> roomIdsToJoin) {
+        TalkConnection talkConnection = talkConnectionFactory.connect();
+
+        if (connectionId != null) {
+
+            for( UUID roomId : roomIdsToJoin) {
+                talkConnection.joinRoom(connectionId, roomId);
+            }
+        }
+    }
+
 
     public void leaveRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
@@ -74,6 +85,7 @@ public class GridTalkRouter {
             talkConnection.joinRoom(memberConnection.getConnectionId(), roomId);
         }
     }
+
 
 
 }

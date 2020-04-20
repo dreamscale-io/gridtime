@@ -157,7 +157,7 @@ public class AccountResource {
 
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.CONNECT_PATH)
-    RoomConnectionScopeDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
+    SimpleStatusDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.connect(connectionInputDto.getConnectionId());

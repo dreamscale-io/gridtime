@@ -29,7 +29,7 @@ public interface AccountClient {
     SimpleStatusDto logout();
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.CONNECT_PATH)
-    RoomConnectionScopeDto connect(ConnectionInputDto connectionInputDto );
+    SimpleStatusDto connect(ConnectionInputDto connectionInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(HeartbeatDto accountKey);

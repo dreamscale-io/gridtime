@@ -132,11 +132,11 @@ class AccountResourceSpec extends Specification {
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
-        RoomConnectionScopeDto roomConnections = accountClient.connect(new ConnectionInputDto(connectionStatusDto.getConnectionId()));
+        SimpleStatusDto statusDto = accountClient.connect(new ConnectionInputDto(connectionStatusDto.getConnectionId()));
 
         then:
-        assert roomConnections != null
-        assert roomConnections.roomIdsToJoin.size() == 2
+        assert statusDto != null
+        assert statusDto.getStatus() == Status.VALID
     }
 
     def "should create a circuit then logout & login again"() {
@@ -228,7 +228,6 @@ class AccountResourceSpec extends Specification {
         return organization
     }
 
-
     private OrganizationMemberEntity createMemberWithOrgAndTeam() {
 
         RootAccountEntity account = aRandom.rootAccountEntity().save()
@@ -240,6 +239,5 @@ class AccountResourceSpec extends Specification {
         TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(team.id).organizationId(org.id).memberId(member.id).save()
 
         return member;
-
     }
 }
