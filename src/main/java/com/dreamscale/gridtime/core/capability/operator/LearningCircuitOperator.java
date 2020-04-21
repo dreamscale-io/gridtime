@@ -966,13 +966,13 @@ public class LearningCircuitOperator {
         messageDto.setUri(messageEntity.getToRoomId().toString());
         messageDto.setData(messageEntity.getJsonBody());
 
-        messageDto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, messageEntity.getFromId().toString());
+        messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
         MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
 
         if (memberDetails != null) {
-            messageDto.addMetaProp(TalkMessageMetaProps.FROM_USERNAME, memberDetails.getUsername());
-            messageDto.addMetaProp(TalkMessageMetaProps.FROM_FULLNAME, memberDetails.getFullName());
+            messageDto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());
+            messageDto.addMetaProp(TalkMessageMetaProp.FROM_FULLNAME, memberDetails.getFullName());
         }
 
         messageDto.setMessageTime(messageEntity.getPosition());
@@ -1123,13 +1123,13 @@ public class LearningCircuitOperator {
             dto.setData(message.getJsonBody());
 
             //TODO this needs to be joined in a view
-            dto.addMetaProp(TalkMessageMetaProps.FROM_MEMBER_ID, message.getFromId().toString());
+            dto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, message.getFromId().toString());
 
             MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(message.getFromId());
 
             if (memberDetails != null) {
-                dto.addMetaProp(TalkMessageMetaProps.FROM_USERNAME, memberDetails.getUsername());
-                dto.addMetaProp(TalkMessageMetaProps.FROM_FULLNAME, memberDetails.getFullName());
+                dto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());
+                dto.addMetaProp(TalkMessageMetaProp.FROM_FULLNAME, memberDetails.getFullName());
             }
 
             talkMessageDtos.add(dto);

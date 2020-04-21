@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -26,10 +25,18 @@ public class TalkMessageDto {
     private String messageType;
     private String data;
 
-    public void addMetaProp(String propName, String value) {
+    public void addMetaProp(TalkMessageMetaProp prop, String value) {
         if (metaProps == null) {
             metaProps = new LinkedHashMap<>();
         }
-        metaProps.put(propName, value);
+        metaProps.put(prop.getPropName(), value);
+    }
+
+    public String getMetaProp(TalkMessageMetaProp metaPropType) {
+        if (metaProps != null) {
+            return metaProps.get(metaPropType.getPropName());
+        }
+
+        return null;
     }
 }

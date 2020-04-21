@@ -11,10 +11,7 @@ import com.dreamscale.gridtime.core.capability.operator.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
-import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
-import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionRepository;
-import com.dreamscale.gridtime.core.domain.circuit.TalkRoomMemberEntity;
-import com.dreamscale.gridtime.core.domain.circuit.TalkRoomMemberRepository;
+import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -75,8 +72,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private EmailCapability emailCapability;
 
+//    @Autowired
+//    private TalkRoomMemberRepository talkRoomMemberRepository;
+
     @Autowired
-    private TalkRoomMemberRepository talkRoomMemberRepository;
+    private TalkRoomRepository talkRoomRepository;
 
     @Autowired
     private GridTalkRouter talkRouter;
@@ -317,9 +317,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(connectionId);
 
-        List<TalkRoomMemberEntity> roomMemberships = talkRoomMemberRepository.findByMemberId(memberConnection.getMemberId());
-        List<UUID> roomIdsToJoin = getRoomIdsToJoin(roomMemberships);
-        talkRouter.joinAllRooms(connectionId, roomIdsToJoin);
+
+        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
+
+        talkRouter.joinAllRooms(connectionId, talkRooms);
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
         accountStatusRepository.save(accountStatusEntity);
