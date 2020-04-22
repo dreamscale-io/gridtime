@@ -373,6 +373,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
 
+
         talkRouter.leaveAllRooms(memberConnection, talkRooms);
 
         OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);

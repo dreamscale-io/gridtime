@@ -532,8 +532,10 @@ public class LearningCircuitOperator {
         //retro room is still open
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
+        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
+        talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -576,8 +578,10 @@ public class LearningCircuitOperator {
         activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
+        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
+        talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -703,7 +707,6 @@ public class LearningCircuitOperator {
 
         talkRoomMemberRepository.save(roomMembers);
 
-        talkRouter.reviveRoom(learningCircuitEntity.getOrganizationId(), roomId);
     }
 
     @Transactional
@@ -742,6 +745,7 @@ public class LearningCircuitOperator {
         learningCircuitRepository.save(learningCircuitEntity);
 
         reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getWtfRoomId());
+        reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -833,7 +837,6 @@ public class LearningCircuitOperator {
             circuitMember.setOrganizationId(organizationId);
             circuitMember.setMemberId(memberId);
             circuitMember.setJoinTime(now);
-
 
             learningCircuitMemberRepository.save(circuitMember);
 
