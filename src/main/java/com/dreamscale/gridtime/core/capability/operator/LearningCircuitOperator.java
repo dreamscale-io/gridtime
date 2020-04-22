@@ -963,7 +963,7 @@ public class LearningCircuitOperator {
 
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
-        messageDto.setUri(messageEntity.getToRoomId().toString());
+        messageDto.setUrn(messageEntity.getToRoomId().toString());
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
@@ -1116,7 +1116,7 @@ public class LearningCircuitOperator {
         for (TalkRoomMessageEntity message : talkMessages) {
             TalkMessageDto dto = new TalkMessageDto();
             dto.setId(message.getId());
-            dto.setUri(message.getToRoomId().toString());
+            dto.setUrn(message.getToRoomId().toString());
             dto.setMessageTime(message.getPosition());
             dto.setNanoTime(message.getNanoTime());
             dto.setMessageType(message.getMessageType().getSimpleClassName());

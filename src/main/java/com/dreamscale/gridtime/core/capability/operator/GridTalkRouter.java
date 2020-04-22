@@ -52,19 +52,33 @@ public class GridTalkRouter {
 
     }
 
-    public void joinAllRooms(UUID connectionId, List<TalkRoomEntity> roomsToJoin) {
+    public void joinAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToJoin) {
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
-        MemberConnectionEntity connectionEntity = memberConnectionRepository.findByConnectionId(connectionId);
 
-        log.debug("joinAllRooms for {} , found {} rooms to join.", connectionEntity.getUsername(), roomsToJoin.size());
+        log.debug("joinAllRooms for {} , found {} rooms to join.", connection.getUsername(), roomsToJoin.size());
 
-        if (connectionId != null) {
+        if (connection != null) {
 
             for( TalkRoomEntity room : roomsToJoin) {
 
-                log.debug("joinRoom {} for ", room.getRoomName(), connectionEntity.getUsername());
-                talkConnection.joinRoom(connectionId, room.getId());
+                log.debug("joinRoom {} for ", room.getRoomName(), connection.getUsername());
+                talkConnection.joinRoom(connection.getConnectionId(), room.getId());
+            }
+        }
+    }
+
+    public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
+        TalkConnection talkConnection = talkConnectionFactory.connect();
+
+        log.debug("leaveAllRooms for {} , found {} rooms to leave.", connection.getUsername(), roomsToLeave.size());
+
+        if (connection != null) {
+
+            for( TalkRoomEntity room : roomsToLeave) {
+
+                log.debug("leaveRoom {} for ", room.getRoomName(), connection.getUsername());
+                talkConnection.leaveRoom(connection.getConnectionId(), room.getId());
             }
         }
     }

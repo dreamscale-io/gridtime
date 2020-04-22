@@ -193,11 +193,16 @@ class AccountResourceSpec extends Specification {
         testUser.setId(member.getRootAccountId())
 
         when:
-        SimpleStatusDto statusDto = accountClient.logout()
+
+        ConnectionStatusDto loginStatus = accountClient.login()
+        SimpleStatusDto logoutStatus = accountClient.logout()
 
         then:
-        assert statusDto != null
-        assert statusDto.status == Status.SUCCESS
+        assert loginStatus != null
+        assert loginStatus.status == Status.VALID
+
+        assert logoutStatus != null
+        assert logoutStatus.status == Status.SUCCESS
     }
 
     def "should update heartbeat"() {

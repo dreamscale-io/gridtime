@@ -317,10 +317,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(connectionId);
 
-
         List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
 
-        talkRouter.joinAllRooms(connectionId, talkRooms);
+        talkRouter.joinAllRooms(memberConnection, talkRooms);
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
         accountStatusRepository.save(accountStatusEntity);
@@ -361,6 +360,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
 
+        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(oldConnectionId);
+
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
         accountStatusEntity.setConnectionId(null);
 
@@ -370,8 +371,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
             learningCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
         }
 
-        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
+        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
 
+        talkRouter.leaveAllRooms(memberConnection, talkRooms);
+
+        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
 
         return new SimpleStatusDto(Status.SUCCESS, "Successfully logged out");

@@ -17,6 +17,7 @@ import java.util.UUID;
 public class TalkMessageDto {
 
     private UUID id;
+    private String urn;
     private String uri;
     private LocalDateTime messageTime;
     private Long nanoTime;

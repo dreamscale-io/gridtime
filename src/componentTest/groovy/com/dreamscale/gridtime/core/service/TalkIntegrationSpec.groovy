@@ -39,7 +39,7 @@ public class TalkIntegrationSpec extends Specification {
 
 		//SimpleStatusDto status1 = connection.joinRoom(talkRoomId)
 
-		TalkMessageDto talkMessageDto = new TalkMessageDto(messageId, roomId.toString(), now, nanoTime, null,
+		TalkMessageDto talkMessageDto = new TalkMessageDto(messageId, roomId.toString(), "/request/trace", now, nanoTime, null,
 				CircuitMessageType.CHAT.getSimpleClassName(), JSONTransformer.toJson(new ChatMessageDetailsDto("hello")))
 
 		SimpleStatusDto status2 = connection.sendRoomMessage(roomId, talkMessageDto)
