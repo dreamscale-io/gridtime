@@ -37,6 +37,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			authentication = createAuthenticationToken(apiKey, connectionId, rootAccountId);
 			context = RequestContext.builder()
 					.rootAccountId(rootAccountId)
+					.requestUri((request.getRequestURI()))
 					.build();
 		}
 

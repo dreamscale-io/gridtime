@@ -29,4 +29,6 @@ public class RequestContext {
 
     private UUID rootAccountId;
 
+    private String requestUri;
+
 }

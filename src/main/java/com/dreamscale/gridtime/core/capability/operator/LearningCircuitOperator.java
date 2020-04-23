@@ -19,6 +19,7 @@ import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
@@ -467,7 +468,7 @@ public class LearningCircuitOperator {
     }
 
     private void validateCircuitIsSolvedOrRetro(String circuitName, LearningCircuitEntity learningCircuitEntity) {
-        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.SOLVED && learningCircuitEntity.getCircuitState() != LearningCircuitState.RETRO ) {
+        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.SOLVED && learningCircuitEntity.getCircuitState() != LearningCircuitState.RETRO) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Solved or in Retro: " + circuitName);
         }
     }
@@ -489,7 +490,7 @@ public class LearningCircuitOperator {
 
         LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member "+ invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
         }
     }
 
@@ -664,7 +665,7 @@ public class LearningCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        if (learningCircuitEntity.getWtfRoomId() != null ) {
+        if (learningCircuitEntity.getWtfRoomId() != null) {
             reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getWtfRoomId());
         }
 
@@ -821,7 +822,7 @@ public class LearningCircuitOperator {
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
-        validateCircuitExists("Circuit for room "+roomName, circuitEntity);
+        validateCircuitExists("Circuit for room " + roomName, circuitEntity);
 
         //if this is the first time I've joined the circuit, join the status room too, and as a participant
 
@@ -862,7 +863,7 @@ public class LearningCircuitOperator {
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
         validateRoomIsFound(roomEntity, roomName);
-        validateCircuitExists("Circuit for room "+roomName, circuitEntity);
+        validateCircuitExists("Circuit for room " + roomName, circuitEntity);
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -967,6 +968,7 @@ public class LearningCircuitOperator {
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
         messageDto.setUrn(messageEntity.getToRoomId().toString());
+        messageDto.setUri(getRequestUriFromContext());
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
@@ -1116,10 +1118,14 @@ public class LearningCircuitOperator {
 
         List<TalkMessageDto> talkMessageDtos = new ArrayList<>();
 
+
+        String requestUri = getRequestUriFromContext();
+
         for (TalkRoomMessageEntity message : talkMessages) {
             TalkMessageDto dto = new TalkMessageDto();
             dto.setId(message.getId());
             dto.setUrn(message.getToRoomId().toString());
+            dto.setUri(requestUri);
             dto.setMessageTime(message.getPosition());
             dto.setNanoTime(message.getNanoTime());
             dto.setMessageType(message.getMessageType().getSimpleClassName());
@@ -1139,6 +1145,17 @@ public class LearningCircuitOperator {
         }
 
         return talkMessageDtos;
+    }
+
+    private String getRequestUriFromContext() {
+
+        RequestContext context = RequestContext.get();
+
+        if (context != null) {
+            return context.getRequestUri();
+        } else {
+            return null;
+        }
     }
 
 
@@ -1254,7 +1271,6 @@ public class LearningCircuitOperator {
     }
 
 
-
     public TalkMessageDto publishScreenshotToActiveRoom(UUID organizationId, UUID memberId, ScreenshotReferenceInputDto screenshotReferenceInput) {
         return null;
     }
@@ -1266,7 +1282,6 @@ public class LearningCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
-
 
 
 }

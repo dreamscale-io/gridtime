@@ -17,6 +17,7 @@ import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
@@ -291,6 +292,7 @@ public class TeamCircuitOperator {
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
         messageDto.setUrn(messageEntity.getToRoomId().toString());
+        messageDto.setUri(getRequestUriFromContext());
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
@@ -307,6 +309,17 @@ public class TeamCircuitOperator {
         messageDto.setMessageType(messageEntity.getMessageType().getSimpleClassName());
 
         return messageDto;
+    }
+
+    private String getRequestUriFromContext() {
+
+        RequestContext context = RequestContext.get();
+
+        if (context != null) {
+            return context.getRequestUri();
+        } else {
+            return null;
+        }
     }
 
     public TeamCircuitRoomDto createTeamCircuitRoom(UUID organizationId, String teamName, String roomName) {
