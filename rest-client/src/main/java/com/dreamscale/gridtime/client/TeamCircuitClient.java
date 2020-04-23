@@ -20,29 +20,29 @@ import java.util.List;
 public interface TeamCircuitClient {
 
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.HOME_PATH)
+    @RequestLine("GET " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + ResourcePaths.HOME_PATH)
     TeamCircuitDto getMyTeamCircuit();
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + "/{teamName}")
+    @RequestLine("GET " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}")
     TeamCircuitDto getTeamCircuitByName(@Param("teamName") String teamName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
     TeamCircuitRoomDto createTeamCircuitRoom(@Param("teamName") String teamName, @Param("roomName") String roomName);
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
+    @RequestLine("GET " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}")
     TeamCircuitRoomDto getTeamCircuitRoom(@Param("teamName") String teamName, @Param("roomName") String roomName);
 
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CLOSE_PATH)
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CLOSE_PATH)
     TeamCircuitRoomDto closeTeamCircuitRoom(@Param("teamName") String teamName, @Param("roomName") String roomName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" +
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" +
             ResourcePaths.PROPERTY_PATH + ResourcePaths.DESCRIPTION_PATH)
     TeamCircuitRoomDto saveDescriptionForTeamCircuitRoom(@Param("teamName") String teamName,
                                                          @Param("roomName") String roomName,
                                                          DescriptionInputDto descriptionInputDto);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" +
+    @RequestLine("POST " + ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH + "/{teamName}" + ResourcePaths.ROOM_PATH + "/{roomName}" +
             ResourcePaths.PROPERTY_PATH + ResourcePaths.TAGS_PATH)
     TeamCircuitRoomDto saveTagsForTeamCircuitRoom(@Param("teamName") String teamName,
                                                   @Param("roomName") String roomName,
