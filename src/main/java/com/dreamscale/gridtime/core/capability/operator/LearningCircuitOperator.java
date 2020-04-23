@@ -551,7 +551,6 @@ public class LearningCircuitOperator {
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
         validateCircuitExists(circuitName, learningCircuitEntity);
-        validateCircuitIsActiveOrOnHold(circuitName, learningCircuitEntity);
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
