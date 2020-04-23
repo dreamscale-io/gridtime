@@ -194,7 +194,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+        talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
     }
 
     public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
@@ -229,7 +229,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
+        talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }
@@ -259,7 +259,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
+        talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }
@@ -282,7 +282,7 @@ public class TeamCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(teamRoomId, talkMessageDto);
+        talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }

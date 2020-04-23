@@ -1007,7 +1007,7 @@ public class LearningCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+        talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
@@ -1029,7 +1029,7 @@ public class LearningCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+        talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
@@ -1050,7 +1050,7 @@ public class LearningCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+        talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 
@@ -1072,7 +1072,7 @@ public class LearningCircuitOperator {
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
 
-        talkRouter.sendAsyncRoomMessage(roomId, talkMessageDto);
+        talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
 

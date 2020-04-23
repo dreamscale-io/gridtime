@@ -9,6 +9,7 @@ import com.dreamscale.gridtime.core.hooks.talk.TalkConnection;
 import com.dreamscale.gridtime.core.hooks.talk.TalkConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,15 +27,17 @@ public class GridTalkRouter {
     @Autowired
     private TalkConnectionFactory talkConnectionFactory;
 
-    public void sendAsyncRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {
+    @Async
+    public void sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {
 
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
-        log.debug("joinRoom {} for {}", roomId, talkMessageDto.getMetaProp(TalkMessageMetaProp.FROM_USERNAME));
+        log.debug("sendRoomMessage {} from {}", roomId, talkMessageDto.getMetaProp(TalkMessageMetaProp.FROM_USERNAME));
 
         talkConnection.sendRoomMessage(roomId, talkMessageDto);
     }
 
+    @Async
     public void joinRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
         MemberDetailsEntity member = memberDetailsRepository.findByMemberId(memberId);
@@ -52,6 +55,7 @@ public class GridTalkRouter {
 
     }
 
+    @Async
     public void joinAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToJoin) {
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
@@ -68,6 +72,7 @@ public class GridTalkRouter {
         }
     }
 
+    @Async
     public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
@@ -83,6 +88,7 @@ public class GridTalkRouter {
         }
     }
 
+    @Async
     public void leaveRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
         MemberConnectionEntity connectionEntity = memberConnectionRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
@@ -95,6 +101,7 @@ public class GridTalkRouter {
         }
     }
 
+    @Async
     public void closeRoom(UUID organizationId, UUID roomId) {
 
         List<MemberConnectionEntity> connectionsInRoom = memberConnectionRepository.findByConnectionsInTalkRoom(organizationId, roomId);
@@ -107,6 +114,7 @@ public class GridTalkRouter {
             talkConnection.leaveRoom(memberConnection.getConnectionId(), roomId);
         }
     }
+
 
     public void reviveRoom(UUID organizationId, UUID roomId) {
 
