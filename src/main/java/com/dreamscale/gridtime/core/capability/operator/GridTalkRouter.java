@@ -27,7 +27,6 @@ public class GridTalkRouter {
     @Autowired
     private TalkConnectionFactory talkConnectionFactory;
 
-    @Async
     public void sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {
 
         TalkConnection talkConnection = talkConnectionFactory.connect();
@@ -37,7 +36,6 @@ public class GridTalkRouter {
         talkConnection.sendRoomMessage(roomId, talkMessageDto);
     }
 
-    @Async
     public void joinRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
         MemberDetailsEntity member = memberDetailsRepository.findByMemberId(memberId);
@@ -55,7 +53,6 @@ public class GridTalkRouter {
 
     }
 
-    @Async
     public void joinAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToJoin) {
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
@@ -72,7 +69,6 @@ public class GridTalkRouter {
         }
     }
 
-    @Async
     public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
         TalkConnection talkConnection = talkConnectionFactory.connect();
 
@@ -88,7 +84,6 @@ public class GridTalkRouter {
         }
     }
 
-    @Async
     public void leaveRoom(UUID organizationId, UUID memberId, UUID roomId) {
 
         MemberConnectionEntity connectionEntity = memberConnectionRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
@@ -101,7 +96,6 @@ public class GridTalkRouter {
         }
     }
 
-    @Async
     public void closeRoom(UUID organizationId, UUID roomId) {
 
         List<MemberConnectionEntity> connectionsInRoom = memberConnectionRepository.findByConnectionsInTalkRoom(organizationId, roomId);
