@@ -25,7 +25,7 @@ public class TalkToResource {
     OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    WTFCircuitOperator WTFCircuitOperator;
+    WTFCircuitOperator wtfCircuitOperator;
 
     /**
      * The invoking member joins the specified "-wtf" or "-retro" talk room.
@@ -46,7 +46,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
     }
@@ -68,7 +68,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
     }
@@ -91,7 +91,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
 
     }
@@ -113,7 +113,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
 
     }
@@ -135,7 +135,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
+        return wtfCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
     }
 
 
@@ -156,7 +156,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
+        return wtfCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
 
     }
 
@@ -176,7 +176,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
 
     }
@@ -197,7 +197,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
+        return wtfCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
 
     }
@@ -218,7 +218,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return WTFCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
+        return wtfCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }
 
 
