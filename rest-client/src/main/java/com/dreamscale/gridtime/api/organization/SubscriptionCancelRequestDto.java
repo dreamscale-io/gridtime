@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationInputDto {
-    private String orgName;
-    private String domainName;
+public class SubscriptionCancelRequestDto {
 
-    private String jiraSiteUrl;
-    private String jiraUser;
-    private String jiraApiKey;
+    private UUID organizationId;
 }

@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,7 @@ import java.util.List;
 public class TalkToResource {
 
     @Autowired
-    OrganizationMembershipCapability organizationMembership;
+    OrganizationCapability organizationCapability;
 
     @Autowired
     WTFCircuitOperator wtfCircuitOperator;
@@ -44,7 +44,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("joinRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
@@ -66,7 +66,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("leaveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
@@ -89,7 +89,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishChatToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
@@ -111,7 +111,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishSnippetToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
@@ -133,7 +133,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishScreenshotToRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
     }
@@ -154,7 +154,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("getAllTalkMessagesFromRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
 
@@ -174,7 +174,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishChatToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
@@ -195,7 +195,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishSnippetToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
@@ -216,7 +216,7 @@ public class TalkToResource {
         RequestContext context = RequestContext.get();
         log.info("publishScreenshotToActiveRoom, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }

@@ -1,34 +1,15 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.account.ActivationCodeDto
-import com.dreamscale.gridtime.api.account.AccountActivationDto
-import com.dreamscale.gridtime.api.account.ActiveTalkConnectionDto
-import com.dreamscale.gridtime.api.account.ConnectionInputDto
-import com.dreamscale.gridtime.api.account.ConnectionStatusDto
-import com.dreamscale.gridtime.api.account.DisplayNameInputDto
-import com.dreamscale.gridtime.api.account.EmailInputDto
-import com.dreamscale.gridtime.api.account.FullNameInputDto
-import com.dreamscale.gridtime.api.account.HeartbeatDto
-import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
-import com.dreamscale.gridtime.api.account.SimpleStatusDto
-import com.dreamscale.gridtime.api.account.UserNameInputDto
-import com.dreamscale.gridtime.api.account.UserProfileDto
+import com.dreamscale.gridtime.api.account.*
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-import com.dreamscale.gridtime.api.organization.OrganizationInputDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability
-import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
-import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
-import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
-import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
-import com.dreamscale.gridtime.core.domain.member.TeamEntity
-import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.domain.member.*
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -82,7 +63,7 @@ class AccountResourceSpec extends Specification {
 
         1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> activationToken = token; return null}
 
-        SimpleStatusDto registerStatus = accountClient.register(rootAccountInput)
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
 
         when:
 
@@ -90,7 +71,8 @@ class AccountResourceSpec extends Specification {
 
         then:
 
-        assert registerStatus.status == Status.SUCCESS
+        assert userProfileDto.email == "janelle@dreamscale.io"
+        assert userProfileDto.rootAccountId != null
 
         assert activationDto != null
         assert activationDto.apiKey != null
@@ -108,6 +90,22 @@ class AccountResourceSpec extends Specification {
         testUser.setId(member.getRootAccountId())
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
+
+        then:
+        assert connectionStatusDto != null
+        assert connectionStatusDto.organizationId != null
+        assert connectionStatusDto.memberId != null
+        assert connectionStatusDto.status == Status.VALID
+    }
+
+    def "should login with org"() {
+
+        when:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        ConnectionStatusDto connectionStatusDto = accountClient.loginToOrganization(member.getOrganizationId())
 
         then:
         assert connectionStatusDto != null
@@ -179,7 +177,7 @@ class AccountResourceSpec extends Specification {
 
         then:
         assert profile != null
-        assert profile.getRootId() != null
+        assert profile.getRootAccountId() != null
         assert profile.getDisplayName() == "Joe"
         assert profile.getFullName() == "Joe Blow"
         assert profile.getUserName() == "joeblow"
@@ -225,13 +223,6 @@ class AccountResourceSpec extends Specification {
         assert statusDto.status == Status.SUCCESS
     }
 
-    private OrganizationInputDto createValidOrganization() {
-        OrganizationInputDto organization = new OrganizationInputDto()
-        organization.setOrgName("DreamScale")
-        organization.setDomainName("dreamscale.io")
-
-        return organization
-    }
 
     private OrganizationMemberEntity createMemberWithOrgAndTeam() {
 

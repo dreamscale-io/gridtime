@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class LearningCircuitResource {
 
     @Autowired
-    OrganizationMembershipCapability organizationMembership;
+    OrganizationCapability organizationCapability;
 
     @Autowired
     WTFCircuitOperator wtfCircuitOperator;
@@ -41,7 +41,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("startWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.startWTF(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -65,7 +65,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("startWTFWithCustomCircuitName, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.startWTFWithCustomName(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -83,7 +83,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("saveDescriptionForLearningCircuit, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.saveDescriptionForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, descriptionInputDto);
     }
@@ -101,7 +101,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("saveTagsForLearningCircuit, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.saveTagsForLearningCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, tagsInputDto);
     }
@@ -118,7 +118,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getCircuitWithAllDetails, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
     }
@@ -143,7 +143,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("solveWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.solveWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -167,7 +167,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("cancelWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.cancelWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -189,7 +189,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("pauseWTFWithDoItLater, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.pauseWTFWithDoItLater(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -213,7 +213,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("resumeWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.resumeWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -238,7 +238,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("startRetroForWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.startRetroForWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -259,7 +259,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("reopenSolvedWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.reopenSolvedWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -280,7 +280,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("closeWTF, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.closeWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
@@ -303,7 +303,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getMyActiveCircuit, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.getMyActiveWTFCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -319,7 +319,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getMyDoItLaterCircuits, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.getMyDoItLaterCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -340,7 +340,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getAllMyParticipatingCircuits, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -362,7 +362,7 @@ public class LearningCircuitResource {
         RequestContext context = RequestContext.get();
         log.info("getAllParticipatingCircuitsForMember, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         UUID otherMemberId = UUID.fromString(memberId);
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserProfileDto {
 
-    private UUID rootId;
+    private UUID rootAccountId;
     private String email;
     private String userName;
     private String fullName;

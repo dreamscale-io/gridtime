@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.api.organization;
 
-import com.dreamscale.gridtime.api.status.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationDto {
-    private UUID id;
-    private String orgName;
-    private String domainName;
+public class JoinRequestInputDto {
+    private String inviteToken;
+    private String orgEmail;
 }

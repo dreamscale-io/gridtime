@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class TerminalResource {
     FlowPublisher flowService;
 
     @Autowired
-    OrganizationMembershipCapability organizationMembership;
+    OrganizationCapability organizationCapability;
 
 
     @PostMapping(ResourcePaths.GRID_PATH + ResourcePaths.START_PATH )
@@ -220,7 +220,7 @@ public class TerminalResource {
 //
 //        RequestContext context = RequestContext.get();
 //
-//        OrganizationMemberEntity memberEntity = organizationService.getDefaultMembership(context.getRootAccountId());
+//        OrganizationMemberEntity memberEntity = organizationService.getActiveMembership(context.getRootAccountId());
 //
 //        UUID memberId = UUID.fromString(memberIdStr);
 //        organizationService.validateMemberWithinOrgByMemberId(memberEntity.getOrganizationId(), memberId);

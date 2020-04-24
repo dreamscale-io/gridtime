@@ -29,7 +29,6 @@ public class CPGBucketConfig {
         projectBoxes.add(new BoxMatcherConfig("Adjustment", "*/src/main/java/com/nbcuniversal/forecasting/controller/OtherRevenueAdjustmentsController.java"));
         projectBoxes.add(new BoxMatcherConfig("Adjustment", "*/src/main/resources/com/nbcuniversal/forecasting/structure/OtherRevenueAdjustmentMapper.xml"));
 
-
         projectBoxes.add(new BoxMatcherConfig("Agent", "*/src/main/java/com/nbcuniversal/forecasting/domain/agent/*"));
         projectBoxes.add(new BoxMatcherConfig("Agent", "*/src/main/resources/com/nbcuniversal/forecasting/structure/AgentCommissionMapper.xml"));
         projectBoxes.add(new BoxMatcherConfig("Agent", "*/src/main/resources/com/nbcuniversal/forecasting/structure/AgentMapper.xml"));
@@ -77,7 +76,6 @@ public class CPGBucketConfig {
         projectBoxes.add(new BoxMatcherConfig("GSF", "*/src/main/java/com/nbcuniversal/forecasting/domain/fees/gsf/*"));
         projectBoxes.add(new BoxMatcherConfig("GSF", "*/src/main/resources/com/nbcuniversal/forecasting/structure/MinimumGuaranteeBalanceMapper.xml"));
         projectBoxes.add(new BoxMatcherConfig("GSF", "*/src/main/resources/com/nbcuniversal/forecasting/structure/RightsLogicMinimumGuaranteeBalanceMapper.xml"));
-
 
         projectBoxes.add(new BoxMatcherConfig("Agent Commission", "*/src/main/java/com/nbcuniversal/forecasting/domain/fees/agentcommission/*"));
 

@@ -129,7 +129,7 @@ class ZoomableBoxLocasSpec extends Specification {
         torchie.changeBoxConfiguration(boxConfigBuilder.build())
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
-        journalFeed.addSomeData(generateIntentionStart(time1, null, "taskA", -3))
+        journalFeed.addSomeData(generateIntentionStart(time1, null, "taskA", "stuff", -3))
 
 
         InputFeed fileActivityFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED)
@@ -162,8 +162,8 @@ class ZoomableBoxLocasSpec extends Specification {
         torchie.changeBoxConfiguration(boxConfigBuilder.build())
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
-        journalFeed.addSomeData(generateIntentionStart(time1, time1.plusMinutes(34), "taskA", -3))
-        journalFeed.addSomeData(generateIntentionStart(time1.plusMinutes(34), null, "taskB", 2))
+        journalFeed.addSomeData(generateIntentionStart(time1, time1.plusMinutes(34), "taskA", "stuff1", -3))
+        journalFeed.addSomeData(generateIntentionStart(time1.plusMinutes(34), null, "taskB", "stuff2", 2))
 
 
         InputFeed wtfFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
@@ -219,11 +219,12 @@ class ZoomableBoxLocasSpec extends Specification {
 
     }
 
-    def generateIntentionStart(LocalDateTime startTime, LocalDateTime finishTime, String taskName, int flame) {
+    def generateIntentionStart(LocalDateTime startTime, LocalDateTime finishTime, String taskName, String description, int flame) {
         JournalEntryEntity journalEntryEntity = new JournalEntryEntity()
         journalEntryEntity.setId(UUID.randomUUID())
         journalEntryEntity.setProjectId(projectId)
         journalEntryEntity.setProjectName("projA")
+        journalEntryEntity.setDescription(description)
         journalEntryEntity.setPosition(startTime)
         journalEntryEntity.setTaskId(UUID.randomUUID())
         journalEntryEntity.setTaskName(taskName)

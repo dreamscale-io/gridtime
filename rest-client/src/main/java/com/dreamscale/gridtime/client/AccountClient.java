@@ -6,6 +6,8 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 
+import java.util.UUID;
+
 @Headers({
         "Content-Type: application/json",
         "Accept: application/json",
@@ -13,7 +15,7 @@ import feign.RequestLine;
 public interface AccountClient {
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.REGISTER_PATH)
-    SimpleStatusDto register(RootAccountCredentialsInputDto accountCreds);
+    UserProfileDto register(RootAccountCredentialsInputDto accountCreds);
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(ActivationCodeDto accountKey);
@@ -23,6 +25,10 @@ public interface AccountClient {
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login();
+
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH +
+            ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}")
+    ConnectionStatusDto loginToOrganization(@Param("organizationId") UUID organizationId);
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout();

@@ -17,7 +17,6 @@ allprojects {
 
     dependencies {
         compileOnly "org.projectlombok:lombok:1.16.18"
-
         mainTestCompile "org.dreamscale:common-test:1.+"
         mainTestCompileOnly "org.codehaus.groovy:groovy-all:${groovyVersion}"
     }
@@ -31,7 +30,7 @@ dependencies {
     compile "org.postgresql:postgresql:42.2.5"
     compile "org.liquibase:liquibase-core"
     compile 'com.sendgrid:sendgrid-java:3.0.9'
-
+    compile "com.stripe:stripe-java:18.14.0"
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
 
     sharedTestCompile project(path: "rest-client", configuration: "mainTestRuntime")

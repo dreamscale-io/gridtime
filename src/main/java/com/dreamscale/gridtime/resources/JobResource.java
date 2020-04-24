@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.job.JobStatusDto;
 import com.dreamscale.gridtime.api.job.SystemJobStatusDto;
 import com.dreamscale.gridtime.api.job.WatchConfigurationDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.GridtimeJobManager;
@@ -24,7 +24,7 @@ public class JobResource {
     private GridtimeJobManager gridtimeJobManager;
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationCapability;
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -42,7 +42,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("getOrganizationJobs, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.getAllJobsForTeam(invokingMember.getOrganizationId(), invokingMember.getId());
     }
@@ -54,7 +54,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("getOrganizationJobs, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.getAllJobsForOrganization(invokingMember.getOrganizationId());
     }
@@ -65,7 +65,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("startJob, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.startJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
     }
@@ -76,7 +76,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("stopJob, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.stopJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
     }
@@ -87,7 +87,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("watchJob, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.watchJob(invokingMember.getOrganizationId(), invokingMember.getId(), jobId, watchConfigurationDto);
     }
@@ -99,7 +99,7 @@ public class JobResource {
         RequestContext context = RequestContext.get();
         log.info("getJobStatus, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return gridtimeJobManager.getJobStatus(invokingMember.getOrganizationId(), invokingMember.getId(), jobId);
     }

@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.service.ProjectService;
 import com.dreamscale.gridtime.core.capability.directory.TaskDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ProjectResource {
     private TaskDirectoryCapability taskDirectoryCapability;
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationCapability;
 
 
     /**
@@ -39,7 +39,7 @@ public class ProjectResource {
      */
     @GetMapping()
     List<ProjectDto> getAllProjects() {
-        return projectService.getAllProjects(getDefaultOrgId());
+        return projectService.getAllProjects(getActiveOrgId());
     }
 
     /**
@@ -49,7 +49,7 @@ public class ProjectResource {
     @GetMapping("/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.SEARCH_PATH + "/{startsWith}")
     List<TaskDto> findTasksStartingWith(@PathVariable("id") String projectId, @PathVariable("startsWith") String startsWith) {
 
-        return taskDirectoryCapability.findTasksStartingWith(getDefaultOrgId(), UUID.fromString(projectId), startsWith);
+        return taskDirectoryCapability.findTasksStartingWith(getActiveOrgId(), UUID.fromString(projectId), startsWith);
     }
 
     /**
@@ -59,12 +59,12 @@ public class ProjectResource {
     @PostMapping("/{id}" + ResourcePaths.TASK_PATH)
     TaskDto createNewTask(@PathVariable("id") String projectId, @RequestBody TaskInputDto taskInputDto) {
         RequestContext context = RequestContext.get();
-        return taskDirectoryCapability.createNewTask(getDefaultOrgId(), UUID.fromString(projectId), context.getRootAccountId(), taskInputDto);
+        return taskDirectoryCapability.createNewTask(getActiveOrgId(), UUID.fromString(projectId), context.getRootAccountId(), taskInputDto);
     }
 
-    private UUID getDefaultOrgId() {
+    private UUID getActiveOrgId() {
         RequestContext context = RequestContext.get();
-        OrganizationDto org = organizationMembership.getDefaultOrganization(context.getRootAccountId());
+        OrganizationDto org = organizationCapability.getActiveOrganization(context.getRootAccountId());
         return org.getId();
     }
 

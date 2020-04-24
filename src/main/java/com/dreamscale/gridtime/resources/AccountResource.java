@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -49,7 +50,7 @@ public class AccountResource {
 
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.REGISTER_PATH)
-    SimpleStatusDto register(@RequestBody RootAccountCredentialsInputDto rootAccountCredentialsInputDto) {
+    UserProfileDto register(@RequestBody RootAccountCredentialsInputDto rootAccountCredentialsInputDto) {
 
         return rootAccountCapability.registerAccount(rootAccountCredentialsInputDto);
     }
@@ -118,6 +119,8 @@ public class AccountResource {
     }
 
     /**
+     * Login to the default organization.
+     *
      * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
      * for the duration of the session
      *
@@ -132,6 +135,27 @@ public class AccountResource {
         RequestContext context = RequestContext.get();
         return rootAccountCapability.login(context.getRootAccountId());
     }
+
+    /**
+     * Login to a specific organization.
+     *
+     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
+     * for the duration of the session
+     *
+     * To login completely, talk has to handshake via the /connect API or the user isnt fully logged in
+     * @return ConnectionStatusDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}")
+    ConnectionStatusDto loginToOrganization(@PathVariable("organizationId") String organizationIdStr) {
+
+        RequestContext context = RequestContext.get();
+
+        UUID organizationId = UUID.fromString(organizationIdStr);
+        return rootAccountCapability.loginToOrganization(context.getRootAccountId(), organizationId);
+    }
+
 
     /**
      * Logout the user so the temporary connectionId expires

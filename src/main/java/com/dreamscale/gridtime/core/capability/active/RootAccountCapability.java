@@ -2,21 +2,22 @@ package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.account.*;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
+import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.capability.operator.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
+import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
 import com.dreamscale.gridtime.core.domain.circuit.*;
+import com.dreamscale.gridtime.core.domain.circuit.TalkRoomMemberRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -48,7 +48,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private ActiveWorkStatusManager activeWorkStatusManager;
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationCapability;
 
     @Autowired
     private TeamMembershipCapability teamMembership;
@@ -63,10 +63,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
-    private OneTimeTicketRepository oneTimeTicketRepository;
+    private OneTimeTicketCapability oneTimeTicketCapability;
+
+    @Autowired
+    private TalkRoomMemberRepository talkRoomMemberRepository;
 
     @Autowired
     private GridClock gridClock;
+
+    @Autowired
+    private GridTalkRouter talkRouter;
 
     @Autowired
     private EmailCapability emailCapability;
@@ -77,14 +83,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private TalkRoomRepository talkRoomRepository;
 
-    @Autowired
-    private GridTalkRouter talkRouter;
-
-    private static final String PUBLIC_ORG_DOMAIN = "public.dreamscale.io";
-    private static final String PUBLIC_ORG_NAME = "Public";
 
 
-    public SimpleStatusDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
+
+    public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());
         RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
@@ -102,16 +104,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         rootAccountRepository.save(newAccount);
 
-        OneTimeTicketEntity oneTimeActivationTicket = issueOneTimeActivationTicket(now, newAccount.getId());
+        OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
 
         emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
 
-        return new SimpleStatusDto(Status.SUCCESS, "Account Activation email sent.");
+        return toDto(newAccount);
     }
 
     @Transactional
     public AccountActivationDto activate(String activationCode) {
-        OneTimeTicketEntity oneTimeTicket = oneTimeTicketRepository.findByTicketCode(activationCode);
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.findByTicketCode(activationCode);
 
         AccountActivationDto accountActivationDto = new AccountActivationDto();
 
@@ -120,11 +122,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
         if (oneTimeTicket == null) {
             accountActivationDto.setMessage("Activation code not found.");
             accountActivationDto.setStatus(Status.FAILED);
-        } else if (isExpired(now, oneTimeTicket)) {
+        } else if (oneTimeTicketCapability.isExpired(now, oneTimeTicket)) {
             accountActivationDto.setMessage("Activation code is expired.");
             accountActivationDto.setStatus(Status.FAILED);
 
-            oneTimeTicketRepository.delete(oneTimeTicket);
+            oneTimeTicketCapability.delete(oneTimeTicket);
 
         } else {
             String apiKey = generateAPIKey();
@@ -140,7 +142,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             rootAccountRepository.save(rootAccountEntity);
 
-            OrganizationEntity publicOrg = findOrCreatePublicOrg();
+            OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg();
 
             OrganizationMemberEntity pubOrgMembership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(publicOrg.getId(), rootAccountEntity.getId());
 
@@ -154,7 +156,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 organizationMemberRepository.save(pubOrgMembership);
             }
 
-            oneTimeTicketRepository.delete(oneTimeTicket);
+            oneTimeTicketCapability.delete(oneTimeTicket);
 
             accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
             accountActivationDto.setApiKey(apiKey);
@@ -165,40 +167,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return accountActivationDto;
     }
 
-    private boolean isExpired(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
-        return now.isAfter(oneTimeTicket.getExpirationDate());
-    }
 
-    private OneTimeTicketEntity issueOneTimeActivationTicket(LocalDateTime now, UUID ticketOwnerId) {
-        OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
-        oneTimeTicket.setId(UUID.randomUUID());
-        oneTimeTicket.setOwnerId(ticketOwnerId);
-        oneTimeTicket.setTicketType(TicketType.ACTIVATION);
-        oneTimeTicket.setTicketCode(generateTicketCode());
-        oneTimeTicket.setIssueDate(now);
-        oneTimeTicket.setExpirationDate(now.plusDays(1));
 
-        oneTimeTicketRepository.save(oneTimeTicket);
-        return oneTimeTicket;
-    }
 
-    private OneTimeTicketEntity issueOneTimeEmailValidationTicket(LocalDateTime now, UUID ticketOwnerId, String newEmail) {
-        OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
-        oneTimeTicket.setId(UUID.randomUUID());
-        oneTimeTicket.setOwnerId(ticketOwnerId);
-        oneTimeTicket.setTicketType(TicketType.EMAIL_VALIDATION);
-        oneTimeTicket.setTicketCode(generateTicketCode());
-        oneTimeTicket.setIssueDate(now);
-        oneTimeTicket.setExpirationDate(now.plusDays(1));
-
-        Map<String, String> props = DefaultCollections.map();
-        props.put(OneTimeTicketEntity.EMAIL_PROP, newEmail);
-
-        oneTimeTicket.setJsonProps(JSONTransformer.toJson(props));
-
-        oneTimeTicketRepository.save(oneTimeTicket);
-        return oneTimeTicket;
-    }
 
     public SimpleStatusDto reset(String email) {
 
@@ -209,7 +180,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         LocalDateTime now = gridClock.now();
 
-        OneTimeTicketEntity oneTimeTicket = issueOneTimeActivationTicket(now, existingRootAccount.getId());
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, existingRootAccount.getId());
 
         emailCapability.sendAccountResetEmail(standardizedEmail, oneTimeTicket.getTicketCode());
 
@@ -240,21 +211,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     }
 
-    private OrganizationEntity findOrCreatePublicOrg() {
 
-        OrganizationEntity publicOrg = organizationRepository.findByDomainName(PUBLIC_ORG_DOMAIN);
-
-        if (publicOrg == null) {
-            publicOrg = new OrganizationEntity();
-            publicOrg.setId(UUID.randomUUID());
-            publicOrg.setDomainName(PUBLIC_ORG_DOMAIN);
-            publicOrg.setOrgName(PUBLIC_ORG_NAME);
-
-            organizationRepository.save(publicOrg);
-        }
-
-        return publicOrg;
-    }
 
     private void validateNoExistingAccount(String standarizedEmail, RootAccountEntity existingRootAccount) {
 
@@ -272,33 +229,49 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public ConnectionStatusDto login(UUID rootAccountId) {
 
+        OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccountId);
+
+        return loginAsOrganizationMember(rootAccountId, membership);
+    }
+
+
+    public ConnectionStatusDto loginToOrganization(UUID rootAccountId, UUID organizationId) {
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
+
+        return loginAsOrganizationMember(rootAccountId, membership);
+    }
+
+    private ConnectionStatusDto loginAsOrganizationMember(UUID rootAccountId, OrganizationMemberEntity membership) {
         LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
+
+        validateMembershipExists(membership);
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         accountStatusEntity.setConnectionId(UUID.randomUUID());
         accountStatusEntity.setOnlineStatus(OnlineStatus.Connecting);
+        accountStatusEntity.setLoggedInOrganizationId(membership.getOrganizationId());
 
         accountStatusRepository.save(accountStatusEntity);
 
-        ConnectionStatusDto statusDto = new ConnectionStatusDto();
-        statusDto.setConnectionId(accountStatusEntity.getConnectionId());
-        statusDto.setStatus(Status.VALID);
-        statusDto.setMessage("Successfully logged in");
+        ConnectionStatusDto connectionStatus = new ConnectionStatusDto();
+        connectionStatus.setMemberId(membership.getId());
+        connectionStatus.setOrganizationId(membership.getOrganizationId());
+        connectionStatus.setUserName(membership.getUsername());
+        connectionStatus.setConnectionId(accountStatusEntity.getConnectionId());
+        connectionStatus.setStatus(Status.VALID);
+        connectionStatus.setMessage("Successfully logged in");
 
-        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
-        statusDto.setMemberId(membership.getId());
-        statusDto.setOrganizationId(membership.getOrganizationId());
-        statusDto.setUserName(membership.getUsername());
-
-        TeamDto team = teamMembership.getMyHomeTeam(membership.getOrganizationId(), membership.getId());
-
+        TeamDto team = teamMembership.getMyActiveTeam(membership.getOrganizationId(), membership.getId());
         if (team != null) {
-            statusDto.setTeamId(team.getId());
+            connectionStatus.setTeamId(team.getId());
         }
 
-        return statusDto;
+        List<OrganizationDto> participatingOrgs = organizationCapability.getParticipatingOrganizations(rootAccountId);
+        connectionStatus.setParticipatingOrganizations(participatingOrgs);
+
+        return connectionStatus;
     }
 
     public ActiveTalkConnectionDto connect(UUID connectionId) {
@@ -310,7 +283,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         validateConnectionExists(connectionId, accountStatusEntity);
 
-        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(accountStatusEntity.getRootAccountId());
+        OrganizationMemberEntity membership = organizationCapability.getActiveMembership(accountStatusEntity.getRootAccountId());
 
         MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(connectionId);
 
@@ -321,6 +294,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         return getActiveTalkConnection(connectionId, memberConnection.getUsername());
     }
+
 
     private ActiveTalkConnectionDto getActiveTalkConnection(UUID newConnectionId, String userName) {
 
@@ -354,6 +328,13 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
     }
 
+    private void validateMembershipExists(OrganizationMemberEntity membership) {
+        if (membership == null) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Unable to find org membership for account." );
+        }
+    }
+
+
 
     public SimpleStatusDto logout(UUID rootAccountId) {
 
@@ -380,7 +361,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         talkRouter.leaveAllRooms(memberConnection, talkRooms);
 
-        OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(rootAccountId);
+        OrganizationMemberEntity membership = organizationCapability.getActiveMembership(rootAccountId);
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
 
         return new SimpleStatusDto(Status.SUCCESS, "Successfully logged out");
@@ -470,7 +451,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     private UserProfileDto toDto(RootAccountEntity rootAccount) {
         UserProfileDto userProfileDto = new UserProfileDto();
-        userProfileDto.setRootId(rootAccount.getId());
+        userProfileDto.setRootAccountId(rootAccount.getId());
         userProfileDto.setFullName(rootAccount.getFullName());
         userProfileDto.setDisplayName(rootAccount.getDisplayName());
         userProfileDto.setEmail(rootAccount.getRootEmail());
@@ -508,9 +489,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         String standardizedEmail = standarizeToLowerCase(newEmail);
 
-        OneTimeTicketEntity oneTimeTicket = issueOneTimeEmailValidationTicket(now, rootAccountId, standardizedEmail);
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeEmailValidationTicket(now, rootAccountId, standardizedEmail);
 
-        emailCapability.sendEmailValidationEmail(standardizedEmail, oneTimeTicket.getTicketCode());
+        emailCapability.sendEmailToValidateRootAccountProfileAddress(standardizedEmail, oneTimeTicket.getTicketCode());
 
         rootAccountRepository.save(rootAccountEntity);
 
@@ -523,7 +504,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public SimpleStatusDto validateProfileEmail(String validationCode) {
 
-        OneTimeTicketEntity oneTimeTicket = oneTimeTicketRepository.findByTicketCode(validationCode);
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.findByTicketCode(validationCode);
 
         SimpleStatusDto simpleStatus = new SimpleStatusDto();
 
@@ -532,11 +513,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
         if (oneTimeTicket == null) {
             simpleStatus.setMessage("Validation code not found.");
             simpleStatus.setStatus(Status.FAILED);
-        } else if (isExpired(now, oneTimeTicket)) {
+        } else if (oneTimeTicketCapability.isExpired(now, oneTimeTicket)) {
             simpleStatus.setMessage("Validation code is expired.");
             simpleStatus.setStatus(Status.FAILED);
 
-            oneTimeTicketRepository.delete(oneTimeTicket);
+            oneTimeTicketCapability.delete(oneTimeTicket);
 
         } else {
 
@@ -552,7 +533,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             rootAccountRepository.save(rootAccountEntity);
 
-            oneTimeTicketRepository.delete(oneTimeTicket);
+            oneTimeTicketCapability.delete(oneTimeTicket);
 
             simpleStatus.setMessage("Profile Email successfully updated.");
             simpleStatus.setStatus(Status.SUCCESS);

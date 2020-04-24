@@ -25,6 +25,9 @@ public class ActiveAccountStatusEntity {
     @Column(name = "connection_id")
     private UUID connectionId;
 
+    @Column(name = "logged_in_organization_id")
+    private UUID loggedInOrganizationId;
+
     @Column(name = "delta_time")
     private Integer deltaTime;
 

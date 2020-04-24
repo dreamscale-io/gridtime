@@ -28,13 +28,18 @@ public class EmailCapability {
 
 
     //account/profile/property/email/validate
-    private static final String EMAIL_VALIDATE_API =
+    private static final String ACCOUNT_PROFILE_VALIDATE_API =
             ResourcePaths.ACCOUNT_PATH +
             ResourcePaths.PROFILE_PATH +
             ResourcePaths.PROPERTY_PATH +
             ResourcePaths.EMAIL_PATH +
             ResourcePaths.VALIDATE_PATH;
 
+    private static final String ORG_JOIN_EMAIL_VALIDATE_API =
+            ResourcePaths.ORGANIZATION_PATH +
+                    ResourcePaths.JOIN_PATH +
+                    ResourcePaths.EMAIL_PATH +
+                    ResourcePaths.VALIDATE_PATH;
 
     public SimpleStatusDto sendDownloadAndActivationEmail(String toEmailAddress, String activationToken) {
 
@@ -79,7 +84,15 @@ public class EmailCapability {
         return responseDto;
     }
 
-    public SimpleStatusDto sendEmailValidationEmail(String toEmailAddress, String ticketCode) {
+    public SimpleStatusDto sendEmailToValidateRootAccountProfileAddress(String toEmailAddress, String ticketCode) {
+        return sendEmailValidationEmail(toEmailAddress, ticketCode, ACCOUNT_PROFILE_VALIDATE_API);
+    }
+
+    public SimpleStatusDto sendEmailToValidateOrgEmailAddress(String toEmailAddress, String ticketCode) {
+        return sendEmailValidationEmail(toEmailAddress, ticketCode, ORG_JOIN_EMAIL_VALIDATE_API);
+    }
+
+    private SimpleStatusDto sendEmailValidationEmail(String toEmailAddress, String ticketCode, String validateAPI) {
 
         Mail mail = new Mail();
         mail.setFrom(new Email(fromAddress, fromName));
@@ -96,7 +109,7 @@ public class EmailCapability {
         Content content = new Content();
         content.setType("text/html");
         content.setValue("<html><body> <p> Click this link to validate your email address:</p>" +
-                "<p><a href='"+sitelinkUrl+ EMAIL_VALIDATE_API + "?validationCode="+ticketCode+"'>Validate Email</a></p></body></html>");
+                "<p><a href='"+sitelinkUrl+ validateAPI + "?validationCode="+ticketCode+"'>Validate Email</a></p></body></html>");
         mail.addContent(content);
 
         SendGrid sg = new SendGrid(apiKey);

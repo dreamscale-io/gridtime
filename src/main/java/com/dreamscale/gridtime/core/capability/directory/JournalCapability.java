@@ -50,7 +50,7 @@ public class JournalCapability {
     private JournalLinkEventRepository journalLinkEventRepository;
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationMembership;
 
     @Autowired
     private RecentActivityManager recentActivityManager;

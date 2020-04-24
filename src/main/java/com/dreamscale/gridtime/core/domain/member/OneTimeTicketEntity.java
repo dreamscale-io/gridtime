@@ -20,6 +20,8 @@ import java.util.UUID;
 public class OneTimeTicketEntity {
 
     public static final String EMAIL_PROP = "email";
+    public static final String ORGANIZATION_ID_PROP = "organizationId";
+
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -39,25 +41,38 @@ public class OneTimeTicketEntity {
     private LocalDateTime expirationDate;
 
     @Transient
-    private Map<String, Object> propsMap;
+    private Map<String, String> propsMap;
 
-    public Map<String, Object> getProps() {
+    public Map<String, String> getProps() {
         if (propsMap != null) {
             return propsMap;
         }
 
         if (jsonProps != null) {
-            propsMap = (HashMap<String, Object>) JSONTransformer.fromJson(jsonProps, HashMap.class);
+            propsMap = (HashMap<String, String>) JSONTransformer.fromJson(jsonProps, HashMap.class);
         }
 
         return propsMap;
     }
 
     public String getEmailProp() {
-        Map<String, Object> props = getProps();
+        Map<String, String> props = getProps();
 
         if (props != null) {
-            return (String) props.get(EMAIL_PROP);
+            return props.get(EMAIL_PROP);
+        }
+
+        return null;
+    }
+
+    public UUID getOrganizationIdProp() {
+        Map<String, String> props = getProps();
+
+        if (props != null) {
+            String prop = props.get(ORGANIZATION_ID_PROP);
+            if (prop != null) {
+                return UUID.fromString(prop);
+            }
         }
 
         return null;

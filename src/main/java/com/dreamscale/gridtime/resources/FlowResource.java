@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,7 @@ public class FlowResource {
     FlowPublisher flowService;
 
     @Autowired
-    OrganizationMembershipCapability organizationMembership;
+    OrganizationCapability organizationCapability;
     @Autowired
     WTFCircuitOperator WTFCircuitOperator;
 
@@ -37,7 +37,7 @@ public class FlowResource {
         RequestContext context = RequestContext.get();
         log.info("publishBatch, user={}, batch={}", context.getRootAccountId(), batch);
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         flowService.saveFlowBatch(invokingMember.getOrganizationId(), invokingMember.getId(), batch);
     }
@@ -51,7 +51,7 @@ public class FlowResource {
         RequestContext context = RequestContext.get();
         log.info("saveFlowSnippet, user={}, snippet={}", context.getRootAccountId(), snippet);
 
-        OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         flowService.saveSnippetEvent(invokingMember.getOrganizationId(), invokingMember.getId(), snippet);
 

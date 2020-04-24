@@ -11,3 +11,9 @@ databaseChangeLog:
 
   - include:
         file: db/v007/create_one_time_ticket.sql
+
+  - include:
+        file: db/v007/create_organization_subscription.sql
+
+  - include:
+        file: db/v007/alter_active_account_status_add_organization.sql

@@ -1,11 +1,14 @@
 package com.dreamscale.gridtime.core.service;
 
+import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto;
+import com.dreamscale.gridtime.api.account.UserProfileDto;
 import com.dreamscale.gridtime.api.admin.ProjectSyncInputDto;
 import com.dreamscale.gridtime.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository;
@@ -16,6 +19,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository;
 import com.dreamscale.gridtime.core.domain.tile.GridBoxBucketConfigEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridBoxBucketConfigRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraProjectDto;
@@ -28,13 +32,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
 public class AdminService {
+
+    @Autowired
+    private RootAccountCapability rootAccountCapability;
 
     @Autowired
     private JiraCapability jiraCapability;
@@ -52,7 +58,7 @@ public class AdminService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationCapability;
 
     @Autowired
     private TeamMembershipCapability teamMembership;
@@ -74,7 +80,7 @@ public class AdminService {
         String teamName = "CPG";
         String projectName = "NBCU CPG";
 
-        OrganizationDto organizationDto = organizationMembership.getOrganizationByDomainName(domainName);
+        OrganizationDto organizationDto = organizationCapability.getOrganizationByDomainName(domainName);
 
         UUID orgId = organizationDto.getId();
 
@@ -147,120 +153,140 @@ public class AdminService {
 
     public List<MemberRegistrationDetailsDto> configureDreamScale(AutoConfigInputDto inputConfig) {
 
-        OrganizationInputDto orgInput = new OrganizationInputDto();
-        orgInput.setOrgName("DreamScale");
+        UserProfileDto account1 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("janelle@dreamscale.io", "password"));
+        UserProfileDto account2 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("mike@dreamscale.io", "password"));
+        UserProfileDto account3 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("kara@dreamscale.io", "password"));
+        UserProfileDto account4 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("zoe@dreamscale.io", "password"));
+        UserProfileDto account5 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("evan@dreamscale.io", "password"));
+
+        SubscriptionInputDto orgInput = new SubscriptionInputDto();
+        orgInput.setOrganizationName("DreamScale");
         orgInput.setDomainName("dreamscale.io");
-        orgInput.setJiraSiteUrl("dreamscale.atlassian.net");
-        orgInput.setJiraUser("janelle@dreamscale.io");
-        orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
+        orgInput.setStripePaymentId("[STRIPE_PAYMENT]");
+        orgInput.setRequireMemberEmailInDomain(true);
+        orgInput.setSeats(10);
 
-        OrganizationDto dreamScaleOrg = organizationMembership.createOrganization(orgInput);
+        OrganizationSubscriptionDto dreamScaleSubscription = organizationCapability.createOrganizationSubscription(account1.getRootAccountId(), orgInput);
 
-        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-data-plugins"));
-        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "flow-platform"));
-        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleOrg.getId(), "dummy-test"));
+        MemberRegistrationDetailsDto member1 = joinOrganization(account1, dreamScaleSubscription);
+        MemberRegistrationDetailsDto member2 = joinOrganization(account2, dreamScaleSubscription);
+        MemberRegistrationDetailsDto member3 = joinOrganization(account3, dreamScaleSubscription);
+        MemberRegistrationDetailsDto member4 = joinOrganization(account4, dreamScaleSubscription);
+        MemberRegistrationDetailsDto member5 = joinOrganization(account5, dreamScaleSubscription);
 
-        List<MemberRegistrationDetailsDto> registrations = new ArrayList<>();
+        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleSubscription.getOrganizationId(), "flow-data-plugins"));
+        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleSubscription.getOrganizationId(), "flow-platform"));
+        configureJiraProjectSync(new ProjectSyncInputDto(dreamScaleSubscription.getOrganizationId(), "dummy-test"));
 
-        registrations.add(registerMember(dreamScaleOrg, "janelle@dreamscale.io"));
-        registrations.add(registerMember(dreamScaleOrg, "mike@dreamscale.io"));
-        registrations.add(registerMember(dreamScaleOrg, "kara@dreamscale.io"));
-        registrations.add(registerMember(dreamScaleOrg, "evan@dreamscale.io"));
-        registrations.add(registerMember(dreamScaleOrg, "bethlrichardson@gmail.com"));
-        registrations.add(registerMember(dreamScaleOrg, "tobias@davistobias.com"));
+        TeamDto team = teamMembership.createTeam(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix");
 
-        TeamDto team = teamMembership.createTeam(dreamScaleOrg.getId(), registrations.get(0).getMemberId(), "Phoenix");
+        teamMembership.addMemberToTeamWithMemberId(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix", member1.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix", member2.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix", member3.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix", member4.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(dreamScaleSubscription.getOrganizationId(), member1.getMemberId(), "Phoenix", member5.getMemberId());
 
-        for (MemberRegistrationDetailsDto registration : registrations) {
-            teamMembership.addMemberToTeamWithMemberId(dreamScaleOrg.getId(), registrations.get(0).getMemberId(), "Phoenix", registration.getMemberId());
-        }
+        return DefaultCollections.toList(member1, member2, member3, member4, member5);
+    }
 
-        return registrations;
+    private MemberRegistrationDetailsDto joinOrganization(UserProfileDto account, OrganizationSubscriptionDto subscription) {
+        return organizationCapability.joinOrganization(account.getRootAccountId(), subscription.getOrganizationId(),
+                new MembershipInputDto(subscription.getInviteToken(), account.getEmail()));
     }
 
 
     public List<MemberRegistrationDetailsDto> configureOnPrem(AutoConfigInputDto inputConfig) {
 
-        OrganizationInputDto orgInput = new OrganizationInputDto();
-        orgInput.setOrgName("OnPrem");
+        UserProfileDto account1 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("adrian@onprem.com", "password"));
+        UserProfileDto account2 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("pat@onprem.com", "password"));
+        UserProfileDto account3 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("steve@onprem.com", "password"));
+        UserProfileDto account4 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("ckenley@onprem.com", "password"));
+        UserProfileDto account5 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("costa@onprem.com", "password"));
+        UserProfileDto account6 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("george@onprem.com", "password"));
+        UserProfileDto account7 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("joegarcia@onprem.com", "password"));
+        UserProfileDto account8 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("joshdeford@onprem.com", "password"));
+
+        SubscriptionInputDto orgInput = new SubscriptionInputDto();
+        orgInput.setOrganizationName("OnPrem");
         orgInput.setDomainName("onprem.com");
-        orgInput.setJiraSiteUrl("onprem.atlassian.net");
-        orgInput.setJiraUser("janelle_klein@onprem.com");
-        orgInput.setJiraApiKey(inputConfig.getJiraApiKey());
+        orgInput.setStripePaymentId("[STRIPE_PAYMENT]");
+        orgInput.setRequireMemberEmailInDomain(true);
+        orgInput.setSeats(10);
 
-        OrganizationDto onpremOrg = organizationMembership.createOrganization(orgInput);
+        OrganizationSubscriptionDto onPremSubscription = organizationCapability.createOrganizationSubscription(account1.getRootAccountId(), orgInput);
 
-        configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "Toyota"));
-        configureJiraProjectSync(new ProjectSyncInputDto(onpremOrg.getId(), "NBCU CPG"));
-
-
-
-        //toyota team
-        List<MemberRegistrationDetailsDto> toyotaRegistrations = new ArrayList<>();
-
-        toyotaRegistrations.add(registerMember(onpremOrg, "adrian@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "pat@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "steve@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "ckenley@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "costa@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "george@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "joegarcia@onprem.com"));
-        toyotaRegistrations.add(registerMember(onpremOrg, "joshdeford@onprem.com"));
+        MemberRegistrationDetailsDto member1 = joinOrganization(account1, onPremSubscription);
+        MemberRegistrationDetailsDto member2 = joinOrganization(account2, onPremSubscription);
+        MemberRegistrationDetailsDto member3 = joinOrganization(account3, onPremSubscription);
+        MemberRegistrationDetailsDto member4 = joinOrganization(account4, onPremSubscription);
+        MemberRegistrationDetailsDto member5 = joinOrganization(account5, onPremSubscription);
+        MemberRegistrationDetailsDto member6 = joinOrganization(account6, onPremSubscription);
+        MemberRegistrationDetailsDto member7 = joinOrganization(account7, onPremSubscription);
+        MemberRegistrationDetailsDto member8 = joinOrganization(account8, onPremSubscription);
 
 
-        TeamDto toyotaTeam = teamMembership.createTeam(onpremOrg.getId(), toyotaRegistrations.get(0).getMemberId(), "Toyota");
+        configureJiraProjectSync(new ProjectSyncInputDto(onPremSubscription.getOrganizationId(), "Toyota"));
+        configureJiraProjectSync(new ProjectSyncInputDto(onPremSubscription.getOrganizationId(), "NBCU CPG"));
 
-        for (MemberRegistrationDetailsDto registration : toyotaRegistrations) {
-            teamMembership.addMemberToTeamWithMemberId(onpremOrg.getId(), toyotaRegistrations.get(0).getMemberId(), "Toyota", registration.getMemberId());
-        }
+        TeamDto toyotaTeam = teamMembership.createTeam(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota");
+
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member1.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member2.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member3.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member4.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member5.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member6.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member7.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), member1.getMemberId(), "Toyota", member8.getMemberId());
 
         //cpg team
 
-        List<MemberRegistrationDetailsDto> cpgRegistrations = new ArrayList<>();
+        UserProfileDto cpg1 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("janelle_klein@onprem.com", "password"));
+        UserProfileDto cpg2 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("ashley@onprem.com", "password"));
+        UserProfileDto cpg3 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("corey@onprem.com", "password"));
+        UserProfileDto cpg4 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("mfitzpatrick@onprem.com", "password"));
+        UserProfileDto cpg5 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("kristian@onprem.com", "password"));
+        UserProfileDto cpg6 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("joseph@onprem.com", "password"));
+        UserProfileDto cpg7 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("mattk@onprem.com", "password"));
+        UserProfileDto cpg8 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("noel@onprem.com", "password"));
+        UserProfileDto cpg9 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("richard@onprem.com", "password"));
+        UserProfileDto cpg10 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("swetha@onprem.com", "password"));
+        UserProfileDto cpg11 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("christophe@onprem.com", "password"));
+        UserProfileDto cpg12 = rootAccountCapability.registerAccount(new RootAccountCredentialsInputDto("jeremy@onprem.com", "password"));
 
-        cpgRegistrations.add(registerMember(onpremOrg, "janelle_klein@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "ashley@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "corey@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "mfitzpatrick@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "kristian@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "joseph@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "mattk@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "noel@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "richard@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "swetha@onprem.com"));
+        MemberRegistrationDetailsDto cpgmember1 = joinOrganization(cpg1, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember2 = joinOrganization(cpg2, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember3 = joinOrganization(cpg3, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember4 = joinOrganization(cpg4, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember5 = joinOrganization(cpg5, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember6 = joinOrganization(cpg6, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember7 = joinOrganization(cpg7, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember8 = joinOrganization(cpg8, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember9 = joinOrganization(cpg9, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember10 = joinOrganization(cpg10, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember11 = joinOrganization(cpg11, onPremSubscription);
+        MemberRegistrationDetailsDto cpgmember12 = joinOrganization(cpg12, onPremSubscription);
 
-        cpgRegistrations.add(registerMember(onpremOrg, "christophe@onprem.com"));
-        cpgRegistrations.add(registerMember(onpremOrg, "jeremy@onprem.com"));
+        TeamDto cpgTeam = teamMembership.createTeam(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG");
+
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember1.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember2.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember3.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember4.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember5.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember6.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember7.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember8.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember9.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember10.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember11.getMemberId());
+        teamMembership.addMemberToTeamWithMemberId(onPremSubscription.getOrganizationId(), cpgmember1.getMemberId(), "CPG", cpgmember12.getMemberId());
 
 
-        TeamDto cpgTeam = teamMembership.createTeam(onpremOrg.getId(), cpgRegistrations.get(0).getMemberId(), "CPG");
-
-        for (MemberRegistrationDetailsDto registration : toyotaRegistrations) {
-            teamMembership.addMemberToTeamWithMemberId(onpremOrg.getId(), cpgRegistrations.get(0).getMemberId(), "CPG", registration.getMemberId());
-        }
-
-        List<MemberRegistrationDetailsDto> allRegistrations = new ArrayList<>();
-        allRegistrations.addAll(toyotaRegistrations);
-        allRegistrations.addAll(cpgRegistrations);
-
-        return allRegistrations;
+        return DefaultCollections.toList(member1, member2, member3, member4, member5, member6, member7, member8,
+                cpgmember1, cpgmember2, cpgmember3, cpgmember4, cpgmember5, cpgmember6, cpgmember7, cpgmember8, cpgmember9, cpgmember10, cpgmember11, cpgmember12);
     }
 
-    private List<UUID> extractMemberIds(List<MemberRegistrationDetailsDto> registrations) {
-        List<UUID> memberIds = new ArrayList<>();
-        for (MemberRegistrationDetailsDto member: registrations) {
-            memberIds.add(member.getMemberId());
-        }
-        return memberIds;
-    }
-
-    private MemberRegistrationDetailsDto registerMember(OrganizationDto org, String memberEmail) {
-        MembershipInputDto membership = new MembershipInputDto();
-        membership.setInviteToken(org.getInviteToken());
-        membership.setOrgEmail(memberEmail);
-
-        return organizationMembership.registerMember(org.getId(), membership);
-    }
 
 
 }

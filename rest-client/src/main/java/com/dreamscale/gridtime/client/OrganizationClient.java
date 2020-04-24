@@ -1,11 +1,8 @@
 package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
-import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.api.team.TeamInputDto;
-import com.dreamscale.gridtime.api.team.TeamMemberDto;
-import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -18,15 +15,41 @@ import java.util.List;
 })
 public interface OrganizationClient {
 
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH)
-    OrganizationDto createOrganization(OrganizationInputDto organizationInputDto);
+    //find out about orgs you're participating in
 
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH
-            + "?token={token}")
-    OrganizationDto decodeInvitation(@Param("token") String inviteToken);
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
+    OrganizationDto getMyActiveOrganization();
 
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH+ "/{id}"  + ResourcePaths.MEMBER_PATH)
-    MemberRegistrationDetailsDto registerMember(@Param("id") String organizationId, MembershipInputDto membershipInputDto);
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
+    List<OrganizationDto> getParticipatingOrganizations();
 
+    //Get members of your organization
+
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH)
+    List<MemberRegistrationDto> getOrganizationMembers();
+
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}")
+    MemberRegistrationDto getOrganizationMember(@Param("memberId") String memberId);
+
+    //Must be organization *owner *to use these APIs
+
+    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
+    SimpleStatusDto removeOrganizationMember(@Param("memberId") String memberId);
+
+    @RequestLine("GET " +ResourcePaths.ORGANIZATION_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
+    JiraConfigDto getJiraConfiguration();
+
+    @RequestLine("POST " +ResourcePaths.ORGANIZATION_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
+    SimpleStatusDto updateJiraConfiguration(JiraConfigDto jiraConfigDto);
+
+
+    //Join an existing org using the invitation token
+
+    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH)
+    SimpleStatusDto joinOrganizationWithInvitationAndEmail(JoinRequestInputDto joinRequestInputDto);
+
+    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH + ResourcePaths.EMAIL_PATH +
+            ResourcePaths.VALIDATE_PATH + "?validationCode={validationCode}")
+    SimpleStatusDto validateMemberEmailAndJoin(@Param("validationCode") String validationCode);
 
 }

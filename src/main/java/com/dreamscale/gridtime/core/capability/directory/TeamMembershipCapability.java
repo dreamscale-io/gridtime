@@ -28,7 +28,7 @@ import java.util.*;
 public class TeamMembershipCapability {
 
     @Autowired
-    private OrganizationMembershipCapability organizationMembership;
+    private OrganizationCapability organizationMembership;
 
     @Autowired
     private SpiritNetworkOperator xpService;
@@ -263,7 +263,7 @@ public class TeamMembershipCapability {
     }
 
     @Transactional
-    public TeamDto getMyHomeTeam(UUID orgId, UUID memberId) {
+    public TeamDto getMyActiveTeam(UUID orgId, UUID memberId) {
 
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(orgId, memberId);
 
@@ -503,7 +503,7 @@ public class TeamMembershipCapability {
 
         List<TeamDto> teamDtos = teamOutputMapper.toApiList(teams);
 
-        TeamDto homeTeam = getMyHomeTeam(organizationId, invokingMemberId);
+        TeamDto homeTeam = getMyActiveTeam(organizationId, invokingMemberId);
 
         TeamDto everyoneTeam = findEveryoneTeam(teamDtos);
 

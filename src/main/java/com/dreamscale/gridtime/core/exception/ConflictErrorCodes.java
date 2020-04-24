@@ -12,7 +12,9 @@ public enum ConflictErrorCodes implements ErrorCodes {
     CIRCUIT_IN_WRONG_STATE(3, CONFLICT),
     CONFLICTING_TEAM_NAME(4, CONFLICT),
     CONFLICTING_USER_NAME(5, CONFLICT),
-    EMAIL_ALREADY_IN_USE(6, CONFLICT);
+    EMAIL_ALREADY_IN_USE(6, CONFLICT),
+    ORG_DOMAIN_ALREADY_IN_USE(7, CONFLICT),
+    NO_SEATS_AVAILABLE(8, CONFLICT);
 
     private int subcode;
     private ConflictErrorCodeGroups errorCodeGroup;
