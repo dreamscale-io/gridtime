@@ -14,17 +14,20 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomConnectionScopeDto {
+public class ActiveTalkConnectionDto {
 
     private UUID connectionId;
+    private String userName;
+    Status status;
+    String message;
 
-    private List<UUID> roomIdsToJoin;
+    private List<ActiveRoomDto> activeRooms;
 
-    public void addRoomId(UUID roomId) {
-        if (roomIdsToJoin == null) {
-            roomIdsToJoin = new ArrayList<>();
+    public void addRoom(UUID roomId, String roomName) {
+        if (activeRooms == null) {
+            activeRooms = new ArrayList<>();
         }
 
-        roomIdsToJoin.add(roomId);
+        activeRooms.add(new ActiveRoomDto(roomId, roomName));
     }
 }

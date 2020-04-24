@@ -28,6 +28,13 @@ public class TalkRoomMessageEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID toRoomId;
 
+    //TODO add these new props in the DB, useful query props to improve observability
+//    private String uri;
+//
+//    private String request;
+//
+//    private String urn;
+
     private LocalDateTime position;
 
     private Long nanoTime;

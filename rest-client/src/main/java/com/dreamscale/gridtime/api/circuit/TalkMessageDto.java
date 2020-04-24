@@ -17,8 +17,9 @@ import java.util.UUID;
 public class TalkMessageDto {
 
     private UUID id;
-    private String urn;
-    private String uri;
+    private String urn;   //this should be the friendly /circuit/wtf/{room}
+    private String uri;   //this should be the global unique id of the room
+    private String request;  //this should be the grid request context uri
     private LocalDateTime messageTime;
     private Long nanoTime;
     private Map<String, String> metaProps;

@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.capability.active;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
-import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
+import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
@@ -26,7 +26,7 @@ public class MemberStatusCapability {
     private SpiritNetworkOperator xpService;
 
     @Autowired
-    private LearningCircuitOperator learningCircuitOperator;
+    private WTFCircuitOperator WTFCircuitOperator;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -111,7 +111,7 @@ public class MemberStatusCapability {
         memberStatusDto.setDisplayName(createDisplayName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircuitId() != null) {
-            LearningCircuitDto circuitDto = learningCircuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
+            LearningCircuitDto circuitDto = WTFCircuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
                     memberStatusEntity.getActiveCircuitId());
 
             memberStatusDto.setActiveCircuit(circuitDto);

@@ -2,7 +2,6 @@ package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.*;
-import com.dreamscale.gridtime.api.journal.RecentJournalDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -29,7 +28,7 @@ public interface AccountClient {
     SimpleStatusDto logout();
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.CONNECT_PATH)
-    SimpleStatusDto connect(ConnectionInputDto connectionInputDto );
+    ActiveTalkConnectionDto connect(ConnectionInputDto connectionInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(HeartbeatDto accountKey);

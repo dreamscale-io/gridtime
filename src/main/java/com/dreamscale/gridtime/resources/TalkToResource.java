@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
+import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class TalkToResource {
     OrganizationMembershipCapability organizationMembership;
 
     @Autowired
-    LearningCircuitOperator learningCircuitOperator;
+    WTFCircuitOperator WTFCircuitOperator;
 
     /**
      * The invoking member joins the specified "-wtf" or "-retro" talk room.
@@ -46,7 +46,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
     }
@@ -68,7 +68,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
     }
@@ -91,7 +91,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
 
     }
@@ -113,7 +113,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
 
     }
@@ -135,7 +135,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
+        return WTFCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
     }
 
 
@@ -156,7 +156,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
+        return WTFCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
 
     }
 
@@ -176,7 +176,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
 
     }
@@ -197,7 +197,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
+        return WTFCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
 
     }
@@ -218,7 +218,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationMembership.getDefaultMembership(context.getRootAccountId());
 
-        return learningCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
+        return WTFCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }
 
 

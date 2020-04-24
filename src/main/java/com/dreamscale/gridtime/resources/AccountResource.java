@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -152,12 +151,12 @@ public class AccountResource {
      *
      * The user will be "Online" once this handshake is complete
      *
-     * @return RoomConnectionScopeDto
+     * @return ActiveTalkConnectionDto
      */
 
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.CONNECT_PATH)
-    SimpleStatusDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
+    ActiveTalkConnectionDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
 
         RequestContext context = RequestContext.get();
         return rootAccountCapability.connect(connectionInputDto.getConnectionId());

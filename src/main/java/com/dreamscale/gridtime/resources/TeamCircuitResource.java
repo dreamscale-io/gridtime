@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping(path = ResourcePaths.TEAM_PATH + ResourcePaths.CIRCUIT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH , produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class TeamCircuitResource {
 
     @Autowired

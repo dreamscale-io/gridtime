@@ -34,6 +34,8 @@ import java.util.UUID;
 @Service
 public class TeamCircuitOperator {
 
+    public static final String ROOM_URN_PREFIX = "/talk/to/room/";
+
     @Autowired
     private TalkRoomRepository talkRoomRepository;
 
@@ -85,6 +87,7 @@ public class TeamCircuitOperator {
 
        return circuit.getTeamRoomId();
     }
+
 
 
     public void validateMemberIsOwnerOrModeratorOfTeam(UUID organizationId, UUID teamId, UUID invokingMemberId) {
@@ -192,7 +195,8 @@ public class TeamCircuitOperator {
 
         talkRoomMessageRepository.save(messageEntity);
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        String urn = ROOM_URN_PREFIX + teamCircuit.getDefaultRoom().getTalkRoomName();
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
     }
@@ -216,6 +220,8 @@ public class TeamCircuitOperator {
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
+        TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+
         WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
@@ -227,7 +233,9 @@ public class TeamCircuitOperator {
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(wtfStatusUpdateDto));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
@@ -248,6 +256,8 @@ public class TeamCircuitOperator {
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
+        TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(memberFromId);
@@ -257,7 +267,9 @@ public class TeamCircuitOperator {
         messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_STATUS_UPDATE);
         messageEntity.setJsonBody(JSONTransformer.toJson(memberStatusDto));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
@@ -271,6 +283,8 @@ public class TeamCircuitOperator {
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
 
+        TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(fromMemberId);
@@ -280,19 +294,22 @@ public class TeamCircuitOperator {
         messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_XP_UPDATE);
         messageEntity.setJsonBody(JSONTransformer.toJson(xpStatusUpdateDto));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
+
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
         talkRoomMessageRepository.save(messageEntity);
     }
 
-    private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity) {
+    private TalkMessageDto toTalkMessageDto(String urn, TalkRoomMessageEntity messageEntity) {
 
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
-        messageDto.setUrn(messageEntity.getToRoomId().toString());
-        messageDto.setUri(getRequestUriFromContext());
+        messageDto.setUrn(urn);
+        messageDto.setUri(messageEntity.getToRoomId().toString());
+        messageDto.setRequest(getRequestUriFromContext());
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
@@ -504,7 +521,7 @@ public class TeamCircuitOperator {
     }
 
     @Transactional
-    private TeamCircuitRoomEntity createTeamRoom(TeamCircuitEntity teamCircuit, String teamName, String roomName) {
+    public TeamCircuitRoomEntity createTeamRoom(TeamCircuitEntity teamCircuit, String teamName, String roomName) {
 
         log.info("Team ID : "+teamCircuit.getTeamId());
 

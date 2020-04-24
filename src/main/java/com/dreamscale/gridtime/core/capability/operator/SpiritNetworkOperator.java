@@ -33,7 +33,7 @@ public class SpiritNetworkOperator {
     RootAccountCapability rootAccountCapability;
 
     @Autowired
-    LearningCircuitOperator learningCircuitOperator;
+    WTFCircuitOperator WTFCircuitOperator;
 
     @Autowired
     TeamCircuitOperator teamCircuitOperator;
@@ -167,11 +167,11 @@ public class SpiritNetworkOperator {
 
     public void grantGroupXP(UUID organizationId, UUID ownerMember, int xpAmount) {
 
-        LearningCircuitDto activeCircuit = learningCircuitOperator.getMyActiveWTFCircuit(organizationId, ownerMember);
+        LearningCircuitDto activeCircuit = WTFCircuitOperator.getMyActiveWTFCircuit(organizationId, ownerMember);
 
         if (activeCircuit != null) {
             LearningCircuitWithMembersDto circuitDetails =
-                    learningCircuitOperator.getCircuitWithAllDetails(organizationId, activeCircuit.getCircuitName());
+                    WTFCircuitOperator.getCircuitWithAllDetails(organizationId, activeCircuit.getCircuitName());
 
             List<CircuitMemberStatusDto> members = circuitDetails.getCircuitParticipants();
 
@@ -188,7 +188,7 @@ public class SpiritNetworkOperator {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(learningCircuitOperator.getAllParticipatingCircuits(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(WTFCircuitOperator.getAllParticipatingCircuits(organizationId, torchieId));
 
         return spiritNetworkDto;
     }

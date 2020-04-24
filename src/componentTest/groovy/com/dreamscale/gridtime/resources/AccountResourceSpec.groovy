@@ -3,23 +3,19 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.ActivationCodeDto
 import com.dreamscale.gridtime.api.account.AccountActivationDto
+import com.dreamscale.gridtime.api.account.ActiveTalkConnectionDto
 import com.dreamscale.gridtime.api.account.ConnectionInputDto
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.DisplayNameInputDto
 import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.FullNameInputDto
 import com.dreamscale.gridtime.api.account.HeartbeatDto
-import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserNameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
-import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
-import com.dreamscale.gridtime.api.organization.MembershipInputDto
-import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationInputDto
-import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
@@ -32,7 +28,6 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
@@ -126,17 +121,22 @@ class AccountResourceSpec extends Specification {
         OrganizationMemberEntity member = createMemberWithOrgAndTeam()
         testUser.setId(member.getRootAccountId())
 
+        ConnectionStatusDto firstLogin = accountClient.login()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        SimpleStatusDto logoutStatus = accountClient.logout()
+
         when:
 
-        LearningCircuitDto circuitDto = circuitClient.startWTF()
+        ConnectionStatusDto secondLogin = accountClient.login()
 
-        ConnectionStatusDto connectionStatusDto = accountClient.login()
-
-        SimpleStatusDto statusDto = accountClient.connect(new ConnectionInputDto(connectionStatusDto.getConnectionId()));
+        ActiveTalkConnectionDto activeTalkConnection = accountClient.connect(new ConnectionInputDto(secondLogin.getConnectionId()));
 
         then:
-        assert statusDto != null
-        assert statusDto.getStatus() == Status.VALID
+        assert activeTalkConnection != null
+        assert activeTalkConnection.getStatus() == Status.VALID
+        assert activeTalkConnection.getActiveRooms().size() == 3
     }
 
     def "should create a circuit then logout & login again"() {

@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
-import com.dreamscale.gridtime.core.hooks.talk.TalkConnection
-import com.dreamscale.gridtime.core.hooks.talk.TalkConnectionFactory
+import com.dreamscale.gridtime.core.hooks.talk.TalkClientConnection
+import com.dreamscale.gridtime.core.hooks.talk.TalkClientConnectionFactory
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 public class TalkIntegrationSpec extends Specification {
 
 	@Autowired
-	TalkConnectionFactory talkConnectionFactory
+	TalkClientConnectionFactory talkConnectionFactory
 
 	//try to talk to talk!
 
@@ -35,14 +35,14 @@ public class TalkIntegrationSpec extends Specification {
 		Long nanoTime = System.nanoTime();
 
 		when:
-		TalkConnection connection = talkConnectionFactory.connect()
+		TalkClientConnection connection = talkConnectionFactory.connect()
 
 		//SimpleStatusDto status1 = connection.joinRoom(talkRoomId)
 
-		TalkMessageDto talkMessageDto = new TalkMessageDto(messageId, roomId.toString(), "/request/trace", now, nanoTime, null,
+		TalkMessageDto talkMessageDto = new TalkMessageDto(messageId, "/talk/to/room/"+talkRoomName, roomId.toString(), "/request/trace", now, nanoTime, null,
 				CircuitMessageType.CHAT.getSimpleClassName(), JSONTransformer.toJson(new ChatMessageDetailsDto("hello")))
 
-		SimpleStatusDto status2 = connection.sendRoomMessage(roomId, talkMessageDto)
+		SimpleStatusDto status2 = connection.sendRoomMessage(roomId, talkMessageDto, "joe", talkRoomName)
 
 		//SimpleStatusDto status3 = connection.leaveRoom(talkRoomId)
 

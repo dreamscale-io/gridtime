@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.core.capability.directory.OrganizationMembershipC
 import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.capability.operator.GridTalkRouter;
-import com.dreamscale.gridtime.core.capability.operator.LearningCircuitOperator;
+import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.circuit.*;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,7 +42,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private ActiveAccountStatusRepository accountStatusRepository;
 
     @Autowired
-    private LearningCircuitOperator learningCircuitOperator;
+    private WTFCircuitOperator WTFCircuitOperator;
 
     @Autowired
     private ActiveWorkStatusManager activeWorkStatusManager;
@@ -302,7 +301,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return statusDto;
     }
 
-    public SimpleStatusDto connect(UUID connectionId) {
+    public ActiveTalkConnectionDto connect(UUID connectionId) {
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -311,38 +310,43 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         validateConnectionExists(connectionId, accountStatusEntity);
 
-        //TODO needs to be updated for default org, or whatever org we're logging in with...
-
         OrganizationMemberEntity membership = organizationMembership.getDefaultMembership(accountStatusEntity.getRootAccountId());
 
         MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(connectionId);
-
-        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
-
-        talkRouter.joinAllRooms(memberConnection, talkRooms);
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Online);
         accountStatusRepository.save(accountStatusEntity);
 
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
 
-        SimpleStatusDto statusDto = new SimpleStatusDto();
-        statusDto.setStatus(Status.VALID);
-        statusDto.setMessage("Account connected.");
-
-        return statusDto;
+        return getActiveTalkConnection(connectionId, memberConnection.getUsername());
     }
 
-    private List<UUID> getRoomIdsToJoin(List<TalkRoomMemberEntity> roomMemberships) {
+    private ActiveTalkConnectionDto getActiveTalkConnection(UUID newConnectionId, String userName) {
 
-        List<UUID> roomIds = new ArrayList<>();
+        ActiveTalkConnectionDto activeTalkConnection = new ActiveTalkConnectionDto();
+        activeTalkConnection.setUserName(userName);
+        activeTalkConnection.setConnectionId(newConnectionId);
+        activeTalkConnection.setStatus(Status.VALID);
+        activeTalkConnection.setMessage("Account connected.");
 
-        for (TalkRoomMemberEntity roomMembership : roomMemberships) {
-            roomIds.add(roomMembership.getRoomId());
+        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(newConnectionId);
+
+        if (memberConnection != null) {
+
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
+
+            List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
+
+            for (TalkRoomEntity room : talkRooms) {
+
+                activeTalkConnection.addRoom(room.getId(), room.getRoomName());
+            }
         }
-
-        return roomIds;
+        return activeTalkConnection;
     }
+
 
     private void validateConnectionExists(UUID connectionId, ActiveAccountStatusEntity accountStatusEntity) {
         if (accountStatusEntity == null) {
@@ -368,7 +372,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         accountStatusRepository.save(accountStatusEntity);
 
         if (oldConnectionId != null) {
-            learningCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
+            WTFCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
         }
 
         List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());

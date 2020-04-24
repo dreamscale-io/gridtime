@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.capability.operator;
 
-import com.dreamscale.gridtime.api.account.RoomConnectionScopeDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
@@ -39,8 +38,9 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class LearningCircuitOperator {
+public class WTFCircuitOperator {
 
+    public static final String ROOM_URN_PREFIX = "/talk/to/room/";
     public static final String RETRO_ROOM_SUFFIX = "-retro";
     public static final String WTF_ROOM_SUFFIX = "-wtf";
     public static final String STATUS_ROOM_SUFFIX = "-status";
@@ -120,7 +120,7 @@ public class LearningCircuitOperator {
     public LearningCircuitDto startWTF(UUID organizationId, UUID memberId) {
         String circuitName = sillyNameGenerator.random();
 
-        log.info("Creating new circuit : " + circuitName);
+        log.info("[WTFCircuitOperator] Creating new circuit : " + circuitName);
         return startWTFWithCustomName(organizationId, memberId, circuitName);
     }
 
@@ -165,7 +165,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Creating WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Creating WTF circuit {} at {}", circuitName, nanoTime);
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
@@ -197,7 +197,7 @@ public class LearningCircuitOperator {
 
         //then I need to join this new person in the room...
 
-        log.debug("Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
+        log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
 
         LearningCircuitMemberEntity circuitMemberEntity = new LearningCircuitMemberEntity();
 
@@ -241,7 +241,9 @@ public class LearningCircuitOperator {
 
     private void sendStatusMessageToCircuit(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
 
-        sendCircuitStatusMessage(circuit.getId(), circuit.getCircuitName(), circuit.getOwnerId(), now, nanoTime,
+        String urn = ROOM_URN_PREFIX + deriveStatusRoomName(circuit);
+
+        sendCircuitStatusMessage(urn, circuit.getId(), circuit.getCircuitName(), circuit.getOwnerId(), now, nanoTime,
                 circuit.getStatusRoomId(), messageType);
     }
 
@@ -263,7 +265,7 @@ public class LearningCircuitOperator {
         LearningCircuitDto circuitDto = null;
         if (activeCircuits != null && activeCircuits.size() > 0) {
             if (activeCircuits.size() > 1) {
-                log.warn("Member {} has multiple active circuits, should only be one", memberId);
+                log.warn("[WTFCircuitOperator] Member {} has multiple active circuits, should only be one", memberId);
             }
 
             LearningCircuitEntity activeCircuit = activeCircuits.get(0);
@@ -277,7 +279,7 @@ public class LearningCircuitOperator {
 
     public LearningCircuitWithMembersDto getCircuitWithAllDetails(UUID organizationId, String circuitName) {
 
-        log.info("inside getCircuitWithAllDetails");
+        log.info("[WTFCircuitOperator] getCircuitWithAllDetails");
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
 
@@ -366,7 +368,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
 
@@ -486,7 +488,7 @@ public class LearningCircuitOperator {
     }
 
     private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
-        log.debug("validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
+        log.debug("[WTFCircuitOperator] validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
         LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
@@ -515,7 +517,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Solving WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Solving WTF circuit {} at {}", circuitName, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_SOLVED);
 
@@ -555,7 +557,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Cancel WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
@@ -601,7 +603,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Pause WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Pause WTF circuit {} at {}", circuitName, nanoTime);
 
         //every time I put it on hold, I calculate the seconds before on hold
         long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -652,7 +654,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Resume WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Resume WTF circuit {} at {}", circuitName, nanoTime);
 
         //every time I resume a circuit, calculate how long I've been paused
         long nanoElapsedTime = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -720,7 +722,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Reopen WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Reopen WTF circuit {} at {}", circuitName, nanoTime);
 
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
@@ -799,7 +801,7 @@ public class LearningCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("Member {} joining room {} at {}", memberId, roomName, nanoTime);
+        log.debug("[WTFCircuitOperator] Member {} joining room {} at {}", memberId, roomName, nanoTime);
 
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 
@@ -814,7 +816,7 @@ public class LearningCircuitOperator {
             talkRoomMemberRepository.save(roomMemberEntity);
 
         } else {
-            log.warn("Member {} already joined {}", memberId, roomName);
+            log.warn("[WTFCircuitOperator] Member {} already joined {}", memberId, roomName);
         }
 
         talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
@@ -829,7 +831,7 @@ public class LearningCircuitOperator {
 
         if (circuitMember == null) {
 
-            log.debug("Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
+            log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
 
             circuitMember = new LearningCircuitMemberEntity();
             circuitMember.setId(UUID.randomUUID());
@@ -852,7 +854,9 @@ public class LearningCircuitOperator {
             talkRouter.joinRoom(organizationId, memberId, circuitEntity.getStatusRoomId());
         }
 
-        return sendRoomStatusMessage(circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
+        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
+
+        return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
     }
 
     @Transactional
@@ -869,12 +873,12 @@ public class LearningCircuitOperator {
 
 
         if (circuitEntity.getOwnerId() == memberId) {
-            log.warn("Unable to leave the room as the owner. No op.");
+            log.warn("[WTFCircuitOperator] Unable to leave the room as the owner. No op.");
 
             return null;
         }
 
-        log.debug("Member {} leaving room {} at {}", memberId, roomName, nanoTime);
+        log.debug("[WTFCircuitOperator] Member {} leaving room {} at {}", memberId, roomName, nanoTime);
 
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 
@@ -896,7 +900,9 @@ public class LearningCircuitOperator {
         }
 
 
-        return sendRoomStatusMessage(circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
+        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
+
+        return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
     }
 
     private long calculateActiveNanoElapsedTime(LearningCircuitEntity circuitEntity, Long nanoPauseTime) {
@@ -937,6 +943,8 @@ public class LearningCircuitOperator {
 
     public TalkMessageDto publishChatToTalkRoom(UUID organizationId, UUID fromMemberId, String talkRoomName, String chatMessage) {
 
+        //TODO this doesn't allow talking on TeamCircuitRooms... doesn't belong in this class
+
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
 
         validateCircuitExists(talkRoomName, learningCircuitEntity);
@@ -950,7 +958,9 @@ public class LearningCircuitOperator {
 
         UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomName);
 
-        return sendRoomMessage(messageId, now, nanoTime, fromMemberId, roomId, chatMessage);
+        String urn = ROOM_URN_PREFIX + talkRoomName;
+
+        return sendRoomMessage(urn, messageId, now, nanoTime, fromMemberId, roomId, chatMessage);
     }
 
     private UUID getRoomIdBasedOnTalkRoomId(LearningCircuitEntity learningCircuitEntity, String talkRoomId) {
@@ -962,12 +972,13 @@ public class LearningCircuitOperator {
     }
 
 
-    private TalkMessageDto toTalkMessageDto(TalkRoomMessageEntity messageEntity) {
+    private TalkMessageDto toTalkMessageDto(String urn, TalkRoomMessageEntity messageEntity) {
 
         TalkMessageDto messageDto = new TalkMessageDto();
         messageDto.setId(messageEntity.getId());
-        messageDto.setUrn(messageEntity.getToRoomId().toString());
-        messageDto.setUri(getRequestUriFromContext());
+        messageDto.setUrn(urn);
+        messageDto.setUri(messageEntity.getToRoomId().toString());
+        messageDto.setRequest(getRequestUriFromContext());
         messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
@@ -992,7 +1003,7 @@ public class LearningCircuitOperator {
         //activeStatusService.touchActivity(memberId);
     }
 
-    private TalkMessageDto sendCircuitStatusMessage(UUID circuitId, String circuitName, UUID circuitOwnerId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
+    private TalkMessageDto sendCircuitStatusMessage(String urn, UUID circuitId, String circuitName, UUID circuitOwnerId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
 
         CircuitStatusDto statusDto = new CircuitStatusDto(circuitId, circuitName, messageType.name(), messageType.getStatusMessage());
 
@@ -1005,7 +1016,7 @@ public class LearningCircuitOperator {
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
@@ -1014,7 +1025,7 @@ public class LearningCircuitOperator {
         return talkMessageDto;
     }
 
-    private TalkMessageDto sendRoomStatusMessage(UUID circuitOwnerId, UUID memberId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
+    private TalkMessageDto sendRoomStatusMessage(String urn, UUID circuitOwnerId, UUID memberId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
 
         RoomMemberStatusEventDto statusDto = new RoomMemberStatusEventDto(memberId, messageType.name(), messageType.getStatusMessage());
 
@@ -1026,8 +1037,7 @@ public class LearningCircuitOperator {
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
-
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity );
 
         talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
@@ -1037,7 +1047,7 @@ public class LearningCircuitOperator {
     }
 
 
-    private TalkMessageDto sendRoomMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String chatMessage) {
+    private TalkMessageDto sendRoomMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String chatMessage) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(messageId);
@@ -1048,7 +1058,7 @@ public class LearningCircuitOperator {
         messageEntity.setMessageType(CircuitMessageType.CHAT);
         messageEntity.setJsonBody(JSONTransformer.toJson(new ChatMessageDetailsDto(chatMessage)));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
@@ -1059,7 +1069,7 @@ public class LearningCircuitOperator {
         return talkMessageDto;
     }
 
-    private TalkMessageDto sendSnippetMessage(UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, NewSnippetEventDto snippet) {
+    private TalkMessageDto sendSnippetMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, NewSnippetEventDto snippet) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(messageId);
@@ -1070,7 +1080,7 @@ public class LearningCircuitOperator {
         messageEntity.setMessageType(CircuitMessageType.SNIPPET);
         messageEntity.setJsonBody(JSONTransformer.toJson(createSnippetMessage(snippet)));
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(messageEntity);
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
@@ -1108,6 +1118,7 @@ public class LearningCircuitOperator {
 
     public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
 
+        //TODO this won't work for team circuit messages, will need to adapt here to support both
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
 
         validateCircuitExists(talkRoomName, learningCircuitEntity);
@@ -1117,14 +1128,14 @@ public class LearningCircuitOperator {
 
         List<TalkMessageDto> talkMessageDtos = new ArrayList<>();
 
-
         String requestUri = getRequestUriFromContext();
 
         for (TalkRoomMessageEntity message : talkMessages) {
             TalkMessageDto dto = new TalkMessageDto();
             dto.setId(message.getId());
-            dto.setUrn(message.getToRoomId().toString());
-            dto.setUri(requestUri);
+            dto.setUrn(ROOM_URN_PREFIX + talkRoomName);
+            dto.setUri(message.getToRoomId().toString());
+            dto.setRequest(requestUri);
             dto.setMessageTime(message.getPosition());
             dto.setNanoTime(message.getNanoTime());
             dto.setMessageType(message.getMessageType().getSimpleClassName());
@@ -1171,36 +1182,15 @@ public class LearningCircuitOperator {
 
             for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
 
+                String urn = circuitRoom.getRoomName();
+
                 talkRouter.leaveRoom(circuitRoom.getOrganizationId(), memberConnection.getMemberId(), circuitRoom.getRoomId());
-                sendRoomStatusMessage(circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_OFFLINE);
+                sendRoomStatusMessage(urn, circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_OFFLINE);
             }
 
 
         }
     }
-
-    public RoomConnectionScopeDto notifyRoomsOfMemberReconnect(UUID newConnectionId) {
-
-        RoomConnectionScopeDto talkConnectionScope = new RoomConnectionScopeDto();
-        talkConnectionScope.setConnectionId(newConnectionId);
-
-        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(newConnectionId);
-
-        if (memberConnection != null) {
-
-            LocalDateTime now = gridClock.now();
-            Long nanoTime = gridClock.nanoTime();
-
-            List<LearningCircuitRoomEntity> circuitRooms = learningCircuitRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
-
-            for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
-
-                talkConnectionScope.addRoomId(circuitRoom.getRoomId());
-            }
-        }
-        return talkConnectionScope;
-    }
-
 
     public LearningCircuitDto saveDescriptionForLearningCircuit(UUID organizationId, UUID ownerId, String circuitName, DescriptionInputDto descriptionInputDto) {
 
@@ -1240,7 +1230,9 @@ public class LearningCircuitOperator {
             Long nanoTime = gridClock.nanoTime();
             UUID messageId = UUID.randomUUID();
 
-            messageDto = sendSnippetMessage(messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), newSnippetEventDto);
+            String urn = ROOM_URN_PREFIX + learningCircuitDto.getCircuitName() + WTF_ROOM_SUFFIX;
+
+            messageDto = sendSnippetMessage(urn, messageId, now, nanoTime, memberId, learningCircuitDto.getWtfTalkRoomId(), newSnippetEventDto);
         }
 
         return messageDto;
