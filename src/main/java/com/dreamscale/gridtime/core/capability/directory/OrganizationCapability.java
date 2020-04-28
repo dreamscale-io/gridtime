@@ -143,6 +143,8 @@ public class OrganizationCapability {
 
     }
 
+
+
     public List<OrganizationSubscriptionDto> getOrganizationSubscriptions(UUID rootAccountId) {
 
         List<OrganizationSubscriptionDetailsEntity> subscriptions = organizationSubscriptionDetailsRepository.findByRootAccountOwnerIdOrderByCreationDate(rootAccountId);
@@ -405,38 +407,11 @@ public class OrganizationCapability {
 
     public List<OrganizationDto> getParticipatingOrganizations(UUID rootAccountId) {
 
-        //TODO refactor this to query for organizations directly via membership, below is lazy
+        List<OrganizationEntity> orgs = organizationRepository.findByParticipatingMembership(rootAccountId);
 
-        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByRootAccountId(rootAccountId);
-
-        List<OrganizationDto> participatingOrgs = new ArrayList<>();
-
-        for (OrganizationMemberEntity membership : orgMemberships) {
-            OrganizationEntity organizationEntity = organizationRepository.findById(membership.getOrganizationId());
-            participatingOrgs.add(orgOutputMapper.toApi(organizationEntity));
-        }
-
-        return participatingOrgs;
+        return orgOutputMapper.toApiList(orgs);
     }
 
-//    public OrganizationDto getDefaultOrganizationWithInvitation(UUID rootAccountId) {
-//        List<OrganizationMemberEntity> orgMemberships = memberRepository.findByRootAccountId(rootAccountId);
-//
-//        if (orgMemberships == null || orgMemberships.size() == 0) {
-//            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "organization membership not found");
-//        }
-//
-//        OrganizationEntity organizationEntity = organizationRepository.findById(orgMemberships.get(0).getOrganizationId());
-//
-//        OrganizationInviteTokenEntity inviteToken = inviteTokenRepository.findByOrganizationId(organizationEntity.getId());
-//
-//        OrganizationDto outputOrg = orgOutputMapper.toApi(organizationEntity);
-//        outputOrg.setConnectionStatus(Status.VALID);
-//        outputOrg.setInviteLink(constructInvitationLink(inviteToken.getToken()));
-//        outputOrg.setInviteToken(inviteToken.getToken());
-//
-//        return outputOrg;
-//    }
 
     public void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
         if (memberId == null) {
@@ -493,9 +468,6 @@ public class OrganizationCapability {
         return null;
     }
 
-    public OrganizationDto getMyActiveOrganization(UUID rootAccountId) {
-        return null;
-    }
 
 
     public List<MemberRegistrationDto> getOrganizationMembers(UUID rootAccountId, UUID organizationId) {

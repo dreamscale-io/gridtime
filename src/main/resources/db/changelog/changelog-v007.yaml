@@ -17,3 +17,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_active_account_status_add_organization.sql
+
+  - include:
+        file: db/v007/fix_member_connection_view_for_active_org.sql

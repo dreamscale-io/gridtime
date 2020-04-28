@@ -203,6 +203,47 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
+    def "should allow user to join and login to multiple private organizations"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io")
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        SubscriptionInputDto onpremSubscriptionInput = createSubscriptionInput("onprem.com")
+        OrganizationSubscriptionDto onpremSubscription = subscriptionClient.createSubscription(onpremSubscriptionInput)
+
+        SimpleStatusDto artyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
+        SimpleStatusDto artyJoinedOP = joinOrganizationWithValidate(onpremSubscription.getInviteToken(), "arty@onprem.com")
+
+        when:
+
+        ConnectionStatusDto loginToDSStatus = accountClient.loginToOrganization(dreamScaleSubscription.getOrganizationId())
+
+        OrganizationDto dsIsActive = organizationClient.getMyActiveOrganization();
+
+        accountClient.logout()
+
+        ConnectionStatusDto loginToOPStatus = accountClient.loginToOrganization(onpremSubscription.getOrganizationId())
+
+        OrganizationDto opIsActive = organizationClient.getMyActiveOrganization();
+
+        then:
+
+        assert loginToDSStatus != null
+        assert loginToDSStatus.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSStatus.getParticipatingOrganizations().size() == 3
+        assert dsIsActive.getId() == dreamScaleSubscription.getOrganizationId()
+
+        assert loginToOPStatus != null
+        assert loginToOPStatus.getOrganizationId() == onpremSubscription.getOrganizationId()
+        assert loginToOPStatus.getParticipatingOrganizations().size() == 3
+        assert opIsActive.getId() == onpremSubscription.getOrganizationId()
+    }
+
     private AccountActivationDto register(String email) {
 
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();

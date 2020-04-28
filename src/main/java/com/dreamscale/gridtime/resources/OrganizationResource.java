@@ -34,7 +34,7 @@ public class OrganizationResource {
         RequestContext context = RequestContext.get();
         log.info("getMyActiveOrganization, user={}", context.getRootAccountId());
 
-        return organizationCapability.getMyActiveOrganization(context.getRootAccountId());
+        return organizationCapability.getActiveOrganization(context.getRootAccountId());
     }
 
     /**
