@@ -3,8 +3,12 @@ package com.dreamscale.gridtime.core.capability.operator;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
+import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
 import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.domain.circuit.RoomType;
 import com.dreamscale.gridtime.core.domain.circuit.*;
@@ -95,6 +99,9 @@ public class WTFCircuitOperator {
     @Autowired
     private MemberDetailsService memberDetailsService;
 
+    @Autowired
+    private MemberStatusRepository memberStatusRepository;
+
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
@@ -150,6 +157,8 @@ public class WTFCircuitOperator {
 
     @Transactional
     public LearningCircuitDto startWTFWithCustomName(UUID organizationId, UUID memberId, String circuitName) {
+
+        validateNoActiveCircuit(organizationId, memberId);
 
         LearningCircuitEntity learningCircuitEntity = new LearningCircuitEntity();
         learningCircuitEntity.setId(UUID.randomUUID());
@@ -224,6 +233,14 @@ public class WTFCircuitOperator {
 
         return circuitDto;
 
+    }
+
+    private void validateNoActiveCircuit(UUID organizationId, UUID memberId) {
+        MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+        if (memberStatusEntity != null && memberStatusEntity.getActiveCircuitId() != null) {
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active circuit.");
+        }
     }
 
     private void addMemberToRoom(UUID memberId, LocalDateTime now, LearningCircuitEntity learningCircuitEntity, TalkRoomEntity roomEntity) {

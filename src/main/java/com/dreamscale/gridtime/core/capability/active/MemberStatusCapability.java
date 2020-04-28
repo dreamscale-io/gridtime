@@ -26,7 +26,7 @@ public class MemberStatusCapability {
     private SpiritNetworkOperator xpService;
 
     @Autowired
-    private WTFCircuitOperator WTFCircuitOperator;
+    private WTFCircuitOperator wtfCircuitOperator;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -111,7 +111,7 @@ public class MemberStatusCapability {
         memberStatusDto.setDisplayName(createDisplayName(memberStatusEntity.getFullName()));
 
         if (memberStatusEntity.getActiveCircuitId() != null) {
-            LearningCircuitDto circuitDto = WTFCircuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
+            LearningCircuitDto circuitDto = wtfCircuitOperator.getCircuit(memberStatusEntity.getOrganizationId(),
                     memberStatusEntity.getActiveCircuitId());
 
             memberStatusDto.setActiveCircuit(circuitDto);
