@@ -8,24 +8,19 @@ import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.organization.JoinRequestInputDto
-import com.dreamscale.gridtime.api.organization.MemberRegistrationDto
+import com.dreamscale.gridtime.api.organization.MemberDetailsDto
 import com.dreamscale.gridtime.api.organization.MembershipInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
-import com.dreamscale.gridtime.api.organization.TeamWithMembersDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
-import com.dreamscale.gridtime.api.team.TeamDto
-import com.dreamscale.gridtime.api.team.TeamMemberDto
-import com.dreamscale.gridtime.api.team.TeamMembersToAddInputDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.SubscriptionClient
 import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
@@ -36,7 +31,6 @@ import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -243,6 +237,70 @@ class OrganizationResourceSpec extends Specification {
         assert loginToOPStatus.getParticipatingOrganizations().size() == 3
         assert opIsActive.getId() == onpremSubscription.getOrganizationId()
     }
+
+    def "should join an organization created by someone else"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io")
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        SimpleStatusDto artyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
+
+        switchUser(zoeProfile)
+
+        SimpleStatusDto zoeJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "zoe@dreamscale.io")
+
+        when:
+
+        ConnectionStatusDto loginToDSFromZoe = accountClient.login()
+
+        OrganizationDto dsIsActiveForZoe = organizationClient.getMyActiveOrganization();
+
+        accountClient.logout()
+
+        switchUser(artyProfile)
+
+        ConnectionStatusDto loginToDSFromArty =  accountClient.login()
+
+        OrganizationDto dsIsActiveForArty = organizationClient.getMyActiveOrganization();
+
+
+        List<MemberDetailsDto> memberships = organizationClient.getOrganizationMembers();
+
+        then:
+
+        assert artyJoinedDS.status == Status.JOINED
+        assert zoeJoinedDS.status == Status.JOINED
+
+        assert loginToDSFromZoe != null
+        assert loginToDSFromZoe.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSFromZoe.getParticipatingOrganizations().size() == 2
+
+        assert loginToDSFromArty != null
+        assert loginToDSFromArty.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSFromArty.getParticipatingOrganizations().size() == 2
+
+        assert dsIsActiveForZoe.getId() == dreamScaleSubscription.getOrganizationId()
+        assert dsIsActiveForArty.getId() == dreamScaleSubscription.getOrganizationId()
+
+        assert memberships.size() == 2
+    }
+
+
+    //TODO join an organization created by another person, and then retrieve the orgs members.
+
+    //TODO retrieve organization members
+
+    //TODO configure, and retrieve, jira integration info
+
+    // TODO remove a member (needs to recover seat, and remap to a ghost root account)
+
+
 
     private AccountActivationDto register(String email) {
 

@@ -11,8 +11,12 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberRegistrationDto {
+public class MemberDetailsDto {
+
     private UUID memberId;
-    private String orgEmail;
+
+    private String email;
+    private String username;
+    private String displayName;
     private String fullName;
 }

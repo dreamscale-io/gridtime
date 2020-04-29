@@ -60,7 +60,7 @@ public class OrganizationResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping( ResourcePaths.MEMBER_PATH )
-    public List<MemberRegistrationDto> getMembersOfActiveOrganization() {
+    public List<MemberDetailsDto> getMembersOfActiveOrganization() {
 
         RequestContext context = RequestContext.get();
 
@@ -76,7 +76,7 @@ public class OrganizationResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping( ResourcePaths.MEMBER_PATH + "/{memberId}" )
-    public MemberRegistrationDto getMemberOfActiveOrganization(@PathVariable("memberId") String memberIdStr) {
+    public MemberDetailsDto getMemberOfActiveOrganization(@PathVariable("memberId") String memberIdStr) {
 
         RequestContext context = RequestContext.get();
 

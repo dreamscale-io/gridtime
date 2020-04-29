@@ -20,3 +20,9 @@ databaseChangeLog:
 
   - include:
         file: db/v007/fix_member_connection_view_for_active_org.sql
+
+  - include:
+        file: db/v007/create_subscription_seat.sql
+
+  - include:
+        file: db/v007/replace_member_details_view_add_email.sql

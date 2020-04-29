@@ -15,11 +15,12 @@ public class MemberDetailsEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID organizationId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
+
+    private String email;
     private String username;
     private String displayName;
     private String fullName;

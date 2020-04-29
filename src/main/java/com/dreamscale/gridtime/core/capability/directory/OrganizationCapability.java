@@ -13,6 +13,7 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,7 +64,13 @@ public class OrganizationCapability {
     private EmailCapability emailCapability;
 
     @Autowired
+    private MemberDetailsService memberDetailsService;
+
+    @Autowired
     private OneTimeTicketCapability oneTimeTicketCapability;
+
+    @Autowired
+    private OrganizationSubscriptionSeatRepository organizationSubscriptionSeatRepository;
 
     @Autowired
     private GridClock gridClock;
@@ -144,7 +150,6 @@ public class OrganizationCapability {
     }
 
 
-
     public List<OrganizationSubscriptionDto> getOrganizationSubscriptions(UUID rootAccountId) {
 
         List<OrganizationSubscriptionDetailsEntity> subscriptions = organizationSubscriptionDetailsRepository.findByRootAccountOwnerIdOrderByCreationDate(rootAccountId);
@@ -174,7 +179,7 @@ public class OrganizationCapability {
 
         SimpleStatusDto statusDto = new SimpleStatusDto();
         if (rootAccount.getRootEmail().equals(standardizedEmail)) {
-            createOrgMembership(subscription, rootAccountId, standardizedEmail);
+            createOrgMembership(now, subscription.getOrganizationId(), rootAccountId, standardizedEmail);
 
             statusDto.setStatus(Status.JOINED);
             statusDto.setMessage("Member added to organization.");
@@ -211,9 +216,7 @@ public class OrganizationCapability {
             String orgEmail = oneTimeTicket.getEmailProp();
             UUID organizationId = oneTimeTicket.getOrganizationIdProp();
 
-            OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organizationId);
-
-            createOrgMembership(subscription, rootAccountId, orgEmail);
+            createOrgMembership(now, organizationId, rootAccountId, orgEmail);
 
             simpleStatusDto.setStatus(Status.JOINED);
             simpleStatusDto.setMessage("Member added to organization.");
@@ -247,16 +250,10 @@ public class OrganizationCapability {
         return false;
     }
 
+    private OrganizationMemberEntity createOrgMembership(LocalDateTime now, UUID organizationId, UUID rootAccountId, String email) {
 
+        OrganizationSubscriptionEntity subscription = reserveSeatForUpdate(organizationId);
 
-
-
-
-
-
-    private OrganizationMemberEntity createOrgMembership(OrganizationSubscriptionEntity subscription, UUID rootAccountId, String email) {
-
-        UUID organizationId = subscription.getOrganizationId();
         validateAvailableSeat(subscription);
 
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
@@ -265,6 +262,17 @@ public class OrganizationCapability {
 
             subscription.setSeatsRemaining( subscription.getSeatsRemaining() - 1);
             organizationSubscriptionRepository.save(subscription);
+
+            OrganizationSubscriptionSeatEntity subscriptionSeat = new OrganizationSubscriptionSeatEntity();
+            subscriptionSeat.setId(UUID.randomUUID());
+            subscriptionSeat.setOrganizationId(organizationId);
+            subscriptionSeat.setRootAccountId(rootAccountId);
+            subscriptionSeat.setOrgEmail(email);
+            subscriptionSeat.setSubscriptionId(subscription.getId());
+            subscriptionSeat.setActivationDate(now);
+            subscriptionSeat.setSubscriptionStatus(SubscriptionStatus.VALID);
+
+            organizationSubscriptionSeatRepository.save(subscriptionSeat);
 
             membership = new OrganizationMemberEntity();
             membership.setId(UUID.randomUUID());
@@ -275,9 +283,17 @@ public class OrganizationCapability {
             organizationMemberRepository.save(membership);
 
             teamMembershipCapability.addMemberToEveryone(organizationId, membership.getId());
+        } else {
+            throw new ConflictException(ConflictErrorCodes.ACCOUNT_ALREADY_ADDED, "Account already added to this organization as a member.");
         }
 
         return membership;
+
+    }
+
+    private OrganizationSubscriptionEntity reserveSeatForUpdate(UUID organizationId) {
+
+        return organizationSubscriptionRepository.selectOrgSubscriptionForUpdate(organizationId);
 
     }
 
@@ -412,6 +428,38 @@ public class OrganizationCapability {
         return orgOutputMapper.toApiList(orgs);
     }
 
+    public List<MemberDetailsDto> getMembersOfActiveOrganization(UUID rootAccountId) {
+        OrganizationDto activeOrganization = getActiveOrganization(rootAccountId);
+
+        UUID organizationId = activeOrganization.getId();
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organizationId);
+
+        validateSubscriptionFound(subscription);
+
+        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+        //then, and only then...
+
+        return memberDetailsService.getOrganizationMembers(organizationId);
+    }
+
+    private void validateSubscriptionFound(OrganizationSubscriptionEntity subscription) {
+        if (subscription == null) {
+            throw new BadRequestException(ValidationErrorCodes.NO_SUBSCRIPTION_FOUND, "No subscription found for organization");
+        }
+    }
+
+    private void validateSubscriptionOwnedByRootAccount(OrganizationSubscriptionEntity subscription, UUID rootAccountOwnerId) {
+        if (!subscription.getRootAccountOwnerId().equals(rootAccountOwnerId)) {
+            throw new BadRequestException(ValidationErrorCodes.MUST_BE_ORGANIZATION_OWNER, "Must be organization subscription owner.");
+        }
+    }
+
+    public MemberDetailsDto getMemberOfActiveOrganization(UUID rootAccountId, UUID memberId) {
+        return null;
+    }
+
+
 
     public void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
         if (memberId == null) {
@@ -470,7 +518,7 @@ public class OrganizationCapability {
 
 
 
-    public List<MemberRegistrationDto> getOrganizationMembers(UUID rootAccountId, UUID organizationId) {
+    public List<MemberDetailsDto> getOrganizationMembers(UUID rootAccountId, UUID organizationId) {
         return null;
     }
 
@@ -487,13 +535,6 @@ public class OrganizationCapability {
         return null;
     }
 
-    public List<MemberRegistrationDto> getMembersOfActiveOrganization(UUID rootAccountId) {
-        return null;
-    }
-
-    public MemberRegistrationDto getMemberOfActiveOrganization(UUID rootAccountId, UUID memberId) {
-        return null;
-    }
 
     public JiraConfigDto getJiraConfiguration(UUID rootAccountId) {
         return null;

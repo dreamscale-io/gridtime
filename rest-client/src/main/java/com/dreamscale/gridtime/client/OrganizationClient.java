@@ -26,10 +26,10 @@ public interface OrganizationClient {
     //Get members of your organization
 
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH)
-    List<MemberRegistrationDto> getOrganizationMembers();
+    List<MemberDetailsDto> getOrganizationMembers();
 
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}")
-    MemberRegistrationDto getOrganizationMember(@Param("memberId") String memberId);
+    MemberDetailsDto getOrganizationMember(@Param("memberId") String memberId);
 
     //Must be organization *owner *to use these APIs
 

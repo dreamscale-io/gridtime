@@ -1,13 +1,18 @@
 package com.dreamscale.gridtime.core.service;
 
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsRepository;
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository;
+import com.dreamscale.gridtime.api.organization.MemberDetailsDto;
+import com.dreamscale.gridtime.api.organization.OrganizationDto;
+import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto;
+import com.dreamscale.gridtime.api.organization.SubscriptionInputDto;
+import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
+import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -19,6 +24,16 @@ public class MemberDetailsService {
 
     @Autowired
     OrganizationMemberRepository organizationMemberRepository;
+
+    private DtoEntityMapper<MemberDetailsDto, MemberDetailsEntity> memberDetailsMapper;
+
+    @Autowired
+    private MapperFactory mapperFactory;
+
+    @PostConstruct
+    private void init() {
+        memberDetailsMapper = mapperFactory.createDtoEntityMapper(MemberDetailsDto.class, MemberDetailsEntity.class);
+    }
 
     public String lookupMemberName(UUID organizationId, UUID memberId) {
         String name = null;
@@ -43,6 +58,7 @@ public class MemberDetailsService {
         return username;
     }
 
+
     public MemberDetailsEntity lookupMemberDetails(UUID memberId) {
         return memberDetailsRepository.findByMemberId(memberId);
     }
@@ -52,4 +68,9 @@ public class MemberDetailsService {
     }
 
 
+    public List<MemberDetailsDto> getOrganizationMembers(UUID organizationId) {
+        List<MemberDetailsEntity> memberDetailsList = memberDetailsRepository.findByOrganizationId(organizationId);
+
+        return memberDetailsMapper.toApiList(memberDetailsList);
+    }
 }

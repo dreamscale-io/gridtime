@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public interface OrganizationMemberRepository extends CrudRepository<OrganizationMemberEntity, UUID> {
 
+    List<OrganizationMemberEntity> findByOrganizationId(UUID organizationId);
+
     OrganizationMemberEntity findByOrganizationIdAndId(UUID organizationId, UUID id);
 
     OrganizationMemberEntity findById(UUID id);

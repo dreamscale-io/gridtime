@@ -16,6 +16,8 @@ public interface MemberDetailsRepository extends CrudRepository<MemberDetailsEnt
             "and rm.room_id = (:roomId))")
     List<MemberDetailsEntity> findAllByRoomId(@Param("roomId") UUID roomId);
 
+    List<MemberDetailsEntity> findByOrganizationId(UUID organizationId);
+
     MemberDetailsEntity findByOrganizationIdAndMemberId(UUID organizationId, UUID memberId);
 
     MemberDetailsEntity findByMemberId(UUID memberId);
