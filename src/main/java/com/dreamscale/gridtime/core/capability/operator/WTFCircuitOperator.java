@@ -184,18 +184,9 @@ public class WTFCircuitOperator {
 
         talkRoomRepository.save(wtfRoomEntity);
 
-        TalkRoomEntity statusRoomEntity = new TalkRoomEntity();
-        statusRoomEntity.setId(UUID.randomUUID());
-        statusRoomEntity.setOrganizationId(organizationId);
-        statusRoomEntity.setRoomType(RoomType.STATUS_ROOM);
-        statusRoomEntity.setRoomName(deriveStatusRoomName(learningCircuitEntity));
-
-        talkRoomRepository.save(statusRoomEntity);
-
         //update circuit with the new room
 
         learningCircuitEntity.setWtfRoomId(wtfRoomEntity.getId());
-        learningCircuitEntity.setStatusRoomId(statusRoomEntity.getId());
         learningCircuitEntity.setOpenTime(now);
         learningCircuitEntity.setWtfOpenNanoTime(nanoTime);
         learningCircuitEntity.setCircuitState(LearningCircuitState.TROUBLESHOOT);
@@ -219,7 +210,6 @@ public class WTFCircuitOperator {
         learningCircuitMemberRepository.save(circuitMemberEntity);
 
         addMemberToRoom(memberId, now, learningCircuitEntity, wtfRoomEntity);
-        addMemberToRoom(memberId, now, learningCircuitEntity, statusRoomEntity);
 
         //then update active status
 
@@ -258,10 +248,21 @@ public class WTFCircuitOperator {
 
     private void sendStatusMessageToCircuit(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
 
-        String urn = ROOM_URN_PREFIX + deriveStatusRoomName(circuit);
+        UUID roomId = null;
+        String urn = null;
 
-        sendCircuitStatusMessage(urn, circuit.getId(), circuit.getCircuitName(), circuit.getOwnerId(), now, nanoTime,
-                circuit.getStatusRoomId(), messageType);
+        if (circuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
+            roomId = circuit.getWtfRoomId();
+            urn = ROOM_URN_PREFIX + deriveWTFRoomName(circuit);
+        } else if (circuit.getCircuitState() == LearningCircuitState.RETRO) {
+            roomId = circuit.getRetroRoomId();
+            urn = ROOM_URN_PREFIX + deriveRetroTalkRoomName(circuit);
+        }
+
+        if (roomId != null) {
+            sendCircuitStatusMessage(urn, circuit.getId(), circuit.getCircuitName(), circuit.getOwnerId(), now, nanoTime,
+                    roomId, messageType);
+        }
     }
 
 
@@ -338,9 +339,6 @@ public class WTFCircuitOperator {
             if (circuitEntity.getWtfRoomId() != null) {
                 circuitDto.setWtfTalkRoomId(circuitEntity.getWtfRoomId());
                 circuitDto.setWtfTalkRoomName(deriveWTFRoomName(circuitEntity));
-
-                circuitDto.setStatusTalkRoomId(circuitEntity.getStatusRoomId());
-                circuitDto.setStatusTalkRoomName(deriveStatusRoomName(circuitEntity));
             }
 
             if (circuitEntity.getRetroRoomId() != null) {
@@ -367,10 +365,6 @@ public class WTFCircuitOperator {
 
     private String deriveWTFRoomName(LearningCircuitEntity activeCircuit) {
         return activeCircuit.getCircuitName() + WTF_ROOM_SUFFIX;
-    }
-
-    private String deriveStatusRoomName(LearningCircuitEntity activeCircuit) {
-        return activeCircuit.getCircuitName() + STATUS_ROOM_SUFFIX;
     }
 
     @Transactional
@@ -552,10 +546,8 @@ public class WTFCircuitOperator {
         //retro room is still open
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
-        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
-        talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -597,10 +589,8 @@ public class WTFCircuitOperator {
         activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
 
         talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
-        talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
-        talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -635,12 +625,6 @@ public class WTFCircuitOperator {
             talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
 
             talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getWtfRoomId());
-        }
-
-        if (learningCircuitEntity.getStatusRoomId() != null) {
-            talkRouter.closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
-
-            talkRoomMemberRepository.deleteMembersInRoom(learningCircuitEntity.getStatusRoomId());
         }
 
         if (learningCircuitEntity.getRetroRoomId() != null) {
@@ -685,10 +669,6 @@ public class WTFCircuitOperator {
 
         if (learningCircuitEntity.getWtfRoomId() != null) {
             reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getWtfRoomId());
-        }
-
-        if (learningCircuitEntity.getStatusRoomId() != null) {
-            reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getStatusRoomId());
         }
 
         activeWorkStatusManager.pushWTFStatus(organizationId, ownerId, learningCircuitEntity.getId(), now, nanoTime);
@@ -764,7 +744,6 @@ public class WTFCircuitOperator {
         learningCircuitRepository.save(learningCircuitEntity);
 
         reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getWtfRoomId());
-        reviveRoom(now, learningCircuitEntity, learningCircuitEntity.getStatusRoomId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -786,7 +765,6 @@ public class WTFCircuitOperator {
 
         closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getRetroRoomId());
         closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getWtfRoomId());
-        closeRoom(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getStatusRoomId());
 
         learningCircuitEntity.setCloseCircuitNanoTime(nanoTime);
         learningCircuitEntity.setCircuitState(LearningCircuitState.CLOSED);
@@ -859,16 +837,6 @@ public class WTFCircuitOperator {
 
             learningCircuitMemberRepository.save(circuitMember);
 
-            TalkRoomMemberEntity statusRoomMemberEntity = new TalkRoomMemberEntity();
-            statusRoomMemberEntity.setId(UUID.randomUUID());
-            statusRoomMemberEntity.setRoomId(circuitEntity.getStatusRoomId());
-            statusRoomMemberEntity.setOrganizationId(organizationId);
-            statusRoomMemberEntity.setMemberId(memberId);
-            statusRoomMemberEntity.setJoinTime(now);
-
-            talkRoomMemberRepository.save(statusRoomMemberEntity);
-
-            talkRouter.joinRoom(organizationId, memberId, circuitEntity.getStatusRoomId());
         }
 
         String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
@@ -900,16 +868,6 @@ public class WTFCircuitOperator {
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 
         if (roomMemberEntity != null) {
-
-            talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
-
-            talkRoomMemberRepository.delete(roomMemberEntity);
-        }
-
-
-        TalkRoomMemberEntity statusRoomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuitEntity.getStatusRoomId(), memberId);
-
-        if (statusRoomMemberEntity != null) {
 
             talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
 

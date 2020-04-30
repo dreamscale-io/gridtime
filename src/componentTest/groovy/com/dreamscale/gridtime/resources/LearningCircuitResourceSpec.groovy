@@ -437,7 +437,7 @@ class LearningCircuitResourceSpec extends Specification {
         List<TalkMessageDto> wtfMessages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName());
 
         then:
-        assert wtfMessages.size() == 1
+        assert wtfMessages.size() == 2
 
     }
 
@@ -480,10 +480,10 @@ class LearningCircuitResourceSpec extends Specification {
         log.info("messagesAfterSecondMessage = {}", messagesAfterSecondMessage)
 
         assert firstMessage != null
-        assert messagesBeforeLogout.size() == 1
-        assert messagesAfterLogin.size() == 1
+        assert messagesBeforeLogout.size() == 2
+        assert messagesAfterLogin.size() == 2
         assert secondMessage != null
-        assert messagesAfterSecondMessage.size() == 2
+        assert messagesAfterSecondMessage.size() == 3
 
     }
 

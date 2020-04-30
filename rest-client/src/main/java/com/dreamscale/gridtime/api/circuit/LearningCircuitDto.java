@@ -27,9 +27,6 @@ public class LearningCircuitDto {
     String retroTalkRoomName;
     UUID retroTalkRoomId;
 
-    String statusTalkRoomName;
-    UUID statusTalkRoomId;
-
     private UUID ownerId;
     private String ownerName;
 

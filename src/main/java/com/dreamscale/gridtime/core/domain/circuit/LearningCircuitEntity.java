@@ -36,7 +36,6 @@ public class LearningCircuitEntity {
 
     private UUID wtfRoomId;
     private UUID retroRoomId;
-    private UUID statusRoomId;
 
     private LocalDateTime openTime;
 

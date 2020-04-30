@@ -63,7 +63,7 @@ class TalkToResourceSpec extends Specification {
 
         then:
         assert messages != null
-        assert messages.size() == 2
+        assert messages.size() == 3 //status message is here too
 
     }
 
