@@ -102,7 +102,7 @@ public class TeamCircuitOperator {
         }
     }
 
-    public void addMemberToTeamCircuit(UUID organizationId, UUID teamId, UUID memberId) {
+    public void addMemberToTeamCircuit(LocalDateTime now, UUID organizationId, UUID teamId, UUID memberId) {
 
         TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
 
@@ -117,7 +117,7 @@ public class TeamCircuitOperator {
             talkRoomMember.setOrganizationId(organizationId);
             talkRoomMember.setRoomId(circuit.getTeamRoomId());
             talkRoomMember.setMemberId(memberId);
-            talkRoomMember.setJoinTime(gridClock.now());
+            talkRoomMember.setJoinTime(now);
 
             talkRoomMemberRepository.save(talkRoomMember);
         }

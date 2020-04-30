@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -90,6 +91,8 @@ public class TeamMembershipCapability {
     @Transactional
     public TeamDto createTeam(UUID organizationId, UUID memberId, String teamName) {
 
+        LocalDateTime now = gridClock.now();
+
         String teamWithNoSpaces = stripSpaces(teamName);
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -110,6 +113,7 @@ public class TeamMembershipCapability {
         teamMember.setOrganizationId(organizationId);
         teamMember.setTeamId(teamEntity.getId());
         teamMember.setMemberId(memberId);
+        teamMember.setJoinDate(now);
 
         teamMemberRepository.save(teamMember);
 
@@ -142,6 +146,8 @@ public class TeamMembershipCapability {
     @Transactional
     public void addMemberToEveryone(UUID organizationId, UUID memberId) {
 
+        LocalDateTime now = gridClock.now();
+
         TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
 
         validateTeamExists(EVERYONE, everyoneTeam);
@@ -151,10 +157,11 @@ public class TeamMembershipCapability {
         teamMemberEntity.setOrganizationId(organizationId);
         teamMemberEntity.setTeamId(everyoneTeam.getId());
         teamMemberEntity.setMemberId(memberId);
+        teamMemberEntity.setJoinDate(now);
 
         teamMemberRepository.save(teamMemberEntity);
 
-        teamCircuitOperator.addMemberToTeamCircuit(organizationId, everyoneTeam.getId(), memberId);
+        teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, everyoneTeam.getId(), memberId);
 
         TeamMemberHomeEntity memberHome = new TeamMemberHomeEntity();
         memberHome.setId(UUID.randomUUID());
@@ -388,16 +395,19 @@ public class TeamMembershipCapability {
 
         TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
 
+        LocalDateTime now = gridClock.now();
+
         if (teamMembership == null) {
             teamMembership = new TeamMemberEntity();
             teamMembership.setId(UUID.randomUUID());
             teamMembership.setOrganizationId(organizationId);
             teamMembership.setTeamId(teamEntity.getId());
             teamMembership.setMemberId(memberEntity.getId());
+            teamMembership.setJoinDate(now);
 
             teamMemberRepository.save(teamMembership);
 
-            teamCircuitOperator.addMemberToTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
+            teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, teamEntity.getId(), memberEntity.getId());
 
         }
         return toDto(userName, teamMembership);
@@ -421,15 +431,18 @@ public class TeamMembershipCapability {
         if (teamMembership == null) {
             log.debug("Adding member {} to team {}", memberEntity.getEmail(), standardizedTeamName);
 
+            LocalDateTime now = gridClock.now();
+
             teamMembership = new TeamMemberEntity();
             teamMembership.setId(UUID.randomUUID());
             teamMembership.setOrganizationId(organizationId);
             teamMembership.setTeamId(teamEntity.getId());
             teamMembership.setMemberId(memberEntity.getId());
+            teamMembership.setJoinDate(now);
 
             teamMemberRepository.save(teamMembership);
 
-            teamCircuitOperator.addMemberToTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
+            teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, teamEntity.getId(), memberEntity.getId());
 
         } else {
             log.warn("Member {} already added to team {}", memberEntity.getEmail(), standardizedTeamName);
