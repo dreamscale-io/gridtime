@@ -10,6 +10,7 @@ import com.dreamscale.gridtime.core.hooks.talk.TalkClientConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,9 @@ public class GridTalkRouter {
 
     @Autowired
     private TalkRoomRepository talkRoomRepository;
+
+    @Autowired
+    private TalkRoomMemberRepository talkRoomMemberRepository;
 
     @Autowired
     private MemberDetailsRepository memberDetailsRepository;
@@ -73,6 +77,21 @@ public class GridTalkRouter {
                 talkClientConnection.joinRoom(connection.getConnectionId(), room.getId(), connection.getUsername(), room.getRoomName());
             }
         }
+    }
+
+    //TODO I'm shifting in favor of pushing this functionality into the GridTalkRouter.
+
+    //consider this a work in progress...
+
+    @Transactional
+    public void leaveAllRooms(MemberConnectionEntity connection) {
+
+        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
+
+        leaveAllRooms(connection, talkRooms);
+
+        talkRoomMemberRepository.deleteFromAllRooms(connection.getMemberId());
+
     }
 
     public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {

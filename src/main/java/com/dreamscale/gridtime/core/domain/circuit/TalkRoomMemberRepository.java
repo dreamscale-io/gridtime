@@ -30,4 +30,10 @@ public interface TalkRoomMemberRepository extends CrudRepository<TalkRoomMemberE
     @Query(nativeQuery = true, value = "delete from talk_room_member trm " +
             "where trm.room_id = (:roomId) ")
     void deleteMembersInRoom(@Param("roomId") UUID roomId);
+
+
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from talk_room_member trm " +
+            "where trm.member_id = (:memberId) ")
+    void deleteFromAllRooms(@Param("memberId") UUID memberId);
 }

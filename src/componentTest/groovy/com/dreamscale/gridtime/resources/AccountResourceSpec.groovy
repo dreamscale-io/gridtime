@@ -134,7 +134,6 @@ class AccountResourceSpec extends Specification {
         then:
         assert activeTalkConnection != null
         assert activeTalkConnection.getStatus() == Status.VALID
-        assert activeTalkConnection.getActiveRooms().size() == 2
     }
 
     def "should create a circuit then logout & login again"() {

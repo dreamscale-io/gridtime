@@ -42,7 +42,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private ActiveAccountStatusRepository accountStatusRepository;
 
     @Autowired
-    private WTFCircuitOperator WTFCircuitOperator;
+    private WTFCircuitOperator wtfCircuitOperator;
 
     @Autowired
     private ActiveWorkStatusManager activeWorkStatusManager;
@@ -66,9 +66,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private OneTimeTicketCapability oneTimeTicketCapability;
 
     @Autowired
-    private TalkRoomMemberRepository talkRoomMemberRepository;
-
-    @Autowired
     private GridClock gridClock;
 
     @Autowired
@@ -76,12 +73,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private EmailCapability emailCapability;
-
-//    @Autowired
-//    private TalkRoomMemberRepository talkRoomMemberRepository;
-
-    @Autowired
-    private TalkRoomRepository talkRoomRepository;
 
 
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
@@ -210,7 +201,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-
     private void validateNoExistingAccount(String standarizedEmail, RootAccountEntity existingRootAccount) {
 
         if (existingRootAccount != null) {
@@ -302,20 +292,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
         activeTalkConnection.setStatus(Status.VALID);
         activeTalkConnection.setMessage("Account connected.");
 
-        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(newConnectionId);
-
-        if (memberConnection != null) {
-
-            LocalDateTime now = gridClock.now();
-            Long nanoTime = gridClock.nanoTime();
-
-            List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
-
-            for (TalkRoomEntity room : talkRooms) {
-
-                activeTalkConnection.addRoom(room.getId(), room.getRoomName());
-            }
-        }
         return activeTalkConnection;
     }
 
@@ -332,8 +308,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
     }
 
-
-
+    @Transactional
     public SimpleStatusDto logout(UUID rootAccountId) {
 
         LocalDateTime now = gridClock.now();
@@ -351,13 +326,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
         accountStatusRepository.save(accountStatusEntity);
 
         if (oldConnectionId != null) {
-            WTFCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
+            wtfCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
         }
 
-        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
-
-
-        talkRouter.leaveAllRooms(memberConnection, talkRooms);
+        talkRouter.leaveAllRooms(memberConnection);
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(rootAccountId);
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);

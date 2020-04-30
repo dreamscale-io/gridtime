@@ -520,30 +520,40 @@ class LearningCircuitResourceSpec extends Specification {
         mockTimeService.now() >> time
         mockTimeService.nanoTime() >> timeNano
 
-        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
 
-        loggedInUser.setId(member.getRootAccountId())
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
 
-        LearningCircuitDto circuit = circuitClient.startWTF()
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+        talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
 
         //change active logged in user to a different user within same organization
 
-        OrganizationMemberEntity otherMember =  createMemberWithOrgAndTeam();
-        loggedInUser.setId(otherMember.getRootAccountId())
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
 
-        LearningCircuitDto otherMemberCircuit = circuitClient.startWTF()
+        accountClient.login()
+
         when:
 
-        TalkMessageDto joinMessage = talkClient.joinExistingRoom(circuit.getWtfTalkRoomName())
+        LearningCircuitDto user2Circuit = circuitClient.startWTF()
 
-        List<LearningCircuitDto> participatingCircuits = circuitClient.getAllMyParticipatingCircuits();
+        talkClient.joinExistingRoom(user2Circuit.getWtfTalkRoomName())
+        talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
+
+        List<LearningCircuitDto> user2Participating = circuitClient.getAllMyParticipatingCircuits();
+
+        LearningCircuitWithMembersDto user1CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName())
+        LearningCircuitWithMembersDto user2CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user2Circuit.getCircuitName())
 
         then:
 
-        assert joinMessage != null
+        assert user2Participating != null
+        assert user2Participating.size() == 2
 
-        assert participatingCircuits != null
-        assert participatingCircuits.size() == 2
+        assert user1CircuitFromUser2.getActiveWtfRoomMembers().size() == 2
+        assert user2CircuitFromUser2.getActiveWtfRoomMembers().size() == 1
     }
 
     def 'join and leave another persons chat room to update room status'() {
@@ -573,7 +583,8 @@ class LearningCircuitResourceSpec extends Specification {
         assert fullDetailsDto != null
         assert fullDetailsDto.getCircuitParticipants().size() == 2
 
-        assert fullDetailsDto.getActiveWtfRoomMembers().size() == 1
+        //nobody is automatically joined.
+        assert fullDetailsDto.getActiveWtfRoomMembers().size() == 0
 
     }
 

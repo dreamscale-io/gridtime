@@ -20,14 +20,4 @@ public class ActiveTalkConnectionDto {
     private String userName;
     Status status;
     String message;
-
-    private List<ActiveRoomDto> activeRooms;
-
-    public void addRoom(UUID roomId, String roomName) {
-        if (activeRooms == null) {
-            activeRooms = new ArrayList<>();
-        }
-
-        activeRooms.add(new ActiveRoomDto(roomId, roomName));
-    }
 }

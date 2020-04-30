@@ -478,6 +478,11 @@ public class OrganizationCapability {
 
         organizationSubscriptionRepository.save(subscription);
 
+        //now we need to tombstone the organization member, and all the team memberships.
+
+
+
+
 
         //alright, so what we're going to do, is map all the root_account_id to point to ghost account
 
