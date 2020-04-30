@@ -2,13 +2,18 @@
 
 --changeset dreamscale:5
 
+alter table team_member
+add column join_date timestamp;
+
  create table organization_member_tombstone (
-  member_id uuid primary key not null,
-  root_account_id uuid,
+  id uuid primary key not null,
+  member_id uuid not null,
+  organization_id uuid not null,
   email text,
   username text,
-  external_id text,
-  organization_id uuid,
+  display_name text,
+  full_name text,
+  join_date timestamp,
   rip_date timestamp
  );
 
@@ -17,7 +22,11 @@
     organization_id uuid not null,
     member_id uuid not null,
     team_id uuid not null,
+    email text,
+    username text,
+    display_name text,
+    full_name text,
+    join_date timestamp,
     rip_date timestamp
  );
 
-}

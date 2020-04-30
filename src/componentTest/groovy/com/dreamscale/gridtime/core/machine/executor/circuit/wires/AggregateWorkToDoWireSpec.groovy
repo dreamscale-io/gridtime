@@ -39,11 +39,15 @@ class AggregateWorkToDoWireSpec extends Specification {
     @Autowired
     GridClock mockTimeService
 
+    LocalDateTime now;
+
     def setup() {
         //random builder for work item
         workerId = UUID.randomUUID();
 
         mockTimeService.now() >> LocalDateTime.now()
+
+        this.now = LocalDateTime.now();
     }
 
     def "should get next work item in queue"() {
@@ -57,7 +61,7 @@ class AggregateWorkToDoWireSpec extends Specification {
         UUID member2 = UUID.randomUUID();
         UUID member3 = UUID.randomUUID();
 
-        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member1, teamId))
+        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member1, teamId, now))
 
         GeometryClock.GridTime gridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, oldTime);
         WorkItemToAggregateEntity workItem = aRandom.workItem().teamId(teamId).forGridTime(gridTime).processingState(ProcessingState.Ready).save()
@@ -84,9 +88,9 @@ class AggregateWorkToDoWireSpec extends Specification {
         UUID member2 = UUID.randomUUID();
         UUID member3 = UUID.randomUUID();
 
-        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member1, teamId))
-        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member2, teamId))
-        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member3, teamId))
+        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member1, teamId, now))
+        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member2, teamId, now))
+        teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member3, teamId, now))
 
 
         TileStreamEvent torchieStreamEvent1 = new TileStreamEvent(teamId, member1, gridTime, WorkToDoType.AggregateToTeam);
