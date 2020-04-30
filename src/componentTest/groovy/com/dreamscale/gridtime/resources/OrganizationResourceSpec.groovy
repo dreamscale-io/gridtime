@@ -31,6 +31,7 @@ import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -289,6 +290,80 @@ class OrganizationResourceSpec extends Specification {
         assert dsIsActiveForArty.getId() == dreamScaleSubscription.getOrganizationId()
 
         assert memberships.size() == 2
+    }
+
+    @Ignore //TODO TDD test remove sttill needs finishing
+    def "should remove a member from an organization"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto shakyProfile = register("shaky.piano@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io")
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        SimpleStatusDto artyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
+
+        switchUser(shakyProfile)
+
+        SimpleStatusDto shakyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "shaky.piano@dreamscale.io")
+
+        when:
+
+        ConnectionStatusDto loginFromShakyBeforeRemove = accountClient.login()
+
+        OrganizationDto activeOrgForShakyBeforeRemove = organizationClient.getMyActiveOrganization();
+
+        accountClient.logout()
+
+        switchUser(artyProfile)
+
+        ConnectionStatusDto loginFromArty =  accountClient.login()
+
+        OrganizationDto activeOrgForArty = organizationClient.getMyActiveOrganization();
+
+        List<MemberDetailsDto> membershipsShownForArtyBeforeRemove = organizationClient.getOrganizationMembers();
+
+        organizationClient.removeMember(loginFromShakyBeforeRemove.getMemberId().toString())
+
+        List<MemberDetailsDto> membershipsShownForArtyAfterRemove = organizationClient.getOrganizationMembers();
+
+        switchUser(shakyProfile)
+
+        ConnectionStatusDto loginFromShakyAfterRemove = accountClient.login()
+
+        OrganizationDto activeOrgForShakyAfterRemove = organizationClient.getMyActiveOrganization();
+
+        List<OrganizationDto> shakysOrganizationsAfterRemove =  organizationClient.getParticipatingOrganizations();
+
+        then:
+
+        assert artyJoinedDS.status == Status.JOINED
+        assert shakyJoinedDS.status == Status.JOINED
+
+        assert loginFromShakyBeforeRemove != null
+        assert loginFromShakyBeforeRemove.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginFromShakyBeforeRemove.getParticipatingOrganizations().size() == 2
+
+        assert activeOrgForShakyBeforeRemove.id == dreamScaleSubscription.getOrganizationId()
+
+        assert loginFromArty != null
+        assert loginFromArty.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginFromArty.getParticipatingOrganizations().size() == 2
+        assert activeOrgForArty.id  == dreamScaleSubscription.getOrganizationId()
+
+        assert membershipsShownForArtyBeforeRemove.size() == 2
+        assert membershipsShownForArtyAfterRemove.size() == 1
+
+        assert loginFromShakyAfterRemove != null
+        assert loginFromShakyAfterRemove.getOrganizationId() != dreamScaleSubscription.getOrganizationId()
+        assert loginFromShakyAfterRemove.getParticipatingOrganizations().size() == 1
+
+        assert activeOrgForShakyAfterRemove.orgName == "Public"
+        assert shakysOrganizationsAfterRemove.size() == 1
+
     }
 
 

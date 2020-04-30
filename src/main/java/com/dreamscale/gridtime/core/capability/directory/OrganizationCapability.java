@@ -432,16 +432,81 @@ public class OrganizationCapability {
         OrganizationDto activeOrganization = getActiveOrganization(rootAccountId);
 
         UUID organizationId = activeOrganization.getId();
+
+        OrganizationSubscriptionEntity subscription = findAndValidateSubscription(rootAccountId, organizationId);
+        //then, and only then...
+
+        return memberDetailsService.getOrganizationMembers(organizationId);
+    }
+
+    private OrganizationSubscriptionEntity findAndValidateSubscription(UUID rootAccountId, UUID organizationId) {
         OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organizationId);
 
         validateSubscriptionFound(subscription);
 
         validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
 
-        //then, and only then...
-
-        return memberDetailsService.getOrganizationMembers(organizationId);
+        return subscription;
     }
+
+    @Transactional
+    public SimpleStatusDto removeMember(UUID requestingRootAccountId, UUID memberId) {
+
+        //TODO alright lots of stuff here`
+
+        LocalDateTime now = gridClock.now();
+
+        OrganizationDto activeOrganization = getActiveOrganization(requestingRootAccountId);
+
+        OrganizationSubscriptionEntity subscription = reserveSeatForUpdate(activeOrganization.getId());
+        validateSubscriptionFound(subscription);
+        validateSubscriptionOwnedByRootAccount(subscription, requestingRootAccountId);
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndId(activeOrganization.getId(), memberId);
+        validateMembershipFound(activeOrganization.getDomainName(), membership);
+
+        //okay, the member is real, we've got a lock on the subscription, lets cancel it
+
+        OrganizationSubscriptionSeatEntity subscriptionSeat = organizationSubscriptionSeatRepository.selectValidSubscriptionSeatForUpdate(activeOrganization.getId(), membership.getRootAccountId());
+
+        subscriptionSeat.setCancelDate(now);
+        subscriptionSeat.setSubscriptionStatus(SubscriptionStatus.CANCELED);
+
+        organizationSubscriptionSeatRepository.save(subscriptionSeat);
+
+        subscription.setSeatsRemaining(subscription.getSeatsRemaining() + 1);
+
+        organizationSubscriptionRepository.save(subscription);
+
+
+        //alright, so what we're going to do, is map all the root_account_id to point to ghost account
+
+        //and then the org queries, team queries, I assume they join with root_account, will need to filter ghosts?
+
+
+
+ ;       //cancel the subscription, and return the seat counter to +1
+
+        //the organization membership row, ghost members
+
+        //who was this ghost, track the root account connection as it was at the time
+
+        //create a tombstone entry, and remove the person from the org.
+
+        //remove the person from all teams.
+
+        //create a tombstone entry, for each team they were on.
+
+        return null;
+    }
+
+
+    private void validateMembershipFound(String domainName, OrganizationMemberEntity membership) {
+        if (membership == null) {
+            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_FOUND, "No member found in organization "+domainName);
+        }
+    }
+
 
     private void validateSubscriptionFound(OrganizationSubscriptionEntity subscription) {
         if (subscription == null) {
@@ -523,9 +588,6 @@ public class OrganizationCapability {
     }
 
 
-    public SimpleStatusDto removeOrganizationMember(UUID rootAccountId, UUID memberId) {
-        return null;
-    }
 
 
 

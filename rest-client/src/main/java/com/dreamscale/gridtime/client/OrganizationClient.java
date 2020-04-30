@@ -34,7 +34,7 @@ public interface OrganizationClient {
     //Must be organization *owner *to use these APIs
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
-    SimpleStatusDto removeOrganizationMember(@Param("memberId") String memberId);
+    SimpleStatusDto removeMember(@Param("memberId") String memberId);
 
     @RequestLine("GET " +ResourcePaths.ORGANIZATION_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
     JiraConfigDto getJiraConfiguration();

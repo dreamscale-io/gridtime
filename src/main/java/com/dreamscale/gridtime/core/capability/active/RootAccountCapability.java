@@ -84,8 +84,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private TalkRoomRepository talkRoomRepository;
 
 
-
-
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());

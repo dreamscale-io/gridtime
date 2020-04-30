@@ -102,14 +102,14 @@ public class OrganizationResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
-    public SimpleStatusDto removeOrganizationMember(@PathVariable("memberId") String memberIdStr) {
+    public SimpleStatusDto removeMember(@PathVariable("memberId") String memberIdStr) {
         RequestContext context = RequestContext.get();
 
         UUID memberId = UUID.fromString(memberIdStr);
 
-        log.info("removeOrganizationMember, user={}", context.getRootAccountId());
+        log.info("removeMember, user={}", context.getRootAccountId());
 
-        return organizationCapability.removeOrganizationMember(context.getRootAccountId(), memberId);
+        return organizationCapability.removeMember(context.getRootAccountId(), memberId);
     }
 
 
