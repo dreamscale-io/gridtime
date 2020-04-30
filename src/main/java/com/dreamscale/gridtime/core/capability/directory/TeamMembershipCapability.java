@@ -13,6 +13,7 @@ import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
 import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -66,6 +67,11 @@ public class TeamMembershipCapability {
 
     @Autowired
     private MemberStatusCapability memberStatusCapability;
+
+    @Autowired
+    private TeamMemberTombstoneRepository teamMemberTombstoneRepository;
+
+    private MemberDetailsService memberDetailsService;
 
     @Autowired
     GridClock gridClock;
@@ -225,10 +231,10 @@ public class TeamMembershipCapability {
         }
     }
 
-    private void validateMemberFound(String userName, OrganizationMemberEntity memberEntity) {
+    private void validateMemberFound(String reference, OrganizationMemberEntity memberEntity) {
         if (memberEntity == null) {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_USERNAME,
-                    "Member with username '"+userName + "' not found.");
+                    "Member lookup with '"+reference + "' not found.");
         }
     }
 
@@ -466,15 +472,8 @@ public class TeamMembershipCapability {
 
         validateMemberFound(userName, memberEntity);
 
-        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
 
-        if (teamMembership != null) {
-            teamMemberRepository.delete(teamMembership);
-
-            teamCircuitOperator.removeMemberFromTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
-
-        }
-        return toDto(userName, teamMembership);
+        return removeTeamMemberAndCreateTombstone(organizationId, teamEntity, memberEntity);
     }
 
     public TeamMemberDto removeMemberFromTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
@@ -491,9 +490,34 @@ public class TeamMembershipCapability {
 
         validateMemberFound(memberId.toString(), memberEntity);
 
+        return removeTeamMemberAndCreateTombstone(organizationId, teamEntity, memberEntity);
+    }
+
+    private TeamMemberDto removeTeamMemberAndCreateTombstone(UUID organizationId, TeamEntity teamEntity, OrganizationMemberEntity memberEntity) {
+
         TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
 
         if (teamMembership != null) {
+
+            LocalDateTime now = gridClock.now();
+
+            TeamMemberTombstoneEntity teamMemberTombstoneEntity = new TeamMemberTombstoneEntity();
+            teamMemberTombstoneEntity.setId(UUID.randomUUID());
+            teamMemberTombstoneEntity.setTeamId(teamMembership.getTeamId());
+            teamMemberTombstoneEntity.setOrganizationId(teamMembership.getOrganizationId());
+            teamMemberTombstoneEntity.setMemberId(teamMembership.getMemberId());
+            teamMemberTombstoneEntity.setJoinDate(teamMembership.getJoinDate());
+            teamMemberTombstoneEntity.setRipDate(now);
+
+            MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(teamMembership.getOrganizationId(), teamMembership.getMemberId());
+
+            teamMemberTombstoneEntity.setEmail(memberDetails.getEmail());
+            teamMemberTombstoneEntity.setUsername(memberDetails.getUsername());
+            teamMemberTombstoneEntity.setDisplayName(memberDetails.getDisplayName());
+            teamMemberTombstoneEntity.setFullName(memberDetails.getFullName());
+
+            teamMemberTombstoneRepository.save(teamMemberTombstoneEntity);
+
             teamMemberRepository.delete(teamMembership);
 
             teamCircuitOperator.removeMemberFromTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
