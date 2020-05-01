@@ -623,31 +623,6 @@ public class WTFCircuitOperator {
         return circuitDto;
     }
 
-    private void reviveRoom(LocalDateTime now, LearningCircuitEntity learningCircuitEntity, UUID roomId) {
-
-        List<LearningCircuitMemberEntity> circuitMembers = learningCircuitMemberRepository.findByCircuitId(learningCircuitEntity.getId());
-
-        talkRoomMemberRepository.deleteMembersInRoom(roomId);
-
-        List<TalkRoomMemberEntity> roomMembers = new ArrayList<>();
-
-        for (LearningCircuitMemberEntity circuitMember : circuitMembers) {
-
-            TalkRoomMemberEntity roomMember = new TalkRoomMemberEntity();
-            roomMember.setId(UUID.randomUUID());
-            roomMember.setJoinTime(now);
-            roomMember.setRoomId(roomId);
-            roomMember.setOrganizationId(learningCircuitEntity.getOrganizationId());
-            roomMember.setMemberId(circuitMember.getMemberId());
-
-            talkRouter.joinRoom(learningCircuitEntity.getOrganizationId(), circuitMember.getMemberId(), roomId);
-
-            roomMembers.add(roomMember);
-        }
-
-        talkRoomMemberRepository.save(roomMembers);
-
-    }
 
     @Transactional
     public LearningCircuitDto reopenSolvedWTF(UUID organizationId, UUID ownerId, String circuitName) {
@@ -876,8 +851,6 @@ public class WTFCircuitOperator {
         messageDto.setUrn(urn);
         messageDto.setUri(messageEntity.getToRoomId().toString());
         messageDto.setRequest(getRequestUriFromContext());
-        messageDto.setData(messageEntity.getJsonBody());
-
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
         MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
@@ -890,6 +863,7 @@ public class WTFCircuitOperator {
         messageDto.setMessageTime(messageEntity.getPosition());
         messageDto.setNanoTime(messageEntity.getNanoTime());
         messageDto.setMessageType(messageEntity.getMessageType().getSimpleClassName());
+        messageDto.setData(JSONTransformer.fromJson(messageEntity.getJsonBody(), messageEntity.getMessageType().getMessageClazz()));
 
         return messageDto;
     }
@@ -1036,7 +1010,7 @@ public class WTFCircuitOperator {
             dto.setMessageTime(message.getPosition());
             dto.setNanoTime(message.getNanoTime());
             dto.setMessageType(message.getMessageType().getSimpleClassName());
-            dto.setData(message.getJsonBody());
+            dto.setData(JSONTransformer.fromJson(message.getJsonBody(), message.getMessageType().getMessageClazz()));
 
             //TODO this needs to be joined in a view
             dto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, message.getFromId().toString());

@@ -25,7 +25,7 @@ public class TalkMessageDto {
     private Map<String, String> metaProps;
 
     private String messageType;
-    private String data;
+    private Object data;
 
     public void addMetaProp(TalkMessageMetaProp prop, String value) {
         if (metaProps == null) {

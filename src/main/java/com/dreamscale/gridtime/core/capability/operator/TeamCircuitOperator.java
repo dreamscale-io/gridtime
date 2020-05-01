@@ -310,7 +310,6 @@ public class TeamCircuitOperator {
         messageDto.setUrn(urn);
         messageDto.setUri(messageEntity.getToRoomId().toString());
         messageDto.setRequest(getRequestUriFromContext());
-        messageDto.setData(messageEntity.getJsonBody());
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
@@ -324,6 +323,7 @@ public class TeamCircuitOperator {
         messageDto.setMessageTime(messageEntity.getPosition());
         messageDto.setNanoTime(messageEntity.getNanoTime());
         messageDto.setMessageType(messageEntity.getMessageType().getSimpleClassName());
+        messageDto.setData(JSONTransformer.fromJson(messageEntity.getJsonBody(), messageEntity.getMessageType().getMessageClazz()));
 
         return messageDto;
     }

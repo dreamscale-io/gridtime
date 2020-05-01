@@ -10,10 +10,10 @@ public enum CircuitMessageType {
     CHAT("chat", null, ChatMessageDetailsDto.class),
     SCREENSHOT("screenshot", null, null),
     SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
-    ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatus.class),
-    ROOM_MEMBER_LEAVE("room-member-inactive", "Member has left.", RoomMemberStatus.class),
-    ROOM_MEMBER_OFFLINE("room-member-offline", "Member is offline.", RoomMemberStatus.class),
-    ROOM_MEMBER_ONLINE("room-member-online", "Member is online.", RoomMemberStatus.class),
+    ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatusEventDto.class),
+    ROOM_MEMBER_LEAVE("room-member-inactive", "Member has left.", RoomMemberStatusEventDto.class),
+    ROOM_MEMBER_OFFLINE("room-member-offline", "Member is offline.", RoomMemberStatusEventDto.class),
+    ROOM_MEMBER_ONLINE("room-member-online", "Member is online.", RoomMemberStatusEventDto.class),
     WTF_STARTED("wtf-started", "WTF is started.", CircuitStatusDto.class),
     WTF_SOLVED("wtf-solved", "WTF is solved.", CircuitStatusDto.class),
     WTF_ONHOLD("wtf-onhold", "WTF is on hold.", CircuitStatusDto.class),
@@ -45,6 +45,10 @@ public enum CircuitMessageType {
             return messageClazz.getSimpleName();
         }
         return "";
+    }
+
+    public Class<?> getMessageClass() {
+        return messageClazz;
     }
 
     public String getStatusMessage() {
