@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
+import com.dreamscale.gridtime.api.organization.JiraConfigDto
 import com.dreamscale.gridtime.api.organization.JoinRequestInputDto
 import com.dreamscale.gridtime.api.organization.MemberDetailsDto
 import com.dreamscale.gridtime.api.organization.MembershipInputDto
@@ -292,7 +293,6 @@ class OrganizationResourceSpec extends Specification {
         assert memberships.size() == 2
     }
 
-    //TODO TDD test remove sttill needs finishing
     def "should remove a member from an organization"() {
         given:
 
@@ -363,6 +363,42 @@ class OrganizationResourceSpec extends Specification {
 
         assert activeOrgForShakyAfterRemove.orgName == "Public"
         assert shakysOrganizationsAfterRemove.size() == 1
+
+    }
+
+    def "should configure an organization with jira capabilities"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io")
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        joinOrganization(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
+
+        JiraConfigDto jiraInputConfig = createJiraConfig()
+
+        when:
+
+        accountClient.login()
+
+        1 * mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, "Connected")
+
+        SimpleStatusDto jiraConfigValidStatus = organizationClient.updateJiraConfiguration(jiraInputConfig)
+
+        JiraConfigDto jiraRetrievedConfig = organizationClient.getJiraConfiguration();
+
+        then:
+
+        assert jiraConfigValidStatus != null
+        assert jiraConfigValidStatus.getStatus() == Status.VALID
+
+        assert jiraRetrievedConfig != null
+        assert jiraRetrievedConfig.getJiraSiteUrl() == jiraInputConfig.getJiraSiteUrl()
+        assert jiraRetrievedConfig.getJiraUser() == jiraInputConfig.getJiraUser()
+        assert jiraRetrievedConfig.getJiraApiKey() == jiraInputConfig.getJiraApiKey()
 
     }
 
@@ -698,6 +734,10 @@ class OrganizationResourceSpec extends Specification {
         SubscriptionInputDto organizationSubscription = createSubscriptionInput("dreamscale.io")
 
         return organizationClient.createOrganizationSubscription(organizationSubscription)
+    }
+
+    private JiraConfigDto createJiraConfig() {
+        return new JiraConfigDto("company.atlassian.net", "jiraUser", "143143WRU143APIKEY143WRU143")
     }
 
     private SubscriptionInputDto createSubscriptionInput(String domain) {

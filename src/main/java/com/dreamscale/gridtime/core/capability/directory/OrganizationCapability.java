@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
+import com.dreamscale.gridtime.api.status.ConnectionResultDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
@@ -582,10 +583,43 @@ public class OrganizationCapability {
 
 
     public SimpleStatusDto updateJiraConfiguration(UUID rootAccountId, JiraConfigDto jiraConfigDto) {
-        return null;
+        OrganizationMemberEntity activeMembership = getActiveMembership(rootAccountId);
+
+        OrganizationEntity organization = organizationRepository.findById(activeMembership.getOrganizationId());
+
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organization.getId());
+        validateSubscriptionFound(subscription);
+
+        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+        organization.setJiraSiteUrl(jiraConfigDto.getJiraSiteUrl());
+        organization.setJiraUser(jiraConfigDto.getJiraUser());
+        organization.setJiraApiKey(jiraConfigDto.getJiraApiKey());
+
+        ConnectionResultDto jiraConnection = jiraCapability.validateJiraConnection(organization);
+
+        if (jiraConnection.getStatus() == Status.VALID) {
+            organizationRepository.save(organization);
+        } else {
+            throw new BadRequestException(ValidationErrorCodes.JIRA_CONFIGURATION_INVALID, "Jira configuration invalid, did not save.");
+        }
+
+        return new SimpleStatusDto(Status.VALID, "Jira configuration updated.");
     }
 
+    public JiraConfigDto getJiraConfiguration(UUID rootAccountId) {
 
+        OrganizationMemberEntity activeMembership = getActiveMembership(rootAccountId);
+
+        OrganizationEntity organization = organizationRepository.findById(activeMembership.getOrganizationId());
+
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organization.getId());
+        validateSubscriptionFound(subscription);
+
+        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+        return new JiraConfigDto(organization.getJiraSiteUrl(), organization.getJiraUser(), organization.getJiraApiKey());
+    }
 
 
 
@@ -610,9 +644,7 @@ public class OrganizationCapability {
     }
 
 
-    public JiraConfigDto getJiraConfiguration(UUID rootAccountId) {
-        return null;
-    }
+
 
     public OrganizationSubscriptionDto getOrganizationSubscription(UUID rootAccountId, UUID subscriptionId) {
         return null;

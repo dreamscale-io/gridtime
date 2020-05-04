@@ -87,7 +87,6 @@ public class OrganizationResource {
         return organizationCapability.getMemberOfActiveOrganization(context.getRootAccountId(), memberId);
     }
 
-
     /**
      * Removes a member of the active organization.
      *
@@ -156,13 +155,9 @@ public class OrganizationResource {
      * Configures the JIRA capability associated with the org, to support auto-completion of journal tasks
      * with JIRA ticket numbers, and automatic filling in of Jira task descriptions.
      *
-     * Jira projects should be added for each Jira project that you plan to associate work.
+     * Must be the owner or a moderator of the organization, to use this API
      *
-     * Each project configuration, can have a different Idea Flow data collection spec.
-     *
-     * Must be the *owner* of the organization to use this API
-     *
-     * @return SimpleStatusDto
+     * @return SimpleStatusDto returns VALID, or FAILED depending on the Jira connection
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping( ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
@@ -179,7 +174,7 @@ public class OrganizationResource {
     /**
      * Retrieves the existing Jira configuration information for the organization
      *
-     * Must be the *owner* of the organization to use this API
+     * Must be the owner or a moderator of the organization, to use this API
      *
      * @return JiraConfigDto
      */
