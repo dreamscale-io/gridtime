@@ -73,6 +73,9 @@ public class OrganizationCapability {
     private OrganizationSubscriptionSeatRepository organizationSubscriptionSeatRepository;
 
     @Autowired
+    private OrganizationMemberTombstoneRepository organizationMemberTombstoneRepository;
+
+    @Autowired
     private GridClock gridClock;
 
     @Autowired
@@ -452,7 +455,8 @@ public class OrganizationCapability {
     @Transactional
     public SimpleStatusDto removeMember(UUID requestingRootAccountId, UUID memberId) {
 
-        //TODO alright lots of stuff here`
+        //first, lets take care of the organization subscription, only the owner of the organization has the power to remove members.
+        //The subscription seats need to be refunded, and then available for others to use.
 
         LocalDateTime now = gridClock.now();
 
@@ -478,31 +482,34 @@ public class OrganizationCapability {
 
         organizationSubscriptionRepository.save(subscription);
 
-        //now we need to tombstone the organization member, and all the team memberships.
+        //now we need to tombstone the organization member, and all the team memberships for this user.
+        //the tombstones include the details of the attached user, at the time of the boot.
+        // The connection to this users root user account, will be destroyed.
 
+        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(membership.getId());
 
+        OrganizationMemberTombstoneEntity memberTombstone = new OrganizationMemberTombstoneEntity();
+        memberTombstone.setId(UUID.randomUUID());
+        memberTombstone.setMemberId(membership.getId());
+        memberTombstone.setOrganizationId(membership.getOrganizationId());
+        memberTombstone.setJoinDate(subscriptionSeat.getActivationDate());
+        memberTombstone.setRipDate(now);
+        memberTombstone.setDisplayName(memberDetails.getDisplayName());
+        memberTombstone.setEmail(memberDetails.getEmail());
+        memberTombstone.setUsername(memberDetails.getUsername());
+        memberTombstone.setFullName(memberDetails.getFullName());
 
+        organizationMemberTombstoneRepository.save(memberTombstone);
 
+        //any teams the member was a part of, also need removal and tombstones
 
-        //alright, so what we're going to do, is map all the root_account_id to point to ghost account
+        teamMembershipCapability.removeMemberFromAllTeams(now, membership.getOrganizationId(), membership.getId());
 
-        //and then the org queries, team queries, I assume they join with root_account, will need to filter ghosts?
+        //now finally, can delete the membership entity
 
+        organizationMemberRepository.delete(membership);
 
-
- ;       //cancel the subscription, and return the seat counter to +1
-
-        //the organization membership row, ghost members
-
-        //who was this ghost, track the root account connection as it was at the time
-
-        //create a tombstone entry, and remove the person from the org.
-
-        //remove the person from all teams.
-
-        //create a tombstone entry, for each team they were on.
-
-        return null;
+        return new SimpleStatusDto(Status.SUCCESS, "Membership successfully deleted. Organization subscription seat reclaimed.");
     }
 
 

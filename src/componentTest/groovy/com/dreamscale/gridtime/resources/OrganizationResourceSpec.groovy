@@ -292,7 +292,7 @@ class OrganizationResourceSpec extends Specification {
         assert memberships.size() == 2
     }
 
-    @Ignore //TODO TDD test remove sttill needs finishing
+    //TODO TDD test remove sttill needs finishing
     def "should remove a member from an organization"() {
         given:
 

@@ -71,6 +71,7 @@ public class TeamMembershipCapability {
     @Autowired
     private TeamMemberTombstoneRepository teamMemberTombstoneRepository;
 
+    @Autowired
     private MemberDetailsService memberDetailsService;
 
     @Autowired
@@ -462,6 +463,8 @@ public class TeamMembershipCapability {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
+        LocalDateTime now = gridClock.now();
+
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
         validateTeamFound(standardizedTeamName, teamEntity);
@@ -473,12 +476,14 @@ public class TeamMembershipCapability {
         validateMemberFound(userName, memberEntity);
 
 
-        return removeTeamMemberAndCreateTombstone(organizationId, teamEntity, memberEntity);
+        return removeTeamMemberAndCreateTombstone(now, organizationId, teamEntity, memberEntity.getId());
     }
 
     public TeamMemberDto removeMemberFromTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
+
+        LocalDateTime now = gridClock.now();
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
@@ -490,16 +495,26 @@ public class TeamMembershipCapability {
 
         validateMemberFound(memberId.toString(), memberEntity);
 
-        return removeTeamMemberAndCreateTombstone(organizationId, teamEntity, memberEntity);
+        return removeTeamMemberAndCreateTombstone(now, organizationId, teamEntity, memberEntity.getId());
     }
 
-    private TeamMemberDto removeTeamMemberAndCreateTombstone(UUID organizationId, TeamEntity teamEntity, OrganizationMemberEntity memberEntity) {
+    public void removeMemberFromAllTeams(LocalDateTime now, UUID organizationId, UUID memberId) {
 
-        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
+        List<TeamEntity> teamEntities = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);
+
+        for (TeamEntity team: teamEntities) {
+            removeTeamMemberAndCreateTombstone(now, organizationId, team, memberId);
+        }
+
+    }
+
+    private TeamMemberDto removeTeamMemberAndCreateTombstone(LocalDateTime now, UUID organizationId, TeamEntity teamEntity, UUID memberId) {
+
+        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberId);
+
+        String memberUserName = "[member]";
 
         if (teamMembership != null) {
-
-            LocalDateTime now = gridClock.now();
 
             TeamMemberTombstoneEntity teamMemberTombstoneEntity = new TeamMemberTombstoneEntity();
             teamMemberTombstoneEntity.setId(UUID.randomUUID());
@@ -511,6 +526,8 @@ public class TeamMembershipCapability {
 
             MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(teamMembership.getOrganizationId(), teamMembership.getMemberId());
 
+            memberUserName = memberDetails.getUsername();
+
             teamMemberTombstoneEntity.setEmail(memberDetails.getEmail());
             teamMemberTombstoneEntity.setUsername(memberDetails.getUsername());
             teamMemberTombstoneEntity.setDisplayName(memberDetails.getDisplayName());
@@ -520,10 +537,10 @@ public class TeamMembershipCapability {
 
             teamMemberRepository.delete(teamMembership);
 
-            teamCircuitOperator.removeMemberFromTeamCircuit(organizationId, teamEntity.getId(), memberEntity.getId());
+            teamCircuitOperator.removeMemberFromTeamCircuit(organizationId, teamEntity.getId(), memberId);
 
         }
-        return toDto(memberEntity.getUsername(), teamMembership);
+        return toDto(memberUserName, teamMembership);
     }
 
     private TeamMemberDto toDto(String userName, TeamMemberEntity teamMembership) {
