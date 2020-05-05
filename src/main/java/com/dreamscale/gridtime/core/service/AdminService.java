@@ -191,7 +191,7 @@ public class AdminService {
 
     private MemberRegistrationDetailsDto joinOrganization(UserProfileDto account, OrganizationSubscriptionDto subscription) {
         return organizationCapability.joinOrganization(account.getRootAccountId(), subscription.getOrganizationId(),
-                new MembershipInputDto(subscription.getInviteToken(), account.getEmail()));
+                new MembershipInputDto(subscription.getInviteToken(), account.getRootEmail()));
     }
 
 

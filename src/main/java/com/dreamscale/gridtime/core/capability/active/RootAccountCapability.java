@@ -14,7 +14,6 @@ import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
 import com.dreamscale.gridtime.core.domain.circuit.*;
-import com.dreamscale.gridtime.core.domain.circuit.TalkRoomMemberRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -97,7 +96,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
 
-        return toDto(newAccount);
+
+        return toDto(newAccount, null);
     }
 
     @Transactional
@@ -416,21 +416,28 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
-        return toDto(rootAccountEntity);
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        return toDto(rootAccountEntity, activeMembership);
     }
 
-    private UserProfileDto toDto(RootAccountEntity rootAccount) {
+    private UserProfileDto toDto(RootAccountEntity rootAccount, OrganizationMemberEntity membership) {
         UserProfileDto userProfileDto = new UserProfileDto();
         userProfileDto.setRootAccountId(rootAccount.getId());
         userProfileDto.setFullName(rootAccount.getFullName());
         userProfileDto.setDisplayName(rootAccount.getDisplayName());
-        userProfileDto.setEmail(rootAccount.getRootEmail());
-        userProfileDto.setUserName(rootAccount.getRootUsername());
+        userProfileDto.setRootEmail(rootAccount.getRootEmail());
+        userProfileDto.setRootUserName(rootAccount.getRootUsername());
+
+        if (membership != null) {
+            userProfileDto.setOrgUserName(membership.getUsername());
+            userProfileDto.setOrgEmail(membership.getEmail());
+        }
 
         return userProfileDto;
     }
 
-    public UserProfileDto updateProfileUserName(UUID rootAccountId, String username) {
+    public UserProfileDto updateRootProfileUserName(UUID rootAccountId, String username) {
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
@@ -449,10 +456,12 @@ public class RootAccountCapability implements RootAccountIdResolver {
             throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
         }
 
-        return toDto(rootAccountEntity);
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        return toDto(rootAccountEntity, activeMembership);
     }
 
-    public UserProfileDto updateProfileEmail(UUID rootAccountId, String newEmail) {
+    public UserProfileDto updateRootProfileEmail(UUID rootAccountId, String newEmail) {
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
         LocalDateTime now = gridClock.now();
@@ -465,14 +474,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         rootAccountRepository.save(rootAccountEntity);
 
-        UserProfileDto profile = toDto(rootAccountEntity);
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
 
-        profile.setEmail(newEmail + " (pending validation)");
+        UserProfileDto profile = toDto(rootAccountEntity, activeMembership);
+
+        profile.setRootEmail(newEmail + " (pending validation)");
 
         return profile;
     }
 
-    public SimpleStatusDto validateProfileEmail(String validationCode) {
+    public SimpleStatusDto validateRootProfileEmail(String validationCode) {
 
         OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.findByTicketCode(validationCode);
 
@@ -513,7 +524,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    public UserProfileDto updateProfileFullName(UUID rootAccountId, String fullName) {
+    public UserProfileDto updateRootProfileFullName(UUID rootAccountId, String fullName) {
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
@@ -522,10 +533,12 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         rootAccountRepository.save(rootAccountEntity);
 
-        return toDto(rootAccountEntity);
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        return toDto(rootAccountEntity, activeMembership);
     }
 
-    public UserProfileDto updateProfileDisplayName(UUID rootAccountId, String displayName) {
+    public UserProfileDto updateRootProfileDisplayName(UUID rootAccountId, String displayName) {
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
         rootAccountEntity.setDisplayName(displayName);
@@ -533,7 +546,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         rootAccountRepository.save(rootAccountEntity);
 
-        return toDto(rootAccountEntity);
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        return toDto(rootAccountEntity, activeMembership);
     }
 
     private String standarizeToLowerCase(String name) {
@@ -541,5 +556,96 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
+    public UserProfileDto updateOrgProfileUserName(UUID rootAccountId, String username) {
 
+        RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
+
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        if (activeMembership != null) {
+
+            String oldUserName = activeMembership.getUsername();
+
+            activeMembership.setUsername(username);
+            activeMembership.setLowerCaseUserName(standarizeToLowerCase(username));
+
+            try {
+                organizationMemberRepository.save(activeMembership);
+            } catch (Exception ex) {
+                String conflictMsg = "Conflict in changing org member username from "+oldUserName+" to "+ username;
+                log.warn(conflictMsg);
+
+                throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
+            }
+
+        }
+
+        return toDto(rootAccount, activeMembership);
+    }
+
+    public UserProfileDto updateOrgProfileEmail(UUID rootAccountId, String newEmail) {
+
+        RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
+
+        OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        UserProfileDto profile = toDto(rootAccount, activeMembership);
+
+        if (activeMembership != null) {
+
+            LocalDateTime now = gridClock.now();
+
+            String standardizedEmail = standarizeToLowerCase(newEmail);
+
+            OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeOrgEmailValidationTicket(now, rootAccountId, activeMembership.getOrganizationId(), standardizedEmail);
+
+            emailCapability.sendEmailToValidateOrgAccountProfileAddress(standardizedEmail, oneTimeTicket.getTicketCode());
+
+            profile.setOrgEmail(newEmail + " (pending validation)");
+        }
+
+        return profile;
+    }
+
+    public SimpleStatusDto validateOrgProfileEmail(String validationCode) {
+
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.findByTicketCode(validationCode);
+
+        SimpleStatusDto simpleStatus = new SimpleStatusDto();
+
+        LocalDateTime now = gridClock.now();
+
+        if (oneTimeTicket == null) {
+            simpleStatus.setMessage("Validation code not found.");
+            simpleStatus.setStatus(Status.FAILED);
+        } else if (oneTimeTicketCapability.isExpired(now, oneTimeTicket)) {
+            simpleStatus.setMessage("Validation code is expired.");
+            simpleStatus.setStatus(Status.FAILED);
+
+            oneTimeTicketCapability.delete(oneTimeTicket);
+
+        } else {
+
+            RootAccountEntity rootAccountEntity = rootAccountRepository.findById(oneTimeTicket.getOwnerId());
+
+            validateAccountExists("org email validation ticket owner", rootAccountEntity);
+
+            String email = oneTimeTicket.getEmailProp();
+            UUID orgId = oneTimeTicket.getOrganizationIdProp();
+
+            OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(orgId, rootAccountEntity.getId());
+
+            membership.setEmail(email);
+            membership.setLastUpdated(now);
+
+            organizationMemberRepository.save(membership);
+
+            oneTimeTicketCapability.delete(oneTimeTicket);
+
+            simpleStatus.setMessage("Profile Email successfully updated.");
+            simpleStatus.setStatus(Status.SUCCESS);
+        }
+
+        return simpleStatus;
+    }
 }

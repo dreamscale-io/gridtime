@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.*;
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
+import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
@@ -25,7 +26,6 @@ public class AccountResource {
 
     @Autowired
     private RootAccountCapability rootAccountCapability;
-
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -206,24 +206,69 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateRootProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapability.updateProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
+        return rootAccountCapability.updateRootProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
     }
 
     /**
-     * Updates the user's root account profile email
+     * Updates the user's active organization account profile username (must be unique within the org)
      * @return UserProfileDto
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
-    UserProfileDto updateProfileEmail(@RequestBody EmailInputDto emailInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateOrgProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapability.updateProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
+        return rootAccountCapability.updateOrgProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
+    }
+
+    /**
+     * Updates the user's root account profile email
+     *
+     * Sends a validation email to the new address, and the change is officially active on validation
+     *
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateRootProfileEmail(@RequestBody EmailInputDto emailInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateRootProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
+    }
+
+    /**
+     * Updates the user's active organization account profile email
+     *
+     * Sends a validation email to the new address, and the change is officially active on validation
+     *
+     * @return UserProfileDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateOrgProfileEmail(@RequestBody EmailInputDto emailInputDto) {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.updateOrgProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
+    }
+
+    /**
+     * Validates the change to the user's org account email, setting the new email officially into effect.
+     *
+     * @return SimpleStatusDto SUCCESS if the change succeeded, FAILED if the validation code is expired or cant be found
+     */
+
+    @PreAuthorize("permitAll")
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
+    SimpleStatusDto validateOrgProfileEmail(@RequestParam("validationCode") String validationCode) {
+
+        return rootAccountCapability.validateOrgProfileEmail(validationCode);
     }
 
     /**
@@ -233,11 +278,13 @@ public class AccountResource {
      */
 
     @PreAuthorize("permitAll")
-    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
-    SimpleStatusDto validateProfileEmail(@RequestParam("validationCode") String validationCode) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
+    SimpleStatusDto validateRootProfileEmail(@RequestParam("validationCode") String validationCode) {
 
-        return rootAccountCapability.validateProfileEmail(validationCode);
+        return rootAccountCapability.validateRootProfileEmail(validationCode);
     }
+
+
 
     /**
      * Updates the user's root account full name
@@ -245,11 +292,11 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
-    UserProfileDto updateProfileFullName(@RequestBody FullNameInputDto fullNameInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
+    UserProfileDto updateRootProfileFullName(@RequestBody FullNameInputDto fullNameInputDto) {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapability.updateProfileFullName(context.getRootAccountId(), fullNameInputDto.getFullName());
+        return rootAccountCapability.updateRootProfileFullName(context.getRootAccountId(), fullNameInputDto.getFullName());
     }
 
     /**
@@ -258,11 +305,11 @@ public class AccountResource {
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
-    UserProfileDto updateProfileDisplayName(@RequestBody DisplayNameInputDto displayNameInputDto) {
+    @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
+    UserProfileDto updateRootProfileDisplayName(@RequestBody DisplayNameInputDto displayNameInputDto) {
 
         RequestContext context = RequestContext.get();
-        return rootAccountCapability.updateProfileDisplayName(context.getRootAccountId(), displayNameInputDto.getDisplayName());
+        return rootAccountCapability.updateRootProfileDisplayName(context.getRootAccountId(), displayNameInputDto.getDisplayName());
     }
 
 

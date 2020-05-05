@@ -39,6 +39,7 @@ public class ResourcePaths {
     public static final String LOGOUT_PATH = "/logout";
     public static final String CONNECT_PATH = "/connect";
     public static final String PROFILE_PATH = "/profile";
+    public static final String ROOT_PATH = "/root";
     public static final String VALIDATE_PATH = "/validate";
 
     public static final String ORGANIZATION_PATH = "/organization";

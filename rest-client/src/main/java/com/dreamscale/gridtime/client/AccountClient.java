@@ -47,21 +47,30 @@ public interface AccountClient {
     @RequestLine("GET " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH)
     UserProfileDto getProfile();
 
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateProfileUserName(UserNameInputDto userNameInputDto );
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateRootProfileUserName(UserNameInputDto userNameInputDto );
 
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
-    UserProfileDto updateProfileEmail(EmailInputDto emailInputDto );
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateRootProfileEmail(EmailInputDto emailInputDto );
 
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH +
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
+    UserProfileDto updateOrgProfileUserName(UserNameInputDto userNameInputDto );
+
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
+    UserProfileDto updateOrgProfileEmail(EmailInputDto emailInputDto );
+
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH +
             ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH + "?validationCode={validationCode}")
-    SimpleStatusDto validateProfileEmail(@Param("validationCode") String validationCode );
+    SimpleStatusDto validateRootProfileEmail(@Param("validationCode") String validationCode );
 
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
-    UserProfileDto updateProfileFullName(FullNameInputDto fullNameInputDto );
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH +
+            ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH + "?validationCode={validationCode}")
+    SimpleStatusDto validateOrgProfileEmail(@Param("validationCode") String validationCode );
 
-    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
-    UserProfileDto updateProfileDisplayName(DisplayNameInputDto displayNameInputDto );
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.FULLNAME_PATH)
+    UserProfileDto updateRootProfileFullName(FullNameInputDto fullNameInputDto );
 
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH +  ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.DISPLAYNAME_PATH)
+    UserProfileDto updateRootProfileDisplayName(DisplayNameInputDto displayNameInputDto );
 
 }

@@ -32,3 +32,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/create_tombstone_tables_for_member_remove.sql
+
+  - include:
+        file: db/v007/alter_org_member_add_lowercase_username.sql

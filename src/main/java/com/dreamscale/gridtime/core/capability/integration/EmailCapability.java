@@ -27,13 +27,23 @@ public class EmailCapability {
     private String apiKey;
 
 
-    //account/profile/property/email/validate
-    private static final String ACCOUNT_PROFILE_VALIDATE_API =
+    //account/profile/root/property/email/validate
+    private static final String ACCOUNT_PROFILE_ROOT_EMAIL_VALIDATE_API =
             ResourcePaths.ACCOUNT_PATH +
             ResourcePaths.PROFILE_PATH +
+            ResourcePaths.ROOT_PATH +
             ResourcePaths.PROPERTY_PATH +
             ResourcePaths.EMAIL_PATH +
             ResourcePaths.VALIDATE_PATH;
+
+    //account/profile/org/property/email/validate
+    private static final String ACCOUNT_PROFILE_ORG_EMAIL_VALIDATE_API =
+            ResourcePaths.ACCOUNT_PATH +
+                    ResourcePaths.PROFILE_PATH +
+                    ResourcePaths.ORG_PATH +
+                    ResourcePaths.PROPERTY_PATH +
+                    ResourcePaths.EMAIL_PATH +
+                    ResourcePaths.VALIDATE_PATH;
 
     private static final String ORG_JOIN_EMAIL_VALIDATE_API =
             ResourcePaths.ORGANIZATION_PATH +
@@ -85,7 +95,11 @@ public class EmailCapability {
     }
 
     public SimpleStatusDto sendEmailToValidateRootAccountProfileAddress(String toEmailAddress, String ticketCode) {
-        return sendEmailValidationEmail(toEmailAddress, ticketCode, ACCOUNT_PROFILE_VALIDATE_API);
+        return sendEmailValidationEmail(toEmailAddress, ticketCode, ACCOUNT_PROFILE_ROOT_EMAIL_VALIDATE_API);
+    }
+
+    public SimpleStatusDto sendEmailToValidateOrgAccountProfileAddress(String toEmailAddress, String ticketCode) {
+        return sendEmailValidationEmail(toEmailAddress, ticketCode, ACCOUNT_PROFILE_ORG_EMAIL_VALIDATE_API);
     }
 
     public SimpleStatusDto sendEmailToValidateOrgEmailAddress(String toEmailAddress, String ticketCode) {
@@ -180,6 +194,7 @@ public class EmailCapability {
 
         return responseDto;
     }
+
 
 
 }

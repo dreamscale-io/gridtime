@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "organization_member")
@@ -21,6 +22,10 @@ public class OrganizationMemberEntity {
     private String email;
 
     private String username;
+
+    private String lowerCaseUserName;
+
+    private LocalDateTime lastUpdated;
 
     @Column(name = "root_account_id")
     private UUID rootAccountId;

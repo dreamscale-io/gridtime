@@ -49,7 +49,7 @@ class AccountResourceSpec extends Specification {
     @Autowired
     GridClock mockTimeService
 
-    String activationToken = null;
+    String ticketCode = null;
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
@@ -61,17 +61,17 @@ class AccountResourceSpec extends Specification {
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
         rootAccountInput.setEmail("janelle@dreamscale.io")
 
-        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> activationToken = token; return null}
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> ticketCode = token; return null}
 
         UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
 
         when:
 
-        AccountActivationDto activationDto = accountClient.activate(new ActivationCodeDto(activationToken))
+        AccountActivationDto activationDto = accountClient.activate(new ActivationCodeDto(ticketCode))
 
         then:
 
-        assert userProfileDto.email == "janelle@dreamscale.io"
+        assert userProfileDto.rootEmail == "janelle@dreamscale.io"
         assert userProfileDto.rootAccountId != null
 
         assert activationDto != null
@@ -168,19 +168,62 @@ class AccountResourceSpec extends Specification {
 
         when:
 
-        UserProfileDto profile = accountClient.updateProfileUserName(new UserNameInputDto("joeblow"))
+        UserProfileDto profile = accountClient.updateRootProfileUserName(new UserNameInputDto("joeblow"))
 
-        profile = accountClient.updateProfileDisplayName(new DisplayNameInputDto("Joe"))
-        profile = accountClient.updateProfileFullName(new FullNameInputDto("Joe Blow"))
-        profile = accountClient.updateProfileEmail(new EmailInputDto("joe@blow.com"))
+        profile = accountClient.updateRootProfileDisplayName(new DisplayNameInputDto("Joe"))
+        profile = accountClient.updateRootProfileFullName(new FullNameInputDto("Joe Blow"))
+        profile = accountClient.updateRootProfileEmail(new EmailInputDto("joe@blow.com"))
 
         then:
         assert profile != null
         assert profile.getRootAccountId() != null
         assert profile.getDisplayName() == "Joe"
         assert profile.getFullName() == "Joe Blow"
-        assert profile.getUserName() == "joeblow"
-        assert profile.getEmail() == "joe@blow.com (pending validation)"
+        assert profile.getRootUserName() == "joeblow"
+        assert profile.getRootEmail() == "joe@blow.com (pending validation)"
+    }
+
+    def "should update org profile username property"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        when:
+
+        accountClient.login()
+
+        UserProfileDto profile = accountClient.updateOrgProfileUserName(new UserNameInputDto("joeblow"))
+
+        then:
+        assert profile != null
+        assert profile.getOrgUserName() == "joeblow"
+    }
+
+    def "should update org profile email property"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        when:
+
+        accountClient.login()
+
+        1 * mockEmailCapability.sendEmailToValidateOrgAccountProfileAddress(_, _) >> { email, token -> ticketCode = token; return null}
+
+        UserProfileDto profile = accountClient.updateOrgProfileEmail(new EmailInputDto("joe@blow.com"))
+
+        accountClient.validateOrgProfileEmail(ticketCode)
+
+        UserProfileDto profileAfterUpdate = accountClient.getProfile()
+
+        then:
+        assert profile != null
+        assert profile.getOrgEmail() == "joe@blow.com (pending validation)"
+
+        assert profileAfterUpdate != null
+        assert profileAfterUpdate.getOrgEmail() == "joe@blow.com"
     }
 
     def "should logout"() {
