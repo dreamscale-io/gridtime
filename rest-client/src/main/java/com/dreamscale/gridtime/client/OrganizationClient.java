@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import feign.Headers;
@@ -47,6 +48,9 @@ public interface OrganizationClient {
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH)
     SimpleStatusDto joinOrganizationWithInvitationAndEmail(JoinRequestInputDto joinRequestInputDto);
+
+    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.INVITE_PATH)
+    SimpleStatusDto inviteToOrganizationWithEmail(EmailInputDto emailInputDto);
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH + ResourcePaths.EMAIL_PATH +
             ResourcePaths.VALIDATE_PATH + "?validationCode={validationCode}")

@@ -26,4 +26,7 @@ public interface OrganizationMemberRepository extends CrudRepository<Organizatio
             "select 1 from active_account_status aas where aas.root_account_id = om.root_account_id  "+
             "and aas.logged_in_organization_id = om.organization_id ) ")
     OrganizationMemberEntity findByActiveOrganizationAndRootAccountId(@Param("rootAccountId") UUID rootAccountId);
+
+    OrganizationMemberEntity findByOrganizationIdAndEmail(UUID organizationId, String email);
+
 }

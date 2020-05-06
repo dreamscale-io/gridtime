@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.capability.integration;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.sendgrid.*;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,9 @@ public class EmailCapability {
 
     @Value( "${gridtime.sitelink.url}" )
     private String sitelinkUrl;
+
+    @Value( "${torchie.downloadlink.url}" )
+    private String downloadLinkUrl;
 
     @Value( "${sendgrid.mail.from-address}" )
     private String fromAddress;
@@ -55,7 +59,7 @@ public class EmailCapability {
 
         Mail mail = new Mail();
         mail.setFrom(new Email(fromAddress, fromName));
-        mail.setSubject("Activate Your Account");
+        mail.setSubject("Activate Your Torchie Account");
         mail.setReplyTo(new Email(fromAddress, fromName));
 
         Personalization personalization = new Personalization();
@@ -67,7 +71,58 @@ public class EmailCapability {
 
         Content content = new Content();
         content.setType("text/html");
-        content.setValue("<html><body> <p> Use this Token to Activate Your Account:</p><p>"+activationToken+"</p></body></html>");
+        content.setValue("<html><body> <p> To install Torchie Shell, first download the latest release here:</p>" +
+                "<p><a href='"+downloadLinkUrl+ "' > Download Torchie Shell</a></p>" +
+                "<br/><p>Then use this token to activate Your Torchie account:</p><p>"+activationToken+"</p></body></html>");
+        mail.addContent(content);
+
+        SendGrid sg = new SendGrid(apiKey);
+        Request request = new Request();
+
+        SimpleStatusDto responseDto = null;
+        try {
+            request.method = Method.POST;
+            request.endpoint = "mail/send";
+            request.body = mail.build();
+            Response response = sg.api(request);
+
+            if (response.statusCode == 200) {
+                responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
+            } else {
+                responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
+            }
+        } catch (IOException ex) {
+            responseDto = new SimpleStatusDto(Status.FAILED, ex.getMessage());
+
+            log.error("Unable to send email to "+toEmailAddress, ex);
+        }
+
+        return responseDto;
+    }
+
+
+
+    public SimpleStatusDto sendDownloadActivateAndOrgInviteEmail(String toEmailAddress, OrganizationDto org, String ticketCode) {
+        Mail mail = new Mail();
+        mail.setFrom(new Email(fromAddress, fromName));
+        mail.setSubject("You've been invited to join "+org.getDomainName() + " in hyperspace.");
+        mail.setReplyTo(new Email(fromAddress, fromName));
+
+        Personalization personalization = new Personalization();
+        Email to = new Email();
+        to.setEmail(toEmailAddress);
+        personalization.addTo(to);
+
+        mail.addPersonalization(personalization);
+
+        Content content = new Content();
+        content.setType("text/html");
+        content.setValue("<html><body> <p> You've been invited to join " + org.getDomainName() + " in hyperspace.</p>" +
+                        "<p>If you already have an existing Torchie Account, you can join the organization within the app, " +
+                "by selecting 'Use Invitation Key' from the help menu, and pasting in : </p>"+
+                "<p>" + ticketCode + "</p><br/><p>If you don't have an existing Torchie Account, first download Torchie Shell here: " +
+                "<p><a href='"+downloadLinkUrl+ "' > Download Torchie Shell</a></p> " +
+                "and use this same token to activate your Torchie Account, and you will be automatically joined to the organization.</p></body></html>");
         mail.addContent(content);
 
         SendGrid sg = new SendGrid(apiKey);
@@ -156,7 +211,7 @@ public class EmailCapability {
 
         Mail mail = new Mail();
         mail.setFrom(new Email(fromAddress, fromName));
-        mail.setSubject("Reset Your Account");
+        mail.setSubject("Reset Your Torchie Account");
         mail.setReplyTo(new Email(fromAddress, fromName));
 
         Personalization personalization = new Personalization();
@@ -168,7 +223,10 @@ public class EmailCapability {
 
         Content content = new Content();
         content.setType("text/html");
-        content.setValue("<html><body> <p> Use this Token to Re-Activate Your Account:</p><p>"+activationToken+"</p></body></html>");
+
+        content.setValue("<html><body> <p> If you need to install Torchie Shell, first download the latest release here:</p>" +
+                "<p><a href='"+downloadLinkUrl+ "' > Download Torchie Shell</a></p>" +
+                "<br/><p>Then use this token to re-activate your account:</p><p>"+activationToken+"</p></body></html>");
         mail.addContent(content);
 
         SendGrid sg = new SendGrid(apiKey);
@@ -194,7 +252,5 @@ public class EmailCapability {
 
         return responseDto;
     }
-
-
 
 }

@@ -113,6 +113,7 @@ public class ResourcePaths {
     public static final String EMIT_PATH = "/emit";
     public static final String JOIN_PATH = "/join";
     public static final String LEAVE_PATH = "/leave";
+    public static final String INVITE_PATH = "/invite";
 
     public static final String SCREENSHOT_PATH = "/screenshot";
     public static final String SNIPPET_PATH = "/snippet";

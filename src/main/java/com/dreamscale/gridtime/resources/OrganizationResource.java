@@ -1,10 +1,12 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
+import feign.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -133,6 +135,24 @@ public class OrganizationResource {
         return organizationCapability.joinOrganizationWithInvitationAndEmail(context.getRootAccountId(), joinRequestInputDto);
     }
 
+    /**
+     * Invites a user to an existing organization by supplying the users email
+     *
+     * If this user has an existing account, they should be able to join the org in connection with their new account
+     *
+     * If this user is new, they should be able to setup a new root account, using this email
+     *
+     * @return SimpleStatusDto SENT if the invitation email is sent
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.INVITE_PATH)
+    public SimpleStatusDto inviteToOrganizationWithEmail(@RequestBody EmailInputDto emailInputDto) {
+
+        RequestContext context = RequestContext.get();
+        log.info("inviteToOrganizationWithEmail, user={}", context.getRootAccountId());
+
+        return organizationCapability.inviteToOrganizationWithEmail(context.getRootAccountId(), emailInputDto.getEmail());
+    }
 
     /**
      * Validates the organization member has access to the specified email,

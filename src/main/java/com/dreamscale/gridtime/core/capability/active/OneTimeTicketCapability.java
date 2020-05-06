@@ -33,6 +33,26 @@ public class OneTimeTicketCapability {
         return oneTimeTicket;
     }
 
+    public OneTimeTicketEntity issueOneTimeActivateAndInviteTicket(LocalDateTime now, UUID ticketOwnerId, UUID organizationId, String orgEmail) {
+        OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
+        oneTimeTicket.setId(UUID.randomUUID());
+        oneTimeTicket.setOwnerId(ticketOwnerId);
+        oneTimeTicket.setTicketType(TicketType.ACTIVATE_AND_INVITE);
+        oneTimeTicket.setTicketCode(generateTicketCode());
+        oneTimeTicket.setIssueDate(now);
+        oneTimeTicket.setExpirationDate(now.plusDays(1));
+
+        Map<String, String> props = DefaultCollections.map();
+        props.put(OneTimeTicketEntity.EMAIL_PROP, orgEmail);
+        props.put(OneTimeTicketEntity.ORGANIZATION_ID_PROP, organizationId.toString());
+
+        oneTimeTicket.setJsonProps(JSONTransformer.toJson(props));
+
+        oneTimeTicketRepository.save(oneTimeTicket);
+        return oneTimeTicket;
+    }
+
+
     public OneTimeTicketEntity issueOneTimeEmailValidationTicket(LocalDateTime now, UUID ticketOwnerId, String newEmail) {
         OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
         oneTimeTicket.setId(UUID.randomUUID());
@@ -69,6 +89,8 @@ public class OneTimeTicketCapability {
         oneTimeTicketRepository.save(oneTimeTicket);
         return oneTimeTicket;
     }
+
+
 
     //
 

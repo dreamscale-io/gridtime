@@ -6,6 +6,6 @@ import java.util.Map;
 
 public enum TicketType {
 
-    ACTIVATION, EMAIL_VALIDATION;
+    ACTIVATION, EMAIL_VALIDATION, ACTIVATE_AND_INVITE;
 
 }

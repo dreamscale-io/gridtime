@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.capability.directory;
 
+import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
@@ -197,6 +198,45 @@ public class OrganizationCapability {
         return statusDto;
     }
 
+
+    @Transactional
+    public SimpleStatusDto inviteToOrganizationWithEmail(UUID rootAccountId, String email) {
+
+        OrganizationDto org = getActiveOrganization(rootAccountId);
+
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(org.getId());
+
+        validateSubscriptionFound(subscription);
+        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+        LocalDateTime now = gridClock.now();
+
+        String standardizedEmail = email.toLowerCase();
+
+        if (requiresEmailMatch(subscription)) {
+            validateEmailWithinDomain(standardizedEmail, org.getDomainName());
+        }
+
+        //see if this person is already a member
+
+        validateNoExistingMembership(org.getId(), standardizedEmail);
+
+        //send invite or join email
+
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteTicket(now, rootAccountId, org.getId(), standardizedEmail);
+
+        //so this code could come back through, an activation, or this "invite key" API, that needs to allow invite to anything
+
+        //invite XXX to org
+        //invite XXX to public
+
+        //TODO build this API to do the invite key thing
+        //TODO enable the code use for activation
+
+        return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
+    }
+
+
     public SimpleStatusDto validateMemberEmailAndJoin(String validationCode) {
 
         OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.findByTicketCode(validationCode);
@@ -305,6 +345,17 @@ public class OrganizationCapability {
         if (subscription.getSeatsRemaining() <= 0) {
             throw new ConflictException(ConflictErrorCodes.NO_SEATS_AVAILABLE, "No seats available, check with your admin about increasing capacity.");
         }
+    }
+
+    private void validateNoExistingMembership(UUID organizationId, String standardizedEmail) {
+
+        OrganizationMemberEntity existingMembership = organizationMemberRepository.findByOrganizationIdAndEmail(organizationId, standardizedEmail);
+
+        if (existingMembership != null) {
+            throw new ConflictException(ConflictErrorCodes.MEMBER_ALREADY_ADDED, "Member "+standardizedEmail + " already added to organization.");
+
+        }
+
     }
 
     private void validateEmailWithinDomain(String standardizedEmail, String domainName) {

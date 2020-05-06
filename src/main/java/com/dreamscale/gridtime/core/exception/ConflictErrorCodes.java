@@ -16,7 +16,8 @@ public enum ConflictErrorCodes implements ErrorCodes {
     ORG_DOMAIN_ALREADY_IN_USE(7, CONFLICT),
     NO_SEATS_AVAILABLE(8, CONFLICT),
     CONFLICTING_ACTIVE_CIRCUIT(9, CONFLICT),
-    ACCOUNT_ALREADY_ADDED(10, CONFLICT);
+    ACCOUNT_ALREADY_ADDED(10, CONFLICT),
+    MEMBER_ALREADY_ADDED(11, CONFLICT);
 
     private int subcode;
     private ConflictErrorCodeGroups errorCodeGroup;
