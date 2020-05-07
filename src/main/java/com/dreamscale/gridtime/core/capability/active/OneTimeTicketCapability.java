@@ -37,7 +37,7 @@ public class OneTimeTicketCapability {
         OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
         oneTimeTicket.setId(UUID.randomUUID());
         oneTimeTicket.setOwnerId(ticketOwnerId);
-        oneTimeTicket.setTicketType(TicketType.ACTIVATE_AND_INVITE);
+        oneTimeTicket.setTicketType(TicketType.ACTIVATE_AND_INVITE_TO_ORG);
         oneTimeTicket.setTicketCode(generateTicketCode());
         oneTimeTicket.setIssueDate(now);
         oneTimeTicket.setExpirationDate(now.plusDays(1));

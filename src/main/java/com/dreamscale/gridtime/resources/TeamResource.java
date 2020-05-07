@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,10 +27,8 @@ public class TeamResource {
     private OrganizationCapability organizationCapability;
 
     @Autowired
-    private TeamMembershipCapability teamMembership;
+    private TeamCapability teamCapability;
 
-    @Autowired
-    private TeamCircuitOperator teamCircuitOperator;
 
     /**
      * Get all the teams for the Organization
@@ -43,7 +41,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.getAllTeams(invokingMember.getOrganizationId());
+        return teamCapability.getAllTeams(invokingMember.getOrganizationId());
     }
 
     /**
@@ -60,7 +58,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.createTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+        return teamCapability.createTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
     }
 
 
@@ -76,7 +74,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.getTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+        return teamCapability.getTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
     }
 
     /**
@@ -89,7 +87,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.getMyActiveTeam(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamCapability.getMyActiveTeam(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -102,7 +100,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.setMyHomeTeam(invokingMember.getOrganizationId(), invokingMember.getId(), homeTeamConfigInputDto.getHomeTeam());
+        return teamCapability.setMyHomeTeam(invokingMember.getOrganizationId(), invokingMember.getId(), homeTeamConfigInputDto.getHomeTeam());
     }
 
 
@@ -116,7 +114,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.getMyParticipatingTeams(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamCapability.getMyParticipatingTeams(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
@@ -133,7 +131,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.addMemberToTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+        return teamCapability.addMemberToTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
     }
 
     /**
@@ -152,7 +150,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.addMemberToTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
+        return teamCapability.addMemberToTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
     }
 
 
@@ -170,7 +168,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.removeMemberFromTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+        return teamCapability.removeMemberFromTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
     }
 
 
@@ -188,6 +186,6 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamMembership.removeMemberFromTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
+        return teamCapability.removeMemberFromTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
     }
 }

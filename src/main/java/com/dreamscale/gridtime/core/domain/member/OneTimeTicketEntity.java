@@ -21,7 +21,7 @@ public class OneTimeTicketEntity {
 
     public static final String EMAIL_PROP = "email";
     public static final String ORGANIZATION_ID_PROP = "organizationId";
-
+    public static final String TEAM_ID_PROP = "teamId";
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -70,6 +70,19 @@ public class OneTimeTicketEntity {
 
         if (props != null) {
             String prop = props.get(ORGANIZATION_ID_PROP);
+            if (prop != null) {
+                return UUID.fromString(prop);
+            }
+        }
+
+        return null;
+    }
+
+    public UUID getTeamIdProp() {
+        Map<String, String> props = getProps();
+
+        if (props != null) {
+            String prop = props.get(TEAM_ID_PROP);
             if (prop != null) {
                 return UUID.fromString(prop);
             }

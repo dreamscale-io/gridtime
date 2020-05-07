@@ -31,7 +31,7 @@ import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -50,7 +50,7 @@ class ZoomableTeamBoxLocasSpec extends Specification {
     CalendarService calendarService;
 
     @Autowired
-    TeamMembershipCapability teamService
+    TeamCapability teamCapability
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -103,11 +103,11 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         projectId = UUID.randomUUID()
 
-        team = teamService.createTeam(org.getId(), member1.getId(), "Team23")
+        team = teamCapability.createTeam(org.getId(), member1.getId(), "Team23")
 
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         time1 = clockStart.plusMinutes(1)

@@ -24,7 +24,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -46,7 +46,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     CalendarService calendarService;
 
     @Autowired
-    TeamMembershipCapability teamService
+    TeamCapability teamCapability
 
     @Autowired
     OrganizationRepository organizationRepository
@@ -95,11 +95,11 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         member2 = createMembership(org.getId())
         member3 = createMembership(org.getId())
 
-        team = teamService.createTeam(org.getId(), member1.getId(), "Team23")
+        team = teamCapability.createTeam(org.getId(), member1.getId(), "Team23")
 
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
-        teamService.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member1.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
+        teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
 
         ideaFlowTeamAggregatorLocas = locasFactory.createIdeaFlowTeamAggregatorLocas(team.getId());
 

@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.capability.directory;
 
-import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
@@ -17,6 +16,7 @@ import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Local;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class OrganizationCapability {
     private ActiveAccountStatusRepository activeAccountStatusRepository;
 
     @Autowired
-    private TeamMembershipCapability teamMembershipCapability;
+    private TeamCapability teamCapability;
 
 
     @Autowired
@@ -122,7 +122,7 @@ public class OrganizationCapability {
 
         organizationRepository.save(organizationEntity);
 
-        teamMembershipCapability.createEveryoneTeam(organizationEntity.getId());
+        teamCapability.createEveryoneTeam(organizationEntity.getId());
 
         OrganizationSubscriptionEntity subscriptionEntity = new OrganizationSubscriptionEntity();
 
@@ -271,6 +271,18 @@ public class OrganizationCapability {
         return simpleStatusDto;
     }
 
+    public SimpleStatusDto joinOrganization(LocalDateTime now, UUID rootAccountId, UUID organizationId, String orgEmail) {
+
+        SimpleStatusDto status = new SimpleStatusDto();
+
+        createOrgMembership(now, organizationId, rootAccountId, orgEmail);
+
+        status.setStatus(Status.JOINED);
+        status.setMessage("Member added to organization.");
+
+        return status;
+    }
+
     public OrganizationEntity findOrCreatePublicOrg() {
 
         OrganizationEntity publicOrg = organizationRepository.findByDomainName(PUBLIC_ORG_DOMAIN);
@@ -304,7 +316,7 @@ public class OrganizationCapability {
 
         if (membership == null) {
 
-            subscription.setSeatsRemaining( subscription.getSeatsRemaining() - 1);
+            subscription.setSeatsRemaining(subscription.getSeatsRemaining() - 1);
             organizationSubscriptionRepository.save(subscription);
 
             OrganizationSubscriptionSeatEntity subscriptionSeat = new OrganizationSubscriptionSeatEntity();
@@ -326,7 +338,7 @@ public class OrganizationCapability {
 
             organizationMemberRepository.save(membership);
 
-            teamMembershipCapability.addMemberToEveryone(organizationId, membership.getId());
+            teamCapability.addMemberToEveryone(organizationId, membership.getId());
         } else {
             throw new ConflictException(ConflictErrorCodes.ACCOUNT_ALREADY_ADDED, "Account already added to this organization as a member.");
         }
@@ -352,15 +364,15 @@ public class OrganizationCapability {
         OrganizationMemberEntity existingMembership = organizationMemberRepository.findByOrganizationIdAndEmail(organizationId, standardizedEmail);
 
         if (existingMembership != null) {
-            throw new ConflictException(ConflictErrorCodes.MEMBER_ALREADY_ADDED, "Member "+standardizedEmail + " already added to organization.");
+            throw new ConflictException(ConflictErrorCodes.MEMBER_ALREADY_ADDED, "Member " + standardizedEmail + " already added to organization.");
 
         }
 
     }
 
     private void validateEmailWithinDomain(String standardizedEmail, String domainName) {
-        if ( ! standardizedEmail.endsWith(domainName) ) {
-            throw new BadRequestException(ValidationErrorCodes.EMAIL_NOT_IN_DOMAIN, "Email '"+standardizedEmail+"' must be in the domain.");
+        if (!standardizedEmail.endsWith(domainName)) {
+            throw new BadRequestException(ValidationErrorCodes.EMAIL_NOT_IN_DOMAIN, "Email '" + standardizedEmail + "' must be in the domain.");
         }
     }
 
@@ -370,7 +382,7 @@ public class OrganizationCapability {
 
     private void validateTokenFound(LocalDateTime now, String inviteToken, OrganizationInviteTokenEntity tokenEntity) {
         if (tokenEntity == null || isExpired(now, tokenEntity)) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITE_TOKEN, "Invite token '"+inviteToken+"' is expired or not found.");
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invite token '" + inviteToken + "' is expired or not found.");
         }
     }
 
@@ -400,7 +412,7 @@ public class OrganizationCapability {
 
     private void validateNotNull(String fieldName, Object value) {
         if (value == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_FIELD, "field '"+fieldName + "' is required.");
+            throw new BadRequestException(ValidationErrorCodes.MISSING_FIELD, "field '" + fieldName + "' is required.");
         }
     }
 
@@ -410,17 +422,17 @@ public class OrganizationCapability {
         OrganizationEntity existingOrg = organizationRepository.findByDomainName(standardizedDomain);
 
         if (existingOrg != null) {
-            throw new ConflictException(ConflictErrorCodes.ORG_DOMAIN_ALREADY_IN_USE, "Org domain '"+domainName + "' already in use.");
+            throw new ConflictException(ConflictErrorCodes.ORG_DOMAIN_ALREADY_IN_USE, "Org domain '" + domainName + "' already in use.");
         }
     }
 
 
     private OrganizationInviteTokenEntity createInviteToken(UUID organizationId, LocalDateTime expiration) {
-            OrganizationInviteTokenEntity inviteToken = new OrganizationInviteTokenEntity();
-            inviteToken.setOrganizationId(organizationId);
-            inviteToken.setId(UUID.randomUUID());
-            inviteToken.setToken(generateToken());
-            inviteToken.setExpirationDate(expiration);
+        OrganizationInviteTokenEntity inviteToken = new OrganizationInviteTokenEntity();
+        inviteToken.setOrganizationId(organizationId);
+        inviteToken.setId(UUID.randomUUID());
+        inviteToken.setToken(generateToken());
+        inviteToken.setExpirationDate(expiration);
 
         return inviteToken;
     }
@@ -443,7 +455,7 @@ public class OrganizationCapability {
     private OrganizationEntity findPriorityOrg(List<OrganizationEntity> orgs) {
         OrganizationEntity priorityOrg = null;
 
-        for (OrganizationEntity org : orgs ) {
+        for (OrganizationEntity org : orgs) {
             if (priorityOrg == null && isPublicOrg(org)) {
                 priorityOrg = org;
             } else if (!isPublicOrg(org)) {
@@ -461,7 +473,7 @@ public class OrganizationCapability {
             activeMembership = getDefaultOrganizationMembership(rootAccountId);
         }
 
-        if (activeMembership == null ) {
+        if (activeMembership == null) {
             throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "active organization membership not found");
         }
 
@@ -502,6 +514,16 @@ public class OrganizationCapability {
         validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
 
         return subscription;
+    }
+
+    public boolean isMember(UUID organizationId, UUID rootAccountId) {
+
+        OrganizationMemberEntity member = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
+
+        if (member != null) {
+            return true;
+        }
+        return false;
     }
 
     @Transactional
@@ -555,7 +577,7 @@ public class OrganizationCapability {
 
         //any teams the member was a part of, also need removal and tombstones
 
-        teamMembershipCapability.removeMemberFromAllTeams(now, membership.getOrganizationId(), membership.getId());
+        teamCapability.removeMemberFromAllTeams(now, membership.getOrganizationId(), membership.getId());
 
         //now finally, can delete the membership entity
 
@@ -567,7 +589,7 @@ public class OrganizationCapability {
 
     private void validateMembershipFound(String domainName, OrganizationMemberEntity membership) {
         if (membership == null) {
-            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_FOUND, "No member found in organization "+domainName);
+            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_FOUND, "No member found in organization " + domainName);
         }
     }
 
@@ -587,7 +609,6 @@ public class OrganizationCapability {
     public MemberDetailsDto getMemberOfActiveOrganization(UUID rootAccountId, UUID memberId) {
         return null;
     }
-
 
 
     public void validateMemberWithinOrgByMemberId(UUID organizationId, UUID memberId) {
@@ -673,11 +694,9 @@ public class OrganizationCapability {
     }
 
 
-
     public MemberRegistrationDetailsDto joinOrganization(UUID rootAccountId, UUID organizationId, MembershipInputDto membershipInputDto) {
         return null;
     }
-
 
 
     public List<MemberDetailsDto> getOrganizationMembers(UUID rootAccountId, UUID organizationId) {
@@ -685,21 +704,15 @@ public class OrganizationCapability {
     }
 
 
-
-
-
-
-
     public OrganizationSubscriptionDto cancelSubscription(UUID rootAccountId, UUID subscriptionId) {
         return null;
     }
 
 
-
-
     public OrganizationSubscriptionDto getOrganizationSubscription(UUID rootAccountId, UUID subscriptionId) {
         return null;
     }
+
 
 
 }

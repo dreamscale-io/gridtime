@@ -28,7 +28,7 @@ public class DictionaryCapability {
     GridClock gridClock;
 
     @Autowired
-    TeamMembershipCapability teamMembership;
+    TeamCapability teamMembership;
 
     @Autowired
     TeamDictionaryWordRepository teamDictionaryWordRepository;

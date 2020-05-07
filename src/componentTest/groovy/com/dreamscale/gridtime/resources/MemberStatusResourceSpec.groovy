@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.client.MemberStatusClient
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -26,7 +26,7 @@ class MemberStatusResourceSpec extends Specification {
     RootAccountEntity testUser
 
     @Autowired
-    TeamMembershipCapability teamService
+    TeamCapability teamCapability
 
     @Autowired
     GridClock mockTimeService
@@ -60,9 +60,9 @@ class MemberStatusResourceSpec extends Specification {
         OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
         testUser.setId(member.getRootAccountId())
 
-        TeamDto team = teamService.createTeam(org.id,  member.getId(), "myTeam")
+        TeamDto team = teamCapability.createTeam(org.id,  member.getId(), "myTeam")
 
-        //teamService.addMemberToTeamWithMemberId(org.getId(), member.getId(), "myTeam", member.getId())
+        //teamCapability.addMemberToTeamWithMemberId(org.getId(), member.getId(), "myTeam", member.getId())
 
         when:
         List<MemberWorkStatusDto> members = memberStatusClient.getStatusOfMeAndMyTeam()

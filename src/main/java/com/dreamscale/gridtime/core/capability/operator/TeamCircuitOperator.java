@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
@@ -52,7 +52,7 @@ public class TeamCircuitOperator {
     private TeamCircuitTalkRoomRepository teamCircuitTalkRoomRepository;
 
     @Autowired
-    private TeamMembershipCapability teamMembership;
+    private TeamCapability teamMembership;
 
     @Autowired
     private MemberStatusCapability memberStatusCapability;

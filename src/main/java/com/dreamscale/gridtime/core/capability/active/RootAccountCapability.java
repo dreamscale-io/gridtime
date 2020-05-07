@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamMembershipCapability;
+import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.capability.operator.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
@@ -50,7 +50,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private OrganizationCapability organizationCapability;
 
     @Autowired
-    private TeamMembershipCapability teamMembership;
+    private TeamCapability teamMembership;
 
     @Autowired
     private MemberConnectionRepository memberConnectionRepository;

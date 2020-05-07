@@ -1,6 +1,8 @@
 package com.dreamscale.gridtime.core.capability.directory;
 
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
+import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.api.team.TeamMemberDto;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
@@ -27,7 +29,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class TeamMembershipCapability {
+public class TeamCapability {
 
     @Autowired
     private OrganizationCapability organizationMembership;
@@ -94,6 +96,14 @@ public class TeamMembershipCapability {
         teamMemberOutputMapper = mapperFactory.createDtoEntityMapper(TeamMemberDto.class, TeamMemberEntity.class);
     }
 
+    public SimpleStatusDto joinWithInvite(UUID rootAccountId, String invitationKey) {
+
+        //TODO join the team with an invitation key...
+        // this all needs refactoring to generalize the invitation wrapper capabilities
+
+
+        return null;
+    }
 
     @Transactional
     public TeamDto createTeam(UUID organizationId, UUID memberId, String teamName) {
@@ -429,34 +439,60 @@ public class TeamMembershipCapability {
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
 
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
+        LocalDateTime now = gridClock.now();
 
-        validateMemberFound(memberId.toString(), memberEntity);
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
+        validateMemberFound(memberId.toString(), membership);
 
-        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
+        return joinTeam(now, organizationId, membership, teamEntity);
+    }
+
+    private TeamMemberDto joinTeam(LocalDateTime now, UUID organizationId, OrganizationMemberEntity memberEntity, TeamEntity team) {
+
+        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(team.getId(), memberEntity.getId());
 
         if (teamMembership == null) {
-            log.debug("Adding member {} to team {}", memberEntity.getEmail(), standardizedTeamName);
-
-            LocalDateTime now = gridClock.now();
+            log.debug("Adding member {} to team {}", memberEntity.getEmail(), team.getName());
 
             teamMembership = new TeamMemberEntity();
             teamMembership.setId(UUID.randomUUID());
             teamMembership.setOrganizationId(organizationId);
-            teamMembership.setTeamId(teamEntity.getId());
+            teamMembership.setTeamId(team.getId());
             teamMembership.setMemberId(memberEntity.getId());
             teamMembership.setJoinDate(now);
 
             teamMemberRepository.save(teamMembership);
 
-            teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, teamEntity.getId(), memberEntity.getId());
+            teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, team.getId(), memberEntity.getId());
 
         } else {
-            log.warn("Member {} already added to team {}", memberEntity.getEmail(), standardizedTeamName);
+            log.warn("Member {} already added to team {}", memberEntity.getEmail(), team.getName());
         }
         return toDto(memberEntity.getUsername(), teamMembership);
     }
 
+    public SimpleStatusDto joinTeam(LocalDateTime now, UUID rootAccountId, UUID organizationId, UUID teamId) {
+
+        OrganizationMemberEntity member = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
+
+        validateMemberAlreadyInOrg(member);
+
+        TeamEntity team = teamRepository.findById(teamId);
+
+        TeamMemberDto teamMember = joinTeam(now, organizationId, member, team);
+
+        SimpleStatusDto status = new SimpleStatusDto();
+        status.setStatus(Status.JOINED);
+        status.setMessage("Member joined "+team.getName() + ".");
+
+        return status;
+    }
+
+    private void validateMemberAlreadyInOrg(OrganizationMemberEntity member) {
+        if (member == null) {
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Membership for user not found, please join the organization first.");
+        }
+    }
 
     @Transactional
     public TeamMemberDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {

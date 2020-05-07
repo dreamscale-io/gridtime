@@ -42,6 +42,7 @@ public class ResourcePaths {
     public static final String ROOT_PATH = "/root";
     public static final String VALIDATE_PATH = "/validate";
 
+    public static final String PUBLIC_PATH = "/public";
     public static final String ORGANIZATION_PATH = "/organization";
     public static final String SUBSCRIPTION_PATH = "/subscription";
     public static final String DIRECTORY_PATH = "/directory";
