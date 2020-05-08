@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/dreamscale/gridtime.svg?branch=master)](https://travis-ci.org/dreamscale/gridtime)
 
 # GridTime Server
-Generates zoomable tile feeds, and aggregate tile feeds from flow source data streams
+Generates zoombie tile feeds, and aggregate tile feeds from flow source data streams
 
 ## IDE Setup
 
