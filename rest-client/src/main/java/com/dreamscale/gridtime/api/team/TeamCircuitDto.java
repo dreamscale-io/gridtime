@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.api.team;
 
-import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
+import com.dreamscale.gridtime.api.organization.TeamMemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +28,7 @@ public class TeamCircuitDto {
     private UUID moderatedId;
     private String moderatorName;
 
-    List<MemberWorkStatusDto> teamMembers;
+    List<TeamMemberDto> teamMembers;
 
     List<TeamCircuitRoomDto> teamRooms;
 

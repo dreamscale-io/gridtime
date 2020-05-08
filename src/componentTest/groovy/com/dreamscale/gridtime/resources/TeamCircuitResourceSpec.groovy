@@ -154,9 +154,8 @@ class TeamCircuitResourceSpec extends Specification {
     }
 
 
-
     CircuitMemberStatusDto getMemberStatusById(List<CircuitMemberStatusDto> members, UUID memberId) {
-        for (CircuitMemberStatusDto memberStatus: members) {
+        for (CircuitMemberStatusDto memberStatus : members) {
             if (memberStatus.memberId == memberId) {
                 return memberStatus;
             }

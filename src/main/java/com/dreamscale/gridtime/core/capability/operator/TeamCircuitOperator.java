@@ -2,12 +2,12 @@ package com.dreamscale.gridtime.core.capability.operator;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
-import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
+import com.dreamscale.gridtime.api.organization.TeamMemberDto;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
+import com.dreamscale.gridtime.core.capability.active.MemberCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
 import com.dreamscale.gridtime.core.domain.circuit.*;
@@ -55,7 +55,7 @@ public class TeamCircuitOperator {
     private TeamCapability teamCapability;
 
     @Autowired
-    private MemberStatusCapability memberStatusCapability;
+    private MemberCapability memberCapability;
 
     @Autowired
     private MemberDetailsService memberDetailsService;
@@ -143,20 +143,18 @@ public class TeamCircuitOperator {
         }
     }
 
-    public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
+    public TeamCircuitDto getMyActiveTeamCircuit(UUID organizationId, UUID memberId) {
 
         TeamDto teamDto = teamCapability.getMyActiveTeam(organizationId, memberId);
 
-        List<MemberWorkStatusDto> members = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, memberId);
-
-       TeamCircuitEntity teamCircuitEntity = findOrCreateTeamCircuit(teamDto, members);
+       TeamCircuitEntity teamCircuitEntity = findOrCreateTeamCircuit(teamDto);
 
         TeamCircuitDto teamCircuitDto = new TeamCircuitDto();
 
         teamCircuitDto.setTeamId(teamDto.getId());
         teamCircuitDto.setOrganizationId(organizationId);
         teamCircuitDto.setTeamName(teamDto.getName());
-        teamCircuitDto.setTeamMembers(members);
+        teamCircuitDto.setTeamMembers(teamDto.getTeamMembers());
 
         teamCircuitDto.setOwnerId(teamCircuitEntity.getOwnerId());
         teamCircuitDto.setModeratedId(teamCircuitEntity.getModeratorId());
@@ -187,7 +185,7 @@ public class TeamCircuitOperator {
     public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
 
         String userName = organizationMembership.getUsernameForMemberId(memberFromId);
-        TeamCircuitDto teamCircuit = getMyPrimaryTeamCircuit(organizationId, memberFromId);
+        TeamCircuitDto teamCircuit = getMyActiveTeamCircuit(organizationId, memberFromId);
 
         IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
 
@@ -259,7 +257,7 @@ public class TeamCircuitOperator {
         notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED);
     }
 
-    public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, MemberWorkStatusDto memberStatusDto) {
+    public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, TeamMemberDto memberStatusDto) {
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
@@ -518,12 +516,12 @@ public class TeamCircuitOperator {
         return teamCircuitRoomDtos;
     }
 
-    private TeamCircuitEntity findOrCreateTeamCircuit(TeamDto team, List<MemberWorkStatusDto> teamMembers) {
+    private TeamCircuitEntity findOrCreateTeamCircuit(TeamDto team) {
 
         TeamCircuitEntity teamCircuit = teamCircuitRepository.findByTeamId(team.getId());
 
         if (teamCircuit == null) {
-            teamCircuit = createTeamCircuit(team, teamMembers);
+            teamCircuit = createTeamCircuit(team);
         }
 
         return teamCircuit;
@@ -610,7 +608,7 @@ public class TeamCircuitOperator {
         return teamCircuitEntity;
     }
 
-    private TeamCircuitEntity createTeamCircuit(TeamDto team, List<MemberWorkStatusDto> teamMembers) {
+    private TeamCircuitEntity createTeamCircuit(TeamDto team) {
         TalkRoomEntity defaultTalkRoom = new TalkRoomEntity();
         defaultTalkRoom.setId(UUID.randomUUID());
         defaultTalkRoom.setOrganizationId(team.getOrganizationId());
@@ -624,8 +622,8 @@ public class TeamCircuitOperator {
         teamCircuitEntity.setOrganizationId(team.getOrganizationId());
         teamCircuitEntity.setTeamId(team.getId());
         teamCircuitEntity.setTeamRoomId(defaultTalkRoom.getId());
-        teamCircuitEntity.setOwnerId(getFirstMemberId(teamMembers));
-        teamCircuitEntity.setModeratorId(getFirstMemberId(teamMembers));
+        teamCircuitEntity.setOwnerId(getFirstMemberId(team.getTeamMembers()));
+        teamCircuitEntity.setModeratorId(getFirstMemberId(team.getTeamMembers()));
 
         teamCircuitRepository.save(teamCircuitEntity);
 
@@ -633,7 +631,7 @@ public class TeamCircuitOperator {
 
         List<TalkRoomMemberEntity> talkRoomMembers = new ArrayList<>();
 
-        for (MemberWorkStatusDto teamMember : teamMembers) {
+        for (TeamMemberDto teamMember : team.getTeamMembers()) {
 
             TalkRoomMemberEntity talkRoomMember = new TalkRoomMemberEntity();
             talkRoomMember.setId(UUID.randomUUID());
@@ -650,7 +648,7 @@ public class TeamCircuitOperator {
         return teamCircuitEntity;
     }
 
-    private UUID getFirstMemberId(List<MemberWorkStatusDto> teamMembers) {
+    private UUID getFirstMemberId(List<TeamMemberDto> teamMembers) {
         UUID memberId = null;
 
         if (teamMembers != null && teamMembers.size() > 0) {

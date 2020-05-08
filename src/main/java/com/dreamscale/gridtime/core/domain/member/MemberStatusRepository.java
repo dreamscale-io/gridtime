@@ -27,4 +27,5 @@ public interface MemberStatusRepository extends CrudRepository<MemberStatusEntit
     MemberStatusEntity findById(UUID memberId);
 
     MemberStatusEntity findByOrganizationIdAndId(UUID organizationId, UUID memberId);
+
 }

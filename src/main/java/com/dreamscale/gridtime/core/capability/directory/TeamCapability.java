@@ -4,8 +4,8 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.api.team.TeamMemberDto;
-import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
+import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
+import com.dreamscale.gridtime.core.capability.active.MemberCapability;
 import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
@@ -68,7 +68,7 @@ public class TeamCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    private MemberStatusCapability memberStatusCapability;
+    private MemberCapability memberCapability;
 
     @Autowired
     private TeamMemberTombstoneRepository teamMemberTombstoneRepository;
@@ -86,14 +86,14 @@ public class TeamCapability {
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamDto, TeamEntity> teamOutputMapper;
 
-    private DtoEntityMapper<TeamMemberDto, TeamMemberEntity> teamMemberOutputMapper;
+    private DtoEntityMapper<TeamMemberOldDto, TeamMemberEntity> teamMemberOutputMapper;
 
 
 
     @PostConstruct
     private void init() {
         teamOutputMapper = mapperFactory.createDtoEntityMapper(TeamDto.class, TeamEntity.class);
-        teamMemberOutputMapper = mapperFactory.createDtoEntityMapper(TeamMemberDto.class, TeamMemberEntity.class);
+        teamMemberOutputMapper = mapperFactory.createDtoEntityMapper(TeamMemberOldDto.class, TeamMemberEntity.class);
     }
 
     public SimpleStatusDto joinWithInvite(UUID rootAccountId, String invitationKey) {
@@ -289,6 +289,7 @@ public class TeamCapability {
     @Transactional
     public TeamDto getMyActiveTeam(UUID orgId, UUID memberId) {
 
+        //TODO okay, why is this returning null?
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(orgId, memberId);
 
         TeamEntity defaultTeam = null;
@@ -313,7 +314,10 @@ public class TeamCapability {
             defaultTeam = teamRepository.findById(teamMemberHomeConfig.getHomeTeamId());
         }
 
-        return teamOutputMapper.toApi(defaultTeam);
+        TeamDto team = teamOutputMapper.toApi(defaultTeam);
+
+        fillTeamWithTeamMembers(team);
+        return team;
     }
 
 
@@ -354,7 +358,7 @@ public class TeamCapability {
 
         validateTeamMemberFound(standardizeTeamName, teamMember);
 
-        List<MemberWorkStatusDto> memberStatusList = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, invokingMemberId);
+        List<TeamMemberDto> memberStatusList = memberCapability.getMeAndMyTeam(organizationId, invokingMemberId);
 
         TeamWithMembersDto teamWithMembersDto = new TeamWithMembersDto();
         teamWithMembersDto.setTeamId(teamEntity.getId());
@@ -396,7 +400,7 @@ public class TeamCapability {
         return teamOutputMapper.toApi(teamEntity);
     }
 
-    public TeamMemberDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
+    public TeamMemberOldDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -430,7 +434,7 @@ public class TeamCapability {
         return toDto(userName, teamMembership);
     }
 
-    public TeamMemberDto addMemberToTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
+    public TeamMemberOldDto addMemberToTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
         String standardizedTeamName = standardizeForSearch(teamName);
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
@@ -447,7 +451,7 @@ public class TeamCapability {
         return joinTeam(now, organizationId, membership, teamEntity);
     }
 
-    private TeamMemberDto joinTeam(LocalDateTime now, UUID organizationId, OrganizationMemberEntity memberEntity, TeamEntity team) {
+    private TeamMemberOldDto joinTeam(LocalDateTime now, UUID organizationId, OrganizationMemberEntity memberEntity, TeamEntity team) {
 
         TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(team.getId(), memberEntity.getId());
 
@@ -479,7 +483,7 @@ public class TeamCapability {
 
         TeamEntity team = teamRepository.findById(teamId);
 
-        TeamMemberDto teamMember = joinTeam(now, organizationId, member, team);
+        TeamMemberOldDto teamMember = joinTeam(now, organizationId, member, team);
 
         SimpleStatusDto status = new SimpleStatusDto();
         status.setStatus(Status.JOINED);
@@ -495,7 +499,7 @@ public class TeamCapability {
     }
 
     @Transactional
-    public TeamMemberDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
+    public TeamMemberOldDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -515,7 +519,7 @@ public class TeamCapability {
         return removeTeamMemberAndCreateTombstone(now, organizationId, teamEntity, memberEntity.getId());
     }
 
-    public TeamMemberDto removeMemberFromTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
+    public TeamMemberOldDto removeMemberFromTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -544,7 +548,7 @@ public class TeamCapability {
 
     }
 
-    private TeamMemberDto removeTeamMemberAndCreateTombstone(LocalDateTime now, UUID organizationId, TeamEntity teamEntity, UUID memberId) {
+    private TeamMemberOldDto removeTeamMemberAndCreateTombstone(LocalDateTime now, UUID organizationId, TeamEntity teamEntity, UUID memberId) {
 
         TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberId);
 
@@ -579,15 +583,15 @@ public class TeamCapability {
         return toDto(memberUserName, teamMembership);
     }
 
-    private TeamMemberDto toDto(String userName, TeamMemberEntity teamMembership) {
-        TeamMemberDto teamMemberDto = teamMemberOutputMapper.toApi(teamMembership);
+    private TeamMemberOldDto toDto(String userName, TeamMemberEntity teamMembership) {
+        TeamMemberOldDto teamMemberDto = teamMemberOutputMapper.toApi(teamMembership);
 
         teamMemberDto.setUserName(userName);
 
         return teamMemberDto;
     }
 
-    public List<TeamDto> getMyParticipatingTeams(UUID organizationId, UUID invokingMemberId) {
+    public List<TeamDto> getMyParticipatingTeamsWithMembers(UUID organizationId, UUID invokingMemberId) {
 
         List<TeamEntity> teams = teamRepository.findMyTeamsByOrgMembership(organizationId, invokingMemberId);
 
@@ -595,10 +599,39 @@ public class TeamCapability {
 
         TeamDto homeTeam = getMyActiveTeam(organizationId, invokingMemberId);
 
+        List<TeamDto> sortedTeams = sortTeams(homeTeam, null, teamDtos);
+
+        fillTeamDtosWithTeamMembers(sortedTeams);
+
+        return sortedTeams;
+    }
+
+    public List<TeamDto> getMyParticipatingTeamsWithoutMembers(UUID organizationId, UUID invokingMemberId) {
+
+        List<TeamEntity> teams = teamRepository.findMyTeamsByOrgMembership(organizationId, invokingMemberId);
+
+        List<TeamDto> teamDtos = teamOutputMapper.toApiList(teams);
+
+        TeamDto homeTeam = getMyActiveTeam(organizationId, invokingMemberId);
         TeamDto everyoneTeam = findEveryoneTeam(teamDtos);
 
         return sortTeams(homeTeam, everyoneTeam, teamDtos);
     }
+
+    private void fillTeamDtosWithTeamMembers(List<TeamDto> sortedTeams) {
+        for (TeamDto team : sortedTeams) {
+
+            fillTeamWithTeamMembers(team);
+        }
+    }
+
+    private void fillTeamWithTeamMembers(TeamDto team) {
+        if (team != null) {
+            List<TeamMemberDto> membersWithDetails = memberCapability.getMembersForTeam(team.getOrganizationId(), team.getId());
+            team.setTeamMembers(membersWithDetails);
+        }
+    }
+
 
     private TeamDto findEveryoneTeam(List<TeamDto> teamDtos) {
 

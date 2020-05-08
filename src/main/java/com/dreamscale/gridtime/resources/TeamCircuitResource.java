@@ -34,14 +34,14 @@ public class TeamCircuitResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.HOME_PATH)
-    public TeamCircuitDto getMyTeamCircuit() {
+    public TeamCircuitDto getMyHomeTeamCircuit() {
 
         RequestContext context = RequestContext.get();
-        log.info("getMyTeamCircuit, user={}", context.getRootAccountId());
+        log.info("getMyHomeTeamCircuit, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamCircuitOperator.getMyPrimaryTeamCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamCircuitOperator.getMyActiveTeamCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**

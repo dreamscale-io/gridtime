@@ -9,9 +9,13 @@ class RandomTeamEntityBuilder extends TeamEntity.TeamEntityBuilder {
 
     RandomTeamEntityBuilder(TeamRepository teamRepository) {
 		this.teamRepository = teamRepository
+
+		String name = aRandom.firstName()
 		id(aRandom.uuid())
-				.name(aRandom.firstName())
+				.name(name)
+				.lowerCaseName(name.toLowerCase())
 				.organizationId(aRandom.uuid())
+				.creatorId(aRandom.uuid())
 	}
 
 	TeamEntity save() {

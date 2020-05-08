@@ -1,9 +1,8 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto
-import com.dreamscale.gridtime.api.team.TeamDto
-import com.dreamscale.gridtime.client.MemberStatusClient
+import com.dreamscale.gridtime.api.organization.TeamMemberDto
+import com.dreamscale.gridtime.client.MemberClient
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -17,10 +16,10 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class MemberStatusResourceSpec extends Specification {
+class MemberResourceSpec extends Specification {
 
     @Autowired
-    MemberStatusClient memberStatusClient
+    MemberClient memberClient
 
     @Autowired
     RootAccountEntity testUser
@@ -44,34 +43,12 @@ class MemberStatusResourceSpec extends Specification {
         testUser.setId(member.getRootAccountId())
 
         when:
-        MemberWorkStatusDto memberWorkStatusDto = memberStatusClient.getMyCurrentStatus()
+        TeamMemberDto memberWorkStatusDto = memberClient.getMe()
 
         then:
         assert memberWorkStatusDto != null
         assert memberWorkStatusDto.getUsername() != null;
 
-    }
-
-    def "should return status for current team"() {
-        given:
-
-        RootAccountEntity account = aRandom.rootAccountEntity().save()
-        OrganizationEntity org = aRandom.organizationEntity().save()
-        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
-        testUser.setId(member.getRootAccountId())
-
-        TeamDto team = teamCapability.createTeam(org.id,  member.getId(), "myTeam")
-
-        //teamCapability.addMemberToTeamWithMemberId(org.getId(), member.getId(), "myTeam", member.getId())
-
-        when:
-        List<MemberWorkStatusDto> members = memberStatusClient.getStatusOfMeAndMyTeam()
-
-        then:
-        assert members != null
-        assert members.size() > 0
-
-        assert members.get(0).getUsername() != null;
     }
 
 }

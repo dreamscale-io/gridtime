@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberWorkStatusDto implements MessageDetailsBody {
+public class TeamMemberDto implements MessageDetailsBody {
     private UUID id;
 
     private String email;

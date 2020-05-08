@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class MemberStatusCapability {
+public class MemberCapability {
 
     @Autowired
     private SpiritNetworkOperator xpService;
@@ -36,75 +36,82 @@ public class MemberStatusCapability {
 
     @Autowired
     private MapperFactory mapperFactory;
-    private DtoEntityMapper<MemberWorkStatusDto, MemberStatusEntity> memberStatusMapper;
+    private DtoEntityMapper<TeamMemberDto, MemberStatusEntity> memberStatusMapper;
 
     @Autowired
     private GridClock gridClock;
 
     @PostConstruct
     private void init() {
-        memberStatusMapper = mapperFactory.createDtoEntityMapper(MemberWorkStatusDto.class, MemberStatusEntity.class);
+        memberStatusMapper = mapperFactory.createDtoEntityMapper(TeamMemberDto.class, MemberStatusEntity.class);
     }
 
-    public MemberWorkStatusDto getMyCurrentStatus(UUID organizationId, UUID memberId) {
-
-        MemberStatusEntity memberStatusEntity = memberStatusRepository.findById(memberId);
-        log.debug("Who am I? "+memberStatusEntity.getId() + ", "+memberStatusEntity.getFullName());
-
+    public TeamMemberDto getMyCurrentStatus(UUID organizationId, UUID memberId) {
+        MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
         return toDtoWithDetails(memberStatusEntity);
     }
-
 
     public List<MemberStatusEntity> getTeamMemberStatuses(UUID teamId) {
 
         return memberStatusRepository.findByTeamId(teamId);
-
     }
 
-    public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId, UUID teamId) {
-
-        LinkedList<MemberWorkStatusDto> memberWorkStatusDtos = new LinkedList<>();
+    public List<TeamMemberDto> getMeAndMyTeam(UUID organizationId, UUID memberId, UUID teamId) {
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
-        for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
-            memberWorkStatusDtos.add(toDtoWithDetails(memberStatusEntity));
-        }
-        sortMembers(memberWorkStatusDtos);
 
-        memberWorkStatusDtos.addFirst(getMyCurrentStatus(organizationId, memberId));
+        MemberStatusEntity meStatus = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
 
-        return memberWorkStatusDtos;
+        return toStatusDtos(meStatus, teamMemberStatusEntities);
     }
 
-    public List<MemberWorkStatusDto> getStatusOfMeAndMyTeam(UUID organizationId, UUID memberId) {
+    public List<TeamMemberDto> getMembersForTeam(UUID organizationId, UUID teamId) {
+
+        List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamId(teamId);
+
+        return toStatusDtos(null, teamMemberStatusEntities);
+    }
+
+    public List<TeamMemberDto> getMeAndMyTeam(UUID organizationId, UUID memberId) {
 
         List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);
 
         UUID teamId = teamEntityList.get(0).getId();
 
-        LinkedList<MemberWorkStatusDto> memberWorkStatusDtos = new LinkedList<>();
+        LinkedList<TeamMemberDto> teamMemberDtos = new LinkedList<>();
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
-        for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
-            memberWorkStatusDtos.add(toDtoWithDetails(memberStatusEntity));
-        }
-        sortMembers(memberWorkStatusDtos);
+        MemberStatusEntity meStatus = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
 
-        memberWorkStatusDtos.addFirst(getMyCurrentStatus(organizationId, memberId));
+        toStatusDtos(meStatus, teamMemberStatusEntities);
 
-        return memberWorkStatusDtos;
+        return teamMemberDtos;
     }
 
-    public MemberWorkStatusDto getStatusOfMember(UUID organizationId, UUID memberId) {
+    private LinkedList<TeamMemberDto> toStatusDtos(MemberStatusEntity meStatus, List<MemberStatusEntity> teamMemberStatusEntities) {
+        LinkedList<TeamMemberDto> teamMemberDtos = new LinkedList<>();
+
+        for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
+            teamMemberDtos.add(toDtoWithDetails(memberStatusEntity));
+        }
+        sortMembers(teamMemberDtos);
+
+        if (meStatus != null) {
+            teamMemberDtos.addFirst(toDtoWithDetails(meStatus));
+        }
+
+        return teamMemberDtos;
+    }
+
+    public TeamMemberDto getStatusOfMember(UUID organizationId, UUID memberId) {
 
         MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
 
         return toDtoWithDetails(memberStatusEntity);
     }
 
-
-    private MemberWorkStatusDto toDtoWithDetails(MemberStatusEntity memberStatusEntity) {
-        MemberWorkStatusDto memberStatusDto = memberStatusMapper.toApi(memberStatusEntity);
+    private TeamMemberDto toDtoWithDetails(MemberStatusEntity memberStatusEntity) {
+        TeamMemberDto memberStatusDto = memberStatusMapper.toApi(memberStatusEntity);
 
         XPSummaryDto xpSummary = xpService.translateToXPSummary(memberStatusEntity.getTotalXp());
         memberStatusDto.setXpSummary(xpSummary);
@@ -120,8 +127,6 @@ public class MemberStatusCapability {
         return memberStatusDto;
     }
 
-
-
     private String createDisplayName(String fullName) {
         String shortName = fullName;
         if (fullName != null && fullName.contains(" ")) {
@@ -130,7 +135,7 @@ public class MemberStatusCapability {
         return shortName;
     }
 
-    private void sortMembers(List<MemberWorkStatusDto> teamMembers) {
+    private void sortMembers(List<TeamMemberDto> teamMembers) {
 
         teamMembers.sort((member1, member2) -> {
             int compare = 0;
@@ -146,9 +151,7 @@ public class MemberStatusCapability {
             }
             return compare;
         });
-
     }
-
 
 
 }

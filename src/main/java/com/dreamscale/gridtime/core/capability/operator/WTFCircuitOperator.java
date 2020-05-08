@@ -3,8 +3,6 @@ package com.dreamscale.gridtime.core.capability.operator;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
-import com.dreamscale.gridtime.api.organization.MemberWorkStatusDto;
-import com.dreamscale.gridtime.core.capability.active.MemberStatusCapability;
 import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;

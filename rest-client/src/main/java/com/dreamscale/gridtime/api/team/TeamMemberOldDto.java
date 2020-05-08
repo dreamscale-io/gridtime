@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamMemberDto {
+public class TeamMemberOldDto {
 
     private UUID organizationId;
     private UUID teamId;
