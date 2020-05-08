@@ -1,9 +1,7 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.account.EmailInputDto;
-import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.invitation.InvitationDto;
+import com.dreamscale.gridtime.api.invitation.InvitationKeyDto;
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto;
 import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
@@ -11,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +31,7 @@ public class InvitationResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping()
-    public InvitationDto useInvitationKey(InvitationKeyInputDto invitationKeyInputDto ) {
+    public InvitationKeyDto useInvitationKey(@RequestBody InvitationKeyInputDto invitationKeyInputDto ) {
 
         RequestContext context = RequestContext.get();
         log.info("useInvitationKey, user={}", context.getRootAccountId());

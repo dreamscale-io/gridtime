@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.invitation.InvitationDto;
+import com.dreamscale.gridtime.api.invitation.InvitationKeyDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
 import com.dreamscale.gridtime.core.domain.member.*;
@@ -31,30 +31,29 @@ public class InviteCapability {
     @Autowired
     private GridClock gridClock;
 
-    public InvitationDto useInvitationKey(UUID rootAccountId, String invitationKey) {
+    public InvitationKeyDto useInvitationKey(UUID rootAccountId, String invitationKey) {
 
         LocalDateTime now = gridClock.now();
 
         OneTimeTicketEntity invitationTicket = oneTimeTicketCapability.findByTicketCode(invitationKey);
 
-        validateInvitationKeyFound(invitationTicket);
+        validateInvitationKeyFound(invitationKey, invitationTicket);
         validateInvitationNotExpired(now, invitationTicket);
 
-        InvitationDto invitationDto = new InvitationDto();
-        invitationDto.setTicketType(invitationTicket.getTicketType().name());
+        InvitationKeyDto invitationKeyDto = new InvitationKeyDto();
+        invitationKeyDto.setInvitationType(invitationTicket.getTicketType().name());
 
-        SimpleStatusDto status = processTicket(now, rootAccountId, invitationTicket);
+        SimpleStatusDto status = processInvite(now, rootAccountId, invitationTicket);
 
-        invitationDto.setStatus(status);
+        invitationKeyDto.setStatus(status);
+        invitationKeyDto.setKey(invitationKey);
 
-        return invitationDto;
+        return invitationKeyDto;
     }
 
-    private SimpleStatusDto joinWithInvite(UUID rootAccountId, OneTimeTicketEntity inviteTicket) {
+    private SimpleStatusDto processInvite(LocalDateTime now, UUID rootAccountId, OneTimeTicketEntity inviteTicket) {
 
         SimpleStatusDto simpleStatusDto = new SimpleStatusDto();
-
-        LocalDateTime now = gridClock.now();
 
         if (inviteTicket == null) {
             simpleStatusDto.setMessage("Invitation Key not found.");
@@ -66,7 +65,6 @@ public class InviteCapability {
             oneTimeTicketCapability.delete(inviteTicket);
 
         } else {
-
             simpleStatusDto = processTicket(now, rootAccountId, inviteTicket);
             oneTimeTicketCapability.delete(inviteTicket);
         }
@@ -91,7 +89,7 @@ public class InviteCapability {
 
             case ACTIVATE_AND_INVITE_TO_ORG_AND_TEAM:
                 if (organizationCapability.isMember(rootAccountId, organizationId) == false) {
-                    status = organizationCapability.joinOrganization(now, rootAccountId, organizationId, orgEmail);
+                    organizationCapability.joinOrganization(now, rootAccountId, organizationId, orgEmail);
                 }
             case INVITE_TO_TEAM:
                 status = teamCapability.joinTeam(now, rootAccountId, organizationId, teamId);
@@ -110,16 +108,17 @@ public class InviteCapability {
         }
     }
 
-    private void validateInvitationKeyFound(OneTimeTicketEntity invitationKeyTicket) {
+    private void validateInvitationKeyFound(String invitationKey, OneTimeTicketEntity invitationKeyTicket) {
 
         if (invitationKeyTicket == null) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation Key not found.");
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation Key '"+invitationKey+"' not found.");
         }
 
     }
 
     public SimpleStatusDto inviteToActiveOrganization(UUID invokingRootAccountId, String orgEmail) {
-        return null;
+
+        return organizationCapability.inviteToOrganizationWithEmail(invokingRootAccountId, orgEmail);
     }
 
     public SimpleStatusDto inviteToActiveTeam(UUID invokingRootAccountId, String email) {

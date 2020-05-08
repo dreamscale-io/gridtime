@@ -3,8 +3,6 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.invitation.InvitationDto;
-import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto;
 import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +28,7 @@ public class InviteToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.PUBLIC_PATH)
-    public SimpleStatusDto inviteToPublicCommunity(EmailInputDto emailInputDto ) {
+    public SimpleStatusDto inviteToPublicCommunity(@RequestBody EmailInputDto emailInputDto ) {
 
         RequestContext context = RequestContext.get();
         log.info("inviteToPublicCommunity, user={}", context.getRootAccountId());
@@ -48,7 +46,7 @@ public class InviteToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH)
-    public SimpleStatusDto inviteToActiveOrganization(EmailInputDto emailInputDto ) {
+    public SimpleStatusDto inviteToActiveOrganization(@RequestBody EmailInputDto emailInputDto ) {
 
         RequestContext context = RequestContext.get();
         log.info("inviteToActiveOrganization, user={}", context.getRootAccountId());
@@ -66,7 +64,7 @@ public class InviteToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.TEAM_PATH)
-    public SimpleStatusDto inviteToActiveTeam(EmailInputDto emailInputDto ) {
+    public SimpleStatusDto inviteToActiveTeam(@RequestBody EmailInputDto emailInputDto ) {
 
         RequestContext context = RequestContext.get();
         log.info("inviteToActiveTeam, user={}", context.getRootAccountId());

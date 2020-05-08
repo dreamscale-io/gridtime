@@ -206,6 +206,7 @@ public class OrganizationCapability {
 
         OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(org.getId());
 
+        validateNotNull("email", email);
         validateSubscriptionFound(subscription);
         validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
 
@@ -229,8 +230,6 @@ public class OrganizationCapability {
 
         //invite XXX to org
         //invite XXX to public
-
-        //TODO build this API to do the invite key thing
         //TODO enable the code use for activation
 
         return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
@@ -263,7 +262,7 @@ public class OrganizationCapability {
             createOrgMembership(now, organizationId, rootAccountId, orgEmail);
 
             simpleStatusDto.setStatus(Status.JOINED);
-            simpleStatusDto.setMessage("Member added to organization.");
+            simpleStatusDto.setMessage("Member has joined the organization.");
 
             oneTimeTicketCapability.delete(oneTimeTicket);
         }
@@ -278,7 +277,7 @@ public class OrganizationCapability {
         createOrgMembership(now, organizationId, rootAccountId, orgEmail);
 
         status.setStatus(Status.JOINED);
-        status.setMessage("Member added to organization.");
+        status.setMessage("Member has joined the organization.");
 
         return status;
     }
@@ -412,7 +411,7 @@ public class OrganizationCapability {
 
     private void validateNotNull(String fieldName, Object value) {
         if (value == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_FIELD, "field '" + fieldName + "' is required.");
+            throw new BadRequestException(ValidationErrorCodes.MISSING_FIELD, "Field '" + fieldName + "' is required.");
         }
     }
 

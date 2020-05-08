@@ -52,7 +52,7 @@ public class TeamCircuitOperator {
     private TeamCircuitTalkRoomRepository teamCircuitTalkRoomRepository;
 
     @Autowired
-    private TeamCapability teamMembership;
+    private TeamCapability teamCapability;
 
     @Autowired
     private MemberStatusCapability memberStatusCapability;
@@ -78,14 +78,21 @@ public class TeamCircuitOperator {
 
     public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamMembership.getMyActiveTeam(organizationId, memberId);
-        TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
+        UUID teamCircuitRoomId = null;
 
-        if (circuit == null) {
-            circuit = createTeamCircuit(teamDto, memberId);
+        TeamDto teamDto = teamCapability.getMyActiveTeam(organizationId, memberId);
+
+        if (teamDto != null) {
+            TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
+
+            if (circuit == null) {
+                circuit = createTeamCircuit(teamDto, memberId);
+            }
+
+            teamCircuitRoomId = circuit.getTeamRoomId();
         }
 
-       return circuit.getTeamRoomId();
+       return teamCircuitRoomId;
     }
 
 
@@ -138,7 +145,7 @@ public class TeamCircuitOperator {
 
     public TeamCircuitDto getMyPrimaryTeamCircuit(UUID organizationId, UUID memberId) {
 
-        TeamDto teamDto = teamMembership.getMyActiveTeam(organizationId, memberId);
+        TeamDto teamDto = teamCapability.getMyActiveTeam(organizationId, memberId);
 
         List<MemberWorkStatusDto> members = memberStatusCapability.getStatusOfMeAndMyTeam(organizationId, memberId);
 
@@ -256,24 +263,26 @@ public class TeamCircuitOperator {
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
-        TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+        if (teamRoomId != null) {
+            TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
 
-        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
-        messageEntity.setId(UUID.randomUUID());
-        messageEntity.setFromId(memberFromId);
-        messageEntity.setToRoomId(teamRoomId);
-        messageEntity.setPosition(now);
-        messageEntity.setNanoTime(nanoTime);
-        messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_STATUS_UPDATE);
-        messageEntity.setJsonBody(JSONTransformer.toJson(memberStatusDto));
+            TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+            messageEntity.setId(UUID.randomUUID());
+            messageEntity.setFromId(memberFromId);
+            messageEntity.setToRoomId(teamRoomId);
+            messageEntity.setPosition(now);
+            messageEntity.setNanoTime(nanoTime);
+            messageEntity.setMessageType(CircuitMessageType.TEAM_MEMBER_STATUS_UPDATE);
+            messageEntity.setJsonBody(JSONTransformer.toJson(memberStatusDto));
 
-        String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
+            String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
 
-        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+            TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
-        talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
+            talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
 
-        talkRoomMessageRepository.save(messageEntity);
+            talkRoomMessageRepository.save(messageEntity);
+        }
     }
 
     public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {

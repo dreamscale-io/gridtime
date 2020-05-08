@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvitationDto {
+public class InvitationKeyDto {
 
-    String ticketType;
+    String invitationType;
+    String key;
 
     SimpleStatusDto status;
 }

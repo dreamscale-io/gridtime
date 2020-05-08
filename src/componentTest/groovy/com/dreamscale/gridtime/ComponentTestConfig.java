@@ -48,7 +48,6 @@ public class ComponentTestConfig extends BaseTestConfig {
         return detachedMockFactory().Mock(EmailCapability.class);
     }
 
-
     @Bean
     JournalClient journalClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, JournalClient.class);
@@ -63,7 +62,6 @@ public class ComponentTestConfig extends BaseTestConfig {
     ProjectClient projectClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, ProjectClient.class);
     }
-
 
     @Bean
     TalkToClient circuitTalkClient() {
@@ -97,6 +95,12 @@ public class ComponentTestConfig extends BaseTestConfig {
     @Bean
     TeamCircuitClient teamCircuitClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamCircuitClient.class); }
 
+    @Bean
+    InviteToClient inviteToClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, InviteToClient.class); }
+
+    @Bean
+    InvitationClient invitationClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, InvitationClient.class); }
+
 
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);
@@ -119,7 +123,6 @@ public class ComponentTestConfig extends BaseTestConfig {
 
     @Bean
     TeamClient teamClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, TeamClient.class); }
-
 
     @Bean
     FlowClient unauthenticatedFlowClient() {
