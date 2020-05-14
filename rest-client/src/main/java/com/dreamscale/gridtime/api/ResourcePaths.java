@@ -49,6 +49,7 @@ public class ResourcePaths {
     public static final String MEMBER_PATH = "/member";
     public static final String INVITATION_PATH = "/invitation";
     public static final String TEAM_PATH = "/team";
+    public static final String WITH_PATH = "/with";
     public static final String TORCHIE_PATH = "/torchie";
     public static final String PLEXER_PATH = "/plexer";
 
@@ -123,6 +124,7 @@ public class ResourcePaths {
     public static final String USER_PROFILE_PATH = "/userprofile";
     public static final String ME_PATH = "/me";
     public static final String MY_PATH = "/my";
+    public static final String BY_PATH = "/by";
 
     public static final String API_KEY_HEADER = "X-API-KEY";
     public static final String CONNECT_ID_HEADER = "X-CONNECT-ID";

@@ -34,6 +34,9 @@ public class MemberCapability {
     @Autowired
     private MemberStatusRepository memberStatusRepository;
 
+
+
+
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamMemberDto, MemberStatusEntity> memberStatusMapper;
@@ -154,4 +157,13 @@ public class MemberCapability {
     }
 
 
+    public TeamMemberDto findMemberByEmail(UUID organizationId, String email) {
+
+        MemberStatusEntity memberStatus = memberStatusRepository.findByOrganizationIdAndEmail(organizationId, email);
+        return toDtoWithDetails(memberStatus);
+    }
+
+    public TeamMemberDto findMemberWithUserName(UUID organizationId, String username) {
+        return null;
+    }
 }

@@ -1,7 +1,10 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.EmailInputDto;
+import com.dreamscale.gridtime.api.account.UserNameInputDto;
 import com.dreamscale.gridtime.api.organization.*;
+import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.active.MemberCapability;
@@ -31,6 +34,32 @@ public class MemberResource {
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return memberCapability.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
+    }
+
+    /**
+     * Get the status of a member within the active organization using their email
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.BY_PATH + ResourcePaths.EMAIL_PATH)
+    public TeamMemberDto findMemberWithEmail(@RequestBody EmailInputDto emailInputDto) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return memberCapability.findMemberByEmail(memberEntity.getOrganizationId(), emailInputDto.getEmail());
+    }
+
+    /**
+     * Get the status of a member within the active organization using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.BY_PATH + ResourcePaths.USERNAME_PATH)
+    public TeamMemberDto findMemberWithUserName(@RequestBody UserNameInputDto userNameInputDto) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return memberCapability.findMemberWithUserName(memberEntity.getOrganizationId(), userNameInputDto.getUsername());
     }
 
 }

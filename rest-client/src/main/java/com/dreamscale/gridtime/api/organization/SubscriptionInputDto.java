@@ -14,6 +14,8 @@ public class SubscriptionInputDto {
     private String organizationName;
     private String domainName;
 
+    private String ownerEmail;
+
     private Boolean requireMemberEmailInDomain;
     private Integer seats;
 

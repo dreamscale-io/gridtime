@@ -32,9 +32,6 @@ import java.util.*;
 public class TeamCapability {
 
     @Autowired
-    private OrganizationCapability organizationMembership;
-
-    @Autowired
     private SpiritNetworkOperator xpService;
 
     @Autowired
@@ -137,6 +134,8 @@ public class TeamCapability {
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
         teamCircuitOperator.createTeamCircuit(teamDto, memberId);
+
+        updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
 
         return teamDto;
     }
@@ -286,6 +285,7 @@ public class TeamCapability {
         return teamOutputMapper.toApiList(teamEntityList);
     }
 
+
     @Transactional
     public TeamDto getMyActiveTeam(UUID orgId, UUID memberId) {
 
@@ -377,12 +377,20 @@ public class TeamCapability {
 
     public TeamDto setMyHomeTeam(UUID organizationId, UUID memberId, String homeTeamName) {
 
+        LocalDateTime now = gridClock.now();
+
         String standardizedTeamName = standardizeForSearch(homeTeamName);
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizedTeamName);
 
         validateTeamFound(standardizedTeamName, teamEntity);
 
+        updateTeamMemberHome(now, organizationId, memberId, teamEntity.getId());
+
+        return teamOutputMapper.toApi(teamEntity);
+    }
+
+    private void updateTeamMemberHome(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
         if (teamMemberHomeConfig == null) {
@@ -392,12 +400,32 @@ public class TeamCapability {
             teamMemberHomeConfig.setMemberId(memberId);
         }
 
-        teamMemberHomeConfig.setHomeTeamId(teamEntity.getId());
-        teamMemberHomeConfig.setLastModifiedDate(gridClock.now());
+        teamMemberHomeConfig.setHomeTeamId(teamId);
+        teamMemberHomeConfig.setLastModifiedDate(now);
 
         teamMemberHomeRepository.save(teamMemberHomeConfig);
+    }
 
-        return teamOutputMapper.toApi(teamEntity);
+    private void updateTeamMemberHomeIfFirstTeam(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
+        TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
+
+        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
+
+        if (teamMemberHomeConfig == null) {
+            teamMemberHomeConfig = new TeamMemberHomeEntity();
+            teamMemberHomeConfig.setId(UUID.randomUUID());
+            teamMemberHomeConfig.setOrganizationId(organizationId);
+            teamMemberHomeConfig.setMemberId(memberId);
+
+            teamMemberHomeConfig.setHomeTeamId(teamId);
+            teamMemberHomeConfig.setLastModifiedDate(now);
+
+        } else if (teamMemberHomeConfig.getHomeTeamId().equals(everyoneTeam.getId())){
+            teamMemberHomeConfig.setHomeTeamId(teamId);
+            teamMemberHomeConfig.setLastModifiedDate(now);
+        }
+
+        teamMemberHomeRepository.save(teamMemberHomeConfig);
     }
 
     public TeamMemberOldDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
@@ -434,6 +462,19 @@ public class TeamCapability {
         return toDto(userName, teamMembership);
     }
 
+    public SimpleStatusDto inviteUserToMyActiveTeam(UUID organizationId, UUID invokingMemberId, String userToInvite) {
+
+        TeamDto activeTeam = getMyActiveTeam(organizationId, invokingMemberId);
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, standardizeForSearch(userToInvite));
+
+        validateMemberFound(userToInvite, membership);
+
+        addMemberToTeamWithMemberId(organizationId, invokingMemberId, activeTeam.getName(), membership.getId());
+
+        return new SimpleStatusDto(Status.JOINED, "Added member to team.");
+    }
+
     public TeamMemberOldDto addMemberToTeamWithMemberId(UUID organizationId, UUID invokingMemberId, String teamName, UUID memberId) {
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -468,6 +509,8 @@ public class TeamCapability {
             teamMemberRepository.save(teamMembership);
 
             teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, team.getId(), memberEntity.getId());
+
+            updateTeamMemberHomeIfFirstTeam(now, organizationId, teamMembership.getMemberId(), team.getId());
 
         } else {
             log.warn("Member {} already added to team {}", memberEntity.getEmail(), team.getName());

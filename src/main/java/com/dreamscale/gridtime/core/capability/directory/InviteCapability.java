@@ -31,6 +31,7 @@ public class InviteCapability {
     @Autowired
     private GridClock gridClock;
 
+
     public InvitationKeyDto useInvitationKey(UUID rootAccountId, String invitationKey) {
 
         LocalDateTime now = gridClock.now();
@@ -88,7 +89,7 @@ public class InviteCapability {
                 break;
 
             case ACTIVATE_AND_INVITE_TO_ORG_AND_TEAM:
-                if (organizationCapability.isMember(rootAccountId, organizationId) == false) {
+                if (organizationCapability.isMember(organizationId, rootAccountId) == false) {
                     organizationCapability.joinOrganization(now, rootAccountId, organizationId, orgEmail);
                 }
             case INVITE_TO_TEAM:
@@ -113,7 +114,6 @@ public class InviteCapability {
         if (invitationKeyTicket == null) {
             throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation Key '"+invitationKey+"' not found.");
         }
-
     }
 
     public SimpleStatusDto inviteToActiveOrganization(UUID invokingRootAccountId, String orgEmail) {
@@ -121,11 +121,21 @@ public class InviteCapability {
         return organizationCapability.inviteToOrganizationWithEmail(invokingRootAccountId, orgEmail);
     }
 
-    public SimpleStatusDto inviteToActiveTeam(UUID invokingRootAccountId, String email) {
-        return null;
+    public SimpleStatusDto inviteToActiveTeamWithEmail(UUID invokingRootAccountId, String email) {
+
+        return organizationCapability.inviteToOrganizationAndTeamWithEmail(invokingRootAccountId, email);
     }
+
+
+    public SimpleStatusDto inviteToActiveTeamWithUsername(UUID rootAccountId, String userToInvite) {
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(rootAccountId);
+        return teamCapability.inviteUserToMyActiveTeam(invokingMember.getOrganizationId(), invokingMember.getId(), userToInvite);
+    }
+
 
     public SimpleStatusDto inviteToPublicCommunity(UUID invokingRootAccountId, String email) {
         return null;
     }
+
 }

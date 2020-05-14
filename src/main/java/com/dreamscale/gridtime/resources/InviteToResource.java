@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.UserNameInputDto;
 import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -56,20 +57,39 @@ public class InviteToResource {
 
     /**
      * Invites the user at the specified email to a team within the organization, by sending an email
-     * with an Invitation Key associated with the organization join privilege, and the team join privilege.
+     * with an Invitation Key associated with the organization join privilege, and the team join privilege, combined.
      *
      * Using this InvitationKey will cause the user to be joined to both the org, and the team.
      *
      * @return SimpleStatusDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.TEAM_PATH)
-    public SimpleStatusDto inviteToActiveTeam(@RequestBody EmailInputDto emailInputDto ) {
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.EMAIL_PATH)
+    public SimpleStatusDto inviteToActiveTeamWithEmail(@RequestBody EmailInputDto emailInputDto ) {
 
         RequestContext context = RequestContext.get();
-        log.info("inviteToActiveTeam, user={}", context.getRootAccountId());
+        log.info("inviteToActiveTeamWithEmail, user={}", context.getRootAccountId());
 
-        return inviteCapability.inviteToActiveTeam(context.getRootAccountId(), emailInputDto.getEmail());
+        return inviteCapability.inviteToActiveTeamWithEmail(context.getRootAccountId(), emailInputDto.getEmail());
+    }
+
+    /**
+     * Invites the user with the specified org username to a team within the active organization.
+     *
+     * The user m
+     *
+     * Using this InvitationKey will cause the user to be joined to both the org, and the team.
+     *
+     * @return SimpleStatusDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.USERNAME_PATH)
+    public SimpleStatusDto inviteToActiveTeamWithUsername(@RequestBody UserNameInputDto userNameInputDto ) {
+
+        RequestContext context = RequestContext.get();
+        log.info("inviteToActiveTeamWithUsername, user={}", context.getRootAccountId());
+
+        return inviteCapability.inviteToActiveTeamWithUsername(context.getRootAccountId(), userNameInputDto.getUsername());
     }
 
 }

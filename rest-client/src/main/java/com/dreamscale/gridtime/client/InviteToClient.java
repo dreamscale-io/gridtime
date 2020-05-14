@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.client;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.UserNameInputDto;
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
@@ -28,7 +29,11 @@ public interface InviteToClient {
     SimpleStatusDto inviteToActiveOrganization(EmailInputDto emailInputDto);
 
     @RequestLine("POST " + ResourcePaths.INVITE_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.TEAM_PATH)
-    SimpleStatusDto inviteToActiveTeam(EmailInputDto emailInputDto);
+            ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.EMAIL_PATH)
+    SimpleStatusDto inviteToActiveTeamWithEmail(EmailInputDto emailInputDto);
+
+    @RequestLine("POST " + ResourcePaths.INVITE_PATH + ResourcePaths.TO_PATH +
+            ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.USERNAME_PATH)
+    SimpleStatusDto inviteToActiveTeamWithUsername(UserNameInputDto userNameInputDto);
 
 }

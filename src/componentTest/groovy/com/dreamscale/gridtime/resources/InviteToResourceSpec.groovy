@@ -101,10 +101,8 @@ class InviteToResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io")
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
         OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
-
-        joinOrganization(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
 
         when:
 
@@ -112,11 +110,7 @@ class InviteToResourceSpec extends Specification {
 
         String inviteKey = null;
 
-        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token ->
-            println "YAY! :" + token
-            inviteKey = token;
-            return null;
-        }
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> inviteKey = token; return null; }
 
         inviteToClient.inviteToActiveOrganization(new EmailInputDto("zoe@dreamscale.io"));
 
@@ -186,12 +180,13 @@ class InviteToResourceSpec extends Specification {
         return organizationClient.validateMemberEmailAndJoin(validationCode)
     }
 
-    private SubscriptionInputDto createSubscriptionInput(String domain) {
+    private SubscriptionInputDto createSubscriptionInput(String domain, String ownerEmail) {
         SubscriptionInputDto orgSubscription = new SubscriptionInputDto()
         orgSubscription.setOrganizationName("MemberCompany")
         orgSubscription.setDomainName(domain)
         orgSubscription.setRequireMemberEmailInDomain(true)
         orgSubscription.setSeats(10)
+        orgSubscription.setOwnerEmail(ownerEmail)
         orgSubscription.setStripePaymentId("[payment.id]")
 
         return orgSubscription

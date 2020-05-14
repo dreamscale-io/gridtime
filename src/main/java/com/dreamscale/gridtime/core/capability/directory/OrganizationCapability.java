@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
 import com.dreamscale.gridtime.api.status.Status;
+import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
@@ -108,6 +109,7 @@ public class OrganizationCapability {
         validateNotNull("orgName", orgInputDto.getOrganizationName());
         validateNotNull("domainName", orgInputDto.getDomainName());
         validateNotNull("seats", orgInputDto.getSeats());
+        validateNotNull("ownerEmail", orgInputDto.getOwnerEmail());
 
         validateDomainNotAlreadyRegistered(orgInputDto.getDomainName());
 
@@ -149,6 +151,8 @@ public class OrganizationCapability {
         LocalDateTime expiration = now.plusMonths(1);
         OrganizationInviteTokenEntity inviteToken = createInviteToken(organizationEntity.getId(), expiration);
         inviteTokenRepository.save(inviteToken);
+
+        joinOrganizationWithInvitationAndEmail(rootAccountId, new JoinRequestInputDto(inviteToken.getToken(), orgInputDto.getOwnerEmail()));
 
         return createSubscriptionDto(organizationEntity, subscriptionEntity, inviteToken);
 
@@ -231,6 +235,41 @@ public class OrganizationCapability {
         //invite XXX to org
         //invite XXX to public
         //TODO enable the code use for activation
+
+        return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
+    }
+
+    @Transactional
+    public SimpleStatusDto inviteToOrganizationAndTeamWithEmail(UUID rootAccountId, String email) {
+
+        OrganizationDto org = getActiveOrganization(rootAccountId);
+        String standardizedEmail = email.toLowerCase();
+
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(org.getId());
+
+        validateNotNull("email", email);
+        validateSubscriptionFound(subscription);
+        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+        LocalDateTime now = gridClock.now();
+
+        if (requiresEmailMatch(subscription)) {
+            validateEmailWithinDomain(standardizedEmail, org.getDomainName());
+        }
+
+        //see if this person is already a member
+
+        validateNoExistingMembership(org.getId(), standardizedEmail);
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(org.getId(), rootAccountId);
+
+        validateMembershipFound(org.getDomainName(), membership);
+
+        TeamDto activeTeam = teamCapability.getMyActiveTeam(org.getId(), membership.getId());
+
+        //send invite or join email
+
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteToOrgAndTeamTicket(now, rootAccountId, org.getId(), activeTeam.getId(), standardizedEmail);
 
         return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
     }

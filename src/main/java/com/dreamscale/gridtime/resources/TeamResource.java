@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.TeamWithMembersDto;
 import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -97,6 +99,79 @@ public class TeamResource {
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return teamCapability.getTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+    }
+
+
+    /**
+     * Adds an existing member to the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}")
+
+    public TeamMemberOldDto addMemberToTeam(@PathVariable("teamName") String teamName,
+                                            @PathVariable("userName") String userName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("addMemberToTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.addMemberToTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+    }
+
+    /**
+     * Adds an existing member to the team using their memberId
+     *
+     * This API can be used, even when no username has been configured on the account
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}")
+
+    public TeamMemberOldDto addMemberToTeamWithMemberId(@PathVariable("teamName") String teamName,
+                                                        @PathVariable("memberId") String memberId) {
+
+        RequestContext context = RequestContext.get();
+        log.info("addMemberToTeamWithMemberId, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.addMemberToTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
+    }
+
+
+    /**
+     * Removes the specified member from the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.USERNAME_PATH + "/{userName}" + ResourcePaths.REMOVE_PATH)
+
+    public TeamMemberOldDto removeMemberFromTeam(@PathVariable("teamName") String teamName,
+                                                 @PathVariable("userName") String userName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("removeMemberFromTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.removeMemberFromTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, userName);
+    }
+
+
+    /**
+     * Removes the specified member from the team using their username
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping("/{teamName}" + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
+
+    public TeamMemberOldDto removeMemberFromTeamWithMemberId(@PathVariable("teamName") String teamName,
+                                                             @PathVariable("memberId") String memberId) {
+
+        RequestContext context = RequestContext.get();
+        log.info("removeMemberFromTeamWithMemberId, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.removeMemberFromTeamWithMemberId(invokingMember.getOrganizationId(), invokingMember.getId(), teamName, UUID.fromString(memberId));
     }
 
 }

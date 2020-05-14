@@ -52,6 +52,28 @@ public class OneTimeTicketCapability {
         return oneTimeTicket;
     }
 
+    public OneTimeTicketEntity issueOneTimeActivateAndInviteToOrgAndTeamTicket(
+            LocalDateTime now, UUID rootAccountId, UUID organizationId, UUID teamId, String orgEmail) {
+
+        OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
+        oneTimeTicket.setId(UUID.randomUUID());
+        oneTimeTicket.setOwnerId(rootAccountId);
+        oneTimeTicket.setTicketType(TicketType.ACTIVATE_AND_INVITE_TO_ORG_AND_TEAM);
+        oneTimeTicket.setTicketCode(generateTicketCode());
+        oneTimeTicket.setIssueDate(now);
+        oneTimeTicket.setExpirationDate(now.plusDays(1));
+
+        Map<String, String> props = DefaultCollections.map();
+        props.put(OneTimeTicketEntity.EMAIL_PROP, orgEmail);
+        props.put(OneTimeTicketEntity.ORGANIZATION_ID_PROP, organizationId.toString());
+        props.put(OneTimeTicketEntity.TEAM_ID_PROP, teamId.toString());
+
+        oneTimeTicket.setJsonProps(JSONTransformer.toJson(props));
+
+        oneTimeTicketRepository.save(oneTimeTicket);
+        return oneTimeTicket;
+    }
+
 
     public OneTimeTicketEntity issueOneTimeEmailValidationTicket(LocalDateTime now, UUID ticketOwnerId, String newEmail) {
         OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
@@ -109,5 +131,7 @@ public class OneTimeTicketCapability {
     public boolean isExpired(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
         return now.isAfter(oneTimeTicket.getExpirationDate());
     }
+
+
 }
 
