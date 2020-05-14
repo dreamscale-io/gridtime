@@ -214,11 +214,18 @@ class TeamResourceSpec extends Specification {
 
         assert phoenixIsActiveForZoe.id == phoenixTeam.id
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
+        assert phoenixIsActiveForZoe.isHomeTeam() == true
 
         assert circleIsActiveForZoe.id == circleTeam.id
         assert circleIsActiveForZoe.teamMembers.size() == 2
+        assert circleIsActiveForZoe.isHomeTeam() == true
 
         assert teams.size() == 3
+        assert teams.get(0).isHomeTeam() == true
+        assert teams.get(1).isHomeTeam() == false
+        assert teams.get(2).isHomeTeam() == false
+
+
     }
 
 

@@ -93,15 +93,6 @@ public class TeamCapability {
         teamMemberOutputMapper = mapperFactory.createDtoEntityMapper(TeamMemberOldDto.class, TeamMemberEntity.class);
     }
 
-    public SimpleStatusDto joinWithInvite(UUID rootAccountId, String invitationKey) {
-
-        //TODO join the team with an invitation key...
-        // this all needs refactoring to generalize the invitation wrapper capabilities
-
-
-        return null;
-    }
-
     @Transactional
     public TeamDto createTeam(UUID organizationId, UUID memberId, String teamName) {
 
@@ -317,6 +308,11 @@ public class TeamCapability {
         TeamDto team = teamOutputMapper.toApi(defaultTeam);
 
         fillTeamWithTeamMembers(team);
+
+        if (team != null) {
+            team.setHomeTeam(true);
+        }
+
         return team;
     }
 
