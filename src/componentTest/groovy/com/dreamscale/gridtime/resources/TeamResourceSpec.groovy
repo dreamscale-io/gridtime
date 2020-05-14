@@ -18,6 +18,7 @@ import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.organization.TeamMemberDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
+import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.InvitationClient
@@ -115,8 +116,7 @@ class TeamResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
         when:
 
@@ -125,11 +125,7 @@ class TeamResourceSpec extends Specification {
 
         TeamDto phoenixTeam = teamClient.createTeam("Phoenix")
 
-        String invitationKey = null;
-
-        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, ticketCode -> invitationKey = ticketCode; return null}
-
-        inviteToClient.inviteToActiveTeamWithEmail(new EmailInputDto("zoe@dreamscale.io"))
+        String invitationKey = inviteToTeamWithEmail("zoe@dreamscale.io")
 
         accountClient.logout()
 
@@ -160,116 +156,79 @@ class TeamResourceSpec extends Specification {
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
     }
 
-    def "should remove a member from an organization"() {
+
+
+    def "should create multiple teams and switch home teams"() {
         given:
 
         AccountActivationDto artyProfile = register("arty@dreamscale.io");
-        AccountActivationDto shakyProfile = register("shaky.piano@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
-
-        switchUser(shakyProfile)
-
-        SimpleStatusDto shakyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "shaky.piano@dreamscale.io")
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
         when:
 
-        ConnectionStatusDto loginFromShakyBeforeRemove = accountClient.login()
+        ConnectionStatusDto loginToDSFromArty = accountClient.login()
+        OrganizationDto dsIsActiveForArty = organizationClient.getMyActiveOrganization();
 
-        OrganizationDto activeOrgForShakyBeforeRemove = organizationClient.getMyActiveOrganization();
+        TeamDto phoenixTeam = teamClient.createTeam("Phoenix")
+        String phoenixInvitation = inviteToTeamWithEmail("zoe@dreamscale.io")
+
+        TeamDto circleTeam = teamClient.createTeam("Circle")
+        teamClient.setMyHomeTeam(new HomeTeamConfigInputDto(circleTeam.getName()))
+
+        String circleInvitation = inviteToTeamWithEmail("zoe@dreamscale.io")
 
         accountClient.logout()
 
-        switchUser(artyProfile)
-
-        ConnectionStatusDto loginFromArty =  accountClient.login()
-
-        OrganizationDto activeOrgForArty = organizationClient.getMyActiveOrganization();
-
-        List<MemberDetailsDto> membershipsShownForArtyBeforeRemove = organizationClient.getOrganizationMembers();
-
-        organizationClient.removeMember(loginFromShakyBeforeRemove.getMemberId().toString())
-
-        List<MemberDetailsDto> membershipsShownForArtyAfterRemove = organizationClient.getOrganizationMembers();
-
-        switchUser(shakyProfile)
-
-        ConnectionStatusDto loginFromShakyAfterRemove = accountClient.login()
-
-        OrganizationDto activeOrgForShakyAfterRemove = organizationClient.getMyActiveOrganization();
-
-        List<OrganizationDto> shakysOrganizationsAfterRemove =  organizationClient.getParticipatingOrganizations();
-
-        then:
-
-        assert shakyJoinedDS.status == Status.JOINED
-
-        assert loginFromShakyBeforeRemove != null
-        assert loginFromShakyBeforeRemove.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
-        assert loginFromShakyBeforeRemove.getParticipatingOrganizations().size() == 2
-
-        assert activeOrgForShakyBeforeRemove.id == dreamScaleSubscription.getOrganizationId()
-
-        assert loginFromArty != null
-        assert loginFromArty.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
-        assert loginFromArty.getParticipatingOrganizations().size() == 2
-        assert activeOrgForArty.id  == dreamScaleSubscription.getOrganizationId()
-
-        assert membershipsShownForArtyBeforeRemove.size() == 2
-        assert membershipsShownForArtyAfterRemove.size() == 1
-
-        assert loginFromShakyAfterRemove != null
-        assert loginFromShakyAfterRemove.getOrganizationId() != dreamScaleSubscription.getOrganizationId()
-        assert loginFromShakyAfterRemove.getParticipatingOrganizations().size() == 1
-
-        assert activeOrgForShakyAfterRemove.orgName == "Public"
-        assert shakysOrganizationsAfterRemove.size() == 1
-
-    }
-
-    def "should configure an organization with jira capabilities"() {
-        given:
-
-        AccountActivationDto artyProfile = register("arty@dreamscale.io");
-
-        switchUser(artyProfile)
-
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
-
-        JiraConfigDto jiraInputConfig = createJiraConfig()
-
-        when:
+        switchUser(zoeProfile)
 
         accountClient.login()
 
-        1 * mockJiraService.validateJiraConnection(_) >> new ConnectionResultDto(Status.VALID, "Connected")
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(phoenixInvitation))
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(circleInvitation))
 
-        SimpleStatusDto jiraConfigValidStatus = organizationClient.updateJiraConfiguration(jiraInputConfig)
+        accountClient.logout()
+        accountClient.login()
 
-        JiraConfigDto jiraRetrievedConfig = organizationClient.getJiraConfiguration();
+        OrganizationDto dsIsActiveForZoe = organizationClient.getMyActiveOrganization();
+
+        TeamDto phoenixIsActiveForZoe = teamClient.getMyHomeTeam();
+
+        teamClient.setMyHomeTeam(new HomeTeamConfigInputDto(circleTeam.getName()));
+
+        TeamDto circleIsActiveForZoe = teamClient.getMyHomeTeam();
+
+        List<TeamDto> teams = teamClient.getAllMyTeams();
 
         then:
 
-        assert jiraConfigValidStatus != null
-        assert jiraConfigValidStatus.getStatus() == Status.VALID
+        assert loginToDSFromArty != null
+        assert loginToDSFromArty.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSFromArty.getParticipatingOrganizations().size() == 2
 
-        assert jiraRetrievedConfig != null
-        assert jiraRetrievedConfig.getJiraSiteUrl() == jiraInputConfig.getJiraSiteUrl()
-        assert jiraRetrievedConfig.getJiraUser() == jiraInputConfig.getJiraUser()
-        assert jiraRetrievedConfig.getJiraApiKey() == jiraInputConfig.getJiraApiKey()
+        assert dsIsActiveForArty.getId() == dreamScaleSubscription.getOrganizationId()
+        assert dsIsActiveForZoe.getId() == dreamScaleSubscription.getOrganizationId()
 
+        assert phoenixIsActiveForZoe.id == phoenixTeam.id
+        assert phoenixIsActiveForZoe.teamMembers.size() == 2
+
+        assert circleIsActiveForZoe.id == circleTeam.id
+        assert circleIsActiveForZoe.teamMembers.size() == 2
+
+        assert teams.size() == 3
     }
+
+
 
     private AccountActivationDto register(String email) {
 
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
         rootAccountInput.setEmail(email)
 
-        activationToken = null;
+        String activationToken = null;
 
         1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { emailAddr, token -> activationToken = token; return null}
 
@@ -277,26 +236,6 @@ class TeamResourceSpec extends Specification {
         return accountClient.activate(new ActivationCodeDto(activationToken))
     }
 
-    private SimpleStatusDto joinOrganization(String inviteToken, String email) {
-
-        return organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
-    }
-
-    private SimpleStatusDto joinOrganizationWithValidate(String inviteToken, String email) {
-
-        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, ticketCode -> validationCode = ticketCode; return null}
-
-        organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
-
-        return organizationClient.validateMemberEmailAndJoin(validationCode)
-    }
-
-
-    private JiraConfigDto createJiraConfig() {
-        return new JiraConfigDto("company.atlassian.net", "jiraUser", "143143WRU143APIKEY143WRU143")
-    }
 
     private SubscriptionInputDto createSubscriptionInput(String domain, String ownerEmail) {
         SubscriptionInputDto orgSubscription = new SubscriptionInputDto()
@@ -318,5 +257,50 @@ class TeamResourceSpec extends Specification {
         testUser.setApiKey(account.getApiKey())
     }
 
+
+    AccountActivationDto registerWithInviteKey(String email, String invitationKey) {
+
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail(email)
+        rootAccountInput.setInvitationKey(invitationKey)
+
+        UserProfileDto userProfile = accountClient.register(rootAccountInput)
+
+
+        return accountClient.activate(new ActivationCodeDto(invitationKey))
+    }
+
+    private String inviteToTeamWithEmail(String email) {
+
+        String inviteToken = null;
+
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> inviteToken = token; return null}
+
+        inviteToClient.inviteToActiveTeamWithEmail(new EmailInputDto(email))
+
+        return inviteToken;
+    }
+
+    private OrganizationSubscriptionDto createSubscriptionAndValidateEmail(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
+
+        String validateToken = null;
+
+        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, token -> validateToken = token; return null}
+
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(validateToken))
+
+        return dreamScaleSubscription;
+    }
+
+    private OrganizationSubscriptionDto createSubscription(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
+
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        return dreamScaleSubscription;
+    }
 
 }

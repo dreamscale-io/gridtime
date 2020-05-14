@@ -4,20 +4,21 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.AccountActivationDto
 import com.dreamscale.gridtime.api.account.ActivationCodeDto
 import com.dreamscale.gridtime.api.account.ConnectionStatusDto
+import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
+import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.JiraConfigDto
-import com.dreamscale.gridtime.api.organization.JoinRequestInputDto
 import com.dreamscale.gridtime.api.organization.MemberDetailsDto
-import com.dreamscale.gridtime.api.organization.MembershipInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
-import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
+import com.dreamscale.gridtime.client.InvitationClient
+import com.dreamscale.gridtime.client.InviteToClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.SubscriptionClient
 import com.dreamscale.gridtime.client.TeamClient
@@ -28,16 +29,12 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.member.TeamRepository
-import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
-
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class OrganizationResourceSpec extends Specification {
@@ -47,6 +44,12 @@ class OrganizationResourceSpec extends Specification {
 
     @Autowired
     SubscriptionClient subscriptionClient
+
+    @Autowired
+    InviteToClient inviteToClient
+
+    @Autowired
+    InvitationClient invitationClient
 
     @Autowired
     TeamClient teamClient
@@ -111,7 +114,6 @@ class OrganizationResourceSpec extends Specification {
         assert subscription.getOrganizationId() != null
         assert subscription.getOrganizationName() == orgSubscription.getOrganizationName()
         assert subscription.getDomainName() == orgSubscription.getDomainName()
-        assert subscription.getInviteToken() != null
     }
 
 
@@ -122,11 +124,8 @@ class OrganizationResourceSpec extends Specification {
         switchUser(artyProfile)
         accountClient.login()
 
-        SubscriptionInputDto orgSubscription1 = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        SubscriptionInputDto orgSubscription2 = createSubscriptionInput("onprem.com", "arty@onprem.com")
-
-        OrganizationSubscriptionDto subscription1 = subscriptionClient.createSubscription(orgSubscription1)
-        OrganizationSubscriptionDto subscription2 = subscriptionClient.createSubscription(orgSubscription2)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+        OrganizationSubscriptionDto onPremSubscription = createSubscriptionAndValidateEmail("onprem.com", "arty@onprem.com")
 
         when:
         List<OrganizationSubscriptionDto> subscriptions = subscriptionClient.getOrganizationSubscriptions();
@@ -154,8 +153,8 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
-    private void switchUser(AccountActivationDto artyProfile) {
-        RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());
+    private void switchUser(AccountActivationDto userProfile) {
+        RootAccountEntity account = rootAccountRepository.findByApiKey(userProfile.getApiKey());
 
         testUser.setId(account.getId())
         testUser.setApiKey(account.getApiKey())
@@ -168,8 +167,7 @@ class OrganizationResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
         when:
 
@@ -190,12 +188,9 @@ class OrganizationResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscriptionAndValidateEmail("dreamscale.io", "arty@dreamscale.io")
 
         when:
-
-        SimpleStatusDto artyJoined = joinOrganizationWithValidate(dreamScaleSubscription.getInviteToken(), "arty@dreamscale.io")
 
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
@@ -207,6 +202,7 @@ class OrganizationResourceSpec extends Specification {
 
     }
 
+
     def "should allow user to join and login to multiple private organizations"() {
         given:
 
@@ -214,17 +210,8 @@ class OrganizationResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
-
-        String validationCode = null;
-
-        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, token -> validationCode = token; return null}
-
-        SubscriptionInputDto onpremSubscriptionInput = createSubscriptionInput("onprem.com", "arty@onprem.com")
-        OrganizationSubscriptionDto onpremSubscription = subscriptionClient.createSubscription(onpremSubscriptionInput)
-
-        organizationClient.validateMemberEmailAndJoin(validationCode)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+        OrganizationSubscriptionDto onpremSubscription = createSubscriptionAndValidateEmail("onprem.com", "arty@onprem.com")
 
         when:
 
@@ -255,16 +242,16 @@ class OrganizationResourceSpec extends Specification {
         given:
 
         AccountActivationDto artyProfile = register("arty@dreamscale.io");
-        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+
+        String inviteKey = inviteToOrgWithEmail("zoe@dreamscale.io")
+
+        AccountActivationDto zoeProfile = registerWithInviteKey("zoe@personal.com", inviteKey);
 
         switchUser(zoeProfile)
-
-        SimpleStatusDto zoeJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "zoe@dreamscale.io")
 
         when:
 
@@ -280,12 +267,58 @@ class OrganizationResourceSpec extends Specification {
 
         OrganizationDto dsIsActiveForArty = organizationClient.getMyActiveOrganization();
 
-
         List<MemberDetailsDto> memberships = organizationClient.getOrganizationMembers();
 
         then:
 
-        assert zoeJoinedDS.status == Status.JOINED
+        assert loginToDSFromZoe != null
+        assert loginToDSFromZoe.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSFromZoe.getParticipatingOrganizations().size() == 2
+
+        assert loginToDSFromArty != null
+        assert loginToDSFromArty.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
+        assert loginToDSFromArty.getParticipatingOrganizations().size() == 2
+
+        assert dsIsActiveForZoe.getId() == dreamScaleSubscription.getOrganizationId()
+        assert dsIsActiveForArty.getId() == dreamScaleSubscription.getOrganizationId()
+
+        assert memberships.size() == 2
+    }
+
+    def "should join an organization from an existing private account using invite key"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        AccountActivationDto zoeProfile = register("zoe@personal.com");
+
+        switchUser(artyProfile)
+
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+
+        String zoeInviteKey = inviteToOrgWithEmail("zoe@dreamscale.io")
+
+        switchUser(zoeProfile)
+
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(zoeInviteKey))
+
+        when:
+
+        ConnectionStatusDto loginToDSFromZoe = accountClient.login()
+
+        OrganizationDto dsIsActiveForZoe = organizationClient.getMyActiveOrganization();
+
+        accountClient.logout()
+
+        switchUser(artyProfile)
+
+        ConnectionStatusDto loginToDSFromArty =  accountClient.login()
+
+        OrganizationDto dsIsActiveForArty = organizationClient.getMyActiveOrganization();
+
+        List<MemberDetailsDto> memberships = organizationClient.getOrganizationMembers();
+
+        then:
 
         assert loginToDSFromZoe != null
         assert loginToDSFromZoe.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
@@ -309,12 +342,13 @@ class OrganizationResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+
+        String inviteKey = inviteToOrgWithEmail("shaky.piano@dreamscale.io")
 
         switchUser(shakyProfile)
 
-        SimpleStatusDto shakyJoinedDS = joinOrganization(dreamScaleSubscription.getInviteToken(), "shaky.piano@dreamscale.io")
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(inviteKey))
 
         when:
 
@@ -346,8 +380,6 @@ class OrganizationResourceSpec extends Specification {
 
         then:
 
-        assert shakyJoinedDS.status == Status.JOINED
-
         assert loginFromShakyBeforeRemove != null
         assert loginFromShakyBeforeRemove.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
         assert loginFromShakyBeforeRemove.getParticipatingOrganizations().size() == 2
@@ -378,8 +410,7 @@ class OrganizationResourceSpec extends Specification {
 
         switchUser(artyProfile)
 
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput("dreamscale.io", "arty@dreamscale.io")
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
         JiraConfigDto jiraInputConfig = createJiraConfig()
 
@@ -410,7 +441,7 @@ class OrganizationResourceSpec extends Specification {
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
         rootAccountInput.setEmail(email)
 
-        activationToken = null;
+        String activationToken = null;
 
         1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { emailAddr, token -> activationToken = token; return null}
 
@@ -418,22 +449,50 @@ class OrganizationResourceSpec extends Specification {
         return accountClient.activate(new ActivationCodeDto(activationToken))
     }
 
-    private SimpleStatusDto joinOrganization(String inviteToken, String email) {
+    AccountActivationDto registerWithInviteKey(String email, String invitationKey) {
 
-        return organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail(email)
+        rootAccountInput.setInvitationKey(invitationKey)
+
+        UserProfileDto userProfile = accountClient.register(rootAccountInput)
+
+
+        return accountClient.activate(new ActivationCodeDto(invitationKey))
     }
 
-    private SimpleStatusDto joinOrganizationWithValidate(String inviteToken, String email) {
+    private String inviteToOrgWithEmail(String email) {
 
-        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, ticketCode -> validationCode = ticketCode; return null}
+        String activationToken = null;
 
-        organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token; return null}
 
-        return organizationClient.validateMemberEmailAndJoin(validationCode)
+        inviteToClient.inviteToActiveOrganization(new EmailInputDto(email))
+
+        return activationToken;
     }
 
+    private OrganizationSubscriptionDto createSubscriptionAndValidateEmail(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
+
+        String validateToken = null;
+
+        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, token -> validateToken = token; return null}
+
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(validateToken))
+
+        return dreamScaleSubscription;
+    }
+
+    private OrganizationSubscriptionDto createSubscription(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
+
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        return dreamScaleSubscription;
+    }
 
     private JiraConfigDto createJiraConfig() {
         return new JiraConfigDto("company.atlassian.net", "jiraUser", "143143WRU143APIKEY143WRU143")

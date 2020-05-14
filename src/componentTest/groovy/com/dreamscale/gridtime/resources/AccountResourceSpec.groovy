@@ -114,7 +114,7 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto.status == Status.VALID
     }
 
-    def "on talk connect should resume rooms"() {
+    def "on talk connect should validate connection"() {
         given:
         OrganizationMemberEntity member = createMemberWithOrgAndTeam()
         testUser.setId(member.getRootAccountId())

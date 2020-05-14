@@ -81,6 +81,8 @@ public class InviteCapability {
         UUID teamId = inviteTicket.getTeamIdProp();
         String orgEmail = inviteTicket.getEmailProp();
 
+        log.debug("Process invitation: type {}, org {}, team {}, email {}", inviteTicket.getTicketType().name(), organizationId, teamId, orgEmail);
+
         switch (inviteTicket.getTicketType()) {
 
             case ACTIVATE_AND_INVITE_TO_ORG:

@@ -38,8 +38,6 @@ public class OrganizationSubscriptionDetailsEntity {
 
     private String domainName;
 
-    private String inviteToken;
-
     @Enumerated(EnumType.STRING)
     private SubscriptionStatus subscriptionStatus;
 

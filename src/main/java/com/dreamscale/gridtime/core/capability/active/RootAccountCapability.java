@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,7 +75,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private EmailCapability emailCapability;
 
+    @Autowired
+    private InviteCapability inviteCapability;
 
+
+    @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());
@@ -92,10 +98,20 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         rootAccountRepository.save(newAccount);
 
-        OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
+        if (rootAccountCreationInput.getInvitationKey() != null) {
+            OneTimeTicketEntity existingInvitation = oneTimeTicketCapability.findByTicketCode(rootAccountCreationInput.getInvitationKey());
 
-        emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
-
+            if (existingInvitation == null || oneTimeTicketCapability.isExpired(now, existingInvitation)) {
+                throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation is invalid or expired.");
+            } else {
+                //this ticket now belongs to the registered account, instead of the person who initially issued the ticket on registration
+                existingInvitation.setOwnerId(newAccount.getId());
+                oneTimeTicketCapability.update(existingInvitation);
+            }
+        } else {
+            OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
+            emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
+        }
 
         return toDto(newAccount, null);
     }
@@ -145,7 +161,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 organizationMemberRepository.save(pubOrgMembership);
             }
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            inviteCapability.useInvitationKey(rootAccountEntity.getId(), activationCode);
 
             accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
             accountActivationDto.setApiKey(apiKey);
@@ -155,9 +171,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         return accountActivationDto;
     }
-
-
-
 
 
     public SimpleStatusDto reset(String email) {

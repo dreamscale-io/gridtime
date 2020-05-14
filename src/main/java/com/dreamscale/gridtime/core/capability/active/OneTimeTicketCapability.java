@@ -128,9 +128,14 @@ public class OneTimeTicketCapability {
         oneTimeTicketRepository.delete(oneTimeTicket);
     }
 
+    public void update(OneTimeTicketEntity existingInvitation) {
+        oneTimeTicketRepository.save(existingInvitation);
+    }
+
     public boolean isExpired(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
         return now.isAfter(oneTimeTicket.getExpirationDate());
     }
+
 
 
 }

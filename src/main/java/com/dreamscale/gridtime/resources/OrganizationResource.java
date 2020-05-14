@@ -72,24 +72,6 @@ public class OrganizationResource {
     }
 
     /**
-     * Retrieves all the members of the active organization.
-     *
-     * @return List<MemberRegistrationDto>
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping( ResourcePaths.MEMBER_PATH + "/{memberId}" )
-    public MemberDetailsDto getMemberOfActiveOrganization(@PathVariable("memberId") String memberIdStr) {
-
-        RequestContext context = RequestContext.get();
-
-        UUID memberId = UUID.fromString(memberIdStr);
-
-        log.info("getMemberOfActiveOrganization, user={}", context.getRootAccountId());
-
-        return organizationCapability.getMemberOfActiveOrganization(context.getRootAccountId(), memberId);
-    }
-
-    /**
      * Removes a member of the active organization.
      *
      * This member will still be available to support old data references created by the user,
@@ -111,63 +93,6 @@ public class OrganizationResource {
         log.info("removeMember, user={}", context.getRootAccountId());
 
         return organizationCapability.removeMember(context.getRootAccountId(), memberId);
-    }
-
-
-    /**
-     * Joins an existing organization via the Invitation Token and an org email.
-     *
-     * If this organization requires validated emails within the domain, this call will fail if the email
-     * provided doesn't match the domain specified for the organization.
-     *
-     * If this requirement is passed, an email is sent to the provided email with a validation code.
-     * Once the email is validated, the user will be added to the org.
-     *
-     * @return SimpleStatusDto SENT if the validation email is sent
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.JOIN_PATH)
-    public SimpleStatusDto joinOrganizationWithInvitationAndEmail(@RequestBody JoinRequestInputDto joinRequestInputDto) {
-
-        RequestContext context = RequestContext.get();
-        log.info("joinOrganizationWithInvitationAndEmail, user={}", context.getRootAccountId());
-
-        return organizationCapability.joinOrganizationWithInvitationAndEmail(context.getRootAccountId(), joinRequestInputDto);
-    }
-
-    /**
-     * Invites a user to an existing organization by supplying the users email
-     *
-     * If this user has an existing account, they should be able to join the org in connection with their new account
-     *
-     * If this user is new, they should be able to setup a new root account, using this email
-     *
-     * @return SimpleStatusDto SENT if the invitation email is sent
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.INVITE_PATH)
-    public SimpleStatusDto inviteToOrganizationWithEmail(@RequestBody EmailInputDto emailInputDto) {
-
-        RequestContext context = RequestContext.get();
-        log.info("inviteToOrganizationWithEmail, user={}", context.getRootAccountId());
-
-        return organizationCapability.inviteToOrganizationWithEmail(context.getRootAccountId(), emailInputDto.getEmail());
-    }
-
-    /**
-     * Validates the organization member has access to the specified email,
-     * if this is a requirement for the org, then officially adds the member to the org
-     *
-     * @return SimpleStatusDto SUCCESS if the change succeeded, FAILED if the validation code is expired or cant be found
-     */
-
-    @PreAuthorize("permitAll")
-    @PostMapping(ResourcePaths.JOIN_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
-    SimpleStatusDto validateMemberEmailAndJoin(@RequestParam("validationCode") String validationCode) {
-
-        log.info("validateMemberEmailAndJoin" );
-
-        return organizationCapability.validateMemberEmailAndJoin(validationCode);
     }
 
 
@@ -208,7 +133,6 @@ public class OrganizationResource {
 
         return organizationCapability.getJiraConfiguration(context.getRootAccountId());
     }
-
 
 
     //paymentMethod.id from stripe, from create payment method response

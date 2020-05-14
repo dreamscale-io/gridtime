@@ -23,6 +23,8 @@ public class TeamDto {
     private TeamMemberDto me;
     private List<TeamMemberDto> teamMembers;
 
+    private boolean isHomeTeam;
+
     public void addMember(TeamMemberDto teamMember) {
         if (teamMembers == null) {
             teamMembers = new ArrayList<>();

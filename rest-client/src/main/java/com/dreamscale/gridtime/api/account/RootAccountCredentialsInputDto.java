@@ -13,4 +13,12 @@ public class RootAccountCredentialsInputDto {
 
     private String email;
     private String password;
+
+    //optional
+    private String invitationKey;
+
+    public RootAccountCredentialsInputDto(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 }

@@ -17,7 +17,6 @@ import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.jni.Local;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +38,6 @@ public class OrganizationCapability {
     OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
-    private OrganizationInviteTokenRepository inviteTokenRepository;
-
-    @Autowired
     private OrganizationMemberRepository memberRepository;
 
     @Autowired
@@ -52,7 +48,6 @@ public class OrganizationCapability {
 
     @Autowired
     private TeamCapability teamCapability;
-
 
     @Autowired
     private OrganizationSubscriptionRepository organizationSubscriptionRepository;
@@ -145,16 +140,11 @@ public class OrganizationCapability {
 
         organizationSubscriptionRepository.save(subscriptionEntity);
 
-        //TODO expire the orgs invitation token, need to get the expiration based on stripe payment
-        //TODO memberships need to stop working when subscription is invalid, invitation token should expire too.
+        //will join automatically if the same email, otherwise will send another validation, and join will happen on validate
 
-        LocalDateTime expiration = now.plusMonths(1);
-        OrganizationInviteTokenEntity inviteToken = createInviteToken(organizationEntity.getId(), expiration);
-        inviteTokenRepository.save(inviteToken);
+        joinOrganizationWithEmailValidation(now, rootAccountId, organizationEntity.getId(), orgInputDto.getOwnerEmail());
 
-        joinOrganizationWithInvitationAndEmail(rootAccountId, new JoinRequestInputDto(inviteToken.getToken(), orgInputDto.getOwnerEmail()));
-
-        return createSubscriptionDto(organizationEntity, subscriptionEntity, inviteToken);
+        return createSubscriptionDto(organizationEntity, subscriptionEntity);
 
     }
 
@@ -166,19 +156,12 @@ public class OrganizationCapability {
         return subscriptionMapper.toApiList(subscriptions);
     }
 
-    @Transactional
-    public SimpleStatusDto joinOrganizationWithInvitationAndEmail(UUID rootAccountId, JoinRequestInputDto joinRequestInputDto) {
+    private SimpleStatusDto joinOrganizationWithEmailValidation(LocalDateTime now, UUID rootAccountId, UUID organizationId, String orgEmail) {
 
-        OrganizationInviteTokenEntity tokenEntity = inviteTokenRepository.findByToken(joinRequestInputDto.getInviteToken());
+        OrganizationEntity org = organizationRepository.findById(organizationId);
+        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(organizationId);
 
-        LocalDateTime now = gridClock.now();
-
-        validateTokenFound(now, joinRequestInputDto.getInviteToken(), tokenEntity);
-
-        OrganizationEntity org = organizationRepository.findById(tokenEntity.getOrganizationId());
-        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(tokenEntity.getOrganizationId());
-
-        String standardizedEmail = joinRequestInputDto.getOrgEmail().toLowerCase();
+        String standardizedEmail = orgEmail.toLowerCase();
 
         if (requiresEmailMatch(subscription)) {
             validateEmailWithinDomain(standardizedEmail, org.getDomainName());
@@ -194,7 +177,7 @@ public class OrganizationCapability {
             statusDto.setMessage("Member added to organization.");
         } else {
 
-            OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeOrgEmailValidationTicket(now, rootAccountId, org.getId(), standardizedEmail);
+            OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteTicket(now, rootAccountId, org.getId(), standardizedEmail);
             //need to valid
             return emailCapability.sendEmailToValidateOrgEmailAddress(standardizedEmail, oneTimeTicket.getTicketCode());
 
@@ -313,13 +296,27 @@ public class OrganizationCapability {
 
         SimpleStatusDto status = new SimpleStatusDto();
 
-        createOrgMembership(now, organizationId, rootAccountId, orgEmail);
+        OrganizationMemberEntity membership = createOrgMembership(now, organizationId, rootAccountId, orgEmail);
 
         status.setStatus(Status.JOINED);
         status.setMessage("Member has joined the organization.");
 
         return status;
     }
+
+    public MemberRegistrationDetailsDto forceJoinOrganization(LocalDateTime now, UUID rootAccountId, UUID organizationId, String orgEmail) {
+
+        OrganizationMemberEntity membership = createOrgMembership(now, organizationId, rootAccountId, orgEmail);
+
+        MemberRegistrationDetailsDto memberRegistrationDetailsDto = new MemberRegistrationDetailsDto();
+
+        memberRegistrationDetailsDto.setRootAccountId(rootAccountId);
+        memberRegistrationDetailsDto.setMemberId(membership.getId());
+        memberRegistrationDetailsDto.setOrgEmail(orgEmail);
+
+        return memberRegistrationDetailsDto;
+    }
+
 
     public OrganizationEntity findOrCreatePublicOrg() {
 
@@ -418,26 +415,13 @@ public class OrganizationCapability {
         return subscription.getRequireMemberEmailInDomain();
     }
 
-    private void validateTokenFound(LocalDateTime now, String inviteToken, OrganizationInviteTokenEntity tokenEntity) {
-        if (tokenEntity == null || isExpired(now, tokenEntity)) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invite token '" + inviteToken + "' is expired or not found.");
-        }
-    }
-
-
-    private boolean isExpired(LocalDateTime now, OrganizationInviteTokenEntity inviteTokenEntity) {
-        return now.isAfter(inviteTokenEntity.getExpirationDate());
-    }
-
-
-    private OrganizationSubscriptionDto createSubscriptionDto(OrganizationEntity organizationEntity, OrganizationSubscriptionEntity subscriptionEntity, OrganizationInviteTokenEntity inviteToken) {
+    private OrganizationSubscriptionDto createSubscriptionDto(OrganizationEntity organizationEntity, OrganizationSubscriptionEntity subscriptionEntity) {
         OrganizationSubscriptionDto subscriptionDto = new OrganizationSubscriptionDto();
 
         subscriptionDto.setId(subscriptionEntity.getId());
         subscriptionDto.setOrganizationId(organizationEntity.getId());
         subscriptionDto.setDomainName(organizationEntity.getDomainName());
         subscriptionDto.setOrganizationName(organizationEntity.getOrgName());
-        subscriptionDto.setInviteToken(inviteToken.getToken());
         subscriptionDto.setRequireMemberEmailInDomain(subscriptionEntity.getRequireMemberEmailInDomain());
         subscriptionDto.setTotalSeats(subscriptionEntity.getTotalSeats());
         subscriptionDto.setSeatsRemaining(subscriptionEntity.getSeatsRemaining());
@@ -463,18 +447,6 @@ public class OrganizationCapability {
             throw new ConflictException(ConflictErrorCodes.ORG_DOMAIN_ALREADY_IN_USE, "Org domain '" + domainName + "' already in use.");
         }
     }
-
-
-    private OrganizationInviteTokenEntity createInviteToken(UUID organizationId, LocalDateTime expiration) {
-        OrganizationInviteTokenEntity inviteToken = new OrganizationInviteTokenEntity();
-        inviteToken.setOrganizationId(organizationId);
-        inviteToken.setId(UUID.randomUUID());
-        inviteToken.setToken(generateToken());
-        inviteToken.setExpirationDate(expiration);
-
-        return inviteToken;
-    }
-
 
     private String generateToken() {
         return UUID.randomUUID().toString().replace("-", "");
@@ -731,10 +703,6 @@ public class OrganizationCapability {
         return new JiraConfigDto(organization.getJiraSiteUrl(), organization.getJiraUser(), organization.getJiraApiKey());
     }
 
-
-    public MemberRegistrationDetailsDto joinOrganization(UUID rootAccountId, UUID organizationId, MembershipInputDto membershipInputDto) {
-        return null;
-    }
 
 
     public List<MemberDetailsDto> getOrganizationMembers(UUID rootAccountId, UUID organizationId) {

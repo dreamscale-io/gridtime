@@ -29,9 +29,6 @@ public interface OrganizationClient {
     @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH)
     List<MemberDetailsDto> getOrganizationMembers();
 
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}")
-    MemberDetailsDto getOrganizationMember(@Param("memberId") String memberId);
-
     //Must be organization *owner *to use these APIs
 
     @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.REMOVE_PATH)
@@ -44,16 +41,5 @@ public interface OrganizationClient {
     SimpleStatusDto updateJiraConfiguration(JiraConfigDto jiraConfigDto);
 
 
-    //Join an existing org using the invitation token
-
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH)
-    SimpleStatusDto joinOrganizationWithInvitationAndEmail(JoinRequestInputDto joinRequestInputDto);
-
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.INVITE_PATH)
-    SimpleStatusDto inviteToOrganizationWithEmail(EmailInputDto emailInputDto);
-
-    @RequestLine("POST " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.JOIN_PATH + ResourcePaths.EMAIL_PATH +
-            ResourcePaths.VALIDATE_PATH + "?validationCode={validationCode}")
-    SimpleStatusDto validateMemberEmailAndJoin(@Param("validationCode") String validationCode);
 
 }

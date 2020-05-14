@@ -25,8 +25,6 @@ public class OrganizationSubscriptionDto {
 
     private Boolean requireMemberEmailInDomain;
 
-    private String inviteToken;
-
     private LocalDateTime creationDate;
 
     private SubscriptionStatus subscriptionStatus;

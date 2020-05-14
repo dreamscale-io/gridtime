@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,6 +63,9 @@ public class AdminService {
 
     @Autowired
     private TeamCapability teamCapability;
+
+    @Autowired
+    private GridClock gridClock;
 
     @Autowired
     GridBoxBucketConfigRepository gridBoxBucketConfigRepository;
@@ -190,8 +194,9 @@ public class AdminService {
     }
 
     private MemberRegistrationDetailsDto joinOrganization(UserProfileDto account, OrganizationSubscriptionDto subscription) {
-        return organizationCapability.joinOrganization(account.getRootAccountId(), subscription.getOrganizationId(),
-                new MembershipInputDto(subscription.getInviteToken(), account.getRootEmail()));
+        LocalDateTime now = gridClock.now();
+
+        return organizationCapability.forceJoinOrganization(now, account.getRootAccountId(), subscription.getOrganizationId(), account.getRootEmail());
     }
 
 

@@ -14,9 +14,7 @@ import java.util.UUID;
 public class MemberRegistrationDetailsDto {
     private UUID memberId;
     private String orgEmail;
-    private String fullName;
 
     private UUID rootAccountId;
-    private String activationCode;
 
 }

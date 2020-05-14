@@ -35,3 +35,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_org_member_add_lowercase_username.sql
+
+  - include:
+        file: db/v007/drop_organization_invite_token.sql

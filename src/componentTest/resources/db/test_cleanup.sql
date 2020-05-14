@@ -10,7 +10,6 @@ truncate table recent_task cascade;
 truncate table active_account_status cascade;
 truncate table active_work_status cascade;
 truncate table root_account cascade;
-truncate table organization_invite_token cascade;
 truncate table organization_member cascade;
 truncate table team_member cascade;
 truncate table team cascade;
