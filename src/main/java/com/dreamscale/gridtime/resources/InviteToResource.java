@@ -34,7 +34,7 @@ public class InviteToResource {
         RequestContext context = RequestContext.get();
         log.info("inviteToPublicCommunity, user={}", context.getRootAccountId());
 
-        return inviteCapability.inviteToPublicCommunity(context.getRootAccountId(), emailInputDto.getEmail());
+        return inviteCapability.inviteToPublicCommunityOrg(context.getRootAccountId(), emailInputDto.getEmail());
     }
 
     /**

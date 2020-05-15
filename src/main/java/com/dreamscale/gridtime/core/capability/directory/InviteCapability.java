@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.invitation.InvitationKeyDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
+import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.service.GridClock;
@@ -24,6 +25,9 @@ public class InviteCapability {
 
     @Autowired
     private TeamCapability teamCapability;
+
+    @Autowired
+    private RootAccountCapability rootAccountCapability;
 
     @Autowired
     private OneTimeTicketCapability oneTimeTicketCapability;
@@ -128,16 +132,18 @@ public class InviteCapability {
         return organizationCapability.inviteToOrganizationAndTeamWithEmail(invokingRootAccountId, email);
     }
 
-
+    //TODO write a test for this
     public SimpleStatusDto inviteToActiveTeamWithUsername(UUID rootAccountId, String userToInvite) {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(rootAccountId);
         return teamCapability.inviteUserToMyActiveTeam(invokingMember.getOrganizationId(), invokingMember.getId(), userToInvite);
     }
 
+    public SimpleStatusDto inviteToPublicCommunityOrg(UUID invokingRootAccountId, String email) {
 
-    public SimpleStatusDto inviteToPublicCommunity(UUID invokingRootAccountId, String email) {
-        return null;
+        //TODO this one, should just send an email, inviting them to download and signup, give an activation code?
+
+        return rootAccountCapability.inviteToPublic(invokingRootAccountId, email);
     }
 
 }

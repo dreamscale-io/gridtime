@@ -661,4 +661,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         return simpleStatus;
     }
+
+    public SimpleStatusDto inviteToPublic(UUID invokingRootAccountId, String email) {
+        return null;
+    }
 }

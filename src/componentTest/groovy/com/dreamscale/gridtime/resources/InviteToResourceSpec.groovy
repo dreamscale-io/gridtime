@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
+import com.dreamscale.gridtime.api.account.UserNameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
@@ -20,6 +21,7 @@ import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
+import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.InvitationClient
 import com.dreamscale.gridtime.client.InviteToClient
@@ -142,6 +144,59 @@ class InviteToResourceSpec extends Specification {
         assert artysOrgMembers.size() == 2
     }
 
+
+    def "should allow a user to invite a member to their team via username"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
+
+        accountClient.login()
+
+        String inviteToOrgKey = inviteToOrgWithEmail("zoe@dreamscale.io")
+
+        accountClient.logout()
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(inviteToOrgKey))
+
+        accountClient.logout()
+        accountClient.login()
+
+        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+
+        accountClient.logout()
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        when:
+
+        TeamDto phoenixTeam = teamClient.createTeam("Phoenix")
+
+        //this should be instant, since it doesn't require email validation
+
+        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+
+        TeamDto artysHomeTeam = teamClient.getMyHomeTeam()
+
+        then:
+        assert inviteStatus.status == Status.JOINED
+
+        assert artysHomeTeam.getId() == phoenixTeam.getId()
+        assert artysHomeTeam.getTeamMembers().size() == 2
+    }
+
+
+
     private void switchUser(AccountActivationDto artyProfile) {
         RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());
 
@@ -162,22 +217,37 @@ class InviteToResourceSpec extends Specification {
         return accountClient.activate(new ActivationCodeDto(inviteKey))
     }
 
-    private SimpleStatusDto joinOrganization(String inviteToken, String email) {
+    private String inviteToOrgWithEmail(String email) {
 
-        return organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
+        String activationToken = null;
+
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token; return null}
+
+        inviteToClient.inviteToActiveOrganization(new EmailInputDto(email))
+
+        return activationToken;
     }
 
-    private SimpleStatusDto joinOrganizationWithValidate(String inviteToken, String email) {
+    private OrganizationSubscriptionDto createSubscriptionAndValidateEmail(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
 
-        String validationCode = null;
+        String validateToken = null;
 
-        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, ticketCode -> validationCode = ticketCode; return null}
+        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, token -> validateToken = token; return null}
 
-        organizationClient.joinOrganizationWithInvitationAndEmail(
-                new JoinRequestInputDto(inviteToken, email))
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
 
-        return organizationClient.validateMemberEmailAndJoin(validationCode)
+        invitationClient.useInvitationKey(new InvitationKeyInputDto(validateToken))
+
+        return dreamScaleSubscription;
+    }
+
+    private OrganizationSubscriptionDto createSubscription(String domain, String ownerEmail) {
+        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
+
+        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
+
+        return dreamScaleSubscription;
     }
 
     private SubscriptionInputDto createSubscriptionInput(String domain, String ownerEmail) {
