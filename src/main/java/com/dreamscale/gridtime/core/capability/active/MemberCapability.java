@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
+import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class MemberCapability {
 
     @Autowired
-    private SpiritNetworkOperator xpService;
+    private TorchieNetworkOperator xpService;
 
     @Autowired
     private WTFCircuitOperator wtfCircuitOperator;

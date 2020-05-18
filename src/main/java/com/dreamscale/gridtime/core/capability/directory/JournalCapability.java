@@ -13,7 +13,7 @@ import com.dreamscale.gridtime.core.domain.member.json.PairingMemberList;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
+import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +62,7 @@ public class JournalCapability {
     private TaskRepository taskRepository;
 
     @Autowired
-    private SpiritNetworkOperator spiritNetworkOperator;
+    private TorchieNetworkOperator torchieNetworkOperator;
 
     private ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -86,7 +86,7 @@ public class JournalCapability {
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
-        ActiveLinksNetworkDto activeLinksNetwork = spiritNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
+        ActiveLinksNetworkDto activeLinksNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
 
         boolean isLinked = false;
         if (!activeLinksNetwork.isEmpty()) {
@@ -174,7 +174,7 @@ public class JournalCapability {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        spiritNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
+        torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
         IntentionEntity lastIntention = closeLastIntention(memberId, now);
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
@@ -298,7 +298,7 @@ public class JournalCapability {
     }
 
     private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
-        ActiveLinksNetworkDto spiritNetwork = spiritNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
+        ActiveLinksNetworkDto spiritNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
         for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
             List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {

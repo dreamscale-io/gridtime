@@ -13,7 +13,7 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
-import com.dreamscale.gridtime.core.capability.operator.SpiritNetworkOperator;
+import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ import java.util.*;
 public class TeamCapability {
 
     @Autowired
-    private SpiritNetworkOperator xpService;
+    private TorchieNetworkOperator xpService;
 
     @Autowired
     private ActiveWorkStatusManager wtfService;
@@ -630,7 +630,7 @@ public class TeamCapability {
         return teamMemberDto;
     }
 
-    public List<TeamDto> getMyParticipatingTeamsWithMembers(UUID organizationId, UUID invokingMemberId) {
+    public List<TeamDto> getAllMyParticipatingTeamsWithMembers(UUID organizationId, UUID invokingMemberId) {
 
         List<TeamEntity> teams = teamRepository.findMyTeamsByOrgMembership(organizationId, invokingMemberId);
 

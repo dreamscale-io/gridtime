@@ -51,13 +51,38 @@ class TeamCircuitResourceSpec extends Specification {
 
         when:
 
-        TeamCircuitDto circuit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         then:
         assert circuit != null
         assert circuit.getDefaultRoom().getOwnerName() != null;
         assert circuit.getTeamMembers().size() == 1
     }
+
+    def 'should retrieve all team circuits'() {
+        given:
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        loggedInUser.setId(member.getRootAccountId())
+
+        TeamEntity team1 = aRandom.teamEntity().organizationId(org.id).save();
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team1.id).save();
+
+        TeamEntity team2 = aRandom.teamEntity().organizationId(org.id).save();
+        TeamMemberEntity teamMember2 = aRandom.teamMemberEntity().organizationId(org.id).memberId(member.id).teamId(team2.id).save();
+
+        when:
+
+        List<TeamCircuitDto> teamCircuits = teamCircuitClient.getAllMyTeamCircuits();
+
+        TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
+
+        then:
+        assert teamCircuits != null
+        assert teamCircuits.size() == 2
+    }
+
 
 
     def 'should spin up a new room on the team circuit'() {
@@ -73,12 +98,12 @@ class TeamCircuitResourceSpec extends Specification {
         when:
 
         //circuit initialized on first retrieve
-        TeamCircuitDto circuitInit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuitInit = teamCircuitClient.getMyHomeTeamCircuit();
 
         TeamCircuitRoomDto circuitRoom1 = teamCircuitClient.createTeamCircuitRoom(team.name, "angry_teachers");
         TeamCircuitRoomDto circuitRoom2 = teamCircuitClient.createTeamCircuitRoom(team.name, "angry_lemmings");
 
-        TeamCircuitDto circuit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         then:
         assert circuitRoom1 != null
@@ -101,7 +126,7 @@ class TeamCircuitResourceSpec extends Specification {
         when:
 
         //circuit initialized on first retrieve
-        TeamCircuitDto circuitInit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuitInit = teamCircuitClient.getMyHomeTeamCircuit();
 
         TeamCircuitRoomDto circuitRoom1 = teamCircuitClient.createTeamCircuitRoom(team.name, "angry_teachers");
         TeamCircuitRoomDto circuitRoom2 = teamCircuitClient.createTeamCircuitRoom(team.name, "angry_lemmings");
@@ -110,7 +135,7 @@ class TeamCircuitResourceSpec extends Specification {
 
         TeamCircuitRoomDto closedRoom = teamCircuitClient.getTeamCircuitRoom(team.name, "angry_teachers")
 
-        TeamCircuitDto circuit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         then:
         assert circuit.getTeamRooms().size() == 1
@@ -132,7 +157,7 @@ class TeamCircuitResourceSpec extends Specification {
         when:
 
         //circuit initialized on first retrieve
-        TeamCircuitDto circuitInit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuitInit = teamCircuitClient.getMyHomeTeamCircuit();
 
         TeamCircuitRoomDto circuitRoom = teamCircuitClient.createTeamCircuitRoom(team.name, "angry_teachers");
 
@@ -142,7 +167,7 @@ class TeamCircuitResourceSpec extends Specification {
                 new TagsInputDto("tag1", "tag2"))
 
 
-        TeamCircuitDto circuit = teamCircuitClient.getMyTeamCircuit();
+        TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         then:
         assert circuit.getTeamRooms().size() == 1

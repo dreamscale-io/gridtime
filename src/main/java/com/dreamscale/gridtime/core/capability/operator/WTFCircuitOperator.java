@@ -679,6 +679,42 @@ public class WTFCircuitOperator {
         return toDto(learningCircuitEntity);
     }
 
+
+    public LearningCircuitDto joinWTF(UUID organizationId, UUID memberId, String circuitName) {
+
+        //this is kinda like join room, but lemme do a joined_circuits table
+
+        //so I've got an active circuits, and their owners in the learning circuit repo
+
+        //now, member_active_circuit
+
+        //this table will be used to track current state, and if I'm pointing to my circuit or someone else's
+
+        //and then the active queries will use this new table, as opposed to assuming that the owner's circuit is active.
+
+        //these ones could be on hold.
+
+        //so i need another table.
+
+        //and then, I probably need to rename the active things, rename the vaiables.
+
+        //and when I start a new circuit, will need to be my "active_join_circuit"
+
+        //thats a better name, okay so:
+
+        //1. I need this new table
+        //2. wtf() needs to make an entry in this new table
+        //3. join() needs to put wtf on hold and make an entry into this table
+        //4. get() needs to use this table instead of owner table
+        //5. member status for team needs to use this table instead of owner table
+
+        return null;
+    }
+
+    public LearningCircuitDto leaveWTF(UUID organizationId, UUID memberId, String circuitName) {
+        return null;
+    }
+
     @Transactional
     public TalkMessageDto joinRoom(UUID organizationId, UUID memberId, String roomName) {
 
@@ -1141,11 +1177,5 @@ public class WTFCircuitOperator {
     }
 
 
-    public LearningCircuitDto joinWTF(UUID organizationId, UUID memberId, String circuitName) {
-        return null;
-    }
 
-    public LearningCircuitDto leaveWTF(UUID organizationId, UUID memberId, String circuitName) {
-        return null;
-    }
 }

@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping(path = ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH , produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
@@ -25,6 +27,25 @@ public class TeamCircuitResource {
     @Autowired
     TeamCircuitOperator teamCircuitOperator;
 
+
+
+    /**
+     * Gets all the team circuits, for all the teams of the active user
+     *
+     * @return TeamCircuitDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping()
+    public List<TeamCircuitDto> getAllTeamCircuits() {
+
+        RequestContext context = RequestContext.get();
+        log.info("getMyHomeTeamCircuit, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCircuitOperator.gettAllMyTeamCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
 
     /**
      * Gets the team circuit for the active user, and all member statuses

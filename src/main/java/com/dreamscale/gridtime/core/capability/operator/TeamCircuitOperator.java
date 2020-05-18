@@ -147,7 +147,13 @@ public class TeamCircuitOperator {
 
         TeamDto teamDto = teamCapability.getMyActiveTeam(organizationId, memberId);
 
-       TeamCircuitEntity teamCircuitEntity = findOrCreateTeamCircuit(teamDto);
+
+        return loadTeamCircuitDto(organizationId, teamDto);
+    }
+
+    private TeamCircuitDto loadTeamCircuitDto(UUID organizationId, TeamDto teamDto) {
+
+        TeamCircuitEntity teamCircuitEntity = findOrCreateTeamCircuit(teamDto);
 
         TeamCircuitDto teamCircuitDto = new TeamCircuitDto();
 
@@ -178,8 +184,20 @@ public class TeamCircuitOperator {
         teamCircuitDto.setDefaultRoom(defaultRoom);
 
         teamCircuitDto.setTeamRooms(lookupTeamRooms(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getTeamId()));
-
         return teamCircuitDto;
+    }
+
+    public List<TeamCircuitDto> gettAllMyTeamCircuits(UUID organizationId, UUID memberId) {
+
+        List<TeamDto> teams = teamCapability.getAllMyParticipatingTeamsWithMembers(organizationId, memberId);
+
+        List<TeamCircuitDto> teamCircuitDtos = new ArrayList<>();
+
+        for (TeamDto team : teams) {
+            teamCircuitDtos.add(loadTeamCircuitDto(organizationId, team));
+        }
+
+        return teamCircuitDtos;
     }
 
     public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {

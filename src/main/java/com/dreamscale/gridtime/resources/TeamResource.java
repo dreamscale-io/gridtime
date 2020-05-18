@@ -4,7 +4,6 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.TeamWithMembersDto;
 import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
@@ -15,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -40,7 +38,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamCapability.getMyParticipatingTeamsWithMembers(invokingMember.getOrganizationId(), invokingMember.getId());
+        return teamCapability.getAllMyParticipatingTeamsWithMembers(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**

@@ -2,13 +2,12 @@
 
 --changeset dreamscale:5
 
-  create table organization_subscription_seat (
+  create table active_join_circuit (
     id uuid primary key not null,
-    subscription_id uuid not null,
     organization_id uuid not null,
-    root_account_id uuid not null,
-    org_email text,
-    activation_date timestamp,
-    cancel_date timestamp,
-    subscription_status text not null
+    member_id uuid not null,
+    team_id_of_invocation uuid not null,
+    join_date timestamp,
+    owner_type text,
+    circuit_type text
  );

@@ -24,7 +24,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class SpiritNetworkOperator {
+public class TorchieNetworkOperator {
 
     @Autowired
     OrganizationCapability organizationMembership;

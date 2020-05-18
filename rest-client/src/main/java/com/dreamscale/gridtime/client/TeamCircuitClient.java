@@ -21,10 +21,10 @@ public interface TeamCircuitClient {
 
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH )
-    List<TeamCircuitDto> getTeamCircuits(@Param("teamName") String teamName);
+    List<TeamCircuitDto> getAllMyTeamCircuits();
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.HOME_PATH)
-    TeamCircuitDto getMyTeamCircuit();
+    TeamCircuitDto getMyHomeTeamCircuit();
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH + "/{teamName}")
     TeamCircuitDto getTeamCircuitByName(@Param("teamName") String teamName);
