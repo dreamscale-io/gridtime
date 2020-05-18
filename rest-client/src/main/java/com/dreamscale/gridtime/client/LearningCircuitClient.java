@@ -19,6 +19,9 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
     LearningCircuitDto startWTF();
 
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
+    LearningCircuitDto getActiveCircuit();
+
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}")
     LearningCircuitDto startWTFWithCustomCircuitName(@Param("name") String customCircuitName);
 
@@ -54,10 +57,15 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.REOPEN_PATH)
     LearningCircuitDto reopenWTF(@Param("name") String circuitName);
 
-    //query circuits
+    //join and leave at the circuit level
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH )
-    LearningCircuitDto getActiveCircuit();
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
+    LearningCircuitDto joinWTF(@Param("name") String circuitName);
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
+    LearningCircuitDto leaveWTF(@Param("name") String circuitName);
+
+    //query circuits -- these below APIs feel like they need to move somewhere else...?
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)
     List<LearningCircuitDto> getAllMyDoItLaterCircuits();
@@ -68,6 +76,10 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
     List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@Param("id") String memberId);
 
+    //deprecate below, and use GET /circuit/wtf to get the active
+
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH )
+    LearningCircuitDto getActiveCircuitOld();
 
 
 }

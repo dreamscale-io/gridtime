@@ -1141,4 +1141,11 @@ public class WTFCircuitOperator {
     }
 
 
+    public LearningCircuitDto joinWTF(UUID organizationId, UUID memberId, String circuitName) {
+        return null;
+    }
+
+    public LearningCircuitDto leaveWTF(UUID organizationId, UUID memberId, String circuitName) {
+        return null;
+    }
 }

@@ -47,6 +47,23 @@ public class LearningCircuitResource {
     }
 
     /**
+     * Retrieves the active LearningCircuit of the invoking user, whether created by the user, or
+     * a joined session of another member.
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.WTF_PATH)
+    public LearningCircuitDto getActiveWTF() {
+        RequestContext context = RequestContext.get();
+        log.info("getActiveWTF, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.getMyActiveWTFCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
      * Pulls the "Global Andon Cord" to generate a new "Learning Circuit" with a specified custom name, that can be joined by
      * anyone in the organization that wants to collaborate.  Learning Circuits help the team navigate through
      * the learning flow of triaging the WTF, then reflecting with a Retro to distill the experience into patterns.
@@ -122,6 +139,49 @@ public class LearningCircuitResource {
 
         return wtfCircuitOperator.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
     }
+
+    /**
+     * Joins the specified WTF circuit.
+     *
+     * If the user currently has a WTF active, this old WTF will be put on hold, and this new one will become active.
+     *
+     * If the user is currently joined to another members WTF, they will leave and join this new one.
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
+    public LearningCircuitDto joinWTF(@PathVariable("name") String circuitName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("joinWTF, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.joinWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+    /**
+     * Joins the specified WTF circuit.
+     *
+     * If the user currently has a WTF active, this old WTF will be put on hold, and this new one will become active.
+     *
+     * If the user is currently joined to another members WTF, they will leave and join this new one.
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
+    public LearningCircuitDto leaveWTF(@PathVariable("name") String circuitName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("leaveWTF, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.leaveWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
 
 
     /**
