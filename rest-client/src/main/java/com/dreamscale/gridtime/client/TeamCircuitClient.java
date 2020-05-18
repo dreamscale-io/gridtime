@@ -20,6 +20,9 @@ import java.util.List;
 public interface TeamCircuitClient {
 
 
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH )
+    List<TeamCircuitDto> getTeamCircuits(@Param("teamName") String teamName);
+
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.HOME_PATH)
     TeamCircuitDto getMyTeamCircuit();
 
@@ -47,5 +50,7 @@ public interface TeamCircuitClient {
     TeamCircuitRoomDto saveTagsForTeamCircuitRoom(@Param("teamName") String teamName,
                                                   @Param("roomName") String roomName,
                                                   TagsInputDto tagsInputDto);
+
+
 
 }
