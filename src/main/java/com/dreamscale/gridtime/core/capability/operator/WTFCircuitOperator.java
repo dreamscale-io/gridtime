@@ -100,6 +100,12 @@ public class WTFCircuitOperator {
     @Autowired
     private MemberStatusRepository memberStatusRepository;
 
+    @Autowired
+    private ActiveJoinCircuitRepository activeJoinCircuitRepository;
+
+    @Autowired
+    private RoomOperator roomOperator;
+
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
@@ -344,12 +350,12 @@ public class WTFCircuitOperator {
         }
     }
 
-    private String deriveRetroTalkRoomName(LearningCircuitEntity activeCircuit) {
-        return activeCircuit.getCircuitName() + RETRO_ROOM_SUFFIX;
+    private String deriveRetroTalkRoomName(LearningCircuitEntity circuit) {
+        return circuit.getCircuitName() + RETRO_ROOM_SUFFIX;
     }
 
-    private String deriveWTFRoomName(LearningCircuitEntity activeCircuit) {
-        return activeCircuit.getCircuitName() + WTF_ROOM_SUFFIX;
+    private String deriveWTFRoomName(LearningCircuitEntity circuit) {
+        return circuit.getCircuitName() + WTF_ROOM_SUFFIX;
     }
 
     @Transactional
@@ -413,6 +419,7 @@ public class WTFCircuitOperator {
         }
     }
 
+
     private void validateRetroNotAlreadyStarted(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getRetroRoomId() != null) {
             throw new ConflictException(ConflictErrorCodes.RETRO_ALREADY_STARTED, "Retro already started for circuit: " + circuitName);
@@ -422,6 +429,12 @@ public class WTFCircuitOperator {
     private void validateCircuitIsActive(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getCircuitState() != LearningCircuitState.TROUBLESHOOT) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active: " + circuitName);
+        }
+    }
+
+    private void validateCircuitIsJoinable(String circuitName, LearningCircuitEntity learningCircuitEntity) {
+        if (learningCircuitEntity.getCircuitState() != LearningCircuitState.TROUBLESHOOT && learningCircuitEntity.getCircuitState() != LearningCircuitState.RETRO) {
+            throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be in Troubleshoot or Retro state to be joinable, Circuit: " + circuitName);
         }
     }
 
@@ -679,8 +692,32 @@ public class WTFCircuitOperator {
         return toDto(learningCircuitEntity);
     }
 
-
+    @Transactional
     public LearningCircuitDto joinWTF(UUID organizationId, UUID memberId, String circuitName) {
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        LearningCircuitEntity wtfCircuit = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+
+        validateCircuitExists(circuitName, wtfCircuit);
+        validateCircuitIsJoinable(circuitName, wtfCircuit);
+
+        updateActiveJoinedCircuit(now, organizationId, memberId, circuitName, wtfCircuit);
+
+        joinCircuitAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
+
+        return toDto(wtfCircuit);
+
+        //then I need to do the join room part of this, there's the circuit, and then the room interaction here
+
+
+
+        //if the circuit is in retro state, join the retro room.
+
+
+        //you'll also be added as a circuit participant, on the circuit itself
+
 
         //this is kinda like join room, but lemme do a joined_circuits table
 
@@ -707,12 +744,73 @@ public class WTFCircuitOperator {
         //3. join() needs to put wtf on hold and make an entry into this table
         //4. get() needs to use this table instead of owner table
         //5. member status for team needs to use this table instead of owner table
-
-        return null;
     }
 
-    public LearningCircuitDto leaveWTF(UUID organizationId, UUID memberId, String circuitName) {
-        return null;
+    private void joinCircuitAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
+
+        LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
+
+        if (circuitMember == null) {
+
+            log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, wtfCircuit.getCircuitName());
+
+            circuitMember = new LearningCircuitMemberEntity();
+            circuitMember.setId(UUID.randomUUID());
+            circuitMember.setCircuitId(wtfCircuit.getId());
+            circuitMember.setOrganizationId(organizationId);
+            circuitMember.setMemberId(memberId);
+            circuitMember.setJoinTime(now);
+
+            learningCircuitMemberRepository.save(circuitMember);
+
+        }
+        //if circuit is in troubleshoot state, join the troubleshooting room.
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
+            String urn = ROOM_URN_PREFIX + deriveWTFRoomName(wtfCircuit);
+            sendRoomStatusMessage(urn, wtfCircuit.getOwnerId(), memberId, now, nanoTime,
+                    wtfCircuit.getWtfRoomId(), CircuitMessageType.ROOM_MEMBER_JOIN);
+        } else if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
+            String urn = ROOM_URN_PREFIX + deriveRetroTalkRoomName(wtfCircuit);
+            sendRoomStatusMessage(urn, wtfCircuit.getOwnerId(), memberId, now, nanoTime,
+                    wtfCircuit.getRetroRoomId(), CircuitMessageType.ROOM_MEMBER_JOIN);
+        }
+    }
+
+    private void updateActiveJoinedCircuit(LocalDateTime now, UUID organizationId, UUID memberId, String circuitName, LearningCircuitEntity wtfCircuit) {
+        //if we own it, we should already be setup as a member, so this is a no-op, we can't leave a circuit we own
+        if (!wtfCircuit.getOwnerId().equals(memberId)) {
+
+            ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
+
+            //if existing circuit is found, if it's ours, we ought to put it on hold, or if we joined someone else's, we ought to leave
+
+            if (existingJoinCircuit != null) {
+
+                if (existingJoinCircuit.getJoinType() == JoinType.OWNER) {
+                    pauseWTFWithDoItLater(organizationId, memberId, circuitName);
+
+                }
+            }
+
+            //okay now, we can join this new WTF circuit.
+
+            if (existingJoinCircuit == null) {
+                existingJoinCircuit = new ActiveJoinCircuitEntity();
+                existingJoinCircuit.setId(UUID.randomUUID());
+                existingJoinCircuit.setOrganizationId(organizationId);
+                existingJoinCircuit.setMemberId(memberId);
+            }
+
+            existingJoinCircuit.setJoinedCircuitId(wtfCircuit.getId());
+            existingJoinCircuit.setJoinedCircuitOwnerId(wtfCircuit.getOwnerId());
+            existingJoinCircuit.setJoinDate(now);
+            existingJoinCircuit.setJoinedCircuitType(JoinedCircuitType.WTF);
+            existingJoinCircuit.setJoinType(JoinType.TEAM_MEMBER_JOIN);
+
+            activeJoinCircuitRepository.save(existingJoinCircuit);
+
+        }
     }
 
     @Transactional
@@ -941,7 +1039,7 @@ public class WTFCircuitOperator {
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
-        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity );
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(roomId, talkMessageDto);
 
@@ -1174,7 +1272,6 @@ public class WTFCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
-
 
 
 }

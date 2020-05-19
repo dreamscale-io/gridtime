@@ -38,3 +38,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/drop_organization_invite_token.sql
+
+  - include:
+        file: db/v007/create_active_join_circuit.sql

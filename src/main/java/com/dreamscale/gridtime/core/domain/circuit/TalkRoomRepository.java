@@ -19,4 +19,6 @@ public interface TalkRoomRepository extends CrudRepository<TalkRoomEntity, UUID>
             "where tr.id = trm.room_id and trm.member_id = (:memberId) "+
             "order by tr.room_name ) ")
     List<TalkRoomEntity> findRoomsByMembership(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
+
+    TalkRoomEntity findByOrganizationIdAndId(UUID organizationId, UUID roomId);
 }
