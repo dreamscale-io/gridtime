@@ -749,30 +749,29 @@ public class WTFCircuitOperator {
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
 
-        validateCircuitExists("Circuit for room " + roomName, circuitEntity);
+        if (circuitEntity != null) {
+            LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuitEntity.getId(), memberId);
 
-        //if this is the first time I've joined the circuit, join the status room too, and as a participant
+            if (circuitMember == null) {
 
-        LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuitEntity.getId(), memberId);
+                log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
 
-        if (circuitMember == null) {
+                circuitMember = new LearningCircuitMemberEntity();
+                circuitMember.setId(UUID.randomUUID());
+                circuitMember.setCircuitId(circuitEntity.getId());
+                circuitMember.setOrganizationId(organizationId);
+                circuitMember.setMemberId(memberId);
+                circuitMember.setJoinTime(now);
 
-            log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
+                learningCircuitMemberRepository.save(circuitMember);
 
-            circuitMember = new LearningCircuitMemberEntity();
-            circuitMember.setId(UUID.randomUUID());
-            circuitMember.setCircuitId(circuitEntity.getId());
-            circuitMember.setOrganizationId(organizationId);
-            circuitMember.setMemberId(memberId);
-            circuitMember.setJoinTime(now);
+            }
 
-            learningCircuitMemberRepository.save(circuitMember);
-
+            String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
+            return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
         }
 
-        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
-
-        return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
+        return null;
     }
 
     @Transactional
