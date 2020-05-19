@@ -20,6 +20,8 @@ public class TeamCircuitDto {
 
     private String teamName;
 
+    private Boolean isHomeTeam;
+
     TeamCircuitRoomDto defaultRoom;
 
     private UUID ownerId;

@@ -161,6 +161,7 @@ public class TeamCircuitOperator {
         teamCircuitDto.setOrganizationId(organizationId);
         teamCircuitDto.setTeamName(teamDto.getName());
         teamCircuitDto.setTeamMembers(teamDto.getTeamMembers());
+        teamCircuitDto.setIsHomeTeam(teamDto.isHomeTeam());
 
         teamCircuitDto.setOwnerId(teamCircuitEntity.getOwnerId());
         teamCircuitDto.setModeratedId(teamCircuitEntity.getModeratorId());

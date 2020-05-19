@@ -166,7 +166,6 @@ class TeamCircuitResourceSpec extends Specification {
         TeamCircuitRoomDto updatedAgain = teamCircuitClient.saveTagsForTeamCircuitRoom(team.name, "angry_teachers",
                 new TagsInputDto("tag1", "tag2"))
 
-
         TeamCircuitDto circuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         then:
