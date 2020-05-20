@@ -213,6 +213,9 @@ public class WTFCircuitOperator {
 
         learningCircuitMemberRepository.save(circuitMemberEntity);
 
+        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
+        updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
+
         //addMemberToRoom(memberId, now, learningCircuitEntity, wtfRoomEntity);
 
         //then update active status
@@ -267,20 +270,13 @@ public class WTFCircuitOperator {
 
     public LearningCircuitDto getMyActiveWTFCircuit(UUID organizationId, UUID memberId) {
 
-        //shouldn't generally be more than one, but technically, it's possible during the moments of transition,
-        //that multiple circuits could be open at the same time.
-        List<LearningCircuitEntity> activeCircuits = learningCircuitRepository.findAllActiveCircuitsOwnedBy(organizationId, memberId);
+        ActiveJoinCircuitEntity activeJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
         LearningCircuitDto circuitDto = null;
-        if (activeCircuits != null && activeCircuits.size() > 0) {
-            if (activeCircuits.size() > 1) {
-                log.warn("[WTFCircuitOperator] Member {} has multiple active circuits, should only be one", memberId);
-            }
 
-            LearningCircuitEntity activeCircuit = activeCircuits.get(0);
+        if (activeJoinCircuit != null && activeJoinCircuit.getJoinedCircuitId() != null) {
 
-            circuitDto = toDto(activeCircuit);
-
+            circuitDto = getCircuit(organizationId, activeJoinCircuit.getJoinedCircuitId());
         }
 
         return circuitDto;
@@ -371,6 +367,9 @@ public class WTFCircuitOperator {
         Long nanoTime = gridClock.nanoTime();
 
         log.debug("[WTFCircuitOperator] Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
+
+        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
+        updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
 
@@ -485,15 +484,6 @@ public class WTFCircuitOperator {
         }
     }
 
-    private void deleteRoomMember(UUID organizationId, UUID memberId, LocalDateTime leaveTime, UUID roomId) {
-
-        TalkRoomMemberEntity roomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomId, memberId);
-
-        if (roomMember != null) {
-            talkRoomMemberRepository.delete(roomMember);
-        }
-
-    }
 
     @Transactional
     public LearningCircuitDto solveWTF(UUID organizationId, UUID ownerId, String circuitName) {
@@ -524,6 +514,8 @@ public class WTFCircuitOperator {
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        clearActiveJoinedCircuit(organizationId, ownerId);
 
         return circuitDto;
     }
@@ -564,6 +556,8 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
 
+        clearActiveJoinedCircuit(organizationId, ownerId);
+
         return circuitDto;
 
     }
@@ -579,7 +573,10 @@ public class WTFCircuitOperator {
         Long nanoTime = gridClock.nanoTime();
 
         log.debug("[WTFCircuitOperator] Pause WTF circuit {} at {}", circuitName, nanoTime);
+        return pauseAndUpdateCircuitStatus(now, nanoTime, learningCircuitEntity);
+    }
 
+    private LearningCircuitDto pauseAndUpdateCircuitStatus(LocalDateTime now, Long nanoTime, LearningCircuitEntity learningCircuitEntity) {
         //every time I put it on hold, I calculate the seconds before on hold
         long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
 
@@ -589,14 +586,15 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
+        activeWorkStatusManager.resolveWTFWithCancel(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_ONHOLD);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
-        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+        teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
+        clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
         return circuitDto;
     }
 
@@ -612,6 +610,9 @@ public class WTFCircuitOperator {
         Long nanoTime = gridClock.nanoTime();
 
         log.debug("[WTFCircuitOperator] Resume WTF circuit {} at {}", circuitName, nanoTime);
+
+        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+        updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
 
         //every time I resume a circuit, calculate how long I've been paused
         long nanoElapsedTime = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -648,6 +649,8 @@ public class WTFCircuitOperator {
 
         log.debug("[WTFCircuitOperator] Reopen WTF circuit {} at {}", circuitName, nanoTime);
 
+        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+        updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
 
@@ -689,6 +692,8 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
+        clearActiveJoinedCircuit(organizationId, ownerId);
+
         return toDto(learningCircuitEntity);
     }
 
@@ -703,14 +708,19 @@ public class WTFCircuitOperator {
         validateCircuitExists(circuitName, wtfCircuit);
         validateCircuitIsJoinable(circuitName, wtfCircuit);
 
-        updateActiveJoinedCircuit(now, organizationId, memberId, circuitName, wtfCircuit);
+        //if we own it, we should already be setup as a member, so this is a no-op
 
-        joinCircuitAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
+        if (!wtfCircuit.getOwnerId().equals(memberId)) {
+
+            pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, wtfCircuit.getId());
+            updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
+
+            joinCircuitAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
+        }
 
         return toDto(wtfCircuit);
 
         //then I need to do the join room part of this, there's the circuit, and then the room interaction here
-
 
 
         //if the circuit is in retro state, join the retro room.
@@ -744,6 +754,15 @@ public class WTFCircuitOperator {
         //3. join() needs to put wtf on hold and make an entry into this table
         //4. get() needs to use this table instead of owner table
         //5. member status for team needs to use this table instead of owner table
+
+
+        //TODO now cancel, should blank out active, and we need a method that blanks this out, and gets reused by all the "end" things
+
+        //then we need to run tests
+
+        //oh yeah, member status needs to join with this table...
+
+        //will see if I can think of anything esle
     }
 
     private void joinCircuitAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
@@ -777,40 +796,60 @@ public class WTFCircuitOperator {
         }
     }
 
-    private void updateActiveJoinedCircuit(LocalDateTime now, UUID organizationId, UUID memberId, String circuitName, LearningCircuitEntity wtfCircuit) {
-        //if we own it, we should already be setup as a member, so this is a no-op, we can't leave a circuit we own
-        if (!wtfCircuit.getOwnerId().equals(memberId)) {
+    private void pauseExistingWTFIfDifferentCircuit(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
 
-            ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
+        ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
-            //if existing circuit is found, if it's ours, we ought to put it on hold, or if we joined someone else's, we ought to leave
+        if (existingJoinCircuit != null && existingJoinCircuit.getJoinType() == JoinType.OWNER &&
+                existingJoinCircuit.getJoinedCircuitId() != null && !existingJoinCircuit.getJoinedCircuitId().equals(circuitId)) {
 
-            if (existingJoinCircuit != null) {
-
-                if (existingJoinCircuit.getJoinType() == JoinType.OWNER) {
-                    pauseWTFWithDoItLater(organizationId, memberId, circuitName);
-
-                }
-            }
-
-            //okay now, we can join this new WTF circuit.
-
-            if (existingJoinCircuit == null) {
-                existingJoinCircuit = new ActiveJoinCircuitEntity();
-                existingJoinCircuit.setId(UUID.randomUUID());
-                existingJoinCircuit.setOrganizationId(organizationId);
-                existingJoinCircuit.setMemberId(memberId);
-            }
-
-            existingJoinCircuit.setJoinedCircuitId(wtfCircuit.getId());
-            existingJoinCircuit.setJoinedCircuitOwnerId(wtfCircuit.getOwnerId());
-            existingJoinCircuit.setJoinDate(now);
-            existingJoinCircuit.setJoinedCircuitType(JoinedCircuitType.WTF);
-            existingJoinCircuit.setJoinType(JoinType.TEAM_MEMBER_JOIN);
-
-            activeJoinCircuitRepository.save(existingJoinCircuit);
-
+            LearningCircuitEntity oldCircuit = learningCircuitRepository.findByOrganizationIdAndId(organizationId, existingJoinCircuit.getJoinedCircuitId());
+            pauseAndUpdateCircuitStatus(now, nanoTime, oldCircuit);
         }
+    }
+
+    private void updateActiveJoinedCircuit(LocalDateTime now, UUID organizationId, UUID memberId, LearningCircuitEntity newCircuit, JoinType joinType) {
+
+        ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
+
+        if (existingJoinCircuit == null) {
+            existingJoinCircuit = new ActiveJoinCircuitEntity();
+            existingJoinCircuit.setId(UUID.randomUUID());
+            existingJoinCircuit.setOrganizationId(organizationId);
+            existingJoinCircuit.setMemberId(memberId);
+        }
+
+        existingJoinCircuit.setJoinedCircuitId(newCircuit.getId());
+        existingJoinCircuit.setJoinedCircuitOwnerId(newCircuit.getOwnerId());
+        existingJoinCircuit.setJoinDate(now);
+        existingJoinCircuit.setJoinedCircuitType(JoinedCircuitType.WTF);
+        existingJoinCircuit.setJoinType(joinType);
+
+        activeJoinCircuitRepository.save(existingJoinCircuit);
+
+    }
+
+    private void clearActiveJoinedCircuit(UUID organizationId, UUID memberId) {
+
+        ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
+
+        //okay now, we can join this new WTF circuit.
+
+        if (existingJoinCircuit == null) {
+            existingJoinCircuit = new ActiveJoinCircuitEntity();
+            existingJoinCircuit.setId(UUID.randomUUID());
+            existingJoinCircuit.setOrganizationId(organizationId);
+            existingJoinCircuit.setMemberId(memberId);
+        }
+
+        existingJoinCircuit.setJoinedCircuitId(null);
+        existingJoinCircuit.setJoinedCircuitOwnerId(null);
+        existingJoinCircuit.setJoinDate(null);
+        existingJoinCircuit.setJoinedCircuitType(null);
+        existingJoinCircuit.setJoinType(null);
+
+        activeJoinCircuitRepository.save(existingJoinCircuit);
+
     }
 
     @Transactional

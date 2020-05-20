@@ -41,3 +41,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/create_active_join_circuit.sql
+
+  - include:
+        file: db/v007/replace_active_join_circuit_drop_not_nulls.sql

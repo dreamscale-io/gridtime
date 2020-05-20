@@ -83,6 +83,7 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuit.circuitName != null
         assert circuit.circuitState != null
         assert circuit.openTimeStr != null
+        assert circuit.circuitState == LearningCircuitState.TROUBLESHOOT.name()
 
     }
 
@@ -550,10 +551,54 @@ class LearningCircuitResourceSpec extends Specification {
         then:
 
         assert user2Participating != null
-        assert user2Participating.size() == 2
+        assert user2Participating.size() == 1 //only includes joined, not my own
 
         assert user1CircuitFromUser2.getActiveWtfRoomMembers().size() == 2
         assert user2CircuitFromUser2.getActiveWtfRoomMembers().size() == 1
+    }
+
+
+    def 'should join another persons circuit and put existing WTF on hold'() {
+        given:
+        mockTimeService.now() >> time
+        mockTimeService.nanoTime() >> timeNano
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
+
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+
+        //change active logged in user to a different user within same organization
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        accountClient.login()
+
+        when:
+
+        LearningCircuitDto user2Circuit = circuitClient.startWTF()
+
+        LearningCircuitDto joinedCircuit = circuitClient.joinWTF(user1Circuit.getCircuitName())
+
+        List<LearningCircuitDto> doItLaterCircuits = circuitClient.getAllMyDoItLaterCircuits();
+
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
+
+        List<LearningCircuitDto> user2Participating = circuitClient.getAllMyParticipatingCircuits();
+
+        then:
+
+        assert joinedCircuit.getCircuitName() == user1Circuit.getCircuitName()
+
+        assert doItLaterCircuits.size() == 1
+        assert doItLaterCircuits.get(0).getCircuitName() == user2Circuit.getCircuitName()
+
+        assert activeCircuit.getCircuitName() == user1Circuit.getCircuitName()
+
+        assert user2Participating.size() == 1 //only includes joined, not my own
     }
 
     def 'join and leave another persons chat room to update room status'() {
