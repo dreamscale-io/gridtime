@@ -540,6 +540,8 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto user2Circuit = circuitClient.startWTF()
 
+        circuitClient.joinWTF(user1Circuit.getCircuitName())
+
         talkClient.joinExistingRoom(user2Circuit.getWtfTalkRoomName())
         talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
 
@@ -619,8 +621,12 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto joinMessage  = talkClient.joinExistingRoom(circuit.getWtfTalkRoomName())
-        TalkMessageDto leaveMessage  = talkClient.leaveExistingRoom(circuit.getWtfTalkRoomName())
+        circuitClient.joinWTF(circuit.getCircuitName())
+
+        //below no longer has side-effects, have to join the circuit
+
+        TalkMessageDto joinMessage  = talkClient.joinExistingRoom(circuit.getWtfTalkRoomId().toString())
+        TalkMessageDto leaveMessage  = talkClient.leaveExistingRoom(circuit.getWtfTalkRoomId().toString())
 
         LearningCircuitWithMembersDto fullDetailsDto = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
 

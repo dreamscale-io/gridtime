@@ -469,12 +469,6 @@ public class WTFCircuitOperator {
         }
     }
 
-    private void validateRoomIsFound(TalkRoomEntity roomEntity, String roomName) {
-        if (roomEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ROOM, "Unable to find: " + roomName);
-        }
-    }
-
     private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
         log.debug("[WTFCircuitOperator] validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
@@ -720,49 +714,6 @@ public class WTFCircuitOperator {
 
         return toDto(wtfCircuit);
 
-        //then I need to do the join room part of this, there's the circuit, and then the room interaction here
-
-
-        //if the circuit is in retro state, join the retro room.
-
-
-        //you'll also be added as a circuit participant, on the circuit itself
-
-
-        //this is kinda like join room, but lemme do a joined_circuits table
-
-        //so I've got an active circuits, and their owners in the learning circuit repo
-
-        //now, member_active_circuit
-
-        //this table will be used to track current state, and if I'm pointing to my circuit or someone else's
-
-        //and then the active queries will use this new table, as opposed to assuming that the owner's circuit is active.
-
-        //these ones could be on hold.
-
-        //so i need another table.
-
-        //and then, I probably need to rename the active things, rename the vaiables.
-
-        //and when I start a new circuit, will need to be my "active_join_circuit"
-
-        //thats a better name, okay so:
-
-        //1. I need this new table
-        //2. wtf() needs to make an entry in this new table
-        //3. join() needs to put wtf on hold and make an entry into this table
-        //4. get() needs to use this table instead of owner table
-        //5. member status for team needs to use this table instead of owner table
-
-
-        //TODO now cancel, should blank out active, and we need a method that blanks this out, and gets reused by all the "end" things
-
-        //then we need to run tests
-
-        //oh yeah, member status needs to join with this table...
-
-        //will see if I can think of anything esle
     }
 
     private void joinCircuitAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
@@ -852,101 +803,6 @@ public class WTFCircuitOperator {
 
     }
 
-    @Transactional
-    public TalkMessageDto joinRoom(UUID organizationId, UUID memberId, String roomName) {
-
-        //another person joining a room, should add that person as a member.
-
-        TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
-
-        validateRoomIsFound(roomEntity, roomName);
-
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
-
-        log.debug("[WTFCircuitOperator] Member {} joining room {} at {}", memberId, roomName, nanoTime);
-
-        TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
-
-        if (roomMemberEntity == null) {
-            roomMemberEntity = new TalkRoomMemberEntity();
-            roomMemberEntity.setId(UUID.randomUUID());
-            roomMemberEntity.setRoomId(roomEntity.getId());
-            roomMemberEntity.setOrganizationId(organizationId);
-            roomMemberEntity.setMemberId(memberId);
-            roomMemberEntity.setJoinTime(now);
-
-            talkRoomMemberRepository.save(roomMemberEntity);
-
-        } else {
-            log.warn("[WTFCircuitOperator] Member {} already joined {}", memberId, roomName);
-        }
-
-        talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
-
-        LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
-
-        if (circuitEntity != null) {
-            LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuitEntity.getId(), memberId);
-
-            if (circuitMember == null) {
-
-                log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, circuitEntity.getCircuitName());
-
-                circuitMember = new LearningCircuitMemberEntity();
-                circuitMember.setId(UUID.randomUUID());
-                circuitMember.setCircuitId(circuitEntity.getId());
-                circuitMember.setOrganizationId(organizationId);
-                circuitMember.setMemberId(memberId);
-                circuitMember.setJoinTime(now);
-
-                learningCircuitMemberRepository.save(circuitMember);
-
-            }
-
-            String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
-            return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_JOIN);
-        }
-
-        return null;
-    }
-
-    @Transactional
-    public TalkMessageDto leaveRoom(UUID organizationId, UUID memberId, String roomName) {
-
-        TalkRoomEntity roomEntity = talkRoomRepository.findByOrganizationIdAndRoomName(organizationId, roomName);
-        LearningCircuitEntity circuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, roomName);
-
-        validateRoomIsFound(roomEntity, roomName);
-        validateCircuitExists("Circuit for room " + roomName, circuitEntity);
-
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
-
-
-        if (circuitEntity.getOwnerId() == memberId) {
-            log.warn("[WTFCircuitOperator] Unable to leave the room as the owner. No op.");
-
-            return null;
-        }
-
-        log.debug("[WTFCircuitOperator] Member {} leaving room {} at {}", memberId, roomName, nanoTime);
-
-        TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
-
-        if (roomMemberEntity != null) {
-
-            talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
-
-            talkRoomMemberRepository.delete(roomMemberEntity);
-        }
-
-
-        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
-
-        return sendRoomStatusMessage(urn, circuitEntity.getOwnerId(), memberId, now, nanoTime, roomEntity.getId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
-    }
-
     private long calculateActiveNanoElapsedTime(LearningCircuitEntity circuitEntity, Long nanoPauseTime) {
         long totalDuration = 0;
 
@@ -982,36 +838,6 @@ public class WTFCircuitOperator {
         return totalDuration;
     }
 
-
-    public TalkMessageDto publishChatToTalkRoom(UUID organizationId, UUID fromMemberId, String talkRoomName, String chatMessage) {
-
-        //TODO this doesn't allow talking on TeamCircuitRooms... doesn't belong in this class
-
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
-
-        validateCircuitExists(talkRoomName, learningCircuitEntity);
-        validateCircuitIsActive(talkRoomName, learningCircuitEntity);
-
-        validateMemberIsCircuitParticipant(learningCircuitEntity, fromMemberId);
-
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
-        UUID messageId = UUID.randomUUID();
-
-        UUID roomId = getRoomIdBasedOnTalkRoomId(learningCircuitEntity, talkRoomName);
-
-        String urn = ROOM_URN_PREFIX + talkRoomName;
-
-        return sendRoomMessage(urn, messageId, now, nanoTime, fromMemberId, roomId, chatMessage);
-    }
-
-    private UUID getRoomIdBasedOnTalkRoomId(LearningCircuitEntity learningCircuitEntity, String talkRoomId) {
-        if (talkRoomId.endsWith(RETRO_ROOM_SUFFIX)) {
-            return learningCircuitEntity.getRetroRoomId();
-        } else {
-            return learningCircuitEntity.getWtfRoomId();
-        }
-    }
 
 
     private TalkMessageDto toTalkMessageDto(String urn, TalkRoomMessageEntity messageEntity) {
@@ -1088,28 +914,6 @@ public class WTFCircuitOperator {
     }
 
 
-    private TalkMessageDto sendRoomMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String chatMessage) {
-
-        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
-        messageEntity.setId(messageId);
-        messageEntity.setFromId(fromMemberId);
-        messageEntity.setToRoomId(roomId);
-        messageEntity.setPosition(now);
-        messageEntity.setNanoTime(nanoTime);
-        messageEntity.setMessageType(CircuitMessageType.CHAT);
-        messageEntity.setJsonBody(JSONTransformer.toJson(new ChatMessageDetailsDto(chatMessage)));
-
-        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
-
-        talkRouter.sendRoomMessage(roomId, talkMessageDto);
-
-        talkRoomMessageRepository.save(messageEntity);
-
-        updateMemberStatusWithTouch(roomId, fromMemberId);
-
-        return talkMessageDto;
-    }
-
     private TalkMessageDto sendSnippetMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, NewSnippetEventDto snippet) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
@@ -1156,47 +960,6 @@ public class WTFCircuitOperator {
         return doItLaterCircuits;
     }
 
-
-    public List<TalkMessageDto> getAllTalkMessagesFromRoom(UUID organizationId, UUID invokingMemberId, String talkRoomName) {
-
-        //TODO this won't work for team circuit messages, will need to adapt here to support both
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findCircuitByOrganizationAndRoomName(organizationId, talkRoomName);
-
-        validateCircuitExists(talkRoomName, learningCircuitEntity);
-        validateMemberIsCircuitParticipant(learningCircuitEntity, invokingMemberId);
-
-        List<TalkRoomMessageEntity> talkMessages = talkRoomMessageRepository.findByTalkRoomName(talkRoomName);
-
-        List<TalkMessageDto> talkMessageDtos = new ArrayList<>();
-
-        String requestUri = getRequestUriFromContext();
-
-        for (TalkRoomMessageEntity message : talkMessages) {
-            TalkMessageDto dto = new TalkMessageDto();
-            dto.setId(message.getId());
-            dto.setUrn(ROOM_URN_PREFIX + talkRoomName);
-            dto.setUri(message.getToRoomId().toString());
-            dto.setRequest(requestUri);
-            dto.setMessageTime(message.getPosition());
-            dto.setNanoTime(message.getNanoTime());
-            dto.setMessageType(message.getMessageType().getSimpleClassName());
-            dto.setData(JSONTransformer.fromJson(message.getJsonBody(), message.getMessageType().getMessageClazz()));
-
-            //TODO this needs to be joined in a view
-            dto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, message.getFromId().toString());
-
-            MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(message.getFromId());
-
-            if (memberDetails != null) {
-                dto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());
-                dto.addMetaProp(TalkMessageMetaProp.FROM_FULLNAME, memberDetails.getFullName());
-            }
-
-            talkMessageDtos.add(dto);
-        }
-
-        return talkMessageDtos;
-    }
 
     private String getRequestUriFromContext() {
 
@@ -1291,22 +1054,6 @@ public class WTFCircuitOperator {
     }
 
 
-    public TalkMessageDto publishSnippetToTalkRoom(UUID organizationId, UUID memberId, String talkRoomId, NewSnippetEventDto newSnippetEventDto) {
-        return null;
-    }
-
-    public TalkMessageDto publishScreenshotToTalkRoom(UUID organizationId, UUID memberId, String talkRoomId, ScreenshotReferenceInputDto screenshotReferenceInput) {
-        return null;
-    }
-
-
-    public TalkMessageDto publishScreenshotToActiveRoom(UUID organizationId, UUID memberId, ScreenshotReferenceInputDto screenshotReferenceInput) {
-        return null;
-    }
-
-    public TalkMessageDto publishChatToActiveRoom(UUID organizationId, UUID memberId, String chatMessage) {
-        return null;
-    }
 
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;

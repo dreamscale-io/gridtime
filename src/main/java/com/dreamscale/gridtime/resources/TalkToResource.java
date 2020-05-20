@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
+import com.dreamscale.gridtime.core.capability.operator.RoomOperator;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
@@ -25,7 +26,7 @@ public class TalkToResource {
     OrganizationCapability organizationCapability;
 
     @Autowired
-    WTFCircuitOperator wtfCircuitOperator;
+    RoomOperator roomOperator;
 
     /**
      * The invoking member joins the specified "-wtf" or "-retro" talk room.
@@ -39,16 +40,14 @@ public class TalkToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.JOIN_PATH )
-    public TalkMessageDto joinRoom(@PathVariable("roomName") String roomName) {
+    public void joinRoom(@PathVariable("roomName") String roomName) {
 
         RequestContext context = RequestContext.get();
         log.info("joinRoom, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.joinRoom(invokingMember.getOrganizationId(),
-                invokingMember.getId(), roomName);
-
+        roomOperator.joinRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
     }
 
     /**
@@ -61,14 +60,14 @@ public class TalkToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.LEAVE_PATH )
-    public TalkMessageDto leaveRoom(@PathVariable("roomName") String roomName) {
+    public void leaveRoom(@PathVariable("roomName") String roomName) {
 
         RequestContext context = RequestContext.get();
         log.info("leaveRoom, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.leaveRoom(invokingMember.getOrganizationId(),
+        roomOperator.leaveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
     }
@@ -91,7 +90,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
+        return roomOperator.publishChatToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, chatMessageInputDto.getChatMessage());
 
     }
@@ -113,7 +112,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
+        return roomOperator.publishSnippetToTalkRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName, newSnippetEventDto);
 
     }
@@ -135,7 +134,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
+        return roomOperator.publishScreenshotToTalkRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName, screenshotReferenceInput);
     }
 
 
@@ -156,7 +155,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
+        return roomOperator.getAllTalkMessagesFromRoom(invokingMember.getOrganizationId(), invokingMember.getId(), roomName);
 
     }
 
@@ -176,7 +175,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
+        return roomOperator.publishChatToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), chatMessageInputDto.getChatMessage());
 
     }
@@ -197,7 +196,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishSnippetToActiveCircuit(invokingMember.getOrganizationId(),
+        return roomOperator.publishSnippetToActiveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), newSnippetEventDto);
 
     }
@@ -218,7 +217,7 @@ public class TalkToResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
+        return roomOperator.publishScreenshotToActiveRoom(invokingMember.getOrganizationId(), invokingMember.getId(), screenshotReferenceInput);
     }
 
 

@@ -18,4 +18,6 @@ public interface TalkRoomMessageRepository extends CrudRepository<TalkRoomMessag
             "and tr.room_name = (:talkRoomName) " +
             "order by position ")
     List<TalkRoomMessageEntity> findByTalkRoomName(@Param("talkRoomName") String talkRoomName);
+
+    List<TalkRoomMessageEntity> findByToRoomIdOrderByNanoTime(UUID roomId);
 }

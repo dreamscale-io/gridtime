@@ -121,7 +121,7 @@ class SpiritResourceSpec extends Specification {
         testUser.setId(member2.getRootAccountId())
         accountClient.login()
 
-        talkToClient.joinExistingRoom(circuit.getWtfTalkRoomName())
+        circuitClient.joinWTF(circuit.getCircuitName())
 
         testUser.setId(member1.getRootAccountId())
 
