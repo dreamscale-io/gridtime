@@ -32,5 +32,5 @@ truncate table team_circuit_room;
 truncate table one_time_ticket;
 truncate table active_join_circuit;
 
-
+truncate team_member_home;
 

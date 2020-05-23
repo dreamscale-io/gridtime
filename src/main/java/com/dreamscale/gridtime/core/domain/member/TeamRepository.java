@@ -23,11 +23,12 @@ public interface TeamRepository extends CrudRepository<TeamEntity, UUID> {
     List<TeamEntity> findMyTeamsByMembership(@Param("orgId") UUID orgId, @Param("rootAccountId") UUID rootAccountId);
 
 
-    @Query(nativeQuery = true, value = "select t.* from team t, team_member tm, organization_member om " +
+    @Query(nativeQuery = true, value = "select t.* from team t where exists " +
+            "(select 1 from team_member tm, organization_member om " +
             "where t.id = tm.team_id " +
             "and tm.member_id = om.id "+
             "and om.organization_id = (:orgId) "+
-            "and om.id =(:memberId) order by t.name")
+            "and om.id =(:memberId)) order by t.name")
     List<TeamEntity> findMyTeamsByOrgMembership(@Param("orgId") UUID orgId, @Param("memberId") UUID memberId);
 
 

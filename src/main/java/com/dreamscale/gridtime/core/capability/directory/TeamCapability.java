@@ -283,13 +283,16 @@ public class TeamCapability {
         //TODO okay, why is this returning null?
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(orgId, memberId);
 
+        log.debug("Home Config?:: "+teamMemberHomeConfig);
         TeamEntity defaultTeam = null;
 
         if (teamMemberHomeConfig == null) {
 
             List<TeamEntity> teamEntities = teamRepository.findMyTeamsByOrgMembership(orgId, memberId);
 
+            log.debug("Teams:: {}", teamEntities);
             defaultTeam = chooseDefaultTeam(teamEntities);
+            log.debug("DefaultTeam:: {}", defaultTeam);
 
             if (defaultTeam != null) {
                 teamMemberHomeConfig = new TeamMemberHomeEntity();
@@ -307,7 +310,7 @@ public class TeamCapability {
 
         TeamDto team = teamOutputMapper.toApi(defaultTeam);
 
-        fillTeamWithTeamMembers(team);
+        fillTeamWithTeamMembers(team, memberId);
 
         if (team != null) {
             team.setHomeTeam(true);
@@ -354,7 +357,7 @@ public class TeamCapability {
 
         validateTeamMemberFound(standardizeTeamName, teamMember);
 
-        List<TeamMemberDto> memberStatusList = memberCapability.getMeAndMyTeam(organizationId, invokingMemberId);
+        List<TeamMemberDto> memberStatusList = memberCapability.getMembersForMeAndMyTeam(organizationId, invokingMemberId);
 
         TeamWithMembersDto teamWithMembersDto = new TeamWithMembersDto();
         teamWithMembersDto.setTeamId(teamEntity.getId());
@@ -640,7 +643,7 @@ public class TeamCapability {
 
         List<TeamDto> sortedTeams = sortTeams(homeTeam, null, teamDtos);
 
-        fillTeamDtosWithTeamMembers(sortedTeams);
+        fillTeamDtosWithTeamMembers(sortedTeams, invokingMemberId);
 
         return sortedTeams;
     }
@@ -657,16 +660,17 @@ public class TeamCapability {
         return sortTeams(homeTeam, everyoneTeam, teamDtos);
     }
 
-    private void fillTeamDtosWithTeamMembers(List<TeamDto> sortedTeams) {
+    private void fillTeamDtosWithTeamMembers(List<TeamDto> sortedTeams, UUID meId) {
         for (TeamDto team : sortedTeams) {
 
-            fillTeamWithTeamMembers(team);
+            fillTeamWithTeamMembers(team, meId);
         }
     }
 
-    private void fillTeamWithTeamMembers(TeamDto team) {
+    private void fillTeamWithTeamMembers(TeamDto team, UUID meId) {
         if (team != null) {
-            List<TeamMemberDto> membersWithDetails = memberCapability.getMembersForTeam(team.getOrganizationId(), team.getId());
+            log.debug("Team member retrieval, team: {}", team);
+            List<TeamMemberDto> membersWithDetails = memberCapability.getMembersForTeam(team.getOrganizationId(), team.getId(), meId);
             team.setTeamMembers(membersWithDetails);
         }
     }

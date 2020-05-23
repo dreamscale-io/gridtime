@@ -10,10 +10,13 @@ import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -34,15 +37,15 @@ public class MemberCapability {
     @Autowired
     private MemberStatusRepository memberStatusRepository;
 
-
-
-
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamMemberDto, MemberStatusEntity> memberStatusMapper;
 
     @Autowired
     private GridClock gridClock;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @PostConstruct
     private void init() {
@@ -59,7 +62,7 @@ public class MemberCapability {
         return memberStatusRepository.findByTeamId(teamId);
     }
 
-    public List<TeamMemberDto> getMeAndMyTeam(UUID organizationId, UUID memberId, UUID teamId) {
+    public List<TeamMemberDto> getMembersForMeAndMyTeam(UUID organizationId, UUID memberId, UUID teamId) {
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamIdAndNotMe(teamId, memberId);
 
@@ -68,14 +71,17 @@ public class MemberCapability {
         return toStatusDtos(meStatus, teamMemberStatusEntities);
     }
 
-    public List<TeamMemberDto> getMembersForTeam(UUID organizationId, UUID teamId) {
+    public List<TeamMemberDto> getMembersForTeam(UUID organizationId, UUID teamId, UUID memberId) {
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamId(teamId);
 
-        return toStatusDtos(null, teamMemberStatusEntities);
+        MemberStatusEntity meStatus = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+
+        return toStatusDtos(meStatus, teamMemberStatusEntities);
     }
 
-    public List<TeamMemberDto> getMeAndMyTeam(UUID organizationId, UUID memberId) {
+    public List<TeamMemberDto> getMembersForMeAndMyTeam(UUID organizationId, UUID memberId) {
 
         List<TeamEntity> teamEntityList = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);
 
@@ -95,7 +101,9 @@ public class MemberCapability {
         LinkedList<TeamMemberDto> teamMemberDtos = new LinkedList<>();
 
         for (MemberStatusEntity memberStatusEntity : teamMemberStatusEntities) {
-            teamMemberDtos.add(toDtoWithDetails(memberStatusEntity));
+            if (isNotMe(meStatus, memberStatusEntity)) {
+                teamMemberDtos.add(toDtoWithDetails(memberStatusEntity));
+            }
         }
         sortMembers(teamMemberDtos);
 
@@ -105,6 +113,11 @@ public class MemberCapability {
 
         return teamMemberDtos;
     }
+
+    private boolean isNotMe(MemberStatusEntity meStatus, MemberStatusEntity memberStatusEntity) {
+        return meStatus != null && !meStatus.getId().equals(memberStatusEntity.getId());
+    }
+
 
     public TeamMemberDto getStatusOfMember(UUID organizationId, UUID memberId) {
 

@@ -159,11 +159,33 @@ public class WTFCircuitOperator {
 
     }
 
-    @Transactional
     public LearningCircuitDto startWTFWithCustomName(UUID organizationId, UUID memberId, String circuitName) {
 
         validateNoActiveCircuit(organizationId, memberId);
 
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+
+        LearningCircuitEntity learningCircuitEntity = createLearningCircuit(now, nanoTime, circuitName, organizationId, memberId);
+
+        //addMemberToRoom(memberId, now, learningCircuitEntity, wtfRoomEntity);
+
+        //then update active status
+
+        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
+
+        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_STARTED);
+
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
+
+        return circuitDto;
+
+    }
+
+    private LearningCircuitEntity createLearningCircuit(LocalDateTime now, Long nanoTime, String circuitName, UUID organizationId, UUID memberId) {
         LearningCircuitEntity learningCircuitEntity = new LearningCircuitEntity();
         learningCircuitEntity.setId(UUID.randomUUID());
         learningCircuitEntity.setCircuitName(circuitName);
@@ -175,8 +197,6 @@ public class WTFCircuitOperator {
 
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
 
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
 
         log.debug("[WTFCircuitOperator] Creating WTF circuit {} at {}", circuitName, nanoTime);
 
@@ -215,21 +235,7 @@ public class WTFCircuitOperator {
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
-
-        //addMemberToRoom(memberId, now, learningCircuitEntity, wtfRoomEntity);
-
-        //then update active status
-
-        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
-
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_STARTED);
-
-        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
-
-        teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
-
-        return circuitDto;
-
+        return learningCircuitEntity;
     }
 
     private void validateNoActiveCircuit(UUID organizationId, UUID memberId) {
@@ -240,7 +246,8 @@ public class WTFCircuitOperator {
         }
     }
 
-    private void sendStatusMessageToCircuit(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
+    @Transactional
+    void sendStatusMessageToCircuit(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
 
         UUID roomId = null;
         String urn = null;
@@ -407,6 +414,8 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfRetroStarted(organizationId, memberId, now, nanoTime, circuitDto);
 
+        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
+
         return circuitDto;
 
     }
@@ -514,20 +523,32 @@ public class WTFCircuitOperator {
         return circuitDto;
     }
 
-    @Transactional
     public LearningCircuitDto cancelWTF(UUID organizationId, UUID ownerId, String circuitName) {
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
         validateCircuitExists(circuitName, learningCircuitEntity);
 
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
+        cancelWTFAndCommit(organizationId, ownerId, circuitName, learningCircuitEntity, now, nanoTime);
 
-        log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
+        activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        return circuitDto;
+
+    }
+
+    @Transactional
+    void cancelWTFAndCommit(UUID organizationId, UUID ownerId, String circuitName, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
+        log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -544,16 +565,7 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
-
-        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
-
-        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
-
         clearActiveJoinedCircuit(organizationId, ownerId);
-
-        return circuitDto;
-
     }
 
     @Transactional
@@ -586,11 +598,15 @@ public class WTFCircuitOperator {
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
+        clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
+
         teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
-        clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
         return circuitDto;
     }
+
+    //TODO start, cancel, pause
+
 
     @Transactional
     public LearningCircuitDto resumeWTF(UUID organizationId, UUID ownerId, String circuitName) {
@@ -839,7 +855,6 @@ public class WTFCircuitOperator {
     }
 
 
-
     private TalkMessageDto toTalkMessageDto(String urn, TalkRoomMessageEntity messageEntity) {
 
         TalkMessageDto messageDto = new TalkMessageDto();
@@ -1052,7 +1067,6 @@ public class WTFCircuitOperator {
 
         return participatingCircuits;
     }
-
 
 
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {

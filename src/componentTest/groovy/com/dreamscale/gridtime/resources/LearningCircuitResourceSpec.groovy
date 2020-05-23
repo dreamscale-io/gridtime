@@ -8,9 +8,13 @@ import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
+import com.dreamscale.gridtime.api.organization.TeamMemberDto
+import com.dreamscale.gridtime.api.team.TeamCircuitDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
+import com.dreamscale.gridtime.client.MemberClient
 import com.dreamscale.gridtime.client.TalkToClient
+import com.dreamscale.gridtime.client.TeamCircuitClient
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitState
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
@@ -34,6 +38,12 @@ class LearningCircuitResourceSpec extends Specification {
 
     @Autowired
     LearningCircuitClient circuitClient
+
+    @Autowired
+    TeamCircuitClient teamCircuitClient
+
+    @Autowired
+    MemberClient memberClient
 
     @Autowired
     AccountClient accountClient
@@ -221,17 +231,44 @@ class LearningCircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
+        accountClient.login()
+
         LearningCircuitDto circuit = circuitClient.startWTF()
+
+        TeamCircuitDto teamCircuit = teamCircuitClient.getMyHomeTeamCircuit();
 
         when:
 
-        LearningCircuitDto abortedCircuit = circuitClient.abortWTF(circuit.getCircuitName());
+        TeamMemberDto meStatusBefore = memberClient.getMe();
+
+        LearningCircuitDto canceledCircuit = circuitClient.cancelWTF(circuit.getCircuitName());
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
+        TeamMemberDto meStatusAfter = memberClient.getMe();
+
+        List<TalkMessageDto> wtfRoomMessages = talkClient.getAllTalkMessagesFromRoom(circuit.getWtfTalkRoomName())
+
+        List<TalkMessageDto> teamCircuitMessages = talkClient.getAllTalkMessagesFromRoom(teamCircuit.getDefaultRoom().talkRoomName)
+
         then:
-        assert abortedCircuit != null
-        assert abortedCircuit.circuitState == LearningCircuitState.CANCELED.name()
+        assert canceledCircuit != null
+        assert canceledCircuit.circuitState == LearningCircuitState.CANCELED.name()
         assert activeCircuit == null
+
+        assert meStatusBefore != null
+        assert meStatusBefore.getActiveCircuit() != null
+
+        assert meStatusAfter != null
+        assert meStatusAfter.getActiveCircuit() == null
+
+        for (TalkMessageDto message : wtfRoomMessages) {
+            println message
+        }
+
+        for (TalkMessageDto message : teamCircuitMessages) {
+            println message
+        }
+        
     }
 
 

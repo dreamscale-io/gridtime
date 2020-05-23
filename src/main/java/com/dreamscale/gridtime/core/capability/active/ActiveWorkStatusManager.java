@@ -1,7 +1,9 @@
 package com.dreamscale.gridtime.core.capability.active;
 
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.TeamMemberDto;
 import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
@@ -34,6 +36,9 @@ public class ActiveWorkStatusManager {
     @Autowired
     GridClock gridClock;
 
+    @Autowired
+    WTFCircuitOperator wtfCircuitOperator;
+
 
     //rename circuitId to circuitId
 
@@ -61,6 +66,12 @@ public class ActiveWorkStatusManager {
 
         TeamMemberDto memberStatus = memberCapability.getStatusOfMember(organizationId, memberId);
 
+        //TODO remove below hack because of cacheing issue
+        LearningCircuitDto circuitDto = wtfCircuitOperator.getCircuit(organizationId,
+                circuitId);
+
+        memberStatus.setActiveCircuit(circuitDto);
+
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
     }
@@ -76,7 +87,7 @@ public class ActiveWorkStatusManager {
     }
 
     @Transactional
-    private void pushResolveStatus(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
+    void pushResolveStatus(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
@@ -87,6 +98,9 @@ public class ActiveWorkStatusManager {
         }
 
         TeamMemberDto memberStatus = memberCapability.getStatusOfMember(organizationId, memberId);
+
+        //pulls from the cached version for this session, TODO is there a way to fix this caching thing?
+        memberStatus.setActiveCircuit(null);
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
@@ -111,6 +125,9 @@ public class ActiveWorkStatusManager {
         activeWorkStatusRepository.save(workStatus);
 
         TeamMemberDto memberStatus = memberCapability.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
+
+        memberStatus.setActiveTaskId(activeIntention.getTaskId());
+        memberStatus.setWorkingOn(activeIntention.getDescription());
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(activeIntention.getOrganizationId(), activeIntention.getMemberId(), now, nanoTime, memberStatus);
     }

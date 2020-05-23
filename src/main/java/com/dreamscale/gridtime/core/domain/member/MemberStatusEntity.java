@@ -17,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MemberStatusEntity {
 
+
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
@@ -50,4 +51,8 @@ public class MemberStatusEntity {
 
     private Integer totalXp;
 
+
+    public MemberStatusEntity(UUID memberId) {
+        this.id = memberId;
+    }
 }
