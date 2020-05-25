@@ -32,6 +32,9 @@ public class RootAccountEntity {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "crypt_password")
+    private String cryptPassword;
+
     @Column(name = "display_name")
     private String displayName;
 

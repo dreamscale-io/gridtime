@@ -268,7 +268,7 @@ class LearningCircuitResourceSpec extends Specification {
         for (TalkMessageDto message : teamCircuitMessages) {
             println message
         }
-        
+
     }
 
 

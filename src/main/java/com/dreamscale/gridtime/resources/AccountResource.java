@@ -38,7 +38,6 @@ public class AccountResource {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
     }
 
-
     /**
      * Register your root account using an email address & password, will cause an activation email
      * to be sent.  The account will not be active, as part of the public organization, until activated.
@@ -119,21 +118,46 @@ public class AccountResource {
     }
 
     /**
-     * Login to the default organization.
+     * Login to the default organization using a username and password, (or email and password works too)
      *
-     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
+     * Will return a temporary connectionId that can be used in lieu of an API-key
      * for the duration of the session
      *
-     * To login completely, talk has to handshake via the /connect API or the user isnt fully logged in
+     * Logging in this way, will not change your status to Online.
+     *
+     * Use the talk /connect API to go Online.
+     *
+     *
      * @return ConnectionStatusDto
      */
 
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.LOGIN_PATH)
-    ConnectionStatusDto login() {
+    @PreAuthorize("permitAll")
+    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginWithPassword(RootLoginInputDto rootLoginInputDto) {
 
-        RequestContext context = RequestContext.get();
-        return rootAccountCapability.login(context.getRootAccountId());
+        return rootAccountCapability.loginWithPassword(rootLoginInputDto.getUserName(), rootLoginInputDto.getPassword());
+    }
+
+    /**
+     * Login to a specific organization using a username and password, (or email and password works too)
+     *
+     * Will return a temporary connectionId that can be used in lieu of an API-key
+     * for the duration of the session
+     *
+     * Logging in this way, will not change your status to Online.
+     *
+     * Use the talk /connect API to go Online.
+     *
+     * @return ConnectionStatusDto
+     */
+
+    @PreAuthorize("permitAll")
+    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}" + ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginToOrganizationWithPassword(@PathVariable("organizationId") String organizationIdStr, RootLoginInputDto rootLoginInputDto) {
+
+        UUID organizationId = UUID.fromString(organizationIdStr);
+
+        return rootAccountCapability.loginToOrganizationWithPassword(rootLoginInputDto.getUserName(), rootLoginInputDto.getPassword(), organizationId);
     }
 
     /**
@@ -154,6 +178,24 @@ public class AccountResource {
 
         UUID organizationId = UUID.fromString(organizationIdStr);
         return rootAccountCapability.loginToOrganization(context.getRootAccountId(), organizationId);
+    }
+
+    /**
+     * Login to the default organization.
+     *
+     * Login with the API-key and get a temporary connectionId that can be used in lieu of an API-key
+     * for the duration of the session
+     *
+     * To login completely, talk has to handshake via the /connect API or the user isnt fully logged in
+     * @return ConnectionStatusDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.LOGIN_PATH)
+    ConnectionStatusDto login() {
+
+        RequestContext context = RequestContext.get();
+        return rootAccountCapability.login(context.getRootAccountId());
     }
 
 

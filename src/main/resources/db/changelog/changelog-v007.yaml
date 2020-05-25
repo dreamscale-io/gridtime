@@ -44,3 +44,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/replace_active_join_circuit_drop_not_nulls.sql
+
+  - include:
+        file: db/v007/setup_root_account_login_password.sql

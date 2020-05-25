@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,6 +82,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());
+        String password = rootAccountCreationInput.getPassword();
+
         RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
 
         validateNoExistingAccount(standardizedEmail, existingRootAccount);
@@ -97,6 +98,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
         newAccount.setEmailValidated(false);
 
         rootAccountRepository.save(newAccount);
+
+        rootAccountRepository.updatePassword(newAccount.getId(), rootAccountCreationInput.getPassword());
 
         if (rootAccountCreationInput.getInvitationKey() != null) {
             OneTimeTicketEntity existingInvitation = oneTimeTicketCapability.findByTicketCode(rootAccountCreationInput.getInvitationKey());
@@ -228,11 +231,56 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
     }
 
+    private void validateUserOrPasswordMatch(String searchForAccountCriteria, RootAccountEntity foundIfPasswordMatches) {
+
+        if (foundIfPasswordMatches == null) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_USER_OR_PASSWORD, "Invalid user or password for: " + searchForAccountCriteria);
+        }
+    }
+
     public ConnectionStatusDto login(UUID rootAccountId) {
 
         OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccountId);
 
         return loginAsOrganizationMember(rootAccountId, membership);
+    }
+
+    public ConnectionStatusDto loginWithPassword(String userName, String password) {
+        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(userName, password);
+
+        OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccount.getId());
+
+        return loginAsOrganizationMember(rootAccount.getId(), membership);
+    }
+
+
+    public ConnectionStatusDto loginToOrganizationWithPassword(String userName, String password, UUID organizationId) {
+
+        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(userName, password);
+
+        //now I need to connect to the default organization for this account, and return the connect info
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccount.getId());
+
+        return loginAsOrganizationMember(rootAccount.getId(), membership);
+    }
+
+
+    private RootAccountEntity loginAndFindAccountWithUserPassword(String userName, String password) {
+
+        RootAccountEntity rootAccount = rootAccountRepository.findByLowerCaseRootUserName(standarizeToLowerCase(userName));
+
+        if (rootAccount == null) {
+            String maybeAnEmail = userName;
+            rootAccount = rootAccountRepository.findByRootEmail(standarizeToLowerCase(maybeAnEmail));
+        }
+
+        validateUserOrPasswordMatch(userName, rootAccount);
+
+        RootAccountEntity foundIfPasswordValid = rootAccountRepository.checkPasswordAndReturnIfValid(rootAccount.getId(), password);
+
+        validateUserOrPasswordMatch(userName, foundIfPasswordValid);
+        return rootAccount;
     }
 
 
@@ -665,4 +713,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
     public SimpleStatusDto inviteToPublic(UUID invokingRootAccountId, String email) {
         return null;
     }
+
+
 }
