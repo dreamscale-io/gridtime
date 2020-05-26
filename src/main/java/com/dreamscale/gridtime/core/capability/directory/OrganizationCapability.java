@@ -82,8 +82,8 @@ public class OrganizationCapability {
     private DtoEntityMapper<OrganizationDto, OrganizationEntity> orgOutputMapper;
     private DtoEntityMapper<OrganizationSubscriptionDto, OrganizationSubscriptionDetailsEntity> subscriptionMapper;
 
-    private static final String PUBLIC_ORG_DOMAIN = "public.dreamscale.io";
-    private static final String PUBLIC_ORG_NAME = "Public";
+    private static final String PUBLIC_ORG_DOMAIN = "open.dreamscale.io";
+    private static final String PUBLIC_ORG_NAME = "Open";
 
     @PostConstruct
     private void init() {
@@ -147,7 +147,6 @@ public class OrganizationCapability {
         return createSubscriptionDto(organizationEntity, subscriptionEntity);
 
     }
-
 
     public List<OrganizationSubscriptionDto> getOrganizationSubscriptions(UUID rootAccountId) {
 
@@ -225,36 +224,50 @@ public class OrganizationCapability {
     @Transactional
     public SimpleStatusDto inviteToOrganizationAndTeamWithEmail(UUID rootAccountId, String email) {
 
+        LocalDateTime now = gridClock.now();
+
         OrganizationDto org = getActiveOrganization(rootAccountId);
         String standardizedEmail = email.toLowerCase();
 
-        OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(org.getId());
-
         validateNotNull("email", email);
-        validateSubscriptionFound(subscription);
-        validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
 
-        LocalDateTime now = gridClock.now();
+        SimpleStatusDto statusDto = null;
 
-        if (requiresEmailMatch(subscription)) {
-            validateEmailWithinDomain(standardizedEmail, org.getDomainName());
+        if (!isPublicOrg(org)) {
+            OrganizationSubscriptionEntity subscription = organizationSubscriptionRepository.findByOrganizationId(org.getId());
+
+            validateSubscriptionFound(subscription);
+            validateSubscriptionOwnedByRootAccount(subscription, rootAccountId);
+
+            if (requiresEmailMatch(subscription)) {
+                validateEmailWithinDomain(standardizedEmail, org.getDomainName());
+            }
         }
 
-        //see if this person is already a member
+        OrganizationMemberEntity invokingMembersMembership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(org.getId(), rootAccountId);
+        validateMembershipFound(org.getDomainName(), invokingMembersMembership);
 
-        validateNoExistingMembership(org.getId(), standardizedEmail);
+        TeamDto activeTeam = teamCapability.getMyActiveTeam(org.getId(), invokingMembersMembership.getId());
 
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(org.getId(), rootAccountId);
 
-        validateMembershipFound(org.getDomainName(), membership);
+        //if already an org member, just add to team
 
-        TeamDto activeTeam = teamCapability.getMyActiveTeam(org.getId(), membership.getId());
+        OrganizationMemberEntity existingMembership = organizationMemberRepository.findByOrganizationIdAndEmail(org.getId(), standardizedEmail);
 
-        //send invite or join email
+        if (existingMembership != null) {
+            //should this be sending a talk notification instead of automatically joining?
 
-        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteToOrgAndTeamTicket(now, rootAccountId, org.getId(), activeTeam.getId(), standardizedEmail);
+            teamCapability.joinTeam(now, existingMembership.getRootAccountId(), org.getId(), activeTeam.getId());
 
-        return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
+            statusDto = new SimpleStatusDto(Status.JOINED, "Member added to the team.");
+        } else {
+
+            OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteToOrgAndTeamTicket(now, rootAccountId, org.getId(), activeTeam.getId(), standardizedEmail);
+
+            statusDto = emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
+        }
+
+        return statusDto;
     }
 
 
@@ -335,6 +348,13 @@ public class OrganizationCapability {
     }
 
     public boolean isPublicOrg(OrganizationEntity org) {
+        if (org != null && org.getDomainName().equals(PUBLIC_ORG_DOMAIN)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isPublicOrg(OrganizationDto org) {
         if (org != null && org.getDomainName().equals(PUBLIC_ORG_DOMAIN)) {
             return true;
         }

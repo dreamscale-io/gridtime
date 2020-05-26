@@ -149,7 +149,7 @@ class OrganizationResourceSpec extends Specification {
 
         assert connectionToPublicOrg != null
         assert connectionToPublicOrg.getParticipatingOrganizations().size() == 1
-        assert connectionToPublicOrg.getParticipatingOrganizations().get(0).orgName == "Public"
+        assert connectionToPublicOrg.getParticipatingOrganizations().get(0).orgName == "Open"
 
     }
 
@@ -170,7 +170,6 @@ class OrganizationResourceSpec extends Specification {
         OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
         when:
-
         ConnectionStatusDto connectionStatusDto = accountClient.login()
 
         then:
@@ -178,7 +177,6 @@ class OrganizationResourceSpec extends Specification {
         assert connectionStatusDto != null
         assert connectionStatusDto.getOrganizationId() == dreamScaleSubscription.getOrganizationId()
         assert connectionStatusDto.getParticipatingOrganizations().size() == 2
-
     }
 
     def "should allow joining an organization from a personal email root account"() {
@@ -398,7 +396,7 @@ class OrganizationResourceSpec extends Specification {
         assert loginFromShakyAfterRemove.getOrganizationId() != dreamScaleSubscription.getOrganizationId()
         assert loginFromShakyAfterRemove.getParticipatingOrganizations().size() == 1
 
-        assert activeOrgForShakyAfterRemove.orgName == "Public"
+        assert activeOrgForShakyAfterRemove.orgName == "Open"
         assert shakysOrganizationsAfterRemove.size() == 1
 
     }

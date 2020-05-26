@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
+import com.dreamscale.gridtime.api.account.UserNameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.JiraConfigDto
@@ -153,6 +154,90 @@ class TeamResourceSpec extends Specification {
 
         assert phoenixIsActiveForZoe.id == phoenixTeam.id
 
+        assert phoenixIsActiveForZoe.teamMembers.size() == 2
+    }
+
+    def "should create team inside public namespace"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        when:
+
+        ConnectionStatusDto loginToPublicFromArty = accountClient.login()
+        OrganizationDto publicIsActiveForArty = organizationClient.getMyActiveOrganization();
+
+        TeamDto phoenixTeamWithinPublic = teamClient.createTeam("Phoenix")
+
+        inviteToClient.inviteToActiveTeamWithEmail(new EmailInputDto(zoeProfile.getEmail()))
+
+        accountClient.logout()
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        OrganizationDto publicIsActiveForZoe = organizationClient.getMyActiveOrganization();
+
+        TeamDto phoenixIsActiveForZoe = teamClient.getMyHomeTeam();
+
+        then:
+
+        assert loginToPublicFromArty != null
+        assert publicIsActiveForArty.orgName == "Open"
+
+        assert loginToPublicFromArty.getOrganizationId() == publicIsActiveForArty.getId()
+        assert loginToPublicFromArty.getParticipatingOrganizations().size() == 1
+
+        assert publicIsActiveForZoe != null
+        assert publicIsActiveForZoe.orgName == "Open"
+
+        assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
+        assert phoenixIsActiveForZoe.teamMembers.size() == 2
+    }
+
+    def "should create team inside public and allow invite with usernames"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        TeamDto phoenixTeamWithinPublic = teamClient.createTeam("Phoenix")
+
+        accountClient.logout()
+
+        when:
+
+        switchUser(zoeProfile)
+        accountClient.login()
+
+        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+
+        switchUser(artyProfile)
+        accountClient.login()
+
+        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+
+        switchUser(zoeProfile)
+        accountClient.login()
+
+        OrganizationDto publicIsActiveForZoe = organizationClient.getMyActiveOrganization();
+
+        TeamDto phoenixIsActiveForZoe = teamClient.getMyHomeTeam();
+
+        then:
+
+        assert publicIsActiveForZoe != null
+        assert publicIsActiveForZoe.orgName == "Open"
+
+        assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
     }
 
