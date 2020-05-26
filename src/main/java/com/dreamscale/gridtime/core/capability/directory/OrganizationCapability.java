@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,8 +83,11 @@ public class OrganizationCapability {
     private DtoEntityMapper<OrganizationDto, OrganizationEntity> orgOutputMapper;
     private DtoEntityMapper<OrganizationSubscriptionDto, OrganizationSubscriptionDetailsEntity> subscriptionMapper;
 
-    private static final String PUBLIC_ORG_DOMAIN = "open.dreamscale.io";
-    private static final String PUBLIC_ORG_NAME = "Open";
+    @Value("${torchie.public.org.domain}")
+    private String PUBLIC_ORG_DOMAIN;
+
+    @Value("${torchie.public.org.name}")
+    private String PUBLIC_ORG_NAME;
 
     @PostConstruct
     private void init() {
