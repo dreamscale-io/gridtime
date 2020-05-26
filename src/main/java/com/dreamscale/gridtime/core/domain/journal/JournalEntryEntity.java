@@ -25,7 +25,11 @@ public class JournalEntryEntity {
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
+
+    //these below are the same field, this is a projection in the view to support UI mapping
     private LocalDateTime position;
+    private LocalDateTime createdDate;
+
     private String description;
 
     private String taskName;
@@ -49,7 +53,9 @@ public class JournalEntryEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    String journalEntryType;
+    private String userName;
+
+    private String journalEntryType;
 
     private String linkedMembers;
 

@@ -90,6 +90,10 @@ class JournalResourceSpec extends Specification {
         assert journalEntry.getTaskId() == intentionInputDto.getTaskId()
         assert journalEntry.description == intentionInputDto.getDescription()
         assert journalEntry.journalEntryType == JournalEntryType.Intention
+        assert journalEntry.getMemberId() != null
+        assert journalEntry.getUserName() != null
+        assert journalEntry.getCreatedDate() != null
+
     }
 
     def "should update flame rating"() {

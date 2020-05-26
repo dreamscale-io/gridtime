@@ -47,3 +47,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/setup_root_account_login_password.sql
+
+  - include:
+        file: db/v007/replace_journal_entry_view_add_member_details.sql

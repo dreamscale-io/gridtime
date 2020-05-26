@@ -16,8 +16,13 @@ import java.util.UUID;
 public class JournalEntryDto {
 
     private UUID id;
+
+    //TODO deprecated fields, remove
     private LocalDateTime position;
     private String positionStr;
+
+    private LocalDateTime createdDate;
+    private String createdDateStr;
 
     private String description;
     private UUID projectId;
@@ -31,10 +36,18 @@ public class JournalEntryDto {
     private String finishStatus;
     private Boolean linked;
 
+    private UUID memberId;
+    private String userName;
+
     private JournalEntryType journalEntryType;
 
     public void setPosition(LocalDateTime position) {
         this.position = position;
         this.positionStr = TimeFormatter.format(position);
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+        this.createdDateStr = TimeFormatter.format(createdDate);
     }
 }

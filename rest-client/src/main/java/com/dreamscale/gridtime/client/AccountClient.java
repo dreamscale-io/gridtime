@@ -26,9 +26,16 @@ public interface AccountClient {
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login();
 
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH + ResourcePaths.WITH_PATH +  ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginWithPassword(RootLoginInputDto rootLoginInputDto);
+
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH +
             ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}")
     ConnectionStatusDto loginToOrganization(@Param("organizationId") UUID organizationId);
+
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH +
+            ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}" + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginToOrganizationWithPassword(@Param("organizationId") UUID organizationId, RootLoginInputDto rootLoginInputDto);
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout();
