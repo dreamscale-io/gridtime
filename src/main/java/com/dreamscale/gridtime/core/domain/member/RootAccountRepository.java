@@ -20,13 +20,13 @@ public interface RootAccountRepository extends CrudRepository<RootAccountEntity,
 
     @Modifying
     @Query(nativeQuery = true, value = "update root_account " +
-            "set crypt_password = crypt((:password), gen_salt('bf')) "+
+            "set crypt_password = crypt(cast ((:password) as text), gen_salt('bf')) "+
             "where id = (:rootAccountId) ")
     void updatePassword(@Param("rootAccountId") UUID rootAccountId, @Param("password") String password);
 
 
     @Query(nativeQuery = true, value = "select * from root_account " +
-            "where id = (:rootAccountId) and crypt_password = crypt((:password), crypt_password)")
+            "where id = (:rootAccountId) and crypt_password = crypt(cast ((:password) as text), crypt_password)")
     RootAccountEntity checkPasswordAndReturnIfValid(@Param("rootAccountId") UUID rootAccountId, @Param("password") String password);
 
 }

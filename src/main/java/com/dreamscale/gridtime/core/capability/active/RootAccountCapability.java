@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -77,29 +78,20 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private InviteCapability inviteCapability;
 
+    @Autowired
+    private EntityManager entityManager;
+
 
     @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
+        LocalDateTime now = gridClock.now();
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());
         String password = rootAccountCreationInput.getPassword();
 
-        RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
+        RootAccountEntity newAccount = createAccountAndFlush(now, standardizedEmail);
 
-        validateNoExistingAccount(standardizedEmail, existingRootAccount);
-
-        LocalDateTime now = gridClock.now();
-
-        RootAccountEntity newAccount = new RootAccountEntity();
-        newAccount.setId(UUID.randomUUID());
-        newAccount.setRootEmail(standardizedEmail);
-        newAccount.setRegistrationDate(now);
-        newAccount.setLastUpdated(now);
-        newAccount.setEmailValidated(false);
-
-        rootAccountRepository.save(newAccount);
-
-        rootAccountRepository.updatePassword(newAccount.getId(), rootAccountCreationInput.getPassword());
+        updatePassword(newAccount.getId(), password);
 
         if (rootAccountCreationInput.getInvitationKey() != null) {
             OneTimeTicketEntity existingInvitation = oneTimeTicketCapability.findByTicketCode(rootAccountCreationInput.getInvitationKey());
@@ -117,6 +109,30 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
 
         return toDto(newAccount, null);
+    }
+
+
+    void updatePassword(UUID rootAccountId, String password) {
+        rootAccountRepository.updatePassword(rootAccountId, password);
+    }
+
+    RootAccountEntity createAccountAndFlush(LocalDateTime now, String standardizedEmail) {
+        RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
+
+        validateNoExistingAccount(standardizedEmail, existingRootAccount);
+
+        RootAccountEntity newAccount = new RootAccountEntity();
+        newAccount.setId(UUID.randomUUID());
+        newAccount.setRootEmail(standardizedEmail);
+        newAccount.setRegistrationDate(now);
+        newAccount.setLastUpdated(now);
+        newAccount.setEmailValidated(false);
+
+        rootAccountRepository.save(newAccount);
+
+        entityManager.flush();
+
+        return newAccount;
     }
 
     @Transactional
@@ -267,6 +283,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
 
     private RootAccountEntity loginAndFindAccountWithUserPassword(String userName, String password) {
+        log.debug("user = {}", userName);
 
         RootAccountEntity rootAccount = rootAccountRepository.findByLowerCaseRootUserName(standarizeToLowerCase(userName));
 

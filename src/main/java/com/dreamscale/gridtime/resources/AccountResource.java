@@ -50,6 +50,7 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.REGISTER_PATH)
     UserProfileDto register(@RequestBody RootAccountCredentialsInputDto rootAccountCredentialsInputDto) {
+        log.info("register, user={}", rootAccountCredentialsInputDto.getEmail());
 
         return rootAccountCapability.registerAccount(rootAccountCredentialsInputDto);
     }
@@ -67,6 +68,7 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(@RequestBody ActivationCodeDto activationCode) {
+        log.info("activate, activationCode={}", activationCode.getActivationCode());
 
         return rootAccountCapability.activate(activationCode.getActivationCode());
     }
@@ -81,6 +83,7 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.RESET_PATH)
     SimpleStatusDto reset(@RequestBody RootAccountEmailInputDto rootAccountEmailInputDto) {
+        log.info("reset, user={}", rootAccountEmailInputDto.getEmail());
 
         return rootAccountCapability.reset(rootAccountEmailInputDto.getEmail());
     }
@@ -97,8 +100,9 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.CYCLE_PATH + ResourcePaths.KEYS_PATH)
     AccountActivationDto cycleKeys() {
-
         RequestContext context = RequestContext.get();
+        log.info("cycleKeys, user={}", context.getRootAccountId());
+
         return rootAccountCapability.cycleKeys(context.getRootAccountId());
     }
 
@@ -112,8 +116,9 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.HEARTBEAT_PATH)
     SimpleStatusDto heartbeat(@RequestBody HeartbeatDto heartbeat) {
-
         RequestContext context = RequestContext.get();
+        log.info("heartbeat, user={}", context.getRootAccountId());
+
         return rootAccountCapability.heartbeat(context.getRootAccountId(), heartbeat);
     }
 
@@ -132,8 +137,9 @@ public class AccountResource {
      */
 
     @PreAuthorize("permitAll")
-    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.PASSWORD_PATH)
-    ConnectionStatusDto loginWithPassword(RootLoginInputDto rootLoginInputDto) {
+    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginWithPassword(@RequestBody RootLoginInputDto rootLoginInputDto) {
+        log.info("loginWithPassword, user={}", rootLoginInputDto.getUserName());
 
         return rootAccountCapability.loginWithPassword(rootLoginInputDto.getUserName(), rootLoginInputDto.getPassword());
     }
@@ -152,8 +158,9 @@ public class AccountResource {
      */
 
     @PreAuthorize("permitAll")
-    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}" + ResourcePaths.PASSWORD_PATH)
-    ConnectionStatusDto loginToOrganizationWithPassword(@PathVariable("organizationId") String organizationIdStr, RootLoginInputDto rootLoginInputDto) {
+    @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}" + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH)
+    ConnectionStatusDto loginToOrganizationWithPassword(@PathVariable("organizationId") String organizationIdStr, @RequestBody RootLoginInputDto rootLoginInputDto) {
+        log.info("loginToOrganizationWithPassword, user={}", rootLoginInputDto.getUserName());
 
         UUID organizationId = UUID.fromString(organizationIdStr);
 
@@ -175,6 +182,7 @@ public class AccountResource {
     ConnectionStatusDto loginToOrganization(@PathVariable("organizationId") String organizationIdStr) {
 
         RequestContext context = RequestContext.get();
+        log.info("loginToOrganization, user={}", context.getRootAccountId());
 
         UUID organizationId = UUID.fromString(organizationIdStr);
         return rootAccountCapability.loginToOrganization(context.getRootAccountId(), organizationId);
@@ -193,8 +201,10 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.LOGIN_PATH)
     ConnectionStatusDto login() {
-
         RequestContext context = RequestContext.get();
+
+        log.info("login, user={}", context.getRootAccountId());
+
         return rootAccountCapability.login(context.getRootAccountId());
     }
 
@@ -207,8 +217,10 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.LOGOUT_PATH)
     SimpleStatusDto logout() {
-
         RequestContext context = RequestContext.get();
+
+        log.info("logout, user={}", context.getRootAccountId());
+
         return rootAccountCapability.logout(context.getRootAccountId());
     }
 
@@ -225,6 +237,9 @@ public class AccountResource {
     ActiveTalkConnectionDto connect(@RequestBody ConnectionInputDto connectionInputDto) {
 
         RequestContext context = RequestContext.get();
+
+        log.info("connect, user={}", context.getRootAccountId());
+
         return rootAccountCapability.connect(connectionInputDto.getConnectionId());
     }
 
@@ -237,8 +252,9 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.PROFILE_PATH)
     UserProfileDto getProfile() {
-
         RequestContext context = RequestContext.get();
+
+        log.info("getProfile, user={}", context.getRootAccountId());
         return rootAccountCapability.getProfile(context.getRootAccountId());
     }
 
@@ -250,8 +266,9 @@ public class AccountResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
     UserProfileDto updateRootProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
-
         RequestContext context = RequestContext.get();
+        log.info("updateRootProfileUserName, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateRootProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
     }
 
@@ -265,6 +282,9 @@ public class AccountResource {
     UserProfileDto updateOrgProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
 
         RequestContext context = RequestContext.get();
+
+        log.info("updateOrgProfileUserName, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateOrgProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
     }
 
@@ -281,6 +301,9 @@ public class AccountResource {
     UserProfileDto updateRootProfileEmail(@RequestBody EmailInputDto emailInputDto) {
 
         RequestContext context = RequestContext.get();
+
+        log.info("updateRootProfileEmail, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateRootProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
     }
 
@@ -297,6 +320,8 @@ public class AccountResource {
     UserProfileDto updateOrgProfileEmail(@RequestBody EmailInputDto emailInputDto) {
 
         RequestContext context = RequestContext.get();
+        log.info("updateOrgProfileEmail, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateOrgProfileEmail(context.getRootAccountId(), emailInputDto.getEmail());
     }
 
@@ -310,6 +335,8 @@ public class AccountResource {
     @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
     SimpleStatusDto validateOrgProfileEmail(@RequestParam("validationCode") String validationCode) {
 
+        log.info("validateOrgProfileEmail, validationCode={}", validationCode);
+
         return rootAccountCapability.validateOrgProfileEmail(validationCode);
     }
 
@@ -322,6 +349,8 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH)
     SimpleStatusDto validateRootProfileEmail(@RequestParam("validationCode") String validationCode) {
+
+        log.info("validateRootProfileEmail, validationCode={}", validationCode);
 
         return rootAccountCapability.validateRootProfileEmail(validationCode);
     }
@@ -338,6 +367,9 @@ public class AccountResource {
     UserProfileDto updateRootProfileFullName(@RequestBody FullNameInputDto fullNameInputDto) {
 
         RequestContext context = RequestContext.get();
+
+        log.info("updateRootProfileFullName, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateRootProfileFullName(context.getRootAccountId(), fullNameInputDto.getFullName());
     }
 
@@ -351,8 +383,10 @@ public class AccountResource {
     UserProfileDto updateRootProfileDisplayName(@RequestBody DisplayNameInputDto displayNameInputDto) {
 
         RequestContext context = RequestContext.get();
+
+        log.info("updateRootProfileDisplayName, user={}", context.getRootAccountId());
+
         return rootAccountCapability.updateRootProfileDisplayName(context.getRootAccountId(), displayNameInputDto.getDisplayName());
     }
-
 
 }

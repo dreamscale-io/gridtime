@@ -59,7 +59,7 @@ class AccountResourceSpec extends Specification {
     def "should activate account and create APIKey"() {
         given:
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
-        rootAccountInput.setEmail("janelle@dreamscale.io")
+        rootAccountInput.setEmail("arty@dreamscale.io")
 
         1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> ticketCode = token; return null}
 
@@ -71,7 +71,7 @@ class AccountResourceSpec extends Specification {
 
         then:
 
-        assert userProfileDto.rootEmail == "janelle@dreamscale.io"
+        assert userProfileDto.rootEmail == "arty@dreamscale.io"
         assert userProfileDto.rootAccountId != null
 
         assert activationDto != null
@@ -97,6 +97,66 @@ class AccountResourceSpec extends Specification {
         assert connectionStatusDto.memberId != null
         assert connectionStatusDto.status == Status.VALID
     }
+
+    def "should login with email/pass"() {
+        given:
+
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail("arty@dreamscale.io")
+        rootAccountInput.setPassword("password123")
+
+        String ticketCode = null
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> ticketCode = token; return null}
+
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
+
+        accountClient.activate(new ActivationCodeDto(ticketCode))
+
+        testUser.setId(userProfileDto.getRootAccountId())
+
+        when:
+
+        ConnectionStatusDto connectionStatusDto = accountClient.loginWithPassword(new RootLoginInputDto(rootAccountInput.getEmail(), rootAccountInput.getPassword()))
+
+        then:
+        assert connectionStatusDto != null
+        assert connectionStatusDto.organizationId != null
+        assert connectionStatusDto.memberId != null
+        assert connectionStatusDto.status == Status.VALID
+    }
+
+    def "should login with email/pass to a specific org"() {
+        given:
+
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail("arty@dreamscale.io")
+        rootAccountInput.setPassword("password123")
+
+        String ticketCode = null
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> ticketCode = token; return null}
+
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
+
+        accountClient.activate(new ActivationCodeDto(ticketCode))
+
+        testUser.setId(userProfileDto.getRootAccountId())
+
+        OrganizationEntity org = aRandom.organizationEntity().save()
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(userProfileDto.getRootAccountId()).save()
+
+        when:
+
+        ConnectionStatusDto connectionStatusDto = accountClient.loginToOrganizationWithPassword(org.id, new RootLoginInputDto(rootAccountInput.getEmail(), rootAccountInput.getPassword()))
+
+        then:
+        assert connectionStatusDto != null
+        assert connectionStatusDto.organizationId != null
+        assert connectionStatusDto.memberId != null
+        assert connectionStatusDto.status == Status.VALID
+    }
+
 
     def "should login with org"() {
 
