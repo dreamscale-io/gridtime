@@ -36,8 +36,6 @@ public interface OrganizationClient {
     @RequestLine("POST " +ResourcePaths.ORGANIZATION_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
     SimpleStatusDto updateJiraConfiguration(JiraConfigDto jiraConfigDto);
 
-    //
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.PARTICIPATING_PATH)
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     List<OrganizationDto> getParticipatingOrganizations();
 }

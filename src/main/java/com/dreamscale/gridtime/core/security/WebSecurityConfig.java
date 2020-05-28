@@ -30,6 +30,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.REGISTER_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.RESET_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.CONNECT_PATH).permitAll()
+
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/*" + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/*" + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH).permitAll()
+
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH).permitAll()
+                .antMatchers(ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH + ResourcePaths.VALIDATE_PATH).permitAll()
+
                 .antMatchers(ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MEMBER_PATH + ResourcePaths.INVITATION_PATH).permitAll()
                 .antMatchers(ResourcePaths.PROJECT_PATH + "/**").hasRole("USER")
                 .antMatchers(ResourcePaths.JOURNAL_PATH + "/**").hasRole("USER")

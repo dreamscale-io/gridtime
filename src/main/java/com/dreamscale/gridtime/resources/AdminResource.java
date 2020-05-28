@@ -5,14 +5,15 @@ import com.dreamscale.gridtime.api.admin.ProjectSyncInputDto;
 import com.dreamscale.gridtime.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.gridtime.api.organization.AutoConfigInputDto;
 import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto;
+import com.dreamscale.gridtime.api.status.PingDto;
 import com.dreamscale.gridtime.core.service.AdminService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Slf4j
@@ -34,6 +35,17 @@ public class AdminResource {
 
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
+
+    @PostMapping(ResourcePaths.PING_PATH)
+    PingDto ping() {
+        log.info("ping!");
+
+        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime nowZone = now.atZone(ZoneId.of("UTC"));
+
+        return new PingDto(LocalDateTime.now(), nowZone);
+    }
+
 
 
     /**
