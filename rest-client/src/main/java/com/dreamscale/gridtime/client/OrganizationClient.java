@@ -16,13 +16,9 @@ import java.util.List;
 })
 public interface OrganizationClient {
 
-    //find out about orgs you're participating in
 
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH)
     OrganizationDto getMyActiveOrganization();
-
-    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
-    List<OrganizationDto> getParticipatingOrganizations();
 
     //Get members of your organization
 
@@ -40,6 +36,8 @@ public interface OrganizationClient {
     @RequestLine("POST " +ResourcePaths.ORGANIZATION_PATH + ResourcePaths.CONFIG_PATH + ResourcePaths.JIRA_PATH)
     SimpleStatusDto updateJiraConfiguration(JiraConfigDto jiraConfigDto);
 
+    //
 
-
+    @RequestLine("GET " + ResourcePaths.ORGANIZATION_PATH + ResourcePaths.PARTICIPATING_PATH)
+    List<OrganizationDto> getParticipatingOrganizations();
 }

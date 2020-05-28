@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
 import com.dreamscale.gridtime.core.capability.active.MemberCapability;
 import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
@@ -82,6 +83,7 @@ public class TeamCapability {
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamDto, TeamEntity> teamOutputMapper;
+    private DtoEntityMapper<TeamLinkDto, TeamEntity> teamLinkOutputMapper;
 
     private DtoEntityMapper<TeamMemberOldDto, TeamMemberEntity> teamMemberOutputMapper;
 
@@ -91,6 +93,8 @@ public class TeamCapability {
     private void init() {
         teamOutputMapper = mapperFactory.createDtoEntityMapper(TeamDto.class, TeamEntity.class);
         teamMemberOutputMapper = mapperFactory.createDtoEntityMapper(TeamMemberOldDto.class, TeamMemberEntity.class);
+
+        teamLinkOutputMapper =  mapperFactory.createDtoEntityMapper(TeamLinkDto.class, TeamEntity.class);
     }
 
     @Transactional
@@ -111,6 +115,7 @@ public class TeamCapability {
         teamEntity.setName(teamWithNoSpaces);
         teamEntity.setLowerCaseName(standardizedTeamName);
         teamEntity.setCreatorId(memberId);
+        teamEntity.setTeamType(TeamType.OPEN);
         teamRepository.save(teamEntity);
 
         TeamMemberEntity teamMember = new TeamMemberEntity();
@@ -143,6 +148,7 @@ public class TeamCapability {
         teamEntity.setOrganizationId(organizationId);
         teamEntity.setName(EVERYONE);
         teamEntity.setLowerCaseName(LOWER_CASE_EVERYONE);
+        teamEntity.setTeamType(TeamType.OPEN);
         teamRepository.save(teamEntity);
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
@@ -201,12 +207,12 @@ public class TeamCapability {
         return name.replace(" ", "_").toLowerCase();
     }
 
+    @Deprecated
     public TeamDto getTeamByName(UUID organizationId, String teamName) {
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, teamName);
         return teamOutputMapper.toApi(teamEntity);
     }
-
 
     private void validateMember(UUID memberId, UUID orgId) {
         OrganizationMemberEntity member = organizationMemberRepository.findById(memberId);
@@ -217,10 +223,10 @@ public class TeamCapability {
         }
     }
 
-    private void validateTeamMemberFound(String teamName, TeamMemberEntity teamMember) {
+    private void validateMemberIsOnTeam(String teamName, TeamMemberEntity teamMember) {
         if (teamMember == null) {
             throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_IN_TEAM,
-                    "Member must be part of the team : "+teamName);
+                    "Member must be on the team to perform this operation: "+teamName);
         }
 
     }
@@ -271,9 +277,14 @@ public class TeamCapability {
         return orgEntity;
     }
 
-    public List<TeamDto> getAllTeams(UUID orgId) {
+    public List<TeamLinkDto> getLinksToAllTeams(UUID orgId) {
+        log.debug("getLinksToAllTeams : "+ orgId);
+
         List<TeamEntity> teamEntityList = teamRepository.findByOrganizationId(orgId);
-        return teamOutputMapper.toApiList(teamEntityList);
+
+        log.debug("results : "+ teamEntityList);
+
+        return teamLinkOutputMapper.toApiList(teamEntityList);
     }
 
 
@@ -343,9 +354,7 @@ public class TeamCapability {
         return teamOutputMapper.toApiList(teamEntityList);
     }
 
-
-
-    public TeamWithMembersDto getTeam(UUID organizationId, UUID invokingMemberId, String teamName) {
+    public TeamDto getTeam(UUID organizationId, UUID invokingMemberId, String teamName) {
 
         String standardizeTeamName = standardizeForSearch(teamName);
 
@@ -355,26 +364,17 @@ public class TeamCapability {
 
         TeamMemberEntity teamMember = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), invokingMemberId);
 
-        validateTeamMemberFound(standardizeTeamName, teamMember);
+        validateMemberIsOnTeam(standardizeTeamName, teamMember);
 
-        List<TeamMemberDto> memberStatusList = memberCapability.getMembersForMeAndMyTeam(organizationId, invokingMemberId);
+        TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
-        TeamWithMembersDto teamWithMembersDto = new TeamWithMembersDto();
-        teamWithMembersDto.setTeamId(teamEntity.getId());
-        teamWithMembersDto.setOrganizationId(organizationId);
-        teamWithMembersDto.setTeamName(teamEntity.getName());
-        teamWithMembersDto.setMe(memberStatusList.get(0));
-        if (memberStatusList.size() > 1) {
-            teamWithMembersDto.setTeamMembers(memberStatusList.subList(1, memberStatusList.size()));
-        } else {
-            teamWithMembersDto.setTeamMembers(Collections.emptyList());
-        }
+        fillTeamWithTeamMembers(teamDto, invokingMemberId);
 
 
-        return teamWithMembersDto;
+        return teamDto;
     }
 
-    public TeamDto setMyHomeTeam(UUID organizationId, UUID memberId, String homeTeamName) {
+    public SimpleStatusDto setMyHomeTeam(UUID organizationId, UUID memberId, String homeTeamName) {
 
         LocalDateTime now = gridClock.now();
 
@@ -386,7 +386,7 @@ public class TeamCapability {
 
         updateTeamMemberHome(now, organizationId, memberId, teamEntity.getId());
 
-        return teamOutputMapper.toApi(teamEntity);
+        return new SimpleStatusDto(Status.SUCCESS, "Updated home team to "+homeTeamName);
     }
 
     private void updateTeamMemberHome(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
@@ -408,24 +408,28 @@ public class TeamCapability {
     private void updateTeamMemberHomeIfFirstTeam(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
-        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
-
         if (teamMemberHomeConfig == null) {
             teamMemberHomeConfig = new TeamMemberHomeEntity();
             teamMemberHomeConfig.setId(UUID.randomUUID());
             teamMemberHomeConfig.setOrganizationId(organizationId);
             teamMemberHomeConfig.setMemberId(memberId);
-
             teamMemberHomeConfig.setHomeTeamId(teamId);
             teamMemberHomeConfig.setLastModifiedDate(now);
+        }
 
-        } else if (teamMemberHomeConfig.getHomeTeamId().equals(everyoneTeam.getId())){
+        //everyone team doesn't exist in public scope, only private orgs, so sometimes this will be null
+        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
+
+        //if I have a home config, but it's the everyone config, overide with this new one
+        if (everyoneTeam != null && teamMemberHomeConfig.getHomeTeamId().equals(everyoneTeam.getId())){
             teamMemberHomeConfig.setHomeTeamId(teamId);
             teamMemberHomeConfig.setLastModifiedDate(now);
         }
 
         teamMemberHomeRepository.save(teamMemberHomeConfig);
     }
+
+
 
     public TeamMemberOldDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
 
@@ -515,6 +519,55 @@ public class TeamCapability {
             log.warn("Member {} already added to team {}", memberEntity.getEmail(), team.getName());
         }
         return toDto(memberEntity.getUsername(), teamMembership);
+    }
+
+    public SimpleStatusDto joinTeam(UUID organizationId, UUID memberId, String teamName) {
+
+        String standardizeTeamName = standardizeForSearch(teamName);
+
+        TeamEntity team = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizeTeamName);
+
+        validateTeamFound(standardizeTeamName, team);
+        validateTeamIsOpen(standardizeTeamName, team);
+
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
+
+        LocalDateTime now = gridClock.now();
+
+        TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(team.getId(), memberId);
+
+        if (teamMembership == null) {
+            log.debug("Member {} is joining team {}", membership.getBestAvailableName(), team.getName());
+
+            teamMembership = new TeamMemberEntity();
+            teamMembership.setId(UUID.randomUUID());
+            teamMembership.setOrganizationId(organizationId);
+            teamMembership.setTeamId(team.getId());
+            teamMembership.setMemberId(membership.getId());
+            teamMembership.setJoinDate(now);
+
+            teamMemberRepository.save(teamMembership);
+
+            teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, team.getId(), membership.getId());
+
+            updateTeamMemberHomeIfFirstTeam(now, organizationId, teamMembership.getMemberId(), team.getId());
+
+        } else {
+            log.warn("Member {} is already member of team {}", membership.getBestAvailableName(), team.getName());
+        }
+
+        SimpleStatusDto status = new SimpleStatusDto();
+        status.setStatus(Status.JOINED);
+        status.setMessage("Member joined "+team.getName() + ".");
+
+        return status;
+    }
+
+    private void validateTeamIsOpen(String standardizeTeamName, TeamEntity team) {
+        if (team.getTeamType() != TeamType.OPEN) {
+            throw new BadRequestException(ValidationErrorCodes.TEAM_MUST_BE_OPEN_TO_JOIN,
+                    "Team "+standardizeTeamName + " must be open to to join.");
+        }
     }
 
     public SimpleStatusDto joinTeam(LocalDateTime now, UUID rootAccountId, UUID organizationId, UUID teamId) {

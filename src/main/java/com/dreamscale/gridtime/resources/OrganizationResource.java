@@ -30,7 +30,7 @@ public class OrganizationResource {
      * @return OrganizationDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
+    @GetMapping()
     public OrganizationDto getMyActiveOrganization() {
 
         RequestContext context = RequestContext.get();

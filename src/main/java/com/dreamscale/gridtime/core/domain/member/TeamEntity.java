@@ -3,6 +3,8 @@ package com.dreamscale.gridtime.core.domain.member;
 import lombok.*;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.util.UUID;
 
@@ -27,5 +29,8 @@ public class TeamEntity {
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID creatorId;
+
+    @Enumerated(EnumType.STRING)
+    private TeamType teamType;
 
 }

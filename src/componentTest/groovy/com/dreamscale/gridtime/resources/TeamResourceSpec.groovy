@@ -10,17 +10,12 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.account.UserNameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
-import com.dreamscale.gridtime.api.organization.JiraConfigDto
-import com.dreamscale.gridtime.api.organization.JoinRequestInputDto
-import com.dreamscale.gridtime.api.organization.MemberDetailsDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
-import com.dreamscale.gridtime.api.organization.TeamMemberDto
-import com.dreamscale.gridtime.api.status.ConnectionResultDto
-import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto
 import com.dreamscale.gridtime.api.team.TeamDto
+import com.dreamscale.gridtime.api.team.TeamLinkDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.InvitationClient
 import com.dreamscale.gridtime.client.InviteToClient
@@ -30,12 +25,9 @@ import com.dreamscale.gridtime.client.SubscriptionClient
 import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
-import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
-import com.dreamscale.gridtime.core.capability.directory.TeamCapability
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.member.TeamRepository
@@ -44,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import java.time.LocalDateTime
-
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class TeamResourceSpec extends Specification {
@@ -241,6 +231,76 @@ class TeamResourceSpec extends Specification {
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
     }
 
+    def "should create multiple teams inside public and allow them to be joined, invited to, configured as home "() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        TeamDto circleTeamWithinPublic = teamClient.createTeam("Circle")
+        TeamDto phoenixTeamWithinPublic = teamClient.createTeam("Phoenix")
+
+        accountClient.updateOrgProfileUserName(new UserNameInputDto("arty"))
+
+        accountClient.logout()
+
+        when:
+
+        switchUser(zoeProfile)
+        accountClient.login()
+
+        TeamDto coffeeCoffeeCoffeeTeamWithinPublic = teamClient.createTeam("CoffeeCoffeeCoffee")
+        TeamDto pleasureTeamWithinPublic = teamClient.createTeam("Pleasure")
+
+        inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("arty"))
+
+        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+
+        switchUser(artyProfile)
+        accountClient.login()
+
+        teamClient.joinTeam("Pleasure")
+
+        teamClient.setMyHomeTeam(new HomeTeamConfigInputDto("Phoenix"))
+        inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+
+        switchUser(zoeProfile)
+
+        teamClient.setMyHomeTeam(new HomeTeamConfigInputDto("Phoenix"));
+
+        TeamDto zoesHomeTeam = teamClient.getMyHomeTeam();
+
+        List<TeamLinkDto> allTeamsWithinOrg = teamClient.getAllTeamsWithinOrg();
+
+        OrganizationDto publicIsActiveForZoe = organizationClient.getMyActiveOrganization();
+        TeamDto phoenixIsActiveForZoe = teamClient.getMyHomeTeam();
+
+        TeamDto phoenixEnd = teamClient.getTeam("Phoenix");
+        TeamDto pleasureEnd = teamClient.getTeam("Pleasure");
+        TeamDto coffeeEnd = teamClient.getTeam("CoffeeCoffeeCoffee");
+
+        switchUser(artyProfile)
+        TeamDto circleEnd = teamClient.getTeam("Circle");
+
+        then:
+
+        assert publicIsActiveForZoe != null
+        assert publicIsActiveForZoe.orgName == "Open"
+
+        assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
+        assert phoenixIsActiveForZoe.teamMembers.size() == 2
+
+        assert allTeamsWithinOrg.size() == 4
+
+        assert phoenixEnd.getTeamMembers().size()  == 2
+        assert circleEnd.getTeamMembers().size() == 1
+        assert pleasureEnd.getTeamMembers().size() == 2
+        assert coffeeEnd.getTeamMembers().size() == 2
+    }
 
 
     def "should create multiple teams and switch home teams"() {
@@ -286,7 +346,7 @@ class TeamResourceSpec extends Specification {
 
         TeamDto circleIsActiveForZoe = teamClient.getMyHomeTeam();
 
-        List<TeamDto> teams = teamClient.getAllMyTeams();
+        List<TeamDto> teams = teamClient.getMyTeams();
 
         then:
 

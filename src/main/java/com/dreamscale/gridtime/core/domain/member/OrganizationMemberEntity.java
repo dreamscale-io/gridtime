@@ -36,4 +36,11 @@ public class OrganizationMemberEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
+    public String getBestAvailableName() {
+        if (username != null) {
+            return username;
+        }
+
+        return email;
+    }
 }

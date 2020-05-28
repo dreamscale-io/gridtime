@@ -17,9 +17,6 @@ public class ResourcePaths {
     public static final String UPDATE_PATH = "/update";
     public static final String ACTIVITY_PATH = "/activity";
 
-
-
-
     public static final String RECENT_PATH = "/recent";
     public static final String HISTORY_PATH = "/history";
     public static final String TASKREF_PATH = "/taskref";
@@ -44,7 +41,7 @@ public class ResourcePaths {
     public static final String ROOT_PATH = "/root";
     public static final String VALIDATE_PATH = "/validate";
 
-    public static final String PUBLIC_PATH = "/public";
+    public static final String OPEN_PATH = "/open";
     public static final String ORGANIZATION_PATH = "/organization";
     public static final String SUBSCRIPTION_PATH = "/subscription";
     public static final String DIRECTORY_PATH = "/directory";
@@ -84,7 +81,6 @@ public class ResourcePaths {
     public static final String LINK_PATH = "/link";
     public static final String UNLINK_PATH = "/unlink";
 
-
     public static final String RIP_PATH = "/restinpeace";
 
     public static final String CONFIRM_PATH = "/confirm";
@@ -108,7 +104,6 @@ public class ResourcePaths {
     public static final String DONE_PATH = "/done";
     public static final String REOPEN_PATH = "/reopen";
     public static final String SOLVE_PATH = "/solve";
-
 
     public static final String ACTIVE_PATH = "/active";
 
@@ -154,7 +149,7 @@ public class ResourcePaths {
     public static final String DESCRIPTION_PATH = "/description";
     public static final String TAGS_PATH = "/tags";
 
-
+    public static final String ALL_PATH = "/all";
     public static final String HOME_PATH = "/home";
     public static final String USERNAME_PATH = "/username";
     public static final String EMAIL_PATH = "/email";

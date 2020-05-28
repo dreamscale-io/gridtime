@@ -14,25 +14,10 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamDto {
+public class TeamLinkDto {
 
-    private UUID organizationId;
     private UUID id;
     private String name;
-
     private String teamType;
-
-    private TeamMemberDto me;
-    private List<TeamMemberDto> teamMembers;
-
-    private boolean isHomeTeam;
-
-    public void addMember(TeamMemberDto teamMember) {
-        if (teamMembers == null) {
-            teamMembers = new ArrayList<>();
-        }
-
-        teamMembers.add(teamMember);
-    }
 
 }

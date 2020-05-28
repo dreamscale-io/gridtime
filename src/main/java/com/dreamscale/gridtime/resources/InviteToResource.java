@@ -28,7 +28,7 @@ public class InviteToResource {
      * @return SimpleStatusDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.PUBLIC_PATH)
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.OPEN_PATH)
     public SimpleStatusDto inviteToPublicCommunity(@RequestBody EmailInputDto emailInputDto ) {
 
         RequestContext context = RequestContext.get();

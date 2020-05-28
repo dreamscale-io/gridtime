@@ -1,9 +1,10 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.organization.TeamWithMembersDto;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.team.HomeTeamConfigInputDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
@@ -32,13 +33,28 @@ public class TeamResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping()
-    public List<TeamDto> getAllMyTeams() {
+    public List<TeamDto> getMyTeams() {
 
         RequestContext context = RequestContext.get();
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return teamCapability.getAllMyParticipatingTeamsWithMembers(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    /**
+     * Gets all the teams within the scope of the active organization
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.ALL_PATH)
+    public List<TeamLinkDto> getAllTeamsWithinOrg() {
+
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.getLinksToAllTeams(invokingMember.getOrganizationId());
     }
 
     /**
@@ -59,7 +75,7 @@ public class TeamResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.HOME_PATH )
-    public TeamDto setMyHomeTeam(@RequestBody HomeTeamConfigInputDto homeTeamConfigInputDto) {
+    public SimpleStatusDto setMyHomeTeam(@RequestBody HomeTeamConfigInputDto homeTeamConfigInputDto) {
         RequestContext context = RequestContext.get();
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
@@ -85,20 +101,38 @@ public class TeamResource {
     }
 
     /**
+     * Join the team specified by the team name, must be an existing team within the current org context,
+     * that is an "open" team, otherwise the only way to join is via an invite.
+     *
+     * For the public organization, all teams are open teams and can be joined with join
+     *
+     * Creates a new TeamCircuit for the team to coordinate work, that will be accessible at /circuit/{teamName}
+     *
+     * Additional members can be invited with their username once the team is created
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping( "/{teamName}" + ResourcePaths.JOIN_PATH)
+    public SimpleStatusDto joinTeam(@PathVariable("teamName") String teamName) {
+        RequestContext context = RequestContext.get();
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return teamCapability.joinTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
+    }
+
+    /**
      * Retrieves a team and all it's members.
      *
      * You can only get the list of team members if you are a member of the team.
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping( "/{teamName}")
-    public TeamWithMembersDto getTeam(@PathVariable("teamName") String teamName) {
+    public TeamDto getTeam(@PathVariable("teamName") String teamName) {
         RequestContext context = RequestContext.get();
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return teamCapability.getTeam(invokingMember.getOrganizationId(), invokingMember.getId(), teamName);
     }
-
-
 
 }
