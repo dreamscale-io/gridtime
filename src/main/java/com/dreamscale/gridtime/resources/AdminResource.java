@@ -36,7 +36,7 @@ public class AdminResource {
         return adminService.configureJiraProjectSync(projectSyncDto);
     }
 
-    @PostMapping(ResourcePaths.PING_PATH)
+    @GetMapping(ResourcePaths.PING_PATH)
     PingDto ping() {
         log.info("ping!");
 
