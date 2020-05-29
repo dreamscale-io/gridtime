@@ -185,7 +185,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
             accountActivationDto.setApiKey(apiKey);
             accountActivationDto.setMessage("Your account has been successfully activated.");
-            accountActivationDto.setStatus(Status.SUCCESS);
+            accountActivationDto.setStatus(Status.VALID);
         }
 
         return accountActivationDto;
