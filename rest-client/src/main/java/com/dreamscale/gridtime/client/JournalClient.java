@@ -23,11 +23,11 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + "?limit={limit}")
     RecentJournalDto getRecentJournalWithLimit(@Param("limit") Integer limit);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{userName}")
-    RecentJournalDto getRecentJournalForUser(@Param("userName") String userName);
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}")
+    RecentJournalDto getRecentJournalForUser(@Param("username") String username);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{userName}" + "?limit={limit}")
-    RecentJournalDto getRecentJournalForUserWithLimit(@Param("userName") String userName, @Param("limit") Integer limit);
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}" + "?limit={limit}")
+    RecentJournalDto getRecentJournalForUserWithLimit(@Param("username") String username, @Param("limit") Integer limit);
 
     //change stuff
 
@@ -52,14 +52,14 @@ public interface JournalClient {
 
     //for paging history
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{userName}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
             + "?before_date={beforeDate}&limit={limit}")
-    List<JournalEntryDto> getHistoricalIntentionsWithLimit(@Param("userName") String userName,
+    List<JournalEntryDto> getHistoricalIntentionsWithLimit(@Param("username") String username,
                                                            @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{userName}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH
             + "?before_date={beforeDate}&limit={limit}")
-    List<JournalEntryDto> getHistoricalIntentionsForUserWithLimit(@Param("userName") String userName,
+    List<JournalEntryDto> getHistoricalIntentionsForUserWithLimit(@Param("username") String username,
                                                                   @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
 }

@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.account.UserNameInputDto;
+import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -84,12 +84,12 @@ public class InviteToResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.USERNAME_PATH)
-    public SimpleStatusDto inviteToActiveTeamWithUsername(@RequestBody UserNameInputDto userNameInputDto ) {
+    public SimpleStatusDto inviteToActiveTeamWithUsername(@RequestBody UsernameInputDto usernameInputDto ) {
 
         RequestContext context = RequestContext.get();
         log.info("inviteToActiveTeamWithUsername, user={}", context.getRootAccountId());
 
-        return inviteCapability.inviteToActiveTeamWithUsername(context.getRootAccountId(), userNameInputDto.getUsername());
+        return inviteCapability.inviteToActiveTeamWithUsername(context.getRootAccountId(), usernameInputDto.getUsername());
     }
 
 }

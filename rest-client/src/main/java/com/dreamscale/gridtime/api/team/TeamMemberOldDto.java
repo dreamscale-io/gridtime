@@ -17,5 +17,5 @@ public class TeamMemberOldDto {
     private UUID teamId;
     private UUID memberId;
 
-    private String userName;
+    private String username;
 }

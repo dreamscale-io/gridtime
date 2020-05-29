@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class IntentionStartedDetailsDto implements MessageDetailsBody {
 
-    String userName;
+    String username;
     UUID memberId;
     JournalEntryDto journalEntry;
 }

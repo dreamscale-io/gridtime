@@ -53,7 +53,7 @@ public class JournalEntryEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID memberId;
 
-    private String userName;
+    private String username;
 
     private String journalEntryType;
 

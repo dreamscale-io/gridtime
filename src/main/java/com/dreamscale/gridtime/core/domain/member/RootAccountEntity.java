@@ -23,11 +23,11 @@ public class RootAccountEntity {
     @Column(name = "root_email")
     private String rootEmail;
 
-    @Column(name = "root_user_name")
+    @Column(name = "root_username")
     private String rootUsername;
 
-    @Column(name = "lower_case_root_user_name")
-    private String lowerCaseRootUserName;
+    @Column(name = "lowercase_root_username")
+    private String lowercaseRootUsername;
 
     @Column(name = "full_name")
     private String fullName;

@@ -665,8 +665,8 @@ public class OrganizationCapability {
     }
 
 
-    public UUID getMemberIdForUser(UUID organizationId, String userName) {
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, userName);
+    public UUID getMemberIdForUser(UUID organizationId, String username) {
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
 
         UUID memberId = null;
         if (membership != null) {
@@ -679,12 +679,12 @@ public class OrganizationCapability {
     public String getUsernameForMemberId(UUID memberId) {
         OrganizationMemberEntity membership = organizationMemberRepository.findById(memberId);
 
-        String userName = null;
+        String username = null;
         if (membership != null) {
             return membership.getUsername();
         }
 
-        return userName;
+        return username;
     }
 
 

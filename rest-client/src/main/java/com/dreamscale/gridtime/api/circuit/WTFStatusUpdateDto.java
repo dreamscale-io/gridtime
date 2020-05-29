@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class WTFStatusUpdateDto implements MessageDetailsBody {
 
-    String userName;
+    String username;
     UUID memberId;
 
     String statusType;

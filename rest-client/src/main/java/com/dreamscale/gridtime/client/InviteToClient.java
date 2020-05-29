@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.client;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.account.UserNameInputDto;
+import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import feign.Headers;
 import feign.RequestLine;
 
@@ -27,6 +27,6 @@ public interface InviteToClient {
 
     @RequestLine("POST " + ResourcePaths.INVITE_PATH + ResourcePaths.TO_PATH +
             ResourcePaths.TEAM_PATH + ResourcePaths.WITH_PATH + ResourcePaths.USERNAME_PATH)
-    SimpleStatusDto inviteToActiveTeamWithUsername(UserNameInputDto userNameInputDto);
+    SimpleStatusDto inviteToActiveTeamWithUsername(UsernameInputDto usernameInputDto);
 
 }

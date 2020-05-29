@@ -37,7 +37,7 @@ public class JournalEntryDto {
     private Boolean linked;
 
     private UUID memberId;
-    private String userName;
+    private String username;
 
     private JournalEntryType journalEntryType;
 

@@ -3,23 +3,17 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.AccountActivationDto
 import com.dreamscale.gridtime.api.account.ActivationCodeDto
-import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
-import com.dreamscale.gridtime.api.account.UserNameInputDto
+import com.dreamscale.gridtime.api.account.UsernameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
-import com.dreamscale.gridtime.api.organization.JiraConfigDto
-import com.dreamscale.gridtime.api.organization.JoinRequestInputDto
 import com.dreamscale.gridtime.api.organization.MemberDetailsDto
-import com.dreamscale.gridtime.api.organization.MemberRegistrationDetailsDto
-import com.dreamscale.gridtime.api.organization.MembershipInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
-import com.dreamscale.gridtime.api.status.ConnectionResultDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.client.AccountClient
@@ -31,14 +25,11 @@ import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability
 import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.*
-import com.dreamscale.gridtime.core.hooks.jira.dto.JiraUserDto
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import java.time.LocalDateTime
-
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class InviteToResourceSpec extends Specification {
@@ -170,7 +161,7 @@ class InviteToResourceSpec extends Specification {
         accountClient.logout()
         accountClient.login()
 
-        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+        accountClient.updateOrgProfileUsername(new UsernameInputDto("zoe"))
 
         accountClient.logout()
 
@@ -184,7 +175,7 @@ class InviteToResourceSpec extends Specification {
 
         //this should be instant, since it doesn't require email validation
 
-        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UsernameInputDto("zoe"))
 
         TeamDto artysHomeTeam = teamClient.getMyHomeTeam()
 

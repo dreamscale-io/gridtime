@@ -228,7 +228,7 @@ class AccountResourceSpec extends Specification {
 
         when:
 
-        UserProfileDto profile = accountClient.updateRootProfileUserName(new UserNameInputDto("joeblow"))
+        UserProfileDto profile = accountClient.updateRootProfileUsername(new UsernameInputDto("joeblow"))
 
         profile = accountClient.updateRootProfileDisplayName(new DisplayNameInputDto("Joe"))
         profile = accountClient.updateRootProfileFullName(new FullNameInputDto("Joe Blow"))
@@ -239,7 +239,7 @@ class AccountResourceSpec extends Specification {
         assert profile.getRootAccountId() != null
         assert profile.getDisplayName() == "Joe"
         assert profile.getFullName() == "Joe Blow"
-        assert profile.getRootUserName() == "joeblow"
+        assert profile.getRootUsername() == "joeblow"
         assert profile.getRootEmail() == "joe@blow.com (pending validation)"
     }
 
@@ -253,11 +253,11 @@ class AccountResourceSpec extends Specification {
 
         accountClient.login()
 
-        UserProfileDto profile = accountClient.updateOrgProfileUserName(new UserNameInputDto("joeblow"))
+        UserProfileDto profile = accountClient.updateOrgProfileUsername(new UsernameInputDto("joeblow"))
 
         then:
         assert profile != null
-        assert profile.getOrgUserName() == "joeblow"
+        assert profile.getOrgUsername() == "joeblow"
     }
 
     def "should update org profile email property"() {

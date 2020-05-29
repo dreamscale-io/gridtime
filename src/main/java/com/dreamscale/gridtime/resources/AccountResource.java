@@ -4,7 +4,6 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.*;
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
@@ -139,9 +138,9 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH)
     ConnectionStatusDto loginWithPassword(@RequestBody RootLoginInputDto rootLoginInputDto) {
-        log.info("loginWithPassword, user={}", rootLoginInputDto.getUserName());
+        log.info("loginWithPassword, user={}", rootLoginInputDto.getUsername());
 
-        return rootAccountCapability.loginWithPassword(rootLoginInputDto.getUserName(), rootLoginInputDto.getPassword());
+        return rootAccountCapability.loginWithPassword(rootLoginInputDto.getUsername(), rootLoginInputDto.getPassword());
     }
 
     /**
@@ -160,11 +159,11 @@ public class AccountResource {
     @PreAuthorize("permitAll")
     @PostMapping(ResourcePaths.LOGIN_PATH + ResourcePaths.TO_PATH + ResourcePaths.ORGANIZATION_PATH + "/{organizationId}" + ResourcePaths.WITH_PATH + ResourcePaths.PASSWORD_PATH)
     ConnectionStatusDto loginToOrganizationWithPassword(@PathVariable("organizationId") String organizationIdStr, @RequestBody RootLoginInputDto rootLoginInputDto) {
-        log.info("loginToOrganizationWithPassword, user={}", rootLoginInputDto.getUserName());
+        log.info("loginToOrganizationWithPassword, user={}", rootLoginInputDto.getUsername());
 
         UUID organizationId = UUID.fromString(organizationIdStr);
 
-        return rootAccountCapability.loginToOrganizationWithPassword(rootLoginInputDto.getUserName(), rootLoginInputDto.getPassword(), organizationId);
+        return rootAccountCapability.loginToOrganizationWithPassword(rootLoginInputDto.getUsername(), rootLoginInputDto.getPassword(), organizationId);
     }
 
     /**
@@ -265,11 +264,11 @@ public class AccountResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateRootProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
+    UserProfileDto updateRootProfileUserName(@RequestBody UsernameInputDto usernameInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("updateRootProfileUserName, user={}", context.getRootAccountId());
+        log.info("updateRootProfileUsername, user={}", context.getRootAccountId());
 
-        return rootAccountCapability.updateRootProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
+        return rootAccountCapability.updateRootProfileUserName(context.getRootAccountId(), usernameInputDto.getUsername());
     }
 
     /**
@@ -279,13 +278,13 @@ public class AccountResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateOrgProfileUserName(@RequestBody UserNameInputDto userProfileInputDto) {
+    UserProfileDto updateOrgProfileUserName(@RequestBody UsernameInputDto usernameInputDto) {
 
         RequestContext context = RequestContext.get();
 
-        log.info("updateOrgProfileUserName, user={}", context.getRootAccountId());
+        log.info("updateOrgProfileUsername, user={}", context.getRootAccountId());
 
-        return rootAccountCapability.updateOrgProfileUserName(context.getRootAccountId(), userProfileInputDto.getUsername());
+        return rootAccountCapability.updateOrgProfileUserName(context.getRootAccountId(), usernameInputDto.getUsername());
     }
 
     /**

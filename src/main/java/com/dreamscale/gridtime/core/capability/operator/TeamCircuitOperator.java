@@ -203,10 +203,10 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfIntention(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
 
-        String userName = organizationMembership.getUsernameForMemberId(memberFromId);
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
         TeamCircuitDto teamCircuit = getMyActiveTeamCircuit(organizationId, memberFromId);
 
-        IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(userName, memberFromId, journalEntryDto);
+        IntentionStartedDetailsDto intentionStartedDetails = new IntentionStartedDetailsDto(username, memberFromId, journalEntryDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
@@ -240,13 +240,13 @@ public class TeamCircuitOperator {
     }
 
     private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
-        String userName = organizationMembership.getUsernameForMemberId(memberFromId);
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
 
         TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
 
-        WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(userName, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
+        WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(username, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
@@ -304,8 +304,8 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfXPUpdate(UUID organizationId, UUID fromMemberId, UUID forMemberId, LocalDateTime now, Long nanoTime, XPSummaryDto oldXPSummary, XPSummaryDto newXPSummary) {
 
-        String userName = organizationMembership.getUsernameForMemberId(forMemberId);
-        XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(userName, forMemberId, oldXPSummary, newXPSummary);
+        String username = organizationMembership.getUsernameForMemberId(forMemberId);
+        XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(username, forMemberId, oldXPSummary, newXPSummary);
 
         UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
 

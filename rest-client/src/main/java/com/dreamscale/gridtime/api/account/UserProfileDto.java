@@ -15,10 +15,10 @@ public class UserProfileDto {
 
     private UUID rootAccountId;
     private String rootEmail;
-    private String rootUserName;
+    private String rootUsername;
 
     private String orgEmail;
-    private String orgUserName;
+    private String orgUsername;
 
     private String fullName;
     private String displayName;

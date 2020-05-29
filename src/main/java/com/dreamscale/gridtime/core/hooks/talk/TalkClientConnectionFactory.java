@@ -20,7 +20,7 @@ public class TalkClientConnectionFactory {
     private String talkUrl;
 
     @Value( "${talk.connect.username}" )
-    private String talkUserName;
+    private String talkUsername;
 
     @Value( "${talk.connect.password}" )
     private String talkPassword;
@@ -28,7 +28,7 @@ public class TalkClientConnectionFactory {
     @PostConstruct
     void initSharedTalkClient () {
         this.talkClient = jacksonFeignBuilder
-                .requestInterceptor(new BasicAuthRequestInterceptor(talkUserName, talkPassword))
+                .requestInterceptor(new BasicAuthRequestInterceptor(talkUsername, talkPassword))
                 .target(TalkClient.class, talkUrl);
     }
 

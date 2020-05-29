@@ -119,8 +119,8 @@ public class JournalResource {
      * Defaults to providing the most recent 20 Journal entries, but a specific limit can also be provided
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{userName}")
-    RecentJournalDto getRecentJournalForUser(@PathVariable("userName") String userName, @RequestParam("limit") Optional<Integer> limit) {
+    @GetMapping("/{username}")
+    RecentJournalDto getRecentJournalForUser(@PathVariable("username") String username, @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
         log.info("getRecentJournalForUser, user={}", context.getRootAccountId());
 
@@ -128,7 +128,7 @@ public class JournalResource {
 
         Integer effectiveLimit = getEffectiveLimit(limit);
 
-        return journalCapability.getJournalForUser(memberEntity.getOrganizationId(), userName, effectiveLimit);
+        return journalCapability.getJournalForUser(memberEntity.getOrganizationId(), username, effectiveLimit);
 
     }
 
@@ -136,15 +136,15 @@ public class JournalResource {
      * Get historical Intentions from the Journal before a specific date, ordered by time descending.
      * Can be retrieved for the current user (if member not provided), or for another memberId within the org
      * @param beforeDateStr yyyyMMdd_HHmmss
-     * @param userName optional member within organization
+     * @param username optional member within organization
      * @param limit number of records to retrieve
      * @return List<IntentionDto>
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{userName}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH)
+    @GetMapping("/{username}" + ResourcePaths.HISTORY_PATH + ResourcePaths.FEED_PATH)
     List<JournalEntryDto> getHistoricalIntentionsFeedBeforeDate(
-            @PathVariable("userName") String userName,
+            @PathVariable("username") String username,
             @RequestParam("before_date") String beforeDateStr,
             @RequestParam("limit") Optional<Integer> limit) {
         RequestContext context = RequestContext.get();
@@ -155,7 +155,7 @@ public class JournalResource {
         Integer effectiveLimit = getEffectiveLimit(limit);
         LocalDateTime beforeDate = DateTimeAPITranslator.convertToDateTime(beforeDateStr);
 
-        return journalCapability.getHistoricalIntentionsForUser(memberEntity.getOrganizationId(), userName, beforeDate, effectiveLimit);
+        return journalCapability.getHistoricalIntentionsForUser(memberEntity.getOrganizationId(), username, beforeDate, effectiveLimit);
 
     }
 

@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.EmailInputDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.SimpleStatusDto
-import com.dreamscale.gridtime.api.account.UserNameInputDto
+import com.dreamscale.gridtime.api.account.UsernameInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationDto
@@ -208,12 +208,12 @@ class TeamResourceSpec extends Specification {
         switchUser(zoeProfile)
         accountClient.login()
 
-        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+        accountClient.updateOrgProfileUsername(new UsernameInputDto("zoe"))
 
         switchUser(artyProfile)
         accountClient.login()
 
-        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+        SimpleStatusDto inviteStatus = inviteToClient.inviteToActiveTeamWithUsername(new UsernameInputDto("zoe"))
 
         switchUser(zoeProfile)
         accountClient.login()
@@ -244,7 +244,7 @@ class TeamResourceSpec extends Specification {
         TeamDto circleTeamWithinPublic = teamClient.createTeam("Circle")
         TeamDto phoenixTeamWithinPublic = teamClient.createTeam("Phoenix")
 
-        accountClient.updateOrgProfileUserName(new UserNameInputDto("arty"))
+        accountClient.updateOrgProfileUsername(new UsernameInputDto("arty"))
 
         accountClient.logout()
 
@@ -256,9 +256,9 @@ class TeamResourceSpec extends Specification {
         TeamDto coffeeCoffeeCoffeeTeamWithinPublic = teamClient.createTeam("CoffeeCoffeeCoffee")
         TeamDto pleasureTeamWithinPublic = teamClient.createTeam("Pleasure")
 
-        inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("arty"))
+        inviteToClient.inviteToActiveTeamWithUsername(new UsernameInputDto("arty"))
 
-        accountClient.updateOrgProfileUserName(new UserNameInputDto("zoe"))
+        accountClient.updateOrgProfileUsername(new UsernameInputDto("zoe"))
 
         switchUser(artyProfile)
         accountClient.login()
@@ -266,7 +266,7 @@ class TeamResourceSpec extends Specification {
         teamClient.joinTeam("Pleasure")
 
         teamClient.setMyHomeTeam(new HomeTeamConfigInputDto("Phoenix"))
-        inviteToClient.inviteToActiveTeamWithUsername(new UserNameInputDto("zoe"))
+        inviteToClient.inviteToActiveTeamWithUsername(new UsernameInputDto("zoe"))
 
         switchUser(zoeProfile)
 

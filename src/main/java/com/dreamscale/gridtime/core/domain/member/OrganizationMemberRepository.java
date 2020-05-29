@@ -19,7 +19,7 @@ public interface OrganizationMemberRepository extends CrudRepository<Organizatio
 
     OrganizationMemberEntity findByOrganizationIdAndRootAccountId(UUID organizationId, UUID rootAccountId);
 
-    OrganizationMemberEntity findByOrganizationIdAndUsername(UUID organizationId, String userName);
+    OrganizationMemberEntity findByOrganizationIdAndUsername(UUID organizationId, String username);
 
     @Query(nativeQuery = true, value = "select om.* from organization_member om where " +
             "om.root_account_id = (:rootAccountId) and exists ( " +

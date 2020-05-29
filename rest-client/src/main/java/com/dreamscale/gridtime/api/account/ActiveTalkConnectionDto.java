@@ -17,7 +17,7 @@ import java.util.UUID;
 public class ActiveTalkConnectionDto {
 
     private UUID connectionId;
-    private String userName;
+    private String username;
     Status status;
     String message;
 }

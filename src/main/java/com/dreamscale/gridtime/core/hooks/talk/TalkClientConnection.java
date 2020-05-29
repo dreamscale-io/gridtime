@@ -24,54 +24,54 @@ public class TalkClientConnection {
         this.talkClient = talkClient;
     }
 
-    public SimpleStatusDto joinRoom(UUID connectionId, UUID roomId, String userName, String roomName) {
+    public SimpleStatusDto joinRoom(UUID connectionId, UUID roomId, String username, String roomName) {
         SimpleStatusDto status = null;
 
         try {
             status = talkClient.joinRoom(roomId.toString(), new ClientConnectionDto(connectionId));
         } catch (Exception ex) {
             log.error("[TalkClient] joinRoom failed with exception.", ex);
-            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] joinRoom("+userName + " , "+roomName+") failed with exception.");
+            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] joinRoom("+username + " , "+roomName+") failed with exception.");
         }
 
         return status;
     }
 
-    public SimpleStatusDto leaveRoom(UUID connectionId, UUID roomId, String userName, String roomName) {
+    public SimpleStatusDto leaveRoom(UUID connectionId, UUID roomId, String username, String roomName) {
         SimpleStatusDto status = null;
 
         try {
             status = talkClient.leaveRoom(roomId.toString(), new ClientConnectionDto(connectionId));
         } catch (Exception ex) {
             log.error("[TalkClient] leaveRoom failed with exception.", ex);
-            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] leaveRoom("+userName + ", "+roomName+") failed with exception.");
+            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] leaveRoom("+username + ", "+roomName+") failed with exception.");
 
         }
 
         return status;
     }
 
-    public SimpleStatusDto sendDirectMessage(UUID toConnectionId, TalkMessageDto talkMessageDto, String userName) {
+    public SimpleStatusDto sendDirectMessage(UUID toConnectionId, TalkMessageDto talkMessageDto, String username) {
         SimpleStatusDto status = null;
 
         try {
             status = talkClient.sendDirectMessage(toConnectionId.toString(), talkMessageDto);
         } catch (Exception ex) {
             log.error("[TalkClient] sendDirectMessage failed with exception.", ex);
-            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendDirectMessage("+userName + ") failed with exception.");
+            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendDirectMessage("+username + ") failed with exception.");
         }
 
         return status;
     }
 
-    public SimpleStatusDto sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto, String userName, String roomName) {
+    public SimpleStatusDto sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto, String username, String roomName) {
         SimpleStatusDto status = null;
 
         try {
             status = talkClient.sendRoomMessage(roomId.toString(), talkMessageDto);
         } catch (Exception ex) {
             log.error("[TalkClient] sendRoomMessage failed with exception.", ex);
-            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendRoomMessage("+userName + " , "+roomName+") failed with exception.");
+            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendRoomMessage("+username + " , "+roomName+") failed with exception.");
         }
 
         return status;

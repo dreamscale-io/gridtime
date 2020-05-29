@@ -56,3 +56,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_team_add_team_type.sql
+
+  - include:
+        file: db/v007/refactor_user_name_to_username.sql

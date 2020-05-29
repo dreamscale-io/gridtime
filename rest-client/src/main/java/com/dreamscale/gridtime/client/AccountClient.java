@@ -55,13 +55,13 @@ public interface AccountClient {
     UserProfileDto getProfile();
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateRootProfileUserName(UserNameInputDto userNameInputDto );
+    UserProfileDto updateRootProfileUsername(UsernameInputDto usernameInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ROOT_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
     UserProfileDto updateRootProfileEmail(EmailInputDto emailInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.USERNAME_PATH)
-    UserProfileDto updateOrgProfileUserName(UserNameInputDto userNameInputDto );
+    UserProfileDto updateOrgProfileUsername(UsernameInputDto usernameInputDto );
 
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.PROFILE_PATH + ResourcePaths.ORG_PATH + ResourcePaths.PROPERTY_PATH + ResourcePaths.EMAIL_PATH)
     UserProfileDto updateOrgProfileEmail(EmailInputDto emailInputDto );

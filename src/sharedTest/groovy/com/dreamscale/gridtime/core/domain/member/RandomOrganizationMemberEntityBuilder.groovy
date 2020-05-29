@@ -10,14 +10,14 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 	RandomOrganizationMemberEntityBuilder(OrganizationMemberRepository organizationMemberRepository) {
 		this.organizationMemberRepository = organizationMemberRepository
 
-		String userName = aRandom.firstName().toLowerCase();
+		String username = aRandom.firstName().toLowerCase();
 
 		id(aRandom.uuid())
 		.rootAccountId(aRandom.uuid())
 		.organizationId(aRandom.uuid())
 		.email(aRandom.email())
-		.username(userName)
-		.lowerCaseUserName(userName)
+		.username(username)
+		.lowercaseUsername(username)
 		.externalId(aRandom.text(4))
 	}
 

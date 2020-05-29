@@ -23,7 +23,7 @@ public class OrganizationMemberEntity {
 
     private String username;
 
-    private String lowerCaseUserName;
+    private String lowercaseUsername;
 
     private LocalDateTime lastUpdated;
 

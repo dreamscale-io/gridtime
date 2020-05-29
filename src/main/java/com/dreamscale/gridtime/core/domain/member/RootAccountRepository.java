@@ -16,7 +16,7 @@ public interface RootAccountRepository extends CrudRepository<RootAccountEntity,
 
     RootAccountEntity findByRootEmail(String standarizedEmail);
 
-    RootAccountEntity findByLowerCaseRootUserName(String userName);
+    RootAccountEntity findByLowercaseRootUsername(String username);
 
     @Modifying
     @Query(nativeQuery = true, value = "update root_account " +

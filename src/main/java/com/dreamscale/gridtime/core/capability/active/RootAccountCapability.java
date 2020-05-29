@@ -261,8 +261,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return loginAsOrganizationMember(rootAccountId, membership);
     }
 
-    public ConnectionStatusDto loginWithPassword(String userName, String password) {
-        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(userName, password);
+    public ConnectionStatusDto loginWithPassword(String username, String password) {
+        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(username, password);
 
         OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccount.getId());
 
@@ -270,9 +270,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    public ConnectionStatusDto loginToOrganizationWithPassword(String userName, String password, UUID organizationId) {
+    public ConnectionStatusDto loginToOrganizationWithPassword(String username, String password, UUID organizationId) {
 
-        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(userName, password);
+        RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(username, password);
 
         //now I need to connect to the default organization for this account, and return the connect info
 
@@ -282,21 +282,21 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    private RootAccountEntity loginAndFindAccountWithUserPassword(String userName, String password) {
-        log.debug("user = {}", userName);
+    private RootAccountEntity loginAndFindAccountWithUserPassword(String username, String password) {
+        log.debug("loginAndFindAccountWithUserPassword, user = {}", username);
 
-        RootAccountEntity rootAccount = rootAccountRepository.findByLowerCaseRootUserName(standarizeToLowerCase(userName));
+        RootAccountEntity rootAccount = rootAccountRepository.findByLowercaseRootUsername(standarizeToLowerCase(username));
 
         if (rootAccount == null) {
-            String maybeAnEmail = userName;
+            String maybeAnEmail = username;
             rootAccount = rootAccountRepository.findByRootEmail(standarizeToLowerCase(maybeAnEmail));
         }
 
-        validateUserOrPasswordMatch(userName, rootAccount);
+        validateUserOrPasswordMatch(username, rootAccount);
 
         RootAccountEntity foundIfPasswordValid = rootAccountRepository.checkPasswordAndReturnIfValid(rootAccount.getId(), password);
 
-        validateUserOrPasswordMatch(userName, foundIfPasswordValid);
+        validateUserOrPasswordMatch(username, foundIfPasswordValid);
         return rootAccount;
     }
 
@@ -324,7 +324,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         ConnectionStatusDto connectionStatus = new ConnectionStatusDto();
         connectionStatus.setMemberId(membership.getId());
         connectionStatus.setOrganizationId(membership.getOrganizationId());
-        connectionStatus.setUserName(membership.getUsername());
+        connectionStatus.setUsername(membership.getUsername());
         connectionStatus.setConnectionId(accountStatusEntity.getConnectionId());
         connectionStatus.setStatus(Status.VALID);
         connectionStatus.setMessage("Successfully logged in");
@@ -361,18 +361,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return getActiveTalkConnection(connectionId, memberConnection.getUsername());
     }
 
-
-    private ActiveTalkConnectionDto getActiveTalkConnection(UUID newConnectionId, String userName) {
+    private ActiveTalkConnectionDto getActiveTalkConnection(UUID newConnectionId, String username) {
 
         ActiveTalkConnectionDto activeTalkConnection = new ActiveTalkConnectionDto();
-        activeTalkConnection.setUserName(userName);
+        activeTalkConnection.setUsername(username);
         activeTalkConnection.setConnectionId(newConnectionId);
         activeTalkConnection.setStatus(Status.VALID);
         activeTalkConnection.setMessage("Account connected.");
 
         return activeTalkConnection;
     }
-
 
     private void validateConnectionExists(UUID connectionId, ActiveAccountStatusEntity accountStatusEntity) {
         if (accountStatusEntity == null) {
@@ -505,10 +503,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
         userProfileDto.setFullName(rootAccount.getFullName());
         userProfileDto.setDisplayName(rootAccount.getDisplayName());
         userProfileDto.setRootEmail(rootAccount.getRootEmail());
-        userProfileDto.setRootUserName(rootAccount.getRootUsername());
+        userProfileDto.setRootUsername(rootAccount.getRootUsername());
 
         if (membership != null) {
-            userProfileDto.setOrgUserName(membership.getUsername());
+            userProfileDto.setOrgUsername(membership.getUsername());
             userProfileDto.setOrgEmail(membership.getEmail());
         }
 
@@ -522,7 +520,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         String oldUserName = rootAccountEntity.getRootUsername();
 
         rootAccountEntity.setRootUsername(username);
-        rootAccountEntity.setLowerCaseRootUserName(standarizeToLowerCase(username));
+        rootAccountEntity.setLowercaseRootUsername(standarizeToLowerCase(username));
         rootAccountEntity.setLastUpdated(gridClock.now());
 
         try {
@@ -645,7 +643,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             String oldUserName = activeMembership.getUsername();
 
             activeMembership.setUsername(username);
-            activeMembership.setLowerCaseUserName(standarizeToLowerCase(username));
+            activeMembership.setLowercaseUsername(standarizeToLowerCase(username));
 
             try {
                 organizationMemberRepository.save(activeMembership);

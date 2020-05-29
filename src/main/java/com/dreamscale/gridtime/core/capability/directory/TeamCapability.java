@@ -431,7 +431,7 @@ public class TeamCapability {
 
 
 
-    public TeamMemberOldDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
+    public TeamMemberOldDto addMemberToTeam(UUID organizationId, UUID invokingMemberId, String teamName, String username) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -441,9 +441,9 @@ public class TeamCapability {
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
 
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, userName);
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
 
-        validateMemberFound(userName, memberEntity);
+        validateMemberFound(username, memberEntity);
 
         TeamMemberEntity teamMembership = teamMemberRepository.findByTeamIdAndMemberId(teamEntity.getId(), memberEntity.getId());
 
@@ -462,7 +462,7 @@ public class TeamCapability {
             teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, teamEntity.getId(), memberEntity.getId());
 
         }
-        return toDto(userName, teamMembership);
+        return toDto(username, teamMembership);
     }
 
     public SimpleStatusDto inviteUserToMyActiveTeam(UUID organizationId, UUID invokingMemberId, String userToInvite) {
@@ -594,7 +594,7 @@ public class TeamCapability {
     }
 
     @Transactional
-    public TeamMemberOldDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String userName) {
+    public TeamMemberOldDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String username) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
 
@@ -606,9 +606,9 @@ public class TeamCapability {
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
 
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, userName);
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
 
-        validateMemberFound(userName, memberEntity);
+        validateMemberFound(username, memberEntity);
 
 
         return removeTeamMemberAndCreateTombstone(now, organizationId, teamEntity, memberEntity.getId());
@@ -678,10 +678,10 @@ public class TeamCapability {
         return toDto(memberUserName, teamMembership);
     }
 
-    private TeamMemberOldDto toDto(String userName, TeamMemberEntity teamMembership) {
+    private TeamMemberOldDto toDto(String username, TeamMemberEntity teamMembership) {
         TeamMemberOldDto teamMemberDto = teamMemberOutputMapper.toApi(teamMembership);
 
-        teamMemberDto.setUserName(userName);
+        teamMemberDto.setUsername(username);
 
         return teamMemberDto;
     }

@@ -91,7 +91,7 @@ class JournalResourceSpec extends Specification {
         assert journalEntry.description == intentionInputDto.getDescription()
         assert journalEntry.journalEntryType == JournalEntryType.Intention
         assert journalEntry.getMemberId() != null
-        assert journalEntry.getUserName() != null
+        assert journalEntry.getUsername() != null
         assert journalEntry.getCreatedDate() != null
 
     }

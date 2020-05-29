@@ -36,13 +36,13 @@ public class GridTalkRouter {
     public void sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {
 
         TalkRoomEntity room = talkRoomRepository.findById(roomId);
-        String userName = talkMessageDto.getMetaProp(TalkMessageMetaProp.FROM_USERNAME);
+        String username = talkMessageDto.getMetaProp(TalkMessageMetaProp.FROM_USERNAME);
 
-        log.debug("[GridTalkRouter] sendRoomMessage from {} to {}", userName, room.getRoomName());
+        log.debug("[GridTalkRouter] sendRoomMessage from {} to {}", username, room.getRoomName());
 
         TalkClientConnection talkClientConnection = talkClientConnectionFactory.connect();
 
-        talkClientConnection.sendRoomMessage(roomId, talkMessageDto, userName, room.getRoomName());
+        talkClientConnection.sendRoomMessage(roomId, talkMessageDto, username, room.getRoomName());
     }
 
     public void joinRoom(UUID organizationId, UUID memberId, UUID roomId) {

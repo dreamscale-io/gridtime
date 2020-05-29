@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class XPStatusUpdateDto implements MessageDetailsBody {
 
-    String userName;
+    String username;
     UUID memberId;
 
     XPSummaryDto oldXPSummary;
