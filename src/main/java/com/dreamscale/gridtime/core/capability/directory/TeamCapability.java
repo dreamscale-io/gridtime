@@ -133,6 +133,8 @@ public class TeamCapability {
 
         updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
 
+        fillTeamWithTeamMembers(teamDto, memberId);
+
         return teamDto;
     }
 

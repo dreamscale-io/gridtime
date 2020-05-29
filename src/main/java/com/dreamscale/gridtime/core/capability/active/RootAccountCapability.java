@@ -21,6 +21,7 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.security.RootAccountIdResolver;
 import com.dreamscale.gridtime.core.service.GridClock;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private EntityManager entityManager;
 
-
     @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
@@ -89,7 +89,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         String standardizedEmail = standarizeToLowerCase(rootAccountCreationInput.getEmail());
         String password = rootAccountCreationInput.getPassword();
 
-        RootAccountEntity newAccount = createAccountAndFlush(now, standardizedEmail);
+        RootAccountEntity newAccount = createAccountAndFlush(now, standardizedEmail, rootAccountCreationInput);
 
         updatePassword(newAccount.getId(), password);
 
@@ -112,18 +112,24 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    void updatePassword(UUID rootAccountId, String password) {
+    private void updatePassword(UUID rootAccountId, String password) {
         rootAccountRepository.updatePassword(rootAccountId, password);
     }
 
-    RootAccountEntity createAccountAndFlush(LocalDateTime now, String standardizedEmail) {
+    private RootAccountEntity createAccountAndFlush(LocalDateTime now, String standardizedEmail, RootAccountCredentialsInputDto rootAccountInput) {
         RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
 
         validateNoExistingAccount(standardizedEmail, existingRootAccount);
 
+        String displayName = ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), standardizedEmail);
+
         RootAccountEntity newAccount = new RootAccountEntity();
         newAccount.setId(UUID.randomUUID());
         newAccount.setRootEmail(standardizedEmail);
+        newAccount.setRootUsername(rootAccountInput.getUsername());
+        newAccount.setLowercaseRootUsername(standarizeToLowerCase(rootAccountInput.getUsername()));
+        newAccount.setFullName(rootAccountInput.getFullName());
+        newAccount.setDisplayName(displayName);
         newAccount.setRegistrationDate(now);
         newAccount.setLastUpdated(now);
         newAccount.setEmailValidated(false);
@@ -628,7 +634,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
     private String standarizeToLowerCase(String name) {
-        return name.toLowerCase();
+        if (name != null) {
+            return name.toLowerCase();
+        }
+        return null;
     }
 
 

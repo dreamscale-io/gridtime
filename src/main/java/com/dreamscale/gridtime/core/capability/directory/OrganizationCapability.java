@@ -148,6 +148,8 @@ public class OrganizationCapability {
 
         joinOrganizationWithEmailValidation(now, rootAccountId, organizationEntity.getId(), orgInputDto.getOwnerEmail());
 
+        subscriptionEntity = organizationSubscriptionRepository.findById(subscriptionEntity.getId());
+
         return createSubscriptionDto(organizationEntity, subscriptionEntity);
 
     }

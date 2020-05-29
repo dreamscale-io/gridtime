@@ -354,8 +354,6 @@ public class AccountResource {
         return rootAccountCapability.validateRootProfileEmail(validationCode);
     }
 
-
-
     /**
      * Updates the user's root account full name
      * @return UserProfileDto

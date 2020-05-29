@@ -18,4 +18,6 @@ public interface OrganizationSubscriptionRepository extends CrudRepository<Organ
     @Query(nativeQuery = true, value = "select * from organization_subscription " +
             "where organization_id = (:organizationId) for update")
     OrganizationSubscriptionEntity selectOrgSubscriptionForUpdate(@Param("organizationId") UUID organizationId);
+
+    OrganizationSubscriptionEntity findById(UUID id);
 }
