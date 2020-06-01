@@ -14,7 +14,7 @@ import feign.RequestLine;
 public interface InviteToClient {
 
     @RequestLine("POST " + ResourcePaths.INVITE_PATH + ResourcePaths.TO_PATH +
-            ResourcePaths.OPEN_PATH)
+            ResourcePaths.PUBLIC_PATH)
     SimpleStatusDto inviteToPublicCommunity(EmailInputDto emailInputDto);
 
     @RequestLine("POST " + ResourcePaths.INVITE_PATH + ResourcePaths.TO_PATH +

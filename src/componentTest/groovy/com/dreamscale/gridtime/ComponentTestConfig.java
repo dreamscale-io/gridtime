@@ -64,6 +64,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
+    TerminalClient terminalClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, TerminalClient.class);
+    }
+
+    @Bean
     TalkToClient circuitTalkClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, TalkToClient.class);
     }
