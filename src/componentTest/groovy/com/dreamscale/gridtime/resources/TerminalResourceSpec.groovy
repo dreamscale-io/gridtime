@@ -67,7 +67,6 @@ class TerminalResourceSpec extends Specification {
         mockTimeService.nanoTime() >> System.nanoTime()
     }
 
-    @Ignore
     def "should test terminal loop for a basic invite command"() {
         given:
 
@@ -79,10 +78,15 @@ class TerminalResourceSpec extends Specification {
 
         accountClient.login()
 
-        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token; return null}
+        OrganizationSubscriptionDto dreamScaleSubscription = createSubscription("dreamscale.io", "arty@dreamscale.io")
 
-        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe@dreamscale.io to public"))
+        accountClient.logout()
+        accountClient.login()
 
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token;
+            return new SimpleStatusDto(Status.SENT, "Sent!")}
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe@dreamscale.io to org"))
 
         then:
         assert activationToken != null

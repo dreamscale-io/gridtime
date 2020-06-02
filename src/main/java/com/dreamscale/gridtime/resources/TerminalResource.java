@@ -3,11 +3,9 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto;
-import com.dreamscale.gridtime.core.capability.integration.FlowPublisher;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.terminal.TerminalCmdRouter;
+import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,7 @@ public class TerminalResource {
     OrganizationCapability organizationCapability;
 
     @Autowired
-    TerminalCmdRouter terminalCmdRouter;
+    TerminalRouteRegistry terminalRouteRegistry;
 
     /**
      * Run a specific command on the grid and return the result synchronously as a TalkMessageDto
@@ -35,13 +33,13 @@ public class TerminalResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.RUN_PATH)
-    public TalkMessageDto runCommand(RunCommandInputDto runCommandInputDto) {
+    public TalkMessageDto runCommand(@RequestBody RunCommandInputDto runCommandInputDto) {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         log.info("runCommand, user={}", invokingMember.getBestAvailableName());
 
-        return terminalCmdRouter.runCommand(invokingMember.getOrganizationId(), invokingMember.getId(), runCommandInputDto);
+        return terminalRouteRegistry.routeCommand(invokingMember.getOrganizationId(), invokingMember.getId(), runCommandInputDto);
     }
 
 }
