@@ -24,7 +24,7 @@ public class OneTimeTicketCapability {
         OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
         oneTimeTicket.setId(UUID.randomUUID());
         oneTimeTicket.setOwnerId(ticketOwnerId);
-        oneTimeTicket.setTicketType(TicketType.ACTIVATION);
+        oneTimeTicket.setTicketType(TicketType.ACTIVATION_BY_OWNER);
         oneTimeTicket.setTicketCode(generateTicketCode());
         oneTimeTicket.setIssueDate(now);
         oneTimeTicket.setExpirationDate(now.plusDays(1));
@@ -133,7 +133,10 @@ public class OneTimeTicketCapability {
     }
 
     public boolean isExpired(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
-        return now.isAfter(oneTimeTicket.getExpirationDate());
+        if (oneTimeTicket != null) {
+            return now.isAfter(oneTimeTicket.getExpirationDate());
+        }
+        return false;
     }
 
 

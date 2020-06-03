@@ -7,10 +7,8 @@ import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.terminal.Command;
 import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
-import com.dreamscale.gridtime.core.capability.terminal.TerminalController;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRoute;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
@@ -19,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -35,7 +32,7 @@ public class InviteToResource {
 
     @PostConstruct
     void init() {
-
+        terminalRouteRegistry.registerManPageDescription(Command.INVITE, "Invite people to your team, org, or the public community.");
         terminalRouteRegistry.register(Command.INVITE, new InviteTerminalRoute());
     }
 
@@ -52,9 +49,9 @@ public class InviteToResource {
     public SimpleStatusDto inviteToPublicCommunity(@RequestBody EmailInputDto emailInputDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("inviteToPublicCommunity, user={}", context.getRootAccountId());
+        log.info("inviteToPublicOrg, user={}", context.getRootAccountId());
 
-        return inviteCapability.inviteToPublicCommunityOrg(context.getRootAccountId(), emailInputDto.getEmail());
+        return inviteCapability.inviteToPublicOrg(context.getRootAccountId(), emailInputDto.getEmail());
     }
 
     /**

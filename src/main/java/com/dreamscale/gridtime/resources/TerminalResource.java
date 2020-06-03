@@ -2,6 +2,9 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
+import com.dreamscale.gridtime.api.terminal.Command;
+import com.dreamscale.gridtime.api.terminal.CommandManualDto;
+import com.dreamscale.gridtime.api.terminal.CommandManualPageDto;
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto;
 import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
@@ -40,6 +43,44 @@ public class TerminalResource {
         log.info("runCommand, user={}", invokingMember.getBestAvailableName());
 
         return terminalRouteRegistry.routeCommand(invokingMember.getOrganizationId(), invokingMember.getId(), runCommandInputDto);
+    }
+
+    /**
+     * Returns the entire manual for all available registered terminal commands
+     *
+     * @return CommandManualDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MANUAL_PATH )
+    public CommandManualDto getManual() {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("getCommandManual, user={}", invokingMember.getBestAvailableName());
+
+        return terminalRouteRegistry.getManual(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    /**
+     * Gets help information summary for the specified command
+     *
+     * @see com.dreamscale.gridtime.api.terminal.Command for the available command types
+     *
+     * @param commandName
+     * @return CommandManualPageDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MANUAL_PATH + ResourcePaths.COMMAND_PATH + "/{commandName}")
+    public CommandManualPageDto getManualPage(@PathVariable("commandName") String commandName) {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("getCommandManualPage, user={}", invokingMember.getBestAvailableName());
+
+        Command command = Command.fromString(commandName);
+
+        return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), command);
     }
 
 }

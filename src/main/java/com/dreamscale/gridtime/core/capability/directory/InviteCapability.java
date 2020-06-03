@@ -139,11 +139,9 @@ public class InviteCapability {
         return teamCapability.inviteUserToMyActiveTeam(invokingMember.getOrganizationId(), invokingMember.getId(), userToInvite);
     }
 
-    public SimpleStatusDto inviteToPublicCommunityOrg(UUID invokingRootAccountId, String email) {
+    public SimpleStatusDto inviteToPublicOrg(UUID invokingRootAccountId, String email) {
 
-        //TODO this one, should just send an email, inviting them to download and signup, give an activation code?
-
-        return rootAccountCapability.inviteToPublic(invokingRootAccountId, email);
+        return organizationCapability.inviteToPublicOrg(invokingRootAccountId, email);
     }
 
 }

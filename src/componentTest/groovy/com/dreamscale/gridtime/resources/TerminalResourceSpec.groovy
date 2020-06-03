@@ -3,23 +3,20 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
-import com.dreamscale.gridtime.api.invitation.InvitationKeyDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
-import com.dreamscale.gridtime.api.organization.MemberDetailsDto
-import com.dreamscale.gridtime.api.organization.OrganizationDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.api.terminal.Command
+import com.dreamscale.gridtime.api.terminal.CommandManualDto
+import com.dreamscale.gridtime.api.terminal.CommandManualPageDto
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto
 import com.dreamscale.gridtime.client.*
 import com.dreamscale.gridtime.core.capability.integration.EmailCapability
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.*
 import com.dreamscale.gridtime.core.service.GridClock
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -60,7 +57,7 @@ class TerminalResourceSpec extends Specification {
     @Autowired
     GridClock mockTimeService;
 
-    String activationToken = null;
+    String activationCode = null;
 
     def setup() {
         mockTimeService.now() >> LocalDateTime.now()
@@ -83,16 +80,105 @@ class TerminalResourceSpec extends Specification {
         accountClient.logout()
         accountClient.login()
 
-        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token;
+        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationCode = token;
             return new SimpleStatusDto(Status.SENT, "Sent!")}
 
-        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe@dreamscale.io to org"))
+        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "org"))
 
         then:
-        assert activationToken != null
+        assert activationCode != null
         assert inviteResult != null
     }
 
+    def "should invite with user names"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+        accountClient.updateOrgProfileUsername(new UsernameInputDto("zoe"))
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+        TeamDto team = teamClient.createTeam("Phoenix")
+
+        when:
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe", "to", "team"))
+
+        switchUser(zoeProfile)
+
+        TeamDto zoesTeam = teamClient.getMyHomeTeam();
+
+        then:
+        assert inviteResult != null
+
+        assert inviteResult.messageType == "SimpleStatusDto"
+        assert ((SimpleStatusDto)inviteResult.data).status == Status.JOINED;
+
+        assert  zoesTeam.getName() == team.getName()
+
+    }
+
+    def "should invite to public from terminal"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        when:
+
+        accountClient.login()
+
+        1 * mockEmailCapability.sendDownloadAndInviteToPublicEmail(_, _, _, _) >> { from, emailAddr, org, token -> activationCode = token;
+            return new SimpleStatusDto(Status.SENT, "Sent!")}
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(new RunCommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "public"))
+
+        AccountActivationDto accountActivation = accountClient.activate(new ActivationCodeDto(activationCode: activationCode))
+
+        then:
+        assert activationCode != null
+        assert inviteResult != null
+        assert accountActivation.status == Status.VALID
+        assert accountActivation.apiKey != null
+
+    }
+
+    def "should get terminal help manual"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        when:
+
+        accountClient.login()
+
+        CommandManualDto manual = terminalClient.getCommandManual()
+        CommandManualPageDto manualPage = terminalClient.getCommandManualPage("invite");
+
+        println manualPage
+
+        then:
+        assert manual != null
+        assert manual.getManualPages().size() == 1
+
+        assert manualPage != null
+        assert manualPage.command == Command.INVITE
+        assert manualPage.description != null
+
+        assert manualPage.terminalRoutes.size() == 1
+        assert manualPage.terminalRoutes.get(0).argsTemplate != null
+        assert manualPage.terminalRoutes.get(0).optionsHelp.size() == 2
+
+    }
 
     private void switchUser(AccountActivationDto artyProfile) {
         RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());

@@ -144,6 +144,7 @@ public class ResourcePaths {
     public static final String GATE_PATH = "/gate";
     public static final String THRESHOLD_PATH = "/threshold";
     public static final String RUN_PATH = "/run";
+    public static final String MANUAL_PATH = "/manual";
     public static final String PROGRAM_PATH = "/program";
     public static final String CMD_PATH = "/cmd";
     public static final String PROPERTY_PATH = "/property";
@@ -172,4 +173,5 @@ public class ResourcePaths {
 
     public static final String SYSTEM_PATH = "/system";
     public static final String STOP_PATH = "/stop";
+    public static final String COMMAND_PATH = "/command";
 }

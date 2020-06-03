@@ -6,22 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RunCommandInputDto {
+public class CommandManualDto {
 
-    private Command command;
+    private List<CommandManualPageDto> manualPages;
 
-    private List<String> args;
 
-    public RunCommandInputDto(Command command, String ... inputArgs) {
-        this.command = command;
+    public void addPage(CommandManualPageDto manPage)
+    {
+        if (manualPages == null) {
+           manualPages = new ArrayList<>();
+        }
 
-        args = Arrays.asList(inputArgs);
+        manualPages.add(manPage);
     }
 }

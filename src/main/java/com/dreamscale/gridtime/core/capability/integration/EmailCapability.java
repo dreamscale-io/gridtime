@@ -100,6 +100,51 @@ public class EmailCapability {
         return responseDto;
     }
 
+    public SimpleStatusDto sendDownloadAndInviteToPublicEmail(String fromUser, String toEmailAddress, OrganizationDto publicOrg, String ticketCode) {
+        Mail mail = new Mail();
+        mail.setFrom(new Email(fromAddress, fromName));
+        mail.setSubject("You've been invited to join "+publicOrg.getDomainName() + " in hyperspace.");
+        mail.setReplyTo(new Email(fromAddress, fromName));
+
+        Personalization personalization = new Personalization();
+        Email to = new Email();
+        to.setEmail(toEmailAddress);
+        personalization.addTo(to);
+
+        mail.addPersonalization(personalization);
+
+        Content content = new Content();
+        content.setType("text/html");
+        content.setValue("<html><body> <p>"+fromUser+ " has invited you to join " + publicOrg.getDomainName() + " in hyperspace.</p>" +
+                "<p>First, download the Torchie Shell here: " +
+                "<p><a href='"+downloadLinkUrl+ "' > Download Torchie Shell</a></p> " +
+                "then use the activation code below, to activate your account:</p>" +
+                "<p>"+ticketCode + "</p></body></html>");
+        mail.addContent(content);
+
+        SendGrid sg = new SendGrid(apiKey);
+        Request request = new Request();
+
+        SimpleStatusDto responseDto = null;
+        try {
+            request.method = Method.POST;
+            request.endpoint = "mail/send";
+            request.body = mail.build();
+            Response response = sg.api(request);
+
+            if (response.statusCode == 200) {
+                responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
+            } else {
+                responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
+            }
+        } catch (IOException ex) {
+            responseDto = new SimpleStatusDto(Status.FAILED, ex.getMessage());
+
+            log.error("Unable to send email to "+toEmailAddress, ex);
+        }
+
+        return responseDto;
+    }
 
 
     public SimpleStatusDto sendDownloadActivateAndOrgInviteEmail(String toEmailAddress, OrganizationDto org, String ticketCode) {

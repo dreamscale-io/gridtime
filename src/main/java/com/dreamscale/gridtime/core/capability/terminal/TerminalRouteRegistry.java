@@ -2,13 +2,10 @@ package com.dreamscale.gridtime.core.capability.terminal;
 
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageMetaProp;
-import com.dreamscale.gridtime.api.terminal.Command;
-import com.dreamscale.gridtime.api.terminal.RunCommandInputDto;
-import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
+import com.dreamscale.gridtime.api.terminal.*;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.service.GridClock;
 import com.dreamscale.gridtime.core.service.MemberDetailsService;
@@ -20,6 +17,8 @@ import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +32,17 @@ public class TerminalRouteRegistry {
     private GridClock gridClock;
 
     private MultiValueMap<Command, TerminalRoute> terminalRoutes = DefaultCollections.multiMap();
+    private Map<Command, String> manPageDescriptions = DefaultCollections.map();
+
+    public void registerManPageDescription(Command command, String description) {
+        manPageDescriptions.put(command, description);
+    }
+
+    public void register(Command command, TerminalRoute terminalRoute) {
+        log.info("[TerminalRouteRegistry] Register "+command.name());
+
+        terminalRoutes.add(command, terminalRoute);
+    }
 
     public TalkMessageDto routeCommand(UUID organizationId, UUID memberId, RunCommandInputDto runCommandInputDto) {
 
@@ -44,8 +54,8 @@ public class TerminalRouteRegistry {
         if (terminalRoutes != null) {
             for (TerminalRoute route : terminalRoutes) {
 
-                if (route.matches(runCommandInputDto.getArgumentStr())) {
-                    Object result = route.route(runCommandInputDto.getArgumentStr());
+                if (route.matches(runCommandInputDto.getArgs())) {
+                    Object result = route.route(runCommandInputDto.getArgs());
 
                     return wrapResultAsTalkMessage(now, nanoTime, memberId, result);
                 }
@@ -83,7 +93,6 @@ public class TerminalRouteRegistry {
     }
 
     private String getRequestUriFromContext() {
-
         RequestContext context = RequestContext.get();
 
         if (context != null) {
@@ -93,9 +102,62 @@ public class TerminalRouteRegistry {
         }
     }
 
-    public void register(Command command, TerminalRoute terminalRoute) {
-        log.info("[TerminalRouteRegistry] Register "+command.name());
+    public CommandManualDto getManual(UUID organizationId, UUID memberId) {
 
-        terminalRoutes.add(command, terminalRoute);
+        CommandManualDto manualDto = new CommandManualDto();
+
+        Set<Command> commands = terminalRoutes.keySet();
+
+        for (Command command : commands) {
+
+            String description = manPageDescriptions.get(command);
+            List<TerminalRoute> commandPageRoutes = terminalRoutes.get(command);
+
+            CommandManualPageDto manPage = toManPage(command, description, commandPageRoutes);
+
+            manualDto.addPage(manPage);
+        }
+
+        return manualDto;
     }
+
+    private CommandManualPageDto toManPage(Command command, String description, List<TerminalRoute> commandPageRoutes) {
+
+        CommandManualPageDto page = new CommandManualPageDto();
+
+        page.setCommand(command);
+        page.setDescription(description);
+
+        if (commandPageRoutes != null) {
+            for (TerminalRoute route : commandPageRoutes) {
+                TerminalRouteDto routeDto = new TerminalRouteDto();
+
+                routeDto.setArgsTemplate(route.getArgsTemplate());
+                routeDto.setOptionsHelp(route.getOptionsHelpDescriptions());
+
+                page.addRoute(routeDto);
+            }
+        }
+
+        return page;
+    }
+
+    public CommandManualPageDto getManualPage(UUID organizationId, UUID memberId, Command command) {
+
+        String description = manPageDescriptions.get(command);
+        List<TerminalRoute> routes = terminalRoutes.get(command);
+
+        validateAtLeastOneRouteIsFound(command, routes);
+
+        return toManPage(command, description, routes);
+    }
+
+    private void validateAtLeastOneRouteIsFound(Command command, List<TerminalRoute> routes) {
+        if (routes == null || routes.size() == 0) {
+
+            throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find any registered terminal routes for command: " + command);
+
+        }
+    }
+
 }

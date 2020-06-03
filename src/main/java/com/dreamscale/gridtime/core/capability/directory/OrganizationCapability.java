@@ -190,7 +190,6 @@ public class OrganizationCapability {
         return statusDto;
     }
 
-
     @Transactional
     public SimpleStatusDto inviteToOrganizationWithEmail(UUID rootAccountId, String email) {
 
@@ -225,6 +224,39 @@ public class OrganizationCapability {
         //TODO enable the code use for activation
 
         return emailCapability.sendDownloadActivateAndOrgInviteEmail(standardizedEmail, org, oneTimeTicket.getTicketCode());
+    }
+
+
+    public SimpleStatusDto inviteToPublicOrg(UUID invokingRootAccountId, String email) {
+
+        OrganizationMemberEntity invokingMember = getActiveMembership(invokingRootAccountId);
+
+        OrganizationEntity org = organizationRepository.findByDomainName(PUBLIC_ORG_DOMAIN);
+        OrganizationDto orgDto = orgOutputMapper.toApi(org);
+
+        validateNotNull("email", email);
+
+        LocalDateTime now = gridClock.now();
+
+        String standardizedEmail = email.toLowerCase();
+
+        validateNoExistingMembership(org.getId(), standardizedEmail);
+
+        //send invite or join email
+
+        OneTimeTicketEntity oneTimeTicket = oneTimeTicketCapability.issueOneTimeActivateAndInviteTicket(now, invokingRootAccountId, org.getId(), standardizedEmail);
+
+        //so this code could come back through, an activation, or this "invite key" API, that needs to allow invite to anything
+
+        //invite XXX to org
+        //invite XXX to public
+        //TODO enable the code use for activation
+
+        //TODO think through this logic with joining public, and being able to invite to public teams within
+
+        //then we also need a way to create accounts
+
+        return emailCapability.sendDownloadAndInviteToPublicEmail(invokingMember.getBestAvailableName(), standardizedEmail, orgDto, oneTimeTicket.getTicketCode());
     }
 
     @Transactional
@@ -315,10 +347,17 @@ public class OrganizationCapability {
 
         SimpleStatusDto status = new SimpleStatusDto();
 
-        OrganizationMemberEntity membership = createOrgMembership(now, organizationId, rootAccountId, orgEmail);
+        OrganizationEntity org = organizationRepository.findById(organizationId);
 
-        status.setStatus(Status.JOINED);
-        status.setMessage("Member has joined the organization.");
+        if (!isPublicOrg(org)) {
+            OrganizationMemberEntity membership = createOrgMembership(now, organizationId, rootAccountId, orgEmail);
+            status.setStatus(Status.JOINED);
+            status.setMessage("Member has joined the organization.");
+        } else {
+
+            status.setStatus(Status.JOINED);
+            status.setMessage("Already a member of the public organization.");
+        }
 
         return status;
     }

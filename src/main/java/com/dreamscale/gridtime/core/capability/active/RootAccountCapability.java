@@ -159,18 +159,45 @@ public class RootAccountCapability implements RootAccountIdResolver {
             oneTimeTicketCapability.delete(oneTimeTicket);
 
         } else {
+
             String apiKey = generateAPIKey();
 
-            RootAccountEntity rootAccountEntity = rootAccountRepository.findById(oneTimeTicket.getOwnerId());
+            //if this was an invite ticket, the owner will be someone else, so process these cases differently...
 
-            validateAccountExists("activation ticket owner", rootAccountEntity);
+            RootAccountEntity rootAccountEntity = null;
 
-            rootAccountEntity.setApiKey(apiKey);
-            rootAccountEntity.setActivationDate(now);
-            rootAccountEntity.setLastUpdated(now);
-            rootAccountEntity.setEmailValidated(true);
+            if (oneTimeTicket.getTicketType() == TicketType.ACTIVATION_BY_OWNER) {
 
-            rootAccountRepository.save(rootAccountEntity);
+                rootAccountEntity = rootAccountRepository.findById(oneTimeTicket.getOwnerId());
+
+                validateAccountExists("activation by ticket owner", rootAccountEntity);
+
+                rootAccountEntity.setApiKey(apiKey);
+                rootAccountEntity.setActivationDate(now);
+                rootAccountEntity.setLastUpdated(now);
+                rootAccountEntity.setEmailValidated(true);
+
+                rootAccountRepository.save(rootAccountEntity);
+
+
+            } else if (TicketType.isInviteAndActivateType(oneTimeTicket.getTicketType())) {
+
+                //this person will be totally new to the system, so make a new root account
+
+                String invitedEmail = oneTimeTicket.getEmailProp();
+
+                rootAccountEntity = new RootAccountEntity();
+                rootAccountEntity.setId(UUID.randomUUID());
+                rootAccountEntity.setRootEmail(invitedEmail);
+                rootAccountEntity.setApiKey(apiKey);
+                rootAccountEntity.setRegistrationDate(now);
+                rootAccountEntity.setActivationDate(now);
+                rootAccountEntity.setEmailValidated(true);
+
+                rootAccountRepository.save(rootAccountEntity);
+            } else {
+                throw new BadRequestException(ValidationErrorCodes.INVALID_TICKET_TYPE, "Invalid ticket type for activation.");
+            }
 
             OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg();
 
@@ -734,9 +761,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return simpleStatus;
     }
 
-    public SimpleStatusDto inviteToPublic(UUID invokingRootAccountId, String email) {
-        return null;
-    }
 
 
 }
