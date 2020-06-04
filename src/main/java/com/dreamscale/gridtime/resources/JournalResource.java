@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.journal.*;
-import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
+import com.dreamscale.gridtime.api.project.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator;
@@ -50,6 +50,46 @@ public class JournalResource {
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return journalCapability.createIntention(invokingMember.getOrganizationId(), invokingMember.getId(), intentionInput);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PROJECT_PATH  )
+    ProjectDto createProject(@RequestBody CreateProjectInputDto projectInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("createProject, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return journalCapability.createProject(invokingMember.getOrganizationId(), invokingMember.getId(), projectInputDto.getName());
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH  )
+    TaskDto createTask(@PathVariable("projectId") String projectIdStr, @RequestBody CreateTaskInputDto taskInputDto) {
+
+        RequestContext context = RequestContext.get();
+        log.info("createTask, user={}", context.getRootAccountId());
+
+        UUID projectId = UUID.fromString(projectIdStr);
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return journalCapability.createTask(invokingMember.getOrganizationId(), invokingMember.getId(), projectId, taskInputDto);
+    }
+
+    /**
+     * Gets an overview of all the recent projects and tasks used in the journal
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.ME_PATH + ResourcePaths.RECENT_PATH)
+    RecentTasksSummaryDto getRecentProjectsAndTasks() {
+        RequestContext context = RequestContext.get();
+        log.info("getRecentProjectsAndTasks, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return recentActivityManager.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
 

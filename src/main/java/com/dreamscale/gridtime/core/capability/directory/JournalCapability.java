@@ -1,7 +1,10 @@
 package com.dreamscale.gridtime.core.capability.directory;
 
 import com.dreamscale.gridtime.api.journal.*;
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto;
+import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
+import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
@@ -359,4 +362,11 @@ public class JournalCapability {
     }
 
 
+    public ProjectDto createProject(UUID organizationId, UUID invokingMemberId, String name) {
+        return null;
+    }
+
+    public TaskDto createTask(UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto) {
+        return null;
+    }
 }
