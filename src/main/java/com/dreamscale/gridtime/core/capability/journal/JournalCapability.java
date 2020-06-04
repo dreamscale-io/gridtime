@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.directory;
+package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.journal.*;
 import com.dreamscale.gridtime.api.project.CreateTaskInputDto;
@@ -8,7 +8,8 @@ import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
-import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.json.Member;
@@ -16,8 +17,8 @@ import com.dreamscale.gridtime.core.domain.member.json.PairingMemberList;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.circuit.TorchieNetworkOperator;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,7 @@ public class JournalCapability {
         journalEntryOutputMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
     }
 
+
     public JournalEntryDto createIntention(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
         UUID organizationIdForProject = getOrganizationIdForProject(intentionInputDto.getProjectId());
 
@@ -110,6 +112,16 @@ public class JournalCapability {
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
+
+    public ProjectDto createProject(UUID organizationId, UUID invokingMemberId, String name) {
+
+        return null;
+    }
+
+    public TaskDto createTask(UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto) {
+        return null;
+    }
+
 
     public LocalDateTime getDateOfFirstIntention(UUID memberId) {
         LocalDateTime dateOfIntention = null;
@@ -362,11 +374,5 @@ public class JournalCapability {
     }
 
 
-    public ProjectDto createProject(UUID organizationId, UUID invokingMemberId, String name) {
-        return null;
-    }
 
-    public TaskDto createTask(UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto) {
-        return null;
-    }
 }

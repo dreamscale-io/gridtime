@@ -1,18 +1,18 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
-import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.RootAccountCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveSpiritLinkRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class TorchieNetworkOperator {
     SpiritXPRepository spiritXPRepository;
 
     @Autowired
-    MemberDetailsService memberDetailsService;
+    MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     GridClock gridClock;
@@ -97,7 +97,7 @@ public class TorchieNetworkOperator {
             SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
             spiritLinkDto.setSpiritId(invokingTorchie);
             spiritLinkDto.setFriendSpiritId(friendTorchie);
-            spiritLinkDto.setName(memberDetailsService.lookupMemberName(organizationId, friendTorchie));
+            spiritLinkDto.setName(memberDetailsRetriever.lookupMemberName(organizationId, friendTorchie));
             spiritNetwork.addSpiritLink(spiritLinkDto);
         }
 
@@ -131,7 +131,7 @@ public class TorchieNetworkOperator {
                     SpiritLinkDto spiritLinkDto = new SpiritLinkDto();
                     spiritLinkDto.setSpiritId(memberId);
                     spiritLinkDto.setFriendSpiritId(torchieLink.getTorchieId());
-                    spiritLinkDto.setName(memberDetailsService.lookupMemberName(organizationId, torchieLink.getTorchieId()));
+                    spiritLinkDto.setName(memberDetailsRetriever.lookupMemberName(organizationId, torchieLink.getTorchieId()));
                     activeLinksNetworkDto.addSpiritLink(spiritLinkDto);
                 }
             }
@@ -140,7 +140,7 @@ public class TorchieNetworkOperator {
         }
 
         activeLinksNetworkDto.setMyId(memberId);
-        activeLinksNetworkDto.setMyName(memberDetailsService.lookupMemberName(organizationId, memberId));
+        activeLinksNetworkDto.setMyName(memberDetailsRetriever.lookupMemberName(organizationId, memberId));
 
         return activeLinksNetworkDto;
     }

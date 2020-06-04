@@ -31,8 +31,8 @@ import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
-import com.dreamscale.gridtime.core.capability.directory.TeamCapability
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.membership.TeamCapability
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

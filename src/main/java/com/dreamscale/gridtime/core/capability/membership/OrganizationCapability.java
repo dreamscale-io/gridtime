@@ -1,21 +1,20 @@
-package com.dreamscale.gridtime.core.capability.directory;
+package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
-import com.dreamscale.gridtime.core.capability.integration.EmailCapability;
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.external.EmailCapability;
+import com.dreamscale.gridtime.core.capability.external.JiraCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.service.GridClock;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -63,7 +62,7 @@ public class OrganizationCapability {
     private EmailCapability emailCapability;
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     private OneTimeTicketCapability oneTimeTicketCapability;
@@ -578,7 +577,7 @@ public class OrganizationCapability {
         OrganizationSubscriptionEntity subscription = findAndValidateSubscription(rootAccountId, organizationId);
         //then, and only then...
 
-        return memberDetailsService.getOrganizationMembers(organizationId);
+        return memberDetailsRetriever.getOrganizationMembers(organizationId);
     }
 
     private OrganizationSubscriptionEntity findAndValidateSubscription(UUID rootAccountId, UUID organizationId) {
@@ -635,7 +634,7 @@ public class OrganizationCapability {
         //the tombstones include the details of the attached user, at the time of the boot.
         // The connection to this users root user account, will be destroyed.
 
-        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(membership.getId());
+        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(membership.getId());
 
         OrganizationMemberTombstoneEntity memberTombstone = new OrganizationMemberTombstoneEntity();
         memberTombstone.setId(UUID.randomUUID());

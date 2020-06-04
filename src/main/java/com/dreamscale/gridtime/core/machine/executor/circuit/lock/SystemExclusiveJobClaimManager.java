@@ -7,7 +7,7 @@ import com.dreamscale.gridtime.core.domain.work.LockRepository;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.job.SystemJobDescriptor;
 import com.dreamscale.gridtime.core.machine.executor.worker.SystemJobClaim;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

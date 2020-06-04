@@ -7,8 +7,8 @@ import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.GridClock;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class TerminalRouteRegistry {
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     private GridClock gridClock;
@@ -74,7 +74,7 @@ public class TerminalRouteRegistry {
         messageDto.setRequest(requestUri);
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, memberId.toString());
 
-        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(memberId);
+        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(memberId);
 
         if (memberDetails != null) {
             messageDto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());

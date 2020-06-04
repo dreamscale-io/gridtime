@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
@@ -11,8 +11,8 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.GridClock;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class RoomOperator {
     private GridTalkRouter talkRouter;
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
@@ -121,7 +121,7 @@ public class RoomOperator {
         messageDto.setRequest(getRequestUriFromContext());
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
-        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
+        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(messageEntity.getFromId());
 
         if (memberDetails != null) {
             messageDto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());
@@ -221,7 +221,7 @@ public class RoomOperator {
             //TODO this needs to be joined in a view
             dto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, message.getFromId().toString());
 
-            MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(message.getFromId());
+            MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(message.getFromId());
 
             if (memberDetails != null) {
                 dto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());

@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.directory;
+package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
@@ -6,17 +6,17 @@ import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
-import com.dreamscale.gridtime.core.capability.active.MemberCapability;
-import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusManager;
+import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
-import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
-import com.dreamscale.gridtime.core.service.GridClock;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.capability.circuit.TorchieNetworkOperator;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -66,13 +66,13 @@ public class TeamCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    private MemberCapability memberCapability;
+    private MemberStatusManager memberStatusManager;
 
     @Autowired
     private TeamMemberTombstoneRepository teamMemberTombstoneRepository;
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     GridClock gridClock;
@@ -661,7 +661,7 @@ public class TeamCapability {
             teamMemberTombstoneEntity.setJoinDate(teamMembership.getJoinDate());
             teamMemberTombstoneEntity.setRipDate(now);
 
-            MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(teamMembership.getOrganizationId(), teamMembership.getMemberId());
+            MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(teamMembership.getOrganizationId(), teamMembership.getMemberId());
 
             memberUserName = memberDetails.getUsername();
 
@@ -725,7 +725,7 @@ public class TeamCapability {
     private void fillTeamWithTeamMembers(TeamDto team, UUID meId) {
         if (team != null) {
             log.debug("Team member retrieval, team: {}", team);
-            List<TeamMemberDto> membersWithDetails = memberCapability.getMembersForTeam(team.getOrganizationId(), team.getId(), meId);
+            List<TeamMemberDto> membersWithDetails = memberStatusManager.getMembersForTeam(team.getOrganizationId(), team.getId(), meId);
             team.setTeamMembers(membersWithDetails);
         }
     }

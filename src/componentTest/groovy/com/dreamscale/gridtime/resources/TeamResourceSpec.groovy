@@ -23,15 +23,15 @@ import com.dreamscale.gridtime.client.MemberClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.SubscriptionClient
 import com.dreamscale.gridtime.client.TeamClient
-import com.dreamscale.gridtime.core.capability.integration.EmailCapability
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.capability.external.EmailCapability
+import com.dreamscale.gridtime.core.capability.external.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.member.TeamRepository
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

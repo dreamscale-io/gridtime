@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.system;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

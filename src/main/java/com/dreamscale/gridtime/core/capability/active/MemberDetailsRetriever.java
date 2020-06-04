@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.organization.MemberDetailsDto;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class MemberDetailsService {
+public class MemberDetailsRetriever {
 
     @Autowired
     MemberDetailsRepository memberDetailsRepository;

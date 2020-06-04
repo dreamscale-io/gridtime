@@ -1,21 +1,18 @@
 package com.dreamscale.gridtime.core.machine.executor.worker
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.domain.work.WorkToDoType
-import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CoordinateResults
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

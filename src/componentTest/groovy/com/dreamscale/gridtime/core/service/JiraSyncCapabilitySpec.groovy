@@ -1,7 +1,8 @@
 package com.dreamscale.gridtime.core.service
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.capability.external.JiraCapability
+import com.dreamscale.gridtime.core.capability.external.JiraSyncCapability
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
@@ -17,7 +18,7 @@ import spock.lang.Specification
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-public class JiraSyncServiceSpec extends Specification {
+public class JiraSyncCapabilitySpec extends Specification {
 
 	@Autowired
 	OrganizationRepository organizationRepository
@@ -32,7 +33,7 @@ public class JiraSyncServiceSpec extends Specification {
 	TaskRepository taskRepository
 
 	@Autowired
-	JiraSyncService jiraSyncService
+    JiraSyncCapability jiraSyncService
 
 	@Autowired
     JiraCapability mockJiraService

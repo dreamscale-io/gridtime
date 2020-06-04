@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.api.terminal.Command;
 import com.dreamscale.gridtime.api.terminal.CommandManualDto;
 import com.dreamscale.gridtime.api.terminal.CommandManualPageDto;
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;

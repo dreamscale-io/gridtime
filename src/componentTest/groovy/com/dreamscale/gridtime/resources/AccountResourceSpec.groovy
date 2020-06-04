@@ -7,10 +7,10 @@ import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.OrganizationClient
-import com.dreamscale.gridtime.core.capability.integration.EmailCapability
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.capability.external.EmailCapability
+import com.dreamscale.gridtime.core.capability.external.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.*
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

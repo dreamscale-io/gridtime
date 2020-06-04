@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
+import com.dreamscale.gridtime.core.capability.membership.RootAccountCapability;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

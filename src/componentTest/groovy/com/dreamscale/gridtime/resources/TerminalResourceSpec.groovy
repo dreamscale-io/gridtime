@@ -13,9 +13,9 @@ import com.dreamscale.gridtime.api.terminal.CommandManualDto
 import com.dreamscale.gridtime.api.terminal.CommandManualPageDto
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto
 import com.dreamscale.gridtime.client.*
-import com.dreamscale.gridtime.core.capability.integration.EmailCapability
+import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.domain.member.*
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

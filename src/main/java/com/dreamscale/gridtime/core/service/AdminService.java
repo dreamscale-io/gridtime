@@ -6,10 +6,12 @@ import com.dreamscale.gridtime.api.admin.ProjectSyncInputDto;
 import com.dreamscale.gridtime.api.admin.ProjectSyncOutputDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
+import com.dreamscale.gridtime.core.capability.external.JiraSyncCapability;
+import com.dreamscale.gridtime.core.capability.membership.RootAccountCapability;
+import com.dreamscale.gridtime.core.capability.external.JiraCapability;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncEntity;
 import com.dreamscale.gridtime.core.domain.journal.ConfigProjectSyncRepository;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
@@ -47,7 +49,7 @@ public class AdminService {
     private JiraCapability jiraCapability;
 
     @Autowired
-    private JiraSyncService jiraSyncService;
+    private JiraSyncCapability jiraSyncCapability;
 
     @Autowired
     private ConfigProjectSyncRepository configProjectSyncRepository;
@@ -151,7 +153,7 @@ public class AdminService {
         Iterable<OrganizationEntity> orgs = organizationRepository.findAll();
 
         for (OrganizationEntity org : orgs) {
-            jiraSyncService.synchronizeProjectsWithJira(org.getId());
+            jiraSyncCapability.synchronizeProjectsWithJira(org.getId());
         }
     }
 

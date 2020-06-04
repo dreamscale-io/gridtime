@@ -6,9 +6,9 @@ import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.service.ProjectService;
-import com.dreamscale.gridtime.core.capability.directory.TaskDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.journal.ProjectDirectoryCapability;
+import com.dreamscale.gridtime.core.capability.journal.TaskDirectoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +25,7 @@ import java.util.UUID;
 public class ProjectResource {
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectDirectoryCapability projectDirectoryCapability;
 
     @Autowired
     private TaskDirectoryCapability taskDirectoryCapability;
@@ -39,7 +39,7 @@ public class ProjectResource {
      */
     @GetMapping()
     List<ProjectDto> getAllProjects() {
-        return projectService.getAllProjects(getActiveOrgId());
+        return projectDirectoryCapability.getAllProjects(getActiveOrgId());
     }
 
     /**

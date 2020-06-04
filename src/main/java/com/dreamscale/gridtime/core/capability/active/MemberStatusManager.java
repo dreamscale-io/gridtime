@@ -3,27 +3,25 @@ package com.dreamscale.gridtime.core.capability.active;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
-import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
+import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import com.dreamscale.gridtime.core.capability.operator.TorchieNetworkOperator;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.circuit.TorchieNetworkOperator;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
-public class MemberCapability {
+public class MemberStatusManager {
 
     @Autowired
     private TorchieNetworkOperator xpService;

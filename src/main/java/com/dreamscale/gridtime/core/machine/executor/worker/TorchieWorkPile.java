@@ -15,7 +15,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.api.dictionary.WordDefinitionWithDetailsDto
 import com.dreamscale.gridtime.client.DictionaryClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.core.domain.member.*
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 

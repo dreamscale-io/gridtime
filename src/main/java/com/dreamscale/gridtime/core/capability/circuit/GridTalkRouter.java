@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageMetaProp;

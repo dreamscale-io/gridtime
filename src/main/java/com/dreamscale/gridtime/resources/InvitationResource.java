@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.resources;
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.invitation.InvitationKeyDto;
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto;
-import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
+import com.dreamscale.gridtime.core.capability.membership.InviteCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

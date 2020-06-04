@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class ProjectService {
+public class ProjectDirectoryCapability {
 
     @Autowired
     private ProjectRepository projectRepository;

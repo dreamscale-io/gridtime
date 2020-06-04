@@ -1,10 +1,10 @@
-package com.dreamscale.gridtime.core.capability.integration;
+package com.dreamscale.gridtime.core.capability.flow;
 
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchEventDto;
 import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.flow.activity.*;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.flow.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,8 +6,8 @@ import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.organization.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.active.MemberCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusManager;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ public class MemberResource {
     private OrganizationCapability organizationCapability;
 
     @Autowired
-    private MemberCapability memberCapability;
+    private MemberStatusManager memberStatusManager;
 
     /**
      * Get the active status of me
@@ -32,7 +32,7 @@ public class MemberResource {
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return memberCapability.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
+        return memberStatusManager.getMyCurrentStatus(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
     /**
@@ -45,7 +45,7 @@ public class MemberResource {
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return memberCapability.findMemberByEmail(memberEntity.getOrganizationId(), emailInputDto.getEmail());
+        return memberStatusManager.findMemberByEmail(memberEntity.getOrganizationId(), emailInputDto.getEmail());
     }
 
     /**
@@ -58,7 +58,7 @@ public class MemberResource {
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return memberCapability.findMemberWithUserName(memberEntity.getOrganizationId(), usernameInputDto.getUsername());
+        return memberStatusManager.findMemberWithUserName(memberEntity.getOrganizationId(), usernameInputDto.getUsername());
     }
 
 }

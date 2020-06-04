@@ -17,7 +17,7 @@ import com.dreamscale.gridtime.core.domain.flow.FlowEventRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager
-import com.dreamscale.gridtime.core.service.GridClock
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.dreamscale.exception.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification

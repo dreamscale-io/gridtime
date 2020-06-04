@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.integration;
+package com.dreamscale.gridtime.core.capability.external;
 
 import com.dreamscale.gridtime.api.project.TaskInputDto;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;

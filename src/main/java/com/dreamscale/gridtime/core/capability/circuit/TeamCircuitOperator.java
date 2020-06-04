@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.journal.JournalEntryDto;
@@ -7,9 +7,11 @@ import com.dreamscale.gridtime.api.spirit.XPSummaryDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitRoomDto;
 import com.dreamscale.gridtime.api.team.TeamCircuitDto;
 import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.active.MemberCapability;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.directory.TeamCapability;
+import com.dreamscale.gridtime.core.capability.active.MemberStatusManager;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
@@ -18,7 +20,6 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +56,10 @@ public class TeamCircuitOperator {
     private TeamCapability teamCapability;
 
     @Autowired
-    private MemberCapability memberCapability;
+    private MemberStatusManager memberStatusManager;
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     private GridClock gridClock;
@@ -101,7 +102,7 @@ public class TeamCircuitOperator {
 
         TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
 
-        validateCircuitExists("[team circuit]", circuit);
+        validateCircuitExists("[team network]", circuit);
 
         if ((!circuit.getOwnerId().equals(invokingMemberId) && !circuit.getModeratorId().equals(invokingMemberId))) {
             throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_MODERATOR_OF_TEAM,
@@ -113,7 +114,7 @@ public class TeamCircuitOperator {
 
         TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
 
-        validateCircuitExists("[team circuit]", circuit);
+        validateCircuitExists("[team network]", circuit);
 
         TalkRoomMemberEntity talkRoomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuit.getTeamRoomId(), memberId);
 
@@ -133,7 +134,7 @@ public class TeamCircuitOperator {
     public void removeMemberFromTeamCircuit(UUID organizationId, UUID teamId, UUID memberId) {
         TeamCircuitEntity circuit = teamCircuitRepository.findByOrganizationIdAndTeamId(organizationId, teamId);
 
-        validateCircuitExists("[team circuit]", circuit);
+        validateCircuitExists("[team network]", circuit);
 
         TalkRoomMemberEntity talkRoomMember = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, circuit.getTeamRoomId(), memberId);
 
@@ -166,8 +167,8 @@ public class TeamCircuitOperator {
         teamCircuitDto.setOwnerId(teamCircuitEntity.getOwnerId());
         teamCircuitDto.setModeratedId(teamCircuitEntity.getModeratorId());
 
-        String ownerName = memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getOwnerId());
-        String moderatorName = memberDetailsService.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getModeratorId());
+        String ownerName = memberDetailsRetriever.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getOwnerId());
+        String moderatorName = memberDetailsRetriever.lookupMemberName(teamCircuitEntity.getOrganizationId(), teamCircuitEntity.getModeratorId());
 
         teamCircuitDto.setOwnerName(ownerName);
         teamCircuitDto.setModeratorName(moderatorName);
@@ -339,7 +340,7 @@ public class TeamCircuitOperator {
 
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
-        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
+        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(messageEntity.getFromId());
 
         if (memberDetails != null) {
             messageDto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());
@@ -381,8 +382,8 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setOwnerId(circuitEntity.getOwnerId());
         teamCircuitRoomDto.setModeratorId(circuitEntity.getModeratorId());
 
-        String ownerName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
-        String moderatorName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
+        String ownerName = memberDetailsRetriever.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
+        String moderatorName = memberDetailsRetriever.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
 
         teamCircuitRoomDto.setOwnerName(ownerName);
         teamCircuitRoomDto.setModeratorName(moderatorName);
@@ -393,7 +394,7 @@ public class TeamCircuitOperator {
 
     private void validateCircuitExists(String circuitName, TeamCircuitEntity teamCircuitEntity) {
         if (teamCircuitEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_CIRCUIT, "Unable to find team circuit: " + circuitName);
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_CIRCUIT, "Unable to find team network: " + circuitName);
         }
     }
 
@@ -430,8 +431,8 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setOwnerId(teamRoom.getOwnerId());
         teamCircuitRoomDto.setModeratorId(teamRoom.getModeratorId());
 
-        String ownerName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getOwnerId());
-        String moderatorName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getModeratorId());
+        String ownerName = memberDetailsRetriever.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getOwnerId());
+        String moderatorName = memberDetailsRetriever.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getModeratorId());
 
         teamCircuitRoomDto.setOwnerName(ownerName);
         teamCircuitRoomDto.setModeratorName(moderatorName);
@@ -467,8 +468,8 @@ public class TeamCircuitOperator {
         teamCircuitRoomDto.setOwnerId(teamRoom.getOwnerId());
         teamCircuitRoomDto.setModeratorId(teamRoom.getModeratorId());
 
-        String ownerName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getOwnerId());
-        String moderatorName = memberDetailsService.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getModeratorId());
+        String ownerName = memberDetailsRetriever.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getOwnerId());
+        String moderatorName = memberDetailsRetriever.lookupMemberName(teamRoom.getOrganizationId(), teamRoom.getModeratorId());
 
         teamCircuitRoomDto.setOwnerName(ownerName);
         teamCircuitRoomDto.setModeratorName(moderatorName);

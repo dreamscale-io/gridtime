@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.terminal.Command;
-import com.dreamscale.gridtime.core.capability.directory.InviteCapability;
+import com.dreamscale.gridtime.core.capability.membership.InviteCapability;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRoute;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;

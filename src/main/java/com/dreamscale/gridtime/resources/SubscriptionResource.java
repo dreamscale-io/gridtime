@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.*;
-import com.dreamscale.gridtime.core.capability.directory.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
-package com.dreamscale.gridtime.core.service;
+package com.dreamscale.gridtime.core.capability.external;
 
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class JiraSyncService {
+public class JiraSyncCapability {
 
     @Autowired
     ProjectRepository projectRepository;

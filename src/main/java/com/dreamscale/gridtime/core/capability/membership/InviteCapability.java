@@ -1,13 +1,11 @@
-package com.dreamscale.gridtime.core.capability.directory;
+package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.invitation.InvitationKeyDto;
 import com.dreamscale.gridtime.api.status.Status;
-import com.dreamscale.gridtime.core.capability.active.OneTimeTicketCapability;
-import com.dreamscale.gridtime.core.capability.active.RootAccountCapability;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;

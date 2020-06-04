@@ -1,8 +1,8 @@
-package com.dreamscale.gridtime.core.capability.directory;
+package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.project.TaskInputDto;
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability;
+import com.dreamscale.gridtime.core.capability.external.JiraCapability;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository;
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity;

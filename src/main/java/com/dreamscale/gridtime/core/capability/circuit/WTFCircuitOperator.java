@@ -1,9 +1,8 @@
-package com.dreamscale.gridtime.core.capability.operator;
+package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
-import com.dreamscale.gridtime.core.capability.directory.DictionaryCapability;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
@@ -14,15 +13,14 @@ import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.api.circuit.ChatMessageDetailsDto;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.service.GridClock;
-import com.dreamscale.gridtime.core.service.MemberDetailsService;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -95,7 +93,7 @@ public class WTFCircuitOperator {
     private MapperFactory mapperFactory;
 
     @Autowired
-    private MemberDetailsService memberDetailsService;
+    private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
     private MemberStatusRepository memberStatusRepository;
@@ -131,7 +129,7 @@ public class WTFCircuitOperator {
     public LearningCircuitDto startWTF(UUID organizationId, UUID memberId) {
         String circuitName = sillyNameGenerator.random();
 
-        log.info("[WTFCircuitOperator] Creating new circuit : " + circuitName);
+        log.info("[WTFCircuitOperator] Creating new network : " + circuitName);
         return startWTFWithCustomName(organizationId, memberId, circuitName);
     }
 
@@ -198,7 +196,7 @@ public class WTFCircuitOperator {
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
 
 
-        log.debug("[WTFCircuitOperator] Creating WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Creating WTF network {} at {}", circuitName, nanoTime);
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
@@ -221,7 +219,7 @@ public class WTFCircuitOperator {
 
         //then I need to join this new person in the room...
 
-        log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
+        log.debug("[WTFCircuitOperator] Member {} joining network {}", memberId, learningCircuitEntity.getCircuitName());
 
         LearningCircuitMemberEntity circuitMemberEntity = new LearningCircuitMemberEntity();
 
@@ -242,7 +240,7 @@ public class WTFCircuitOperator {
         MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
 
         if (memberStatusEntity != null && memberStatusEntity.getActiveCircuitId() != null) {
-            throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active circuit.");
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active network.");
         }
     }
 
@@ -345,10 +343,10 @@ public class WTFCircuitOperator {
                 circuitDto.setTags(tagsInput.getTags());
             }
 
-            String ownerName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
+            String ownerName = memberDetailsRetriever.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getOwnerId());
             circuitDto.setOwnerName(ownerName);
 
-            String moderatorName = memberDetailsService.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
+            String moderatorName = memberDetailsRetriever.lookupMemberName(circuitEntity.getOrganizationId(), circuitEntity.getModeratorId());
             circuitDto.setModeratorName(moderatorName);
         }
     }
@@ -373,7 +371,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Starting Retro for WTF network {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
@@ -430,7 +428,7 @@ public class WTFCircuitOperator {
 
     private void validateRetroNotAlreadyStarted(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getRetroRoomId() != null) {
-            throw new ConflictException(ConflictErrorCodes.RETRO_ALREADY_STARTED, "Retro already started for circuit: " + circuitName);
+            throw new ConflictException(ConflictErrorCodes.RETRO_ALREADY_STARTED, "Retro already started for network: " + circuitName);
         }
     }
 
@@ -479,11 +477,11 @@ public class WTFCircuitOperator {
     }
 
     private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
-        log.debug("[WTFCircuitOperator] validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
+        log.debug("[WTFCircuitOperator] validate org={}, member={}, network={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
         LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access network: " + circuit.getCircuitName());
         }
     }
 
@@ -499,7 +497,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Solving WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Solving WTF network {} at {}", circuitName, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_SOLVED);
 
@@ -548,7 +546,7 @@ public class WTFCircuitOperator {
 
     @Transactional
     void cancelWTFAndCommit(UUID organizationId, UUID ownerId, String circuitName, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
-        log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Cancel WTF network {} at {}", circuitName, nanoTime);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -578,7 +576,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Pause WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Pause WTF network {} at {}", circuitName, nanoTime);
         return pauseAndUpdateCircuitStatus(now, nanoTime, learningCircuitEntity);
     }
 
@@ -619,7 +617,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Resume WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Resume WTF network {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
@@ -657,7 +655,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Reopen WTF circuit {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Reopen WTF network {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
@@ -738,7 +736,7 @@ public class WTFCircuitOperator {
 
         if (circuitMember == null) {
 
-            log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, wtfCircuit.getCircuitName());
+            log.debug("[WTFCircuitOperator] Member {} joining network {}", memberId, wtfCircuit.getCircuitName());
 
             circuitMember = new LearningCircuitMemberEntity();
             circuitMember.setId(UUID.randomUUID());
@@ -864,7 +862,7 @@ public class WTFCircuitOperator {
         messageDto.setRequest(getRequestUriFromContext());
         messageDto.addMetaProp(TalkMessageMetaProp.FROM_MEMBER_ID, messageEntity.getFromId().toString());
 
-        MemberDetailsEntity memberDetails = memberDetailsService.lookupMemberDetails(messageEntity.getFromId());
+        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(messageEntity.getFromId());
 
         if (memberDetails != null) {
             messageDto.addMetaProp(TalkMessageMetaProp.FROM_USERNAME, memberDetails.getUsername());

@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.capability.active;
+package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.core.domain.member.OneTimeTicketEntity;
 import com.dreamscale.gridtime.core.domain.member.OneTimeTicketRepository;

@@ -2,13 +2,13 @@ package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.organization.TeamMemberDto;
-import com.dreamscale.gridtime.core.capability.operator.TeamCircuitOperator;
-import com.dreamscale.gridtime.core.capability.operator.WTFCircuitOperator;
+import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
+import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveWorkStatusRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberWorkStatusRepository;
-import com.dreamscale.gridtime.core.service.GridClock;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class ActiveWorkStatusManager {
     TeamMemberWorkStatusRepository teamMemberWorkStatusRepository;
 
     @Autowired
-    private MemberCapability memberCapability;
+    private MemberStatusManager memberStatusManager;
 
     @Autowired
     TeamCircuitOperator teamCircuitOperator;
@@ -64,7 +64,7 @@ public class ActiveWorkStatusManager {
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
-        TeamMemberDto memberStatus = memberCapability.getStatusOfMember(organizationId, memberId);
+        TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(organizationId, memberId);
 
         //TODO remove below hack because of cacheing issue
         LearningCircuitDto circuitDto = wtfCircuitOperator.getCircuit(organizationId,
@@ -97,7 +97,7 @@ public class ActiveWorkStatusManager {
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
 
-        TeamMemberDto memberStatus = memberCapability.getStatusOfMember(organizationId, memberId);
+        TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(organizationId, memberId);
 
         //pulls from the cached version for this session, TODO is there a way to fix this caching thing?
         memberStatus.setActiveCircuit(null);
@@ -124,7 +124,7 @@ public class ActiveWorkStatusManager {
 
         activeWorkStatusRepository.save(workStatus);
 
-        TeamMemberDto memberStatus = memberCapability.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
+        TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
 
         memberStatus.setActiveTaskId(activeIntention.getTaskId());
         memberStatus.setWorkingOn(activeIntention.getDescription());
@@ -134,7 +134,7 @@ public class ActiveWorkStatusManager {
 
     public void pushTeamMemberStatusUpdate(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
-        TeamMemberDto memberStatus = memberCapability.getStatusOfMember(organizationId, memberId);
+        TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(organizationId, memberId);
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 

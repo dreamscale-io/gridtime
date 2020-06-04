@@ -46,8 +46,6 @@ public class AdminResource {
         return new PingDto(LocalDateTime.now(), nowZone);
     }
 
-
-
     /**
      * Synchronize all Jira Projects for all organizations
      */

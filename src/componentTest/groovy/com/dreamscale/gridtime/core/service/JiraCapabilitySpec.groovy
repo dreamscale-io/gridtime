@@ -3,7 +3,7 @@ package com.dreamscale.gridtime.core.service
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.project.TaskInputDto
 import com.dreamscale.gridtime.client.OrganizationClient
-import com.dreamscale.gridtime.core.capability.integration.JiraCapability
+import com.dreamscale.gridtime.core.capability.external.JiraCapability
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.hooks.jira.JiraConnectionFactory
