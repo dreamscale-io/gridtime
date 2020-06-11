@@ -118,7 +118,7 @@ public class TeamProjectCapability {
 
     public UUID getOrganizationIdForTeamProject(UUID projectId) {
 
-        TeamProjectEntity projectEntity = teamProjectRepository.findOne(projectId);
+        ProjectEntity projectEntity = projectRepository.findOne(projectId);
 
         if (projectEntity == null) {
             throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Team project not found");
