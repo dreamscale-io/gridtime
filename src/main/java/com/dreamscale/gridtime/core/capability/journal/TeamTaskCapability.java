@@ -83,7 +83,11 @@ public class TeamTaskCapability {
             teamTask.setDescription(taskInputDto.getDescription());
 
             teamTaskRepository.save(teamTask);
+        }
 
+        TaskEntity oldTaskEntity = taskRepository.findByProjectIdAndName(projectId, standardizedTaskName);
+
+        if (oldTaskEntity == null) {
             TaskEntity orgTask = new TaskEntity();
             orgTask.setId(teamTask.getId());
             orgTask.setName(teamTask.getName());
@@ -103,7 +107,17 @@ public class TeamTaskCapability {
 
         TeamTaskEntity teamTask = teamTaskRepository.findOne(taskId);
 
-        return toDto(teamTask);
+        if (teamTask != null) {
+            return toDto(teamTask);
+        }
+
+        TaskEntity oldTask = taskRepository.findOne(taskId);
+
+        if (oldTask != null) {
+            return taskMapper.toApi(oldTask);
+        }
+
+        return null;
     }
 
 
