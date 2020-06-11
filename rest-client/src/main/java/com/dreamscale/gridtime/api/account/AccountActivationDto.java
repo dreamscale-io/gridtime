@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 public class AccountActivationDto {
 
     String email;
+    String username;
+
     String apiKey;
     String message;
     Status status;

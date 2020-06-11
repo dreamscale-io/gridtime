@@ -7,30 +7,25 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.UUID;
 
-public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
+public interface TeamProjectRepository extends CrudRepository<TeamProjectEntity, UUID> {
 
-    ProjectEntity findByExternalId(String externalId);
+    TeamProjectEntity findByTeamIdAndLowercaseName(UUID teamId, String projectName);
 
-    List<ProjectEntity> findByOrganizationId(UUID organizationId);
+    List<TeamProjectEntity> findByTeamId(UUID teamId);
 
-    ProjectEntity findByOrganizationIdAndName(UUID orgId, String name);
-
-    ProjectEntity findById(UUID id);
-
-    @Query(nativeQuery = true, value = "select p.* from project p, recent_project rp " +
+    @Query(nativeQuery = true, value = "select p.* from team_project p, recent_project rp " +
             "where p.id = rp.project_id " +
             "and rp.member_id=(:memberId) " +
             "order by rp.last_accessed desc ")
-    List<ProjectEntity> findByRecentMemberAccess(@Param("memberId") UUID memberId);
+    List<TeamProjectEntity> findByRecentMemberAccess(@Param("memberId") UUID memberId);
 
-    @Query(nativeQuery = true, value = "select p.* from project p where exists " +
+    @Query(nativeQuery = true, value = "select p.* from team_project p where exists " +
             "( select 1 from recent_project rp, team_member tm " +
             "where p.id = rp.project_id " +
             "and rp.member_id=tm.member_id " +
             "and tm.team_id = (:teamId) "+
             "and tm.organization_id = (:organizationId) "+
             "order by rp.last_accessed desc) limit 5" )
-    List<ProjectEntity> findByRecentTeamMemberAccess(@Param("organizationId") UUID organizationId,
+    List<TeamProjectEntity> findByRecentTeamMemberAccess(@Param("organizationId") UUID organizationId,
                                                      @Param("teamId") UUID teamId);
-
 }

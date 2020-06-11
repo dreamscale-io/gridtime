@@ -15,7 +15,11 @@ public class TaskDto {
 
     private UUID id;
     private String name;
+
+    @Deprecated
     private String summary;
+
+    private String description;
 
     private String externalId;
 

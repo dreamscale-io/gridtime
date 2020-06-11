@@ -80,6 +80,9 @@ public class TeamCapability {
     private static final String EVERYONE = "Everyone";
     private static final String LOWER_CASE_EVERYONE = "everyone";
 
+    private static final String ME_TEAM_PREFIX = "me-";
+
+
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<TeamDto, TeamEntity> teamOutputMapper;
@@ -129,7 +132,7 @@ public class TeamCapability {
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
-        teamCircuitOperator.createTeamCircuit(teamDto, memberId);
+        teamCircuitOperator.createTeamCircuit(now, teamDto, memberId);
 
         updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
 
@@ -139,7 +142,7 @@ public class TeamCapability {
     }
 
     @Transactional
-    public void createEveryoneTeam(UUID organizationId) {
+    public void createEveryoneTeam(LocalDateTime now, UUID organizationId) {
 
         TeamEntity teamEntity = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
 
@@ -150,12 +153,34 @@ public class TeamCapability {
         teamEntity.setOrganizationId(organizationId);
         teamEntity.setName(EVERYONE);
         teamEntity.setLowerCaseName(LOWER_CASE_EVERYONE);
-        teamEntity.setTeamType(TeamType.OPEN);
+        teamEntity.setTeamType(TeamType.EVERYONE);
         teamRepository.save(teamEntity);
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
-        teamCircuitOperator.createTeamCircuit(teamDto, null);
+        teamCircuitOperator.createTeamCircuit(now, teamDto, null);
+    }
+
+    public void createMeTeam(LocalDateTime now, UUID organizationId, UUID memberId) {
+
+        TeamEntity teamEntity = new TeamEntity();
+        teamEntity.setId(UUID.randomUUID());
+        teamEntity.setOrganizationId(organizationId);
+        teamEntity.setName(ME_TEAM_PREFIX + memberId);
+        teamEntity.setLowerCaseName(ME_TEAM_PREFIX + memberId);
+        teamEntity.setTeamType(TeamType.ME);
+        teamRepository.save(teamEntity);
+
+        TeamMemberEntity teamMemberEntity = new TeamMemberEntity();
+        teamMemberEntity.setId(UUID.randomUUID());
+        teamMemberEntity.setOrganizationId(organizationId);
+        teamMemberEntity.setTeamId(teamEntity.getId());
+        teamMemberEntity.setMemberId(memberId);
+        teamMemberEntity.setJoinDate(now);
+
+        teamMemberRepository.save(teamMemberEntity);
+
+        updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
     }
 
     @Transactional
@@ -178,14 +203,7 @@ public class TeamCapability {
 
         teamCircuitOperator.addMemberToTeamCircuit(now, organizationId, everyoneTeam.getId(), memberId);
 
-        TeamMemberHomeEntity memberHome = new TeamMemberHomeEntity();
-        memberHome.setId(UUID.randomUUID());
-        memberHome.setOrganizationId(organizationId);
-        memberHome.setMemberId(memberId);
-        memberHome.setHomeTeamId(everyoneTeam.getId());
-        memberHome.setLastModifiedDate(gridClock.now());
-
-        teamMemberHomeRepository.save(memberHome);
+        updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, everyoneTeam.getId());
 
     }
 
@@ -279,21 +297,40 @@ public class TeamCapability {
         return orgEntity;
     }
 
-    public List<TeamLinkDto> getLinksToAllTeams(UUID orgId) {
-        log.debug("getLinksToAllTeams : "+ orgId);
+    public List<TeamLinkDto> getLinksToAllOpenTeams(UUID orgId) {
+        log.debug("getLinksToAllOpenTeams : "+ orgId);
 
-        List<TeamEntity> teamEntityList = teamRepository.findByOrganizationId(orgId);
+        List<TeamEntity> teamEntityList = teamRepository.findOpenTeamsByOrganizationId(orgId);
 
         log.debug("results : "+ teamEntityList);
 
         return teamLinkOutputMapper.toApiList(teamEntityList);
     }
 
+    public TeamLinkDto getMyActiveTeamLink(UUID organizationId, UUID memberId) {
+        TeamEntity defaultTeam = getMyActiveTeamEntity(organizationId, memberId);
 
-    @Transactional
+        return teamLinkOutputMapper.toApi(defaultTeam);
+    }
+
     public TeamDto getMyActiveTeam(UUID orgId, UUID memberId) {
 
         //TODO okay, why is this returning null?
+        TeamEntity defaultTeam = getMyActiveTeamEntity(orgId, memberId);
+
+        TeamDto team = teamOutputMapper.toApi(defaultTeam);
+
+        fillTeamWithTeamMembers(team, memberId);
+
+        if (team != null) {
+            team.setHomeTeam(true);
+        }
+
+        return team;
+    }
+
+    @Transactional
+    TeamEntity getMyActiveTeamEntity(UUID orgId, UUID memberId) {
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(orgId, memberId);
 
         log.debug("Home Config?:: "+teamMemberHomeConfig);
@@ -320,16 +357,7 @@ public class TeamCapability {
 
             defaultTeam = teamRepository.findById(teamMemberHomeConfig.getHomeTeamId());
         }
-
-        TeamDto team = teamOutputMapper.toApi(defaultTeam);
-
-        fillTeamWithTeamMembers(team, memberId);
-
-        if (team != null) {
-            team.setHomeTeam(true);
-        }
-
-        return team;
+        return defaultTeam;
     }
 
 
@@ -410,20 +438,18 @@ public class TeamCapability {
     private void updateTeamMemberHomeIfFirstTeam(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
-        if (teamMemberHomeConfig == null) {
+        if (teamMemberHomeConfig != null) {
+            TeamEntity currentHomeTeam = teamRepository.findById(teamMemberHomeConfig.getHomeTeamId());
+
+            if (currentHomeTeam.getTeamType() == TeamType.ME || currentHomeTeam.getTeamType() == TeamType.EVERYONE) {
+                teamMemberHomeConfig.setHomeTeamId(teamId);
+                teamMemberHomeConfig.setLastModifiedDate(now);
+            }
+        } else {
             teamMemberHomeConfig = new TeamMemberHomeEntity();
             teamMemberHomeConfig.setId(UUID.randomUUID());
             teamMemberHomeConfig.setOrganizationId(organizationId);
             teamMemberHomeConfig.setMemberId(memberId);
-            teamMemberHomeConfig.setHomeTeamId(teamId);
-            teamMemberHomeConfig.setLastModifiedDate(now);
-        }
-
-        //everyone team doesn't exist in public scope, only private orgs, so sometimes this will be null
-        TeamEntity everyoneTeam = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, LOWER_CASE_EVERYONE);
-
-        //if I have a home config, but it's the everyone config, overide with this new one
-        if (everyoneTeam != null && teamMemberHomeConfig.getHomeTeamId().equals(everyoneTeam.getId())){
             teamMemberHomeConfig.setHomeTeamId(teamId);
             teamMemberHomeConfig.setLastModifiedDate(now);
         }

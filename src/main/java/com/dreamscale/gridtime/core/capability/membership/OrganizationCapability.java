@@ -122,7 +122,7 @@ public class OrganizationCapability {
 
         organizationRepository.save(organizationEntity);
 
-        teamCapability.createEveryoneTeam(organizationEntity.getId());
+        teamCapability.createEveryoneTeam(now, organizationEntity.getId());
 
         OrganizationSubscriptionEntity subscriptionEntity = new OrganizationSubscriptionEntity();
 

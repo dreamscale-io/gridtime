@@ -59,3 +59,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/refactor_user_name_to_username.sql
+
+  - include:
+        file: db/v007/create_journal_project_and_task.sql

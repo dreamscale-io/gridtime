@@ -401,14 +401,12 @@ class TeamResourceSpec extends Specification {
         return orgSubscription
     }
 
-
     private void switchUser(AccountActivationDto artyProfile) {
         RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());
 
         testUser.setId(account.getId())
         testUser.setApiKey(account.getApiKey())
     }
-
 
     AccountActivationDto registerWithInviteKey(String email, String invitationKey) {
 
@@ -417,7 +415,6 @@ class TeamResourceSpec extends Specification {
         rootAccountInput.setInvitationKey(invitationKey)
 
         UserProfileDto userProfile = accountClient.register(rootAccountInput)
-
 
         return accountClient.activate(new ActivationCodeDto(invitationKey))
     }

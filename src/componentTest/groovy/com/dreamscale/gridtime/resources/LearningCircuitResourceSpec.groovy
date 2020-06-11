@@ -425,7 +425,7 @@ class LearningCircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
-        2 * mockTimeService.now() >> time
+        1 * mockTimeService.now() >> time
         1 * mockTimeService.nanoTime() >> timeNano
 
         LearningCircuitDto circuit = circuitClient.startWTF()

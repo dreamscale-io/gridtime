@@ -54,7 +54,7 @@ public class TeamResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamCapability.getLinksToAllTeams(invokingMember.getOrganizationId());
+        return teamCapability.getLinksToAllOpenTeams(invokingMember.getOrganizationId());
     }
 
     /**

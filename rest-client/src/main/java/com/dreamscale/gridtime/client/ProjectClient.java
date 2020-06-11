@@ -20,7 +20,4 @@ public interface ProjectClient {
     @RequestLine("GET " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH + ResourcePaths.SEARCH_PATH + "/{startsWith}")
     List<TaskDto> findTasksStartingWith(@Param("id") String projectId, @Param("startsWith") String startsWith);
 
-    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.TASK_PATH)
-    TaskDto createNewTask(@Param("id") String projectId, TaskInputDto taskInputDto);
-
 }

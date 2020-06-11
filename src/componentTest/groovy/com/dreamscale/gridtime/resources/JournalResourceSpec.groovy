@@ -1,11 +1,23 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.account.AccountActivationDto
+import com.dreamscale.gridtime.api.account.ActivationCodeDto
+import com.dreamscale.gridtime.api.account.ConnectionStatusDto
+import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
+import com.dreamscale.gridtime.api.account.UserProfileDto
 import com.dreamscale.gridtime.api.journal.*
+import com.dreamscale.gridtime.api.project.CreateProjectInputDto
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto
+import com.dreamscale.gridtime.api.project.TaskDto
+import com.dreamscale.gridtime.api.team.TeamDto
+import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.JournalClient
+import com.dreamscale.gridtime.client.TeamClient
+import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.domain.active.RecentProjectRepository
 import com.dreamscale.gridtime.core.domain.active.RecentTaskRepository
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository
@@ -32,6 +44,12 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class JournalResourceSpec extends Specification {
+
+    @Autowired
+    AccountClient accountClient
+
+    @Autowired
+    TeamClient teamClient
 
     @Autowired
     JournalClient journalClient
@@ -67,28 +85,41 @@ class JournalResourceSpec extends Specification {
     @Autowired
     RootAccountEntity loggedInUser
 
+    @Autowired
+    EmailCapability mockEmailCapability
+
+
     def "should save new intention"() {
         given:
-        2 * mockGridClock.now() >> LocalDateTime.now()
-        1 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        rootAccountRepository.save(loggedInUser)
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        switchUser(artyProfile)
 
-        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
+        accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
 
         when:
-        JournalEntryDto journalEntry = createIntentionWithClient(intentionInputDto)
+
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto journalEntry = journalClient.createIntention(new IntentionInputDto("My Intention", project.getId(), task.getId()))
 
         then:
+        assert project != null
+        assert task != null
         assert journalEntry != null
+
         assert journalEntry.getId() != null
-        assert journalEntry.getTaskId() == intentionInputDto.getTaskId()
-        assert journalEntry.description == intentionInputDto.getDescription()
+        assert journalEntry.getTaskId() == task.getId()
+        assert journalEntry.getTaskName() == task.getName()
+        assert journalEntry.getTaskSummary() == task.getDescription()
+        assert journalEntry.getProjectName() == project.getName()
+        assert journalEntry.getDescription() == "My Intention"
         assert journalEntry.journalEntryType == JournalEntryType.Intention
         assert journalEntry.getMemberId() != null
         assert journalEntry.getUsername() != null
@@ -98,20 +129,26 @@ class JournalResourceSpec extends Specification {
 
     def "should update flame rating"() {
         given:
-        2 * mockGridClock.now() >> LocalDateTime.now()
-        1 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        rootAccountRepository.save(loggedInUser)
-        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
-        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
         int flameRating = 3;
 
+        JournalEntryDto intention = journalClient.createIntention(new IntentionInputDto("My Intention", project.getId(), task.getId()))
+
         when:
+
         JournalEntryDto result = journalClient.updateRetroFlameRating(intention.getId().toString(), new FlameRatingInputDto(flameRating));
 
         then:
@@ -123,16 +160,21 @@ class JournalResourceSpec extends Specification {
 
     def "should finish intention"() {
         given:
-        3 * mockGridClock.now() >> LocalDateTime.now()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        rootAccountRepository.save(loggedInUser)
-        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        IntentionInputDto intentionInputDto = aRandom.intentionInputDto().forTask(task).build()
-        JournalEntryDto intention = createIntentionWithClient(intentionInputDto)
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto intention = journalClient.createIntention(new IntentionInputDto("My Intention", project.getId(), task.getId()))
 
         when:
         JournalEntryDto result = journalClient.finishIntention(intention.getId().toString(), new IntentionFinishInputDto(FinishStatus.done));
@@ -146,20 +188,22 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions"() {
         given:
-        3 * mockGridClock.now() >> LocalDateTime.now()
-        2 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        rootAccountRepository.save(loggedInUser)
-        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
+        switchUser(artyProfile)
 
-        createIntentionWithClient(intention1)
-        createIntentionWithClient(intention2)
+        accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project.getId(), task.getId()))
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournal().recentIntentions
@@ -171,25 +215,23 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions with limit"() {
         given:
-        5 * mockGridClock.now() >> LocalDateTime.now()
-        4 * mockGridClock.nanoTime() >> System.nanoTime()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        rootAccountRepository.save(loggedInUser)
-        createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        switchUser(artyProfile)
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build()
+        accountClient.login()
 
+        TeamDto team = teamClient.createTeam("myteam")
 
-        createIntentionWithClient(intention1)
-        createIntentionWithClient(intention2)
-        createIntentionWithClient(intention3)
-        createIntentionWithClient(intention4)
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project.getId(), task.getId()))
+        JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project.getId(), task.getId()))
+        JournalEntryDto intention4 = journalClient.createIntention(new IntentionInputDto("My Intention 4", project.getId(), task.getId()))
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalWithLimit(3).recentIntentions
@@ -201,72 +243,70 @@ class JournalResourceSpec extends Specification {
 
     def "get historical intentions before date"() {
         given:
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
+        6 * mockGridClock.now() >>  LocalDateTime.now().minusDays(5)
 
-        rootAccountRepository.save(loggedInUser)
-        OrganizationMemberEntity membership = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task).build()
+        switchUser(artyProfile)
 
-        4 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
+        ConnectionStatusDto connection = accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        3 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
         3 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        journalClient.createIntention(intention1)
-        journalClient.createIntention(intention2)
-        journalClient.createIntention(intention3)
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project.getId(), task.getId()))
+        JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project.getId(), task.getId()))
 
         1 * mockGridClock.now() >> LocalDateTime.now()
         1 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        journalClient.createIntention(intention4)
+        JournalEntryDto intention4 = journalClient.createIntention(new IntentionInputDto("My Intention 4", project.getId(), task.getId()))
 
         String beforeDateStr = DateTimeAPITranslator.convertToString(LocalDateTime.now().minusDays(1))
 
         when:
-        List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(membership.getUsername(), beforeDateStr, 5)
+        List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(connection.getUsername(), beforeDateStr, 5)
 
         then:
         assert intentions != null
         assert intentions.size() == 3
     }
 
-
     def "get recent tasks summary"() {
         given:
-        5 * mockGridClock.now() >> LocalDateTime.now()
-        4 * mockGridClock.nanoTime() >> System.nanoTime()
 
-        OrganizationEntity organization = aRandom.organizationEntity().save()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(organization.getId()).save()
-        rootAccountRepository.save(loggedInUser)
+        mockGridClock.now() >> LocalDateTime.now()
 
-        createMembership(organization.getId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).save()
-        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).save()
+        switchUser(artyProfile)
 
-        TaskEntity task1 = aRandom.taskEntity().forProject(project1).save()
-        TaskEntity task2 = aRandom.taskEntity().forProject(project1).save()
-        TaskEntity task3 = aRandom.taskEntity().forProject(project2).save()
-        TaskEntity task4 = aRandom.taskEntity().forProject(project2).save()
+        accountClient.login()
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task1).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task2).build()
-        IntentionInputDto intention3 = aRandom.intentionInputDto().forTask(task3).build()
-        IntentionInputDto intention4 = aRandom.intentionInputDto().forTask(task4).build()
+        TeamDto team = teamClient.createTeam("myteam")
 
-        createIntentionWithClient(intention1)
-        createIntentionWithClient(intention2)
-        createIntentionWithClient(intention3)
-        createIntentionWithClient(intention4)
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description"))
+
+        TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+        TaskDto task2 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-112", "my task description"))
+        TaskDto task3 = journalClient.createTask(project2.getId().toString(), new CreateTaskInputDto("DS-113", "my task description"))
+        TaskDto task4 = journalClient.createTask(project2.getId().toString(), new CreateTaskInputDto("DS-114", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project1.getId(), task1.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project1.getId(), task2.getId()))
+        JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project2.getId(), task3.getId()))
+        JournalEntryDto intention4 = journalClient.createIntention(new IntentionInputDto("My Intention 4", project2.getId(), task4.getId()))
 
         when:
 
-        RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentTaskReferencesSummary();
+        RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentProjectsAndTasks();
 
         then:
         assert recentTasksSummary != null
@@ -275,38 +315,36 @@ class JournalResourceSpec extends Specification {
         ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0)
         ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1)
 
-        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 2
-        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 2
+        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3
+        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 3
 
     }
 
     def "create a new task reference in the journal"() {
         given:
-        OrganizationEntity organization = aRandom.organizationEntity().build()
-        organizationRepository.save(organization)
+        mockGridClock.now() >> LocalDateTime.now()
 
-        rootAccountRepository.save(loggedInUser)
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(organization.getId()).save()
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        createMembership(organization.getId(), loggedInUser.getId(), teamEntity.getId());
+        switchUser(artyProfile)
 
-        ProjectEntity project1 = aRandom.projectEntity().forOrg(organization).build()
-        projectRepository.save(project1)
+        accountClient.login()
 
-        ProjectEntity project2 = aRandom.projectEntity().forOrg(organization).build()
-        projectRepository.save(project2)
+        TeamDto team = teamClient.createTeam("myteam")
 
-        TaskEntity task1 = aRandom.taskEntity().forProject(project1).build()
-        taskRepository.save(task1)
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description"))
 
-        TaskEntity task2 = aRandom.taskEntity().forProject(project1).build()
-        taskRepository.save(task2)
+        TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+        TaskDto task2 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-112", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project1.getId(), task1.getId()))
 
         TaskReferenceInputDto taskReferenceDto = new TaskReferenceInputDto()
-
         taskReferenceDto.setTaskName(task1.name)
 
         when:
+
         RecentTasksSummaryDto recentTasksSummary = journalClient.createTaskReference(taskReferenceDto);
 
         then:
@@ -318,34 +356,40 @@ class JournalResourceSpec extends Specification {
         ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0);
         ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1);
 
-        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 2;
+        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3;
+        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 1;
 
     }
 
-
-
     def "get recent intentions for other member"() {
         given:
-        3 * mockGridClock.now() >> LocalDateTime.now()
-        2 * mockGridClock.nanoTime() >> System.nanoTime()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        TaskEntity task = createOrganizationAndTask()
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
-        rootAccountRepository.save(loggedInUser)
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        switchUser(artyProfile)
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
+        accountClient.login()
 
-        createIntentionWithClient(intention1)
-        createIntentionWithClient(intention2)
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+
+        TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project1.getId(), task1.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project1.getId(), task1.getId()))
 
         //change active logged in user to a different user within same organization
-        loggedInUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+        switchUser(zoeProfile)
+
+        teamClient.joinTeam("myteam")
+
+        accountClient.login()
 
         when:
-        List<JournalEntryDto> intentions = journalClient.getRecentJournalForUser(memberWithIntentions.getUsername()).recentIntentions
+        List<JournalEntryDto> intentions = journalClient.getRecentJournalForUser(artyProfile.getUsername()).recentIntentions
 
         then:
         assert intentions != null
@@ -354,28 +398,34 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions for other member with limit"() {
         given:
-        3 * mockGridClock.now() >> LocalDateTime.now()
-        2 * mockGridClock.nanoTime() >> System.nanoTime()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        TaskEntity task = createOrganizationAndTask()
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        switchUser(artyProfile)
 
-        TeamEntity teamEntity = aRandom.teamEntity().organizationId(task.getOrganizationId()).save()
-        rootAccountRepository.save(loggedInUser)
-        OrganizationMemberEntity memberWithIntentions = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+        accountClient.login()
 
-        IntentionInputDto intention1 = aRandom.intentionInputDto().forTask(task).build()
-        IntentionInputDto intention2 = aRandom.intentionInputDto().forTask(task).build()
+        TeamDto team = teamClient.createTeam("myteam")
 
-        createIntentionWithClient(intention1)
-        createIntentionWithClient(intention2)
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+
+        TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project1.getId(), task1.getId()))
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project1.getId(), task1.getId()))
 
         //change active logged in user to a different user within same organization
-        loggedInUser.setId(UUID.randomUUID())
-        OrganizationMemberEntity otherMember = createMembership(task.getOrganizationId(), loggedInUser.getId(), teamEntity.getId())
+
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+        switchUser(zoeProfile)
+
+        teamClient.joinTeam("myteam")
+
+        accountClient.login()
 
         when:
         List<JournalEntryDto> intentions = journalClient.getRecentJournalForUserWithLimit(
-                memberWithIntentions.getUsername(), 1).recentIntentions
+                artyProfile.getUsername(), 1).recentIntentions
 
         then:
         assert intentions != null
@@ -409,7 +459,29 @@ class JournalResourceSpec extends Specification {
                 .teamId(teamId)
                 .save()
 
+
+
         return member
+    }
+
+    private AccountActivationDto registerAndActivate(String email) {
+
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail(email)
+
+        String activationToken = null;
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { emailAddr, token -> activationToken = token; return null}
+
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
+        return accountClient.activate(new ActivationCodeDto(activationToken))
+    }
+
+    private void switchUser(AccountActivationDto artyProfile) {
+        RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());
+
+        loggedInUser.setId(account.getId())
+        loggedInUser.setApiKey(account.getApiKey())
     }
 
 }

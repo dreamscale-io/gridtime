@@ -29,9 +29,7 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}" + "?limit={limit}")
     RecentJournalDto getRecentJournalForUserWithLimit(@Param("username") String username, @Param("limit") Integer limit);
 
-    //create shared team projects and tasks ... if we switch home teams, what happens to the journal?
-    //
-    // Journal stays decoupled, but project list, and task list, recents are coupled to recent for the team?  Or is recent global?
+    //create journal projects and tasks and retrieve recent
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     ProjectDto createProject(CreateProjectInputDto createProjectInputDto);
@@ -39,11 +37,10 @@ public interface JournalClient {
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH)
     TaskDto createTask(@Param("projectId") String projectId, CreateTaskInputDto taskInputDto);
 
-    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + ResourcePaths.RECENT_PATH)
+    @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     RecentTasksSummaryDto getRecentProjectsAndTasks();
 
-
-    //change stuff
+    //create and annotate intentions
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(IntentionInputDto chunkEvent);
@@ -55,6 +52,7 @@ public interface JournalClient {
     @RequestLine("POST " +ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH +
             ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
     JournalEntryDto finishIntention(@Param("id") String id, IntentionFinishInputDto intentionFinishInputDto);
+
 
     //for paging history
 
@@ -69,12 +67,13 @@ public interface JournalClient {
                                                                   @Param("beforeDate") String beforeDateStr, @Param("limit") Integer limit);
 
 
+    //delete these, deprecated
 
-    //deprecated
-
+    @Deprecated
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksSummaryDto getRecentTaskReferencesSummary();
 
+    @Deprecated
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReference(TaskReferenceInputDto taskReferenceDto);
 

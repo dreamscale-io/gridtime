@@ -78,6 +78,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private InviteCapability inviteCapability;
 
     @Autowired
+    private TeamCapability teamCapability;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Transactional
@@ -94,13 +97,14 @@ public class RootAccountCapability implements RootAccountIdResolver {
         if (rootAccountCreationInput.getInvitationKey() != null) {
             OneTimeTicketEntity existingInvitation = oneTimeTicketCapability.findByTicketCode(rootAccountCreationInput.getInvitationKey());
 
-            if (existingInvitation == null || oneTimeTicketCapability.isExpired(now, existingInvitation)) {
-                throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation is invalid or expired.");
-            } else {
-                //this ticket now belongs to the registered account, instead of the person who initially issued the ticket on registration
+
+            validateTicketExistsAndNotExpired(now, existingInvitation);
+
+            if (TicketType.isInviteAndActivateType(existingInvitation.getTicketType()) ) {
                 existingInvitation.setOwnerId(newAccount.getId());
                 oneTimeTicketCapability.update(existingInvitation);
             }
+
         } else {
             OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
             emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
@@ -109,6 +113,11 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return toDto(newAccount, null);
     }
 
+    private void validateTicketExistsAndNotExpired(LocalDateTime now, OneTimeTicketEntity existingInvitation) {
+        if (existingInvitation == null || oneTimeTicketCapability.isExpired(now, existingInvitation)) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation is invalid or expired.");
+        }
+    }
 
     private void updatePassword(UUID rootAccountId, String password) {
         rootAccountRepository.updatePassword(rootAccountId, password);
@@ -132,11 +141,48 @@ public class RootAccountCapability implements RootAccountIdResolver {
         newAccount.setLastUpdated(now);
         newAccount.setEmailValidated(false);
 
-        rootAccountRepository.save(newAccount);
+        if (newAccount.getRootUsername() == null) {
+            String generatedUsername = "user" + createRandomExtension();
+
+            newAccount.setRootUsername(generatedUsername);
+            newAccount.setLowercaseRootUsername(generatedUsername);
+        }
+
+        newAccount = tryToSaveAndReserveUsername(newAccount);
 
         entityManager.flush();
 
         return newAccount;
+    }
+
+    private RootAccountEntity tryToSaveAndReserveUsername(RootAccountEntity newAccount) {
+
+        RootAccountEntity savedEntity = null;
+        int retryCounter = 3;
+
+        String requestedUsername = newAccount.getLowercaseRootUsername();
+
+        while (savedEntity == null & retryCounter > 0)
+            try {
+                savedEntity = rootAccountRepository.save(newAccount);
+            } catch (Exception ex) {
+
+                String randomExtension = createRandomExtension();
+                newAccount.setRootUsername(requestedUsername + randomExtension);
+                newAccount.setLowercaseRootUsername(requestedUsername + randomExtension);
+                retryCounter--;
+            }
+
+        if (savedEntity == null) {
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, "Unable to create account with requested username after 3 tries: " + requestedUsername);
+        }
+
+        return savedEntity;
+
+    }
+
+    private String createRandomExtension() {
+        return Long.toString(Math.round(Math.random() * 89999 + 10000));
     }
 
     @Transactional
@@ -207,13 +253,19 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 pubOrgMembership.setOrganizationId(publicOrg.getId());
                 pubOrgMembership.setRootAccountId(rootAccountEntity.getId());
                 pubOrgMembership.setEmail(rootAccountEntity.getRootEmail());
+                pubOrgMembership.setUsername(rootAccountEntity.getRootUsername());
+                pubOrgMembership.setLowercaseUsername(rootAccountEntity.getLowercaseRootUsername());
 
                 organizationMemberRepository.save(pubOrgMembership);
+
+                teamCapability.createMeTeam(now, publicOrg.getId(), pubOrgMembership.getId());
+
             }
 
-            inviteCapability.useInvitationKey(rootAccountEntity.getId(), activationCode);
+            inviteCapability.useInvitationKey(now, rootAccountEntity.getId(), activationCode);
 
             accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
+            accountActivationDto.setUsername(rootAccountEntity.getRootUsername());
             accountActivationDto.setApiKey(apiKey);
             accountActivationDto.setMessage("Your account has been successfully activated.");
             accountActivationDto.setStatus(Status.VALID);
@@ -255,6 +307,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         AccountActivationDto accountActivationDto = new AccountActivationDto();
 
         accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
+        accountActivationDto.setUsername(rootAccountEntity.getRootUsername());
         accountActivationDto.setApiKey(apiKey);
         accountActivationDto.setMessage("Your account keys have been successfully cycled.");
         accountActivationDto.setStatus(Status.SUCCESS);
@@ -286,22 +339,27 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
     public ConnectionStatusDto login(UUID rootAccountId) {
+        LocalDateTime now = gridClock.now();
 
         OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccountId);
 
-        return loginAsOrganizationMember(rootAccountId, membership);
+        return loginAsOrganizationMember(now, rootAccountId, membership);
     }
 
     public ConnectionStatusDto loginWithPassword(String username, String password) {
+        LocalDateTime now = gridClock.now();
+
         RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(username, password);
 
         OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccount.getId());
 
-        return loginAsOrganizationMember(rootAccount.getId(), membership);
+        return loginAsOrganizationMember(now, rootAccount.getId(), membership);
     }
 
 
     public ConnectionStatusDto loginToOrganizationWithPassword(String username, String password, UUID organizationId) {
+
+        LocalDateTime now = gridClock.now();
 
         RootAccountEntity rootAccount = loginAndFindAccountWithUserPassword(username, password);
 
@@ -309,7 +367,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccount.getId());
 
-        return loginAsOrganizationMember(rootAccount.getId(), membership);
+        return loginAsOrganizationMember(now, rootAccount.getId(), membership);
     }
 
 
@@ -334,13 +392,14 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public ConnectionStatusDto loginToOrganization(UUID rootAccountId, UUID organizationId) {
 
+        LocalDateTime now = gridClock.now();
+
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
 
-        return loginAsOrganizationMember(rootAccountId, membership);
+        return loginAsOrganizationMember(now, rootAccountId, membership);
     }
 
-    private ConnectionStatusDto loginAsOrganizationMember(UUID rootAccountId, OrganizationMemberEntity membership) {
-        LocalDateTime now = gridClock.now();
+    private ConnectionStatusDto loginAsOrganizationMember(LocalDateTime now, UUID rootAccountId, OrganizationMemberEntity membership) {
 
         validateMembershipExists(membership);
 
@@ -544,7 +603,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return userProfileDto;
     }
 
-    public UserProfileDto updateRootProfileUserName(UUID rootAccountId, String username) {
+    public UserProfileDto updateRootProfileUsername(UUID rootAccountId, String username) {
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
@@ -557,10 +616,20 @@ public class RootAccountCapability implements RootAccountIdResolver {
         try {
             rootAccountRepository.save(rootAccountEntity);
         } catch (Exception ex) {
-            String conflictMsg = "Conflict in changing account username from "+oldUserName+" to "+ username;
+            String conflictMsg = "Conflict in renaming account username from "+oldUserName+" to "+ username;
             log.warn(conflictMsg);
 
             throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
+        }
+
+        OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg();
+
+        OrganizationMemberEntity pubOrgMembership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(publicOrg.getId(), rootAccountEntity.getId());
+
+        if (pubOrgMembership != null) {
+            pubOrgMembership.setUsername(rootAccountEntity.getRootUsername());
+            pubOrgMembership.setLowercaseUsername(rootAccountEntity.getLowercaseRootUsername());
+            organizationMemberRepository.save(pubOrgMembership);
         }
 
         OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);

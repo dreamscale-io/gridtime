@@ -77,7 +77,7 @@ public class TeamCircuitOperator {
     private static final String TEAM_ROOM_DEFAULT_NAME = "home";
 
 
-    public UUID getMyTeamCircuitRoomId(UUID organizationId, UUID memberId) {
+    public UUID getMyTeamCircuitRoomId(LocalDateTime now, UUID organizationId, UUID memberId) {
 
         UUID teamCircuitRoomId = null;
 
@@ -87,7 +87,7 @@ public class TeamCircuitOperator {
             TeamCircuitEntity circuit = teamCircuitRepository.findByTeamId(teamDto.getId());
 
             if (circuit == null) {
-                circuit = createTeamCircuit(teamDto, memberId);
+                circuit = createTeamCircuit(now, teamDto, memberId);
             }
 
             teamCircuitRoomId = circuit.getTeamRoomId();
@@ -243,7 +243,7 @@ public class TeamCircuitOperator {
     private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
         String username = organizationMembership.getUsernameForMemberId(memberFromId);
 
-        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
+        UUID teamRoomId = getMyTeamCircuitRoomId(now, organizationId, memberFromId);
 
         TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
 
@@ -279,7 +279,7 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, TeamMemberDto memberStatusDto) {
 
-        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, memberFromId);
+        UUID teamRoomId = getMyTeamCircuitRoomId(now, organizationId, memberFromId);
 
         if (teamRoomId != null) {
             TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
@@ -308,7 +308,7 @@ public class TeamCircuitOperator {
         String username = organizationMembership.getUsernameForMemberId(forMemberId);
         XPStatusUpdateDto xpStatusUpdateDto = new XPStatusUpdateDto(username, forMemberId, oldXPSummary, newXPSummary);
 
-        UUID teamRoomId = getMyTeamCircuitRoomId(organizationId, fromMemberId);
+        UUID teamRoomId = getMyTeamCircuitRoomId(now, organizationId, fromMemberId);
 
         TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
 
@@ -595,7 +595,7 @@ public class TeamCircuitOperator {
     }
 
 
-    public TeamCircuitEntity createTeamCircuit(TeamDto team, UUID ownerId) {
+    public TeamCircuitEntity createTeamCircuit(LocalDateTime now, TeamDto team, UUID ownerId) {
         TalkRoomEntity defaultTalkRoom = new TalkRoomEntity();
         defaultTalkRoom.setId(UUID.randomUUID());
         defaultTalkRoom.setOrganizationId(team.getOrganizationId());
@@ -613,8 +613,6 @@ public class TeamCircuitOperator {
         teamCircuitEntity.setModeratorId(ownerId);
 
         teamCircuitRepository.save(teamCircuitEntity);
-
-        LocalDateTime now = gridClock.now();
 
         TalkRoomMemberEntity talkRoomMember = new TalkRoomMemberEntity();
         talkRoomMember.setId(UUID.randomUUID());

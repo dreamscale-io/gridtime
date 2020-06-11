@@ -85,7 +85,7 @@ class TalkToResourceSpec extends Specification {
 //        given:
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
-//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(testUser.getId()).save()
+//        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(loggedInUser.getId()).save()
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -120,7 +120,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-//        testUser.setId(member.getRootAccountId())
+//        loggedInUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -146,7 +146,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).save()
-//        testUser.setId(member.getRootAccountId())
+//        loggedInUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -174,7 +174,7 @@ class TalkToResourceSpec extends Specification {
 //        RootAccountEntity account = aRandom.rootAccountEntity().save()
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
-//        testUser.setId(member.getRootAccountId())
+//        loggedInUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");
@@ -204,7 +204,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        OrganizationEntity org = aRandom.organizationEntity().save()
 //        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
-//        testUser.setId(member.getRootAccountId())
+//        loggedInUser.setId(member.getRootAccountId())
 //
 //        CreateWTFCircleInputDto circleSessionInputDto = new CreateWTFCircleInputDto();
 //        circleSessionInputDto.setProblemDescription("Problem is this thing");

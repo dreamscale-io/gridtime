@@ -14,5 +14,5 @@ import java.util.UUID;
 public class CreateTaskInputDto {
 
     private String name;
-    private String summary;
+    private String description;
 }

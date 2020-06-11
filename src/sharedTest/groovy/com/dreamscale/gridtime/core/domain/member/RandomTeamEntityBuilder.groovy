@@ -16,6 +16,7 @@ class RandomTeamEntityBuilder extends TeamEntity.TeamEntityBuilder {
 				.lowerCaseName(name.toLowerCase())
 				.organizationId(aRandom.uuid())
 				.creatorId(aRandom.uuid())
+				.teamType(TeamType.OPEN)
 	}
 
 	TeamEntity save() {

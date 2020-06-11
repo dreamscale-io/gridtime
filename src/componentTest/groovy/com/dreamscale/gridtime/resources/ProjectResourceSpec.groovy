@@ -1,11 +1,21 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.account.AccountActivationDto
+import com.dreamscale.gridtime.api.account.ActivationCodeDto
+import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
+import com.dreamscale.gridtime.api.account.UserProfileDto
+import com.dreamscale.gridtime.api.project.CreateProjectInputDto
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.TaskDto
 import com.dreamscale.gridtime.api.project.TaskInputDto
+import com.dreamscale.gridtime.client.AccountClient
+import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.ProjectClient
+import com.dreamscale.gridtime.core.capability.external.EmailCapability
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
@@ -13,11 +23,14 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository
 import com.dreamscale.gridtime.core.domain.journal.TaskRepository
+import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto
 import com.dreamscale.gridtime.core.capability.external.JiraCapability
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+
+import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
@@ -25,7 +38,13 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 class ProjectResourceSpec extends Specification {
 
     @Autowired
+    AccountClient accountClient
+
+    @Autowired
     ProjectClient projectClient
+
+    @Autowired
+    JournalClient journalClient
 
     @Autowired
     OrganizationClient organizationClient
@@ -45,37 +64,61 @@ class ProjectResourceSpec extends Specification {
     JiraCapability mockJiraService
 
     @Autowired
-    RootAccountEntity testUser
+    RootAccountRepository rootAccountRepository;
+
+    @Autowired
+    RootAccountEntity loggedInUser
+
+    @Autowired
+    EmailCapability mockEmailCapability
+
+    @Autowired
+    GridClock mockGridClock
 
     def "should retrieve project list"() {
         given:
-        OrganizationEntity org = createOrgAndTestUserMembership()
 
-        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(org).save()
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
+        ProjectDto proj2 = journalClient.createProject(new CreateProjectInputDto("proj2", "desc"))
 
         when:
         List<ProjectDto> projects = projectClient.getProjects()
 
         then:
-        assert projects.size() == 1
-        assert projects[0].id == projectEntity.id
-        assert projects[0].name == projectEntity.name
-        assert projects[0].externalId == projectEntity.externalId
+        assert projects.size() == 2
+        assert projects[0].id == proj1.id
+        assert projects[0].name == proj1.name
+        assert projects[0].externalId == proj1.externalId
     }
 
     def "should find tasks starting with search string"() {
         given:
-        OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
 
-        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(organizationEntity).save()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-123").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-124").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-137").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-211").save()
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
+
+        TaskDto task1 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task2 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
+        TaskDto task3 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc"))
+        TaskDto task4 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc"))
 
         when:
-        List<TaskDto> tasks = projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-1")
+        List<TaskDto> tasks = projectClient.findTasksStartingWith(proj1.id.toString(), "FD-1")
 
         then:
         assert tasks.size() == 3
@@ -83,49 +126,45 @@ class ProjectResourceSpec extends Specification {
 
     def "should refuse to search when search string is too short"() {
         given:
-        OrganizationEntity organizationEntity = createOrgAndTestUserMembership()
+        mockGridClock.now() >> LocalDateTime.now()
 
-        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(organizationEntity).save()
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-123").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-124").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-227").save()
-        aRandom.taskEntity().forProjectAndName(projectEntity, "FD-211").save()
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
+
+        TaskDto task1 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task2 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
+        TaskDto task3 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc"))
+        TaskDto task4 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc"))
 
         when:
-        projectClient.findTasksStartingWith(projectEntity.id.toString(), "FD-")
+        projectClient.findTasksStartingWith(proj1.id.toString(), "FD-")
 
         then:
         thrown(BadRequestException)
     }
 
-    def "should create new task"() {
-        given:
+    private AccountActivationDto registerAndActivate(String email) {
 
-        OrganizationEntity org = createOrgAndTestUserMembership()
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail(email)
 
-        ProjectEntity projectEntity = aRandom.projectEntity().forOrg(org).save()
+        String activationToken = null;
 
-        JiraTaskDto newJiraTaskDto = aRandom.jiraTaskDto().build()
-        mockJiraService.createNewTask(_, _, _, _) >> newJiraTaskDto
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { emailAddr, token -> activationToken = token; return null}
 
-        TaskInputDto taskInputDto = new TaskInputDto(newJiraTaskDto.summary, "description!!")
-
-        when:
-        TaskDto task = projectClient.createNewTask(projectEntity.getId().toString(), taskInputDto)
-
-        then:
-        assert task != null
-        assert task.externalId != null
-        assert task.summary == newJiraTaskDto.summary
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
+        return accountClient.activate(new ActivationCodeDto(activationToken))
     }
 
-    private OrganizationEntity createOrgAndTestUserMembership() {
-        OrganizationEntity organization = aRandom.organizationEntity().save()
-        aRandom.memberEntity()
-                .forOrgAndAccount(organization, testUser)
-                .save()
-        return organization
-    }
+    private void switchUser(AccountActivationDto artyProfile) {
+        RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());
 
+        loggedInUser.setId(account.getId())
+        loggedInUser.setApiKey(account.getApiKey())
+    }
 }

@@ -35,8 +35,12 @@ public class InviteCapability {
 
 
     public InvitationKeyDto useInvitationKey(UUID rootAccountId, String invitationKey) {
-
         LocalDateTime now = gridClock.now();
+
+        return useInvitationKey(now, rootAccountId, invitationKey);
+    }
+
+    public InvitationKeyDto useInvitationKey(LocalDateTime now, UUID rootAccountId, String invitationKey) {
 
         OneTimeTicketEntity invitationTicket = oneTimeTicketCapability.findByTicketCode(invitationKey);
 

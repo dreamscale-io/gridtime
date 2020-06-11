@@ -17,7 +17,9 @@ public enum ConflictErrorCodes implements ErrorCodes {
     NO_SEATS_AVAILABLE(8, CONFLICT),
     CONFLICTING_ACTIVE_CIRCUIT(9, CONFLICT),
     ACCOUNT_ALREADY_ADDED(10, CONFLICT),
-    MEMBER_ALREADY_ADDED(11, CONFLICT);
+    MEMBER_ALREADY_ADDED(11, CONFLICT),
+    CONFLICTING_PROJECT_NAME(12, CONFLICT),
+    CONFLICTING_TASK_NAME(13, CONFLICT),;
 
     private int subcode;
     private ConflictErrorCodeGroups errorCodeGroup;

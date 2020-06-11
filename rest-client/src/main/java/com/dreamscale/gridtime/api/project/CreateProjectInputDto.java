@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateProjectInputDto {
     private String name;
+    private String description;
 }

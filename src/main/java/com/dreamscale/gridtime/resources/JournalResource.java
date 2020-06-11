@@ -33,8 +33,6 @@ public class JournalResource {
     @Autowired
     private OrganizationCapability organizationCapability;
 
-    @Autowired
-    private RecentActivityManager recentActivityManager;
 
     private static final Integer DEFAULT_LIMIT = 100;
 
@@ -43,9 +41,9 @@ public class JournalResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH )
-    JournalEntryDto createNewIntention(@RequestBody IntentionInputDto intentionInput) {
+    JournalEntryDto createIntention(@RequestBody IntentionInputDto intentionInput) {
         RequestContext context = RequestContext.get();
-        log.info("createNewIntention, user={}", context.getRootAccountId());
+        log.info("createIntention, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -60,11 +58,11 @@ public class JournalResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return journalCapability.createProject(invokingMember.getOrganizationId(), invokingMember.getId(), projectInputDto.getName());
+        return journalCapability.findOrCreateTeamProject(invokingMember.getOrganizationId(), invokingMember.getId(), projectInputDto);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH  )
+    @PostMapping(ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH )
     TaskDto createTask(@PathVariable("projectId") String projectIdStr, @RequestBody CreateTaskInputDto taskInputDto) {
 
         RequestContext context = RequestContext.get();
@@ -74,24 +72,23 @@ public class JournalResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return journalCapability.createTask(invokingMember.getOrganizationId(), invokingMember.getId(), projectId, taskInputDto);
+        return journalCapability.findOrCreateTeamTask(invokingMember.getOrganizationId(), invokingMember.getId(), projectId, taskInputDto);
     }
 
     /**
-     * Gets an overview of all the recent projects and tasks used in the journal
+     * Gets an overview of the most recent project and task references used in the journal for the dropdown
      */
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.ME_PATH + ResourcePaths.RECENT_PATH)
+    @GetMapping(ResourcePaths.PROJECT_PATH)
     RecentTasksSummaryDto getRecentProjectsAndTasks() {
         RequestContext context = RequestContext.get();
         log.info("getRecentProjectsAndTasks, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return recentActivityManager.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
+        return journalCapability.getRecentProjectsAndTasks(memberEntity.getOrganizationId(), memberEntity.getId());
     }
-
 
     /**
      * Annotate the Intention with a flame rating
@@ -205,6 +202,7 @@ public class JournalResource {
      * in a summary
      */
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH)
     RecentTasksSummaryDto createTaskReferenceInJournal(@RequestBody TaskReferenceInputDto taskReference) {
@@ -212,17 +210,26 @@ public class JournalResource {
         RequestContext context = RequestContext.get();
         log.info("createTaskReferenceInJournal, user={}", context.getRootAccountId());
 
-        OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return recentActivityManager.createTaskReferenceInJournal(memberEntity.getOrganizationId(), memberEntity.getId(), taskReference.getTaskName());
+        UUID projectId = journalCapability.getLastActiveProjectId(invokingMember.getOrganizationId(), invokingMember.getId());
+
+        if (projectId == null) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Unable to find last active project to associate this task with, which is a hack, this API is deprecated. ");
+        }
+
+        TaskDto task = journalCapability.findOrCreateTeamTask(invokingMember.getOrganizationId(), invokingMember.getId(),
+                projectId, new CreateTaskInputDto(taskReference.getTaskName(), null));
+
+        return journalCapability.getRecentProjectsAndTasks(invokingMember.getOrganizationId(), invokingMember.getId());
     }
-
 
     /**
      * Gets a mapping of all the projects and tasks recently used by the user.  By creating Intentions against
      * a project/task combination, the recent lists are automatically updated
      */
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.ME_PATH + ResourcePaths.TASKREF_PATH + ResourcePaths.RECENT_PATH)
     RecentTasksSummaryDto getRecentTaskReferencesSummary() {
@@ -231,7 +238,7 @@ public class JournalResource {
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return recentActivityManager.getRecentTasksByProject(memberEntity.getOrganizationId(), memberEntity.getId());
+        return journalCapability.getRecentProjectsAndTasks(memberEntity.getOrganizationId(), memberEntity.getId());
     }
 
 

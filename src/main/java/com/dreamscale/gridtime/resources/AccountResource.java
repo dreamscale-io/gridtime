@@ -268,7 +268,7 @@ public class AccountResource {
         RequestContext context = RequestContext.get();
         log.info("updateRootProfileUsername, user={}", context.getRootAccountId());
 
-        return rootAccountCapability.updateRootProfileUserName(context.getRootAccountId(), usernameInputDto.getUsername());
+        return rootAccountCapability.updateRootProfileUsername(context.getRootAccountId(), usernameInputDto.getUsername());
     }
 
     /**
