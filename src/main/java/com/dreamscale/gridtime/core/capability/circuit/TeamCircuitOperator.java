@@ -226,6 +226,28 @@ public class TeamCircuitOperator {
         talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
     }
 
+    public void notifyTeamOfIntentionUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
+
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
+        TeamCircuitDto teamCircuit = getMyActiveTeamCircuit(organizationId, memberFromId);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_INTENTION_UPDATE);
+        messageEntity.setJsonBody(JSONTransformer.toJson(journalEntryDto));
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        String urn = ROOM_URN_PREFIX + teamCircuit.getDefaultRoom().getTalkRoomName();
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+
+        talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+    }
+
     public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
         CircuitMessageType messageType = CircuitMessageType.TEAM_WTF_STARTED;

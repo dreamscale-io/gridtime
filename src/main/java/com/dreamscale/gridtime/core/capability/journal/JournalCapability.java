@@ -195,13 +195,13 @@ public class JournalCapability {
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
         JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
 
-        teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
-
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, intentionEntity.getProjectId());
 
         TaskDto taskDto = teamTaskCapability.getTeamTask(intentionEntity.getTaskId());
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
+
+        teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
 
         return intentionEntity;
 
@@ -261,8 +261,10 @@ public class JournalCapability {
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
-
     public JournalEntryDto saveFlameRating(UUID organizationId, UUID memberId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
         IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
 
         validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
@@ -274,13 +276,22 @@ public class JournalCapability {
         }
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
 
-        return journalEntryOutputMapper.toApi(journalEntryEntity);
+        JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
+
+        teamCircuitOperator.notifyTeamOfIntentionUpdate(organizationId, memberId, now, nanoTime, journalEntryDto);
+
+        return journalEntryDto;
     }
 
     public JournalEntryDto finishIntention(UUID organizationId, UUID memberId, UUID intentionId) {
 
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
         JournalEntryDto myJournalEntry = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.done);
         updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.done);
+
+        teamCircuitOperator.notifyTeamOfIntentionUpdate(organizationId, memberId, now, nanoTime, myJournalEntry);
 
         return myJournalEntry;
     }

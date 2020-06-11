@@ -29,7 +29,7 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + "/{username}" + "?limit={limit}")
     RecentJournalDto getRecentJournalForUserWithLimit(@Param("username") String username, @Param("limit") Integer limit);
 
-    //create journal projects and tasks and retrieve recent
+    //create journal projects and tasks, and retrieve top 5 recent project/task list
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     ProjectDto createProject(CreateProjectInputDto createProjectInputDto);
@@ -40,7 +40,7 @@ public interface JournalClient {
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     RecentTasksSummaryDto getRecentProjectsAndTasks();
 
-    //create and annotate intentions
+    //create intentions and annotate
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH)
     JournalEntryDto createIntention(IntentionInputDto chunkEvent);
@@ -52,7 +52,6 @@ public interface JournalClient {
     @RequestLine("POST " +ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH +
             ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
     JournalEntryDto finishIntention(@Param("id") String id, IntentionFinishInputDto intentionFinishInputDto);
-
 
     //for paging history
 
