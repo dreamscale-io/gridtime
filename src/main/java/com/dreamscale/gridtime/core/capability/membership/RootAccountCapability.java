@@ -128,15 +128,12 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         validateNoExistingAccount(standardizedEmail, existingRootAccount);
 
-        String displayName = ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), standardizedEmail);
-
         RootAccountEntity newAccount = new RootAccountEntity();
         newAccount.setId(UUID.randomUUID());
         newAccount.setRootEmail(standardizedEmail);
         newAccount.setRootUsername(rootAccountInput.getUsername());
         newAccount.setLowercaseRootUsername(standarizeToLowerCase(rootAccountInput.getUsername()));
         newAccount.setFullName(rootAccountInput.getFullName());
-        newAccount.setDisplayName(displayName);
         newAccount.setRegistrationDate(now);
         newAccount.setLastUpdated(now);
         newAccount.setEmailValidated(false);
@@ -149,6 +146,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
 
         newAccount = tryToSaveAndReserveUsername(newAccount);
+
+        newAccount.setDisplayName(ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), newAccount.getRootUsername()));
+
+        rootAccountRepository.save(newAccount);
 
         entityManager.flush();
 

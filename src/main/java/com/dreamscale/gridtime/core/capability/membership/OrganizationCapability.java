@@ -411,6 +411,8 @@ public class OrganizationCapability {
 
         validateAvailableSeat(subscription);
 
+        RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
+
         OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
 
         if (membership == null) {
@@ -433,6 +435,8 @@ public class OrganizationCapability {
             membership.setId(UUID.randomUUID());
             membership.setOrganizationId(organizationId);
             membership.setRootAccountId(rootAccountId);
+            membership.setUsername(rootAccount.getRootUsername());
+            membership.setLowercaseUsername(rootAccount.getLowercaseRootUsername());
             membership.setEmail(email);
 
             organizationMemberRepository.save(membership);
@@ -444,6 +448,13 @@ public class OrganizationCapability {
 
         return membership;
 
+    }
+
+    private String standardizeToLowercase(String name) {
+        if (name != null) {
+            return name.toLowerCase();
+        }
+        return null;
     }
 
     private OrganizationSubscriptionEntity reserveSeatForUpdate(UUID organizationId) {

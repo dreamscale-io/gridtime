@@ -165,7 +165,6 @@ public class TeamTaskCapability {
         return null;
     }
 
-
     public boolean isDefaultTask(TaskDto taskDto) {
         return taskDto != null && DEFAULT_TASK_NAME.equals(taskDto.getName());
     }
