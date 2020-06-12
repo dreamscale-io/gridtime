@@ -139,7 +139,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         newAccount.setEmailValidated(false);
 
         if (newAccount.getRootUsername() == null) {
-            String generatedUsername = "user" + createRandomExtension();
+            String generatedUsername = extractBaseUserFromEmail(standardizedEmail);
 
             newAccount.setRootUsername(generatedUsername);
             newAccount.setLowercaseRootUsername(generatedUsername);
@@ -148,12 +148,25 @@ public class RootAccountCapability implements RootAccountIdResolver {
         newAccount = tryToSaveAndReserveUsername(newAccount);
 
         newAccount.setDisplayName(ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), newAccount.getRootUsername()));
+        newAccount.setFullName(ObjectUtils.firstNonNull(rootAccountInput.getFullName(), newAccount.getRootUsername()));
 
         rootAccountRepository.save(newAccount);
 
         entityManager.flush();
 
         return newAccount;
+    }
+
+    private String extractBaseUserFromEmail(String standardizedEmail) {
+        String user = "user";
+
+        try {
+            user = standardizedEmail.substring(0, standardizedEmail.indexOf('@'));;
+        } catch (Exception ex) {
+            log.warn ("Unable to parse name from email: "+ standardizedEmail);
+        }
+
+        return user;
     }
 
     private RootAccountEntity tryToSaveAndReserveUsername(RootAccountEntity newAccount) {
@@ -245,6 +258,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
                 rootAccountEntity = tryToSaveAndReserveUsername(rootAccountEntity);
                 rootAccountEntity.setDisplayName(rootAccountEntity.getRootUsername());
+                rootAccountEntity.setFullName(rootAccountEntity.getRootUsername());
 
                 rootAccountRepository.save(rootAccountEntity);
             } else {

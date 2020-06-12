@@ -86,7 +86,7 @@ public class EmailCapability {
             request.body = mail.build();
             Response response = sg.api(request);
 
-            if (response.statusCode == 200) {
+            if (isEmailSuccessStatus(response.statusCode)) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
                 responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
@@ -132,7 +132,7 @@ public class EmailCapability {
             request.body = mail.build();
             Response response = sg.api(request);
 
-            if (response.statusCode == 200) {
+            if (isEmailSuccessStatus(response.statusCode)) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
                 responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
@@ -144,6 +144,10 @@ public class EmailCapability {
         }
 
         return responseDto;
+    }
+
+    private boolean isEmailSuccessStatus(int statusCode) {
+        return statusCode == 200 || statusCode == 202;
     }
 
 
@@ -180,7 +184,7 @@ public class EmailCapability {
             request.body = mail.build();
             Response response = sg.api(request);
 
-            if (response.statusCode == 200) {
+            if (isEmailSuccessStatus(response.statusCode)) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
                 responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.statusCode + ":" + response.body);
@@ -236,7 +240,7 @@ public class EmailCapability {
             request.body = mail.build();
             Response response = sg.api(request);
 
-            if (response.statusCode == 200) {
+            if (isEmailSuccessStatus(response.statusCode)) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
                 responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
@@ -284,7 +288,7 @@ public class EmailCapability {
             request.body = mail.build();
             Response response = sg.api(request);
 
-            if (response.statusCode == 200) {
+            if (isEmailSuccessStatus(response.statusCode)) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
                 responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
