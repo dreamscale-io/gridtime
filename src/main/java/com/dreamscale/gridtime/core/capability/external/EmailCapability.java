@@ -183,7 +183,7 @@ public class EmailCapability {
             if (response.statusCode == 200) {
                 responseDto = new SimpleStatusDto(Status.VALID, "Email sent successfully.");
             } else {
-                responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.body);
+                responseDto = new SimpleStatusDto(Status.FAILED, "Unable to send email to "+toEmailAddress +":" + response.statusCode + ":" + response.body);
             }
         } catch (IOException ex) {
             responseDto = new SimpleStatusDto(Status.FAILED, ex.getMessage());

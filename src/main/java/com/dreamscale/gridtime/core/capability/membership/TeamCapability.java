@@ -134,7 +134,11 @@ public class TeamCapability {
 
         teamCircuitOperator.createTeamCircuit(now, teamDto, memberId);
 
-        updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
+        UUID homeTeamId = updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
+
+        if (homeTeamId.equals(teamDto.getId())) {
+            teamDto.setHomeTeam(true);
+        }
 
         fillTeamWithTeamMembers(teamDto, memberId);
 
@@ -435,7 +439,7 @@ public class TeamCapability {
         teamMemberHomeRepository.save(teamMemberHomeConfig);
     }
 
-    private void updateTeamMemberHomeIfFirstTeam(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
+    private UUID updateTeamMemberHomeIfFirstTeam(LocalDateTime now, UUID organizationId, UUID memberId, UUID teamId) {
         TeamMemberHomeEntity teamMemberHomeConfig = teamMemberHomeRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
         if (teamMemberHomeConfig != null) {
@@ -455,6 +459,8 @@ public class TeamCapability {
         }
 
         teamMemberHomeRepository.save(teamMemberHomeConfig);
+
+        return teamMemberHomeConfig.getHomeTeamId();
     }
 
 

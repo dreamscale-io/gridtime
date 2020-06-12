@@ -239,6 +239,13 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 rootAccountEntity.setActivationDate(now);
                 rootAccountEntity.setEmailValidated(true);
 
+                String generatedUsername = "user" + createRandomExtension();
+                rootAccountEntity.setRootUsername(generatedUsername);
+                rootAccountEntity.setLowercaseRootUsername(generatedUsername);
+
+                rootAccountEntity = tryToSaveAndReserveUsername(rootAccountEntity);
+                rootAccountEntity.setDisplayName(rootAccountEntity.getRootUsername());
+
                 rootAccountRepository.save(rootAccountEntity);
             } else {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_TICKET_TYPE, "Invalid ticket type for activation.");
@@ -736,7 +743,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
-    public UserProfileDto updateOrgProfileUserName(UUID rootAccountId, String username) {
+    public UserProfileDto updateOrgProfileUsername(UUID rootAccountId, String username) {
 
         RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 

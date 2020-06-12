@@ -284,7 +284,7 @@ public class AccountResource {
 
         log.info("updateOrgProfileUsername, user={}", context.getRootAccountId());
 
-        return rootAccountCapability.updateOrgProfileUserName(context.getRootAccountId(), usernameInputDto.getUsername());
+        return rootAccountCapability.updateOrgProfileUsername(context.getRootAccountId(), usernameInputDto.getUsername());
     }
 
     /**
