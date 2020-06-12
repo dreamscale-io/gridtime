@@ -94,109 +94,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         updatePassword(newAccount.getId(), password);
 
-        if (rootAccountCreationInput.getInvitationKey() != null) {
-            OneTimeTicketEntity existingInvitation = oneTimeTicketCapability.findByTicketCode(rootAccountCreationInput.getInvitationKey());
-
-
-            validateTicketExistsAndNotExpired(now, existingInvitation);
-
-            if (TicketType.isInviteAndActivateType(existingInvitation.getTicketType()) ) {
-                existingInvitation.setOwnerId(newAccount.getId());
-                oneTimeTicketCapability.update(existingInvitation);
-            }
-
-        } else {
-            OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
-            emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
-        }
+        OneTimeTicketEntity oneTimeActivationTicket = oneTimeTicketCapability.issueOneTimeActivationTicket(now, newAccount.getId());
+        emailCapability.sendDownloadAndActivationEmail(standardizedEmail, oneTimeActivationTicket.getTicketCode());
 
         return toDto(newAccount, null);
-    }
-
-    private void validateTicketExistsAndNotExpired(LocalDateTime now, OneTimeTicketEntity existingInvitation) {
-        if (existingInvitation == null || oneTimeTicketCapability.isExpired(now, existingInvitation)) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation is invalid or expired.");
-        }
-    }
-
-    private void updatePassword(UUID rootAccountId, String password) {
-        rootAccountRepository.updatePassword(rootAccountId, password);
-    }
-
-    private RootAccountEntity createAccountAndFlush(LocalDateTime now, String standardizedEmail, RootAccountCredentialsInputDto rootAccountInput) {
-        RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
-
-        validateNoExistingAccount(standardizedEmail, existingRootAccount);
-
-        RootAccountEntity newAccount = new RootAccountEntity();
-        newAccount.setId(UUID.randomUUID());
-        newAccount.setRootEmail(standardizedEmail);
-        newAccount.setRootUsername(rootAccountInput.getUsername());
-        newAccount.setLowercaseRootUsername(standarizeToLowerCase(rootAccountInput.getUsername()));
-        newAccount.setFullName(rootAccountInput.getFullName());
-        newAccount.setRegistrationDate(now);
-        newAccount.setLastUpdated(now);
-        newAccount.setEmailValidated(false);
-
-        if (newAccount.getRootUsername() == null) {
-            String generatedUsername = extractBaseUserFromEmail(standardizedEmail);
-
-            newAccount.setRootUsername(generatedUsername);
-            newAccount.setLowercaseRootUsername(generatedUsername);
-        }
-
-        newAccount = tryToSaveAndReserveUsername(newAccount);
-
-        newAccount.setDisplayName(ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), newAccount.getRootUsername()));
-        newAccount.setFullName(ObjectUtils.firstNonNull(rootAccountInput.getFullName(), newAccount.getRootUsername()));
-
-        rootAccountRepository.save(newAccount);
-
-        entityManager.flush();
-
-        return newAccount;
-    }
-
-    private String extractBaseUserFromEmail(String standardizedEmail) {
-        String user = "user";
-
-        try {
-            user = standardizedEmail.substring(0, standardizedEmail.indexOf('@'));;
-        } catch (Exception ex) {
-            log.warn ("Unable to parse name from email: "+ standardizedEmail);
-        }
-
-        return user;
-    }
-
-    private RootAccountEntity tryToSaveAndReserveUsername(RootAccountEntity newAccount) {
-
-        RootAccountEntity savedEntity = null;
-        int retryCounter = 3;
-
-        String requestedUsername = newAccount.getLowercaseRootUsername();
-
-        while (savedEntity == null & retryCounter > 0)
-            try {
-                savedEntity = rootAccountRepository.save(newAccount);
-            } catch (Exception ex) {
-
-                String randomExtension = createRandomExtension();
-                newAccount.setRootUsername(requestedUsername + randomExtension);
-                newAccount.setLowercaseRootUsername(requestedUsername + randomExtension);
-                retryCounter--;
-            }
-
-        if (savedEntity == null) {
-            throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, "Unable to create account with requested username after 3 tries: " + requestedUsername);
-        }
-
-        return savedEntity;
-
-    }
-
-    private String createRandomExtension() {
-        return Long.toString(Math.round(Math.random() * 89999 + 10000));
     }
 
     @Transactional
@@ -252,7 +153,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 rootAccountEntity.setActivationDate(now);
                 rootAccountEntity.setEmailValidated(true);
 
-                String generatedUsername = "user" + createRandomExtension();
+                String generatedUsername = extractBaseUserFromEmail(invitedEmail);
+
                 rootAccountEntity.setRootUsername(generatedUsername);
                 rootAccountEntity.setLowercaseRootUsername(generatedUsername);
 
@@ -335,7 +237,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
         accountActivationDto.setStatus(Status.SUCCESS);
 
         return accountActivationDto;
-
     }
 
 
@@ -492,7 +393,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     private void validateMembershipExists(OrganizationMemberEntity membership) {
         if (membership == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Unable to find org membership for account." );
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Unable to find org membership for account.");
         }
     }
 
@@ -638,7 +539,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         try {
             rootAccountRepository.save(rootAccountEntity);
         } catch (Exception ex) {
-            String conflictMsg = "Conflict in renaming account username from "+oldUserName+" to "+ username;
+            String conflictMsg = "Conflict in renaming account username from " + oldUserName + " to " + username;
             log.warn(conflictMsg);
 
             throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
@@ -773,7 +674,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             try {
                 organizationMemberRepository.save(activeMembership);
             } catch (Exception ex) {
-                String conflictMsg = "Conflict in changing org member username from "+oldUserName+" to "+ username;
+                String conflictMsg = "Conflict in changing org member username from " + oldUserName + " to " + username;
                 log.warn(conflictMsg);
 
                 throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
@@ -851,5 +752,94 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
 
+    private void validateTicketExistsAndNotExpired(LocalDateTime now, OneTimeTicketEntity existingInvitation) {
+        if (existingInvitation == null || oneTimeTicketCapability.isExpired(now, existingInvitation)) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_OR_EXPIRED_INVITATION_KEY, "Invitation is invalid or expired.");
+        }
+    }
+
+    private void updatePassword(UUID rootAccountId, String password) {
+        rootAccountRepository.updatePassword(rootAccountId, password);
+    }
+
+    private RootAccountEntity createAccountAndFlush(LocalDateTime now, String standardizedEmail, RootAccountCredentialsInputDto rootAccountInput) {
+        RootAccountEntity existingRootAccount = rootAccountRepository.findByRootEmail(standardizedEmail);
+
+        validateNoExistingAccount(standardizedEmail, existingRootAccount);
+
+        RootAccountEntity newAccount = new RootAccountEntity();
+        newAccount.setId(UUID.randomUUID());
+        newAccount.setRootEmail(standardizedEmail);
+        newAccount.setRootUsername(rootAccountInput.getUsername());
+        newAccount.setLowercaseRootUsername(standarizeToLowerCase(rootAccountInput.getUsername()));
+        newAccount.setFullName(rootAccountInput.getFullName());
+        newAccount.setRegistrationDate(now);
+        newAccount.setLastUpdated(now);
+        newAccount.setEmailValidated(false);
+
+        if (newAccount.getRootUsername() == null) {
+            String generatedUsername = extractBaseUserFromEmail(standardizedEmail);
+
+            newAccount.setRootUsername(generatedUsername);
+            newAccount.setLowercaseRootUsername(generatedUsername);
+        }
+
+        newAccount = tryToSaveAndReserveUsername(newAccount);
+
+        newAccount.setDisplayName(ObjectUtils.firstNonNull(rootAccountInput.getDisplayName(), rootAccountInput.getFullName(), newAccount.getRootUsername()));
+        newAccount.setFullName(ObjectUtils.firstNonNull(rootAccountInput.getFullName(), newAccount.getRootUsername()));
+
+        rootAccountRepository.save(newAccount);
+
+        entityManager.flush();
+
+        return newAccount;
+    }
+
+    private String extractBaseUserFromEmail(String standardizedEmail) {
+        String user = "user";
+
+        try {
+            user = standardizedEmail.substring(0, standardizedEmail.indexOf('@'));
+            ;
+        } catch (Exception ex) {
+            log.warn("Unable to parse name from email: " + standardizedEmail);
+        }
+
+        return user;
+    }
+
+    private RootAccountEntity tryToSaveAndReserveUsername(RootAccountEntity newAccount) {
+
+        RootAccountEntity savedEntity = null;
+        int retryCounter = 3;
+
+        String requestedUsername = newAccount.getLowercaseRootUsername();
+
+        while (savedEntity == null & retryCounter > 0) {
+
+            RootAccountEntity existingUser = rootAccountRepository.findByLowercaseRootUsername(newAccount.getLowercaseRootUsername());
+
+            if (existingUser == null) {
+                savedEntity = rootAccountRepository.save(newAccount);
+            } else {
+                String randomExtension = createRandomExtension();
+                newAccount.setRootUsername(requestedUsername + randomExtension);
+                newAccount.setLowercaseRootUsername(requestedUsername + randomExtension);
+                retryCounter--;
+            }
+        }
+
+        if (savedEntity == null) {
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, "Unable to create account with requested username after 3 tries: " + requestedUsername);
+        }
+
+        return savedEntity;
+
+    }
+
+    private String createRandomExtension() {
+        return Long.toString(Math.round(Math.random() * 89999 + 10000));
+    }
 
 }

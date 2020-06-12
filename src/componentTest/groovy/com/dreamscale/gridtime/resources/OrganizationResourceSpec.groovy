@@ -247,7 +247,7 @@ class OrganizationResourceSpec extends Specification {
 
         String inviteKey = inviteToOrgWithEmail("zoe@dreamscale.io")
 
-        AccountActivationDto zoeProfile = registerWithInviteKey("zoe@personal.com", inviteKey);
+        AccountActivationDto zoeProfile = registerAndActivateWithInviteKey("zoe@personal.com", inviteKey);
 
         switchUser(zoeProfile)
 
@@ -447,14 +447,16 @@ class OrganizationResourceSpec extends Specification {
         return accountClient.activate(new ActivationCodeDto(activationToken))
     }
 
-    AccountActivationDto registerWithInviteKey(String email, String invitationKey) {
+    AccountActivationDto registerAndActivateWithInviteKey(String email, String invitationKey) {
 
         RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
         rootAccountInput.setEmail(email)
-        rootAccountInput.setInvitationKey(invitationKey)
+
+        String activationToken = null;
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { emailAddr, token -> activationToken = token; return null}
 
         UserProfileDto userProfile = accountClient.register(rootAccountInput)
-
 
         return accountClient.activate(new ActivationCodeDto(invitationKey))
     }

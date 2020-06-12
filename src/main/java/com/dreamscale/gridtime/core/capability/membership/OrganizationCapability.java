@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -75,6 +76,9 @@ public class OrganizationCapability {
 
     @Autowired
     private GridClock gridClock;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -439,7 +443,7 @@ public class OrganizationCapability {
             membership.setLowercaseUsername(rootAccount.getLowercaseRootUsername());
             membership.setEmail(email);
 
-            organizationMemberRepository.save(membership);
+            membership = tryToSaveAndReserveUsername(membership);
 
             teamCapability.addMemberToEveryone(organizationId, membership.getId());
         } else {
@@ -449,6 +453,41 @@ public class OrganizationCapability {
         return membership;
 
     }
+
+    private OrganizationMemberEntity tryToSaveAndReserveUsername(OrganizationMemberEntity membership) {
+
+
+        OrganizationMemberEntity savedEntity = null;
+        int retryCounter = 3;
+
+        String requestedUsername = membership.getLowercaseUsername();
+
+        while (savedEntity == null & retryCounter > 0) {
+
+            OrganizationMemberEntity existingUser = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(membership.getOrganizationId(), membership.getLowercaseUsername());
+
+            if (existingUser == null) {
+                savedEntity = organizationMemberRepository.save(membership);
+            } else {
+                String randomExtension = createRandomExtension();
+                membership.setUsername(requestedUsername + randomExtension);
+                membership.setLowercaseUsername(requestedUsername + randomExtension);
+                retryCounter--;
+            }
+        }
+
+        if (savedEntity == null) {
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, "Unable to create membership with requested username after 3 tries: " + requestedUsername);
+        }
+
+        return savedEntity;
+
+    }
+
+    private String createRandomExtension() {
+        return Long.toString(Math.round(Math.random() * 89999 + 10000));
+    }
+
 
     private String standardizeToLowercase(String name) {
         if (name != null) {
@@ -717,7 +756,9 @@ public class OrganizationCapability {
 
 
     public UUID getMemberIdForUser(UUID organizationId, String username) {
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
+
+        String lowercaseUsername = username.toLowerCase();
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(organizationId, lowercaseUsername);
 
         UUID memberId = null;
         if (membership != null) {

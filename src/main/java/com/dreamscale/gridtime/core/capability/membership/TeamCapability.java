@@ -475,7 +475,7 @@ public class TeamCapability {
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
 
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(organizationId, username);
 
         validateMemberFound(username, memberEntity);
 
@@ -503,7 +503,7 @@ public class TeamCapability {
 
         TeamDto activeTeam = getMyActiveTeam(organizationId, invokingMemberId);
 
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, standardizeForSearch(userToInvite));
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(organizationId, standardizeForSearch(userToInvite));
 
         validateMemberFound(userToInvite, membership);
 
@@ -631,6 +631,7 @@ public class TeamCapability {
     public TeamMemberOldDto removeMemberFromTeam(UUID organizationId, UUID invokingMemberId, String teamName, String username) {
 
         String standardizedTeamName = standardizeForSearch(teamName);
+        String standardizedUsername = standardizeForSearch(username);
 
         LocalDateTime now = gridClock.now();
 
@@ -640,10 +641,9 @@ public class TeamCapability {
 
         teamCircuitOperator.validateMemberIsOwnerOrModeratorOfTeam(organizationId, teamEntity.getId(), invokingMemberId);
 
-        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndUsername(organizationId, username);
+        OrganizationMemberEntity memberEntity = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(organizationId, standardizedUsername);
 
         validateMemberFound(username, memberEntity);
-
 
         return removeTeamMemberAndCreateTombstone(now, organizationId, teamEntity, memberEntity.getId());
     }

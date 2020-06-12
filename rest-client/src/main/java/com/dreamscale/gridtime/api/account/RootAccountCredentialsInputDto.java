@@ -16,9 +16,6 @@ public class RootAccountCredentialsInputDto {
     private String password;
 
     //optional
-    private String invitationKey;
-
-    //optional
     private String username;
     private String fullName;
     private String displayName;
