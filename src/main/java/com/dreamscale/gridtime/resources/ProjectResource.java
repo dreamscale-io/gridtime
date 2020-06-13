@@ -4,9 +4,12 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
+import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.journal.TeamProjectCapability;
 import com.dreamscale.gridtime.core.capability.journal.TeamTaskCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping(path = ResourcePaths.PROJECT_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class ProjectResource {
+
+    @Autowired
+    private TeamCapability teamCapability;
 
     @Autowired
     private TeamProjectCapability teamProjectCapability;
@@ -43,7 +49,10 @@ public class ProjectResource {
         log.info("getAllTeamProjects, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
-        return teamProjectCapability.getAllTeamProjects(membership.getOrganizationId(), membership.getId());
+
+        TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(membership.getOrganizationId(), membership.getId());
+
+        return teamProjectCapability.getAllTeamProjects(membership.getOrganizationId(), teamLink.getId(), membership.getId());
     }
 
     /**

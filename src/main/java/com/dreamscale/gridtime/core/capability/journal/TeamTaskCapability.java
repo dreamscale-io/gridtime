@@ -32,22 +32,13 @@ public class TeamTaskCapability {
     private GridClock gridClock;
 
     @Autowired
-    private TeamCapability teamCapability;
-
-    @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
-    private OrganizationMemberRepository organizationMemberRepository;
-
-    @Autowired
     TeamTaskRepository teamTaskRepository;
-
-    @Autowired
-    private JiraCapability jiraCapability;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -62,13 +53,12 @@ public class TeamTaskCapability {
     }
 
     @Transactional
-    public TaskDto findOrCreateTeamTask(LocalDateTime now, UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto) {
+    public TaskDto findOrCreateTeamTask(LocalDateTime now, UUID organizationId, UUID invokingMemberId, UUID teamId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
-        TeamDto activeTeam = teamCapability.getMyActiveTeam(organizationId, invokingMemberId);
 
         String standardizedTaskName = standardizeToLowerCase(taskInputDto.getName());
 
-        TeamTaskEntity teamTask = teamTaskRepository.findByTeamIdAndTeamProjectIdAndLowercaseName(activeTeam.getId(), projectId, standardizedTaskName);
+        TeamTaskEntity teamTask = teamTaskRepository.findByTeamIdAndTeamProjectIdAndLowercaseName(teamId, projectId, standardizedTaskName);
 
         if (teamTask == null) {
             teamTask = new TeamTaskEntity();
@@ -76,7 +66,7 @@ public class TeamTaskCapability {
             teamTask.setOrganizationId(organizationId);
             teamTask.setCreatorId(invokingMemberId);
             teamTask.setTeamProjectId(projectId);
-            teamTask.setTeamId(activeTeam.getId());
+            teamTask.setTeamId(teamId);
             teamTask.setCreationDate(now);
             teamTask.setName(taskInputDto.getName());
             teamTask.setLowercaseName(standardizedTaskName);

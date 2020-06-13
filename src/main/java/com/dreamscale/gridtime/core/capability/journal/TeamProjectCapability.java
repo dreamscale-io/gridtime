@@ -33,9 +33,6 @@ public class TeamProjectCapability {
     private GridClock gridClock;
 
     @Autowired
-    private TeamCapability teamCapability;
-
-    @Autowired
     TeamProjectRepository teamProjectRepository;
 
     @Autowired
@@ -46,6 +43,8 @@ public class TeamProjectCapability {
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
     private DtoEntityMapper<ProjectDto, TeamProjectEntity> teamProjectMapper;
 
+    private static final String DEFAULT_PROJECT_NAME = "No Project";
+
     @PostConstruct
     private void init() {
         teamProjectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, TeamProjectEntity.class);
@@ -53,19 +52,17 @@ public class TeamProjectCapability {
     }
 
     @Transactional
-    public ProjectDto findOrCreateTeamProject(LocalDateTime now, UUID organizationId, UUID invokingMemberId, CreateProjectInputDto projectInputDto) {
-
-        TeamDto activeTeam = teamCapability.getMyActiveTeam(organizationId, invokingMemberId);
+    public ProjectDto findOrCreateTeamProject(LocalDateTime now, UUID organizationId, UUID invokingMemberId, UUID teamId, CreateProjectInputDto projectInputDto) {
 
         String standardizedProjectName = standardizeToLowerCase(projectInputDto.getName());
 
-        TeamProjectEntity teamProject = teamProjectRepository.findByTeamIdAndLowercaseName(activeTeam.getId(), standardizedProjectName);
+        TeamProjectEntity teamProject = teamProjectRepository.findByTeamIdAndLowercaseName(teamId, standardizedProjectName);
 
         if (teamProject == null) {
             teamProject = new TeamProjectEntity();
             teamProject.setId(UUID.randomUUID());
             teamProject.setOrganizationId(organizationId);
-            teamProject.setTeamId(activeTeam.getId());
+            teamProject.setTeamId(teamId);
             teamProject.setCreatorId(invokingMemberId);
             teamProject.setName(projectInputDto.getName());
             teamProject.setDescription(projectInputDto.getDescription());
@@ -86,11 +83,35 @@ public class TeamProjectCapability {
         return toDto(teamProject);
     }
 
-    public List<ProjectDto> getAllTeamProjects(UUID organizationId, UUID invokingMemberId) {
+    @Transactional
+    public ProjectDto createDefaultTeamProject(LocalDateTime now, UUID organizationId, UUID teamId, UUID creatorId) {
 
-        TeamDto activeTeam = teamCapability.getMyActiveTeam(organizationId, invokingMemberId);
+        TeamProjectEntity defaultProject = new TeamProjectEntity();
+        defaultProject.setId(UUID.randomUUID());
+        defaultProject.setOrganizationId(organizationId);
+        defaultProject.setTeamId(teamId);
+        defaultProject.setCreatorId(creatorId);
+        defaultProject.setName(DEFAULT_PROJECT_NAME);
+        defaultProject.setLowercaseName(DEFAULT_PROJECT_NAME.toLowerCase());
+        defaultProject.setCreationDate(now);
 
-        List<TeamProjectEntity> teamProjects = teamProjectRepository.findByTeamId(activeTeam.getId());
+        teamProjectRepository.save(defaultProject);
+
+        ProjectEntity orgProject = new ProjectEntity();
+        orgProject.setId(defaultProject.getId());
+        orgProject.setName(defaultProject.getName());
+        orgProject.setOrganizationId(organizationId);
+
+        projectRepository.save(orgProject);
+
+
+        return toDto(defaultProject);
+    }
+
+
+    public List<ProjectDto> getAllTeamProjects(UUID organizationId, UUID teamId, UUID invokingMemberId) {
+
+        List<TeamProjectEntity> teamProjects = teamProjectRepository.findByTeamId(teamId);
 
         return teamProjectMapper.toApiList(teamProjects);
     }

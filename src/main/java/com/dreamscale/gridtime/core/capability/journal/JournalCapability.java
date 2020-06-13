@@ -449,9 +449,10 @@ public class JournalCapability {
 
         LocalDateTime now = gridClock.now();
 
-        ProjectDto projectDto = teamProjectCapability.findOrCreateTeamProject(now, organizationId, memberId, projectInputDto);
-
         TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
+
+        ProjectDto projectDto = teamProjectCapability.findOrCreateTeamProject(now, organizationId, memberId, teamLink.getId(), projectInputDto);
+
         TaskDto defaultNoTaskTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, memberId, teamLink.getId(), projectDto.getId());
 
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, projectDto.getId());
@@ -463,7 +464,9 @@ public class JournalCapability {
 
         LocalDateTime now = gridClock.now();
 
-        TaskDto taskDto = teamTaskCapability.findOrCreateTeamTask(now, organizationId, memberId, projectId, taskInputDto);
+        TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
+
+        TaskDto taskDto = teamTaskCapability.findOrCreateTeamTask(now, organizationId, memberId, teamLink.getId(), projectId, taskInputDto);
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 

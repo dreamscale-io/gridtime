@@ -93,10 +93,10 @@ class ProjectResourceSpec extends Specification {
         List<ProjectDto> projects = projectClient.getProjects()
 
         then:
-        assert projects.size() == 2
-        assert projects[0].id == proj1.id
-        assert projects[0].name == proj1.name
-        assert projects[0].externalId == proj1.externalId
+        assert projects.size() == 3
+        assert projects[1].id == proj1.id
+        assert projects[1].name == proj1.name
+        assert projects[1].externalId == proj1.externalId
     }
 
     def "should find tasks starting with search string"() {
