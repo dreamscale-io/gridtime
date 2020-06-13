@@ -327,7 +327,7 @@ public class OrganizationCapability {
             simpleStatusDto.setMessage("Validation code is expired.");
             simpleStatusDto.setStatus(Status.FAILED);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.expire(now, oneTimeTicket);
 
         } else {
 
@@ -340,7 +340,7 @@ public class OrganizationCapability {
             simpleStatusDto.setStatus(Status.JOINED);
             simpleStatusDto.setMessage("Member has joined the organization.");
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.use(now, oneTimeTicket, rootAccountId);
         }
 
         return simpleStatusDto;
@@ -664,21 +664,38 @@ public class OrganizationCapability {
         validateSubscriptionFound(subscription);
         validateSubscriptionOwnedByRootAccount(subscription, requestingRootAccountId);
 
-        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndId(activeOrganization.getId(), memberId);
-        validateMembershipFound(activeOrganization.getDomainName(), membership);
 
-        //okay, the member is real, we've got a lock on the subscription, lets cancel it
+        return removeMemberFromOrg(now, activeOrganization.getId(), memberId);
+    }
 
-        OrganizationSubscriptionSeatEntity subscriptionSeat = organizationSubscriptionSeatRepository.selectValidSubscriptionSeatForUpdate(activeOrganization.getId(), membership.getRootAccountId());
+    public SimpleStatusDto removeMemberFromOrg(LocalDateTime now, UUID organizationId, UUID memberId) {
 
-        subscriptionSeat.setCancelDate(now);
-        subscriptionSeat.setSubscriptionStatus(SubscriptionStatus.CANCELED);
+        OrganizationEntity orgEntity = organizationRepository.findById(organizationId);
+        OrganizationMemberEntity membership = organizationMemberRepository.findByOrganizationIdAndId(organizationId, memberId);
 
-        organizationSubscriptionSeatRepository.save(subscriptionSeat);
+        validateMembershipFound(orgEntity.getDomainName(), membership);
 
-        subscription.setSeatsRemaining(subscription.getSeatsRemaining() + 1);
+        RootAccountEntity rootAccount = rootAccountRepository.findById(membership.getRootAccountId());
 
-        organizationSubscriptionRepository.save(subscription);
+        LocalDateTime joinDate = rootAccount.getActivationDate();
+
+        if (!isPublicOrg(orgEntity)) {
+            OrganizationSubscriptionEntity subscription = reserveSeatForUpdate(organizationId);
+            validateSubscriptionFound(subscription);
+
+            //okay, the member is real, we've got a lock on the subscription, lets cancel it
+
+            OrganizationSubscriptionSeatEntity subscriptionSeat = organizationSubscriptionSeatRepository.selectValidSubscriptionSeatForUpdate(orgEntity.getId(), membership.getRootAccountId());
+
+            subscriptionSeat.setCancelDate(now);
+            subscriptionSeat.setSubscriptionStatus(SubscriptionStatus.CANCELED);
+
+            organizationSubscriptionSeatRepository.save(subscriptionSeat);
+
+            subscription.setSeatsRemaining(subscription.getSeatsRemaining() + 1);
+
+            organizationSubscriptionRepository.save(subscription);
+        }
 
         //now we need to tombstone the organization member, and all the team memberships for this user.
         //the tombstones include the details of the attached user, at the time of the boot.
@@ -690,7 +707,7 @@ public class OrganizationCapability {
         memberTombstone.setId(UUID.randomUUID());
         memberTombstone.setMemberId(membership.getId());
         memberTombstone.setOrganizationId(membership.getOrganizationId());
-        memberTombstone.setJoinDate(subscriptionSeat.getActivationDate());
+        memberTombstone.setJoinDate(joinDate);
         memberTombstone.setRipDate(now);
         memberTombstone.setDisplayName(memberDetails.getDisplayName());
         memberTombstone.setEmail(memberDetails.getEmail());

@@ -185,6 +185,10 @@ public class TeamCapability {
         teamMemberRepository.save(teamMemberEntity);
 
         updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
+
+        TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
+
+        teamCircuitOperator.createTeamCircuit(now, teamDto, memberId);
     }
 
     @Transactional
@@ -674,7 +678,6 @@ public class TeamCapability {
         for (TeamEntity team: teamEntities) {
             removeTeamMemberAndCreateTombstone(now, organizationId, team, memberId);
         }
-
     }
 
     private TeamMemberOldDto removeTeamMemberAndCreateTombstone(LocalDateTime now, UUID organizationId, TeamEntity teamEntity, UUID memberId) {

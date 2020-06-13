@@ -73,6 +73,25 @@ public class AccountResource {
     }
 
     /**
+     * Deletes a recently created account using the activation code,
+     * in case something goes wrong during the activation process.
+     *
+     * This API will work until the activation ticket is expired.
+     *
+     * @param activationCode Provided by /account/register in the sent email
+     *
+     * @return AccountActivationDto
+     */
+
+    @PreAuthorize("permitAll")
+    @PostMapping(ResourcePaths.DELETE_PATH)
+    SimpleStatusDto delete(@RequestBody ActivationCodeDto activationCode) {
+        log.info("delete, activationCode={}", activationCode.getActivationCode());
+
+        return rootAccountCapability.delete(activationCode.getActivationCode());
+    }
+
+    /**
      * Resets the account, sending a new activation code to be sent to the user's email
      * The existing API-key will still work, until activate is called with the new code, and the API-key changes
      *

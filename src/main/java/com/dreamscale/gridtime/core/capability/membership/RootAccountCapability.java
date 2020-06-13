@@ -83,6 +83,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private RootAccountTombstoneRepository rootAccountTombstoneRepository;
+
     @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
 
@@ -115,7 +118,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             accountActivationDto.setMessage("Activation code is expired.");
             accountActivationDto.setStatus(Status.FAILED);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.expire(now, oneTimeTicket);
 
         } else {
 
@@ -163,6 +166,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 rootAccountEntity.setFullName(rootAccountEntity.getRootUsername());
 
                 rootAccountRepository.save(rootAccountEntity);
+
             } else {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_TICKET_TYPE, "Invalid ticket type for activation.");
             }
@@ -198,6 +202,59 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return accountActivationDto;
     }
 
+    @Transactional
+    public SimpleStatusDto delete(String activationCode) {
+
+        LocalDateTime now = gridClock.now();
+
+        TicketTombstoneEntity ticketTombstone = oneTimeTicketCapability.findGraveyardTicket(activationCode);
+
+        if (ticketTombstone != null && !oneTimeTicketCapability.isExpired(now, ticketTombstone)) {
+
+            UUID usedBy = ticketTombstone.getUsedBy();
+
+            RootAccountEntity rootAccount = rootAccountRepository.findById(usedBy);
+
+            if (rootAccount != null) {
+                List<OrganizationMemberEntity> memberships = organizationMemberRepository.findByRootAccountId(rootAccount.getId());
+
+                for (OrganizationMemberEntity membership : memberships) {
+                    organizationCapability.removeMemberFromOrg(now, membership.getOrganizationId(), membership.getId());
+                }
+
+                convertToTombstoneAndDelete(now, rootAccount);
+
+                return new SimpleStatusDto(Status.DELETED, "Removed account mapped to activation code.");
+            }
+        }
+
+        return new SimpleStatusDto(Status.NO_ACTION, "Unable to delete account.");
+
+    }
+
+    private void convertToTombstoneAndDelete(LocalDateTime now, RootAccountEntity rootAccount) {
+
+        RootAccountTombstoneEntity rootAccountTombstone = new RootAccountTombstoneEntity();
+        rootAccountTombstone.setId(UUID.randomUUID());
+        rootAccountTombstone.setRootAccountId(rootAccount.getId());
+
+        rootAccountTombstone.setActivationDate(rootAccount.getActivationDate());
+        rootAccountTombstone.setRegistrationDate(rootAccount.getRegistrationDate());
+        rootAccountTombstone.setApiKey(rootAccount.getApiKey());
+
+        rootAccountTombstone.setRootUsername(rootAccount.getRootUsername());
+        rootAccountTombstone.setLowercaseRootUsername(rootAccount.getLowercaseRootUsername());
+        rootAccountTombstone.setEmailValidated(rootAccount.isEmailValidated());
+        rootAccountTombstone.setRootEmail(rootAccount.getRootEmail());
+        rootAccountTombstone.setDisplayName(rootAccount.getDisplayName());
+        rootAccountTombstone.setFullName(rootAccount.getFullName());
+
+        rootAccountTombstone.setRipDate(now);
+
+        rootAccountTombstoneRepository.save(rootAccountTombstone);
+
+        rootAccountRepository.delete(rootAccount);
+    }
 
     public SimpleStatusDto reset(String email) {
 
@@ -597,7 +654,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             simpleStatus.setMessage("Validation code is expired.");
             simpleStatus.setStatus(Status.FAILED);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.expire(now, oneTimeTicket);
 
         } else {
 
@@ -613,7 +670,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             rootAccountRepository.save(rootAccountEntity);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.use(now, oneTimeTicket, oneTimeTicket.getOwnerId());
 
             simpleStatus.setMessage("Profile Email successfully updated.");
             simpleStatus.setStatus(Status.SUCCESS);
@@ -724,7 +781,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             simpleStatus.setMessage("Validation code is expired.");
             simpleStatus.setStatus(Status.FAILED);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.expire(now, oneTimeTicket);
 
         } else {
 
@@ -742,7 +799,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             organizationMemberRepository.save(membership);
 
-            oneTimeTicketCapability.delete(oneTimeTicket);
+            oneTimeTicketCapability.use(now, oneTimeTicket, oneTimeTicket.getOwnerId());
 
             simpleStatus.setMessage("Profile Email successfully updated.");
             simpleStatus.setStatus(Status.SUCCESS);
@@ -841,5 +898,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private String createRandomExtension() {
         return Long.toString(Math.round(Math.random() * 89999 + 10000));
     }
+
+
 
 }

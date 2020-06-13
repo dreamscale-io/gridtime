@@ -79,6 +79,42 @@ class AccountResourceSpec extends Specification {
         assert activationDto.email == rootAccountInput.email
     }
 
+    def "should delete activated account and allow recreation with same email"() {
+        given:
+        RootAccountCredentialsInputDto rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail("arty@dreamscale.io")
+
+        String activationCode1 = null;
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> activationCode1 = token; return null}
+
+        UserProfileDto userProfileDto = accountClient.register(rootAccountInput)
+        AccountActivationDto activationDto = accountClient.activate(new ActivationCodeDto(activationCode1))
+
+        when:
+
+        accountClient.delete(new ActivationCodeDto(activationCode1))
+
+        String activationCode2 = null;
+
+        rootAccountInput = new RootAccountCredentialsInputDto();
+        rootAccountInput.setEmail("arty@dreamscale.io")
+
+        1 * mockEmailCapability.sendDownloadAndActivationEmail(_, _) >> { email, token -> activationCode2 = token; return null}
+
+        userProfileDto = accountClient.register(rootAccountInput)
+        activationDto = accountClient.activate(new ActivationCodeDto(activationCode2))
+
+        then:
+
+        assert userProfileDto.rootEmail == "arty@dreamscale.io"
+        assert userProfileDto.rootAccountId != null
+
+        assert activationDto != null
+        assert activationDto.apiKey != null
+        assert activationDto.email == rootAccountInput.email
+    }
+
     //25050596-d768-4492-b8e5-256a3c05fe1f - orgId
 
 

@@ -20,6 +20,9 @@ public interface AccountClient {
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.ACTIVATE_PATH)
     AccountActivationDto activate(ActivationCodeDto accountKey);
 
+    @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.DELETE_PATH)
+    SimpleStatusDto delete(ActivationCodeDto accountKey);
+
     @RequestLine("POST " + ResourcePaths.ACCOUNT_PATH + ResourcePaths.RESET_PATH)
     SimpleStatusDto reset(RootAccountEmailInputDto accountEmailInputDto);
 

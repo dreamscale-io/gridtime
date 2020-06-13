@@ -69,11 +69,11 @@ public class InviteCapability {
             simpleStatusDto.setMessage("Invitation Key is expired.");
             simpleStatusDto.setStatus(Status.FAILED);
 
-            oneTimeTicketCapability.delete(inviteTicket);
+            oneTimeTicketCapability.expire(now, inviteTicket);
 
         } else {
             simpleStatusDto = processTicket(now, rootAccountId, inviteTicket);
-            oneTimeTicketCapability.delete(inviteTicket);
+            oneTimeTicketCapability.use(now, inviteTicket, rootAccountId);
         }
 
         return simpleStatusDto;

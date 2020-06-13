@@ -1,14 +1,20 @@
 package com.dreamscale.gridtime.core.capability.membership;
 
-import com.dreamscale.gridtime.core.domain.member.OneTimeTicketEntity;
-import com.dreamscale.gridtime.core.domain.member.OneTimeTicketRepository;
-import com.dreamscale.gridtime.core.domain.member.TicketType;
+import com.dreamscale.gridtime.api.journal.IntentionInputDto;
+import com.dreamscale.gridtime.api.journal.JournalEntryDto;
+import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
+import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity;
+import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
+import com.dreamscale.gridtime.core.mapper.MapperFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -18,7 +24,11 @@ import java.util.UUID;
 public class OneTimeTicketCapability {
 
     @Autowired
+    private TicketTombstoneRepository ticketTombstoneRepository;
+
+    @Autowired
     private OneTimeTicketRepository oneTimeTicketRepository;
+
 
     public OneTimeTicketEntity issueOneTimeActivationTicket(LocalDateTime now, UUID ticketOwnerId) {
         OneTimeTicketEntity oneTimeTicket = new OneTimeTicketEntity();
@@ -124,13 +134,36 @@ public class OneTimeTicketCapability {
        return oneTimeTicketRepository.findByTicketCode(ticketCode);
     }
 
-    public void delete(OneTimeTicketEntity oneTimeTicket) {
+    public void expire(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
+        tombstone(now, oneTimeTicket, RipType.EXPIRED, null);
+    }
+
+    public void use(LocalDateTime now, OneTimeTicketEntity oneTimeTicket, UUID usedBy) {
+        tombstone(now, oneTimeTicket, RipType.USED, usedBy);
+    }
+
+
+    private void tombstone(LocalDateTime now, OneTimeTicketEntity oneTimeTicket, RipType ripType, UUID usedByRootAccountId) {
+        TicketTombstoneEntity tombstoneTicket = new TicketTombstoneEntity();
+
+        tombstoneTicket.setId(UUID.randomUUID());
+        tombstoneTicket.setTicketId(oneTimeTicket.getId());
+        tombstoneTicket.setOwnerId(oneTimeTicket.getOwnerId());
+        tombstoneTicket.setIssueDate(oneTimeTicket.getIssueDate());
+        tombstoneTicket.setExpirationDate(oneTimeTicket.getExpirationDate());
+        tombstoneTicket.setJsonProps(oneTimeTicket.getJsonProps());
+        tombstoneTicket.setTicketCode(oneTimeTicket.getTicketCode());
+        tombstoneTicket.setTicketType(oneTimeTicket.getTicketType());
+
+        tombstoneTicket.setRipDate(now);
+        tombstoneTicket.setRipType(ripType);
+        tombstoneTicket.setUsedBy(usedByRootAccountId);
+
+        ticketTombstoneRepository.save(tombstoneTicket);
+
         oneTimeTicketRepository.delete(oneTimeTicket);
     }
 
-    public void update(OneTimeTicketEntity existingInvitation) {
-        oneTimeTicketRepository.save(existingInvitation);
-    }
 
     public boolean isExpired(LocalDateTime now, OneTimeTicketEntity oneTimeTicket) {
         if (oneTimeTicket != null) {
@@ -139,7 +172,16 @@ public class OneTimeTicketCapability {
         return false;
     }
 
+    public boolean isExpired(LocalDateTime now, TicketTombstoneEntity graveyardTicket) {
+        if (graveyardTicket != null) {
+            return now.isAfter(graveyardTicket.getExpirationDate());
+        }
+        return false;
+    }
 
 
+    public TicketTombstoneEntity findGraveyardTicket(String activationCode) {
+        return ticketTombstoneRepository.findByTicketCode(activationCode);
+    }
 }
 
