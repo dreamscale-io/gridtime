@@ -172,7 +172,7 @@ public class TeamTaskCapability {
     }
 
 
-    public TaskDto findDefaultProjectTask(UUID organizationId, UUID projectId) {
+    public TaskDto findDefaultTaskForProject(UUID organizationId, UUID projectId) {
 
         TaskEntity defaultTask = taskRepository.findByProjectIdAndName(projectId, DEFAULT_TASK_NAME);
 

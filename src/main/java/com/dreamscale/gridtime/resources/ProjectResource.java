@@ -52,7 +52,7 @@ public class ProjectResource {
 
         TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(membership.getOrganizationId(), membership.getId());
 
-        return teamProjectCapability.getAllTeamProjects(membership.getOrganizationId(), teamLink.getId(), membership.getId());
+        return teamProjectCapability.getAllTeamProjects(membership.getOrganizationId(), teamLink.getId());
     }
 
     /**

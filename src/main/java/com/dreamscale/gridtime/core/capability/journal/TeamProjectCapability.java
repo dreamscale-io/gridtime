@@ -108,8 +108,14 @@ public class TeamProjectCapability {
         return toDto(defaultProject);
     }
 
+    public ProjectDto findDefaultProjectForTeam(UUID organizationId, UUID teamId) {
 
-    public List<ProjectDto> getAllTeamProjects(UUID organizationId, UUID teamId, UUID invokingMemberId) {
+        TeamProjectEntity defaultProject = teamProjectRepository.findByTeamIdAndLowercaseName(teamId, DEFAULT_PROJECT_NAME.toLowerCase());
+        return teamProjectMapper.toApi(defaultProject);
+    }
+
+
+    public List<ProjectDto> getAllTeamProjects(UUID organizationId, UUID teamId) {
 
         List<TeamProjectEntity> teamProjects = teamProjectRepository.findByTeamId(teamId);
 
@@ -162,4 +168,6 @@ public class TeamProjectCapability {
         return projectMapper.toApiList(projectEntities);
 
     }
+
+
 }

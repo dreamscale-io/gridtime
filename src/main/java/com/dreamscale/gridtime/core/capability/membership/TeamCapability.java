@@ -176,6 +176,9 @@ public class TeamCapability {
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
+        ProjectDto defaultProj = teamProjectCapability.createDefaultTeamProject(now, organizationId, teamEntity.getId(), null);
+        TaskDto defaultTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, null, teamEntity.getId(), defaultProj.getId());
+
         teamCircuitOperator.createTeamCircuit(now, teamDto, null);
     }
 
@@ -338,6 +341,12 @@ public class TeamCapability {
         return teamLinkOutputMapper.toApi(defaultTeam);
     }
 
+    public TeamLinkDto getTeamLink(UUID organizationId, UUID teamId) {
+
+        TeamEntity team = teamRepository.findById(teamId);
+        return teamLinkOutputMapper.toApi(team);
+    }
+
     public TeamDto getMyActiveTeam(UUID orgId, UUID memberId) {
 
         //TODO okay, why is this returning null?
@@ -363,6 +372,7 @@ public class TeamCapability {
 
         if (teamMemberHomeConfig == null) {
 
+            log.debug("findMyTeamsByOrgMembership: "+ orgId + ", "+ memberId);
             List<TeamEntity> teamEntities = teamRepository.findMyTeamsByOrgMembership(orgId, memberId);
 
             log.debug("Teams:: {}", teamEntities);

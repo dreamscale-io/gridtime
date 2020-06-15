@@ -210,7 +210,7 @@ class JournalResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 2 //task switch event added
+        assert intentions.size() == 3 //task switch event added, and welcome message
     }
 
     def "get recent intentions with limit"() {
@@ -275,7 +275,7 @@ class JournalResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 3
+        assert intentions.size() == 4 //welcome message + 3
     }
 
     def "get recent tasks summary"() {
@@ -310,10 +310,10 @@ class JournalResourceSpec extends Specification {
 
         then:
         assert recentTasksSummary != null
-        assert recentTasksSummary.getRecentProjects().size() == 2
+        assert recentTasksSummary.getRecentProjects().size() == 3 //no project project
 
-        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0)
-        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1)
+        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(1)
+        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(2)
 
         assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3
         assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 3
@@ -351,10 +351,10 @@ class JournalResourceSpec extends Specification {
         assert recentTasksSummary.getActiveTask() != null
 
         assert recentTasksSummary != null
-        assert recentTasksSummary.getRecentProjects().size() == 2
+        assert recentTasksSummary.getRecentProjects().size() == 3
 
-        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(0);
-        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(1);
+        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(1);
+        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(2);
 
         assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3;
         assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 1;
@@ -393,7 +393,7 @@ class JournalResourceSpec extends Specification {
 
         then:
         assert intentions != null
-        assert intentions.size() == 2
+        assert intentions.size() == 3 //welcome message + 2
     }
 
     def "get recent intentions for other member with limit"() {

@@ -604,6 +604,12 @@ public class OrganizationCapability {
         return activeMembership;
     }
 
+    public OrganizationMemberEntity findMember(UUID organizationId, UUID rootAccountId) {
+        OrganizationMemberEntity membership = memberRepository.findByOrganizationIdAndRootAccountId(organizationId, rootAccountId);
+
+        return membership;
+    }
+
     public OrganizationDto getActiveOrganization(UUID rootAccountId) {
 
         OrganizationMemberEntity activeMembership = getActiveMembership(rootAccountId);
@@ -649,6 +655,8 @@ public class OrganizationCapability {
         }
         return false;
     }
+
+
 
     @Transactional
     public SimpleStatusDto removeMember(UUID requestingRootAccountId, UUID memberId) {

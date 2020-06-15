@@ -95,19 +95,38 @@ public class JournalCapability {
             isLinked = true;
         }
 
-        IntentionEntity myIntention = createIntentionAndGrantXPForMember(organizationId, memberId, intentionInputDto, isLinked);
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        JournalEntryDto myEntry = createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId, intentionInputDto, isLinked);
 
         if (isLinked) {
-            createJournalLinks(myIntention, memberId, activeLinksNetwork);
+            createJournalLinks(myEntry, memberId, activeLinksNetwork);
         }
 
         for (SpiritLinkDto spiritLink : activeLinksNetwork.getSpiritLinks()) {
-            IntentionEntity otherIntention = createIntentionAndGrantXPForMember(organizationId, spiritLink.getFriendSpiritId(), intentionInputDto, isLinked);
-            createJournalLinks(otherIntention, spiritLink.getFriendSpiritId(), activeLinksNetwork);
+            JournalEntryDto otherJournalEntry = createIntentionAndGrantXPForMember(now, nanoTime, organizationId, spiritLink.getFriendSpiritId(), intentionInputDto, isLinked);
+            createJournalLinks(otherJournalEntry, spiritLink.getFriendSpiritId(), activeLinksNetwork);
         }
 
-        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myIntention.getId());
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myEntry.getId());
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    public JournalEntryDto writeJournalWelcomeMessage(LocalDateTime now, Long nanoTime,
+                                                      UUID organizationId, UUID memberId, String journalText ) {
+
+        TeamLinkDto activeTeamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
+
+        log.debug("TeamLink: "+activeTeamLink.getName());
+
+        ProjectDto defaultProject = teamProjectCapability.findDefaultProjectForTeam(organizationId, activeTeamLink.getId());
+
+        TaskDto defaultTask = teamTaskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
+
+        return createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId,
+                new IntentionInputDto(journalText, defaultProject.getId(), defaultTask.getId()), false);
+
     }
 
     public LocalDateTime getDateOfFirstIntention(UUID memberId) {
@@ -121,11 +140,11 @@ public class JournalCapability {
         return dateOfIntention;
     }
 
-    private void createJournalLinks(IntentionEntity myIntention, UUID memberId, ActiveLinksNetworkDto activeLinksNetwork) {
+    private void createJournalLinks(JournalEntryDto journalEntryDto, UUID memberId, ActiveLinksNetworkDto activeLinksNetwork) {
 
         JournalLinkEventEntity journalLinkEntity = new JournalLinkEventEntity();
         journalLinkEntity.setId(UUID.randomUUID());
-        journalLinkEntity.setIntentionId(myIntention.getId());
+        journalLinkEntity.setIntentionId(journalEntryDto.getId());
         journalLinkEntity.setMemberId(memberId);
         journalLinkEntity.setLinkedMembers(translateLinkedMembersToJson(memberId, activeLinksNetwork));
 
@@ -170,10 +189,7 @@ public class JournalCapability {
         }
     }
 
-    private IntentionEntity createIntentionAndGrantXPForMember(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
-
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
+    private JournalEntryDto createIntentionAndGrantXPForMember(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
 
         torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
@@ -203,7 +219,7 @@ public class JournalCapability {
 
         teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
 
-        return intentionEntity;
+        return journalEntryDto;
 
     }
 
@@ -380,7 +396,7 @@ public class JournalCapability {
             List<TaskDto> recentTasks = teamTaskCapability.findTasksByRecentMemberAccess(organizationId, memberId, projectDto.getId());
             List<TaskDto> recentTeamTasks = teamTaskCapability.findTasksByRecentTeamAccess(organizationId, activeTeamLink.getId(), projectDto.getId());
 
-            TaskDto noTaskDefaultTask = teamTaskCapability.findDefaultProjectTask(organizationId, projectDto.getId());
+            TaskDto noTaskDefaultTask = teamTaskCapability.findDefaultTaskForProject(organizationId, projectDto.getId());
 
             List<TaskDto> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, recentTeamTasks, noTaskDefaultTask);
 

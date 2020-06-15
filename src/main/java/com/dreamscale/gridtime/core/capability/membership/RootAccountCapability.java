@@ -5,10 +5,13 @@ import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
+import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.circuit.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.external.EmailCapability;
+import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.circuit.MemberConnectionEntity;
@@ -23,6 +26,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,10 +85,16 @@ public class RootAccountCapability implements RootAccountIdResolver {
     private TeamCapability teamCapability;
 
     @Autowired
+    private JournalCapability journalCapability;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
     private RootAccountTombstoneRepository rootAccountTombstoneRepository;
+
+    @Value( "${torchie.public.org.domain}" )
+    private String publicTorchieDomain;
 
     @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
@@ -110,6 +120,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         AccountActivationDto accountActivationDto = new AccountActivationDto();
 
         LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
         if (oneTimeTicket == null) {
             accountActivationDto.setMessage("Activation code not found.");
@@ -192,6 +203,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             inviteCapability.useInvitationKey(now, rootAccountEntity.getId(), activationCode);
 
+            writeJournalWelcomeMessage(now, nanoTime, rootAccountEntity.getId(), oneTimeTicket);
+
             accountActivationDto.setEmail(rootAccountEntity.getRootEmail());
             accountActivationDto.setUsername(rootAccountEntity.getRootUsername());
             accountActivationDto.setApiKey(apiKey);
@@ -200,6 +213,42 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
 
         return accountActivationDto;
+    }
+
+    private void writeJournalWelcomeMessage(LocalDateTime now, Long nanoTime, UUID rootAccountId, OneTimeTicketEntity inviteTicket) {
+
+        String welcomeMessage = "";
+
+        UUID organizationId = inviteTicket.getOrganizationIdProp();
+        UUID teamId = inviteTicket.getTeamIdProp();
+
+        if (inviteTicket.getTicketType().equals(TicketType.ACTIVATION_BY_OWNER)) {
+            welcomeMessage = "Welcome to " + publicTorchieDomain + " hyperspace.";
+        }
+
+        if (inviteTicket.getTicketType().equals(TicketType.ACTIVATE_AND_INVITE_TO_ORG)) {
+
+            OrganizationEntity organization = organizationRepository.findById(organizationId);
+            OrganizationMemberEntity senderOfTicket = organizationCapability.findMember(organizationId, inviteTicket.getOwnerId());
+
+            welcomeMessage = "Welcome to "+organization.getDomainName() + " in hyperspace. You've been invited by @"+senderOfTicket.getUsername();
+        }
+
+        if (inviteTicket.getTicketType().equals(TicketType.ACTIVATE_AND_INVITE_TO_ORG_AND_TEAM)) {
+
+            OrganizationEntity organization = organizationRepository.findById(organizationId);
+            OrganizationMemberEntity senderOfTicket = organizationCapability.findMember(organizationId, inviteTicket.getOwnerId());
+            TeamLinkDto teamLinkDto = teamCapability.getTeamLink(organizationId, teamId);
+
+            welcomeMessage = "Welcome to " + organization.getDomainName() + " in hyperspace. " +
+                    "You've been invited to team "+teamLinkDto.getName() + " by @"+senderOfTicket.getUsername();
+        }
+
+        OrganizationMemberEntity myMembership = organizationCapability.getActiveMembership(rootAccountId);
+
+        log.info(welcomeMessage);
+
+        journalCapability.writeJournalWelcomeMessage(now, nanoTime, myMembership.getOrganizationId(), myMembership.getId(), welcomeMessage);
     }
 
     @Transactional
@@ -381,7 +430,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     private ConnectionStatusDto loginAsOrganizationMember(LocalDateTime now, UUID rootAccountId, OrganizationMemberEntity membership) {
 
-        validateMembershipExists(membership);
+        validateMembershipExists("login" , membership);
 
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
@@ -448,9 +497,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
     }
 
-    private void validateMembershipExists(OrganizationMemberEntity membership) {
+    private void validateMembershipExists(String context, OrganizationMemberEntity membership) {
         if (membership == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Unable to find org membership for account.");
+            throw new BadRequestException(ValidationErrorCodes.NO_ORG_MEMBERSHIP_FOR_ACCOUNT, "Unable to find org membership for "+context);
         }
     }
 
