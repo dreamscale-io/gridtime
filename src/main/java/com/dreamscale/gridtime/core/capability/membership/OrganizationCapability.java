@@ -163,7 +163,6 @@ public class OrganizationCapability {
         subscriptionEntity = organizationSubscriptionRepository.findById(subscriptionEntity.getId());
 
         ProjectDto project = projectCapability.createDefaultProject(now, organizationEntity.getId());
-        taskCapability.createDefaultProjectTask(organizationEntity.getId(), project.getId());
 
         return createSubscriptionDto(organizationEntity, subscriptionEntity);
 
@@ -405,7 +404,6 @@ public class OrganizationCapability {
             organizationRepository.save(publicOrg);
 
             ProjectDto project = projectCapability.createDefaultProject(now, publicOrg.getId());
-            taskCapability.createDefaultProjectTask(publicOrg.getId(), project.getId());
         }
 
         return publicOrg;

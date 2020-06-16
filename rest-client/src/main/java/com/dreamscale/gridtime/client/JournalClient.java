@@ -32,10 +32,10 @@ public interface JournalClient {
     //create journal projects and tasks, and retrieve top 5 recent project/task list
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
-    ProjectDto createProject(CreateProjectInputDto createProjectInputDto);
+    ProjectDto findOrCreateProject(CreateProjectInputDto createProjectInputDto);
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH)
-    TaskDto createTask(@Param("projectId") String projectId, CreateTaskInputDto taskInputDto);
+    TaskDto findOrCreateTask(@Param("projectId") String projectId, CreateTaskInputDto taskInputDto);
 
     @RequestLine("GET " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     RecentTasksSummaryDto getRecentProjectsAndTasks();

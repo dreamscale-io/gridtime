@@ -51,9 +51,9 @@ public class JournalResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.PROJECT_PATH  )
-    ProjectDto createProject(@RequestBody CreateProjectInputDto projectInputDto) {
+    ProjectDto findOrCreateProject(@RequestBody CreateProjectInputDto projectInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("createProject, user={}", context.getRootAccountId());
+        log.info("findOrCreateProject, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -62,10 +62,10 @@ public class JournalResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.PROJECT_PATH + "/{projectId}" + ResourcePaths.TASK_PATH )
-    TaskDto createTask(@PathVariable("projectId") String projectIdStr, @RequestBody CreateTaskInputDto taskInputDto) {
+    TaskDto findOrCreateTask(@PathVariable("projectId") String projectIdStr, @RequestBody CreateTaskInputDto taskInputDto) {
 
         RequestContext context = RequestContext.get();
-        log.info("createTask, user={}", context.getRootAccountId());
+        log.info("findOrCreateTask, user={}", context.getRootAccountId());
 
         UUID projectId = UUID.fromString(projectIdStr);
 

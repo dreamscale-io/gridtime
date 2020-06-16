@@ -474,8 +474,6 @@ public class JournalCapability {
 
         ProjectDto projectDto = projectCapability.findOrCreateProject(now, organizationId, projectInputDto);
 
-        TaskDto defaultNoTaskTask = taskCapability.createDefaultProjectTask(organizationId, projectDto.getId());
-
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, projectDto.getId());
 
         return projectDto;
