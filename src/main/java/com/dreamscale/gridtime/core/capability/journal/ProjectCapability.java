@@ -2,14 +2,12 @@ package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto;
 import com.dreamscale.gridtime.api.project.ProjectDto;
-import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
-import javafx.concurrent.Task;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
