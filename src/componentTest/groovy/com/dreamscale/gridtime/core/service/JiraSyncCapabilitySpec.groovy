@@ -52,7 +52,7 @@ public class JiraSyncCapabilitySpec extends Specification {
 		jiraSyncService.synchronizeProjectsWithJira(org.id)
 
 		then:
-		List<ProjectEntity> projects = projectRepository.findByOrganizationId(org.id)
+		List<ProjectEntity> projects = projectRepository.findByOrganizationIdOrderByName(org.id)
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)
@@ -103,7 +103,7 @@ public class JiraSyncCapabilitySpec extends Specification {
 		jiraSyncService.synchronizeProjectsWithJira(org.id)
 
 		then:
-		List<ProjectEntity> projects = projectRepository.findByOrganizationId(org.id)
+		List<ProjectEntity> projects = projectRepository.findByOrganizationIdOrderByName(org.id)
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)
@@ -133,7 +133,7 @@ public class JiraSyncCapabilitySpec extends Specification {
 		jiraSyncService.synchronizeProjectsWithJira(org.id)
 
 		then:
-		List<ProjectEntity> projects = projectRepository.findByOrganizationId(org.id)
+		List<ProjectEntity> projects = projectRepository.findByOrganizationIdOrderByName(org.id)
 		assert projects.size() == 1
 
 		List<TaskEntity> tasks = taskRepository.findByProjectId(projects.get(0).id)

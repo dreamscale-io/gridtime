@@ -30,7 +30,7 @@ public class JiraSyncCapability {
         List<String> externalIds = extractExternalIds(projectsToSync);
 
         List<JiraProjectDto> jiraProjects = jiraCapability.getFilteredProjects(organizationId, externalIds);
-        List<ProjectEntity> dbProjects = projectRepository.findByOrganizationId(organizationId);
+        List<ProjectEntity> dbProjects = projectRepository.findByOrganizationIdOrderByName(organizationId);
 
         saveProjectAndTaskUpdates(organizationId, dbProjects, jiraProjects);
 

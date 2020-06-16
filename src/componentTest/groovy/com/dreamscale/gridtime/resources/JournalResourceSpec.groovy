@@ -185,6 +185,28 @@ class JournalResourceSpec extends Specification {
         assert result.getFinishStatus() == "done";
     }
 
+    def "get task breakdown even when no new intentions"() {
+        given:
+
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        when:
+        RecentJournalDto journal = journalClient.getRecentJournal()
+
+        then:
+        assert journal != null
+        assert journal.getRecentProjects().size() == 1
+        assert journal.getRecentTasksByProjectId().size() == 1
+
+        assert journal.getRecentIntentions().size() == 1 //task switch event added, and welcome message
+    }
+
 
     def "get recent intentions"() {
         given:

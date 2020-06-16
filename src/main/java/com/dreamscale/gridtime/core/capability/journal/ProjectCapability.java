@@ -86,7 +86,7 @@ public class ProjectCapability {
     }
 
     public List<ProjectDto> getAllProjects(UUID organizationId) {
-        Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationId(organizationId);
+        Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdOrderByName(organizationId);
         return projectMapper.toApiList(projectEntities);
     }
 
@@ -110,15 +110,14 @@ public class ProjectCapability {
     }
 
     public List<ProjectDto> findProjectsByRecentMemberAccess(UUID organizationId, UUID memberId) {
-        //TODO once we deprecate the old APIs, we should migrate the old data over, and make this work from team_project tables
 
         List<ProjectEntity> projectEntities = projectRepository.findByRecentMemberAccess(memberId);
         return projectMapper.toApiList(projectEntities);
     }
 
-    public List<ProjectDto> findProjectsByRecentTeamMemberAccess(UUID organizationId, UUID teamId) {
+    public List<ProjectDto> findProjectsByMemberPermission(UUID organizationId, UUID memberId) {
 
-        List<ProjectEntity> projectEntities = projectRepository.findByRecentTeamMemberAccess(organizationId, teamId);
+        List<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdOrderByName(organizationId);
         return projectMapper.toApiList(projectEntities);
 
     }

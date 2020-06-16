@@ -4,7 +4,6 @@ import com.dreamscale.gridtime.api.journal.*;
 import com.dreamscale.gridtime.api.project.*;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
-import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
 import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
@@ -383,19 +382,23 @@ public class JournalCapability {
 
         List<ProjectDto> recentProjects = projectCapability.findProjectsByRecentMemberAccess(organizationId, memberId);
 
-        TeamLinkDto activeTeamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
+        List<ProjectDto> extendedProjects = Collections.emptyList();
 
-        List<ProjectDto> recentTeamProjects = projectCapability.findProjectsByRecentTeamMemberAccess(organizationId, activeTeamLink.getId());
-        List<ProjectDto> projectDtos = combineRecentProjectsWithDefaults(recentProjects, recentTeamProjects);
+        if (recentProjects.size() < 5) {
+            extendedProjects = projectCapability.findProjectsByMemberPermission(organizationId, memberId);
+        }
+
+        ProjectDto noProjectProject = projectCapability.findDefaultProject(organizationId);
+
+        List<ProjectDto> projectDtos = combineRecentProjectsWithDefaults(recentProjects, noProjectProject, extendedProjects);
 
         for (ProjectDto projectDto : projectDtos) {
 
             List<TaskDto> recentTasks = taskCapability.findTasksByRecentMemberAccess(organizationId, memberId, projectDto.getId());
-            List<TaskDto> recentTeamTasks = taskCapability.findTasksByRecentTeamAccess(organizationId, activeTeamLink.getId(), projectDto.getId());
 
             TaskDto noTaskDefaultTask = taskCapability.findDefaultTaskForProject(organizationId, projectDto.getId());
 
-            List<TaskDto> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, recentTeamTasks, noTaskDefaultTask);
+            List<TaskDto> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, noTaskDefaultTask);
 
             recentTasksSummaryDto.addRecentProjectTasks(projectDto, recentTasksWithDefaults);
         }
@@ -409,7 +412,7 @@ public class JournalCapability {
 
 
     private List<TaskDto> combineRecentTasksWithDefaults
-            (List<TaskDto> recentTasks, List<TaskDto> defaultTasks, TaskDto noTaskTask) {
+            (List<TaskDto> recentTasks, TaskDto noTaskTask) {
 
         Map<UUID, TaskDto> recentTaskMap = new LinkedHashMap<>();
 
@@ -431,22 +434,29 @@ public class JournalCapability {
             recentTaskMap.putIfAbsent(noTaskTask.getId(), noTaskTask);
         }
 
-        for (TaskDto defaultTask : defaultTasks) {
-            if (recentTaskMap.size() < 5) {
-                recentTaskMap.putIfAbsent(defaultTask.getId(), defaultTask);
-            }
-        }
-
         return new ArrayList<>(recentTaskMap.values());
     }
 
 
     private List<ProjectDto> combineRecentProjectsWithDefaults
-            (List<ProjectDto> recentProjects, List<ProjectDto> defaultProjects) {
+            (List<ProjectDto> recentProjects, ProjectDto noProjectProject, List<ProjectDto> defaultProjects) {
         Map<UUID, ProjectDto> recentProjectMap = new LinkedHashMap<>();
+
+        int numberAdded = 0;
 
         for (ProjectDto recentProject : recentProjects) {
             recentProjectMap.put(recentProject.getId(), recentProject);
+        }
+
+        //either add the noTaskTask as the 5th last entry, if it's not among recent
+        for (ProjectDto recentProject : recentProjects) {
+            recentProjectMap.put(recentProject.getId(), recentProject);
+            numberAdded++;
+
+            if (numberAdded == 4 && recentProjectMap.get(noProjectProject.getId()) == null) {
+                recentProjectMap.putIfAbsent(noProjectProject.getId(), noProjectProject);
+                break;
+            }
         }
 
         for (ProjectDto defaultProject : defaultProjects) {
