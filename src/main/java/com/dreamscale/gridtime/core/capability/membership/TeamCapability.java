@@ -11,8 +11,8 @@ import com.dreamscale.gridtime.api.team.TeamMemberOldDto;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.active.MemberStatusManager;
 import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
-import com.dreamscale.gridtime.core.capability.journal.TeamProjectCapability;
-import com.dreamscale.gridtime.core.capability.journal.TeamTaskCapability;
+import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
+import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -79,10 +79,10 @@ public class TeamCapability {
     private MemberDetailsRetriever memberDetailsRetriever;
 
     @Autowired
-    private TeamProjectCapability teamProjectCapability;
+    private ProjectCapability projectCapability;
 
     @Autowired
-    private TeamTaskCapability teamTaskCapability;
+    private TaskCapability taskCapability;
 
 
     @Autowired
@@ -145,9 +145,6 @@ public class TeamCapability {
 
         teamCircuitOperator.createTeamCircuit(now, teamDto, memberId);
 
-        ProjectDto defaultProj = teamProjectCapability.createDefaultTeamProject(now, organizationId, teamDto.getId(), memberId);
-        TaskDto defaultTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, memberId, teamDto.getId(), defaultProj.getId());
-
         UUID homeTeamId = updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
 
         if (homeTeamId.equals(teamDto.getId())) {
@@ -176,9 +173,6 @@ public class TeamCapability {
 
         TeamDto teamDto = teamOutputMapper.toApi(teamEntity);
 
-        ProjectDto defaultProj = teamProjectCapability.createDefaultTeamProject(now, organizationId, teamEntity.getId(), null);
-        TaskDto defaultTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, null, teamEntity.getId(), defaultProj.getId());
-
         teamCircuitOperator.createTeamCircuit(now, teamDto, null);
     }
 
@@ -200,9 +194,6 @@ public class TeamCapability {
         teamMemberEntity.setJoinDate(now);
 
         teamMemberRepository.save(teamMemberEntity);
-
-        ProjectDto defaultProj = teamProjectCapability.createDefaultTeamProject(now, organizationId, teamEntity.getId(), memberId);
-        TaskDto defaultTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, memberId, teamEntity.getId(), defaultProj.getId());
 
         updateTeamMemberHomeIfFirstTeam(now, organizationId, memberId, teamEntity.getId());
 

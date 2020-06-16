@@ -13,7 +13,7 @@ public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
 
     List<TaskEntity> findTop5ByProjectIdOrderByExternalIdDesc(UUID projectId);
 
-    TaskEntity findByProjectIdAndName(UUID projectId, String taskName);
+    TaskEntity findByOrganizationIdAndProjectIdAndLowercaseName(UUID organizationId, UUID projectId, String taskName);
 
     List<TaskEntity> findByOrganizationIdAndName(UUID organizationId, String taskName);
 
@@ -34,7 +34,7 @@ public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
     List<TaskEntity> findByRecentTeamAccess(@Param("teamId") UUID teamId, @Param("projectId") UUID projectId);
 
 
-    List<TaskEntity> findTop10ByProjectIdAndNameStartingWith(UUID projectId, String nameStartsWith);
+    List<TaskEntity> findTop10ByProjectIdAndLowercaseNameStartingWith(UUID projectId, String nameStartsWith);
 
 
     @Query(nativeQuery = true, value = "select t.* from task t, recent_task rt " +

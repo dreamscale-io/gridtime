@@ -25,4 +25,9 @@ public class TaskDto {
 
     private UUID projectId;
 
+    public void setDescription(String description) {
+        this.description = description;
+        setSummary(description);
+    }
+
 }

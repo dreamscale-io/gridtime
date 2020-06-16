@@ -53,7 +53,7 @@ public class JiraSyncCapability {
     }
 
     private void synchronizeDefaultTasks(UUID organizationId, ProjectEntity dbProject) {
-        TaskEntity defaultTask = taskRepository.findByProjectIdAndName(dbProject.getId(), TaskEntity.DEFAULT_TASK_NAME);
+        TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, dbProject.getId(), TaskEntity.DEFAULT_TASK_NAME.toLowerCase());
 
         if (defaultTask == null) {
             defaultTask = new TaskEntity().configureDefaultTask();
@@ -134,7 +134,7 @@ public class JiraSyncCapability {
 
     private boolean isTaskUpdated(TaskEntity dbTask, JiraTaskDto jiraTask) {
         String jiraSummary = jiraTask.getSummary();
-        String dbSummary = dbTask.getSummary();
+        String dbSummary = dbTask.getDescription();
 
         boolean summaryIsDifferent = jiraSummary != null && !jiraSummary.equals(dbSummary);
 
@@ -148,7 +148,7 @@ public class JiraSyncCapability {
 
 
     private TaskEntity updateTaskFields(TaskEntity dbTask, JiraTaskDto jiraTask) {
-        dbTask.setSummary(jiraTask.getSummary());
+        dbTask.setDescription(jiraTask.getSummary());
         dbTask.setStatus(jiraTask.getStatus());
         return dbTask;
     }
@@ -158,7 +158,7 @@ public class JiraSyncCapability {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId(UUID.randomUUID());
         taskEntity.setName(jiraTask.getKey());
-        taskEntity.setSummary(jiraTask.getSummary());
+        taskEntity.setDescription(jiraTask.getSummary());
         taskEntity.setStatus(jiraTask.getStatus());
         taskEntity.setExternalId(jiraTask.getId());
         taskEntity.setProjectId(projectId);

@@ -1,24 +1,16 @@
 package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.project.ProjectDto;
-import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
-import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.external.JiraCapability;
-import com.dreamscale.gridtime.core.capability.journal.TeamProjectCapability;
-import com.dreamscale.gridtime.core.capability.journal.TeamTaskCapability;
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.domain.active.*;
 import com.dreamscale.gridtime.core.domain.journal.*;
-import com.dreamscale.gridtime.core.domain.member.OrganizationEntity;
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository;
-import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -173,25 +165,6 @@ public class RecentActivityManager {
                 .projectId(projectId)
                 .memberId(memberId)
                 .organizationId(organizationId)
-                .lastAccessed(now).build();
-    }
-
-    private RecentProjectEntity createRecentProject(LocalDateTime now, IntentionEntity activeChunkEvent) {
-        return RecentProjectEntity.builder()
-                .id(UUID.randomUUID())
-                .projectId(activeChunkEvent.getProjectId())
-                .memberId(activeChunkEvent.getMemberId())
-                .organizationId(activeChunkEvent.getOrganizationId())
-                .lastAccessed(now).build();
-    }
-
-    private RecentTaskEntity createRecentTask(LocalDateTime now, IntentionEntity activeChunkEvent) {
-        return RecentTaskEntity.builder()
-                .id(UUID.randomUUID())
-                .taskId(activeChunkEvent.getTaskId())
-                .projectId(activeChunkEvent.getProjectId())
-                .memberId(activeChunkEvent.getMemberId())
-                .organizationId(activeChunkEvent.getOrganizationId())
                 .lastAccessed(now).build();
     }
 

@@ -149,7 +149,7 @@ class OrganizationResourceSpec extends Specification {
 
         assert connectionToPublicOrg != null
         assert connectionToPublicOrg.getParticipatingOrganizations().size() == 1
-        assert connectionToPublicOrg.getParticipatingOrganizations().get(0).orgName == "Open"
+        assert connectionToPublicOrg.getParticipatingOrganizations().get(0).orgName == "Public"
 
     }
 
@@ -396,7 +396,7 @@ class OrganizationResourceSpec extends Specification {
         assert loginFromShakyAfterRemove.getOrganizationId() != dreamScaleSubscription.getOrganizationId()
         assert loginFromShakyAfterRemove.getParticipatingOrganizations().size() == 1
 
-        assert activeOrgForShakyAfterRemove.orgName == "Open"
+        assert activeOrgForShakyAfterRemove.orgName == "Public"
         assert shakysOrganizationsAfterRemove.size() == 1
 
     }

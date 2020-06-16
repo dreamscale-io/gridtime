@@ -19,7 +19,9 @@ public class TaskEntity implements External {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private String name;
-    private String summary;
+    private String lowercaseName;
+
+    private String description;
     private String status;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -37,7 +39,8 @@ public class TaskEntity implements External {
 
     public TaskEntity configureDefaultTask() {
         name = DEFAULT_TASK_NAME;
-        summary = "(No Task Selected)";
+        lowercaseName = DEFAULT_TASK_NAME.toLowerCase();
+        description = "(No Task Selected)";
         status = "In Progress";
         externalId = "-1";
 

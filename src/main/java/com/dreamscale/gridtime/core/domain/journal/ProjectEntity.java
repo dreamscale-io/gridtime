@@ -23,6 +23,9 @@ public class ProjectEntity implements External {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
     private String name;
+    private String lowercaseName;
+
+    private String description;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     @Column(name = "organization_id")
@@ -30,5 +33,7 @@ public class ProjectEntity implements External {
 
     @Column(name = "external_id")
     private String externalId;
+
+    private boolean isPrivate;
 
 }

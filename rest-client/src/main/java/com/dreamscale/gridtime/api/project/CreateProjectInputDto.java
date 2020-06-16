@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class CreateProjectInputDto {
     private String name;
     private String description;
+
+    private boolean isPrivate;
 }

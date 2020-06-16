@@ -104,7 +104,7 @@ class JournalResourceSpec extends Specification {
 
         when:
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         JournalEntryDto journalEntry = journalClient.createIntention(new IntentionInputDto("My Intention", project.getId(), task.getId()))
@@ -140,7 +140,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         int flameRating = 3;
@@ -171,7 +171,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         JournalEntryDto intention = journalClient.createIntention(new IntentionInputDto("My Intention", project.getId(), task.getId()))
@@ -199,7 +199,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
@@ -225,7 +225,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
@@ -243,7 +243,7 @@ class JournalResourceSpec extends Specification {
 
     def "get historical intentions before date"() {
         given:
-        6 * mockGridClock.now() >>  LocalDateTime.now().minusDays(5)
+        6 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -253,7 +253,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description"))
+        ProjectDto project = journalClient.createProject(new CreateProjectInputDto("my-project", "proj description", true))
         TaskDto task = journalClient.createTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
         3 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
@@ -291,8 +291,8 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
-        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description"))
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description", true))
+        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description", true))
 
         TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
         TaskDto task2 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-112", "my task description"))
@@ -332,8 +332,8 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
-        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description"))
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description", true))
+        ProjectDto project2 = journalClient.createProject(new CreateProjectInputDto("proj2", "proj2 description", true))
 
         TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
         TaskDto task2 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-112", "my task description"))
@@ -372,7 +372,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description", true))
 
         TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 
@@ -407,7 +407,7 @@ class JournalResourceSpec extends Specification {
 
         TeamDto team = teamClient.createTeam("myteam")
 
-        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description"))
+        ProjectDto project1 = journalClient.createProject(new CreateProjectInputDto("proj1", "proj1 description", true))
 
         TaskDto task1 = journalClient.createTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
 

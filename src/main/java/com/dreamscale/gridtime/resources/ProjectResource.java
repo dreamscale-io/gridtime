@@ -4,10 +4,8 @@ import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
-import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.api.team.TeamLinkDto;
-import com.dreamscale.gridtime.core.capability.journal.TeamProjectCapability;
-import com.dreamscale.gridtime.core.capability.journal.TeamTaskCapability;
+import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
+import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
@@ -31,10 +29,10 @@ public class ProjectResource {
     private TeamCapability teamCapability;
 
     @Autowired
-    private TeamProjectCapability teamProjectCapability;
+    private ProjectCapability projectCapability;
 
     @Autowired
-    private TeamTaskCapability teamTaskCapability;
+    private TaskCapability taskCapability;
 
     @Autowired
     private OrganizationCapability organizationCapability;
@@ -44,15 +42,13 @@ public class ProjectResource {
      * Retrieve all projects for the organization
      */
     @GetMapping()
-    List<ProjectDto> getAllTeamProjects() {
+    List<ProjectDto> getProjects() {
         RequestContext context = RequestContext.get();
-        log.info("getAllTeamProjects, user={}", context.getRootAccountId());
+        log.info("getProjects, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(membership.getOrganizationId(), membership.getId());
-
-        return teamProjectCapability.getAllTeamProjects(membership.getOrganizationId(), teamLink.getId());
+        return projectCapability.getAllProjects(membership.getOrganizationId());
     }
 
     /**
@@ -66,7 +62,7 @@ public class ProjectResource {
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return teamTaskCapability.findTasksStartingWith(membership.getOrganizationId(), UUID.fromString(projectId), startsWith);
+        return taskCapability.findTasksStartingWith(membership.getOrganizationId(), UUID.fromString(projectId), startsWith);
     }
 
     private UUID getActiveOrgId() {

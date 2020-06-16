@@ -182,7 +182,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_TICKET_TYPE, "Invalid ticket type for activation.");
             }
 
-            OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg();
+            OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg(now);
 
             OrganizationMemberEntity pubOrgMembership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(publicOrg.getId(), rootAccountEntity.getId());
 
@@ -223,7 +223,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
         UUID teamId = inviteTicket.getTeamIdProp();
 
         if (inviteTicket.getTicketType().equals(TicketType.ACTIVATION_BY_OWNER)) {
-            welcomeMessage = "Welcome to " + publicTorchieDomain + " hyperspace.";
+            welcomeMessage = "Welcome to the " + publicTorchieDomain + " hyperspace.";
         }
 
         if (inviteTicket.getTicketType().equals(TicketType.ACTIVATE_AND_INVITE_TO_ORG)) {
@@ -231,7 +231,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             OrganizationEntity organization = organizationRepository.findById(organizationId);
             OrganizationMemberEntity senderOfTicket = organizationCapability.findMember(organizationId, inviteTicket.getOwnerId());
 
-            welcomeMessage = "Welcome to "+organization.getDomainName() + " in hyperspace. You've been invited by @"+senderOfTicket.getUsername();
+            welcomeMessage = "Welcome to the "+organization.getDomainName() + " hyperspace. You've been invited by @"+senderOfTicket.getUsername();
         }
 
         if (inviteTicket.getTicketType().equals(TicketType.ACTIVATE_AND_INVITE_TO_ORG_AND_TEAM)) {
@@ -240,7 +240,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             OrganizationMemberEntity senderOfTicket = organizationCapability.findMember(organizationId, inviteTicket.getOwnerId());
             TeamLinkDto teamLinkDto = teamCapability.getTeamLink(organizationId, teamId);
 
-            welcomeMessage = "Welcome to " + organization.getDomainName() + " in hyperspace. " +
+            welcomeMessage = "Welcome to the " + organization.getDomainName() + " hyperspace. " +
                     "You've been invited to team "+teamLinkDto.getName() + " by @"+senderOfTicket.getUsername();
         }
 
@@ -634,13 +634,15 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public UserProfileDto updateRootProfileUsername(UUID rootAccountId, String username) {
 
+        LocalDateTime now = gridClock.now();
+
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
         String oldUserName = rootAccountEntity.getRootUsername();
 
         rootAccountEntity.setRootUsername(username);
         rootAccountEntity.setLowercaseRootUsername(standarizeToLowerCase(username));
-        rootAccountEntity.setLastUpdated(gridClock.now());
+        rootAccountEntity.setLastUpdated(now);
 
         try {
             rootAccountRepository.save(rootAccountEntity);
@@ -651,7 +653,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
             throw new ConflictException(ConflictErrorCodes.CONFLICTING_USER_NAME, conflictMsg);
         }
 
-        OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg();
+        OrganizationEntity publicOrg = organizationCapability.findOrCreatePublicOrg(now);
 
         OrganizationMemberEntity pubOrgMembership = organizationMemberRepository.findByOrganizationIdAndRootAccountId(publicOrg.getId(), rootAccountEntity.getId());
 

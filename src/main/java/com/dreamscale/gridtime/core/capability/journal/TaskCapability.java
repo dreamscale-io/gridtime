@@ -2,31 +2,24 @@ package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.project.CreateTaskInputDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
-import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.external.JiraCapability;
-import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.*;
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository;
-import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
-import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
-public class TeamTaskCapability {
+public class TaskCapability {
 
     @Autowired
     private GridClock gridClock;
@@ -36,9 +29,6 @@ public class TeamTaskCapability {
 
     @Autowired
     private TaskRepository taskRepository;
-
-    @Autowired
-    TeamTaskRepository teamTaskRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -53,74 +43,37 @@ public class TeamTaskCapability {
     }
 
     @Transactional
-    public TaskDto findOrCreateTeamTask(LocalDateTime now, UUID organizationId, UUID invokingMemberId, UUID teamId, UUID projectId, CreateTaskInputDto taskInputDto) {
-
+    public TaskDto findOrCreateTask(UUID organizationId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
         String standardizedTaskName = standardizeToLowerCase(taskInputDto.getName());
 
-        TeamTaskEntity teamTask = teamTaskRepository.findByTeamIdAndTeamProjectIdAndLowercaseName(teamId, projectId, standardizedTaskName);
+        TaskEntity task = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, standardizedTaskName);
 
-        if (teamTask == null) {
-            teamTask = new TeamTaskEntity();
-            teamTask.setId(UUID.randomUUID());
-            teamTask.setOrganizationId(organizationId);
-            teamTask.setCreatorId(invokingMemberId);
-            teamTask.setTeamProjectId(projectId);
-            teamTask.setTeamId(teamId);
-            teamTask.setCreationDate(now);
-            teamTask.setName(taskInputDto.getName());
-            teamTask.setLowercaseName(standardizedTaskName);
-            teamTask.setDescription(taskInputDto.getDescription());
+        if (task == null) {
+            task = new TaskEntity();
+            task.setId(UUID.randomUUID());
+            task.setOrganizationId(organizationId);
+            task.setProjectId(projectId);
+            task.setName(taskInputDto.getName());
+            task.setLowercaseName(standardizedTaskName);
+            task.setDescription(taskInputDto.getDescription());
 
-            teamTaskRepository.save(teamTask);
+            taskRepository.save(task);
         }
 
-        TaskEntity oldTaskEntity = taskRepository.findByProjectIdAndName(projectId, standardizedTaskName);
-
-        if (oldTaskEntity == null) {
-            TaskEntity orgTask = new TaskEntity();
-            orgTask.setId(teamTask.getId());
-            orgTask.setName(teamTask.getName());
-            orgTask.setOrganizationId(organizationId);
-            orgTask.setProjectId(teamTask.getTeamProjectId());
-            orgTask.setSummary(teamTask.getDescription());
-
-            taskRepository.save(orgTask);
-        }
-
-        return toDto(teamTask);
-
+       return taskMapper.toApi(task);
     }
 
 
-    public TaskDto getTeamTask(UUID taskId) {
+    public TaskDto getTask(UUID taskId) {
 
-        TeamTaskEntity teamTask = teamTaskRepository.findOne(taskId);
+        TaskEntity task = taskRepository.findOne(taskId);
 
-        if (teamTask != null) {
-            return toDto(teamTask);
-        }
-
-        TaskEntity oldTask = taskRepository.findOne(taskId);
-
-        if (oldTask != null) {
-            return taskMapper.toApi(oldTask);
+        if (task != null) {
+            return taskMapper.toApi(task);
         }
 
         return null;
-    }
-
-
-    private TaskDto toDto(TeamTaskEntity taskEntity) {
-        TaskDto taskDto = new TaskDto();
-
-        taskDto.setId(taskEntity.getId());
-        taskDto.setName(taskEntity.getName());
-        taskDto.setSummary(taskEntity.getDescription());
-        taskDto.setDescription(taskEntity.getDescription());
-        taskDto.setProjectId(taskEntity.getTeamProjectId());
-
-        return taskDto;
     }
 
 
@@ -129,7 +82,7 @@ public class TeamTaskCapability {
 
         validateSearchIncludesNumber(startsWith);
 
-        List<TaskEntity> taskEntities = taskRepository.findTop10ByProjectIdAndNameStartingWith(projectId, startsWith);
+        List<TaskEntity> taskEntities = taskRepository.findTop10ByProjectIdAndLowercaseNameStartingWith(projectId, startsWith.toLowerCase());
 
         return taskMapper.toApiList(taskEntities);
     }
@@ -174,7 +127,7 @@ public class TeamTaskCapability {
 
     public TaskDto findDefaultTaskForProject(UUID organizationId, UUID projectId) {
 
-        TaskEntity defaultTask = taskRepository.findByProjectIdAndName(projectId, DEFAULT_TASK_NAME);
+        TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, DEFAULT_TASK_NAME.toLowerCase());
 
         return taskMapper.toApi(defaultTask);
 
@@ -187,7 +140,7 @@ public class TeamTaskCapability {
     }
 
     @Transactional
-    public TaskDto createDefaultProjectTask(LocalDateTime now, UUID organizationId, UUID creatorId, UUID teamId, UUID projectId) {
+    public TaskDto createDefaultProjectTask(UUID organizationId, UUID projectId) {
 
         TaskEntity defaultTask = new TaskEntity();
         defaultTask.setId(UUID.randomUUID());
@@ -197,18 +150,6 @@ public class TeamTaskCapability {
 
         taskRepository.save(defaultTask);
 
-        TeamTaskEntity teamTask = new TeamTaskEntity();
-        teamTask.setId(UUID.randomUUID());
-        teamTask.setOrganizationId(organizationId);
-        teamTask.setCreatorId(creatorId);
-        teamTask.setTeamProjectId(projectId);
-        teamTask.setTeamId(teamId);
-        teamTask.setCreationDate(now);
-        teamTask.setName(defaultTask.getName());
-        teamTask.setLowercaseName(defaultTask.getName().toLowerCase());
-        teamTask.setDescription(defaultTask.getSummary());
-
-        teamTaskRepository.save(teamTask);
 
         return taskMapper.toApi(defaultTask);
     }

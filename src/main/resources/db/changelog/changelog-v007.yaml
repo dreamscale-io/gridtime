@@ -65,3 +65,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/create_ticket_tombstone.sql
+
+  - include:
+        file: db/v007/alter_project_tables_add_lowercase_name.sql

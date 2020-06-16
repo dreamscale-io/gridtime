@@ -11,7 +11,7 @@ class RandomTaskEntityBuilder extends TaskEntity.TaskEntityBuilder {
         this.taskRepository = taskRepository
         id(aRandom.uuid())
                 .name(aRandom.text(10))
-                .summary(aRandom.text(30))
+                .description(aRandom.text(30))
                 .externalId(aRandom.numberText(5))
                 .projectId(aRandom.uuid())
                 .organizationId(aRandom.uuid())

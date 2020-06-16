@@ -2,12 +2,15 @@ package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
+import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.status.ConnectionResultDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.external.EmailCapability;
 import com.dreamscale.gridtime.core.capability.external.JiraCapability;
+import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
+import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
@@ -67,6 +70,12 @@ public class OrganizationCapability {
 
     @Autowired
     private OneTimeTicketCapability oneTimeTicketCapability;
+
+    @Autowired
+    private ProjectCapability projectCapability;
+
+    @Autowired
+    private TaskCapability taskCapability;
 
     @Autowired
     private OrganizationSubscriptionSeatRepository organizationSubscriptionSeatRepository;
@@ -152,6 +161,9 @@ public class OrganizationCapability {
         joinOrganizationWithEmailValidation(now, rootAccountId, organizationEntity.getId(), orgInputDto.getOwnerEmail());
 
         subscriptionEntity = organizationSubscriptionRepository.findById(subscriptionEntity.getId());
+
+        ProjectDto project = projectCapability.createDefaultProject(now, organizationEntity.getId());
+        taskCapability.createDefaultProjectTask(organizationEntity.getId(), project.getId());
 
         return createSubscriptionDto(organizationEntity, subscriptionEntity);
 
@@ -379,17 +391,21 @@ public class OrganizationCapability {
     }
 
 
-    public OrganizationEntity findOrCreatePublicOrg() {
+    public OrganizationEntity findOrCreatePublicOrg(LocalDateTime now) {
 
         OrganizationEntity publicOrg = organizationRepository.findByDomainName(PUBLIC_ORG_DOMAIN);
 
         if (publicOrg == null) {
+
             publicOrg = new OrganizationEntity();
             publicOrg.setId(UUID.randomUUID());
             publicOrg.setDomainName(PUBLIC_ORG_DOMAIN);
             publicOrg.setOrgName(PUBLIC_ORG_NAME);
 
             organizationRepository.save(publicOrg);
+
+            ProjectDto project = projectCapability.createDefaultProject(now, publicOrg.getId());
+            taskCapability.createDefaultProjectTask(publicOrg.getId(), project.getId());
         }
 
         return publicOrg;

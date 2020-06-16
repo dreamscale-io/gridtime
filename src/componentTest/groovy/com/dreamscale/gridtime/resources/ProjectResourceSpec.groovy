@@ -86,8 +86,8 @@ class ProjectResourceSpec extends Specification {
 
         accountClient.login()
 
-        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
-        ProjectDto proj2 = journalClient.createProject(new CreateProjectInputDto("proj2", "desc"))
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc", true))
+        ProjectDto proj2 = journalClient.createProject(new CreateProjectInputDto("proj2", "desc", true))
 
         when:
         List<ProjectDto> projects = projectClient.getProjects()
@@ -110,7 +110,7 @@ class ProjectResourceSpec extends Specification {
 
         accountClient.login()
 
-        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc", true))
 
         TaskDto task1 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
         TaskDto task2 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
@@ -134,7 +134,7 @@ class ProjectResourceSpec extends Specification {
 
         accountClient.login()
 
-        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc"))
+        ProjectDto proj1 = journalClient.createProject(new CreateProjectInputDto("proj1", "desc", true))
 
         TaskDto task1 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
         TaskDto task2 = journalClient.createTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))

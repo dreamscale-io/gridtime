@@ -10,4 +10,6 @@ public interface RecentTaskRepository extends CrudRepository<RecentTaskEntity, U
     RecentTaskEntity findById(UUID id);
 
     List<RecentTaskEntity> findByMemberIdAndProjectId(UUID memberId, UUID projectId);
+
+
 }

@@ -177,13 +177,13 @@ class TeamResourceSpec extends Specification {
         then:
 
         assert loginToPublicFromArty != null
-        assert publicIsActiveForArty.orgName == "Open"
+        assert publicIsActiveForArty.orgName == "Public"
 
         assert loginToPublicFromArty.getOrganizationId() == publicIsActiveForArty.getId()
         assert loginToPublicFromArty.getParticipatingOrganizations().size() == 1
 
         assert publicIsActiveForZoe != null
-        assert publicIsActiveForZoe.orgName == "Open"
+        assert publicIsActiveForZoe.orgName == "Public"
 
         assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
@@ -225,7 +225,7 @@ class TeamResourceSpec extends Specification {
         then:
 
         assert publicIsActiveForZoe != null
-        assert publicIsActiveForZoe.orgName == "Open"
+        assert publicIsActiveForZoe.orgName == "Public"
 
         assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
@@ -289,7 +289,7 @@ class TeamResourceSpec extends Specification {
         then:
 
         assert publicIsActiveForZoe != null
-        assert publicIsActiveForZoe.orgName == "Open"
+        assert publicIsActiveForZoe.orgName == "Public"
 
         assert phoenixIsActiveForZoe.id == phoenixTeamWithinPublic.id
         assert phoenixIsActiveForZoe.teamMembers.size() == 2
@@ -369,11 +369,7 @@ class TeamResourceSpec extends Specification {
         assert teams.get(0).isHomeTeam() == true
         assert teams.get(1).isHomeTeam() == false
         assert teams.get(2).isHomeTeam() == false
-
-
     }
-
-
 
     private AccountActivationDto register(String email) {
 

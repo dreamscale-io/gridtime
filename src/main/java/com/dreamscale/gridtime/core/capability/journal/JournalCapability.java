@@ -59,10 +59,10 @@ public class JournalCapability {
     private TorchieNetworkOperator torchieNetworkOperator;
 
     @Autowired
-    private TeamProjectCapability teamProjectCapability;
+    private ProjectCapability projectCapability;
 
     @Autowired
-    private TeamTaskCapability teamTaskCapability;
+    private TaskCapability taskCapability;
 
     @Autowired
     private TeamCapability teamCapability;
@@ -84,7 +84,7 @@ public class JournalCapability {
     }
 
     public JournalEntryDto createIntention(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
-        UUID organizationIdForProject = teamProjectCapability.getOrganizationIdForTeamProject(intentionInputDto.getProjectId());
+        UUID organizationIdForProject = projectCapability.getOrganizationIdForTeamProject(intentionInputDto.getProjectId());
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
 
@@ -116,13 +116,10 @@ public class JournalCapability {
     public JournalEntryDto writeJournalWelcomeMessage(LocalDateTime now, Long nanoTime,
                                                       UUID organizationId, UUID memberId, String journalText ) {
 
-        TeamLinkDto activeTeamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
 
-        log.debug("TeamLink: "+activeTeamLink.getName());
+        ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
 
-        ProjectDto defaultProject = teamProjectCapability.findDefaultProjectForTeam(organizationId, activeTeamLink.getId());
-
-        TaskDto defaultTask = teamTaskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
+        TaskDto defaultTask = taskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
 
         return createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId,
                 new IntentionInputDto(journalText, defaultProject.getId(), defaultTask.getId()), false);
@@ -213,7 +210,7 @@ public class JournalCapability {
 
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, intentionEntity.getProjectId());
 
-        TaskDto taskDto = teamTaskCapability.getTeamTask(intentionEntity.getTaskId());
+        TaskDto taskDto = taskCapability.getTask(intentionEntity.getTaskId());
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 
@@ -232,9 +229,9 @@ public class JournalCapability {
         taskSwitchEventEntity.setMemberId(memberId);
         taskSwitchEventEntity.setPosition(creationTime.minusSeconds(1));
 
-        TaskDto taskDto = teamTaskCapability.getTeamTask(intentionInputDto.getTaskId());
+        TaskDto taskDto = taskCapability.getTask(intentionInputDto.getTaskId());
         if (taskDto != null) {
-            taskSwitchEventEntity.setDescription(taskDto.getSummary());
+            taskSwitchEventEntity.setDescription(taskDto.getDescription());
         }
 
         return taskSwitchEventEntity;
@@ -384,26 +381,26 @@ public class JournalCapability {
 
         RecentTasksSummaryDto recentTasksSummaryDto = new RecentTasksSummaryDto();
 
-        List<ProjectDto> recentProjects = teamProjectCapability.findProjectsByRecentMemberAccess(organizationId, memberId);
+        List<ProjectDto> recentProjects = projectCapability.findProjectsByRecentMemberAccess(organizationId, memberId);
 
         TeamLinkDto activeTeamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
 
-        List<ProjectDto> recentTeamProjects = teamProjectCapability.findProjectsByRecentTeamMemberAccess(organizationId, activeTeamLink.getId());
+        List<ProjectDto> recentTeamProjects = projectCapability.findProjectsByRecentTeamMemberAccess(organizationId, activeTeamLink.getId());
         List<ProjectDto> projectDtos = combineRecentProjectsWithDefaults(recentProjects, recentTeamProjects);
 
         for (ProjectDto projectDto : projectDtos) {
 
-            List<TaskDto> recentTasks = teamTaskCapability.findTasksByRecentMemberAccess(organizationId, memberId, projectDto.getId());
-            List<TaskDto> recentTeamTasks = teamTaskCapability.findTasksByRecentTeamAccess(organizationId, activeTeamLink.getId(), projectDto.getId());
+            List<TaskDto> recentTasks = taskCapability.findTasksByRecentMemberAccess(organizationId, memberId, projectDto.getId());
+            List<TaskDto> recentTeamTasks = taskCapability.findTasksByRecentTeamAccess(organizationId, activeTeamLink.getId(), projectDto.getId());
 
-            TaskDto noTaskDefaultTask = teamTaskCapability.findDefaultTaskForProject(organizationId, projectDto.getId());
+            TaskDto noTaskDefaultTask = taskCapability.findDefaultTaskForProject(organizationId, projectDto.getId());
 
             List<TaskDto> recentTasksWithDefaults = combineRecentTasksWithDefaults(recentTasks, recentTeamTasks, noTaskDefaultTask);
 
             recentTasksSummaryDto.addRecentProjectTasks(projectDto, recentTasksWithDefaults);
         }
 
-        TaskDto activeTask = teamTaskCapability.findMostRecentTask(organizationId, memberId);
+        TaskDto activeTask = taskCapability.findMostRecentTask(organizationId, memberId);
 
         recentTasksSummaryDto.setActiveTask(activeTask);
 
@@ -461,28 +458,24 @@ public class JournalCapability {
         return new ArrayList<>(recentProjectMap.values());
     }
 
-    public ProjectDto findOrCreateTeamProject(UUID organizationId, UUID memberId, CreateProjectInputDto projectInputDto) {
+    public ProjectDto findOrCreateProject(UUID organizationId, UUID memberId, CreateProjectInputDto projectInputDto) {
 
         LocalDateTime now = gridClock.now();
 
-        TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
+        ProjectDto projectDto = projectCapability.findOrCreateProject(now, organizationId, projectInputDto);
 
-        ProjectDto projectDto = teamProjectCapability.findOrCreateTeamProject(now, organizationId, memberId, teamLink.getId(), projectInputDto);
-
-        TaskDto defaultNoTaskTask = teamTaskCapability.createDefaultProjectTask(now, organizationId, memberId, teamLink.getId(), projectDto.getId());
+        TaskDto defaultNoTaskTask = taskCapability.createDefaultProjectTask(organizationId, projectDto.getId());
 
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, projectDto.getId());
 
         return projectDto;
     }
 
-    public TaskDto findOrCreateTeamTask(UUID organizationId, UUID memberId, UUID projectId, CreateTaskInputDto taskInputDto) {
+    public TaskDto findOrCreateTask(UUID organizationId, UUID memberId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
         LocalDateTime now = gridClock.now();
 
-        TeamLinkDto teamLink = teamCapability.getMyActiveTeamLink(organizationId, memberId);
-
-        TaskDto taskDto = teamTaskCapability.findOrCreateTeamTask(now, organizationId, memberId, teamLink.getId(), projectId, taskInputDto);
+        TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, projectId, taskInputDto);
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 

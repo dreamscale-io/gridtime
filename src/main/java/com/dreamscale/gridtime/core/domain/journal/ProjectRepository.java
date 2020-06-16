@@ -13,7 +13,7 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
 
     List<ProjectEntity> findByOrganizationId(UUID organizationId);
 
-    ProjectEntity findByOrganizationIdAndName(UUID orgId, String name);
+    ProjectEntity findByOrganizationIdAndLowercaseName(UUID orgId, String name);
 
     ProjectEntity findById(UUID id);
 

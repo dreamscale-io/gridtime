@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,7 @@ public class JournalResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return journalCapability.findOrCreateTeamProject(invokingMember.getOrganizationId(), invokingMember.getId(), projectInputDto);
+        return journalCapability.findOrCreateProject(invokingMember.getOrganizationId(), invokingMember.getId(), projectInputDto);
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -72,7 +71,7 @@ public class JournalResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return journalCapability.findOrCreateTeamTask(invokingMember.getOrganizationId(), invokingMember.getId(), projectId, taskInputDto);
+        return journalCapability.findOrCreateTask(invokingMember.getOrganizationId(), invokingMember.getId(), projectId, taskInputDto);
     }
 
     /**
@@ -218,7 +217,7 @@ public class JournalResource {
             throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Unable to find last active project to associate this task with, which is a hack, this API is deprecated. ");
         }
 
-        TaskDto task = journalCapability.findOrCreateTeamTask(invokingMember.getOrganizationId(), invokingMember.getId(),
+        TaskDto task = journalCapability.findOrCreateTask(invokingMember.getOrganizationId(), invokingMember.getId(),
                 projectId, new CreateTaskInputDto(taskReference.getTaskName(), null));
 
         return journalCapability.getRecentProjectsAndTasks(invokingMember.getOrganizationId(), invokingMember.getId());

@@ -2,20 +2,14 @@ package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto;
 import com.dreamscale.gridtime.api.project.ProjectDto;
-import com.dreamscale.gridtime.api.team.TeamDto;
-import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
-import com.dreamscale.gridtime.core.domain.journal.TeamProjectEntity;
-import com.dreamscale.gridtime.core.domain.journal.TeamProjectRepository;
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
 import com.dreamscale.gridtime.core.domain.journal.ProjectRepository;
-import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
-import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +21,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class TeamProjectCapability {
+public class ProjectCapability {
 
     @Autowired
     private GridClock gridClock;
-
-    @Autowired
-    TeamProjectRepository teamProjectRepository;
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -41,94 +32,57 @@ public class TeamProjectCapability {
     @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
-    private DtoEntityMapper<ProjectDto, TeamProjectEntity> teamProjectMapper;
 
     private static final String DEFAULT_PROJECT_NAME = "No Project";
+    private static final String DEFAULT_PROJECT_DESCRIPTION = "(No Project Selected)";
 
     @PostConstruct
     private void init() {
-        teamProjectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, TeamProjectEntity.class);
         projectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, ProjectEntity.class);
     }
 
     @Transactional
-    public ProjectDto findOrCreateTeamProject(LocalDateTime now, UUID organizationId, UUID invokingMemberId, UUID teamId, CreateProjectInputDto projectInputDto) {
+    public ProjectDto findOrCreateProject(LocalDateTime now, UUID organizationId, CreateProjectInputDto projectInputDto) {
 
         String standardizedProjectName = standardizeToLowerCase(projectInputDto.getName());
 
-        TeamProjectEntity teamProject = teamProjectRepository.findByTeamIdAndLowercaseName(teamId, standardizedProjectName);
+        ProjectEntity orgProject = projectRepository.findByOrganizationIdAndLowercaseName(organizationId, standardizedProjectName);
 
-        if (teamProject == null) {
-            teamProject = new TeamProjectEntity();
-            teamProject.setId(UUID.randomUUID());
-            teamProject.setOrganizationId(organizationId);
-            teamProject.setTeamId(teamId);
-            teamProject.setCreatorId(invokingMemberId);
-            teamProject.setName(projectInputDto.getName());
-            teamProject.setDescription(projectInputDto.getDescription());
-            teamProject.setLowercaseName(standardizedProjectName);
-            teamProject.setCreationDate(now);
-
-            teamProjectRepository.save(teamProject);
-
-            ProjectEntity orgProject = new ProjectEntity();
-            orgProject.setId(teamProject.getId());
-            orgProject.setName(teamProject.getName());
+        if (orgProject == null) {
+            orgProject = new ProjectEntity();
+            orgProject.setId(UUID.randomUUID());
+            orgProject.setName(projectInputDto.getName());
+            orgProject.setDescription(projectInputDto.getDescription());
             orgProject.setOrganizationId(organizationId);
+            orgProject.setPrivate(true);
 
             projectRepository.save(orgProject);
 
         }
 
-        return toDto(teamProject);
+        return projectMapper.toApi(orgProject);
     }
 
     @Transactional
-    public ProjectDto createDefaultTeamProject(LocalDateTime now, UUID organizationId, UUID teamId, UUID creatorId) {
-
-        TeamProjectEntity defaultProject = new TeamProjectEntity();
-        defaultProject.setId(UUID.randomUUID());
-        defaultProject.setOrganizationId(organizationId);
-        defaultProject.setTeamId(teamId);
-        defaultProject.setCreatorId(creatorId);
-        defaultProject.setName(DEFAULT_PROJECT_NAME);
-        defaultProject.setLowercaseName(DEFAULT_PROJECT_NAME.toLowerCase());
-        defaultProject.setCreationDate(now);
-
-        teamProjectRepository.save(defaultProject);
+    public ProjectDto createDefaultProject(LocalDateTime now, UUID organizationId) {
 
         ProjectEntity orgProject = new ProjectEntity();
-        orgProject.setId(defaultProject.getId());
-        orgProject.setName(defaultProject.getName());
+        orgProject.setId(UUID.randomUUID());
+        orgProject.setName(DEFAULT_PROJECT_NAME);
+        orgProject.setDescription(DEFAULT_PROJECT_DESCRIPTION);
+        orgProject.setLowercaseName(DEFAULT_PROJECT_NAME.toLowerCase());
         orgProject.setOrganizationId(organizationId);
 
         projectRepository.save(orgProject);
 
-
-        return toDto(defaultProject);
+        return projectMapper.toApi(orgProject);
     }
 
-    public ProjectDto findDefaultProjectForTeam(UUID organizationId, UUID teamId) {
+    public ProjectDto findDefaultProject(UUID organizationId) {
 
-        TeamProjectEntity defaultProject = teamProjectRepository.findByTeamIdAndLowercaseName(teamId, DEFAULT_PROJECT_NAME.toLowerCase());
-        return teamProjectMapper.toApi(defaultProject);
-    }
+        ProjectEntity project = projectRepository.findByOrganizationIdAndLowercaseName(organizationId, DEFAULT_PROJECT_NAME.toLowerCase());
 
-
-    public List<ProjectDto> getAllTeamProjects(UUID organizationId, UUID teamId) {
-
-        List<TeamProjectEntity> teamProjects = teamProjectRepository.findByTeamId(teamId);
-
-        return teamProjectMapper.toApiList(teamProjects);
-    }
-
-    private ProjectDto toDto(TeamProjectEntity teamProject) {
-        ProjectDto projectDto = new ProjectDto();
-
-        projectDto.setId(teamProject.getId());
-        projectDto.setName(teamProject.getName());
-
-        return projectDto;
+        return projectMapper.toApi(project);
     }
 
     public List<ProjectDto> getAllProjects(UUID organizationId) {
