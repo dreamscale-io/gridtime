@@ -875,5 +875,9 @@ public class OrganizationCapability {
     }
 
 
+    public OrganizationDto getOrganization(UUID organizationId) {
 
+        OrganizationEntity organization = organizationRepository.findById(organizationId);
+        return orgOutputMapper.toApi(organization);
+    }
 }

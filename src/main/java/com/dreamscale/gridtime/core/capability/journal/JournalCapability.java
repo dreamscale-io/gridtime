@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.capability.journal;
 
 import com.dreamscale.gridtime.api.journal.*;
+import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.project.*;
 import com.dreamscale.gridtime.api.spirit.ActiveLinksNetworkDto;
 import com.dreamscale.gridtime.api.spirit.SpiritLinkDto;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
@@ -46,7 +48,7 @@ public class JournalCapability {
     private JournalLinkEventRepository journalLinkEventRepository;
 
     @Autowired
-    private OrganizationCapability organizationMembership;
+    private OrganizationCapability organizationCapability;
 
     @Autowired
     private RecentActivityManager recentActivityManager;
@@ -112,6 +114,7 @@ public class JournalCapability {
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
 
+    @Transactional
     public JournalEntryDto writeJournalWelcomeMessage(LocalDateTime now, Long nanoTime,
                                                       UUID organizationId, UUID memberId, String journalText ) {
 
@@ -254,7 +257,7 @@ public class JournalCapability {
     }
 
     public List<JournalEntryDto> getRecentIntentionsForMember(UUID organizationId, UUID memberId, int limit) {
-        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdWithLimit(memberId, limit);
         Collections.reverse(journalEntryEntities);
@@ -263,9 +266,9 @@ public class JournalCapability {
     }
 
     public List<JournalEntryDto> getHistoricalIntentionsForUser(UUID organizationId, String username, LocalDateTime beforeDate, Integer limit) {
-        UUID memberId = organizationMembership.getMemberIdForUser(organizationId, username);
+        UUID memberId = organizationCapability.getMemberIdForUser(organizationId, username);
 
-        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, memberId);
+        organizationCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -347,9 +350,9 @@ public class JournalCapability {
 
     public RecentJournalDto getJournalForUser(UUID organizationId, String username, Integer effectiveLimit) {
 
-        UUID otherMemberId = organizationMembership.getMemberIdForUser(organizationId, username);
+        UUID otherMemberId = organizationCapability.getMemberIdForUser(organizationId, username);
 
-        organizationMembership.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
+        organizationCapability.validateMemberWithinOrgByMemberId(organizationId, otherMemberId);
 
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, otherMemberId, effectiveLimit);
         RecentTasksSummaryDto recentActivity = getRecentProjectsAndTasks(organizationId, otherMemberId);
@@ -365,6 +368,8 @@ public class JournalCapability {
 
     public RecentJournalDto getJournalForSelf(UUID organizationId, UUID memberId, Integer effectiveLimit) {
 
+        initializeJournalIfNoEntries(organizationId, memberId);
+
         List<JournalEntryDto> journalEntries = getRecentIntentionsForMember(organizationId, memberId, effectiveLimit);
         RecentTasksSummaryDto recentActivity = getRecentProjectsAndTasks(organizationId, memberId);
 
@@ -374,6 +379,19 @@ public class JournalCapability {
         recentJournalDto.setRecentTasksByProjectId(recentActivity.getRecentTasksByProjectId());
 
         return recentJournalDto;
+    }
+
+    private void initializeJournalIfNoEntries(UUID organizationId, UUID memberId) {
+        IntentionEntity intentionEntity = intentionRepository.findFirstByMemberId(memberId);
+
+        if (intentionEntity == null) {
+            LocalDateTime now = gridClock.now();
+            Long nanoTime = gridClock.nanoTime();
+
+            OrganizationDto org = organizationCapability.getOrganization(organizationId);
+
+            writeJournalWelcomeMessage(now, nanoTime, organizationId, memberId, "Welcome to the "+org.getDomainName() + " hyperspace");
+        }
     }
 
     public RecentTasksSummaryDto getRecentProjectsAndTasks(UUID organizationId, UUID memberId) {

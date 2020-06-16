@@ -31,6 +31,8 @@ public interface JournalClient {
 
     //create journal projects and tasks, and retrieve top 5 recent project/task list
 
+    //Note: TaskDto the 'summary' field is deprecated, use 'description' field instead, both are populated for now
+
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.PROJECT_PATH)
     ProjectDto findOrCreateProject(CreateProjectInputDto createProjectInputDto);
 
