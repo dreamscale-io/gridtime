@@ -18,4 +18,6 @@ public class ProjectDto {
     private String description;
     private String externalId;
 
+    private boolean isPrivate;
+
 }
