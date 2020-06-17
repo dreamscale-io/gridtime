@@ -68,3 +68,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_project_tables_add_lowercase_name.sql
+
+  - include:
+        file: db/v007/create_project_grant_access.sql

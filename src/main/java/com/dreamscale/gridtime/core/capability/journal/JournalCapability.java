@@ -403,7 +403,7 @@ public class JournalCapability {
         List<ProjectDto> extendedProjects = Collections.emptyList();
 
         if (recentProjects.size() < 5) {
-            extendedProjects = projectCapability.findProjectsByMemberPermission(organizationId, memberId);
+            extendedProjects = projectCapability.findProjectsByMemberPermission(organizationId, memberId, 5);
         }
 
         ProjectDto noProjectProject = projectCapability.findDefaultProject(organizationId);
@@ -490,7 +490,7 @@ public class JournalCapability {
 
         LocalDateTime now = gridClock.now();
 
-        ProjectDto projectDto = projectCapability.findOrCreateProject(now, organizationId, projectInputDto);
+        ProjectDto projectDto = projectCapability.findOrCreateProject(now, organizationId, memberId, projectInputDto);
 
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, projectDto.getId());
 

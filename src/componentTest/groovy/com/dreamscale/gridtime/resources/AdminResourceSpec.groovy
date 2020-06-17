@@ -103,7 +103,7 @@ public class AdminResourceSpec extends Specification {
 
         then:
 
-        List<ProjectEntity> dbProjects = projectRepository.findByOrganizationIdOrderByName(organizationEntity.id)
+        List<ProjectEntity> dbProjects = projectRepository.findPublicProjectsByOrganizationId(organizationEntity.id)
         assert dbProjects != null
         assert dbProjects.size() > 0
 

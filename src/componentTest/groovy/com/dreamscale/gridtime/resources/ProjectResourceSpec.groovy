@@ -172,8 +172,8 @@ class ProjectResourceSpec extends Specification {
 
         accountClient.login()
 
-        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
-        ProjectDto proj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", true))
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", false))
+        ProjectDto proj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", false))
 
         TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
         TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
@@ -185,7 +185,7 @@ class ProjectResourceSpec extends Specification {
         when:
         RecentTasksSummaryDto zoesJournalProjects = journalClient.getRecentProjectsAndTasks();
 
-        ProjectDto zoesProj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", true))
+        ProjectDto zoesProj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", false))
 
         TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
 

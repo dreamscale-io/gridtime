@@ -2,8 +2,6 @@ package com.dreamscale.gridtime.core.capability.membership;
 
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.organization.*;
-import com.dreamscale.gridtime.api.project.ProjectDto;
-import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.api.team.TeamLinkDto;
@@ -777,9 +775,13 @@ public class TeamCapability {
 
     private void fillTeamWithTeamMembers(TeamDto team, UUID meId) {
         if (team != null) {
-            log.debug("Team member retrieval, team: {}", team);
-            List<TeamMemberDto> membersWithDetails = memberStatusManager.getMembersForTeam(team.getOrganizationId(), team.getId(), meId);
+            List<TeamMemberDto> membersWithDetails = memberStatusManager.getMembersForTeamWithMeFirst(team.getOrganizationId(), team.getId(), meId);
             team.setTeamMembers(membersWithDetails);
+
+            if (membersWithDetails.size() > 0) {
+                team.setMe(membersWithDetails.get(0));
+            }
+            log.debug("Team member retrieval, team: {}", team);
         }
     }
 

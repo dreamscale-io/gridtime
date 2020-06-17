@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "project")
@@ -34,6 +35,20 @@ public class ProjectEntity implements External {
     @Column(name = "external_id")
     private String externalId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID createdBy;
+
+    private LocalDateTime createdDate;
+
     private boolean isPrivate;
 
+
 }
+//    create table project_grant_access (
+//        id uuid primary key not null,
+//        project_id uuid not null,
+//        access_type text not null,
+//        access_id uuid not null,
+//        granted_by_id uuid not null,
+//        granted_date timestamp
+//);

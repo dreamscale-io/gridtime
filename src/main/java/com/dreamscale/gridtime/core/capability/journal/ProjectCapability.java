@@ -3,8 +3,7 @@ package com.dreamscale.gridtime.core.capability.journal;
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto;
 import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
-import com.dreamscale.gridtime.core.domain.journal.ProjectEntity;
-import com.dreamscale.gridtime.core.domain.journal.ProjectRepository;
+import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
@@ -33,6 +32,9 @@ public class ProjectCapability {
     private TaskCapability taskCapability;
 
     @Autowired
+    private ProjectGrantAccessRepository projectGrantAccessRepository;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
 
@@ -45,28 +47,53 @@ public class ProjectCapability {
     }
 
     @Transactional
-    public ProjectDto findOrCreateProject(LocalDateTime now, UUID organizationId, CreateProjectInputDto projectInputDto) {
+    public ProjectDto findOrCreateProject(LocalDateTime now, UUID organizationId, UUID memberId, CreateProjectInputDto projectInputDto) {
 
         String standardizedProjectName = standardizeToLowerCase(projectInputDto.getName());
 
-        ProjectEntity orgProject = projectRepository.findByOrganizationIdAndLowercaseName(organizationId, standardizedProjectName);
+        ProjectEntity project = null;
 
-        if (orgProject == null) {
-            orgProject = new ProjectEntity();
-            orgProject.setId(UUID.randomUUID());
-            orgProject.setName(projectInputDto.getName());
-            orgProject.setLowercaseName(standardizedProjectName);
-            orgProject.setDescription(projectInputDto.getDescription());
-            orgProject.setOrganizationId(organizationId);
-            orgProject.setPrivate(true);
-
-            projectRepository.save(orgProject);
-
-            taskCapability.createDefaultProjectTask(organizationId, orgProject.getId());
-
+        if (projectInputDto.isPrivate()) {
+            project = projectRepository.findPrivateProjectByName(organizationId, memberId, standardizedProjectName);
+        } else {
+            project = projectRepository.findPublicProjectByName(organizationId, standardizedProjectName);
         }
 
-        return projectMapper.toApi(orgProject);
+        if (project == null) {
+            project = new ProjectEntity();
+            project.setId(UUID.randomUUID());
+            project.setName(projectInputDto.getName());
+            project.setLowercaseName(standardizedProjectName);
+            project.setDescription(projectInputDto.getDescription());
+            project.setOrganizationId(organizationId);
+            project.setCreatedBy(memberId);
+            project.setCreatedDate(now);
+            project.setPrivate(projectInputDto.isPrivate());
+
+            if (projectInputDto.isPrivate()) {
+                createGrantAccessForMember(now, organizationId, memberId, project);
+            }
+
+            projectRepository.save(project);
+
+            taskCapability.createDefaultProjectTask(organizationId, project.getId());
+        }
+
+        return projectMapper.toApi(project);
+    }
+
+    private void createGrantAccessForMember(LocalDateTime now, UUID organizationId, UUID memberId, ProjectEntity orgProject) {
+        ProjectGrantAccessEntity projectGrantAccessEntity = new ProjectGrantAccessEntity();
+
+        projectGrantAccessEntity.setId(UUID.randomUUID());
+        projectGrantAccessEntity.setOrganizationId(organizationId);
+        projectGrantAccessEntity.setProjectId(orgProject.getId());
+        projectGrantAccessEntity.setGrantedDate(now);
+        projectGrantAccessEntity.setGrantedById(memberId);
+        projectGrantAccessEntity.setGrantType(GrantType.MEMBER);
+        projectGrantAccessEntity.setGrantedToId(memberId);
+
+        projectGrantAccessRepository.save(projectGrantAccessEntity);
     }
 
     @Transactional
@@ -78,6 +105,8 @@ public class ProjectCapability {
         orgProject.setDescription(DEFAULT_PROJECT_DESCRIPTION);
         orgProject.setLowercaseName(DEFAULT_PROJECT_NAME.toLowerCase());
         orgProject.setOrganizationId(organizationId);
+        orgProject.setCreatedDate(now);
+        orgProject.setPrivate(false);
 
         projectRepository.save(orgProject);
 
@@ -88,13 +117,13 @@ public class ProjectCapability {
 
     public ProjectDto findDefaultProject(UUID organizationId) {
 
-        ProjectEntity project = projectRepository.findByOrganizationIdAndLowercaseName(organizationId, DEFAULT_PROJECT_NAME.toLowerCase());
+        ProjectEntity project = projectRepository.findPublicProjectByName(organizationId, DEFAULT_PROJECT_NAME.toLowerCase());
 
         return projectMapper.toApi(project);
     }
 
-    public List<ProjectDto> getAllProjects(UUID organizationId) {
-        Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdOrderByName(organizationId);
+    public List<ProjectDto> getAllProjectsWithPermission(UUID organizationId, UUID memberId) {
+        Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdAndPermission(organizationId, memberId);
         return projectMapper.toApiList(projectEntities);
     }
 
@@ -114,7 +143,6 @@ public class ProjectCapability {
         } else {
             return projectEntity.getOrganizationId();
         }
-
     }
 
     public List<ProjectDto> findProjectsByRecentMemberAccess(UUID organizationId, UUID memberId) {
@@ -123,9 +151,9 @@ public class ProjectCapability {
         return projectMapper.toApiList(projectEntities);
     }
 
-    public List<ProjectDto> findProjectsByMemberPermission(UUID organizationId, UUID memberId) {
+    public List<ProjectDto> findProjectsByMemberPermission(UUID organizationId, UUID memberId, int limit) {
 
-        List<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdOrderByName(organizationId);
+        List<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdAndPermissionWithLimit(organizationId, memberId, limit);
         return projectMapper.toApiList(projectEntities);
 
     }

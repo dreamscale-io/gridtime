@@ -1,45 +1,38 @@
 package com.dreamscale.gridtime.core.domain.journal;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "project")
+@Entity(name = "project_grant_access")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectEntity implements External {
+public class ProjectGrantAccessEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
-    private String name;
-    private String lowercaseName;
-
-    private String description;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    @Column(name = "organization_id")
     private UUID organizationId;
 
-    @Column(name = "external_id")
-    private String externalId;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID projectId;
+
+    @Enumerated(EnumType.STRING)
+    private GrantType grantType;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID createdBy;
+    private UUID grantedToId;
 
-    private LocalDateTime createdDate;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID grantedById;
 
-    private boolean isPrivate;
+    private LocalDateTime grantedDate;
 
 }

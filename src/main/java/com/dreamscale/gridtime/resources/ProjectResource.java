@@ -48,7 +48,7 @@ public class ProjectResource {
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return projectCapability.getAllProjects(membership.getOrganizationId());
+        return projectCapability.getAllProjectsWithPermission(membership.getOrganizationId(), membership.getId());
     }
 
     /**

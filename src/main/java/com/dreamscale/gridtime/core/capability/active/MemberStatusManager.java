@@ -69,12 +69,11 @@ public class MemberStatusManager {
         return toStatusDtos(meStatus, teamMemberStatusEntities);
     }
 
-    public List<TeamMemberDto> getMembersForTeam(UUID organizationId, UUID teamId, UUID memberId) {
+    public List<TeamMemberDto> getMembersForTeamWithMeFirst(UUID organizationId, UUID teamId, UUID memberId) {
 
         List<MemberStatusEntity> teamMemberStatusEntities = memberStatusRepository.findByTeamId(teamId);
 
         MemberStatusEntity meStatus = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
-
 
         return toStatusDtos(meStatus, teamMemberStatusEntities);
     }

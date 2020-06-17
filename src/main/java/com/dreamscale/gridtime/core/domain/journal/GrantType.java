@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.domain.journal;
 
-public enum GrantAccessType {
+public enum GrantType {
 
     MEMBER, TEAM
 

@@ -4,9 +4,10 @@
 
  create table project_grant_access (
     id uuid primary key not null,
+    organization_id uuid not null,
     project_id uuid not null,
-    access_type text not null,
-    access_id uuid not null,
+    grant_type text not null,
+    granted_to_id uuid not null,
     granted_by_id uuid not null,
     granted_date timestamp
  );

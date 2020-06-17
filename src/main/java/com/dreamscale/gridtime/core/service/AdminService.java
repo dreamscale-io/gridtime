@@ -92,7 +92,7 @@ public class AdminService {
 
         TeamDto teamDto = teamCapability.getTeamByName(orgId, teamName);
 
-        ProjectEntity projectEntity = projectRepository.findByOrganizationIdAndLowercaseName(orgId, projectName);
+        ProjectEntity projectEntity = projectRepository.findPublicProjectByName(orgId, projectName);
 
         List<BoxMatcherConfig> boxMatcherConfigs = new CPGBucketConfig().createBoxMatchers();
 
