@@ -735,6 +735,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
 
+        validateAccountExists(rootAccountId.toString(), rootAccountEntity);
+        validateNotNull("fullName", fullName);
+
         rootAccountEntity.setFullName(fullName);
         rootAccountEntity.setLastUpdated(gridClock.now());
 
@@ -745,8 +748,17 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return toDto(rootAccountEntity, activeMembership);
     }
 
+    private void validateNotNull(String propertyName, String property) {
+        if (property == null) {
+            throw new BadRequestException(ValidationErrorCodes.PROPERTY_CANT_BE_NULL, "Property "+propertyName + " cant be null");
+        }
+    }
+
     public UserProfileDto updateRootProfileDisplayName(UUID rootAccountId, String displayName) {
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        validateAccountExists(rootAccountId.toString(), rootAccountEntity);
+        validateNotNull("displayName", displayName);
 
         rootAccountEntity.setDisplayName(displayName);
         rootAccountEntity.setLastUpdated(gridClock.now());
