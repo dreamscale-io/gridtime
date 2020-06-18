@@ -94,7 +94,7 @@ public class TaskCapability {
     }
 
     private void validateProjectWithinOrg(UUID orgId, UUID projectId) {
-        ProjectEntity projectEntity = projectRepository.findById(projectId);
+        ProjectEntity projectEntity = projectRepository.findByOrganizationIdAndId(orgId, projectId);
 
         if (projectEntity == null || !projectEntity.getOrganizationId().equals(orgId)) {
             throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Project not found in Org");

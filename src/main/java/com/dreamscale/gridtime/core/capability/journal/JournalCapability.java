@@ -501,6 +501,8 @@ public class JournalCapability {
 
         LocalDateTime now = gridClock.now();
 
+        projectCapability.validateProjectPermission(organizationId, memberId, projectId);
+
         TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, projectId, taskInputDto);
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);

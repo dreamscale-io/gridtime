@@ -49,9 +49,19 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
             "where g.project_id = p.id " +
             "and g.grant_type = 'MEMBER' " +
             "and g.granted_to_id=(:memberId))")
-    ProjectEntity findPrivateProjectByName(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("lowercaseProjectName") String lowercaseProjectName);
+    List<ProjectEntity> findPrivateProjectByName(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("lowercaseProjectName") String lowercaseProjectName);
 
-    ProjectEntity findById(UUID id);
+    @Query(nativeQuery = true, value = "select p.* from project p " +
+            "where p.organization_id = (:organizationId) " +
+            "and p.is_private = true "+
+            "and p.id = (:projectId) "+
+            "and exists (select 1 from project_grant_access g " +
+            "where g.project_id = p.id " +
+            "and g.grant_type = 'MEMBER' " +
+            "and g.granted_to_id=(:memberId))")
+    ProjectEntity findPrivateProjectById(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("projectId") UUID projectId);
+
+    ProjectEntity findByOrganizationIdAndId(UUID organizationId, UUID id);
 
     @Query(nativeQuery = true, value = "select p.* from project p, recent_project rp " +
             "where p.id = rp.project_id " +

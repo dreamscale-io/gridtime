@@ -374,11 +374,8 @@ class JournalResourceSpec extends Specification {
         assert recentTasksSummary != null
         assert recentTasksSummary.getRecentProjects().size() == 3
 
-        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(1);
-        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(2);
-
-        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3;
-        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 1;
+        assert recentTasksSummary.getRecentTasks(project1.getId()).size() == 3;
+        assert recentTasksSummary.getRecentTasks(project2.getId()).size() == 1;
 
     }
 

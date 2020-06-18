@@ -32,5 +32,8 @@ truncate table team_circuit_room;
 truncate table one_time_ticket;
 truncate table active_join_circuit;
 
+truncate table project_grant_access;
+truncate table project_grant_tombstone;
+
 truncate team_member_home;
 

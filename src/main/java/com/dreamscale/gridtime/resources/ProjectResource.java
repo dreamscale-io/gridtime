@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.project.*;
 import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
@@ -93,47 +94,47 @@ public class ProjectResource {
     }
 
     /**
-     * Grants access to the current project to a specific member or team within the organization.
+     * Grants access to the current project to a specific member within the organization.
      *
      * This will cause the project to show up for the user as an available project, and allow them to
      * add tasks, and contribute Idea Flow data to the project metrics.
      *
      * @param projectId
-     * @param grantAccessInput GrantAccessInputDto
+     * @param usernameInputDto UsernameInputDto
      * @return SimpleStatusDto
      */
-    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH)
-    SimpleStatusDto grantPermission(@PathVariable("id") String projectId, @RequestBody GrantAccessInputDto grantAccessInput) {
+    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH + ResourcePaths.USERNAME_PATH)
+    SimpleStatusDto grantPermissionToUser(@PathVariable("id") String projectId, @RequestBody UsernameInputDto usernameInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("grantPermission, user={}", context.getRootAccountId());
+        log.info("grantPermissionToUser, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         UUID projectIdParsed = UUID.fromString(projectId);
 
-        return projectCapability.grantAccessForProject(membership.getOrganizationId(), membership.getId(), projectIdParsed, grantAccessInput);
+        return projectCapability.grantAccessForMember(membership.getOrganizationId(), membership.getId(), projectIdParsed, usernameInputDto.getUsername());
     }
 
     /**
-     * Revokes access to the current project for a specific member or team within the organization.
+     * Revokes access to the current project for a specific member within the organization.
      *
      * This will cause the project to stop showing up for the user as an available project,
      * and removes the ability to add tasks, or contribute Idea Flow data to the project metrics.
      *
      * @param projectId
-     * @param revokeAccessInput GrantAccessInputDto
+     * @param usernameInputDto UsernameInputDto
      * @return SimpleStatusDto
      */
-    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH)
-    SimpleStatusDto revokePermission(@PathVariable("id") String projectId, @RequestBody GrantAccessInputDto revokeAccessInput) {
+    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH + ResourcePaths.USERNAME_PATH)
+    SimpleStatusDto revokePermission(@PathVariable("id") String projectId, @RequestBody UsernameInputDto usernameInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("revokePermission, user={}", context.getRootAccountId());
+        log.info("revokePermissionFromUser, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         UUID projectIdParsed = UUID.fromString(projectId);
 
-        return projectCapability.revokeAccessForProject(membership.getOrganizationId(), membership.getId(), projectIdParsed, revokeAccessInput);
+        return projectCapability.revokeAccessForMember(membership.getOrganizationId(), membership.getId(), projectIdParsed, usernameInputDto.getUsername());
     }
 
     /**

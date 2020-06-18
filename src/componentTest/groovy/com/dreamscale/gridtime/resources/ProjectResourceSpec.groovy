@@ -3,10 +3,13 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.AccountActivationDto
 import com.dreamscale.gridtime.api.account.ActivationCodeDto
+import com.dreamscale.gridtime.api.account.ConnectionStatusDto
 import com.dreamscale.gridtime.api.account.RootAccountCredentialsInputDto
 import com.dreamscale.gridtime.api.account.UserProfileDto
+import com.dreamscale.gridtime.api.account.UsernameInputDto
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto
 import com.dreamscale.gridtime.api.project.CreateTaskInputDto
+
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto
 import com.dreamscale.gridtime.api.project.TaskDto
@@ -193,6 +196,71 @@ class ProjectResourceSpec extends Specification {
         assert zoesJournalProjects.getRecentProjects().size() == 3
         assert zoesProj2.getId() == proj2.getId()
         assert zoeTask1.getId() == task1.getId()
+    }
+
+    def "should share private projects granted access to other members"() {
+        given:
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        when:
+
+        projectClient.grantPermissionToUser(proj1.getId().toString(), new UsernameInputDto("zoe"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        then:
+        assert zoesProj1.getId() == proj1.getId()
+        assert zoeTask1.getId() == task1.getId()
+    }
+
+    def "should revoke access to private projects granted access to other members"() {
+        given:
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        when:
+
+        projectClient.grantPermissionToUser(proj1.getId().toString(), new UsernameInputDto("zoe"))
+        projectClient.revokePermissionFromUser(proj1.getId().toString(), new UsernameInputDto("zoe"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        then:
+        assert zoesProj1.getId() != proj1.getId()
+        assert zoeTask1.getId() != task1.getId()
     }
 
 

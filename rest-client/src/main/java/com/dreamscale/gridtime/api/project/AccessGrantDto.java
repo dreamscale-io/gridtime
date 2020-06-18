@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 public class AccessGrantDto {
 
-    GrantType grantType;
+    String grantType;
     UUID grantedToId;
     String grantedToName;
 }

@@ -2,7 +2,9 @@ package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.project.*;
+import com.dreamscale.gridtime.api.team.TeamInputDto;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -27,10 +29,17 @@ public interface ProjectClient {
     @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.BOX_PATH)
     SimpleStatusDto updateBoxConfiguration(@Param("id") String projectId , ProjectBoxConfigurationInputDto boxConfigurationInput);
 
-    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH)
-    SimpleStatusDto grantPermission(@Param("id") String projectId , GrantAccessInputDto grantAccessInputDto);
+    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH + ResourcePaths.USERNAME_PATH)
+    SimpleStatusDto grantPermissionToUser(@Param("id") String projectId , UsernameInputDto usernameInputDto);
 
-    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH)
-    SimpleStatusDto revokePermission(@Param("id") String projectId , GrantAccessInputDto revokeAccessInputDto);
+    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH + ResourcePaths.USERNAME_PATH)
+    SimpleStatusDto revokePermissionFromUser(@Param("id") String projectId , UsernameInputDto usernameInputDto);
+
+    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH + ResourcePaths.TEAM_PATH)
+    SimpleStatusDto grantPermissionToTeam(@Param("id") String projectId , TeamInputDto teamInputDto);
+
+    @RequestLine("POST " + ResourcePaths.PROJECT_PATH + "/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH + ResourcePaths.TEAM_PATH)
+    SimpleStatusDto revokePermissionFromTeam(@Param("id") String projectId , TeamInputDto teamInputDto);
+
 
 }
