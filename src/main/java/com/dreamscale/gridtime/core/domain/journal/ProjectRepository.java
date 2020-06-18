@@ -14,16 +14,26 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
 
     @Query(nativeQuery = true, value = "select p.* from project p " +
             "where p.organization_id = (:organizationId) " +
-            "and (p.is_private = false or exists (select 1 from project_grant_access g " +
+            "and (p.is_private = false or (exists (select 1 from project_grant_access g " +
             "where g.project_id = p.id and g.grant_type = 'MEMBER' and g.granted_to_id=(:memberId))) " +
+            "or exists (select 1 from project_grant_access gt, team_member tm " +
+            "where gt.project_id = p.id " +
+            "and gt.grant_type = 'TEAM'" +
+            "and gt.granted_to_id = tm.team_id " +
+            "and tm.member_id = (:memberId))) "+
             "order by p.created_date limit (:limit)")
     List<ProjectEntity> findByOrganizationIdAndPermissionWithLimit(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("limit") int limit);
 
 
     @Query(nativeQuery = true, value = "select p.* from project p " +
             "where p.organization_id = (:organizationId) " +
-            "and (p.is_private = false or exists (select 1 from project_grant_access g " +
+            "and (p.is_private = false or (exists (select 1 from project_grant_access g " +
             "where g.project_id = p.id and g.grant_type = 'MEMBER' and g.granted_to_id=(:memberId))) " +
+            "or exists (select 1 from project_grant_access gt, team_member tm " +
+            "where gt.project_id = p.id " +
+            "and gt.grant_type = 'TEAM'" +
+            "and gt.granted_to_id = tm.team_id " +
+            "and tm.member_id = (:memberId))) "+
             "order by p.name")
     List<ProjectEntity> findByOrganizationIdAndPermission(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
 
@@ -45,20 +55,31 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
             "where p.organization_id = (:organizationId) " +
             "and p.is_private = true "+
             "and p.lowercase_name=(:lowercaseProjectName) " +
-            "and exists (select 1 from project_grant_access g " +
+            "and (exists (select 1 from project_grant_access g " +
             "where g.project_id = p.id " +
             "and g.grant_type = 'MEMBER' " +
-            "and g.granted_to_id=(:memberId))")
+            "and g.granted_to_id=(:memberId)) " +
+            "or exists (select 1 from project_grant_access gt, team_member tm " +
+            "where gt.project_id = p.id " +
+            "and gt.grant_type = 'TEAM'" +
+            "and gt.granted_to_id = tm.team_id " +
+            "and tm.member_id = (:memberId))) "+
+            "order by p.created_date")
     List<ProjectEntity> findPrivateProjectByName(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("lowercaseProjectName") String lowercaseProjectName);
 
     @Query(nativeQuery = true, value = "select p.* from project p " +
             "where p.organization_id = (:organizationId) " +
             "and p.is_private = true "+
             "and p.id = (:projectId) "+
-            "and exists (select 1 from project_grant_access g " +
+            "and (exists (select 1 from project_grant_access g " +
             "where g.project_id = p.id " +
             "and g.grant_type = 'MEMBER' " +
-            "and g.granted_to_id=(:memberId))")
+            "and g.granted_to_id=(:memberId)) " +
+            "or exists (select 1 from project_grant_access gt, team_member tm " +
+            "where gt.project_id = p.id " +
+            "and gt.grant_type = 'TEAM'" +
+            "and gt.granted_to_id = tm.team_id " +
+            "and tm.member_id = (:memberId)))")
     ProjectEntity findPrivateProjectById(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId, @Param("projectId") UUID projectId);
 
     ProjectEntity findByOrganizationIdAndId(UUID organizationId, UUID id);

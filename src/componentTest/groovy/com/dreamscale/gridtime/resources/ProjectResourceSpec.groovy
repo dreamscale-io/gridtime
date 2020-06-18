@@ -13,10 +13,13 @@ import com.dreamscale.gridtime.api.project.CreateTaskInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.RecentTasksSummaryDto
 import com.dreamscale.gridtime.api.project.TaskDto
+import com.dreamscale.gridtime.api.team.TeamDto
+import com.dreamscale.gridtime.api.team.TeamInputDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.client.ProjectClient
+import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
@@ -43,6 +46,9 @@ class ProjectResourceSpec extends Specification {
 
     @Autowired
     JournalClient journalClient
+
+    @Autowired
+    TeamClient teamClient
 
     @Autowired
     OrganizationClient organizationClient
@@ -230,6 +236,8 @@ class ProjectResourceSpec extends Specification {
         assert zoeTask1.getId() == task1.getId()
     }
 
+
+
     def "should revoke access to private projects granted access to other members"() {
         given:
         mockGridClock.now() >> LocalDateTime.now()
@@ -263,6 +271,74 @@ class ProjectResourceSpec extends Specification {
         assert zoeTask1.getId() != task1.getId()
     }
 
+    def "should share private projects granted access to team"() {
+        given:
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        teamClient.createTeam("Phoenix")
+
+        when:
+
+        projectClient.grantPermissionToTeam(proj1.getId().toString(), new TeamInputDto("Phoenix"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        teamClient.joinTeam("Phoenix")
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        then:
+        assert zoesProj1.getId() == proj1.getId()
+        assert zoeTask1.getId() == task1.getId()
+    }
+
+    def "should unshare private projects after revoking access to team"() {
+        given:
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = registerAndActivate("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        teamClient.createTeam("Phoenix")
+
+        when:
+
+        projectClient.grantPermissionToTeam(proj1.getId().toString(), new TeamInputDto("Phoenix"))
+        projectClient.revokePermissionFromTeam(proj1.getId().toString(), new TeamInputDto("Phoenix"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        teamClient.joinTeam("Phoenix")
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+
+        then:
+        assert zoesProj1.getId() != proj1.getId()
+        assert zoeTask1.getId() != task1.getId()
+    }
 
     private AccountActivationDto registerAndActivate(String email) {
 

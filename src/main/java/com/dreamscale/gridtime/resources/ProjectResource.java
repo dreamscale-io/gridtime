@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.organization.OrganizationDto;
 import com.dreamscale.gridtime.api.project.*;
+import com.dreamscale.gridtime.api.team.TeamInputDto;
 import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
 import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
@@ -135,6 +136,51 @@ public class ProjectResource {
         UUID projectIdParsed = UUID.fromString(projectId);
 
         return projectCapability.revokeAccessForMember(membership.getOrganizationId(), membership.getId(), projectIdParsed, usernameInputDto.getUsername());
+    }
+
+
+    /**
+     * Grants access to the current project to a specific team within the organization.
+     *
+     * This will cause the project to show up for all users of the team as an available project, and allow them to
+     * add tasks, and contribute Idea Flow data to the project metrics.
+     *
+     * @param projectId
+     * @param teamInputDto TeamInputDto
+     * @return SimpleStatusDto
+     */
+    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.GRANT_PATH + ResourcePaths.TEAM_PATH)
+    SimpleStatusDto grantPermissionToTeam(@PathVariable("id") String projectId, @RequestBody TeamInputDto teamInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("grantPermissionToTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        UUID projectIdParsed = UUID.fromString(projectId);
+
+        return projectCapability.grantAccessForTeam(membership.getOrganizationId(), membership.getId(), projectIdParsed, teamInputDto.getName());
+    }
+
+    /**
+     * Revokes access to the current project for a specific team within the organization.
+     *
+     * This will cause the project to stop showing up for all users of the team as an available project,
+     * and removes the ability to add tasks, or contribute Idea Flow data to the project metrics.
+     *
+     * @param projectId
+     * @param teamInputDto TeamInputDto
+     * @return SimpleStatusDto
+     */
+    @PostMapping("/{id}" + ResourcePaths.CONFIG_PATH + ResourcePaths.REVOKE_PATH + ResourcePaths.TEAM_PATH)
+    SimpleStatusDto revokePermissionFromTeam(@PathVariable("id") String projectId, @RequestBody TeamInputDto teamInputDto) {
+        RequestContext context = RequestContext.get();
+        log.info("revokePermissionFromTeam, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity membership = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        UUID projectIdParsed = UUID.fromString(projectId);
+
+        return projectCapability.revokeAccessForTeam(membership.getOrganizationId(), membership.getId(), projectIdParsed,  teamInputDto.getName());
     }
 
     /**

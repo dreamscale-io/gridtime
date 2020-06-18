@@ -8,6 +8,8 @@ import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.journal.GrantType;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamEntity;
+import com.dreamscale.gridtime.core.domain.member.TeamRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
@@ -43,6 +45,9 @@ public class ProjectCapability {
 
     @Autowired
     private OrganizationMemberRepository organizationMemberRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Autowired
     private MapperFactory mapperFactory;
@@ -143,6 +148,21 @@ public class ProjectCapability {
         projectGrantAccessRepository.save(projectGrantAccessEntity);
     }
 
+    private void createGrantAccessForTeam(LocalDateTime now, UUID organizationId, UUID fromMemberId, UUID teamId, ProjectEntity project) {
+        ProjectGrantAccessEntity projectGrantAccessEntity = new ProjectGrantAccessEntity();
+
+        projectGrantAccessEntity.setId(UUID.randomUUID());
+        projectGrantAccessEntity.setOrganizationId(organizationId);
+        projectGrantAccessEntity.setProjectId(project.getId());
+        projectGrantAccessEntity.setGrantedDate(now);
+        projectGrantAccessEntity.setGrantedById(fromMemberId);
+        projectGrantAccessEntity.setGrantType(GrantType.TEAM);
+        projectGrantAccessEntity.setGrantedToId(teamId);
+
+        projectGrantAccessRepository.save(projectGrantAccessEntity);
+    }
+
+
     @Transactional
     public SimpleStatusDto grantAccessForMember(UUID organizationId, UUID invokingMemberId, UUID projectId, String username) {
 
@@ -168,8 +188,6 @@ public class ProjectCapability {
         return new SimpleStatusDto(Status.SUCCESS, "Granted access to project "+ project.getName() + " for "+username);
     }
 
-
-
     public SimpleStatusDto revokeAccessForMember(UUID organizationId, UUID invokingMemberId, UUID projectId, String username) {
         LocalDateTime now = gridClock.now();
 
@@ -191,6 +209,54 @@ public class ProjectCapability {
 
         return new SimpleStatusDto(Status.SUCCESS, "Revoked access to project "+ project.getName() + " for "+username);
 
+    }
+
+    public SimpleStatusDto grantAccessForTeam(UUID organizationId, UUID invokingMemberId, UUID projectId, String teamName) {
+
+        LocalDateTime now = gridClock.now();
+
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+
+        validateProjectFound(projectId.toString(), project);
+        validateProjectIsPrivate(project);
+
+        validateProjectIsOwnedByMember(project, invokingMemberId);
+
+        TeamEntity teamToGrant = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizeToLowerCase(teamName));
+
+        validateTeamFound(teamName, teamToGrant);
+
+        ProjectGrantAccessEntity grant = projectGrantAccessRepository.findByProjectIdAndGrantTypeAndGrantedToId(projectId, GrantType.TEAM, teamToGrant.getId());
+
+        if (grant == null) {
+            createGrantAccessForTeam(now, organizationId, invokingMemberId, teamToGrant.getId(), project);
+        }
+
+        return new SimpleStatusDto(Status.SUCCESS, "Granted access to project "+ project.getName() + " for team "+teamName);
+    }
+
+
+    public SimpleStatusDto revokeAccessForTeam(UUID organizationId, UUID invokingMemberId, UUID projectId, String teamName) {
+
+        LocalDateTime now = gridClock.now();
+
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+
+        validateProjectFound(projectId.toString(), project);
+        validateProjectIsPrivate(project);
+        validateProjectIsOwnedByMember(project, invokingMemberId);
+
+        TeamEntity teamToRevoke = teamRepository.findByOrganizationIdAndLowerCaseName(organizationId, standardizeToLowerCase(teamName));
+
+        validateTeamFound(teamName, teamToRevoke);
+
+        ProjectGrantAccessEntity grant = projectGrantAccessRepository.findByProjectIdAndGrantTypeAndGrantedToId(projectId, GrantType.TEAM, teamToRevoke.getId());
+
+        validateExistingGrantFound(grant);
+
+        convertToTombstone(now, project, grant);
+
+        return new SimpleStatusDto(Status.SUCCESS, "Revoked access to project "+ project.getName() + " for team "+teamName);
     }
 
     private void convertToTombstone(LocalDateTime now, ProjectEntity project, ProjectGrantAccessEntity grant) {
@@ -215,6 +281,12 @@ public class ProjectCapability {
     private void validateMemberFound(String username, OrganizationMemberEntity memberToGrant) {
         if (memberToGrant == null) {
             throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_FOUND, "Member "+username + " not found.");
+        }
+    }
+
+    private void validateTeamFound(String teamName, TeamEntity teamToGrant) {
+        if (teamToGrant == null) {
+            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_TEAM, "Team "+teamName + " not found.");
         }
     }
 
