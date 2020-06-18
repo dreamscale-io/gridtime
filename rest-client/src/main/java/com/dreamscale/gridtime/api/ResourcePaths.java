@@ -24,6 +24,9 @@ public class ResourcePaths {
     public static final String PROJECT_PATH = "/project";
     public static final String TASK_PATH = "/task";
     public static final String SEARCH_PATH = "/search";
+    public static final String BOX_PATH = "/box";
+    public static final String GRANT_PATH = "/grant";
+    public static final String REVOKE_PATH = "/revoke";
 
     public static final String ACCOUNT_PATH = "/account";
     public static final String ACTIVATE_PATH = "/activate";

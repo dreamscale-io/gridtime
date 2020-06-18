@@ -1,9 +1,11 @@
 package com.dreamscale.gridtime.core.capability.journal;
 
-import com.dreamscale.gridtime.api.project.CreateProjectInputDto;
-import com.dreamscale.gridtime.api.project.ProjectDto;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.project.*;
+import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.*;
+import com.dreamscale.gridtime.core.domain.journal.GrantType;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
@@ -122,6 +124,11 @@ public class ProjectCapability {
         return projectMapper.toApi(project);
     }
 
+
+    public ProjectDetailsDto getProjectDetails(UUID organizationId, UUID invokingMemberId, UUID projectId) {
+        return null;
+    }
+
     public List<ProjectDto> getAllProjectsWithPermission(UUID organizationId, UUID memberId) {
         Iterable<ProjectEntity> projectEntities = projectRepository.findByOrganizationIdAndPermission(organizationId, memberId);
         return projectMapper.toApiList(projectEntities);
@@ -159,4 +166,16 @@ public class ProjectCapability {
     }
 
 
+    public SimpleStatusDto updateBoxConfiguration(UUID organizationId, UUID invokingMemberId, UUID projectId, ProjectBoxConfigurationInputDto projectBoxConfiguration) {
+
+        return new SimpleStatusDto(Status.NO_ACTION, "Not yet implemented");
+    }
+
+    public SimpleStatusDto grantAccessForProject(UUID organizationId, UUID invokingMemberId, UUID projectId, GrantAccessInputDto grantAccessInput) {
+        return new SimpleStatusDto(Status.NO_ACTION, "Not yet implemented");
+    }
+
+    public SimpleStatusDto revokeAccessForProject(UUID organizationId, UUID invokingMemberId, UUID projectId, GrantAccessInputDto revokeAccessInput) {
+        return new SimpleStatusDto(Status.NO_ACTION, "Not yet implemented");
+    }
 }

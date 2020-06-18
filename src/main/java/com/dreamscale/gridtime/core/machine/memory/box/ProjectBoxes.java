@@ -18,7 +18,7 @@ public class ProjectBoxes {
         boxMatchers = new ArrayList<>();
     }
 
-    public ProjectBoxes(BoxMatcherConfig ... boxMatcherConfigs) {
+    public ProjectBoxes(BoxMatcherConfig... boxMatcherConfigs) {
         packageToBoxMap = new HashMap<>();
         boxMatchers = new ArrayList<>();
 
