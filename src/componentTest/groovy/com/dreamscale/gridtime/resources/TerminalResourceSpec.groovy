@@ -6,16 +6,24 @@ import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
+import com.dreamscale.gridtime.api.project.CreateProjectInputDto
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto
+import com.dreamscale.gridtime.api.project.ProjectDetailsDto
+import com.dreamscale.gridtime.api.project.ProjectDto
+import com.dreamscale.gridtime.api.project.TaskDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.api.terminal.Command
+import com.dreamscale.gridtime.api.terminal.CommandGroup
 import com.dreamscale.gridtime.api.terminal.CommandManualDto
+import com.dreamscale.gridtime.api.terminal.CommandDescriptorDto
 import com.dreamscale.gridtime.api.terminal.CommandManualPageDto
 import com.dreamscale.gridtime.api.terminal.RunCommandInputDto
 import com.dreamscale.gridtime.client.*
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.domain.member.*
 import com.dreamscale.gridtime.core.capability.system.GridClock
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -55,13 +63,16 @@ class TerminalResourceSpec extends Specification {
     EmailCapability mockEmailCapability
 
     @Autowired
-    GridClock mockTimeService;
+    JournalClient journalClient
+
+    @Autowired
+    GridClock mockGridClock;
 
     String activationCode = null;
 
     def setup() {
-        mockTimeService.now() >> LocalDateTime.now()
-        mockTimeService.nanoTime() >> System.nanoTime()
+        mockGridClock.now() >> LocalDateTime.now()
+        mockGridClock.nanoTime() >> System.nanoTime()
     }
 
     def "should test terminal loop for a basic invite command"() {
@@ -150,6 +161,136 @@ class TerminalResourceSpec extends Specification {
 
     }
 
+
+    def "should share project with user from terminal"() {
+
+        given:
+
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        when:
+
+        terminalClient.runCommand(new RunCommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        then:
+        assert zoesProj1.getId() == proj1.getId()
+
+    }
+
+    def "should unshare project for user from terminal"() {
+
+        given:
+
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        when:
+
+        terminalClient.runCommand(new RunCommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+        terminalClient.runCommand(new RunCommandInputDto(Command.UNSHARE, "project", "proj1", "for", "user", "zoe"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        then:
+        assert zoesProj1.getId() != proj1.getId()
+
+    }
+
+    def "should share project with team from terminal"() {
+
+        given:
+
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        teamClient.createTeam("Phoenix")
+
+        when:
+
+        terminalClient.runCommand(new RunCommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        teamClient.joinTeam("Phoenix")
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        then:
+        assert zoesProj1.getId() == proj1.getId()
+    }
+
+    def "should unshare project for team from terminal"() {
+
+        given:
+
+        mockGridClock.now() >> LocalDateTime.now()
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        teamClient.createTeam("Phoenix")
+
+        when:
+
+        terminalClient.runCommand(new RunCommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+        terminalClient.runCommand(new RunCommandInputDto(Command.UNSHARE, "project", "proj1", "for", "team", "Phoenix"))
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        teamClient.joinTeam("Phoenix")
+
+        ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
+
+        then:
+        assert zoesProj1.getId() != proj1.getId()
+
+    }
+
     def "should get terminal help manual"() {
         given:
 
@@ -162,23 +303,35 @@ class TerminalResourceSpec extends Specification {
         accountClient.login()
 
         CommandManualDto manual = terminalClient.getCommandManual()
-        CommandManualPageDto manualPage = terminalClient.getCommandManualPage("invite");
+        CommandManualPageDto inviteManPage = terminalClient.getManualPageForCommand("invite");
+        CommandManualPageDto projectManPage = terminalClient.getManualPageForGroup("project");
 
-        println manualPage
+
+        println inviteManPage
+
+        println projectManPage
 
         then:
         assert manual != null
-        assert manual.getManualPages().size() == 1
+        assert manual.getGroups().size() == 2;
 
-        assert manualPage != null
-        assert manualPage.command == Command.INVITE
-        assert manualPage.description != null
+        assert inviteManPage != null
+        assert inviteManPage.getCommandGroup() == Command.INVITE.name()
+        assert inviteManPage.getCommandDescriptors().size() == 1;
 
-        assert manualPage.terminalRoutes.size() == 1
-        assert manualPage.terminalRoutes.get(0).argsTemplate != null
-        assert manualPage.terminalRoutes.get(0).optionsHelp.size() == 2
+        CommandDescriptorDto inviteCmd = inviteManPage.getCommandDescriptors().get(0);
+
+        assert inviteCmd.terminalRoutes.size() == 1
+        assert inviteCmd.terminalRoutes.get(0).argsTemplate != null
+        assert inviteCmd.terminalRoutes.get(0).optionsHelp.size() == 2
+
+        assert projectManPage != null
+
+        assert projectManPage.getCommandGroup() == CommandGroup.PROJECT.name()
+        assert projectManPage.getCommandDescriptors().size() == 3
 
     }
+
 
     private void switchUser(AccountActivationDto artyProfile) {
         RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());

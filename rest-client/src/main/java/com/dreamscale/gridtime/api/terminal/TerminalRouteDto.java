@@ -14,7 +14,21 @@ import java.util.Map;
 @NoArgsConstructor
 public class TerminalRouteDto {
 
+    private Command command;
+
     private String argsTemplate;
 
     private Map<String, String> optionsHelp;
+
+    public String toDisplayString() {
+
+        String out = "Usage: "+ command.name().toLowerCase() + " " + argsTemplate + "\n";
+
+        for (String option: optionsHelp.keySet()) {
+            String help = optionsHelp.get(option);
+            out += "\nOption: {" + option + "} :: " + help;
+        }
+
+        return out;
+    }
 }

@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.capability.journal;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.project.*;
 import com.dreamscale.gridtime.api.status.Status;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.journal.GrantType;
@@ -50,15 +51,21 @@ public class ProjectCapability {
     private TeamRepository teamRepository;
 
     @Autowired
+    private MemberDetailsRetriever memberDetailsRetriever;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
 
     private static final String DEFAULT_PROJECT_NAME = "No Project";
     private static final String DEFAULT_PROJECT_DESCRIPTION = "(No Project Selected)";
+    private DtoEntityMapper<ProjectDetailsDto, ProjectEntity> projectDetailsMapper;
 
     @PostConstruct
     private void init() {
+
         projectMapper = mapperFactory.createDtoEntityMapper(ProjectDto.class, ProjectEntity.class);
+        projectDetailsMapper = mapperFactory.createDtoEntityMapper(ProjectDetailsDto.class, ProjectEntity.class);
     }
 
     @Transactional
@@ -66,21 +73,7 @@ public class ProjectCapability {
 
         String standardizedProjectName = standardizeToLowerCase(projectInputDto.getName());
 
-        ProjectEntity project = null;
-
-        ProjectEntity privateProject = findPrivateProject(organizationId, memberId, standardizedProjectName);
-        ProjectEntity publicProject = projectRepository.findPublicProjectByName(organizationId, standardizedProjectName);
-
-
-        if (privateProject != null) {
-            project = privateProject;
-            log.debug("Found private project "+standardizedProjectName);
-        }
-
-        if (project == null && publicProject != null) {
-            project = publicProject;
-            log.debug("Found public project "+standardizedProjectName);
-        }
+        ProjectEntity project = findExistingProjectByNameWithPermission(organizationId, memberId, standardizedProjectName);
 
         if (project == null) {
             project = new ProjectEntity();
@@ -104,6 +97,36 @@ public class ProjectCapability {
 
         return projectMapper.toApi(project);
     }
+
+    private ProjectEntity findExistingProjectByNameWithPermission(UUID organizationId, UUID memberId, String standardizedProjectName) {
+        ProjectEntity project = null;
+
+        ProjectEntity privateProject = findPrivateProject(organizationId, memberId, standardizedProjectName);
+        ProjectEntity publicProject = projectRepository.findPublicProjectByName(organizationId, standardizedProjectName);
+
+
+        if (privateProject != null) {
+            project = privateProject;
+            log.debug("Found private project "+standardizedProjectName);
+        }
+
+        if (project == null && publicProject != null) {
+            project = publicProject;
+            log.debug("Found public project "+standardizedProjectName);
+        }
+        return project;
+    }
+
+
+    public ProjectDto getProjectByName(UUID organizationId, UUID memberId, String projectName) {
+
+        String standardizedProjectName = standardizeToLowerCase(projectName);
+
+        ProjectEntity project = findExistingProjectByNameWithPermission(organizationId, memberId, standardizedProjectName);
+
+        return projectMapper.toApi(project);
+    }
+
 
     private ProjectEntity findPrivateProject(UUID organizationId, UUID memberId, String standardizedProjectName) {
         List<ProjectEntity> projects = projectRepository.findPrivateProjectByName(organizationId, memberId, standardizedProjectName);
@@ -349,7 +372,48 @@ public class ProjectCapability {
 
 
     public ProjectDetailsDto getProjectDetails(UUID organizationId, UUID invokingMemberId, UUID projectId) {
+        ProjectEntity project = findExistingProjectByIdWithPermission(organizationId, invokingMemberId, projectId);
+
+        ProjectDetailsDto projectDetailsDto = projectDetailsMapper.toApi(project);
+
+        List<ProjectGrantAccessEntity> accessGrants = projectGrantAccessRepository.findByProjectId(project.getId());
+
+        for (ProjectGrantAccessEntity grant: accessGrants) {
+            AccessGrantDto grantDto = new AccessGrantDto();
+            grantDto.setGrantType(grant.getGrantType().name());
+            grantDto.setGrantedToId(grant.getGrantedToId());
+            grantDto.setGrantedToName(lookupGrantToName(grant));
+
+            projectDetailsDto.addAccessGrant(grantDto);
+        }
+
+        return projectDetailsDto;
+    }
+
+    private String lookupGrantToName(ProjectGrantAccessEntity grant) {
+        if (grant.getGrantType().equals(GrantType.MEMBER)) {
+            return memberDetailsRetriever.lookupUsername(grant.getGrantedToId());
+        } else if (grant.getGrantType().equals(GrantType.TEAM)) {
+            TeamEntity team = teamRepository.findById(grant.getGrantedToId());
+            return team.getName();
+        }
+
         return null;
+    }
+
+    private ProjectEntity findExistingProjectByIdWithPermission(UUID organizationId, UUID memberId, UUID projectId) {
+
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+
+        validateProjectFound(projectId.toString(), project);
+
+        if (project.isPrivate()) {
+            project = projectRepository.findPrivateProjectById(organizationId, memberId, projectId);
+        }
+
+        validateProjectHasPermission(project);
+
+        return project;
     }
 
     public List<ProjectDto> getAllProjectsWithPermission(UUID organizationId, UUID memberId) {

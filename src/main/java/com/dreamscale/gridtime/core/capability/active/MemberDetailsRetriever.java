@@ -46,7 +46,7 @@ public class MemberDetailsRetriever {
         return name;
     }
 
-    public String lookupUserName(UUID memberId) {
+    public String lookupUsername(UUID memberId) {
         String username = null;
         if (memberId != null) {
             OrganizationMemberEntity memberEntity = organizationMemberRepository.findById(memberId);

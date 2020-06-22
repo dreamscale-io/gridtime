@@ -1,9 +1,6 @@
 package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.account.EmailInputDto;
-import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.terminal.CommandManualDto;
 import com.dreamscale.gridtime.api.terminal.CommandManualPageDto;
@@ -34,6 +31,9 @@ public interface TerminalClient {
     CommandManualDto getCommandManual();
 
     @RequestLine("GET " + ResourcePaths.TERMINAL_PATH + ResourcePaths.MANUAL_PATH + ResourcePaths.COMMAND_PATH + "/{commandName}")
-    CommandManualPageDto getCommandManualPage(@Param("commandName") String commandName);
+    CommandManualPageDto getManualPageForCommand(@Param("commandName") String commandName);
+
+    @RequestLine("GET " + ResourcePaths.TERMINAL_PATH + ResourcePaths.MANUAL_PATH + ResourcePaths.GROUP_PATH + "/{commandGroupName}")
+    CommandManualPageDto getManualPageForGroup(@Param("commandGroupName") String commandGroupName);
 
 }

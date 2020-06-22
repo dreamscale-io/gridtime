@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Builder
@@ -15,17 +13,37 @@ import java.util.Map;
 @NoArgsConstructor
 public class CommandManualPageDto {
 
-    private Command command;
-    private String description;
+    private String commandGroup;
 
-    List<TerminalRouteDto> terminalRoutes;
+    private List<CommandDescriptorDto> commandDescriptors;
 
-    public void addRoute(TerminalRouteDto routeDto)
-    {
-        if (terminalRoutes == null) {
-            terminalRoutes = new ArrayList<>();
-        }
-        terminalRoutes.add(routeDto);
+    public CommandManualPageDto(String commandGroup) {
+        this.commandGroup = commandGroup;
+        commandDescriptors = new ArrayList<>();
     }
 
+    public void addCommandDescriptor(CommandDescriptorDto manPage)
+    {
+        commandDescriptors.add(manPage);
+    }
+
+    public String toDisplayString() {
+        String out = "";
+
+            out += "\n==========================================================\n" +
+                    "Command Group: "+ commandGroup + "\n";
+
+            for (CommandDescriptorDto descriptor : commandDescriptors) {
+                out += "\n------------------------------------\n"
+                        + descriptor.toDisplayString();
+            }
+
+            out += "\n==========================================================\n";
+
+        return out;
+    }
+
+    public String toString() {
+        return toDisplayString();
+    }
 }

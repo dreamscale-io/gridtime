@@ -5,8 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Builder
@@ -14,15 +13,37 @@ import java.util.List;
 @NoArgsConstructor
 public class CommandManualDto {
 
-    private List<CommandManualPageDto> manualPages;
+    private List<CommandGroup> groups;
 
+    private Map<CommandGroup, CommandManualPageDto> manualPagesByGroup;
 
-    public void addPage(CommandManualPageDto manPage)
-    {
-        if (manualPages == null) {
-           manualPages = new ArrayList<>();
+    public void addPage(CommandGroup group, CommandManualPageDto groupPage) {
+        if (groups == null) {
+            groups = new ArrayList<>();
+        }
+        groups.add(group);
+
+        if (manualPagesByGroup == null) {
+            manualPagesByGroup = new HashMap<>();
         }
 
-        manualPages.add(manPage);
+        manualPagesByGroup.put(group, groupPage);
+    }
+
+
+    public String toDisplayString() {
+        String out = "";
+
+        for (CommandGroup group : manualPagesByGroup.keySet()) {
+
+            CommandManualPageDto page = manualPagesByGroup.get(group);
+            out += page.toDisplayString();
+        }
+
+        return out;
+    }
+
+    public String toString() {
+        return toDisplayString();
     }
 }

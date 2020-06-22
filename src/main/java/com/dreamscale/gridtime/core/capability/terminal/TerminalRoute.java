@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.capability.terminal;
 
 import com.dreamscale.gridtime.api.terminal.Command;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriTemplate;
@@ -9,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@Slf4j
 public abstract class TerminalRoute {
 
     private final Command command;
@@ -49,10 +50,13 @@ public abstract class TerminalRoute {
 
     public abstract Object route(Map<String, String> params);
 
-    /* Override if you need to add logic for multiple routes */
+    protected boolean matches(Command inputCommand, List<String> args) {
+        if (inputCommand.equals(command)) {
 
-    protected boolean matches(List<String> args) {
-        return true;
+            String standarizedArgTemplateStr = StringUtils.join(args, " ");
+            return uriTemplate.matches(standarizedArgTemplateStr);
+        }
+        return false;
     }
 
     public String getArgsTemplate() {
@@ -61,5 +65,9 @@ public abstract class TerminalRoute {
 
     public Map<String, String> getOptionsHelpDescriptions() {
         return optionsHelpDescriptions;
+    }
+
+    public Command getCommand() {
+        return command;
     }
 }

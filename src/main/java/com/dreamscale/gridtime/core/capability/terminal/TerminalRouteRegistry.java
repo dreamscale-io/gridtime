@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -32,17 +29,55 @@ public class TerminalRouteRegistry {
     private GridClock gridClock;
 
     private MultiValueMap<Command, TerminalRoute> terminalRoutes = DefaultCollections.multiMap();
-    private Map<Command, String> manPageDescriptions = DefaultCollections.map();
 
-    public void registerManPageDescription(Command command, String description) {
-        manPageDescriptions.put(command, description);
-    }
+    private MultiValueMap<Command, CommandDescriptorDto> commandDescriptorsByCommand = DefaultCollections.multiMap();
 
-    public void register(Command command, TerminalRoute terminalRoute) {
+    private Map<CommandGroup, CommandManualPageDto> manualPagesByGroup = DefaultCollections.map();
+
+    public void register(CommandGroup group, Command command, String description, TerminalRoute ... terminalRoutesForCommand) {
         log.info("[TerminalRouteRegistry] Register "+command.name());
 
-        terminalRoutes.add(command, terminalRoute);
+        CommandManualPageDto manPage = findOrCreateManualPage(group);
+
+        CommandDescriptorDto descriptor = createDescriptor(command, description, terminalRoutesForCommand);
+        manPage.addCommandDescriptor(descriptor);
+
+        commandDescriptorsByCommand.add(descriptor.getCommand(), descriptor);
+
+        for (TerminalRoute route: terminalRoutesForCommand) {
+            terminalRoutes.add(command, route);
+        }
     }
+
+    private CommandDescriptorDto createDescriptor(Command command, String description, TerminalRoute[] terminalRoutesForCommand) {
+
+        CommandDescriptorDto descriptor = new CommandDescriptorDto();
+        descriptor.setCommand(command);
+        descriptor.setDescription(description);
+
+        for (TerminalRoute route : terminalRoutesForCommand) {
+
+            TerminalRouteDto routeDto = new TerminalRouteDto();
+            routeDto.setCommand(route.getCommand());
+            routeDto.setArgsTemplate(route.getArgsTemplate());
+            routeDto.setOptionsHelp(route.getOptionsHelpDescriptions());
+
+            descriptor.addRoute(routeDto);
+        }
+
+        return descriptor;
+    }
+
+    private CommandManualPageDto findOrCreateManualPage(CommandGroup group) {
+        CommandManualPageDto manPage = manualPagesByGroup.get(group);
+
+        if (manPage == null) {
+            manPage = new CommandManualPageDto(group.name());
+            manualPagesByGroup.put(group, manPage);
+        }
+        return manPage;
+    }
+
 
     public TalkMessageDto routeCommand(UUID organizationId, UUID memberId, RunCommandInputDto runCommandInputDto) {
 
@@ -54,7 +89,7 @@ public class TerminalRouteRegistry {
         if (terminalRoutes != null) {
             for (TerminalRoute route : terminalRoutes) {
 
-                if (route.matches(runCommandInputDto.getArgs())) {
+                if (route.matches(runCommandInputDto.getCommand(), runCommandInputDto.getArgs())) {
                     Object result = route.route(runCommandInputDto.getArgs());
 
                     return wrapResultAsTalkMessage(now, nanoTime, memberId, result);
@@ -106,50 +141,30 @@ public class TerminalRouteRegistry {
 
         CommandManualDto manualDto = new CommandManualDto();
 
-        Set<Command> commands = terminalRoutes.keySet();
+        Set<CommandGroup> commandGroups = manualPagesByGroup.keySet();
 
-        for (Command command : commands) {
-
-            String description = manPageDescriptions.get(command);
-            List<TerminalRoute> commandPageRoutes = terminalRoutes.get(command);
-
-            CommandManualPageDto manPage = toManPage(command, description, commandPageRoutes);
-
-            manualDto.addPage(manPage);
+        for (CommandGroup group : commandGroups) {
+            CommandManualPageDto groupPage = manualPagesByGroup.get(group);
+            manualDto.addPage(group, groupPage);
         }
 
         return manualDto;
     }
 
-    private CommandManualPageDto toManPage(Command command, String description, List<TerminalRoute> commandPageRoutes) {
-
-        CommandManualPageDto page = new CommandManualPageDto();
-
-        page.setCommand(command);
-        page.setDescription(description);
-
-        if (commandPageRoutes != null) {
-            for (TerminalRoute route : commandPageRoutes) {
-                TerminalRouteDto routeDto = new TerminalRouteDto();
-
-                routeDto.setArgsTemplate(route.getArgsTemplate());
-                routeDto.setOptionsHelp(route.getOptionsHelpDescriptions());
-
-                page.addRoute(routeDto);
-            }
-        }
-
-        return page;
-    }
-
     public CommandManualPageDto getManualPage(UUID organizationId, UUID memberId, Command command) {
 
-        String description = manPageDescriptions.get(command);
-        List<TerminalRoute> routes = terminalRoutes.get(command);
+        CommandManualPageDto manPage = new CommandManualPageDto(command.name());
 
-        validateAtLeastOneRouteIsFound(command, routes);
+        List<CommandDescriptorDto> commandDescriptors = commandDescriptorsByCommand.get(command);
 
-        return toManPage(command, description, routes);
+        manPage.setCommandDescriptors(commandDescriptors);
+
+        return manPage;
+    }
+
+    public CommandManualPageDto getManualPage(UUID organizationId, UUID memberId, CommandGroup group) {
+
+        return manualPagesByGroup.get(group);
     }
 
     private void validateAtLeastOneRouteIsFound(Command command, List<TerminalRoute> routes) {
@@ -159,5 +174,7 @@ public class TerminalRouteRegistry {
 
         }
     }
+
+
 
 }
