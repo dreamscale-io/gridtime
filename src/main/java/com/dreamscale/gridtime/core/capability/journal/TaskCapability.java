@@ -45,7 +45,7 @@ public class TaskCapability {
     @Transactional
     public TaskDto findOrCreateTask(UUID organizationId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
-        String standardizedTaskName = standardizeToLowerCase(taskInputDto.getName());
+        String standardizedTaskName = standardizeToLowerCase(taskInputDto.getTaskName());
 
         TaskEntity task = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, standardizedTaskName);
 
@@ -54,7 +54,7 @@ public class TaskCapability {
             task.setId(UUID.randomUUID());
             task.setOrganizationId(organizationId);
             task.setProjectId(projectId);
-            task.setName(taskInputDto.getName());
+            task.setName(taskInputDto.getTaskName());
             task.setLowercaseName(standardizedTaskName);
             task.setDescription(taskInputDto.getDescription());
 
@@ -63,7 +63,6 @@ public class TaskCapability {
 
        return taskMapper.toApi(task);
     }
-
 
     public TaskDto getTask(UUID taskId) {
 
@@ -75,7 +74,6 @@ public class TaskCapability {
 
         return null;
     }
-
 
     public List<TaskDto> findTasksStartingWith(UUID orgId, UUID projectId, String startsWith) {
         validateProjectWithinOrg(orgId, projectId);

@@ -306,7 +306,6 @@ class TerminalResourceSpec extends Specification {
         CommandManualPageDto inviteManPage = terminalClient.getManualPageForCommand("invite");
         CommandManualPageDto projectManPage = terminalClient.getManualPageForGroup("project");
 
-
         println inviteManPage
 
         println projectManPage
@@ -331,7 +330,6 @@ class TerminalResourceSpec extends Specification {
         assert projectManPage.getCommandDescriptors().size() == 3
 
     }
-
 
     private void switchUser(AccountActivationDto artyProfile) {
         RootAccountEntity account = rootAccountRepository.findByApiKey(artyProfile.getApiKey());

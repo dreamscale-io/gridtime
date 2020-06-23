@@ -325,7 +325,6 @@ public class JournalCapability {
             if (lastIntentionList.size() > 0) {
                 updateFinishStatus(organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0).getId(), finishStatus);
             }
-
         }
     }
 
@@ -503,11 +502,19 @@ public class JournalCapability {
 
         projectCapability.validateProjectPermission(organizationId, memberId, projectId);
 
+        validateNotNull("taskName", taskInputDto.getTaskName());
+
         TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, projectId, taskInputDto);
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 
         return taskDto;
+    }
+
+    private void validateNotNull(String propertyName, String property) {
+        if (property == null) {
+            throw new BadRequestException(ValidationErrorCodes.PROPERTY_CANT_BE_NULL, "Property "+propertyName + " cant be null");
+        }
     }
 
     public UUID getLastActiveProjectId(UUID organizationId, UUID memberId) {
