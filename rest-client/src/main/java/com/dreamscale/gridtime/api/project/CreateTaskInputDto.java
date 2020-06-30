@@ -13,6 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreateTaskInputDto {
 
-    private String taskName;
+    private String name;
     private String description;
 }

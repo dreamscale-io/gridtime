@@ -502,7 +502,7 @@ public class JournalCapability {
 
         projectCapability.validateProjectPermission(organizationId, memberId, projectId);
 
-        validateNotNull("taskName", taskInputDto.getTaskName());
+        validateNotNull("task", taskInputDto.getName());
 
         TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, projectId, taskInputDto);
 

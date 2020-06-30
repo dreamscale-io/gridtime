@@ -45,7 +45,7 @@ public class TaskCapability {
     @Transactional
     public TaskDto findOrCreateTask(UUID organizationId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
-        String standardizedTaskName = standardizeToLowerCase(taskInputDto.getTaskName());
+        String standardizedTaskName = standardizeToLowerCase(taskInputDto.getName());
 
         TaskEntity task = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, standardizedTaskName);
 
@@ -54,7 +54,7 @@ public class TaskCapability {
             task.setId(UUID.randomUUID());
             task.setOrganizationId(organizationId);
             task.setProjectId(projectId);
-            task.setName(taskInputDto.getTaskName());
+            task.setName(taskInputDto.getName());
             task.setLowercaseName(standardizedTaskName);
             task.setDescription(taskInputDto.getDescription());
 
