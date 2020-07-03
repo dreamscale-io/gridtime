@@ -122,13 +122,11 @@ public class TaskCapability {
         return taskMapper.toApiList(tasks);
     }
 
-
     public TaskDto findDefaultTaskForProject(UUID organizationId, UUID projectId) {
 
         TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, DEFAULT_TASK_NAME.toLowerCase());
 
         return taskMapper.toApi(defaultTask);
-
     }
 
     public TaskDto findMostRecentTask(UUID organizationId, UUID memberId) {
@@ -151,7 +149,6 @@ public class TaskCapability {
 
         return taskMapper.toApi(defaultTask);
     }
-
 
 
 }

@@ -306,14 +306,19 @@ public class JournalCapability {
         JournalEntryDto myJournalEntry = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.done);
         updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.done);
 
-        teamCircuitOperator.notifyTeamOfIntentionUpdate(organizationId, memberId, now, nanoTime, myJournalEntry);
+        teamCircuitOperator.notifyTeamOfIntentionFinished(organizationId, memberId, now, nanoTime, myJournalEntry);
 
         return myJournalEntry;
     }
 
     public JournalEntryDto abortIntention(UUID organizationId, UUID memberId, UUID intentionId) {
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
         JournalEntryDto journalEntryDto = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.aborted);
         updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.aborted);
+
+        teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, journalEntryDto);
 
         return journalEntryDto;
     }

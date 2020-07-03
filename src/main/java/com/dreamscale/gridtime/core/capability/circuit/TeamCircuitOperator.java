@@ -248,6 +248,54 @@ public class TeamCircuitOperator {
         talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
     }
 
+    public void notifyTeamOfIntentionAborted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
+
+        TeamCircuitDto teamCircuit = getMyActiveTeamCircuit(organizationId, memberFromId);
+
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
+        IntentionAbortedDetailsDto intentionFinishedDto = new IntentionAbortedDetailsDto(username, memberFromId, journalEntryDto);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_INTENTION_ABORTED);
+        messageEntity.setJsonBody(JSONTransformer.toJson(intentionFinishedDto));
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        String urn = ROOM_URN_PREFIX + teamCircuit.getDefaultRoom().getTalkRoomName();
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+
+        talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+    }
+
+    public void notifyTeamOfIntentionFinished(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, JournalEntryDto journalEntryDto) {
+
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
+        TeamCircuitDto teamCircuit = getMyActiveTeamCircuit(organizationId, memberFromId);
+
+        IntentionFinishedDetailsDto intentionFinishedDto = new IntentionFinishedDetailsDto(username, memberFromId, journalEntryDto);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberFromId);
+        messageEntity.setToRoomId(teamCircuit.getDefaultRoom().getTalkRoomId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(CircuitMessageType.TEAM_INTENTION_FINISHED);
+        messageEntity.setJsonBody(JSONTransformer.toJson(intentionFinishedDto));
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        String urn = ROOM_URN_PREFIX + teamCircuit.getDefaultRoom().getTalkRoomName();
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+
+        talkRouter.sendRoomMessage(teamCircuit.getDefaultRoom().getTalkRoomId(), talkMessageDto);
+    }
+
     public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
         CircuitMessageType messageType = CircuitMessageType.TEAM_WTF_STARTED;
