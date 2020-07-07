@@ -192,12 +192,14 @@ public class JournalCapability {
 
         torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
-        IntentionEntity lastIntention = closeLastIntention(memberId, now);
+        IntentionEntity lastIntention = closeLastIntention(memberId, now, nanoTime);
+
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
             TaskSwitchEventEntity taskSwitchEventEntity =
                     createTaskSwitchJournalEntry(organizationId, memberId, now, intentionInputDto);
             taskSwitchEventRepository.save(taskSwitchEventEntity);
         }
+
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
@@ -239,7 +241,7 @@ public class JournalCapability {
         return taskSwitchEventEntity;
     }
 
-    private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime finishTime) {
+    private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime now,  Long nanoTime) {
         List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
@@ -247,12 +249,24 @@ public class JournalCapability {
 
             if (lastIntention.getFinishStatus() == null) {
                 lastIntention.setFinishStatus("done");
-                lastIntention.setFinishTime(finishTime);
+                lastIntention.setFinishTime(now);
 
                 intentionRepository.save(lastIntention);
             }
+
+            JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(lastIntention.getId());
+            JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
+
+            //because of the transactional caching against the view objects, this query wont contain the latest updates, so update manually
+            journalEntryDto.setFinishStatus(lastIntention.getFinishStatus());
+
+            teamCircuitOperator.notifyTeamOfIntentionFinished(lastIntention.getOrganizationId(), memberId, now, nanoTime, journalEntryDto);
+
             return lastIntention;
         }
+
+
+
         return null;
     }
 
