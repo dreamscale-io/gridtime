@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -74,6 +75,9 @@ public class JournalCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
     private MapperFactory mapperFactory;
     private DtoEntityMapper<IntentionInputDto, IntentionEntity> intentionInputMapper;
     private DtoEntityMapper<JournalEntryDto, JournalEntryEntity> journalEntryOutputMapper;
@@ -84,6 +88,8 @@ public class JournalCapability {
         journalEntryOutputMapper = mapperFactory.createDtoEntityMapper(JournalEntryDto.class, JournalEntryEntity.class);
     }
 
+
+    @Transactional
     public JournalEntryDto createIntention(UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto) {
         UUID organizationIdForProject = projectCapability.getOrganizationIdForTeamProject(intentionInputDto.getProjectId());
 
@@ -209,6 +215,8 @@ public class JournalCapability {
         intentionEntity.setMemberId(memberId);
         intentionRepository.save(intentionEntity);
 
+        entityManager.flush();
+
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
         JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
 
@@ -247,11 +255,14 @@ public class JournalCapability {
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
 
+
             if (lastIntention.getFinishStatus() == null) {
-                lastIntention.setFinishStatus("done");
+                lastIntention.setFinishStatus(FinishStatus.done.name());
                 lastIntention.setFinishTime(now);
 
                 intentionRepository.save(lastIntention);
+
+                entityManager.flush();
             }
 
             JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(lastIntention.getId());
@@ -291,6 +302,7 @@ public class JournalCapability {
         return journalEntryOutputMapper.toApiList(journalEntryEntities);
     }
 
+    @Transactional
     public JournalEntryDto saveFlameRating(UUID organizationId, UUID memberId, UUID intentionId, FlameRatingInputDto flameRatingInputDto) {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -303,6 +315,8 @@ public class JournalCapability {
         if (flameRatingInputDto.isValid()) {
             intentionEntity.setFlameRating(flameRatingInputDto.getFlameRating());
             intentionRepository.save(intentionEntity);
+
+            entityManager.flush();
         }
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
 
@@ -316,6 +330,7 @@ public class JournalCapability {
         return journalEntryDto;
     }
 
+    @Transactional
     public JournalEntryDto finishIntention(UUID organizationId, UUID memberId, UUID intentionId) {
 
         LocalDateTime now = gridClock.now();
@@ -329,6 +344,7 @@ public class JournalCapability {
         return myJournalEntry;
     }
 
+    @Transactional
     public JournalEntryDto abortIntention(UUID organizationId, UUID memberId, UUID intentionId) {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -358,20 +374,32 @@ public class JournalCapability {
             validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
             validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
 
+            validateFinishStatusIsNull(intentionEntity);
+
             intentionEntity.setFinishStatus(finishStatus.name());
             intentionEntity.setFinishTime(gridClock.now());
 
             intentionRepository.save(intentionEntity);
+
+            entityManager.flush();
         }
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionId);
 
         //below is a workaround, journal entry can return a cached version of the intention
 
-        journalEntryEntity.setFinishStatus(intentionEntity.getFinishStatus());
-        journalEntryEntity.setFinishTime(intentionEntity.getFinishTime());
+        if (intentionEntity != null) {
+            journalEntryEntity.setFinishStatus(intentionEntity.getFinishStatus());
+            journalEntryEntity.setFinishTime(intentionEntity.getFinishTime());
+        }
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    private void validateFinishStatusIsNull(IntentionEntity intentionEntity) {
+        if (intentionEntity.getFinishStatus() != null) {
+            throw new BadRequestException(ValidationErrorCodes.INTENTION_CANT_BE_EDITED, "Unable to edit finish status of intention already finished.");
+        }
     }
 
 

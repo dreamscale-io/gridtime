@@ -34,6 +34,7 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.mapper.DateTimeAPITranslator
 import com.dreamscale.gridtime.core.capability.system.GridClock
+import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -86,6 +87,19 @@ class JournalResourceSpec extends Specification {
 
     @Autowired
     EmailCapability mockEmailCapability
+
+    LocalDateTime time1
+    LocalDateTime time2
+    LocalDateTime time3
+    LocalDateTime time4
+
+
+    def setup() {
+        time1 = LocalDateTime.now()
+        time2 = time1.plusMinutes(15)
+        time3 = time1.plusMinutes(30)
+        time4 = time1.plusMinutes(45)
+    }
 
 
     def "should save new intention"() {
@@ -185,6 +199,48 @@ class JournalResourceSpec extends Specification {
         assert result.getFinishTime() != null
         assert result.getFinishTimeStr() != null
 
+    }
+
+    def "should throw validation error when finishing an already finished intention"() {
+        given:
+
+        6 * mockGridClock.now() >>
+                {
+                    try {
+                        throw new Exception("stack")
+                    } catch (Exception ex) {
+                        ex.printStackTrace()
+                    }
+
+                    return time1;
+                }
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        TeamDto team = teamClient.createTeam("myteam")
+
+        ProjectDto project = journalClient.findOrCreateProject(new CreateProjectInputDto("my-project", "proj description", false))
+        TaskDto task = journalClient.findOrCreateTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description"))
+
+        1 * mockGridClock.now() >> time2
+
+        JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("intention1", project.getId(), task.getId()))
+
+        1 * mockGridClock.now() >> time3
+
+        JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("intention2", project.getId(), task.getId()))
+
+        when:
+        1 * mockGridClock.now() >> time4
+
+        journalClient.finishIntention(intention1.getId().toString(), new IntentionFinishInputDto(FinishStatus.done));
+
+        then:
+        thrown (BadRequestException)
     }
 
     def "get task breakdown even when no new intentions"() {
