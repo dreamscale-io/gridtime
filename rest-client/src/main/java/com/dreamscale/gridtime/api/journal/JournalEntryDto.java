@@ -34,6 +34,11 @@ public class JournalEntryDto {
 
     private Integer flameRating;
     private String finishStatus;
+
+
+    private LocalDateTime finishTime;
+    private String finishTimeStr;
+
     private Boolean linked;
 
     private UUID memberId;
@@ -49,5 +54,10 @@ public class JournalEntryDto {
     public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
         this.createdDateStr = TimeFormatter.format(createdDate);
+    }
+
+    public void setFinishTime(LocalDateTime finishTime) {
+        this.finishTime = finishTime;
+        this.finishTimeStr = TimeFormatter.format(finishTime);
     }
 }

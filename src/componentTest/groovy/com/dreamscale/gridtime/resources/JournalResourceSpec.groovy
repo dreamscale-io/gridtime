@@ -182,6 +182,9 @@ class JournalResourceSpec extends Specification {
         assert result != null
         assert result.getId() == intention.getId()
         assert result.getFinishStatus() == "done";
+        assert result.getFinishTime() != null
+        assert result.getFinishTimeStr() != null
+
     }
 
     def "get task breakdown even when no new intentions"() {

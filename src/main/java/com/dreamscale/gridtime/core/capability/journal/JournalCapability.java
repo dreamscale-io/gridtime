@@ -259,6 +259,7 @@ public class JournalCapability {
 
             //because of the transactional caching against the view objects, this query wont contain the latest updates, so update manually
             journalEntryDto.setFinishStatus(lastIntention.getFinishStatus());
+            journalEntryDto.setFinishTime(lastIntention.getFinishTime());
 
             teamCircuitOperator.notifyTeamOfIntentionFinished(lastIntention.getOrganizationId(), memberId, now, nanoTime, journalEntryDto);
 
@@ -305,6 +306,9 @@ public class JournalCapability {
         }
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
 
+        //below is workaround, hibernate can return cached version without updates
+
+        journalEntryEntity.setFlameRating(intentionEntity.getFlameRating());
         JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
 
         teamCircuitOperator.notifyTeamOfIntentionUpdate(organizationId, memberId, now, nanoTime, journalEntryDto);
@@ -361,6 +365,11 @@ public class JournalCapability {
         }
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionId);
+
+        //below is a workaround, journal entry can return a cached version of the intention
+
+        journalEntryEntity.setFinishStatus(intentionEntity.getFinishStatus());
+        journalEntryEntity.setFinishTime(intentionEntity.getFinishTime());
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
     }
