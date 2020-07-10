@@ -116,10 +116,10 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
-        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
-        TaskDto task3 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc"))
-        TaskDto task4 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
+        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc", true))
+        TaskDto task3 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc", true))
+        TaskDto task4 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc", true))
 
         when:
         List<TaskDto> tasks = projectClient.findTasksStartingWith(proj1.id.toString(), "FD-1")
@@ -140,10 +140,10 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
-        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
-        TaskDto task3 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc"))
-        TaskDto task4 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
+        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc", true))
+        TaskDto task3 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-137", "desc", true))
+        TaskDto task4 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-211", "desc", true))
 
         when:
         projectClient.findTasksStartingWith(proj1.id.toString(), "FD-")
@@ -184,8 +184,8 @@ class ProjectResourceSpec extends Specification {
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", false))
         ProjectDto proj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", false))
 
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
-        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", false))
+        TaskDto task2 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-124", "desc", false))
 
         switchUser(zoeProfile)
 
@@ -196,7 +196,7 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto zoesProj2 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj2", "desc", false))
 
-        TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", false))
 
         then:
         assert zoesJournalProjects.getRecentProjects().size() == 3
@@ -217,7 +217,7 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         when:
 
@@ -229,7 +229,7 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         then:
         assert zoesProj1.getId() == proj1.getId()
@@ -251,7 +251,7 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         when:
 
@@ -264,7 +264,7 @@ class ProjectResourceSpec extends Specification {
 
         ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
 
-        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         then:
         assert zoesProj1.getId() != proj1.getId()
@@ -283,7 +283,7 @@ class ProjectResourceSpec extends Specification {
         accountClient.login()
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         teamClient.createTeam("Phoenix")
 
@@ -298,7 +298,7 @@ class ProjectResourceSpec extends Specification {
         teamClient.joinTeam("Phoenix")
 
         ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
-        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         then:
         assert zoesProj1.getId() == proj1.getId()
@@ -317,7 +317,7 @@ class ProjectResourceSpec extends Specification {
         accountClient.login()
 
         ProjectDto proj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
-        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto task1 = journalClient.findOrCreateTask(proj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         teamClient.createTeam("Phoenix")
 
@@ -333,7 +333,7 @@ class ProjectResourceSpec extends Specification {
         teamClient.joinTeam("Phoenix")
 
         ProjectDto zoesProj1 = journalClient.findOrCreateProject(new CreateProjectInputDto("proj1", "desc", true))
-        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc"))
+        TaskDto zoeTask1 = journalClient.findOrCreateTask(zoesProj1.getId().toString(), new CreateTaskInputDto("FD-123", "desc", true))
 
         then:
         assert zoesProj1.getId() != proj1.getId()

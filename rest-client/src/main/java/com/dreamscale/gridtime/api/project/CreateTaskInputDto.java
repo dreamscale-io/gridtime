@@ -15,4 +15,6 @@ public class CreateTaskInputDto {
 
     private String name;
     private String description;
+
+    private boolean isPrivate;
 }

@@ -31,21 +31,51 @@ public class TaskCapability {
     private TaskRepository taskRepository;
 
     @Autowired
+    private PrivateTaskRepository privateTaskRepository;
+
+    @Autowired
+    private RecentAllTaskRepository recentAllTaskRepository;
+
+    @Autowired
     private MapperFactory mapperFactory;
 
     private DtoEntityMapper<TaskDto, TaskEntity> taskMapper;
+    private DtoEntityMapper<TaskDto, PrivateTaskEntity> privateTaskMapper;
+    private DtoEntityMapper<TaskDto, RecentAllTaskEntity> recentAllTaskMapper;
 
     private static final String DEFAULT_TASK_NAME = "No Task";
 
     @PostConstruct
     private void init() {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
+        privateTaskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, PrivateTaskEntity.class);
+        recentAllTaskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, RecentAllTaskEntity.class);
     }
 
     @Transactional
-    public TaskDto findOrCreateTask(UUID organizationId, UUID projectId, CreateTaskInputDto taskInputDto) {
+    public TaskDto findOrCreateTask(UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto) {
 
         String standardizedTaskName = standardizeToLowerCase(taskInputDto.getName());
+
+        //okay now I've got this new input context, where the project I'm in, could be a public project, and then input for the task is private
+        //in all other cases, the normal private tasks within private projects, are in the task table.
+
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+
+        validateProjectFound(projectId.toString(), project);
+
+        TaskDto taskDto = null;
+
+        if (project.isPublic() && taskInputDto.isPrivate()) {
+            taskDto = findOrCreatePrivateTask(organizationId, invokingMemberId, projectId, taskInputDto, standardizedTaskName);
+        } else {
+            taskDto = findOrCreateNormalTask(organizationId, projectId, project.isPrivate(), taskInputDto, standardizedTaskName);
+        }
+
+       return taskDto;
+    }
+
+    private TaskDto findOrCreateNormalTask(UUID organizationId, UUID projectId, boolean isPrivate, CreateTaskInputDto taskInputDto, String standardizedTaskName) {
 
         TaskEntity task = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, standardizedTaskName);
 
@@ -61,17 +91,65 @@ public class TaskCapability {
             taskRepository.save(task);
         }
 
-       return taskMapper.toApi(task);
+        return toDto(isPrivate, task);
     }
 
-    public TaskDto getTask(UUID taskId) {
+    private TaskDto toDto(boolean isPrivate, TaskEntity task) {
+        TaskDto taskDto = taskMapper.toApi(task);
+        taskDto.setPrivate(isPrivate);
 
-        TaskEntity task = taskRepository.findOne(taskId);
+        return taskDto;
+    }
 
-        if (task != null) {
-            return taskMapper.toApi(task);
+    private TaskDto findOrCreatePrivateTask(UUID organizationId, UUID invokingMemberId, UUID projectId, CreateTaskInputDto taskInputDto, String standardizedTaskName) {
+        PrivateTaskEntity privateTask = privateTaskRepository.findByProjectIdAndMemberIdAndLowercaseName(projectId, invokingMemberId, standardizedTaskName);
+
+        if (privateTask == null) {
+            privateTask = new PrivateTaskEntity();
+            privateTask.setId(UUID.randomUUID());
+            privateTask.setOrganizationId(organizationId);
+            privateTask.setProjectId(projectId);
+            privateTask.setMemberId(invokingMemberId);
+            privateTask.setName(taskInputDto.getName());
+            privateTask.setLowercaseName(standardizedTaskName);
+            privateTask.setDescription(taskInputDto.getDescription());
+
+            privateTaskRepository.save(privateTask);
         }
 
+
+        return toDto(privateTask);
+    }
+
+    private TaskDto toDto(PrivateTaskEntity privateTask) {
+        TaskDto privateTaskDto = privateTaskMapper.toApi(privateTask);
+        privateTaskDto.setPrivate(true);
+        return privateTaskDto;
+    }
+
+    private void validateProjectFound(String reference, ProjectEntity project) {
+        if (project == null) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Project {} not found", reference);
+        }
+    }
+
+    public TaskDto getTask(UUID organizationId, UUID projectId, UUID invokingMemberId, UUID taskId) {
+
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+
+        validateProjectFound(projectId.toString(), project);
+
+        TaskEntity task = taskRepository.findByOrganizationIdAndProjectIdAndId(organizationId, projectId, taskId);
+
+        if (task != null) {
+            return toDto(project.isPrivate(), task);
+        }
+
+        PrivateTaskEntity privateTask = privateTaskRepository.findByOrganizationIdAndMemberIdAndId(organizationId, invokingMemberId, taskId);
+
+        if (privateTask != null) {
+            return toDto(privateTask);
+        }
         return null;
     }
 
@@ -112,31 +190,38 @@ public class TaskCapability {
 
     public List<TaskDto> findTasksByRecentMemberAccess(UUID organizationId, UUID memberId, UUID projectId) {
 
-        List<TaskEntity> tasks = taskRepository.findByRecentMemberAccess(memberId, projectId);
-        return taskMapper.toApiList(tasks);
-    }
+        List<RecentAllTaskEntity> tasks = recentAllTaskRepository.findByRecentMemberAccess(organizationId, memberId, projectId);
 
-    public List<TaskDto> findTasksByRecentTeamAccess(UUID organizationId, UUID teamId, UUID projectId) {
-
-        List<TaskEntity> tasks = taskRepository.findByRecentTeamAccess(teamId, projectId);
-        return taskMapper.toApiList(tasks);
+        return recentAllTaskMapper.toApiList(tasks);
     }
 
     public TaskDto findDefaultTaskForProject(UUID organizationId, UUID projectId) {
 
+        ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
+        validateProjectFound(projectId.toString(), project);
+
         TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, DEFAULT_TASK_NAME.toLowerCase());
 
-        return taskMapper.toApi(defaultTask);
+        return toDto(project.isPrivate(), defaultTask);
     }
 
     public TaskDto findMostRecentTask(UUID organizationId, UUID memberId) {
 
-        TaskEntity activeTask = taskRepository.findMostRecentTaskForMember(memberId);
-        return taskMapper.toApi(activeTask);
+        RecentAllTaskEntity activeTask = recentAllTaskRepository.findMostRecentTaskForMember(organizationId, memberId);
+
+        TaskDto taskDto = null;
+        if (activeTask != null) {
+            ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, activeTask.getProjectId());
+            validateProjectFound(activeTask.getProjectId().toString(), project);
+
+            taskDto =  recentAllTaskMapper.toApi(activeTask);
+        }
+
+        return taskDto;
     }
 
     @Transactional
-    public TaskDto createDefaultProjectTask(UUID organizationId, UUID projectId) {
+    public TaskDto createDefaultProjectTask(UUID organizationId, UUID projectId, boolean isPrivate) {
 
         TaskEntity defaultTask = new TaskEntity();
         defaultTask.setId(UUID.randomUUID());
@@ -146,8 +231,7 @@ public class TaskCapability {
 
         taskRepository.save(defaultTask);
 
-
-        return taskMapper.toApi(defaultTask);
+        return toDto(isPrivate, defaultTask);
     }
 
 

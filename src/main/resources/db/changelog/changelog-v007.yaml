@@ -74,3 +74,12 @@ databaseChangeLog:
 
   - include:
         file: db/v007/create_grant_tombstone.sql
+
+  - include:
+        file: db/v007/create_private_task.sql
+
+  - include:
+        file: db/v007/create_recent_all_task_view.sql
+
+  - include:
+        file: db/v007/replace_journal_view_add_private_task.sql

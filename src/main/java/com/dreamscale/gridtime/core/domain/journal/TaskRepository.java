@@ -15,6 +15,9 @@ public interface TaskRepository extends CrudRepository<TaskEntity, UUID> {
 
     TaskEntity findByOrganizationIdAndProjectIdAndLowercaseName(UUID organizationId, UUID projectId, String taskName);
 
+    TaskEntity findByOrganizationIdAndProjectIdAndId(UUID organizationId, UUID projectId, UUID taskId);
+
+
     List<TaskEntity> findByOrganizationIdAndName(UUID organizationId, String taskName);
 
     @Query(nativeQuery = true, value = "select t.* from task t, recent_task rt " +

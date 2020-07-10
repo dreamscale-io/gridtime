@@ -178,7 +178,6 @@ public class JournalCapability {
         return json;
     }
 
-
     private void validateMemberOrgMatchesProjectOrg(UUID organizationId, UUID organizationIdForProject) {
 
         if (organizationId == null || !organizationId.equals(organizationIdForProject)) {
@@ -222,7 +221,7 @@ public class JournalCapability {
 
         recentActivityManager.updateRecentProjects(now, organizationId, memberId, intentionEntity.getProjectId());
 
-        TaskDto taskDto = taskCapability.getTask(intentionEntity.getTaskId());
+        TaskDto taskDto = taskCapability.getTask(organizationId, intentionEntity.getProjectId(), memberId, intentionEntity.getTaskId());
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 
@@ -241,7 +240,7 @@ public class JournalCapability {
         taskSwitchEventEntity.setMemberId(memberId);
         taskSwitchEventEntity.setPosition(creationTime.minusSeconds(1));
 
-        TaskDto taskDto = taskCapability.getTask(intentionInputDto.getTaskId());
+        TaskDto taskDto = taskCapability.getTask(organizationId, intentionInputDto.getProjectId(), memberId, intentionInputDto.getTaskId());
         if (taskDto != null) {
             taskSwitchEventEntity.setDescription(taskDto.getDescription());
         }
@@ -560,7 +559,7 @@ public class JournalCapability {
 
         validateNotNull("task", taskInputDto.getName());
 
-        TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, projectId, taskInputDto);
+        TaskDto taskDto = taskCapability.findOrCreateTask(organizationId, memberId, projectId, taskInputDto);
 
         recentActivityManager.updateRecentTasks(now, organizationId, memberId, taskDto);
 

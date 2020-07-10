@@ -217,8 +217,9 @@ public class JournalResource {
             throw new BadRequestException(ValidationErrorCodes.INVALID_PROJECT_REFERENCE, "Unable to find last active project to associate this task with, which is a hack, this API is deprecated. ");
         }
 
+        //hack this to false
         TaskDto task = journalCapability.findOrCreateTask(invokingMember.getOrganizationId(), invokingMember.getId(),
-                projectId, new CreateTaskInputDto(taskReference.getTaskName(), null));
+                projectId, new CreateTaskInputDto(taskReference.getTaskName(), null, false));
 
         return journalCapability.getRecentProjectsAndTasks(invokingMember.getOrganizationId(), invokingMember.getId());
     }

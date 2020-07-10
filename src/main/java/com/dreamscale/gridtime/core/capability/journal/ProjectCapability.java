@@ -92,7 +92,7 @@ public class ProjectCapability {
 
             projectRepository.save(project);
 
-            taskCapability.createDefaultProjectTask(organizationId, project.getId());
+            taskCapability.createDefaultProjectTask(organizationId, project.getId(), project.isPrivate());
         }
 
         return projectMapper.toApi(project);
@@ -358,7 +358,7 @@ public class ProjectCapability {
 
         projectRepository.save(orgProject);
 
-        taskCapability.createDefaultProjectTask(organizationId, orgProject.getId());
+        taskCapability.createDefaultProjectTask(organizationId, orgProject.getId(), orgProject.isPrivate());
 
         return projectMapper.toApi(orgProject);
     }
