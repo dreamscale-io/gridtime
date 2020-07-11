@@ -85,4 +85,4 @@ databaseChangeLog:
         file: db/v007/replace_journal_view_add_private_task.sql
 
   - include:
-        file: db/v007/create_wtf_journal_entry.sql
+        file: db/v007/create_wtf_journal_link.sql

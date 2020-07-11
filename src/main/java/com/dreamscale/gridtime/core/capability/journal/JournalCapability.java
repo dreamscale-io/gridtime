@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
 import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
-import com.dreamscale.gridtime.core.domain.active.RecentProjectEntity;
 import com.dreamscale.gridtime.core.domain.active.RecentTaskEntity;
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus;
 import com.dreamscale.gridtime.core.domain.journal.*;
@@ -23,7 +22,6 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -216,16 +214,16 @@ public class JournalCapability {
         intentionEntity.setTaskId(activeTaskId);
         intentionRepository.save(intentionEntity);
 
-        WtfJournalEntryEntity wtfJournalEntryEntity = new WtfJournalEntryEntity();
-        wtfJournalEntryEntity.setId(UUID.randomUUID());
-        wtfJournalEntryEntity.setOrganizationId(organizationId);
-        wtfJournalEntryEntity.setMemberId(memberId);
-        wtfJournalEntryEntity.setProjectId(activeProjectId);
-        wtfJournalEntryEntity.setTaskId(activeTaskId);
-        wtfJournalEntryEntity.setIntentionId(intentionEntity.getId());
-        wtfJournalEntryEntity.setWtfCircuitId(wtfCircuitId);
+        WtfJournalLinkEntity wtfJournalLinkEntity = new WtfJournalLinkEntity();
+        wtfJournalLinkEntity.setId(UUID.randomUUID());
+        wtfJournalLinkEntity.setOrganizationId(organizationId);
+        wtfJournalLinkEntity.setMemberId(memberId);
+        wtfJournalLinkEntity.setProjectId(activeProjectId);
+        wtfJournalLinkEntity.setTaskId(activeTaskId);
+        wtfJournalLinkEntity.setIntentionId(intentionEntity.getId());
+        wtfJournalLinkEntity.setWtfCircuitId(wtfCircuitId);
 
-        wtfJournalEntryRepository.save(wtfJournalEntryEntity);
+        wtfJournalEntryRepository.save(wtfJournalLinkEntity);
 
         entityManager.flush();
 
@@ -351,7 +349,7 @@ public class JournalCapability {
     }
 
     private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime now,  Long nanoTime) {
-        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
+        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithoutWTFsWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
@@ -461,7 +459,7 @@ public class JournalCapability {
     private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
         ActiveLinksNetworkDto spiritNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
         for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
-            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(spiritLink.getFriendSpiritId(), 1);
+            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithoutWTFsWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {
                 updateFinishStatus(organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0).getId(), finishStatus);
             }

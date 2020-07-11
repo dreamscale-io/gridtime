@@ -16,6 +16,16 @@ public interface IntentionRepository extends CrudRepository<IntentionEntity, UUI
     List<IntentionEntity> findByMemberIdWithLimit(@Param("memberId") UUID memberId, @Param("limit") int limit);
 
 
+    @Query(nativeQuery = true, value = "select * from intention i " +
+            "where i.member_id=(:memberId) " +
+            "and not exists (select 1 from wtf_journal_link jl " +
+            "where i.member_id=jl.member_id " +
+            "and jl.intention_id = i.id )" +
+            "order by position desc limit (:limit)")
+    List<IntentionEntity> findByMemberIdWithoutWTFsWithLimit(@Param("memberId") UUID memberId, @Param("limit") int limit);
+
+
+
     @Query(nativeQuery = true, value = "select * from intention " +
             "where member_id=(:memberId) " +
             "and position < (:beforeDate) " +

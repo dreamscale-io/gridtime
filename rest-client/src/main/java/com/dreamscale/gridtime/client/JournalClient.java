@@ -49,7 +49,7 @@ public interface JournalClient {
 
     @RequestLine("POST " + ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH +
             ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto updateRetroFlameRating(@Param("id") String intentionId, FlameRatingInputDto flameRatingInput);
+    JournalEntryDto updateFlameRating(@Param("id") String intentionId, FlameRatingInputDto flameRatingInput);
 
     @RequestLine("POST " +ResourcePaths.JOURNAL_PATH + ResourcePaths.ME_PATH +
             ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FINISH_PATH)
