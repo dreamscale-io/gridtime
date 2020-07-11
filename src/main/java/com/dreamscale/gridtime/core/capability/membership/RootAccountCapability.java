@@ -7,7 +7,6 @@ import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
-import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.circuit.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.external.EmailCapability;

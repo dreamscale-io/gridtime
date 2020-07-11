@@ -11,5 +11,5 @@ public interface RecentProjectRepository extends CrudRepository<RecentProjectEnt
 
     List<RecentProjectEntity> findByMemberId(UUID memberId);
 
-    RecentProjectEntity findFirst1ByMemberIdOrderByLastAccessedDesc(UUID memberId);
+    RecentProjectEntity findFirst1ByOrganizationIdAndMemberIdOrderByLastAccessedDesc(UUID organizationId, UUID memberId);
 }

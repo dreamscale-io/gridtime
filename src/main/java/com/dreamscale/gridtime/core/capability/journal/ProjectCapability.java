@@ -127,6 +127,11 @@ public class ProjectCapability {
         return projectMapper.toApi(project);
     }
 
+    public ProjectDto getProjectById(UUID organizationId, UUID memberId, UUID projectId) {
+        ProjectEntity project = findExistingProjectByIdWithPermission(organizationId, memberId, projectId);
+
+        return projectMapper.toApi(project);
+    }
 
     private ProjectEntity findPrivateProject(UUID organizationId, UUID memberId, String standardizedProjectName) {
         List<ProjectEntity> projects = projectRepository.findPrivateProjectByName(organizationId, memberId, standardizedProjectName);

@@ -9,6 +9,8 @@ import com.dreamscale.gridtime.core.capability.active.RecentActivityManager;
 import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
+import com.dreamscale.gridtime.core.domain.active.RecentProjectEntity;
+import com.dreamscale.gridtime.core.domain.active.RecentTaskEntity;
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.json.Member;
@@ -21,6 +23,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,6 +78,9 @@ public class JournalCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
+    private WtfJournalEntryRepository wtfJournalEntryRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -105,6 +111,35 @@ public class JournalCapability {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        //TODO this sequence is now more complicated, because we may have intermittent WTF, related journal entries.
+        //so the WTF really needs to close when the WTF closes or is canceled, which means, I probably need to save the pointers
+        //to these journal entries.  So maybe in the learning circuit... it's a one time update... this is prolly okay...
+
+        //I've already got LearningCircuitEntity as an upstream caller,
+        // to preserve the sequencing lock, passing it in as an argument,
+        // so learning circuit can get stamped with journal_id, because it already exists
+
+        //then the close previous intention, logic becomes more complex.
+
+        //use cases:
+
+        //Expectation, if you're in your WTF, write notes in your WTF, not your journal, you've got a link to this session in your journal
+        //that forks your session into a nice little bundle, for you to reflect on later.  Start building out your knowledge books.
+
+        //books of tags... you can pull tags into your books, and give them definitions.  Mix ideas of books together,
+        // and use the ideas to drive search.
+
+        //then we assume when you're back to writing in your journal, whatever the intention you were last working on, prior to the WTF,
+        // prior to potentially several WTFs, would then be closed.  The WTF would be closed, via the workflow methods,
+        // providing our core Idea Flow measurement system.
+
+        // So Friction, we measure as a % of capacity consumption, with a specific risk profile organized into a queryable grid, organized by tags.
+        // We can analyze these risk factors, then find strategies to reduce our WTFs, with data.
+
+        // Did we succeed at reducing, lets query history.
+
+        //so things I need to do, are
+
         JournalEntryDto myEntry = createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId, intentionInputDto, isLinked);
 
         if (isLinked) {
@@ -132,6 +167,74 @@ public class JournalCapability {
         return createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId,
                 new IntentionInputDto(journalText, defaultProject.getId(), defaultTask.getId()), false);
 
+    }
+
+    @Transactional
+    public JournalEntryDto writeJournalWTFMessage(LocalDateTime now, Long nanoTime,
+                                                      UUID organizationId, UUID memberId, UUID wtfCircuitId, String journalText ) {
+
+        UUID activeProjectId = null;
+        UUID activeTaskId = null;
+
+        RecentTaskEntity mostRecentTask = recentActivityManager.lookupMostRecentTask(organizationId, memberId);
+
+        if (mostRecentTask != null) {
+            activeProjectId = mostRecentTask.getProjectId();
+            activeTaskId = mostRecentTask.getTaskId();
+        } else {
+            ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
+
+            //this really is only happening in test conditions where all the dependencies arent fully setup
+            //seems reasonable for now to not splode because of a lack of default project/task configuration
+            //TODO refactor with integration tests
+            if (defaultProject != null) {
+                activeProjectId = defaultProject.getId();
+
+                TaskDto defaultTask = taskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
+                if (defaultTask != null) {
+                    activeTaskId = defaultTask.getId();
+                }
+            }
+
+        }
+
+        ActiveLinksNetworkDto activeLinksNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
+
+        boolean isLinked = false;
+        if (!activeLinksNetwork.isEmpty()) {
+            isLinked = true;
+        }
+
+        IntentionEntity intentionEntity = new IntentionEntity();
+        intentionEntity.setId(UUID.randomUUID());
+        intentionEntity.setPosition(now);
+        intentionEntity.setOrganizationId(organizationId);
+        intentionEntity.setLinked(isLinked);
+        intentionEntity.setMemberId(memberId);
+        intentionEntity.setDescription(journalText);
+        intentionEntity.setProjectId(activeProjectId);
+        intentionEntity.setTaskId(activeTaskId);
+        intentionRepository.save(intentionEntity);
+
+        WtfJournalEntryEntity wtfJournalEntryEntity = new WtfJournalEntryEntity();
+        wtfJournalEntryEntity.setId(UUID.randomUUID());
+        wtfJournalEntryEntity.setOrganizationId(organizationId);
+        wtfJournalEntryEntity.setMemberId(memberId);
+        wtfJournalEntryEntity.setProjectId(activeProjectId);
+        wtfJournalEntryEntity.setTaskId(activeTaskId);
+        wtfJournalEntryEntity.setIntentionId(intentionEntity.getId());
+        wtfJournalEntryEntity.setWtfCircuitId(wtfCircuitId);
+
+        wtfJournalEntryRepository.save(wtfJournalEntryEntity);
+
+        entityManager.flush();
+
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+        JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
+
+        teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
+
+        return journalEntryDto;
     }
 
     public LocalDateTime getDateOfFirstIntention(UUID memberId) {
@@ -204,7 +307,6 @@ public class JournalCapability {
                     createTaskSwitchJournalEntry(organizationId, memberId, now, intentionInputDto);
             taskSwitchEventRepository.save(taskSwitchEventEntity);
         }
-
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
         intentionEntity.setId(UUID.randomUUID());
@@ -566,7 +668,7 @@ public class JournalCapability {
         return taskDto;
     }
 
-    private void validateNotNull(String propertyName, String property) {
+    private void validateNotNull(String propertyName, Object property) {
         if (property == null) {
             throw new BadRequestException(ValidationErrorCodes.PROPERTY_CANT_BE_NULL, "Property "+propertyName + " cant be null");
         }

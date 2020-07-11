@@ -37,15 +37,7 @@ public class TaskEntity implements External {
     public static final String DEFAULT_TASK_NAME = "No Task";
 
 
-    public TaskEntity configureDefaultTask() {
-        name = DEFAULT_TASK_NAME;
-        lowercaseName = DEFAULT_TASK_NAME.toLowerCase();
-        description = "(No Task Selected)";
-        status = "In Progress";
-        externalId = "-1";
 
-        return this;
-    }
 
     public boolean isDefaultTask() {
         return name != null && name.equals(DEFAULT_TASK_NAME);

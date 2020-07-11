@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.capability.circuit;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
+import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
@@ -102,7 +103,10 @@ public class WTFCircuitOperator {
     private ActiveJoinCircuitRepository activeJoinCircuitRepository;
 
     @Autowired
-    private RoomOperator roomOperator;
+    private TorchieNetworkOperator torchieNetworkOperator;
+
+    @Autowired
+    private JournalCapability journalCapability;
 
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
@@ -113,6 +117,11 @@ public class WTFCircuitOperator {
 
     private static final String DEFAULT_WTF_MESSAGE = "Started WTF";
     private static final String RESUMED_WTF_MESSAGE = "Resumed WTF";
+
+    private static final String LINK_BEGIN = "<link>";
+    private static final String LINK_END = "</link>";
+    private static final String CIRCUIT_LINK_PREFIX = "/circuit/wtf";
+
 
 
     @PostConstruct
@@ -164,12 +173,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-
         LearningCircuitEntity learningCircuitEntity = createLearningCircuit(now, nanoTime, circuitName, organizationId, memberId);
-
-        //addMemberToRoom(memberId, now, learningCircuitEntity, wtfRoomEntity);
-
-        //then update active status
 
         activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
 
@@ -178,6 +182,10 @@ public class WTFCircuitOperator {
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
+
+        String journalMessage = "WTF started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
+
+        journalCapability.writeJournalWTFMessage(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
 
         return circuitDto;
 
@@ -194,7 +202,6 @@ public class WTFCircuitOperator {
         learningCircuitEntity = tryToSaveAndReserveName(learningCircuitEntity);
 
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
-
 
         log.debug("[WTFCircuitOperator] Creating WTF network {} at {}", circuitName, nanoTime);
 

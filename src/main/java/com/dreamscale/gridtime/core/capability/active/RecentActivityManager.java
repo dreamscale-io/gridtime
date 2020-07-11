@@ -60,13 +60,17 @@ public class RecentActivityManager {
     public UUID lookupProjectIdOfMostRecentActivity(UUID organizationId, UUID memberId) {
         UUID projectId = null;
 
-        RecentProjectEntity recentProjectEntity = recentProjectRepository.findFirst1ByMemberIdOrderByLastAccessedDesc(memberId);
+        RecentProjectEntity recentProjectEntity = recentProjectRepository.findFirst1ByOrganizationIdAndMemberIdOrderByLastAccessedDesc(organizationId, memberId);
         if (recentProjectEntity != null) {
             projectId = recentProjectEntity.getProjectId();
         }
         return projectId;
     }
 
+    public RecentTaskEntity lookupMostRecentTask(UUID organizationId, UUID memberId) {
+
+        return recentTaskRepository.findFirst1ByOrganizationIdAndMemberIdOrderByLastAccessedDesc(organizationId, memberId);
+    }
 
     public void updateRecentTasks(LocalDateTime now, UUID organizationId, UUID memberId, TaskDto taskDto) {
 

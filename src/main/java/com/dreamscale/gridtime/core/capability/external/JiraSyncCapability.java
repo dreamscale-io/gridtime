@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.capability.external;
 
+import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraProjectDto;
 import com.dreamscale.gridtime.core.hooks.jira.dto.JiraTaskDto;
@@ -22,6 +23,9 @@ public class JiraSyncCapability {
 
     @Autowired
     JiraCapability jiraCapability;
+
+    @Autowired
+    TaskCapability taskCapability;
 
 
     public void synchronizeProjectsWithJira(UUID organizationId) {
@@ -55,13 +59,16 @@ public class JiraSyncCapability {
     private void synchronizeDefaultTasks(UUID organizationId, ProjectEntity dbProject) {
         TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, dbProject.getId(), TaskEntity.DEFAULT_TASK_NAME.toLowerCase());
 
+        //TODO this is hacked, but all this jira stuff is deprecated and on hold for now, til we figure out what we want to do with this
+        // no sense on making this better.  It works for now.
         if (defaultTask == null) {
-            defaultTask = new TaskEntity().configureDefaultTask();
+            defaultTask = new TaskEntity();
             defaultTask.setId(UUID.randomUUID());
             defaultTask.setProjectId(dbProject.getId());
             defaultTask.setOrganizationId(organizationId);
 
-            taskRepository.save(defaultTask);
+            taskCapability.createDefaultProjectTask(organizationId, dbProject.getId(), false);
+
         }
     }
 

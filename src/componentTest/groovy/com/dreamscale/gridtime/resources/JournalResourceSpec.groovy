@@ -162,7 +162,7 @@ class JournalResourceSpec extends Specification {
 
         when:
 
-        JournalEntryDto result = journalClient.updateRetroFlameRating(intention.getId().toString(), new FlameRatingInputDto(flameRating));
+        JournalEntryDto result = journalClient.updateFlameRating(intention.getId().toString(), new FlameRatingInputDto(flameRating));
 
         then:
         assert result != null

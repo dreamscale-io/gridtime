@@ -44,6 +44,10 @@ public class TaskCapability {
     private DtoEntityMapper<TaskDto, RecentAllTaskEntity> recentAllTaskMapper;
 
     private static final String DEFAULT_TASK_NAME = "No Task";
+    private static final String DEFAULT_TASK_DESCRIPTION = "(No Task Selected)";
+
+    private static final String WTF_TASK_NAME = "WTF";
+    private static final String WTF_TASK_DESCRIPTION = "(Troubleshoot Confusion)";
 
     @PostConstruct
     private void init() {
@@ -227,7 +231,9 @@ public class TaskCapability {
         defaultTask.setId(UUID.randomUUID());
         defaultTask.setOrganizationId(organizationId);
         defaultTask.setProjectId(projectId);
-        defaultTask.configureDefaultTask();
+        defaultTask.setName(DEFAULT_TASK_NAME);
+        defaultTask.setLowercaseName(DEFAULT_TASK_NAME.toLowerCase());
+        defaultTask.setDescription(DEFAULT_TASK_DESCRIPTION);
 
         taskRepository.save(defaultTask);
 

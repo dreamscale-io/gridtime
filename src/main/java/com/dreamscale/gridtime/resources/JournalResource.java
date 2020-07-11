@@ -97,9 +97,9 @@ public class JournalResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ME_PATH + ResourcePaths.INTENTION_PATH + "/{id}" + ResourcePaths.TRANSITION_PATH + ResourcePaths.FLAME_PATH)
-    JournalEntryDto updateRetroFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
+    JournalEntryDto updateFlameRating(@PathVariable("id") String intentionId, @RequestBody FlameRatingInputDto flameRatingInputDto) {
         RequestContext context = RequestContext.get();
-        log.info("updateRetroFlameRating, user={}", context.getRootAccountId());
+        log.info("updateFlameRating, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity memberEntity = organizationCapability.getActiveMembership(context.getRootAccountId());
 
