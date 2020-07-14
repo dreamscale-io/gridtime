@@ -87,8 +87,9 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, UUID> {
     @Query(nativeQuery = true, value = "select p.* from project p, recent_project rp " +
             "where p.id = rp.project_id " +
             "and rp.member_id=(:memberId) " +
+            "and rp.organization_id=(:organizationId) "+
             "order by rp.last_accessed desc ")
-    List<ProjectEntity> findByRecentMemberAccess(@Param("memberId") UUID memberId);
+    List<ProjectEntity> findByRecentMemberAccess(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
 
 
 }

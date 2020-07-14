@@ -18,6 +18,7 @@ import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.client.TeamClient
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
+import com.dreamscale.gridtime.core.capability.system.IteratingGridClock
 import com.dreamscale.gridtime.core.domain.active.RecentProjectRepository
 import com.dreamscale.gridtime.core.domain.active.RecentTaskRepository
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository
@@ -80,7 +81,7 @@ class JournalResourceSpec extends Specification {
     RootAccountRepository rootAccountRepository;
 
     @Autowired
-    GridClock mockGridClock
+    IteratingGridClock mockGridClock
 
     @Autowired
     RootAccountEntity loggedInUser
@@ -88,24 +89,14 @@ class JournalResourceSpec extends Specification {
     @Autowired
     EmailCapability mockEmailCapability
 
-    LocalDateTime time1
-    LocalDateTime time2
-    LocalDateTime time3
-    LocalDateTime time4
-
 
     def setup() {
-        time1 = LocalDateTime.now()
-        time2 = time1.plusMinutes(15)
-        time3 = time1.plusMinutes(30)
-        time4 = time1.plusMinutes(45)
+        mockGridClock.reset()
     }
 
 
     def "should save new intention"() {
         given:
-
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -143,7 +134,6 @@ class JournalResourceSpec extends Specification {
     def "should update flame rating"() {
         given:
 
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -174,8 +164,6 @@ class JournalResourceSpec extends Specification {
     def "should finish intention"() {
         given:
 
-        mockGridClock.now() >> LocalDateTime.now()
-
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
         switchUser(artyProfile)
@@ -204,8 +192,6 @@ class JournalResourceSpec extends Specification {
 
     def "should create new private task inside public project"() {
         given:
-
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -243,8 +229,6 @@ class JournalResourceSpec extends Specification {
     def "should throw validation error when finishing an already finished intention"() {
         given:
 
-        6 * mockGridClock.now() >> time1
-
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
         switchUser(artyProfile)
@@ -256,17 +240,11 @@ class JournalResourceSpec extends Specification {
         ProjectDto project = journalClient.findOrCreateProject(new CreateProjectInputDto("my-project", "proj description", false))
         TaskDto task = journalClient.findOrCreateTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description", false))
 
-        1 * mockGridClock.now() >> time2
-
         JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("intention1", project.getId(), task.getId()))
-
-        1 * mockGridClock.now() >> time3
 
         JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("intention2", project.getId(), task.getId()))
 
         when:
-        1 * mockGridClock.now() >> time4
-
         journalClient.finishIntention(intention1.getId().toString(), new IntentionFinishInputDto(FinishStatus.done));
 
         then:
@@ -275,8 +253,6 @@ class JournalResourceSpec extends Specification {
 
     def "get task breakdown even when no new intentions"() {
         given:
-
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -298,8 +274,6 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions"() {
         given:
-
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -325,7 +299,6 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions with limit"() {
         given:
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -353,7 +326,7 @@ class JournalResourceSpec extends Specification {
 
     def "get historical intentions before date"() {
         given:
-        6 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
+
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -366,22 +339,17 @@ class JournalResourceSpec extends Specification {
         ProjectDto project = journalClient.findOrCreateProject(new CreateProjectInputDto("my-project", "proj description", false))
         TaskDto task = journalClient.findOrCreateTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description", false))
 
-        3 * mockGridClock.now() >> LocalDateTime.now().minusDays(5)
-        3 * mockGridClock.nanoTime() >> System.nanoTime()
-
         JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project.getId(), task.getId()))
         JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project.getId(), task.getId()))
         JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project.getId(), task.getId()))
 
-        1 * mockGridClock.now() >> LocalDateTime.now()
-        1 * mockGridClock.nanoTime() >> System.nanoTime()
-
         JournalEntryDto intention4 = journalClient.createIntention(new IntentionInputDto("My Intention 4", project.getId(), task.getId()))
 
-        String beforeDateStr = DateTimeAPITranslator.convertToString(LocalDateTime.now().minusDays(1))
+        String beforeDateStr = DateTimeAPITranslator.convertToString(intention4.createdDate) //query should be strictly < less than
 
         when:
         List<JournalEntryDto> intentions = journalClient.getHistoricalIntentionsWithLimit(connection.getUsername(), beforeDateStr, 5)
+
 
         then:
         assert intentions != null
@@ -390,8 +358,6 @@ class JournalResourceSpec extends Specification {
 
     def "get recent tasks summary"() {
         given:
-
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -406,12 +372,12 @@ class JournalResourceSpec extends Specification {
 
         TaskDto task1 = journalClient.findOrCreateTask(project1.getId().toString(), new CreateTaskInputDto("DS-111", "my task description", false))
         TaskDto task2 = journalClient.findOrCreateTask(project1.getId().toString(), new CreateTaskInputDto("DS-112", "my task description", false))
-        TaskDto task3 = journalClient.findOrCreateTask(project2.getId().toString(), new CreateTaskInputDto("DS-113", "my task description", false))
+        TaskDto task3 = journalClient.findOrCreateTask(project1.getId().toString(), new CreateTaskInputDto("DS-113", "my task description", false))
         TaskDto task4 = journalClient.findOrCreateTask(project2.getId().toString(), new CreateTaskInputDto("DS-114", "my task description", false))
 
         JournalEntryDto intention1 = journalClient.createIntention(new IntentionInputDto("My Intention 1", project1.getId(), task1.getId()))
         JournalEntryDto intention2 = journalClient.createIntention(new IntentionInputDto("My Intention 2", project1.getId(), task2.getId()))
-        JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project2.getId(), task3.getId()))
+        JournalEntryDto intention3 = journalClient.createIntention(new IntentionInputDto("My Intention 3", project1.getId(), task3.getId()))
         JournalEntryDto intention4 = journalClient.createIntention(new IntentionInputDto("My Intention 4", project2.getId(), task4.getId()))
 
         when:
@@ -419,20 +385,25 @@ class JournalResourceSpec extends Specification {
         RecentTasksSummaryDto recentTasksSummary = journalClient.getRecentProjectsAndTasks();
 
         then:
+
         assert recentTasksSummary != null
         assert recentTasksSummary.getRecentProjects().size() == 3 //no project project
 
-        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(1)
-        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(2)
+        //sort most recent access descending
 
-        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 3
-        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 3
+        assert recentTasksSummary.getRecentProjects().get(0).name == project2.name
+        assert recentTasksSummary.getRecentProjects().get(1).name == project1.name
+
+        ProjectDto recentProject2 = recentTasksSummary.getRecentProjects().get(0)
+        ProjectDto recentProject1 = recentTasksSummary.getRecentProjects().get(1)
+
+        assert recentTasksSummary.getRecentTasks(recentProject1.getId()).size() == 4 //includes no task task
+        assert recentTasksSummary.getRecentTasks(recentProject2.getId()).size() == 2
 
     }
 
     def "create a new task reference in the journal"() {
         given:
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
 
@@ -470,7 +441,6 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions for other member"() {
         given:
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
         switchUser(artyProfile)
@@ -505,7 +475,6 @@ class JournalResourceSpec extends Specification {
 
     def "get recent intentions for other member with limit"() {
         given:
-        mockGridClock.now() >> LocalDateTime.now()
 
         AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
         switchUser(artyProfile)

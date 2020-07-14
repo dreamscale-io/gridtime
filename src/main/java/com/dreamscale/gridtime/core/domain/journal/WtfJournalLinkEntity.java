@@ -37,6 +37,6 @@ public class WtfJournalLinkEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID wtfCircuitId;
 
-
+    private LocalDateTime createdDate;
 
 }

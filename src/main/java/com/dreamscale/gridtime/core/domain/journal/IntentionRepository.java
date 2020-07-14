@@ -22,7 +22,7 @@ public interface IntentionRepository extends CrudRepository<IntentionEntity, UUI
             "where i.member_id=jl.member_id " +
             "and jl.intention_id = i.id )" +
             "order by position desc limit (:limit)")
-    List<IntentionEntity> findByMemberIdWithoutWTFsWithLimit(@Param("memberId") UUID memberId, @Param("limit") int limit);
+    List<IntentionEntity> findRecentByMemberIdWithoutWTFsWithLimit(@Param("memberId") UUID memberId, @Param("limit") int limit);
 
 
 

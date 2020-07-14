@@ -103,9 +103,6 @@ public class WTFCircuitOperator {
     private ActiveJoinCircuitRepository activeJoinCircuitRepository;
 
     @Autowired
-    private TorchieNetworkOperator torchieNetworkOperator;
-
-    @Autowired
     private JournalCapability journalCapability;
 
 
@@ -120,9 +117,9 @@ public class WTFCircuitOperator {
 
     private static final String LINK_BEGIN = "<link>";
     private static final String LINK_END = "</link>";
-    private static final String CIRCUIT_LINK_PREFIX = "/circuit/wtf";
+    private static final String CIRCUIT_LINK_PREFIX = "/circuit/wtf/";
 
-
+    private static final String RETRO_LINK = "/retro";
 
     @PostConstruct
     private void init() throws IOException, URISyntaxException {
@@ -138,7 +135,7 @@ public class WTFCircuitOperator {
     public LearningCircuitDto startWTF(UUID organizationId, UUID memberId) {
         String circuitName = sillyNameGenerator.random();
 
-        log.info("[WTFCircuitOperator] Creating new network : " + circuitName);
+        log.info("[WTFCircuitOperator] Creating new circuit : " + circuitName);
         return startWTFWithCustomName(organizationId, memberId, circuitName);
     }
 
@@ -185,7 +182,7 @@ public class WTFCircuitOperator {
 
         String journalMessage = "WTF started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
 
-        journalCapability.writeJournalWTFMessage(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
+        journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
 
         return circuitDto;
 
@@ -203,7 +200,7 @@ public class WTFCircuitOperator {
 
         //so now I've got a reserved room Id, for my circuit, my wtf room name will automatically be circuit_name/wtf
 
-        log.debug("[WTFCircuitOperator] Creating WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Creating WTF circuit {} at {}", circuitName, nanoTime);
 
         TalkRoomEntity wtfRoomEntity = new TalkRoomEntity();
         wtfRoomEntity.setId(UUID.randomUUID());
@@ -226,7 +223,7 @@ public class WTFCircuitOperator {
 
         //then I need to join this new person in the room...
 
-        log.debug("[WTFCircuitOperator] Member {} joining network {}", memberId, learningCircuitEntity.getCircuitName());
+        log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
 
         LearningCircuitMemberEntity circuitMemberEntity = new LearningCircuitMemberEntity();
 
@@ -240,6 +237,7 @@ public class WTFCircuitOperator {
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
+
         return learningCircuitEntity;
     }
 
@@ -247,7 +245,7 @@ public class WTFCircuitOperator {
         MemberStatusEntity memberStatusEntity = memberStatusRepository.findByOrganizationIdAndId(organizationId, memberId);
 
         if (memberStatusEntity != null && memberStatusEntity.getActiveCircuitId() != null) {
-            throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active network.");
+            throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active circuit.");
         }
     }
 
@@ -378,7 +376,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Starting Retro for WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Starting Retro for WTF circuit {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
@@ -389,6 +387,8 @@ public class WTFCircuitOperator {
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
 
             learningCircuitEntity.setSolvedCircuitNanoTime(nanoTime);
+
+            journalCapability.finishWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         }
 
         if (learningCircuitEntity.getRetroRoomId() == null) {
@@ -421,6 +421,10 @@ public class WTFCircuitOperator {
 
         activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
 
+        String journalMessage = "Retro started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + RETRO_LINK + LINK_END;
+
+        journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
+
         return circuitDto;
 
     }
@@ -435,7 +439,7 @@ public class WTFCircuitOperator {
 
     private void validateRetroNotAlreadyStarted(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getRetroRoomId() != null) {
-            throw new ConflictException(ConflictErrorCodes.RETRO_ALREADY_STARTED, "Retro already started for network: " + circuitName);
+            throw new ConflictException(ConflictErrorCodes.RETRO_ALREADY_STARTED, "Retro already started for circuit: " + circuitName);
         }
     }
 
@@ -455,6 +459,12 @@ public class WTFCircuitOperator {
         if (!(learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT
                 || learningCircuitEntity.getCircuitState() == LearningCircuitState.ONHOLD)) {
             throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit must be Active or OnHold: " + circuitName);
+        }
+    }
+
+    private void validateCircuitNotClosed(String circuitName, LearningCircuitEntity learningCircuitEntity) {
+        if ((learningCircuitEntity.getCircuitState() == LearningCircuitState.CLOSED)) {
+            throw new ConflictException(ConflictErrorCodes.CIRCUIT_IN_WRONG_STATE, "Circuit is already closed. " + circuitName);
         }
     }
 
@@ -484,11 +494,11 @@ public class WTFCircuitOperator {
     }
 
     private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
-        log.debug("[WTFCircuitOperator] validate org={}, member={}, network={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
+        log.debug("[WTFCircuitOperator] validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
         LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access network: " + circuit.getCircuitName());
+            throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
         }
     }
 
@@ -504,7 +514,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Solving WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Solving WTF circuit {} at {}", circuitName, nanoTime);
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_SOLVED);
 
@@ -524,6 +534,8 @@ public class WTFCircuitOperator {
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
 
         clearActiveJoinedCircuit(organizationId, ownerId);
+
+        journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 
         return circuitDto;
     }
@@ -547,13 +559,15 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
 
+        journalCapability.abortWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+
         return circuitDto;
 
     }
 
     @Transactional
     void cancelWTFAndCommit(UUID organizationId, UUID ownerId, String circuitName, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
-        log.debug("[WTFCircuitOperator] Cancel WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
@@ -564,6 +578,8 @@ public class WTFCircuitOperator {
             long nanoElapsedTime = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitPausedNanoTime(nanoElapsedTime);
         }
+
+        validateCircuitNotClosed(circuitName, learningCircuitEntity);
 
         learningCircuitEntity.setCancelCircuitNanoTime(nanoTime);
         learningCircuitEntity.setCircuitState(LearningCircuitState.CANCELED);
@@ -583,7 +599,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Pause WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Pause WTF circuit {} at {}", circuitName, nanoTime);
         return pauseAndUpdateCircuitStatus(now, nanoTime, learningCircuitEntity);
     }
 
@@ -607,6 +623,9 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
+        journalCapability.abortWTFIntention(now, nanoTime, learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), learningCircuitEntity.getId());
+
+
         return circuitDto;
     }
 
@@ -624,7 +643,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Resume WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Resume WTF circuit {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
@@ -647,6 +666,11 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
 
+        String journalMessage = "WTF resumed: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
+
+        journalCapability.createWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId(), journalMessage);
+
+
         return circuitDto;
     }
 
@@ -662,7 +686,7 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        log.debug("[WTFCircuitOperator] Reopen WTF network {} at {}", circuitName, nanoTime);
+        log.debug("[WTFCircuitOperator] Reopen WTF circuit {} at {}", circuitName, nanoTime);
 
         pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
@@ -670,6 +694,8 @@ public class WTFCircuitOperator {
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
 
             learningCircuitEntity.setRetroOpenNanoTime(null);
+
+            journalCapability.abortWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         }
 
         //so if we are re-opening, then whenever we solved this thing prior, treat that duration as a pause, and this as a resume
@@ -688,6 +714,10 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
 
+        String journalMessage = "WTF reopened: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
+
+        journalCapability.createWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId(), journalMessage);
+
         return circuitDto;
     }
 
@@ -701,6 +731,10 @@ public class WTFCircuitOperator {
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
+
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
+            journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+        }
 
         learningCircuitEntity.setCloseCircuitNanoTime(nanoTime);
         learningCircuitEntity.setCircuitState(LearningCircuitState.CLOSED);
@@ -728,22 +762,29 @@ public class WTFCircuitOperator {
         if (!wtfCircuit.getOwnerId().equals(memberId)) {
 
             pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, wtfCircuit.getId());
+
             updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
 
-            joinCircuitAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
+            String ownerUser = memberDetailsRetriever.lookupUsername(wtfCircuit.getOwnerId());
+
+            String journalMessage = "Helping user @"+ownerUser + " with WTF: " +LINK_BEGIN + CIRCUIT_LINK_PREFIX + wtfCircuit.getCircuitName() + LINK_END;
+
+            journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, wtfCircuit.getId(), journalMessage);
+
+            joinCircuitAsMemberAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
         }
 
         return toDto(wtfCircuit);
 
     }
 
-    private void joinCircuitAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
+    private void joinCircuitAsMemberAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
 
         LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
 
         if (circuitMember == null) {
 
-            log.debug("[WTFCircuitOperator] Member {} joining network {}", memberId, wtfCircuit.getCircuitName());
+            log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, wtfCircuit.getCircuitName());
 
             circuitMember = new LearningCircuitMemberEntity();
             circuitMember.setId(UUID.randomUUID());
@@ -827,18 +868,29 @@ public class WTFCircuitOperator {
     private long calculateActiveNanoElapsedTime(LearningCircuitEntity circuitEntity, Long nanoPauseTime) {
         long totalDuration = 0;
 
+        log.debug("wtfOpenTime = " + +circuitEntity.getWtfOpenNanoTime());
+        log.debug("nanoPauseTime = " + +nanoPauseTime);
+
+
+        log.debug("circuitEntity elapsed in = " + +circuitEntity.getTotalCircuitElapsedNanoTime());
+
         if (circuitEntity.getTotalCircuitElapsedNanoTime() != null) {
             totalDuration = circuitEntity.getTotalCircuitElapsedNanoTime();
         }
 
         //either take the additional time from start, or from resume
         if (circuitEntity.getResumeCircuitNanoTime() == null) {
+
+
             long additionalDuration = nanoPauseTime - circuitEntity.getWtfOpenNanoTime();
             totalDuration += additionalDuration;
         } else {
             long additionalDuration = nanoPauseTime - circuitEntity.getResumeCircuitNanoTime();
             totalDuration += additionalDuration;
         }
+
+        log.debug("circuitEntity elapsed out = " + totalDuration);
+
 
         return totalDuration;
     }

@@ -247,7 +247,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         log.info(welcomeMessage);
 
-        journalCapability.writeJournalWelcomeMessage(now, nanoTime, myMembership.getOrganizationId(), myMembership.getId(), welcomeMessage);
+        journalCapability.createWelcomeMessage(now, nanoTime, myMembership.getOrganizationId(), myMembership.getId(), welcomeMessage);
     }
 
     @Transactional

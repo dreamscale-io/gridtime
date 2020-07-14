@@ -8,9 +8,15 @@ import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
+import com.dreamscale.gridtime.api.journal.IntentionInputDto
 import com.dreamscale.gridtime.api.organization.TeamMemberDto
+import com.dreamscale.gridtime.api.project.CreateProjectInputDto
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto
+import com.dreamscale.gridtime.api.project.ProjectDto
+import com.dreamscale.gridtime.api.project.TaskDto
 import com.dreamscale.gridtime.api.team.TeamCircuitDto
 import com.dreamscale.gridtime.client.AccountClient
+import com.dreamscale.gridtime.client.JournalClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
 import com.dreamscale.gridtime.client.MemberClient
 import com.dreamscale.gridtime.client.TalkToClient
@@ -43,6 +49,9 @@ class LearningCircuitResourceSpec extends Specification {
     TeamCircuitClient teamCircuitClient
 
     @Autowired
+    JournalClient journalClient
+
+    @Autowired
     MemberClient memberClient
 
     @Autowired
@@ -60,8 +69,6 @@ class LearningCircuitResourceSpec extends Specification {
     @Autowired
     TeamCapability teamCapability
 
-    @Autowired
-    GridClock mockTimeService
     OrganizationEntity org
 
     LocalDateTime time
@@ -78,8 +85,6 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should create a circuit'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
@@ -99,17 +104,17 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should start a WTF that becomes the active WTF'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
 
         loggedInUser.setId(member.getRootAccountId())
 
+        createIntentionForWTFContext()
+
         when:
         LearningCircuitDto circuit = circuitClient.startWTF()
 
-        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
+        LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit()
 
         then:
         assert activeCircuit != null
@@ -118,14 +123,21 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+    private void createIntentionForWTFContext() {
+        ProjectDto project = journalClient.findOrCreateProject(new CreateProjectInputDto("proj", "my proj", false));
+        TaskDto task = journalClient.findOrCreateTask(project.getId().toString(), new CreateTaskInputDto("task", "my task", false))
+
+        journalClient.createIntention(new IntentionInputDto("Intention", project.getId(), task.getId()))
+    }
+
 
     def 'should update description of a circuit'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         when:
         LearningCircuitDto circuit = circuitClient.startWTF()
@@ -141,11 +153,10 @@ class LearningCircuitResourceSpec extends Specification {
     def 'should update tags of a circuit'() {
         given:
 
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
-
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         when:
         LearningCircuitDto circuit = circuitClient.startWTF()
@@ -161,11 +172,10 @@ class LearningCircuitResourceSpec extends Specification {
     def "should return active circuit"() {
         given:
 
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
-
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit1 = circuitClient.startWTF()
 
@@ -182,11 +192,10 @@ class LearningCircuitResourceSpec extends Specification {
     def "should return all shelved do it later circuits"() {
         given:
 
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
-
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit1 = circuitClient.startWTF()
         circuitClient.pauseWTFWithDoItLater(circuit1.getCircuitName())
@@ -205,11 +214,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should solve a WTF circuit'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -225,13 +234,13 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should cancel a WTF circuit'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -275,11 +284,10 @@ class LearningCircuitResourceSpec extends Specification {
     def "should shelf a circuit with do it later"() {
         given:
 
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
-
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -299,11 +307,10 @@ class LearningCircuitResourceSpec extends Specification {
     def 'should resume a circuit from do it later'() {
         given:
 
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
-
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -326,11 +333,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should start a retro'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -346,11 +353,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should start a retro with already solved circuit'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -369,11 +376,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should close a circuit with a retro started'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -396,11 +403,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should reopen a circuit with a retro started'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -425,25 +432,23 @@ class LearningCircuitResourceSpec extends Specification {
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
 
-        1 * mockTimeService.now() >> time
-        1 * mockTimeService.nanoTime() >> timeNano
+        createIntentionForWTFContext()
 
-        LearningCircuitDto circuit = circuitClient.startWTF()
+        //1 min go by each tick
 
         when:
 
-        1 * mockTimeService.now() >> time.plusMinutes(5)
-        1 * mockTimeService.nanoTime() >> timeNano.plus(30000000000)
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        //1
 
         LearningCircuitDto onHoldCircuit = circuitClient.pauseWTFWithDoItLater(circuit.circuitName)
 
-        1 * mockTimeService.now() >> time.plusMinutes(10)
-        1 * mockTimeService.nanoTime() >> timeNano.plus(60000000000)
+        //1
 
         LearningCircuitDto resumedCircuit = circuitClient.resumeWTF(circuit.circuitName)
 
-        1 * mockTimeService.now() >> time.plusMinutes(15)
-        1 * mockTimeService.nanoTime() >> timeNano.plus(90000000000)
+        //1
 
         LearningCircuitDto solveWTF = circuitClient.solveWTF(circuit.circuitName)
 
@@ -452,19 +457,25 @@ class LearningCircuitResourceSpec extends Specification {
         assert  resumedCircuit.circuitState == LearningCircuitState.TROUBLESHOOT.name()
         assert  solveWTF.circuitState == LearningCircuitState.SOLVED.name()
 
-        assert solveWTF.getTotalCircuitElapsedNanoTime() == 60000000000
-        assert solveWTF.getTotalCircuitPausedNanoTime() == 30000000000
+        println "onHoldCircuit ====" + onHoldCircuit
+
+        println "resumedCircuit ====" + resumedCircuit
+
+        println "solveWTF ====" + solveWTF
+
+        assert solveWTF.getTotalCircuitElapsedNanoTime() == 12000000000 //2 min
+        assert solveWTF.getTotalCircuitPausedNanoTime() == 6000000000 //1 min
 
     }
 
     def 'should be able to create WTF circuit and retrieve talk messages'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -482,12 +493,12 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should be able to create WTF circuit, post a chat, logout & login, post another chat, and retrieve all messages'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -528,11 +539,11 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should close a circuit thats been solved with no retro'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
@@ -555,13 +566,13 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'join another persons chat room'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
 
         loggedInUser.setId(user1.getRootAccountId())
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto user1Circuit = circuitClient.startWTF()
         talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
@@ -572,6 +583,8 @@ class LearningCircuitResourceSpec extends Specification {
         loggedInUser.setId(user2.getRootAccountId())
 
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         when:
 
@@ -599,13 +612,13 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'should join another persons circuit and put existing WTF on hold'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
 
         loggedInUser.setId(user1.getRootAccountId())
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto user1Circuit = circuitClient.startWTF()
 
@@ -615,6 +628,8 @@ class LearningCircuitResourceSpec extends Specification {
         loggedInUser.setId(user2.getRootAccountId())
 
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         when:
 
@@ -642,12 +657,12 @@ class LearningCircuitResourceSpec extends Specification {
 
     def 'join and leave another persons chat room to update room status'() {
         given:
-        mockTimeService.now() >> time
-        mockTimeService.nanoTime() >> timeNano
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
         loggedInUser.setId(member.getRootAccountId())
         accountClient.login()
+
+        createIntentionForWTFContext()
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 

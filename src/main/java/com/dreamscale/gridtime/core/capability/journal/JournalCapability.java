@@ -21,6 +21,8 @@ import com.dreamscale.gridtime.core.capability.circuit.TorchieNetworkOperator;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +78,7 @@ public class JournalCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    private WtfJournalEntryRepository wtfJournalEntryRepository;
+    private WtfJournalLinkRepository wtfJournalLinkRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -154,8 +156,8 @@ public class JournalCapability {
     }
 
     @Transactional
-    public JournalEntryDto writeJournalWelcomeMessage(LocalDateTime now, Long nanoTime,
-                                                      UUID organizationId, UUID memberId, String journalText ) {
+    public JournalEntryDto createWelcomeMessage(LocalDateTime now, Long nanoTime,
+                                                UUID organizationId, UUID memberId, String journalText) {
 
 
         ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
@@ -168,33 +170,11 @@ public class JournalCapability {
     }
 
     @Transactional
-    public JournalEntryDto writeJournalWTFMessage(LocalDateTime now, Long nanoTime,
-                                                      UUID organizationId, UUID memberId, UUID wtfCircuitId, String journalText ) {
+    public JournalEntryDto createWTFIntention(LocalDateTime now, Long nanoTime,
+                                              UUID organizationId, UUID memberId, UUID wtfCircuitId, String journalText) {
 
-        UUID activeProjectId = null;
-        UUID activeTaskId = null;
 
-        RecentTaskEntity mostRecentTask = recentActivityManager.lookupMostRecentTask(organizationId, memberId);
-
-        if (mostRecentTask != null) {
-            activeProjectId = mostRecentTask.getProjectId();
-            activeTaskId = mostRecentTask.getTaskId();
-        } else {
-            ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
-
-            //this really is only happening in test conditions where all the dependencies arent fully setup
-            //seems reasonable for now to not splode because of a lack of default project/task configuration
-            //TODO refactor with integration tests
-            if (defaultProject != null) {
-                activeProjectId = defaultProject.getId();
-
-                TaskDto defaultTask = taskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
-                if (defaultTask != null) {
-                    activeTaskId = defaultTask.getId();
-                }
-            }
-
-        }
+        ProjectTaskContext projectTaskContext = determineWTFProjectTaskContext(organizationId, memberId, wtfCircuitId);
 
         ActiveLinksNetworkDto activeLinksNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
 
@@ -210,29 +190,76 @@ public class JournalCapability {
         intentionEntity.setLinked(isLinked);
         intentionEntity.setMemberId(memberId);
         intentionEntity.setDescription(journalText);
-        intentionEntity.setProjectId(activeProjectId);
-        intentionEntity.setTaskId(activeTaskId);
+        intentionEntity.setProjectId(projectTaskContext.getProjectId());
+        intentionEntity.setTaskId(projectTaskContext.getTaskId());
         intentionRepository.save(intentionEntity);
 
         WtfJournalLinkEntity wtfJournalLinkEntity = new WtfJournalLinkEntity();
         wtfJournalLinkEntity.setId(UUID.randomUUID());
         wtfJournalLinkEntity.setOrganizationId(organizationId);
         wtfJournalLinkEntity.setMemberId(memberId);
-        wtfJournalLinkEntity.setProjectId(activeProjectId);
-        wtfJournalLinkEntity.setTaskId(activeTaskId);
+        wtfJournalLinkEntity.setProjectId(projectTaskContext.getProjectId());
+        wtfJournalLinkEntity.setTaskId(projectTaskContext.getTaskId());
         wtfJournalLinkEntity.setIntentionId(intentionEntity.getId());
         wtfJournalLinkEntity.setWtfCircuitId(wtfCircuitId);
+        wtfJournalLinkEntity.setCreatedDate(now);
 
-        wtfJournalEntryRepository.save(wtfJournalLinkEntity);
+        wtfJournalLinkRepository.save(wtfJournalLinkEntity);
 
         entityManager.flush();
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
         JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
 
+        log.info("WTF STARTED ENTRY: " + journalEntryDto);
         teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
 
         return journalEntryDto;
+    }
+
+    private ProjectTaskContext determineWTFProjectTaskContext(UUID organizationId, UUID memberId, UUID wtfCircuitId) {
+
+        UUID activeProjectId = null;
+        UUID activeTaskId = null;
+
+
+        //first check if there is an existing established context for this WTF
+        WtfJournalLinkEntity existingContext = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, wtfCircuitId);
+
+        if (existingContext != null) {
+            activeProjectId = existingContext.getProjectId();
+            activeTaskId = existingContext.getTaskId();
+        }
+
+
+        //if this is a new WTF, the project/task context is the most recent intention
+
+        if (activeProjectId == null) {
+            RecentTaskEntity mostRecentTask = recentActivityManager.lookupMostRecentTask(organizationId, memberId);
+
+            if (mostRecentTask != null) {
+                activeProjectId = mostRecentTask.getProjectId();
+                activeTaskId = mostRecentTask.getTaskId();
+            }
+        }
+
+        //if theres no intentions in the journal at all, use the default project
+
+        if (activeProjectId == null) {
+
+            ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
+
+            if (defaultProject != null) {
+                activeProjectId = defaultProject.getId();
+
+                TaskDto defaultTask = taskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
+                if (defaultTask != null) {
+                    activeTaskId = defaultTask.getId();
+                }
+            }
+        }
+
+        return new ProjectTaskContext(activeProjectId, activeTaskId);
     }
 
     public LocalDateTime getDateOfFirstIntention(UUID memberId) {
@@ -348,12 +375,13 @@ public class JournalCapability {
         return taskSwitchEventEntity;
     }
 
-    private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime now,  Long nanoTime) {
-        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithoutWTFsWithLimit(memberId, 1);
+    private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime now, Long nanoTime) {
+        List<IntentionEntity> lastIntentionList = intentionRepository.findRecentByMemberIdWithoutWTFsWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
 
+            log.debug("CLOSING LAST INTENTION: "+ lastIntention.getDescription() + " : status: "+lastIntention.getFinishStatus());
 
             if (lastIntention.getFinishStatus() == null) {
                 lastIntention.setFinishStatus(FinishStatus.done.name());
@@ -377,7 +405,6 @@ public class JournalCapability {
         }
 
 
-
         return null;
     }
 
@@ -394,6 +421,8 @@ public class JournalCapability {
         UUID memberId = organizationCapability.getMemberIdForUser(organizationId, username);
 
         organizationCapability.validateMemberWithinOrgByMemberId(organizationId, memberId);
+
+        log.debug("getHistoricalIntentionsForUser < date: "+beforeDate);
 
         List<JournalEntryEntity> journalEntryEntities = journalEntryRepository.findByMemberIdBeforeDateWithLimit(memberId, Timestamp.valueOf(beforeDate), limit);
         Collections.reverse(journalEntryEntities);
@@ -435,8 +464,11 @@ public class JournalCapability {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        JournalEntryDto myJournalEntry = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.done);
-        updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.done);
+        IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
+        validateNotNull("intentionEntity", intentionEntity);
+
+        JournalEntryDto myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.done);
+        updateFinishStatusOfMultiMembers(now, organizationId, memberId, FinishStatus.done);
 
         teamCircuitOperator.notifyTeamOfIntentionFinished(organizationId, memberId, now, nanoTime, myJournalEntry);
 
@@ -444,55 +476,93 @@ public class JournalCapability {
     }
 
     @Transactional
+    public JournalEntryDto finishWTFIntention(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
+
+        WtfJournalLinkEntity journalLink = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, circuitId);
+
+        validateNotNull("journalLink", journalLink);
+
+        IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
+
+        validateFinishStatusIsNull(intentionEntity);
+
+        JournalEntryDto myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.done);
+
+        teamCircuitOperator.notifyTeamOfIntentionFinished(organizationId, memberId, now, nanoTime, myJournalEntry);
+
+        return myJournalEntry;
+    }
+
+    @Transactional
+    public JournalEntryDto abortWTFIntention(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
+
+        WtfJournalLinkEntity journalLink = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, circuitId);
+
+        validateNotNull("journalLink", journalLink);
+
+        IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
+
+        validateFinishStatusIsNull(intentionEntity);
+
+        JournalEntryDto myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.aborted);
+
+        teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, myJournalEntry);
+
+        return myJournalEntry;
+    }
+
+
+    @Transactional
     public JournalEntryDto abortIntention(UUID organizationId, UUID memberId, UUID intentionId) {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        JournalEntryDto journalEntryDto = updateFinishStatus(organizationId, memberId, intentionId, FinishStatus.aborted);
-        updateFinishStatusOfMultiMembers(organizationId, memberId, FinishStatus.aborted);
+        IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
+        validateNotNull("intentionEntity", intentionEntity);
+
+        JournalEntryDto journalEntryDto = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.aborted);
+        updateFinishStatusOfMultiMembers(now, organizationId, memberId, FinishStatus.aborted);
 
         teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, journalEntryDto);
 
         return journalEntryDto;
     }
 
-    private void updateFinishStatusOfMultiMembers(UUID organizationId, UUID memberId, FinishStatus finishStatus) {
+    private void updateFinishStatusOfMultiMembers(LocalDateTime now, UUID organizationId, UUID memberId, FinishStatus finishStatus) {
         ActiveLinksNetworkDto spiritNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
         for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
-            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithoutWTFsWithLimit(spiritLink.getFriendSpiritId(), 1);
+            List<IntentionEntity> lastIntentionList = intentionRepository.findRecentByMemberIdWithoutWTFsWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {
-                updateFinishStatus(organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0).getId(), finishStatus);
+                updateFinishStatus(now, organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0), finishStatus);
             }
         }
     }
 
-    private JournalEntryDto updateFinishStatus(UUID organizationId, UUID memberId, UUID intentionId, FinishStatus finishStatus) {
-        IntentionEntity intentionEntity = intentionRepository.findOne(intentionId);
+    private JournalEntryDto updateFinishStatus(LocalDateTime now, UUID organizationId, UUID memberId, IntentionEntity intentionEntity, FinishStatus finishStatus) {
 
-        if (intentionEntity != null) {
-            validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
-            validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
+        validateNotNull("intentionEntity", intentionEntity);
 
-            validateFinishStatusIsNull(intentionEntity);
+        validateMemberOrgMatchesProjectOrg(organizationId, intentionEntity.getOrganizationId());
+        validateMemberIdMatchesIntentionMemberId(memberId, intentionEntity.getMemberId());
 
-            intentionEntity.setFinishStatus(finishStatus.name());
-            intentionEntity.setFinishTime(gridClock.now());
+        validateFinishStatusIsNull(intentionEntity);
 
-            intentionRepository.save(intentionEntity);
+        intentionEntity.setFinishStatus(finishStatus.name());
+        intentionEntity.setFinishTime(now);
 
-            entityManager.flush();
-        }
+        intentionRepository.save(intentionEntity);
 
-        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionId);
+        entityManager.flush();
 
-        //below is a workaround, journal entry can return a cached version of the intention
+        //TODO this is coming back null
 
-        if (intentionEntity != null) {
-            journalEntryEntity.setFinishStatus(intentionEntity.getFinishStatus());
-            journalEntryEntity.setFinishTime(intentionEntity.getFinishTime());
-        }
+        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
+
+        journalEntryEntity.setFinishStatus(intentionEntity.getFinishStatus());
+        journalEntryEntity.setFinishTime(intentionEntity.getFinishTime());
 
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+
     }
 
     private void validateFinishStatusIsNull(IntentionEntity intentionEntity) {
@@ -544,7 +614,7 @@ public class JournalCapability {
 
             OrganizationDto org = organizationCapability.getOrganization(organizationId);
 
-            writeJournalWelcomeMessage(now, nanoTime, organizationId, memberId, "Welcome to the "+org.getDomainName() + " hyperspace");
+            createWelcomeMessage(now, nanoTime, organizationId, memberId, "Welcome to the " + org.getDomainName() + " hyperspace");
         }
     }
 
@@ -668,12 +738,19 @@ public class JournalCapability {
 
     private void validateNotNull(String propertyName, Object property) {
         if (property == null) {
-            throw new BadRequestException(ValidationErrorCodes.PROPERTY_CANT_BE_NULL, "Property "+propertyName + " cant be null");
+            throw new BadRequestException(ValidationErrorCodes.PROPERTY_CANT_BE_NULL, "Property " + propertyName + " cant be null");
         }
     }
 
     public UUID getLastActiveProjectId(UUID organizationId, UUID memberId) {
 
         return recentActivityManager.lookupProjectIdOfMostRecentActivity(organizationId, memberId);
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class ProjectTaskContext {
+        private UUID projectId;
+        private UUID taskId;
     }
 }

@@ -9,6 +9,7 @@ create table wtf_journal_link (
     project_id uuid ,
     task_id uuid ,
     intention_id uuid not null,
-    wtf_circuit_id uuid not null
+    wtf_circuit_id uuid not null,
+    created_date timestamp
 );
 

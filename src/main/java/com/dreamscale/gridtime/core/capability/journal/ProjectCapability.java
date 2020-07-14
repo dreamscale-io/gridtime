@@ -446,7 +446,7 @@ public class ProjectCapability {
 
     public List<ProjectDto> findProjectsByRecentMemberAccess(UUID organizationId, UUID memberId) {
 
-        List<ProjectEntity> projectEntities = projectRepository.findByRecentMemberAccess(memberId);
+        List<ProjectEntity> projectEntities = projectRepository.findByRecentMemberAccess(organizationId, memberId);
         return projectMapper.toApiList(projectEntities);
     }
 
