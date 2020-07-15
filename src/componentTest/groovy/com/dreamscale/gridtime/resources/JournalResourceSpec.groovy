@@ -535,8 +535,6 @@ class JournalResourceSpec extends Specification {
                 .teamId(teamId)
                 .save()
 
-
-
         return member
     }
 

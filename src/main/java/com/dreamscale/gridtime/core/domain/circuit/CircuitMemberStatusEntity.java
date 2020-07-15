@@ -39,4 +39,6 @@ public class CircuitMemberStatusEntity {
 
     private OnlineStatus onlineStatus;
 
+    private boolean isActiveInSession;
+
 }

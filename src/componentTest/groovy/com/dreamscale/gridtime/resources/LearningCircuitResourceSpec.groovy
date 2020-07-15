@@ -211,6 +211,50 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuits.size() == 2
     }
 
+    def "should clear circuit members on pause so resume includes only owner "() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
+
+        createIntentionForWTFContext()
+
+
+
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+
+        //change active logged in user to a different user within same organization
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+        accountClient.login()
+
+        circuitClient.joinWTF(user1Circuit.getCircuitName())
+
+        loggedInUser.setId(user1.getRootAccountId())
+
+        when:
+        LearningCircuitDto startingCircuit = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName());
+
+        circuitClient.pauseWTFWithDoItLater(user1Circuit.getCircuitName())
+
+        circuitClient.resumeWTF(user1Circuit.getCircuitName())
+
+        LearningCircuitDto afterPause = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName());
+
+
+        then:
+
+        assert startingCircuit != null
+        assert startingCircuit.circuitName == user1Circuit.circuitName
+        assert startingCircuit.getCircuitParticipants().size() == 2
+
+        assert afterPause != null
+        assert afterPause.getCircuitParticipants().size() == 1
+    }
+
+
 
     def 'should solve a WTF circuit'() {
         given:

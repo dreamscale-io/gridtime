@@ -232,6 +232,7 @@ public class WTFCircuitOperator {
         circuitMemberEntity.setCircuitId(learningCircuitEntity.getId());
         circuitMemberEntity.setOrganizationId(learningCircuitEntity.getOrganizationId());
         circuitMemberEntity.setMemberId(memberId);
+        circuitMemberEntity.setActiveInSession(true);
 
         learningCircuitMemberRepository.save(circuitMemberEntity);
 
@@ -300,7 +301,14 @@ public class WTFCircuitOperator {
 
         validateCircuitExists(circuitName, circuitEntity);
 
-        List<CircuitMemberStatusEntity> circuitParticipants = circuitMemberStatusRepository.findByCircuitId(circuitEntity.getId());
+        List<CircuitMemberStatusEntity> circuitParticipants = null;
+
+        if (circuitEntity.getCircuitState() != LearningCircuitState.CLOSED) {
+            circuitParticipants = circuitMemberStatusRepository.findActiveMembersByCircuitId(organizationId, circuitEntity.getId());
+        } else {
+            circuitParticipants = circuitMemberStatusRepository.findByOrganizationIdAndCircuitId(organizationId, circuitEntity.getId());
+        }
+
         List<RoomMemberStatusEntity> wtfMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getWtfRoomId());
         List<RoomMemberStatusEntity> retroMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getRetroRoomId());
 
@@ -407,11 +415,6 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setRetroOpenNanoTime(nanoTime);
 
         learningCircuitRepository.save(learningCircuitEntity);
-
-        //TODO do we want to notify this set of people of the retro starting?
-        List<LearningCircuitMemberEntity> circuitMembers = learningCircuitMemberRepository.findByCircuitId(learningCircuitEntity.getId());
-
-        //yo, retro is starting would you like to join?
 
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_RETRO_STARTED);
 
@@ -535,6 +538,8 @@ public class WTFCircuitOperator {
 
         clearActiveJoinedCircuit(organizationId, ownerId);
 
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+
         journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 
         return circuitDto;
@@ -621,12 +626,21 @@ public class WTFCircuitOperator {
 
         clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
 
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+
         teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
         journalCapability.abortWTFIntention(now, nanoTime, learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), learningCircuitEntity.getId());
 
 
         return circuitDto;
+    }
+
+    private void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuitEntity) {
+
+        learningCircuitMemberRepository.updateAllMembersToInactiveExceptOwner(
+                learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getId(), learningCircuitEntity.getOwnerId());
+
     }
 
     //TODO start, cancel, pause
@@ -743,6 +757,8 @@ public class WTFCircuitOperator {
 
         clearActiveJoinedCircuit(organizationId, ownerId);
 
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+
         return toDto(learningCircuitEntity);
     }
 
@@ -792,9 +808,15 @@ public class WTFCircuitOperator {
             circuitMember.setOrganizationId(organizationId);
             circuitMember.setMemberId(memberId);
             circuitMember.setJoinTime(now);
+            circuitMember.setActiveInSession(true);
 
             learningCircuitMemberRepository.save(circuitMember);
 
+        } else {
+
+            circuitMember.setActiveInSession(true);
+
+            learningCircuitMemberRepository.save(circuitMember);
         }
         //if circuit is in troubleshoot state, join the troubleshooting room.
 

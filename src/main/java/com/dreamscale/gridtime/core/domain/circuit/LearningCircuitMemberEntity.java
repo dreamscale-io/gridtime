@@ -32,5 +32,7 @@ public class LearningCircuitMemberEntity {
 
     private LocalDateTime joinTime;
 
+    private boolean isActiveInSession;
+
 
 }

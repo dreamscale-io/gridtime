@@ -49,7 +49,8 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "and c.owner_id != (:memberId) " +
             "and exists (select 1 from learning_circuit_member lcm " +
             "where lcm.circuit_id = c.id " +
-            "and lcm.member_id = (:memberId)) " +
+            "and lcm.member_id = (:memberId) " +
+            "and lcm.is_active_in_session = true ) "+
             "and (c.circuit_state = 'TROUBLESHOOT' or c.circuit_state = 'RETRO') " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findAllParticipatingCircuits(@Param("organizationId") UUID organizationId,
