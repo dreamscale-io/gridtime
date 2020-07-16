@@ -200,6 +200,7 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setOrganizationId(organizationId);
         learningCircuitEntity.setOwnerId(memberId);
         learningCircuitEntity.setModeratorId(memberId);
+        learningCircuitEntity.setMarksForReview(0);
 
         learningCircuitEntity = tryToSaveAndReserveName(learningCircuitEntity);
 
@@ -377,6 +378,7 @@ public class WTFCircuitOperator {
         return circuit.getCircuitName() + WTF_ROOM_SUFFIX;
     }
 
+    @Transactional
     public SimpleStatusDto markForReview(UUID organizationId, UUID memberId, String circuitName) {
 
         LearningCircuitEntity learningCircuit = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
@@ -399,6 +401,12 @@ public class WTFCircuitOperator {
             circuitMark.setCreatedDate(now);
 
             circuitMarkRepository.save(circuitMark);
+
+            learningCircuit = learningCircuitRepository.selectForUpdate(learningCircuit.getId());
+
+            learningCircuit.setMarksForReview(learningCircuit.getMarksForReview() + 1);
+
+            learningCircuitRepository.save(learningCircuit);
 
         }
 

@@ -666,9 +666,52 @@ class LearningCircuitResourceSpec extends Specification {
 
         SimpleStatusDto status = circuitClient.markForReview(circuit.getCircuitName())
 
+        LearningCircuitWithMembersDto circuitWithMembers = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
+
+
         then:
 
         assert status.status == Status.VALID
+
+        assert circuitWithMembers.marksForReview == 1
+
+    }
+
+
+    def 'should be able to mark WTF multiple times and still get unique tally'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        OrganizationMemberEntity user2 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        circuitClient.joinWTF(circuit.getCircuitName())
+
+        loggedInUser.setId(user1.getRootAccountId())
+
+        circuitClient.solveWTF(circuit.getCircuitName())
+
+        when:
+
+        circuitClient.markForReview(circuit.getCircuitName())
+
+        loggedInUser.setId(user2.getRootAccountId())
+
+        circuitClient.markForReview(circuit.getCircuitName())
+        circuitClient.markForReview(circuit.getCircuitName())
+
+        LearningCircuitWithMembersDto circuitWithMembers = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
+
+
+        then:
+
+        assert circuitWithMembers.marksForReview == 2
 
     }
 

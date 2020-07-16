@@ -44,10 +44,12 @@ public class LearningCircuitDto {
     private Long resumeCircuitNanoTime;
     private Long cancelCircuitNanoTime;
 
-    LocalDateTime openTime;
-    String openTimeStr;
+    private LocalDateTime openTime;
+    private String openTimeStr;
 
-    String circuitState;
+    private String circuitState;
+
+    private Integer marksForReview;
 
     public void setOpenTime(LocalDateTime openTime) {
         this.openTime = openTime;

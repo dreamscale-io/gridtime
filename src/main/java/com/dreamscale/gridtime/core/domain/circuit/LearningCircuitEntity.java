@@ -53,6 +53,8 @@ public class LearningCircuitEntity {
     private Long cancelCircuitNanoTime;
     private Long closeCircuitNanoTime;
 
+    private Integer marksForReview;
+
 }
 
 

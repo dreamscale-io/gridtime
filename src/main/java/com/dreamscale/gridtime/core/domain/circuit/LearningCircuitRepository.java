@@ -67,6 +67,9 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     List<LearningCircuitEntity> findAllParticipatingCircuits(@Param("organizationId") UUID organizationId,
                                                              @Param("memberId") UUID memberId);
 
+    @Query(nativeQuery = true, value = "select * from learning_circuit where id=(:circuitId) for update ")
+    LearningCircuitEntity selectForUpdate(@Param("circuitId") UUID circuitId);
+
 
 //
 //    @Query(nativeQuery = true, value = "select * from circle c " +
