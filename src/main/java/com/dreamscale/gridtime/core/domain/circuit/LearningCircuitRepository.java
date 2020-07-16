@@ -34,8 +34,8 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "and (c.circuit_state = 'SOLVED' OR c.circuit_state = 'RETRO') " +
             "and c.organization_id = (:organizationId) " +
             "order by c.total_circuit_elapsed_nano_time desc ")
-    List<LearningCircuitEntity> findReadyForReviewCircuits(@Param("organizationId") UUID organizationId,
-                                                             @Param("memberId") UUID memberId);
+    List<LearningCircuitEntity> findReadyForRetroCircuits(@Param("organizationId") UUID organizationId,
+                                                          @Param("memberId") UUID memberId);
 
 
 

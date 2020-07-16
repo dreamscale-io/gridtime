@@ -76,8 +76,8 @@ public interface LearningCircuitClient {
     List<LearningCircuitDto> getAllMyParticipatingCircuits();
 
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.REVIEW_PATH)
-    List<LearningCircuitDto> getAllMyReviewCircuits();
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
+    List<LearningCircuitDto> getAllMyRetroCircuits();
 
 
 

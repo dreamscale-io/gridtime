@@ -31,7 +31,6 @@ import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability
-import com.dreamscale.gridtime.core.capability.system.GridClock
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -641,17 +640,17 @@ class LearningCircuitResourceSpec extends Specification {
 
         loggedInUser.setId(user2.getRootAccountId())
 
-        List<LearningCircuitDto> circuitsForReview = circuitClient.getAllMyReviewCircuits();
+        List<LearningCircuitDto> circuitsForRetro = circuitClient.getAllMyRetroCircuits();
 
         then:
 
-        assert circuitsForReview.size() == 2
-        assert circuitsForReview.get(0).circuitName == user1Circuit1.circuitName
-        assert circuitsForReview.get(1).circuitName == user2Circuit.circuitName
+        assert circuitsForRetro.size() == 2
+        assert circuitsForRetro.get(0).circuitName == user1Circuit1.circuitName
+        assert circuitsForRetro.get(1).circuitName == user2Circuit.circuitName
 
     }
 
-    def 'should be able to mark my solved WTF for review'() {
+    def 'should be able to mark my solved WTF for retro'() {
         given:
 
         OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();

@@ -403,7 +403,7 @@ public class LearningCircuitResource {
 
     /**
      * Retrieves the list of Learning Circuits that are in "SOLVED" or "RETRO" state
-     * that the user participated in, and are ready for the user to review.
+     * that the user participated in, and are ready for the user to retro.
      *
      * Is this important?  Mark for review.
      *
@@ -412,14 +412,14 @@ public class LearningCircuitResource {
      * @return List<LearningCircuitDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.REVIEW_PATH)
-    public List<LearningCircuitDto> getMyReviewCircuits() {
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
+    public List<LearningCircuitDto> getMyRetroCircuits() {
         RequestContext context = RequestContext.get();
-        log.info("getMyReviewCircuits, user={}", context.getRootAccountId());
+        log.info("getMyRetroCircuits, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.getMyReviewCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+        return wtfCircuitOperator.getMyRetroCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**

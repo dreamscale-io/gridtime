@@ -1087,17 +1087,17 @@ public class WTFCircuitOperator {
         return doItLaterCircuits;
     }
 
-    public List<LearningCircuitDto> getMyReviewCircuits(UUID organizationId, UUID memberId) {
+    public List<LearningCircuitDto> getMyRetroCircuits(UUID organizationId, UUID memberId) {
 
-        List<LearningCircuitEntity> circuits = learningCircuitRepository.findReadyForReviewCircuits(organizationId, memberId);
+        List<LearningCircuitEntity> circuits = learningCircuitRepository.findReadyForRetroCircuits(organizationId, memberId);
 
-        List<LearningCircuitDto> reviewCircuits = new ArrayList<>();
+        List<LearningCircuitDto> retroCircuits = new ArrayList<>();
 
         for (LearningCircuitEntity circuit : circuits) {
-            reviewCircuits.add(toDto(circuit));
+            retroCircuits.add(toDto(circuit));
         }
 
-        return reviewCircuits;
+        return retroCircuits;
     }
 
 
