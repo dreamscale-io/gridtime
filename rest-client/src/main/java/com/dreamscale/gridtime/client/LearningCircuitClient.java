@@ -70,6 +70,12 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     List<LearningCircuitDto> getAllMyParticipatingCircuits();
 
+
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.REVIEW_PATH)
+    List<LearningCircuitDto> getAllMyReviewCircuits();
+
+
+
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
     List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@Param("id") String memberId);
 

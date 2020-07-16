@@ -137,6 +137,7 @@ public class ResourcePaths {
     public static final String TALK_PATH = "/talk";
     public static final String ROOM_PATH = "/room";
     public static final String PARTICIPATING_PATH = "/participating";
+    public static final String REVIEW_PATH = "/review";
     public static final String TO_PATH = "/to";
     public static final String CALENDAR_PATH = "/calendar";
     public static final String WATCH_PATH = "/watch";

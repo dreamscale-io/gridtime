@@ -1054,6 +1054,19 @@ public class WTFCircuitOperator {
         return doItLaterCircuits;
     }
 
+    public List<LearningCircuitDto> getMyReviewCircuits(UUID organizationId, UUID memberId) {
+
+        List<LearningCircuitEntity> circuits = learningCircuitRepository.findReadyForReviewCircuits(organizationId, memberId);
+
+        List<LearningCircuitDto> reviewCircuits = new ArrayList<>();
+
+        for (LearningCircuitEntity circuit : circuits) {
+            reviewCircuits.add(toDto(circuit));
+        }
+
+        return reviewCircuits;
+    }
+
 
     private String getRequestUriFromContext() {
 
@@ -1134,7 +1147,7 @@ public class WTFCircuitOperator {
     }
 
 
-    public List<LearningCircuitDto> getAllParticipatingCircuits(UUID organizationId, UUID memberId) {
+    public List<LearningCircuitDto> getMyParticipatingCircuits(UUID organizationId, UUID memberId) {
 
         List<LearningCircuitEntity> circuits = learningCircuitRepository.findAllParticipatingCircuits(organizationId, memberId);
 
@@ -1151,6 +1164,7 @@ public class WTFCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
+
 
 
 }

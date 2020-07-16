@@ -27,6 +27,18 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
                                                              @Param("memberId") UUID memberId);
 
 
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where exists (select 1 from learning_circuit_member lcm " +
+            "where lcm.circuit_id = c.id " +
+            "and lcm.member_id = (:memberId) ) "+
+            "and (c.circuit_state = 'SOLVED' OR c.circuit_state = 'RETRO') " +
+            "and c.organization_id = (:organizationId) " +
+            "order by c.total_circuit_elapsed_nano_time desc ")
+    List<LearningCircuitEntity> findReadyForReviewCircuits(@Param("organizationId") UUID organizationId,
+                                                             @Param("memberId") UUID memberId);
+
+
+
     LearningCircuitEntity findByOrganizationIdAndCircuitName(UUID organizationId, String circuitName);
 
     LearningCircuitEntity findByOrganizationIdAndOwnerIdAndCircuitName(UUID organizationId, UUID ownerId, String circuitName);
@@ -39,7 +51,6 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "and (tr.id = c.wtf_room_id or tr.id=c.retro_room_id)) ")
     LearningCircuitEntity findCircuitByOrganizationAndRoomName(@Param("organizationId")UUID organizationId,
                                                                @Param("roomName") String roomName);
-
 
 
     LearningCircuitEntity findByOrganizationIdAndId(UUID organizationId, UUID circuitId);

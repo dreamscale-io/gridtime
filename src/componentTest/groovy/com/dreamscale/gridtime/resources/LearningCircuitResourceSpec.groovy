@@ -607,6 +607,48 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+    def 'should get a list of circuits ready for review'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto user1Circuit1 = circuitClient.startWTF()
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        accountClient.login()
+
+        createIntentionForWTFContext()
+
+        when:
+
+        circuitClient.joinWTF(user1Circuit1.getCircuitName())
+
+        LearningCircuitDto user2Circuit = circuitClient.startWTF()
+
+        circuitClient.solveWTF(user2Circuit.getCircuitName())
+
+        loggedInUser.setId(user1.getRootAccountId())
+
+        circuitClient.solveWTF(user1Circuit1.getCircuitName())
+        circuitClient.startWTF()
+
+        loggedInUser.setId(user2.getRootAccountId())
+
+        List<LearningCircuitDto> circuitsForReview = circuitClient.getAllMyReviewCircuits();
+
+        then:
+
+        assert circuitsForReview.size() == 2
+        assert circuitsForReview.get(0).circuitName == user1Circuit1.circuitName
+        assert circuitsForReview.get(1).circuitName == user2Circuit.circuitName
+
+    }
+
 
     def 'join another persons chat room'() {
         given:

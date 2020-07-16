@@ -188,7 +188,7 @@ public class TorchieNetworkOperator {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(wtfCircuitOperator.getAllParticipatingCircuits(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(wtfCircuitOperator.getMyParticipatingCircuits(organizationId, torchieId));
 
         return spiritNetworkDto;
     }

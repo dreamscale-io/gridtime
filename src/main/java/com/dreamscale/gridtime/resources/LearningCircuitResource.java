@@ -161,7 +161,6 @@ public class LearningCircuitResource {
         return wtfCircuitOperator.joinWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
-
     /**
      * Finishes an existing WTF , the circuit must be owned by the invoking member.
      *
@@ -281,7 +280,6 @@ public class LearningCircuitResource {
         return wtfCircuitOperator.startRetroForWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
-
     /**
      * For a WTF that's been solved, with a retro potentially already started,
      * the owner can choose to re-open the WTF, moving all the people in the retro, back to the WTF room.
@@ -322,8 +320,6 @@ public class LearningCircuitResource {
 
         return wtfCircuitOperator.closeWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
-
-
 
     /**
      * Retrieves the active LearningCircuit owned by the invoking member.
@@ -374,13 +370,34 @@ public class LearningCircuitResource {
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
-    public List<LearningCircuitDto> getAllMyParticipatingCircuits() {
+    public List<LearningCircuitDto> getMyParticipatingCircuits() {
         RequestContext context = RequestContext.get();
-        log.info("getAllMyParticipatingCircuits, user={}", context.getRootAccountId());
+        log.info("getMyParticipatingCircuits, user={}", context.getRootAccountId());
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.getAllParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+        return wtfCircuitOperator.getMyParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
+     * Retrieves the list of Learning Circuits that are in "SOLVED" or "RETRO" state
+     * that the user participated in, and are ready for the user to review.
+     *
+     * Is this important?  Mark for review.
+     *
+     * These are sorted descending by amount of time in WTF (totalCircuitElapsedNanoTime)
+     *
+     * @return List<LearningCircuitDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.REVIEW_PATH)
+    public List<LearningCircuitDto> getMyReviewCircuits() {
+        RequestContext context = RequestContext.get();
+        log.info("getMyReviewCircuits, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.getMyReviewCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
     /**
