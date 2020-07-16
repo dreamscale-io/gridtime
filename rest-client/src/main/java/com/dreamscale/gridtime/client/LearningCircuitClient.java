@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.client;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import feign.Headers;
 import feign.Param;
@@ -48,8 +49,12 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
     LearningCircuitDto resumeWTF(@Param("name") String circuitName);
 
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH)
+    SimpleStatusDto markForReview(@Param("name") String circuitName);
+
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
     LearningCircuitDto startRetroForWTF(@Param("name") String circuitName);
+
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
     LearningCircuitDto closeWTF(@Param("name") String circuitName);

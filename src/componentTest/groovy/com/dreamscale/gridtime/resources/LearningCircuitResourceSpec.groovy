@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
@@ -14,6 +15,7 @@ import com.dreamscale.gridtime.api.project.CreateProjectInputDto
 import com.dreamscale.gridtime.api.project.CreateTaskInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
 import com.dreamscale.gridtime.api.project.TaskDto
+import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamCircuitDto
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.JournalClient
@@ -646,6 +648,28 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuitsForReview.size() == 2
         assert circuitsForReview.get(0).circuitName == user1Circuit1.circuitName
         assert circuitsForReview.get(1).circuitName == user2Circuit.circuitName
+
+    }
+
+    def 'should be able to mark my solved WTF for review'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        circuitClient.solveWTF(circuit.getCircuitName())
+
+        when:
+
+        SimpleStatusDto status = circuitClient.markForReview(circuit.getCircuitName())
+
+        then:
+
+        assert status.status == Status.VALID
 
     }
 

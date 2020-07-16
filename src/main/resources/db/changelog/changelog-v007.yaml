@@ -89,3 +89,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_learning_circuit_member_add_is_active_session.sql
+
+  - include:
+        file: db/v007/create_circuit_mark.sql

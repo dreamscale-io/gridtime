@@ -133,6 +133,7 @@ public class ResourcePaths {
 
 
     public static final String ROUTER_PATH = "/router";
+    public static final String MARK_PATH = "/mark";
     public static final String RETRO_PATH = "/retro";
     public static final String TALK_PATH = "/talk";
     public static final String ROOM_PATH = "/room";

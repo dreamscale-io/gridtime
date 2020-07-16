@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
@@ -278,6 +279,27 @@ public class LearningCircuitResource {
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.startRetroForWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+    /**
+     * Marks the specified WTF for review by the team.
+     *
+     * The WTF can be marked for review only if it is in solved or retro state,
+     * and only if the user participated in the WTF.
+     *
+     * The Learning Circuit will show how many marks
+     *
+     * @return SimpleStatusDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH)
+    public SimpleStatusDto markForReview(@PathVariable("name") String circuitName) {
+        RequestContext context = RequestContext.get();
+        log.info("markForReview, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.markForReview(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**

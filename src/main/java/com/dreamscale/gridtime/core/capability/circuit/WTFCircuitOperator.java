@@ -1,8 +1,10 @@
 package com.dreamscale.gridtime.core.capability.circuit;
 
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
+import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
@@ -65,6 +67,9 @@ public class WTFCircuitOperator {
 
     @Autowired
     private LearningCircuitMemberRepository learningCircuitMemberRepository;
+
+    @Autowired
+    private CircuitMarkRepository circuitMarkRepository;
 
     @Autowired
     ActiveWorkStatusManager activeWorkStatusManager;
@@ -370,6 +375,34 @@ public class WTFCircuitOperator {
 
     private String deriveWTFRoomName(LearningCircuitEntity circuit) {
         return circuit.getCircuitName() + WTF_ROOM_SUFFIX;
+    }
+
+    public SimpleStatusDto markForReview(UUID organizationId, UUID memberId, String circuitName) {
+
+        LearningCircuitEntity learningCircuit = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+
+        validateCircuitExists(circuitName, learningCircuit);
+        validateMemberIsCircuitParticipant(learningCircuit, memberId);
+        validateCircuitIsSolvedOrRetro(circuitName, learningCircuit);
+
+        CircuitMarkEntity circuitMark = circuitMarkRepository.findByOrganizationIdAndMemberIdAndCircuitId(organizationId, memberId, learningCircuit.getId());
+
+        LocalDateTime now = gridClock.now();
+
+        if (circuitMark == null) {
+            circuitMark = new CircuitMarkEntity();
+            circuitMark.setId(UUID.randomUUID());
+            circuitMark.setOrganizationId(organizationId);
+            circuitMark.setMemberId(memberId);
+            circuitMark.setCircuitId(learningCircuit.getId());
+            circuitMark.setMarkType(MarkType.REVIEW);
+            circuitMark.setCreatedDate(now);
+
+            circuitMarkRepository.save(circuitMark);
+
+        }
+
+        return new SimpleStatusDto(Status.VALID, "Circuit marked for review.");
     }
 
     @Transactional
