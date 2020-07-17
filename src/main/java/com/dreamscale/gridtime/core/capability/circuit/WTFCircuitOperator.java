@@ -571,15 +571,15 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
+        clearActiveJoinedCircuit(organizationId, ownerId);
+
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+
         activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
-
-        clearActiveJoinedCircuit(organizationId, ownerId);
-
-        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
 
         journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 

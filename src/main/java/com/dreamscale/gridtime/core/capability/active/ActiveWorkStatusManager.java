@@ -12,8 +12,9 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -39,6 +40,8 @@ public class ActiveWorkStatusManager {
     @Autowired
     WTFCircuitOperator wtfCircuitOperator;
 
+    @Autowired
+    EntityManager entityManager;
 
     //rename circuitId to circuitId
 
@@ -76,18 +79,20 @@ public class ActiveWorkStatusManager {
 
     }
 
+    @Transactional
     public void resolveWTFWithYay(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
         pushResolveStatus(organizationId, memberId, now, nanoTime);
     }
 
+    @Transactional
     public void resolveWTFWithCancel(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
         pushResolveStatus(organizationId, memberId, now, nanoTime);
     }
 
-    @Transactional
-    void pushResolveStatus(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
+
+    private void pushResolveStatus(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
 
         ActiveWorkStatusEntity activeWorkStatusEntity = activeWorkStatusRepository.findByMemberId(memberId);
 
@@ -97,6 +102,8 @@ public class ActiveWorkStatusManager {
             activeWorkStatusRepository.save(activeWorkStatusEntity);
         }
 
+        entityManager.flush();
+
         TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(organizationId, memberId);
 
         //pulls from the cached version for this session, TODO is there a way to fix this caching thing?
@@ -104,32 +111,6 @@ public class ActiveWorkStatusManager {
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
-    }
-
-    @Transactional
-    public void pushMemberWorkStatus(IntentionEntity activeIntention, LocalDateTime now, Long nanoTime) {
-
-        ActiveWorkStatusEntity workStatus = activeWorkStatusRepository.findByMemberId(activeIntention.getMemberId());
-
-        if (workStatus == null) {
-            workStatus = new ActiveWorkStatusEntity();
-            workStatus.setId(UUID.randomUUID());
-            workStatus.setMemberId(activeIntention.getMemberId());
-            workStatus.setOrganizationId(activeIntention.getOrganizationId());
-        }
-
-        workStatus.setActiveTaskId(activeIntention.getTaskId());
-        workStatus.setLastUpdate(activeIntention.getPosition());
-        workStatus.setWorkingOn(activeIntention.getDescription());
-
-        activeWorkStatusRepository.save(workStatus);
-
-        TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(activeIntention.getOrganizationId(), activeIntention.getMemberId());
-
-        memberStatus.setActiveTaskId(activeIntention.getTaskId());
-        memberStatus.setWorkingOn(activeIntention.getDescription());
-
-        teamCircuitOperator.notifyTeamOfMemberStatusUpdate(activeIntention.getOrganizationId(), activeIntention.getMemberId(), now, nanoTime, memberStatus);
     }
 
     public void pushTeamMemberStatusUpdate(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime) {
