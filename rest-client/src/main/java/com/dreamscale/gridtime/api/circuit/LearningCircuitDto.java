@@ -50,6 +50,10 @@ public class LearningCircuitDto {
     private String circuitState;
 
     private Integer marksForReview;
+    private Integer marksRequiredForReview;
+
+    private Integer marksForClose;
+    private Integer marksRequiredForClose;
 
     public void setOpenTime(LocalDateTime openTime) {
         this.openTime = openTime;

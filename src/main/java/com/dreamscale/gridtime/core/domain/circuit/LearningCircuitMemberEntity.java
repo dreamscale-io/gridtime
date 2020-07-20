@@ -32,7 +32,11 @@ public class LearningCircuitMemberEntity {
 
     private LocalDateTime joinTime;
 
+    @Enumerated(EnumType.STRING)
+    private LearningCircuitState joinState;
+
     private boolean isActiveInSession;
+
 
 
 }

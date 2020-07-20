@@ -24,4 +24,19 @@ public interface LearningCircuitMemberRepository extends CrudRepository<Learning
     void updateAllMembersToInactiveExceptOwner(@Param("organizationId") UUID organizationId,
                                                @Param("circuitId") UUID circuitId,
                                                @Param("ownerId") UUID ownerId);
+
+
+    @Query(nativeQuery = true, value = "select count(*) from learning_circuit_member lcm " +
+            "where lcm.circuit_id = (:circuitId) " +
+            "and lcm.join_state = (:joinState) ")
+    long countByCircuitIdAndJoinState(@Param("circuitId") UUID circuitId, @Param("joinState") String state);
+
+    @Query(nativeQuery = true, value = "select count(*) from learning_circuit_member lcm " +
+            "where lcm.circuit_id = (:circuitId) " +
+            "and lcm.join_state = 'TROUBLESHOOT' ")
+    long countWTFMembersByCircuitId(@Param("circuitId") UUID circuitId);
+
+    @Query(nativeQuery = true, value = "select count(*) from learning_circuit_member lcm " +
+            "where lcm.circuit_id = (:circuitId) ")
+    long countByCircuitId(@Param("circuitId") UUID circuitId);
 }

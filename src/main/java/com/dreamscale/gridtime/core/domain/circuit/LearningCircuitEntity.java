@@ -54,6 +54,10 @@ public class LearningCircuitEntity {
     private Long closeCircuitNanoTime;
 
     private Integer marksForReview;
+    private Integer marksRequiredForReview;
+
+    private Integer marksForClose;
+    private Integer marksRequiredForClose;
 
 }
 

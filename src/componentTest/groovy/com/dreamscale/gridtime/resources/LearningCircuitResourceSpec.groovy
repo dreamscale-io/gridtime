@@ -677,6 +677,49 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
+    def 'should be able to mark retro WTF for close and auto-transition circuit state'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        circuitClient.solveWTF(circuit.getCircuitName())
+
+        when:
+
+        LearningCircuitWithMembersDto circuitBeforeMark = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
+
+        circuitClient.markForReview(circuit.getCircuitName())
+
+        //should be kicked into retro state when marks over threshold
+
+        LearningCircuitWithMembersDto circuitAfterReviewMark = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
+
+        //should be kicked into close state when marks over threshold
+
+        circuitClient.markForClose(circuit.getCircuitName())
+
+        LearningCircuitWithMembersDto circuitAfterCloseMark = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
+
+        then:
+
+        assert circuitBeforeMark.circuitState == LearningCircuitState.SOLVED.name()
+        assert circuitBeforeMark.getMarksForReview() == 0
+
+        assert circuitAfterReviewMark.circuitState == LearningCircuitState.RETRO.name()
+        assert circuitAfterReviewMark.getMarksForReview() == 1
+        assert circuitAfterReviewMark.getMarksRequiredForReview() == 1
+
+        assert circuitAfterCloseMark.circuitState == LearningCircuitState.CLOSED.name()
+        assert circuitAfterCloseMark.getMarksForClose() == 1
+        assert circuitAfterCloseMark.getMarksRequiredForClose() == 1
+
+    }
+
 
     def 'should be able to mark WTF multiple times and still get unique tally'() {
         given:
@@ -707,7 +750,6 @@ class LearningCircuitResourceSpec extends Specification {
         circuitClient.markForReview(circuit.getCircuitName())
 
         LearningCircuitWithMembersDto circuitWithMembers = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
-
 
         then:
 

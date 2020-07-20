@@ -37,6 +37,8 @@ public interface LearningCircuitClient {
 
     //workflow transitions
 
+    //document workflow transitions
+
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.SOLVE_PATH)
     LearningCircuitDto solveWTF(@Param("name") String circuitName);
 
@@ -49,8 +51,12 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RESUME_PATH)
     LearningCircuitDto resumeWTF(@Param("name") String circuitName);
 
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH)
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.RETRO_PATH)
     SimpleStatusDto markForReview(@Param("name") String circuitName);
+
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.CLOSE_PATH)
+    SimpleStatusDto markForClose(@Param("name") String circuitName);
+
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
     LearningCircuitDto startRetroForWTF(@Param("name") String circuitName);

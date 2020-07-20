@@ -201,6 +201,9 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setOwnerId(memberId);
         learningCircuitEntity.setModeratorId(memberId);
         learningCircuitEntity.setMarksForReview(0);
+        learningCircuitEntity.setMarksForClose(0);
+        learningCircuitEntity.setMarksRequiredForReview(0);
+        learningCircuitEntity.setMarksRequiredForClose(0);
 
         learningCircuitEntity = tryToSaveAndReserveName(learningCircuitEntity);
 
@@ -239,6 +242,7 @@ public class WTFCircuitOperator {
         circuitMemberEntity.setOrganizationId(learningCircuitEntity.getOrganizationId());
         circuitMemberEntity.setMemberId(memberId);
         circuitMemberEntity.setActiveInSession(true);
+        circuitMemberEntity.setJoinState(learningCircuitEntity.getCircuitState());
 
         learningCircuitMemberRepository.save(circuitMemberEntity);
 
@@ -320,6 +324,8 @@ public class WTFCircuitOperator {
 
         LearningCircuitWithMembersDto fullDto = toFullDetailsDto(circuitEntity);
 
+
+
         //TODO need to migrate data to this new display name column in the DB
 
         fullDto.setCircuitParticipants(circuitMemberStatusDtoMapper.toApiList(circuitParticipants));
@@ -387,30 +393,123 @@ public class WTFCircuitOperator {
         validateMemberIsCircuitParticipant(learningCircuit, memberId);
         validateCircuitIsSolvedOrRetro(circuitName, learningCircuit);
 
-        CircuitMarkEntity circuitMark = circuitMarkRepository.findByOrganizationIdAndMemberIdAndCircuitId(organizationId, memberId, learningCircuit.getId());
+        CircuitMarkEntity markForReview = circuitMarkRepository.findByOrganizationIdAndMemberIdAndCircuitIdAndMarkType(organizationId, memberId, learningCircuit.getId(), MarkType.REVIEW);
 
         LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
-        if (circuitMark == null) {
-            circuitMark = new CircuitMarkEntity();
-            circuitMark.setId(UUID.randomUUID());
-            circuitMark.setOrganizationId(organizationId);
-            circuitMark.setMemberId(memberId);
-            circuitMark.setCircuitId(learningCircuit.getId());
-            circuitMark.setMarkType(MarkType.REVIEW);
-            circuitMark.setCreatedDate(now);
+        if (markForReview == null) {
+            markForReview = new CircuitMarkEntity();
+            markForReview.setId(UUID.randomUUID());
+            markForReview.setOrganizationId(organizationId);
+            markForReview.setMemberId(memberId);
+            markForReview.setCircuitId(learningCircuit.getId());
+            markForReview.setMarkType(MarkType.REVIEW);
+            markForReview.setCreatedDate(now);
 
-            circuitMarkRepository.save(circuitMark);
+            circuitMarkRepository.save(markForReview);
 
             learningCircuit = learningCircuitRepository.selectForUpdate(learningCircuit.getId());
 
             learningCircuit.setMarksForReview(learningCircuit.getMarksForReview() + 1);
 
+            int marksRequired = getMarksRequiredForReview(learningCircuit);
+            learningCircuit.setMarksRequiredForReview(marksRequired);
+
             learningCircuitRepository.save(learningCircuit);
 
         }
 
-        return new SimpleStatusDto(Status.VALID, "Circuit marked for review.");
+        evaluateMarksAndTriggerRetroIfNeeded(organizationId, memberId, now, nanoTime, learningCircuit);
+
+        return new SimpleStatusDto(Status.VALID, "Learning Circuit marked for review.");
+    }
+
+    private int getMarksRequiredForReview(LearningCircuitEntity learningCircuit) {
+        long circuitMemberCount = learningCircuitMemberRepository.countWTFMembersByCircuitId(learningCircuit.getId());
+
+        log.debug("MEMBER COUNT: "+ circuitMemberCount);
+
+        return (int)(Math.floorDiv(circuitMemberCount , 2 ) + Math.floorMod(circuitMemberCount, 2));
+    }
+
+
+    private void evaluateMarksAndTriggerRetroIfNeeded(UUID organizationId, UUID invokingMemberId, LocalDateTime now, Long nanoTime, LearningCircuitEntity learningCircuit) {
+
+        int marks = learningCircuit.getMarksForReview();
+        int marksRequired = learningCircuit.getMarksRequiredForReview();
+
+        if (marks >= marksRequired) {
+            log.debug("Fulfilled "+marks + " of "+marksRequired + " marks required, triggering RETRO for circuit "+learningCircuit.getCircuitName());
+
+            triggerCircuitRetroStart(organizationId, invokingMemberId, learningCircuit, now, nanoTime);
+        }
+    }
+
+    @Transactional
+    public SimpleStatusDto markForClose(UUID organizationId, UUID memberId, String circuitName) {
+
+        LearningCircuitEntity learningCircuit = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+
+        validateCircuitExists(circuitName, learningCircuit);
+        validateCircuitIsSolvedOrRetro(circuitName, learningCircuit);
+
+        CircuitMarkEntity markForClose = circuitMarkRepository.findByOrganizationIdAndMemberIdAndCircuitIdAndMarkType(organizationId, memberId, learningCircuit.getId(), MarkType.CLOSE);
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        if (markForClose == null) {
+            markForClose = new CircuitMarkEntity();
+            markForClose.setId(UUID.randomUUID());
+            markForClose.setOrganizationId(organizationId);
+            markForClose.setMemberId(memberId);
+            markForClose.setCircuitId(learningCircuit.getId());
+            markForClose.setMarkType(MarkType.CLOSE);
+            markForClose.setCreatedDate(now);
+
+            circuitMarkRepository.save(markForClose);
+
+            learningCircuit = learningCircuitRepository.selectForUpdate(learningCircuit.getId());
+
+            learningCircuit.setMarksForClose(learningCircuit.getMarksForClose() + 1);
+
+            Integer marksRequired = getMarksRequiredForClose(learningCircuit);
+            learningCircuit.setMarksRequiredForClose(marksRequired);
+
+            learningCircuitRepository.save(learningCircuit);
+
+        }
+
+        evaluateMarksAndTriggerCloseIfNeeded(organizationId, memberId, now, nanoTime, learningCircuit);
+
+        return new SimpleStatusDto(Status.VALID, "Learning Circuit marked for close.");
+    }
+
+    private void evaluateMarksAndTriggerCloseIfNeeded(UUID organizationId, UUID memberId, LocalDateTime now, Long nanoTime, LearningCircuitEntity learningCircuit) {
+
+        int marks = learningCircuit.getMarksForClose();
+        int marksRequired = learningCircuit.getMarksRequiredForClose();
+
+        if (marks >= marksRequired) {
+            log.debug("Fulfilled "+marks + " of "+marksRequired + " marks required, triggering CLOSE for circuit "+learningCircuit.getCircuitName());
+
+            triggerCircuitClose(organizationId, memberId, learningCircuit, now, nanoTime);
+        }
+
+    }
+
+
+    private int getMarksRequiredForClose(LearningCircuitEntity learningCircuit) {
+
+        long circuitMemberCount = learningCircuitMemberRepository.countByCircuitId(learningCircuit.getId());
+
+        log.debug("CLOSE COUNT: "+ circuitMemberCount);
+
+        int marks = (int)( 2 * Math.floorDiv(circuitMemberCount , 3 ) + Math.floorMod(circuitMemberCount, 3));
+
+        return marks;
+
     }
 
     @Transactional
@@ -434,12 +533,24 @@ public class WTFCircuitOperator {
 
             long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
             learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
-
             learningCircuitEntity.setSolvedCircuitNanoTime(nanoTime);
 
             journalCapability.finishWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         }
 
+        LearningCircuitDto circuitDto = triggerCircuitRetroStart(organizationId, memberId, learningCircuitEntity, now, nanoTime);
+
+        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
+
+        String journalMessage = "Retro started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
+
+        journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
+
+        return circuitDto;
+
+    }
+
+    private LearningCircuitDto triggerCircuitRetroStart(UUID organizationId, UUID memberId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
         if (learningCircuitEntity.getRetroRoomId() == null) {
             TalkRoomEntity retroRoomEntity = new TalkRoomEntity();
             retroRoomEntity.setId(UUID.randomUUID());
@@ -463,15 +574,11 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfRetroStarted(organizationId, memberId, now, nanoTime, circuitDto);
 
-        activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
-
-        String journalMessage = "Retro started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + RETRO_LINK + LINK_END;
-
-        journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
-
         return circuitDto;
-
     }
+
+
+
 
     private void validateCircuitIsOwnedBy(UUID memberId, LearningCircuitEntity learningCircuitEntity) {
 
@@ -673,7 +780,6 @@ public class WTFCircuitOperator {
 
         journalCapability.abortWTFIntention(now, nanoTime, learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), learningCircuitEntity.getId());
 
-
         return circuitDto;
     }
 
@@ -791,16 +897,25 @@ public class WTFCircuitOperator {
             journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         }
 
+        triggerCircuitClose(organizationId, ownerId, learningCircuitEntity, now, nanoTime);
+
+        clearActiveJoinedCircuit(organizationId, ownerId);
+
+        return toDto(learningCircuitEntity);
+    }
+
+    private void triggerCircuitClose(UUID organizationId, UUID memberId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
+
+        if (learningCircuitEntity.getCircuitState() == LearningCircuitState.RETRO) {
+            journalCapability.finishWTFIntention(now, nanoTime, organizationId, learningCircuitEntity.getOwnerId(), learningCircuitEntity.getId());
+        }
+
         learningCircuitEntity.setCloseCircuitNanoTime(nanoTime);
         learningCircuitEntity.setCircuitState(LearningCircuitState.CLOSED);
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        clearActiveJoinedCircuit(organizationId, ownerId);
-
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
-
-        return toDto(learningCircuitEntity);
     }
 
     @Transactional
@@ -822,20 +937,24 @@ public class WTFCircuitOperator {
 
             updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
 
-            String ownerUser = memberDetailsRetriever.lookupUsername(wtfCircuit.getOwnerId());
-
-            String journalMessage = "Helping user @"+ownerUser + " with WTF: " +LINK_BEGIN + CIRCUIT_LINK_PREFIX + wtfCircuit.getCircuitName() + LINK_END;
-
-            journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, wtfCircuit.getId(), journalMessage);
-
-            joinCircuitAsMemberAndSendRoomStatusUpdate(now, nanoTime, organizationId, memberId, wtfCircuit);
+            joinCircuitAsMemberAndSendNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
         }
 
         return toDto(wtfCircuit);
 
     }
 
-    private void joinCircuitAsMemberAndSendRoomStatusUpdate(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
+    private String getActivityTypeBasedOnState(LearningCircuitEntity wtfCircuit) {
+        String activityType = "WTF";
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
+            activityType = "Retro";
+        }
+
+        return activityType;
+    }
+
+    private void joinCircuitAsMemberAndSendNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
 
         LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
 
@@ -850,8 +969,17 @@ public class WTFCircuitOperator {
             circuitMember.setMemberId(memberId);
             circuitMember.setJoinTime(now);
             circuitMember.setActiveInSession(true);
+            circuitMember.setJoinState(wtfCircuit.getCircuitState());
 
             learningCircuitMemberRepository.save(circuitMember);
+
+            String ownerUser = memberDetailsRetriever.lookupUsername(wtfCircuit.getOwnerId());
+
+            String activityType = getActivityTypeBasedOnState(wtfCircuit);
+
+            String journalMessage = "Helping @"+ownerUser + " with "+activityType+": " +LINK_BEGIN + CIRCUIT_LINK_PREFIX + wtfCircuit.getCircuitName() + LINK_END;
+
+            journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, wtfCircuit.getId(), journalMessage);
 
         } else {
 
@@ -1205,7 +1333,5 @@ public class WTFCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
-
-
 
 }

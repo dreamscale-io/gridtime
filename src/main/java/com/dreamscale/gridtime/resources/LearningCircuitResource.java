@@ -282,17 +282,17 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Marks the specified WTF for review by the team.
+     * Marks the specified WTF for needing review by the team.
      *
-     * The WTF can be marked for review only if it is in solved or retro state,
+     * The WTF can be marked for review only if it is in SOLVED or RETRO state,
      * and only if the user participated in the WTF.
      *
-     * The Learning Circuit will show how many marks
+     * The Learning Circuit will show how many marks.
      *
      * @return SimpleStatusDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH)
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.RETRO_PATH)
     public SimpleStatusDto markForReview(@PathVariable("name") String circuitName) {
         RequestContext context = RequestContext.get();
         log.info("markForReview, user={}", context.getRootAccountId());
@@ -300,6 +300,27 @@ public class LearningCircuitResource {
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
         return wtfCircuitOperator.markForReview(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+    /**
+     * Marks the specified WTF for close by the team.
+     *
+     * The WTF can be marked for close only if it is in RETRO state,
+     * and only if the user participated in the WTF.
+     *
+     * The Learning Circuit will show how many marks, and will automatically close when the majority selects close.
+     *
+     * @return SimpleStatusDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.CLOSE_PATH)
+    public SimpleStatusDto markForClose(@PathVariable("name") String circuitName) {
+        RequestContext context = RequestContext.get();
+        log.info("markForClose, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.markForClose(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
     /**

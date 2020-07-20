@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface CircuitMarkRepository extends CrudRepository<CircuitMarkEntity, UUID> {
 
-    CircuitMarkEntity findByOrganizationIdAndMemberIdAndCircuitId(UUID organizationId, UUID memberId, UUID circuitId);
+    CircuitMarkEntity findByOrganizationIdAndMemberIdAndCircuitIdAndMarkType(UUID organizationId, UUID memberId, UUID circuitId, MarkType markType);
 }
