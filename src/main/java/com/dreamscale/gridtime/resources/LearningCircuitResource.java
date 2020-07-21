@@ -257,31 +257,6 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Starts the retrospective for the specified WTF.
-     *
-     * The WTF can be solved, and waiting for a retro, or I might do a retro immediately.
-     *
-     * If the WTF has not been finished, it will automatically be finished.
-     *
-     * All members in the WTF room, will be moved to the Retro room.
-     *
-     * Input States: TROUBLESHOOT or SOLVED
-     * Ouput State: RETRO
-     *
-     * @return LearningCircuitDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
-    public LearningCircuitDto startRetroForWTF(@PathVariable("name") String circuitName) {
-        RequestContext context = RequestContext.get();
-        log.info("startRetroForWTF, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        return wtfCircuitOperator.startRetroForWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
-    }
-
-    /**
      * Marks the specified WTF for needing review by the team.
      *
      * The WTF can be marked for review only if it is in SOLVED or RETRO state,
@@ -323,46 +298,6 @@ public class LearningCircuitResource {
         return wtfCircuitOperator.markForClose(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
-    /**
-     * For a WTF that's been solved, with a retro potentially already started,
-     * the owner can choose to re-open the WTF, moving all the people in the retro, back to the WTF room.
-     *
-     * Input States: SOLVED or RETRO
-     * Ouput State: TROUBLESHOOT
-     *
-     * @return LearningCircuitDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.REOPEN_PATH)
-    public LearningCircuitDto reopenSolvedWTF(@PathVariable("name") String circuitName) {
-        RequestContext context = RequestContext.get();
-        log.info("reopenSolvedWTF, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        return wtfCircuitOperator.reopenSolvedWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
-    }
-
-    /**
-     * For a WTF that's been solved, with an optional retro thats now finished up,
-     * the owner can now close the WTF, which closes all the rooms.  Once the WTF is closed,
-     * its locked in read-only mode for metrics calculations and analytics.
-     *
-     * Input States: SOLVED or RETRO
-     * Ouput State: CLOSED
-     *
-     * @return LearningCircuitDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
-    public LearningCircuitDto closeWTF(@PathVariable("name") String circuitName) {
-        RequestContext context = RequestContext.get();
-        log.info("closeWTF, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        return wtfCircuitOperator.closeWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
-    }
 
     /**
      * Retrieves the active LearningCircuit owned by the invoking member.

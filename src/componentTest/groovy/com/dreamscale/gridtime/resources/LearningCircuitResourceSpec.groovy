@@ -386,8 +386,13 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
+        circuitClient.solveWTF(circuit.circuitName)
+
         when:
-        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+        circuitClient.markForReview(circuit.circuitName)
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
+
         then:
 
         assert circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
@@ -395,6 +400,7 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuitWithRetroStarted.getSolvedCircuitNanoTime() != null
         assert circuitWithRetroStarted.getRetroOpenNanoTime() != null
     }
+
 
     def 'should start a retro with already solved circuit'() {
         given:
@@ -409,7 +415,9 @@ class LearningCircuitResourceSpec extends Specification {
         when:
         LearningCircuitDto solvedCircuit = circuitClient.solveWTF(circuit.circuitName)
 
-        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+        circuitClient.markForReview(circuit.circuitName)
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
 
         then:
         assert  solvedCircuit.circuitState == LearningCircuitState.SOLVED.name()
@@ -429,11 +437,17 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
+        circuitClient.solveWTF(circuit.circuitName)
+
         when:
 
-        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+        circuitClient.markForReview(circuit.circuitName)
 
-        LearningCircuitDto closedWTF = circuitClient.closeWTF(circuit.circuitName)
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
+
+        circuitClient.markForClose(circuit.circuitName)
+
+        LearningCircuitDto closedWTF = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
 
         then:
         assert  circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
@@ -445,7 +459,6 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
-
     def 'should reopen a circuit with a retro started'() {
         given:
 
@@ -456,9 +469,13 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto circuit = circuitClient.startWTF()
 
+        circuitClient.solveWTF(circuit.circuitName)
+
         when:
 
-        LearningCircuitDto circuitWithRetroStarted = circuitClient.startRetroForWTF(circuit.circuitName)
+        circuitClient.markForReview(circuit.circuitName)
+
+        LearningCircuitDto circuitWithRetroStarted = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
 
         LearningCircuitDto reopenWTF = circuitClient.reopenWTF(circuit.circuitName)
 
@@ -596,7 +613,9 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto solvedWTF = circuitClient.solveWTF(circuit.circuitName)
 
-        LearningCircuitDto closedWTF = circuitClient.closeWTF(circuit.circuitName)
+        circuitClient.markForClose(circuit.circuitName)
+
+        LearningCircuitDto closedWTF = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
 
         then:
         assert  solvedWTF.circuitState == LearningCircuitState.SOLVED.name()

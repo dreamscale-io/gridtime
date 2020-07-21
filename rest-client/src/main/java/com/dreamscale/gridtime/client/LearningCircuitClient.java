@@ -57,17 +57,6 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.CLOSE_PATH)
     SimpleStatusDto markForClose(@Param("name") String circuitName);
 
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.RETRO_PATH)
-    LearningCircuitDto startRetroForWTF(@Param("name") String circuitName);
-
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.CLOSE_PATH)
-    LearningCircuitDto closeWTF(@Param("name") String circuitName);
-
-    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.REOPEN_PATH)
-    LearningCircuitDto reopenWTF(@Param("name") String circuitName);
-
     //join and leave at the circuit level
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
@@ -84,7 +73,6 @@ public interface LearningCircuitClient {
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
     List<LearningCircuitDto> getAllMyRetroCircuits();
-
 
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
