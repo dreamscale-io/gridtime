@@ -306,7 +306,6 @@ public class LearningCircuitResource {
      *
      * All circuits return will be in "TROUBLESHOOT" state.
      *
-     *
      * @return LearningCircuitDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")

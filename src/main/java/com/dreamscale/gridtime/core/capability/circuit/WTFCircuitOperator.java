@@ -110,6 +110,9 @@ public class WTFCircuitOperator {
     @Autowired
     private JournalCapability journalCapability;
 
+    @Autowired
+    private TorchieNetworkOperator torchieNetworkOperator;
+
 
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
@@ -642,17 +645,20 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
-        clearActiveJoinedCircuit(organizationId, ownerId);
+        //relies on active circuit with membership being present still
 
+        torchieNetworkOperator.grantGroupXP(organizationId, learningCircuitEntity.getCircuitName(), 50);
+
+        //then clear out all the things
+
+        clearActiveJoinedCircuit(organizationId, ownerId);
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
 
         activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
+        journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
-
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
-
-        journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 
         return circuitDto;
     }
@@ -848,6 +854,8 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setCircuitState(LearningCircuitState.CLOSED);
 
         learningCircuitRepository.save(learningCircuitEntity);
+
+        torchieNetworkOperator.grantGroupXP(organizationId, learningCircuitEntity.getCircuitName(), 50);
 
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
     }

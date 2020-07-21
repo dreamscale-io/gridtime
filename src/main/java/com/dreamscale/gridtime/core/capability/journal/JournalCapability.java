@@ -323,14 +323,14 @@ public class JournalCapability {
 
     private JournalEntryDto createIntentionAndGrantXPForMember(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, IntentionInputDto intentionInputDto, boolean isLinked) {
 
-        torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
-
         IntentionEntity lastIntention = closeLastIntention(memberId, now, nanoTime);
 
         if (lastIntention == null || (!lastIntention.getTaskId().equals(intentionInputDto.getTaskId()))) {
             TaskSwitchEventEntity taskSwitchEventEntity =
                     createTaskSwitchJournalEntry(organizationId, memberId, now, intentionInputDto);
             taskSwitchEventRepository.save(taskSwitchEventEntity);
+
+            torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
         }
 
         IntentionEntity intentionEntity = intentionInputMapper.toEntity(intentionInputDto);
@@ -469,6 +469,8 @@ public class JournalCapability {
 
         JournalEntryDto myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.done);
         updateFinishStatusOfMultiMembers(now, organizationId, memberId, FinishStatus.done);
+
+        torchieNetworkOperator.grantXP(organizationId, memberId, memberId, now, nanoTime, 10);
 
         teamCircuitOperator.notifyTeamOfIntentionFinished(organizationId, memberId, now, nanoTime, myJournalEntry);
 

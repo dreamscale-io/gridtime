@@ -459,35 +459,6 @@ class LearningCircuitResourceSpec extends Specification {
 
     }
 
-    def 'should reopen a circuit with a retro started'() {
-        given:
-
-        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
-        loggedInUser.setId(member.getRootAccountId())
-
-        createIntentionForWTFContext()
-
-        LearningCircuitDto circuit = circuitClient.startWTF()
-
-        circuitClient.solveWTF(circuit.circuitName)
-
-        when:
-
-        circuitClient.markForReview(circuit.circuitName)
-
-        LearningCircuitDto circuitWithRetroStarted = circuitClient.getCircuitWithAllDetails(circuit.circuitName)
-
-        LearningCircuitDto reopenWTF = circuitClient.reopenWTF(circuit.circuitName)
-
-        then:
-        assert  circuitWithRetroStarted.circuitState == LearningCircuitState.RETRO.name()
-        assert  reopenWTF.circuitState == LearningCircuitState.TROUBLESHOOT.name()
-
-        assert reopenWTF.getSolvedCircuitNanoTime() == null
-        assert reopenWTF.getRetroOpenNanoTime() == null
-        assert reopenWTF.getCloseCircuitNanoTime() == null
-
-    }
 
     def 'should calculate cumulative time'() {
         given:
@@ -686,7 +657,6 @@ class LearningCircuitResourceSpec extends Specification {
         SimpleStatusDto status = circuitClient.markForReview(circuit.getCircuitName())
 
         LearningCircuitWithMembersDto circuitWithMembers = circuitClient.getCircuitWithAllDetails(circuit.getCircuitName());
-
 
         then:
 

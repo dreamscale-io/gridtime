@@ -80,61 +80,6 @@ class SpiritResourceSpec extends Specification {
 
     }
 
-    def "should grant xp to the Torchie spirit"() {
-        given:
-
-        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
-        SpiritXPEntity spiritXPEntity = aRandom.spiritXPEntity().memberId(member.id).save()
-
-        testUser.setId(member.getRootAccountId())
-
-        when:
-        SpiritDto spiritBefore = spiritClient.getMyTorchie();
-
-        spiritClient.grantXP(new XPDto(50));
-
-        SpiritDto spiritAfter = spiritClient.getMyTorchie();
-
-        then:
-        assert spiritAfter != null
-        assert spiritBefore.xpSummary.totalXP + 50 == spiritAfter.xpSummary.totalXP
-    }
-
-    def "should grant xp to the Torchie group members"() {
-        given:
-
-        OrganizationMemberEntity member1 = createMemberWithOrgAndTeam();
-        OrganizationMemberEntity member2 = createMemberWithOrgAndTeam();
-
-        aRandom.spiritXPEntity().memberId(member1.id).save()
-        aRandom.spiritXPEntity().memberId(member2.id).save()
-
-        testUser.setId(member1.getRootAccountId())
-        accountClient.login()
-
-        when:
-        SpiritDto spirit1Before = spiritClient.getMyTorchie();
-        SpiritDto spirit2Before = spiritClient.getFriendTorchie(member2.id.toString())
-
-        LearningCircuitDto circuit = circuitClient.startWTF()
-
-        testUser.setId(member2.getRootAccountId())
-        accountClient.login()
-
-        circuitClient.joinWTF(circuit.getCircuitName())
-
-        testUser.setId(member1.getRootAccountId())
-
-        spiritClient.grantGroupXP(new XPDto(50));
-
-        SpiritDto spirit1After = spiritClient.getMyTorchie();
-        SpiritDto spirit2After = spiritClient.getFriendTorchie(member2.id.toString())
-
-        then:
-        assert spirit1Before.xpSummary.totalXP + 50 == spirit1After.xpSummary.totalXP
-        assert spirit2Before.xpSummary.totalXP + 50 == spirit2After.xpSummary.totalXP
-
-    }
 
     def "should link to another spirit"() {
         given:

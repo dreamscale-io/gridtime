@@ -165,13 +165,13 @@ public class TorchieNetworkOperator {
         }
     }
 
-    public void grantGroupXP(UUID organizationId, UUID ownerMember, int xpAmount) {
+    public void grantGroupXP(UUID organizationId, String circuitName, int xpAmount) {
 
-        LearningCircuitDto activeCircuit = wtfCircuitOperator.getMyActiveWTFCircuit(organizationId, ownerMember);
+        LearningCircuitWithMembersDto circuitDetails = wtfCircuitOperator.getCircuitWithAllDetails(organizationId, circuitName);
 
-        if (activeCircuit != null && activeCircuit.getOwnerId().equals(ownerMember)) {
-            LearningCircuitWithMembersDto circuitDetails =
-                    wtfCircuitOperator.getCircuitWithAllDetails(organizationId, activeCircuit.getCircuitName());
+        if (circuitDetails != null) {
+
+            UUID ownerId = circuitDetails.getOwnerId();
 
             List<CircuitMemberStatusDto> members = circuitDetails.getCircuitParticipants();
 
@@ -179,7 +179,7 @@ public class TorchieNetworkOperator {
             Long nanoTime = gridClock.nanoTime();
 
             for (CircuitMemberStatusDto member : members) {
-                grantXP(organizationId, ownerMember, member.getMemberId(), now, nanoTime, xpAmount);
+                grantXP(organizationId, ownerId, member.getMemberId(), now, nanoTime, xpAmount);
             }
         }
     }
