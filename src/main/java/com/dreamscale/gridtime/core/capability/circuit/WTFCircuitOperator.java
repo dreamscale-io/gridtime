@@ -668,28 +668,33 @@ public class WTFCircuitOperator {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
+        LearningCircuitEntity learningCircuit = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
 
-        validateCircuitExists(circuitName, learningCircuitEntity);
+        validateCircuitExists(circuitName, learningCircuit);
 
-        cancelWTFAndCommit(organizationId, ownerId, circuitName, learningCircuitEntity, now, nanoTime);
+        LearningCircuitState originalState = learningCircuit.getCircuitState();
 
-        activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
+        LearningCircuitEntity canceledCircuit = cancelWTFAndCommit(organizationId, ownerId, circuitName, learningCircuit, now, nanoTime);
 
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_CANCELED);
+        LearningCircuitDto circuitDto = toDto(canceledCircuit);
 
-        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+        if (originalState == LearningCircuitState.TROUBLESHOOT) {
+            activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
 
-        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+            sendStatusMessageToCircuit(canceledCircuit, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
-        journalCapability.abortWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+            teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+            journalCapability.abortWTFIntention(now, nanoTime, organizationId, ownerId, canceledCircuit.getId());
+
+        }
 
         return circuitDto;
 
     }
 
     @Transactional
-    void cancelWTFAndCommit(UUID organizationId, UUID ownerId, String circuitName, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
+    LearningCircuitEntity cancelWTFAndCommit(UUID organizationId, UUID ownerId, String circuitName, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
         log.debug("[WTFCircuitOperator] Cancel WTF circuit {} at {}", circuitName, nanoTime);
 
         if (learningCircuitEntity.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
@@ -710,6 +715,8 @@ public class WTFCircuitOperator {
         learningCircuitRepository.save(learningCircuitEntity);
 
         clearActiveJoinedCircuit(organizationId, ownerId);
+
+        return learningCircuitEntity;
     }
 
     @Transactional
