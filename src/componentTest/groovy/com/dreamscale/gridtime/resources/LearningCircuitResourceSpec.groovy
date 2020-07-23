@@ -326,7 +326,7 @@ class LearningCircuitResourceSpec extends Specification {
     }
 
 
-    def "should shelf a circuit with do it later"() {
+    def "should pause a circuit with do it later"() {
         given:
 
         OrganizationMemberEntity member = createMemberWithOrgAndTeam();
@@ -348,6 +348,65 @@ class LearningCircuitResourceSpec extends Specification {
 
         assert activeCircuit == null
     }
+
+    def "should cancel a circuit thats paused"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+        LearningCircuitDto pausedDto = circuitClient.pauseWTFWithDoItLater(circuit.getCircuitName());
+
+        LearningCircuitDto canceledDto = circuitClient.cancelWTF(circuit.circuitName);
+
+        then:
+        assert pausedDto != null
+        assert pausedDto.circuitState == LearningCircuitState.ONHOLD.name()
+        assert pausedDto.getPauseCircuitNanoTime() != null
+
+        assert canceledDto != null
+        assert canceledDto.circuitState == LearningCircuitState.CANCELED.name()
+        assert canceledDto.getCancelCircuitNanoTime() != null
+    }
+
+
+    def "should pause and resume and re-pause a circuit and calculate correct elapsed time"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+        loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        when:
+        LearningCircuitDto circuitAfterPause = circuitClient.pauseWTFWithDoItLater(circuit.getCircuitName());
+
+        LearningCircuitDto activeCircuitAfterPause = circuitClient.getActiveCircuit();
+
+        LearningCircuitDto circuitAfterResume = circuitClient.resumeWTF(circuit.circuitName)
+
+        LearningCircuitDto activeCircuitAfterResume = circuitClient.getActiveCircuit();
+
+        LearningCircuitDto circuitAfterPauseAgain = circuitClient.pauseWTFWithDoItLater(circuit.getCircuitName());
+
+
+        then:
+        assert circuitAfterPause != null
+        assert circuitAfterPause.circuitState == LearningCircuitState.ONHOLD.name()
+        assert circuitAfterPause.getPauseCircuitNanoTime() != null
+
+        assert activeCircuitAfterPause == null
+
+        assert circuitAfterPauseAgain.getTotalCircuitElapsedNanoTime() > 0
+    }
+
 
     def 'should resume a circuit from do it later'() {
         given:

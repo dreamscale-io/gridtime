@@ -502,15 +502,18 @@ public class JournalCapability {
 
         WtfJournalLinkEntity journalLink = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, circuitId);
 
-        validateNotNull("journalLink", journalLink);
+        JournalEntryDto myJournalEntry = null;
 
-        IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
+        if (journalLink != null) {
+            IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
 
-        validateFinishStatusIsNull(intentionEntity);
+            validateFinishStatusIsNull(intentionEntity);
 
-        JournalEntryDto myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.aborted);
+            myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.aborted);
 
-        teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, myJournalEntry);
+            teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, myJournalEntry);
+
+        }
 
         return myJournalEntry;
     }

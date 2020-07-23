@@ -263,7 +263,6 @@ public class ProjectCapability {
         return new SimpleStatusDto(Status.SUCCESS, "Granted access to project "+ project.getName() + " for team "+teamName);
     }
 
-
     public SimpleStatusDto revokeAccessForTeam(UUID organizationId, UUID invokingMemberId, UUID projectId, String teamName) {
 
         LocalDateTime now = gridClock.now();

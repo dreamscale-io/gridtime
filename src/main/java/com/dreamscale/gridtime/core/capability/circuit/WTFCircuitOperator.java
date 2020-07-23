@@ -806,46 +806,6 @@ public class WTFCircuitOperator {
     }
 
 
-    @Transactional
-    public LearningCircuitDto reopenSolvedWTF(UUID organizationId, UUID ownerId, String circuitName) {
-
-        LearningCircuitEntity learningCircuitEntity = learningCircuitRepository.findByOrganizationIdAndOwnerIdAndCircuitName(organizationId, ownerId, circuitName);
-
-        validateCircuitExists(circuitName, learningCircuitEntity);
-        validateCircuitIsSolvedOrRetro(circuitName, learningCircuitEntity);
-
-        LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
-
-        log.debug("[WTFCircuitOperator] Reopen WTF circuit {} at {}", circuitName, nanoTime);
-
-        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
-        updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
-
-        //so if we are re-opening, then whenever we solved this thing prior, treat that duration as a pause, and this as a resume
-
-        learningCircuitEntity.setPauseCircuitNanoTime(learningCircuitEntity.getSolvedCircuitNanoTime());
-        long durationInSeconds = calculatePausedNanoElapsedTime(learningCircuitEntity, nanoTime);
-        learningCircuitEntity.setTotalCircuitElapsedNanoTime(durationInSeconds);
-
-        learningCircuitEntity.setResumeCircuitNanoTime(nanoTime);
-        learningCircuitEntity.setSolvedCircuitNanoTime(null);
-        learningCircuitEntity.setRetroOpenNanoTime(null);
-        learningCircuitEntity.setCircuitState(LearningCircuitState.TROUBLESHOOT);
-
-        learningCircuitRepository.save(learningCircuitEntity);
-
-        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
-
-        teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
-
-        String journalMessage = "WTF reopened: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
-
-        journalCapability.createWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId(), journalMessage);
-
-        return circuitDto;
-    }
-
     private void triggerCircuitClose(UUID organizationId, UUID memberId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
 
         validateCircuitIsSolvedOrRetro(learningCircuitEntity.getCircuitName(), learningCircuitEntity);
