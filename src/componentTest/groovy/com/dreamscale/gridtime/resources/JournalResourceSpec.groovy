@@ -439,6 +439,47 @@ class JournalResourceSpec extends Specification {
 
     }
 
+    def "create a private task inside default project"() {
+        given:
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        RecentTasksSummaryDto recentActivityBefore = journalClient.getRecentProjectsAndTasks();
+
+        ProjectDto defaultProject = recentActivityBefore.getRecentProjects().get(0);
+
+        when:
+
+        TaskDto taskInsideDefault = journalClient.findOrCreateTask(defaultProject.getId().toString(), new CreateTaskInputDto("Random", "Should be private regardless of flag", false))
+
+        JournalEntryDto intentionInsideDefault = journalClient.createIntention(new IntentionInputDto("My Intention 1", defaultProject.getId(), taskInsideDefault.getId()))
+
+        RecentTasksSummaryDto recentActivityAfter = journalClient.getRecentProjectsAndTasks();
+
+        TaskDto taskAgain = journalClient.findOrCreateTask(defaultProject.getId().toString(), new CreateTaskInputDto("Random", "Should be private regardless of flag", false))
+
+        ProjectDto projectAgain = journalClient.findOrCreateProject(new CreateProjectInputDto("No Project", "Should be private regardless of flag", true))
+
+
+        then:
+        assert taskInsideDefault != null
+
+        assert intentionInsideDefault != null
+        assert recentActivityAfter.getRecentProjects().size() == 1
+        assert recentActivityAfter.getRecentTasks(defaultProject.getId()).size() == 2
+
+        assert defaultProject.isPrivate() == false
+        assert taskInsideDefault.isPrivate() == true
+
+        assert taskAgain.getId() == taskInsideDefault.getId()
+        assert projectAgain.getId() == defaultProject.getId()
+
+    }
+
     def "get recent intentions for other member"() {
         given:
 

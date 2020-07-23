@@ -15,6 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TaskEntity implements External {
 
+    public static final String DEFAULT_TASK_NAME = "No Task";
+    public static final String DEFAULT_TASK_DESCRIPTION = "(No Task Selected)";
+
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
@@ -34,12 +37,13 @@ public class TaskEntity implements External {
     @Column(name = "project_id")
     private UUID projectId;
 
-    public static final String DEFAULT_TASK_NAME = "No Task";
+    public void configureDefault() {
+        this.name = DEFAULT_TASK_NAME;
+        this.lowercaseName = DEFAULT_TASK_NAME.toLowerCase();
+        this.description = DEFAULT_TASK_DESCRIPTION;
+    }
 
-
-
-
-    public boolean isDefaultTask() {
+    public boolean isDefault() {
         return name != null && name.equals(DEFAULT_TASK_NAME);
     }
 }

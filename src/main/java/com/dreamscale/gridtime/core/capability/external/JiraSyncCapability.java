@@ -118,7 +118,7 @@ public class JiraSyncCapability {
     }
 
     private boolean shouldBeInJira(TaskEntity taskEntity) {
-        return !taskEntity.isDefaultTask();
+        return !taskEntity.isDefault();
     }
 
     private List<TaskEntity> findDbTasksNotOpenInJira(List<TaskEntity> dbTasks, List<JiraTaskDto> jiraTasks) {

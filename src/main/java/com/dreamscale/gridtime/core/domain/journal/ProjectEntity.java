@@ -20,6 +20,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProjectEntity implements External {
 
+    public static final String DEFAULT_PROJECT_NAME = "No Project";
+    public static final String DEFAULT_PROJECT_DESCRIPTION = "(No Project Selected)";
+
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
@@ -44,6 +47,16 @@ public class ProjectEntity implements External {
 
     public boolean isPublic() {
         return !isPrivate;
+    }
+
+    public void configureDefault() {
+        this.name = DEFAULT_PROJECT_NAME;
+        this.lowercaseName = this.name.toLowerCase();
+        this.description = DEFAULT_PROJECT_DESCRIPTION;
+    }
+
+    public boolean isDefault() {
+        return (this.name != null && this.name.equals(DEFAULT_PROJECT_NAME));
     }
 
 }

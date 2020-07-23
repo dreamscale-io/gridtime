@@ -57,8 +57,6 @@ public class ProjectCapability {
     private MapperFactory mapperFactory;
     private DtoEntityMapper<ProjectDto, ProjectEntity> projectMapper;
 
-    private static final String DEFAULT_PROJECT_NAME = "No Project";
-    private static final String DEFAULT_PROJECT_DESCRIPTION = "(No Project Selected)";
     private DtoEntityMapper<ProjectDetailsDto, ProjectEntity> projectDetailsMapper;
 
     @PostConstruct
@@ -353,9 +351,7 @@ public class ProjectCapability {
 
         ProjectEntity orgProject = new ProjectEntity();
         orgProject.setId(UUID.randomUUID());
-        orgProject.setName(DEFAULT_PROJECT_NAME);
-        orgProject.setDescription(DEFAULT_PROJECT_DESCRIPTION);
-        orgProject.setLowercaseName(DEFAULT_PROJECT_NAME.toLowerCase());
+        orgProject.configureDefault();
         orgProject.setOrganizationId(organizationId);
         orgProject.setCreatedDate(now);
         orgProject.setPrivate(false);
@@ -369,7 +365,7 @@ public class ProjectCapability {
 
     public ProjectDto findDefaultProject(UUID organizationId) {
 
-        ProjectEntity project = projectRepository.findPublicProjectByName(organizationId, DEFAULT_PROJECT_NAME.toLowerCase());
+        ProjectEntity project = projectRepository.findPublicProjectByName(organizationId, ProjectEntity.DEFAULT_PROJECT_NAME.toLowerCase());
 
         return projectMapper.toApi(project);
     }

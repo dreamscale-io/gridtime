@@ -78,7 +78,7 @@ public class JiraSyncCapabilitySpec extends Specification {
 		TaskEntity nonDefaultTask = null;
 
 		for (TaskEntity task : tasks) {
-			if (!task.isDefaultTask()) {
+			if (!task.isDefault()) {
 				nonDefaultTask = task;
 				break;
 			}

@@ -43,12 +43,6 @@ public class TaskCapability {
     private DtoEntityMapper<TaskDto, PrivateTaskEntity> privateTaskMapper;
     private DtoEntityMapper<TaskDto, RecentAllTaskEntity> recentAllTaskMapper;
 
-    private static final String DEFAULT_TASK_NAME = "No Task";
-    private static final String DEFAULT_TASK_DESCRIPTION = "(No Task Selected)";
-
-    private static final String WTF_TASK_NAME = "WTF";
-    private static final String WTF_TASK_DESCRIPTION = "(Troubleshoot Confusion)";
-
     @PostConstruct
     private void init() {
         taskMapper = mapperFactory.createDtoEntityMapper(TaskDto.class, TaskEntity.class);
@@ -66,11 +60,12 @@ public class TaskCapability {
 
         ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
 
+
         validateProjectFound(projectId.toString(), project);
 
         TaskDto taskDto = null;
 
-        if (project.isPublic() && taskInputDto.isPrivate()) {
+        if (project.isDefault() || (project.isPublic() && taskInputDto.isPrivate())) {
             taskDto = findOrCreatePrivateTask(organizationId, invokingMemberId, projectId, taskInputDto, standardizedTaskName);
         } else {
             taskDto = findOrCreateNormalTask(organizationId, projectId, project.isPrivate(), taskInputDto, standardizedTaskName);
@@ -189,7 +184,7 @@ public class TaskCapability {
     }
 
     public boolean isDefaultTask(TaskDto taskDto) {
-        return taskDto != null && DEFAULT_TASK_NAME.equals(taskDto.getName());
+        return taskDto != null && TaskEntity.DEFAULT_TASK_NAME.equals(taskDto.getName());
     }
 
     public List<TaskDto> findTasksByRecentMemberAccess(UUID organizationId, UUID memberId, UUID projectId) {
@@ -204,7 +199,7 @@ public class TaskCapability {
         ProjectEntity project = projectRepository.findByOrganizationIdAndId(organizationId, projectId);
         validateProjectFound(projectId.toString(), project);
 
-        TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, DEFAULT_TASK_NAME.toLowerCase());
+        TaskEntity defaultTask = taskRepository.findByOrganizationIdAndProjectIdAndLowercaseName(organizationId, projectId, TaskEntity.DEFAULT_TASK_NAME.toLowerCase());
 
         return toDto(project.isPrivate(), defaultTask);
     }
@@ -231,9 +226,7 @@ public class TaskCapability {
         defaultTask.setId(UUID.randomUUID());
         defaultTask.setOrganizationId(organizationId);
         defaultTask.setProjectId(projectId);
-        defaultTask.setName(DEFAULT_TASK_NAME);
-        defaultTask.setLowercaseName(DEFAULT_TASK_NAME.toLowerCase());
-        defaultTask.setDescription(DEFAULT_TASK_DESCRIPTION);
+        defaultTask.configureDefault();
 
         taskRepository.save(defaultTask);
 
