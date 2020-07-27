@@ -337,6 +337,10 @@ public class TeamCircuitOperator {
         notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STOPPED, new WTFStoppedDto(circuitDto));
     }
 
+    public void notifyTeamOfWTFJoined(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_JOINED, new WTFJoinedDto(circuitDto));
+    }
+
     public void notifyTeamOfRetroStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
         notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED, new WTFRetroStartedDto(circuitDto));
     }

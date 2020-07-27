@@ -844,6 +844,8 @@ public class WTFCircuitOperator {
             updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
 
             joinCircuitAsMemberAndSendNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
+
+
         }
 
         return toDto(wtfCircuit);
@@ -879,9 +881,6 @@ public class WTFCircuitOperator {
 
             learningCircuitMemberRepository.save(circuitMember);
 
-            String ownerUser = memberDetailsRetriever.lookupUsername(wtfCircuit.getOwnerId());
-
-            String activityType = getActivityTypeBasedOnState(wtfCircuit);
 
         } else {
 
@@ -889,6 +888,10 @@ public class WTFCircuitOperator {
 
             learningCircuitMemberRepository.save(circuitMember);
         }
+
+        LearningCircuitDto circuitDto = toDto(wtfCircuit);
+        teamCircuitOperator.notifyTeamOfWTFJoined(organizationId, memberId, now, nanoTime, circuitDto);
+
         //if circuit is in troubleshoot state, join the troubleshooting room.
 
         if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
