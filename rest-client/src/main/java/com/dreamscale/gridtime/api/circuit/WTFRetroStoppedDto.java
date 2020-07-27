@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WTFRetroClosedDto implements MessageDetailsBody {
+public class WTFRetroStoppedDto implements MessageDetailsBody {
 
     LearningCircuitDto learningCircuitDto;
 }

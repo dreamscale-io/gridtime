@@ -821,7 +821,7 @@ public class WTFCircuitOperator {
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
-        teamCircuitOperator.notifyTeamOfRetroClosed(organizationId, memberId, now, nanoTime, circuitDto);
+        teamCircuitOperator.notifyTeamOfRetroClosed(organizationId, learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
     }
 
     @Transactional
