@@ -802,7 +802,6 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
 
-
         return circuitDto;
     }
 
@@ -819,6 +818,10 @@ public class WTFCircuitOperator {
         torchieNetworkOperator.grantGroupXP(organizationId, learningCircuitEntity.getCircuitName(), 50);
 
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+
+        LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
+
+        teamCircuitOperator.notifyTeamOfRetroClosed(organizationId, memberId, now, nanoTime, circuitDto);
     }
 
     @Transactional

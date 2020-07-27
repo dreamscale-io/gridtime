@@ -24,10 +24,10 @@ public enum CircuitMessageType {
     TEAM_INTENTION_ABORTED("team-intention-aborted", "Intention aborted.", IntentionAbortedDetailsDto.class),
     TEAM_INTENTION_FINISHED("team-intention-finished", "Intention finished.", IntentionFinishedDetailsDto.class),
     TEAM_INTENTION_UPDATE("team-intention-updated", "Intention updated.", JournalEntryDto.class),
-    TEAM_WTF_STARTED("team-wtf-started", "WTF started.", WTFStatusUpdateDto.class),
-    TEAM_WTF_STOPPED("team-wtf-stopped", "WTF stopped.", WTFStatusUpdateDto.class),
-    TEAM_WTF_RESUMED("team-wtf-resumed", "WTF resumed.", WTFStatusUpdateDto.class),
-    TEAM_RETRO_STARTED("team-wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
+    TEAM_WTF_STARTED("team-wtf-started", "WTF started.", WTFStartedDto.class),
+    TEAM_WTF_STOPPED("team-wtf-stopped", "WTF stopped.", WTFStoppedDto.class),
+    TEAM_RETRO_STARTED("team-retro-started", "Retro started.", WTFRetroStartedDto.class),
+    TEAM_RETRO_CLOSED("team-retro-closed", "Retro closed.", WTFRetroClosedDto.class),
     TEAM_MEMBER_STATUS_UPDATE("team-member-status-update", "Member status updated.", TeamMemberDto.class),
     TEAM_MEMBER_XP_UPDATE("team-member-xp-update", "Member XP updated.", XPStatusUpdateDto.class);
 

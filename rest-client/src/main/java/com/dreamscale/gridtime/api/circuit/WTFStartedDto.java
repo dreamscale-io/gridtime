@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CircleInputDto {
+public class WTFStartedDto implements MessageDetailsBody {
 
-    UUID circleId;
+    LearningCircuitDto learningCircuitDto;
 }

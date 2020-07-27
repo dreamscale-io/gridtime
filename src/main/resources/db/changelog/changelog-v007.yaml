@@ -101,3 +101,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/refactor_wtf_journal_link.sql
+
+  - include:
+        file: db/v007/refactor_wtf_status_messages.sql
