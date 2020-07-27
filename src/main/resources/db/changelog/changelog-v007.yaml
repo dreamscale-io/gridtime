@@ -98,3 +98,6 @@ databaseChangeLog:
 
   - include:
         file: db/v007/alter_learning_circuit_add_marks_for_close.sql
+
+  - include:
+        file: db/v007/refactor_wtf_journal_link.sql

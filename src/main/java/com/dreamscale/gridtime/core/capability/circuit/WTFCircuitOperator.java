@@ -108,9 +108,6 @@ public class WTFCircuitOperator {
     private ActiveJoinCircuitRepository activeJoinCircuitRepository;
 
     @Autowired
-    private JournalCapability journalCapability;
-
-    @Autowired
     private TorchieNetworkOperator torchieNetworkOperator;
 
 
@@ -187,10 +184,6 @@ public class WTFCircuitOperator {
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
-
-        String journalMessage = "WTF started: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
-
-        journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId(), journalMessage);
 
         return circuitDto;
 
@@ -559,15 +552,12 @@ public class WTFCircuitOperator {
     }
 
 
-
-
     private void validateCircuitIsOwnedBy(UUID memberId, LearningCircuitEntity learningCircuitEntity) {
 
         if (!learningCircuitEntity.getOwnerId().equals(memberId)) {
             throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Retro can only be started by the owner of: " + learningCircuitEntity.getCircuitName());
         }
     }
-
 
     private void validateRetroNotAlreadyStarted(String circuitName, LearningCircuitEntity learningCircuitEntity) {
         if (learningCircuitEntity.getRetroRoomId() != null) {
@@ -668,7 +658,6 @@ public class WTFCircuitOperator {
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
 
         activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
-        journalCapability.finishWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
         teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
@@ -697,8 +686,6 @@ public class WTFCircuitOperator {
             sendStatusMessageToCircuit(canceledCircuit, now, nanoTime, CircuitMessageType.WTF_CANCELED);
 
             teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
-
-            journalCapability.abortWTFIntention(now, nanoTime, organizationId, ownerId, canceledCircuit.getId());
 
         }
 
@@ -768,8 +755,6 @@ public class WTFCircuitOperator {
 
         teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
-        journalCapability.abortWTFIntention(now, nanoTime, learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), learningCircuitEntity.getId());
-
         return circuitDto;
     }
 
@@ -816,10 +801,6 @@ public class WTFCircuitOperator {
         sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_RESUMED);
 
         teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
-
-        String journalMessage = "WTF resumed: "+LINK_BEGIN + CIRCUIT_LINK_PREFIX + learningCircuitEntity.getCircuitName() + LINK_END;
-
-        journalCapability.createWTFIntention(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId(), journalMessage);
 
 
         return circuitDto;
@@ -898,10 +879,6 @@ public class WTFCircuitOperator {
             String ownerUser = memberDetailsRetriever.lookupUsername(wtfCircuit.getOwnerId());
 
             String activityType = getActivityTypeBasedOnState(wtfCircuit);
-
-            String journalMessage = "Helping @"+ownerUser + " with "+activityType+": " +LINK_BEGIN + CIRCUIT_LINK_PREFIX + wtfCircuit.getCircuitName() + LINK_END;
-
-            journalCapability.createWTFIntention(now, nanoTime, organizationId, memberId, wtfCircuit.getId(), journalMessage);
 
         } else {
 

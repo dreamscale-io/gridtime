@@ -78,9 +78,6 @@ public class JournalCapability {
     private TeamCircuitOperator teamCircuitOperator;
 
     @Autowired
-    private WtfJournalLinkRepository wtfJournalLinkRepository;
-
-    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -169,98 +166,6 @@ public class JournalCapability {
 
     }
 
-    @Transactional
-    public JournalEntryDto createWTFIntention(LocalDateTime now, Long nanoTime,
-                                              UUID organizationId, UUID memberId, UUID wtfCircuitId, String journalText) {
-
-
-        ProjectTaskContext projectTaskContext = determineWTFProjectTaskContext(organizationId, memberId, wtfCircuitId);
-
-        ActiveLinksNetworkDto activeLinksNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
-
-        boolean isLinked = false;
-        if (!activeLinksNetwork.isEmpty()) {
-            isLinked = true;
-        }
-
-        IntentionEntity intentionEntity = new IntentionEntity();
-        intentionEntity.setId(UUID.randomUUID());
-        intentionEntity.setPosition(now);
-        intentionEntity.setOrganizationId(organizationId);
-        intentionEntity.setLinked(isLinked);
-        intentionEntity.setMemberId(memberId);
-        intentionEntity.setDescription(journalText);
-        intentionEntity.setProjectId(projectTaskContext.getProjectId());
-        intentionEntity.setTaskId(projectTaskContext.getTaskId());
-        intentionRepository.save(intentionEntity);
-
-        WtfJournalLinkEntity wtfJournalLinkEntity = new WtfJournalLinkEntity();
-        wtfJournalLinkEntity.setId(UUID.randomUUID());
-        wtfJournalLinkEntity.setOrganizationId(organizationId);
-        wtfJournalLinkEntity.setMemberId(memberId);
-        wtfJournalLinkEntity.setProjectId(projectTaskContext.getProjectId());
-        wtfJournalLinkEntity.setTaskId(projectTaskContext.getTaskId());
-        wtfJournalLinkEntity.setIntentionId(intentionEntity.getId());
-        wtfJournalLinkEntity.setWtfCircuitId(wtfCircuitId);
-        wtfJournalLinkEntity.setCreatedDate(now);
-
-        wtfJournalLinkRepository.save(wtfJournalLinkEntity);
-
-        entityManager.flush();
-
-        JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(intentionEntity.getId());
-        JournalEntryDto journalEntryDto = journalEntryOutputMapper.toApi(journalEntryEntity);
-
-        log.info("WTF STARTED ENTRY: " + journalEntryDto);
-        teamCircuitOperator.notifyTeamOfIntention(organizationId, memberId, now, nanoTime, journalEntryDto);
-
-        return journalEntryDto;
-    }
-
-    private ProjectTaskContext determineWTFProjectTaskContext(UUID organizationId, UUID memberId, UUID wtfCircuitId) {
-
-        UUID activeProjectId = null;
-        UUID activeTaskId = null;
-
-
-        //first check if there is an existing established context for this WTF
-        WtfJournalLinkEntity existingContext = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, wtfCircuitId);
-
-        if (existingContext != null) {
-            activeProjectId = existingContext.getProjectId();
-            activeTaskId = existingContext.getTaskId();
-        }
-
-
-        //if this is a new WTF, the project/task context is the most recent intention
-
-        if (activeProjectId == null) {
-            RecentTaskEntity mostRecentTask = recentActivityManager.lookupMostRecentTask(organizationId, memberId);
-
-            if (mostRecentTask != null) {
-                activeProjectId = mostRecentTask.getProjectId();
-                activeTaskId = mostRecentTask.getTaskId();
-            }
-        }
-
-        //if theres no intentions in the journal at all, use the default project
-
-        if (activeProjectId == null) {
-
-            ProjectDto defaultProject = projectCapability.findDefaultProject(organizationId);
-
-            if (defaultProject != null) {
-                activeProjectId = defaultProject.getId();
-
-                TaskDto defaultTask = taskCapability.findDefaultTaskForProject(organizationId, defaultProject.getId());
-                if (defaultTask != null) {
-                    activeTaskId = defaultTask.getId();
-                }
-            }
-        }
-
-        return new ProjectTaskContext(activeProjectId, activeTaskId);
-    }
 
     public LocalDateTime getDateOfFirstIntention(UUID memberId) {
         LocalDateTime dateOfIntention = null;
@@ -376,7 +281,7 @@ public class JournalCapability {
     }
 
     private IntentionEntity closeLastIntention(UUID memberId, LocalDateTime now, Long nanoTime) {
-        List<IntentionEntity> lastIntentionList = intentionRepository.findRecentByMemberIdWithoutWTFsWithLimit(memberId, 1);
+        List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(memberId, 1);
 
         if (lastIntentionList.size() > 0) {
             IntentionEntity lastIntention = lastIntentionList.get(0);
@@ -477,47 +382,6 @@ public class JournalCapability {
         return myJournalEntry;
     }
 
-    @Transactional
-    public JournalEntryDto finishWTFIntention(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
-
-        WtfJournalLinkEntity journalLink = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, circuitId);
-
-        JournalEntryDto myJournalEntry = null;
-
-        if (journalLink != null) {
-            IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
-
-            validateFinishStatusIsNull(intentionEntity);
-
-            myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.done);
-
-            teamCircuitOperator.notifyTeamOfIntentionFinished(organizationId, memberId, now, nanoTime, myJournalEntry);
-        }
-
-        return myJournalEntry;
-    }
-
-    @Transactional
-    public JournalEntryDto abortWTFIntention(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
-
-        WtfJournalLinkEntity journalLink = wtfJournalLinkRepository.findLatestUnfinishedJournalLinkByMemberAndCircuit(organizationId, memberId, circuitId);
-
-        JournalEntryDto myJournalEntry = null;
-
-        if (journalLink != null) {
-            IntentionEntity intentionEntity = intentionRepository.findOne(journalLink.getIntentionId());
-
-            validateFinishStatusIsNull(intentionEntity);
-
-            myJournalEntry = updateFinishStatus(now, organizationId, memberId, intentionEntity, FinishStatus.aborted);
-
-            teamCircuitOperator.notifyTeamOfIntentionAborted(organizationId, memberId, now, nanoTime, myJournalEntry);
-
-        }
-
-        return myJournalEntry;
-    }
-
 
     @Transactional
     public JournalEntryDto abortIntention(UUID organizationId, UUID memberId, UUID intentionId) {
@@ -538,7 +402,7 @@ public class JournalCapability {
     private void updateFinishStatusOfMultiMembers(LocalDateTime now, UUID organizationId, UUID memberId, FinishStatus finishStatus) {
         ActiveLinksNetworkDto spiritNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
         for (SpiritLinkDto spiritLink : spiritNetwork.getSpiritLinks()) {
-            List<IntentionEntity> lastIntentionList = intentionRepository.findRecentByMemberIdWithoutWTFsWithLimit(spiritLink.getFriendSpiritId(), 1);
+            List<IntentionEntity> lastIntentionList = intentionRepository.findByMemberIdWithLimit(spiritLink.getFriendSpiritId(), 1);
             if (lastIntentionList.size() > 0) {
                 updateFinishStatus(now, organizationId, spiritLink.getFriendSpiritId(), lastIntentionList.get(0), finishStatus);
             }
