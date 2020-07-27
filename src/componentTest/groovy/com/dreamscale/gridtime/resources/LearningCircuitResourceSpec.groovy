@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto
 import com.dreamscale.gridtime.api.circuit.DescriptionInputDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
+import com.dreamscale.gridtime.api.circuit.LearningCircuitMembersDto
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
@@ -221,8 +222,6 @@ class LearningCircuitResourceSpec extends Specification {
 
         createIntentionForWTFContext()
 
-
-
         LearningCircuitDto user1Circuit = circuitClient.startWTF()
 
         //change active logged in user to a different user within same organization
@@ -238,12 +237,20 @@ class LearningCircuitResourceSpec extends Specification {
         when:
         LearningCircuitDto startingCircuit = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName());
 
-        circuitClient.pauseWTFWithDoItLater(user1Circuit.getCircuitName())
 
-        circuitClient.resumeWTF(user1Circuit.getCircuitName())
+        circuitClient.pauseWTFWithDoItLater(user1Circuit.getCircuitName())
 
         LearningCircuitDto afterPause = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName());
 
+        circuitClient.resumeWTF(user1Circuit.getCircuitName())
+
+        LearningCircuitDto afterResume = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName());
+
+        println startingCircuit.getCircuitParticipants()
+
+        println afterPause.getCircuitParticipants()
+
+        println afterResume.getCircuitParticipants()
 
         then:
 
@@ -253,6 +260,10 @@ class LearningCircuitResourceSpec extends Specification {
 
         assert afterPause != null
         assert afterPause.getCircuitParticipants().size() == 1
+
+        assert afterResume != null
+        assert afterResume.getCircuitParticipants().size() == 1
+
     }
 
 
@@ -896,6 +907,41 @@ class LearningCircuitResourceSpec extends Specification {
 
         assert user2Participating.size() == 1 //only includes joined, not my own
     }
+
+    def 'should get all members of a circuit'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+
+        //change active logged in user to a different user within same organization
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        accountClient.login()
+
+        circuitClient.joinWTF(user1Circuit.getCircuitName())
+
+
+        when:
+
+        LearningCircuitMembersDto membersDto = circuitClient.getCircuitMembers(user1Circuit.getCircuitName())
+
+        then:
+
+        assert membersDto.getCircuitMembers() != null
+
+        assert membersDto.getCircuitMembers().size() == 2
+
+    }
+
 
     def 'join and leave another persons chat room to update room status'() {
         given:

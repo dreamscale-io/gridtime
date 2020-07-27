@@ -35,6 +35,8 @@ public class CircuitMemberStatusEntity {
 
     private String fullName;
 
+    private String displayName;
+
     private LocalDateTime lastActivity;
 
     private OnlineStatus onlineStatus;

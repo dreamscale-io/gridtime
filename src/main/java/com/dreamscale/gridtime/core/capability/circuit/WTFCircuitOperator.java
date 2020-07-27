@@ -313,6 +313,32 @@ public class WTFCircuitOperator {
 
         validateCircuitExists(circuitName, circuitEntity);
 
+        List<CircuitMemberStatusDto> circuitParticipants = getCircuitParticipantsBasedOnCircuitState(organizationId, circuitEntity);
+
+        List<RoomMemberStatusEntity> wtfMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getWtfRoomId());
+        List<RoomMemberStatusEntity> retroMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getRetroRoomId());
+
+        LearningCircuitWithMembersDto fullDto = toFullDetailsDto(circuitEntity);
+
+        fullDto.setCircuitParticipants(circuitParticipants);
+        fullDto.setActiveWtfRoomMembers(roomMemberStatusDtoMapper.toApiList(wtfMembers));
+        fullDto.setActiveRetroRoomMembers(roomMemberStatusDtoMapper.toApiList(retroMembers));
+
+        return fullDto;
+    }
+
+    public LearningCircuitMembersDto getCircuitMembers(UUID organizationId, String circuitName) {
+
+        LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+
+        validateCircuitExists(circuitName, circuitEntity);
+
+        List<CircuitMemberStatusDto> circuitMembers = getCircuitParticipantsBasedOnCircuitState(organizationId, circuitEntity);
+
+        return new LearningCircuitMembersDto(circuitMembers);
+    }
+
+    private List<CircuitMemberStatusDto> getCircuitParticipantsBasedOnCircuitState(UUID organizationId, LearningCircuitEntity circuitEntity) {
         List<CircuitMemberStatusEntity> circuitParticipants = null;
 
         if (circuitEntity.getCircuitState() != LearningCircuitState.CLOSED) {
@@ -321,20 +347,7 @@ public class WTFCircuitOperator {
             circuitParticipants = circuitMemberStatusRepository.findByOrganizationIdAndCircuitId(organizationId, circuitEntity.getId());
         }
 
-        List<RoomMemberStatusEntity> wtfMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getWtfRoomId());
-        List<RoomMemberStatusEntity> retroMembers = roomMemberStatusRepository.findByRoomId(circuitEntity.getRetroRoomId());
-
-        LearningCircuitWithMembersDto fullDto = toFullDetailsDto(circuitEntity);
-
-
-
-        //TODO need to migrate data to this new display name column in the DB
-
-        fullDto.setCircuitParticipants(circuitMemberStatusDtoMapper.toApiList(circuitParticipants));
-        fullDto.setActiveWtfRoomMembers(roomMemberStatusDtoMapper.toApiList(wtfMembers));
-        fullDto.setActiveRetroRoomMembers(roomMemberStatusDtoMapper.toApiList(retroMembers));
-
-        return fullDto;
+        return circuitMemberStatusDtoMapper.toApiList(circuitParticipants);
     }
 
     private LearningCircuitDto toDto(LearningCircuitEntity circuitEntity) {
@@ -1242,5 +1255,6 @@ public class WTFCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
+
 
 }

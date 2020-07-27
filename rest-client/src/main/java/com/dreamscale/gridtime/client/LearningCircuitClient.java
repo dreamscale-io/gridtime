@@ -35,6 +35,9 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" )
     LearningCircuitWithMembersDto getCircuitWithAllDetails(@Param("name") String circuitName);
 
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MEMBER_PATH)
+    LearningCircuitMembersDto getCircuitMembers(@Param("name") String circuitName);
+
     //workflow transitions
 
     //document workflow transitions

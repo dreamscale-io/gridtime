@@ -7,6 +7,8 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
+import feign.Param;
+import feign.RequestLine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -125,8 +127,8 @@ public class LearningCircuitResource {
     }
 
     /**
-     * To retrieve the full set of details for a Learning Circuit, including a list of all participating members,
-     * and their statuses, use this API.
+     * Retrieve the full set of details for a Learning Circuit, including a list of all participating members,
+     * and their statuses.
      *
      * @return LearningCircuitWithMembersDto
      */
@@ -140,6 +142,23 @@ public class LearningCircuitResource {
 
         return wtfCircuitOperator.getCircuitWithAllDetails(invokingMember.getOrganizationId(), circuitName);
     }
+
+    /**
+     * Retrieve the list of Circuit Members for a Learning Circuit, including all of their statuses
+     *
+     * @return LearningCircuitWithMembersDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MEMBER_PATH)
+    LearningCircuitMembersDto getCircuitMembers(@PathVariable("name") String circuitName) {
+        RequestContext context = RequestContext.get();
+        log.info("getCircuitMembers, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.getCircuitMembers(invokingMember.getOrganizationId(), circuitName);
+    }
+
 
     /**
      * Joins the specified WTF circuit.

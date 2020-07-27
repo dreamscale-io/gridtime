@@ -35,6 +35,8 @@ public class RoomMemberStatusEntity {
 
     private String fullName;
 
+    private String displayName;
+
     private LocalDateTime lastActivity;
 
     private OnlineStatus onlineStatus;
