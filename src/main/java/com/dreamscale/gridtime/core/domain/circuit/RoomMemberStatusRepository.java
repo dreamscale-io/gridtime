@@ -11,4 +11,5 @@ public interface RoomMemberStatusRepository extends CrudRepository<RoomMemberSta
     List<RoomMemberStatusEntity> findByRoomId(UUID roomId);
 
 
+    RoomMemberStatusEntity findByRoomIdAndMemberId(UUID roomId, UUID memberId);
 }

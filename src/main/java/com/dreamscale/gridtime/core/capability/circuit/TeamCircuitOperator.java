@@ -298,20 +298,44 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STARTED);
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STARTED, new WTFStartedDto(circuitDto));
     }
 
     public void notifyTeamOfWTFResumed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STARTED, new WTFStartedDto(circuitDto));
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_RESUMED);
     }
 
-    private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType, MessageDetailsBody messageBody) {
+    public void notifyTeamOfWTFStopped(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STOPPED);
+    }
+
+    public void notifyTeamOfWTFJoined(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_JOINED);
+
+    }
+
+    public void notifyTeamOfRetroStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED);
+    }
+
+    public void notifyTeamOfRetroClosed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_CLOSED);
+    }
+
+    private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
+        String username = organizationMembership.getUsernameForMemberId(memberFromId);
 
         UUID teamRoomId = getMyTeamCircuitRoomId(now, organizationId, memberFromId);
 
         TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+
+        WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(username, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
@@ -320,7 +344,7 @@ public class TeamCircuitOperator {
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
         messageEntity.setMessageType(messageType);
-        messageEntity.setJsonBody(JSONTransformer.toJson(messageBody));
+        messageEntity.setJsonBody(JSONTransformer.toJson(wtfStatusUpdateDto));
 
         String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
 
@@ -332,22 +356,7 @@ public class TeamCircuitOperator {
     }
 
 
-    public void notifyTeamOfWTFStopped(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STOPPED, new WTFStoppedDto(circuitDto));
-    }
-
-    public void notifyTeamOfWTFJoined(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_JOINED, new WTFJoinedDto(circuitDto));
-    }
-
-    public void notifyTeamOfRetroStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED, new WTFRetroStartedDto(circuitDto));
-    }
-
-    public void notifyTeamOfRetroClosed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_CLOSED, new WTFRetroStoppedDto(circuitDto));
-    }
 
     public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, TeamMemberDto memberStatusDto) {
 

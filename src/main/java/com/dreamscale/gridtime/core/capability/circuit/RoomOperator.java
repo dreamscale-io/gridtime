@@ -10,6 +10,8 @@ import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
+import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
@@ -19,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +35,6 @@ import java.util.UUID;
 public class RoomOperator {
 
     public static final String ROOM_URN_PREFIX = "/talk/to/room/";
-
 
     @Autowired
     private TalkRoomRepository talkRoomRepository;
@@ -51,6 +56,22 @@ public class RoomOperator {
 
     @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
+
+    @Autowired
+    private RoomMemberStatusRepository roomMemberStatusRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private MapperFactory mapperFactory;
+
+    private DtoEntityMapper<CircuitMemberStatusDto, RoomMemberStatusEntity> roomMemberStatusDtoMapper;
+
+    @PostConstruct
+    private void init() {
+        roomMemberStatusDtoMapper = mapperFactory.createDtoEntityMapper(CircuitMemberStatusDto.class, RoomMemberStatusEntity.class);
+    }
 
     @Transactional
     public void joinRoom(UUID organizationId, UUID memberId, String roomName) {
@@ -173,8 +194,60 @@ public class RoomOperator {
             log.warn("[RoomOperator] Member {} already joined {}", memberId, roomName);
         }
 
+        entityManager.flush();
+
         talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
+
+        createAndSendRoomMemberJoinEvent(now, nanoTime, roomEntity, roomMemberEntity);
     }
+
+
+
+    private void createAndSendRoomMemberJoinEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity) {
+
+        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), roomMemberEntity.getMemberId());
+
+        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
+
+        CircuitMessageType messageType = CircuitMessageType.ROOM_MEMBER_JOIN;
+
+        RoomMemberJoinEventDto statusDto = new RoomMemberJoinEventDto(circuitMemberStatus);
+
+        createAndSendRoomEvent(now, nanoTime, roomEntity, roomMemberEntity, messageType, statusDto);
+    }
+
+    private void createAndSendRoomMemberLeaveEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity) {
+
+        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), roomMemberEntity.getMemberId());
+
+        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
+
+        CircuitMessageType messageType = CircuitMessageType.ROOM_MEMBER_LEAVE;
+
+        RoomMemberLeaveEventDto statusDto = new RoomMemberLeaveEventDto(circuitMemberStatus);
+
+        createAndSendRoomEvent(now, nanoTime, roomEntity, roomMemberEntity, messageType, statusDto);
+    }
+
+    private void createAndSendRoomEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity, CircuitMessageType messageType, MessageDetailsBody statusDto) {
+
+        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(roomMemberEntity.getMemberId());
+        messageEntity.setToRoomId(roomEntity.getId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(messageType);
+        messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        talkRouter.sendRoomMessage(roomEntity.getId(), talkMessageDto);
+    }
+
 
     @Transactional
     public void leaveRoom(UUID organizationId, UUID memberId, String roomName) {
@@ -189,6 +262,8 @@ public class RoomOperator {
         TalkRoomMemberEntity roomMemberEntity = talkRoomMemberRepository.findByOrganizationIdAndRoomIdAndMemberId(organizationId, roomEntity.getId(), memberId);
 
         if (roomMemberEntity != null) {
+
+            createAndSendRoomMemberLeaveEvent(now, nanoTime, roomEntity, roomMemberEntity);
 
             talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
 

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -111,20 +112,15 @@ public class WTFCircuitOperator {
     private TorchieNetworkOperator torchieNetworkOperator;
 
 
+    @Autowired
+    private EntityManager entityManager;
+
+
     private DtoEntityMapper<LearningCircuitDto, LearningCircuitEntity> circuitDtoMapper;
     private DtoEntityMapper<LearningCircuitWithMembersDto, LearningCircuitEntity> circuitFullDtoMapper;
     private DtoEntityMapper<CircuitMemberStatusDto, RoomMemberStatusEntity> roomMemberStatusDtoMapper;
     private DtoEntityMapper<CircuitMemberStatusDto, CircuitMemberStatusEntity> circuitMemberStatusDtoMapper;
 
-
-    private static final String DEFAULT_WTF_MESSAGE = "Started WTF";
-    private static final String RESUMED_WTF_MESSAGE = "Resumed WTF";
-
-    private static final String LINK_BEGIN = "<link>";
-    private static final String LINK_END = "</link>";
-    private static final String CIRCUIT_LINK_PREFIX = "/circuit/wtf/";
-
-    private static final String RETRO_LINK = "/retro";
 
     @PostConstruct
     private void init() throws IOException, URISyntaxException {
@@ -521,6 +517,7 @@ public class WTFCircuitOperator {
     }
 
 
+
     private LearningCircuitDto triggerCircuitRetroStart(UUID organizationId, UUID memberId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
 
         validateCircuitIsSolvedOrRetro(learningCircuitEntity.getCircuitName(), learningCircuitEntity);
@@ -637,8 +634,6 @@ public class WTFCircuitOperator {
 
         log.debug("[WTFCircuitOperator] Solving WTF circuit {} at {}", circuitName, nanoTime);
 
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_SOLVED);
-
         long nanoElapsedTime = calculateActiveNanoElapsedTime(learningCircuitEntity, nanoTime);
         learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
 
@@ -684,10 +679,9 @@ public class WTFCircuitOperator {
             activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
 
             sendStatusMessageToCircuit(canceledCircuit, now, nanoTime, CircuitMessageType.WTF_CANCELED);
-
+        }
             teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
 
-        }
 
         return circuitDto;
 
@@ -845,7 +839,6 @@ public class WTFCircuitOperator {
 
             joinCircuitAsMemberAndSendNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
 
-
         }
 
         return toDto(wtfCircuit);
@@ -889,20 +882,11 @@ public class WTFCircuitOperator {
             learningCircuitMemberRepository.save(circuitMember);
         }
 
+        entityManager.flush();
+
         LearningCircuitDto circuitDto = toDto(wtfCircuit);
         teamCircuitOperator.notifyTeamOfWTFJoined(organizationId, memberId, now, nanoTime, circuitDto);
 
-        //if circuit is in troubleshoot state, join the troubleshooting room.
-
-        if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
-            String urn = ROOM_URN_PREFIX + deriveWTFRoomName(wtfCircuit);
-            sendRoomStatusMessage(urn, wtfCircuit.getOwnerId(), memberId, now, nanoTime,
-                    wtfCircuit.getWtfRoomId(), CircuitMessageType.ROOM_MEMBER_JOIN);
-        } else if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
-            String urn = ROOM_URN_PREFIX + deriveRetroTalkRoomName(wtfCircuit);
-            sendRoomStatusMessage(urn, wtfCircuit.getOwnerId(), memberId, now, nanoTime,
-                    wtfCircuit.getRetroRoomId(), CircuitMessageType.ROOM_MEMBER_JOIN);
-        }
     }
 
     private void pauseExistingWTFIfDifferentCircuit(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
@@ -1169,7 +1153,7 @@ public class WTFCircuitOperator {
 
                 String urn = circuitRoom.getRoomName();
 
-                sendRoomStatusMessage(urn, circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_OFFLINE);
+                sendRoomStatusMessage(urn, circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
             }
         }
     }

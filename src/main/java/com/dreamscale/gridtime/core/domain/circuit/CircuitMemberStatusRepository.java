@@ -20,4 +20,6 @@ public interface CircuitMemberStatusRepository extends CrudRepository<CircuitMem
 
 
     List<CircuitMemberStatusEntity> findByOrganizationIdAndCircuitId(UUID organizationId, UUID circuitId);
+
+    CircuitMemberStatusEntity findByOrganizationIdAndCircuitIdAndMemberId(UUID organizationId, UUID circuitId, UUID memberId);
 }

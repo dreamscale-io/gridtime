@@ -94,7 +94,7 @@ public class GridTalkRouter {
 
     }
 
-    public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
+    private void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
         TalkClientConnection talkClientConnection = talkClientConnectionFactory.connect();
 
         log.debug("[GridTalkRouter] leaveAllRooms for {} , found {} rooms to leave.", connection.getUsername(), roomsToLeave.size());
