@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.capability.circuit;
 
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
-import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
 import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto;
 import com.dreamscale.gridtime.api.spirit.*;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
@@ -188,7 +187,7 @@ public class TorchieNetworkOperator {
 
         SpiritNetworkDto spiritNetworkDto = new SpiritNetworkDto();
         spiritNetworkDto.setActiveLinksNetwork(this.getActiveLinksNetwork(organizationId, torchieId));
-        spiritNetworkDto.setActiveCircles(wtfCircuitOperator.getMyParticipatingCircuits(organizationId, torchieId));
+        spiritNetworkDto.setActiveCircles(wtfCircuitOperator.getMyTroubleshootCircuits(organizationId, torchieId));
 
         return spiritNetworkDto;
     }

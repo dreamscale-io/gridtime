@@ -206,7 +206,7 @@ class LearningCircuitResourceSpec extends Specification {
         circuitClient.pauseWTFWithDoItLater(circuit2.getCircuitName())
 
         when:
-        List<LearningCircuitDto> circuits = circuitClient.getAllMyDoItLaterCircuits()
+        List<LearningCircuitDto> circuits = circuitClient.getMyDoItLaterCircuits()
 
         then:
         assert circuits != null
@@ -702,7 +702,7 @@ class LearningCircuitResourceSpec extends Specification {
 
         loggedInUser.setId(user2.getRootAccountId())
 
-        List<LearningCircuitDto> circuitsReadyForRetro = circuitClient.getAllMySolvedCircuits();
+        List<LearningCircuitDto> circuitsReadyForRetro = circuitClient.getMySolvedCircuits();
 
         then:
 
@@ -752,17 +752,17 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        List<LearningCircuitDto> solvedCircuits = circuitClient.getAllMySolvedCircuits()
+        List<LearningCircuitDto> solvedCircuits = circuitClient.getMySolvedCircuits()
 
         circuitClient.markForReview(circuit.getCircuitName())
 
-        List<LearningCircuitDto> retroCircuits = circuitClient.getAllMyRetroCircuits()
+        List<LearningCircuitDto> retroCircuits = circuitClient.getMyRetroCircuits()
 
-        List<LearningCircuitDto> solvedCircuitsAfterRetro = circuitClient.getAllMySolvedCircuits()
+        List<LearningCircuitDto> solvedCircuitsAfterRetro = circuitClient.getMySolvedCircuits()
 
         circuitClient.markForClose(circuit.getCircuitName())
 
-        List<LearningCircuitDto> retroCircuitsAfterClose = circuitClient.getAllMySolvedCircuits()
+        List<LearningCircuitDto> retroCircuitsAfterClose = circuitClient.getMySolvedCircuits()
 
 
         then:
@@ -892,7 +892,7 @@ class LearningCircuitResourceSpec extends Specification {
         talkClient.joinExistingRoom(user2Circuit.getWtfTalkRoomName())
         talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
 
-        List<LearningCircuitDto> user2Participating = circuitClient.getAllMyParticipatingCircuits();
+        List<LearningCircuitDto> user2Participating = circuitClient.getMyTroubleshootCircuits();
 
         LearningCircuitWithMembersDto user1CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName())
         LearningCircuitWithMembersDto user2CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user2Circuit.getCircuitName())
@@ -934,11 +934,11 @@ class LearningCircuitResourceSpec extends Specification {
 
         LearningCircuitDto joinedCircuit = circuitClient.joinWTF(user1Circuit.getCircuitName())
 
-        List<LearningCircuitDto> doItLaterCircuits = circuitClient.getAllMyDoItLaterCircuits();
+        List<LearningCircuitDto> doItLaterCircuits = circuitClient.getMyDoItLaterCircuits();
 
         LearningCircuitDto activeCircuit = circuitClient.getActiveCircuit();
 
-        List<LearningCircuitDto> user2Participating = circuitClient.getAllMyParticipatingCircuits();
+        List<LearningCircuitDto> user2Participating = circuitClient.getMyTroubleshootCircuits();
 
         then:
 

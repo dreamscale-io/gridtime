@@ -68,19 +68,27 @@ public interface LearningCircuitClient {
     //query circuits -- these below APIs feel like they need to move somewhere else...?
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)
-    List<LearningCircuitDto> getAllMyDoItLaterCircuits();
+    List<LearningCircuitDto> getMyDoItLaterCircuits();
 
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.TROUBLESHOOT_PATH)
+    List<LearningCircuitDto> getMyTroubleshootCircuits();
+
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.SOLVE_PATH)
+    List<LearningCircuitDto> getMySolvedCircuits();
+
+    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
+    List<LearningCircuitDto> getMyRetroCircuits();
+
+
+    //deprecating this API since every one of these searches returns participating, use /circuit/my/troubleshoot instead
+
+    @Deprecated
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     List<LearningCircuitDto> getAllMyParticipatingCircuits();
 
+    //do we need this?  I feel like we don't, or if we do, should follow same pattern as for single user
 
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.SOLVE_PATH)
-    List<LearningCircuitDto> getAllMySolvedCircuits();
-
-    @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
-    List<LearningCircuitDto> getAllMyRetroCircuits();
-
-
+    @Deprecated
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
     List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@Param("id") String memberId);
 
