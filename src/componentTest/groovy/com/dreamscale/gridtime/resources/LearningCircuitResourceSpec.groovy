@@ -702,13 +702,13 @@ class LearningCircuitResourceSpec extends Specification {
 
         loggedInUser.setId(user2.getRootAccountId())
 
-        List<LearningCircuitDto> circuitsForRetro = circuitClient.getAllMyRetroCircuits();
+        List<LearningCircuitDto> circuitsReadyForRetro = circuitClient.getAllMySolvedCircuits();
 
         then:
 
-        assert circuitsForRetro.size() == 2
-        assert circuitsForRetro.get(0).circuitName == user1Circuit1.circuitName
-        assert circuitsForRetro.get(1).circuitName == user2Circuit.circuitName
+        assert circuitsReadyForRetro.size() == 2
+        assert circuitsReadyForRetro.get(0).circuitName == user1Circuit1.circuitName
+        assert circuitsReadyForRetro.get(1).circuitName == user2Circuit.circuitName
 
     }
 
@@ -737,6 +737,48 @@ class LearningCircuitResourceSpec extends Specification {
         assert circuitWithMembers.marksForReview == 1
 
     }
+
+    def 'should be able to retrieve solve and retro circuits as collections'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+        loggedInUser.setId(user1.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto circuit = circuitClient.startWTF()
+
+        circuitClient.solveWTF(circuit.getCircuitName())
+
+        when:
+
+        List<LearningCircuitDto> solvedCircuits = circuitClient.getAllMySolvedCircuits()
+
+        circuitClient.markForReview(circuit.getCircuitName())
+
+        List<LearningCircuitDto> retroCircuits = circuitClient.getAllMyRetroCircuits()
+
+        List<LearningCircuitDto> solvedCircuitsAfterRetro = circuitClient.getAllMySolvedCircuits()
+
+        circuitClient.markForClose(circuit.getCircuitName())
+
+        List<LearningCircuitDto> retroCircuitsAfterClose = circuitClient.getAllMySolvedCircuits()
+
+
+        then:
+
+        assert solvedCircuits.size() == 1
+        assert solvedCircuits.get(0).circuitName == circuit.circuitName
+
+        assert retroCircuits.size() == 1
+        assert retroCircuits.get(0).circuitName == circuit.circuitName
+
+        assert solvedCircuitsAfterRetro.size() == 0
+
+        assert retroCircuitsAfterClose.size() == 0
+
+    }
+
 
     def 'should be able to mark retro WTF for close and auto-transition circuit state'() {
         given:

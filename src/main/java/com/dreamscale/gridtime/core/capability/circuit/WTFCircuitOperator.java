@@ -1035,7 +1035,7 @@ public class WTFCircuitOperator {
 
     public List<LearningCircuitDto> getMyRetroCircuits(UUID organizationId, UUID memberId) {
 
-        List<LearningCircuitEntity> circuits = learningCircuitRepository.findReadyForRetroCircuits(organizationId, memberId);
+        List<LearningCircuitEntity> circuits = learningCircuitRepository.findRetroParticipatingCircuits(organizationId, memberId);
 
         List<LearningCircuitDto> retroCircuits = new ArrayList<>();
 
@@ -1044,6 +1044,19 @@ public class WTFCircuitOperator {
         }
 
         return retroCircuits;
+    }
+
+    public List<LearningCircuitDto> getMySolvedCircuits(UUID organizationId, UUID memberId) {
+
+        List<LearningCircuitEntity> circuits = learningCircuitRepository.findSolvedParticipatingCircuits(organizationId, memberId);
+
+        List<LearningCircuitDto> solvedCircuits = new ArrayList<>();
+
+        for (LearningCircuitEntity circuit : circuits) {
+            solvedCircuits.add(toDto(circuit));
+        }
+
+        return solvedCircuits;
     }
 
 
@@ -1122,6 +1135,7 @@ public class WTFCircuitOperator {
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;
     }
+
 
 
 }

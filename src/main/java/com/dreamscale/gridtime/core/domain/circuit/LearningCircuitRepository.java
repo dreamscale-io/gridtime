@@ -31,10 +31,20 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
             "where exists (select 1 from learning_circuit_member lcm " +
             "where lcm.circuit_id = c.id " +
             "and lcm.member_id = (:memberId) ) "+
-            "and (c.circuit_state = 'SOLVED' OR c.circuit_state = 'RETRO') " +
+            "and (c.circuit_state = 'RETRO') " +
             "and c.organization_id = (:organizationId) " +
             "order by c.total_circuit_elapsed_nano_time desc ")
-    List<LearningCircuitEntity> findReadyForRetroCircuits(@Param("organizationId") UUID organizationId,
+    List<LearningCircuitEntity> findRetroParticipatingCircuits(@Param("organizationId") UUID organizationId,
+                                                          @Param("memberId") UUID memberId);
+
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where exists (select 1 from learning_circuit_member lcm " +
+            "where lcm.circuit_id = c.id " +
+            "and lcm.member_id = (:memberId) ) "+
+            "and (c.circuit_state = 'SOLVED') " +
+            "and c.organization_id = (:organizationId) " +
+            "order by c.total_circuit_elapsed_nano_time desc ")
+    List<LearningCircuitEntity> findSolvedParticipatingCircuits(@Param("organizationId") UUID organizationId,
                                                           @Param("memberId") UUID memberId);
 
 

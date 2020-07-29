@@ -319,26 +319,6 @@ public class LearningCircuitResource {
 
 
     /**
-     * Retrieves the active LearningCircuit owned by the invoking member.
-     *
-     * Once a WTF is solved (even if no Retro has been run yet), it will no longer be the active circuit
-     *
-     * All circuits return will be in "TROUBLESHOOT" state.
-     *
-     * @return LearningCircuitDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.ACTIVE_PATH)
-    public LearningCircuitDto getMyActiveCircuit() {
-        RequestContext context = RequestContext.get();
-        log.info("getMyActiveCircuit, user={}", context.getRootAccountId());
-
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        return wtfCircuitOperator.getMyActiveWTFCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
-    }
-
-    /**
      * Retrieves the list of Learning Circuits in the "ONHOLD" status for the invoking member.
      *
      * @return List<LearningCircuitDto>
@@ -375,11 +355,34 @@ public class LearningCircuitResource {
         return wtfCircuitOperator.getMyParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
+
     /**
-     * Retrieves the list of Learning Circuits that are in "SOLVED" or "RETRO" state
-     * that the user participated in, and are ready for the user to retro.
+     * Retrieves the list of Learning Circuits that are in "SOLVED" state
+     * that the user participated in, and are ready for the user to mark for review or close.
      *
      * Is this important?  Mark for review.
+     *
+     * These are sorted descending by amount of time in WTF (totalCircuitElapsedNanoTime)
+     *
+     * @return List<LearningCircuitDto>
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.SOLVE_PATH)
+    public List<LearningCircuitDto> getMySolvedCircuits() {
+        RequestContext context = RequestContext.get();
+        log.info("getMySolvedCircuits, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.getMySolvedCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+
+    /**
+     * Retrieves the list of Learning Circuits that are in "RETRO" state
+     * that the user participated in, and have retros actively open.
+     *
+     * Done retro-ing?  Mark for close.
      *
      * These are sorted descending by amount of time in WTF (totalCircuitElapsedNanoTime)
      *
