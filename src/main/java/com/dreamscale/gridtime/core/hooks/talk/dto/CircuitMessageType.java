@@ -10,29 +10,26 @@ public enum CircuitMessageType {
     CHAT("chat", null, ChatMessageDetailsDto.class),
     SCREENSHOT("screenshot", null, null),
     SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
-    ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberJoinEventDto.class),
-    ROOM_MEMBER_LEAVE("room-member-leave", "Member has left.", RoomMemberLeaveEventDto.class),
-
-    WTF_STARTED("wtf-started", "WTF is started.", CircuitStatusDto.class),
-    WTF_SOLVED("wtf-solved", "WTF is solved.", CircuitStatusDto.class),
-    WTF_ONHOLD("wtf-onhold", "WTF is on hold.", CircuitStatusDto.class),
-    WTF_RESUMED("wtf-resumed", "WTF is resumed.", CircuitStatusDto.class),
-    WTF_RETRO_STARTED("wtf-retro-started", "WTF retro is started.", CircuitStatusDto.class),
-    WTF_CANCELED("wtf-canceled", "Circuit is canceled", CircuitStatusDto.class),
+    ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatusEventDto.class),
+    ROOM_MEMBER_LEAVE("room-member-leave", "Member has left.", RoomMemberStatusEventDto.class),
 
     TEAM_INTENTION_STARTED("team-intention-started", "Intention started.", IntentionStartedDetailsDto.class),
     TEAM_INTENTION_ABORTED("team-intention-aborted", "Intention aborted.", IntentionAbortedDetailsDto.class),
     TEAM_INTENTION_FINISHED("team-intention-finished", "Intention finished.", IntentionFinishedDetailsDto.class),
     TEAM_INTENTION_UPDATE("team-intention-updated", "Intention updated.", JournalEntryDto.class),
+
     TEAM_WTF_STARTED("team-wtf-started", "WTF started.", WTFStatusUpdateDto.class),
-    TEAM_WTF_STOPPED("team-wtf-stopped", "WTF stopped.", WTFStatusUpdateDto.class),
+    TEAM_WTF_CANCELED("team-wtf-canceled", "WTF canceled.", WTFStatusUpdateDto.class),
+    TEAM_WTF_ON_HOLD("team-wtf-on-hold", "WTF on hold.", WTFStatusUpdateDto.class),
     TEAM_WTF_RESUMED("team-wtf-resumed", "WTF resumed.", WTFStatusUpdateDto.class),
-    TEAM_RETRO_STARTED("team-wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
-    TEAM_RETRO_CLOSED("team-retro-closed", "Retro stopped.", WTFStatusUpdateDto.class),
+    TEAM_WTF_SOLVED("team-wtf-solved", "WTF solved.", WTFStatusUpdateDto.class),
+    TEAM_WTF_CLOSED("team-wtf-closed", "WTF closed.", WTFStatusUpdateDto.class),
     TEAM_WTF_JOINED("team-wtf-joined", "WTF joined.", WTFStatusUpdateDto.class),
+    TEAM_RETRO_STARTED("team-wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
+    TEAM_RETRO_CLOSED("team-retro-closed", "Retro closed.", WTFStatusUpdateDto.class),
+
     TEAM_MEMBER_STATUS_UPDATE("team-member-status-update", "Member status updated.", TeamMemberDto.class),
     TEAM_MEMBER_XP_UPDATE("team-member-xp-update", "Member XP updated.", XPStatusUpdateDto.class);
-
 
     private final String talkMessageType;
     private final Class<?> messageClazz;

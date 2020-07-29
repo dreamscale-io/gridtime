@@ -21,14 +21,14 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
         for (Flowable flowable : window.getFlowables()) {
             WTFFeedMessageEntity feedMessageEntity = (flowable.get());
 
-            CircuitMessageType messageType = feedMessageEntity.getMessageType();
+            CircuitMessageType messageType = feedMessageEntity.getCircuitMessageType();
 
             if (isCircuitBeginningEvent(messageType)) {
-                gridTile.startWTF(feedMessageEntity.getPosition(), createCircuitDetails(feedMessageEntity), decodeStartTag(feedMessageEntity.getMessageType()));
+                gridTile.startWTF(feedMessageEntity.getPosition(), createCircuitDetails(feedMessageEntity), decodeStartTag(feedMessageEntity.getCircuitMessageType()));
             }
 
-            if (isCircleEndingEvent(messageType)) {
-                gridTile.clearWTF(feedMessageEntity.getPosition(), decodeFinishTag(feedMessageEntity.getMessageType()));
+            if (isCircuitEndingEvent(messageType)) {
+                gridTile.clearWTF(feedMessageEntity.getPosition(), decodeFinishTag(feedMessageEntity.getCircuitMessageType()));
             }
         }
     }
@@ -39,18 +39,18 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
 
 
     private StartTypeTag decodeStartTag(CircuitMessageType messageType) {
-        if (messageType.equals(CircuitMessageType.WTF_STARTED)) {
+        if (messageType.equals(CircuitMessageType.TEAM_WTF_STARTED)) {
             return StartTypeTag.Start;
-        } else if (messageType.equals(CircuitMessageType.WTF_RESUMED)) {
+        } else if (messageType.equals(CircuitMessageType.TEAM_WTF_RESUMED)) {
             return StartTypeTag.Resume;
         }
         return StartTypeTag.Start;
     }
 
     private FinishTypeTag decodeFinishTag(CircuitMessageType messageType) {
-        if (messageType.equals(CircuitMessageType.WTF_SOLVED)) {
+        if (messageType.equals(CircuitMessageType.TEAM_WTF_SOLVED)) {
             return FinishTypeTag.Success;
-        } else if (messageType.equals(CircuitMessageType.WTF_ONHOLD)) {
+        } else if (messageType.equals(CircuitMessageType.TEAM_WTF_ON_HOLD)) {
             return FinishTypeTag.DoItLater;
         }
         return FinishTypeTag.Success;
@@ -58,12 +58,12 @@ public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageE
 
 
     private boolean isCircuitBeginningEvent(CircuitMessageType messageType) {
-        return messageType.equals(CircuitMessageType.WTF_STARTED)
-                || messageType.equals(CircuitMessageType.WTF_RESUMED);
+        return messageType.equals(CircuitMessageType.TEAM_WTF_STARTED)
+                || messageType.equals(CircuitMessageType.TEAM_WTF_RESUMED);
     }
 
-    private boolean isCircleEndingEvent(CircuitMessageType messageType) {
-        return messageType.equals(CircuitMessageType.WTF_SOLVED)
-                || messageType.equals(CircuitMessageType.WTF_ONHOLD);
+    private boolean isCircuitEndingEvent(CircuitMessageType messageType) {
+        return messageType.equals(CircuitMessageType.TEAM_WTF_SOLVED)
+                || messageType.equals(CircuitMessageType.TEAM_WTF_ON_HOLD);
     }
 }

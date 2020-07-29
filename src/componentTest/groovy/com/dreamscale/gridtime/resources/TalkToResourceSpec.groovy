@@ -63,7 +63,7 @@ class TalkToResourceSpec extends Specification {
 
         then:
         assert messages != null
-        assert messages.size() == 3 //status message is here too
+        assert messages.size() == 2 //status message is here too
 
     }
 
@@ -135,7 +135,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        then:
 //        assert talkMessageDto != null
-//        assert talkMessageDto.getMessageType() == CircuitMessageType.CHAT
+//        assert talkMessageDto.getCircuitMessageType() == CircuitMessageType.CHAT
 //        assert talkMessageDto.getMessage() == "Here's a chat message"
 //
 //        assert talkMessageDto.getFromMember() != null
@@ -162,7 +162,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        then:
 //        assert talkMessageDto != null
-//        assert talkMessageDto.getMessageType() == CircuitMessageType.SCREENSHOT
+//        assert talkMessageDto.getCircuitMessageType() == CircuitMessageType.SCREENSHOT
 //        assert talkMessageDto.getMessage() != null
 //        assert talkMessageDto.getFileUri() != null
 //        assert talkMessageDto.getFileName() != null
@@ -190,7 +190,7 @@ class TalkToResourceSpec extends Specification {
 //
 //        then:
 //        assert talkMessageDto != null
-//        assert talkMessageDto.getMessageType() == CircuitMessageType.SNIPPET
+//        assert talkMessageDto.getCircuitMessageType() == CircuitMessageType.SNIPPET
 //        assert talkMessageDto.getMessage() != null
 //        assert talkMessageDto.getSnippetSource() != null
 //        assert talkMessageDto.getSnippet() != null

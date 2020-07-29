@@ -270,7 +270,7 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
     def generateWTFStart(LocalDateTime startTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.WTF_STARTED)
+        wtfMessage.setCircuitMessageType(CircuitMessageType.TEAM_WTF_STARTED)
         wtfMessage.setPosition(startTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 
@@ -279,7 +279,7 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
     def generateWTFEnd(LocalDateTime endTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()
-        wtfMessage.setMessageType(CircuitMessageType.WTF_SOLVED)
+        wtfMessage.setCircuitMessageType(CircuitMessageType.TEAM_WTF_SOLVED)
         wtfMessage.setPosition(endTime)
         wtfMessage.setCircuitId(UUID.randomUUID())
 

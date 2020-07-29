@@ -20,7 +20,6 @@ public class WTFFeedMessagesFetcher extends FeedStrategy {
     @Autowired
     WTFFeedMessageRepository wtfFeedMessageRepository;
 
-
     @Override
     public Batch fetchNextBatch(UUID memberId, Bookmark bookmark, int fetchSize) {
 

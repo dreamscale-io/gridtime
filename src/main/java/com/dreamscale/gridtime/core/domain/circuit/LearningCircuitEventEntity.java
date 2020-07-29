@@ -1,40 +1,41 @@
 package com.dreamscale.gridtime.core.domain.circuit;
 
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "learning_circuit_room_view")
+@Entity(name = "learning_circuit_event")
 @Data
-@EqualsAndHashCode(of = "roomId")
+@EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningCircuitRoomEntity {
+public class LearningCircuitEventEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID roomId;
+    private UUID id;
 
-    private String roomName;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID circuitId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID circuitId;
+    private UUID fromMemberId;
 
-    private String circuitName;
+    private LocalDateTime position;
 
-    private UUID circuitOwnerId;
-
-    private UUID circuitModeratorId;
+    private Long nanoTime;
 
     @Enumerated(EnumType.STRING)
-    private LearningCircuitState circuitState;
+    private CircuitMessageType circuitMessageType;
 
 }

@@ -63,38 +63,9 @@ public class GridTalkRouter {
 
     }
 
-    public void joinAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToJoin) {
-        TalkClientConnection talkClientConnection = talkClientConnectionFactory.connect();
-
-
-        log.debug("[GridTalkRouter] joinAllRooms for {} , found {} rooms to join.", connection.getUsername(), roomsToJoin.size());
-
-        if (connection != null) {
-
-            for( TalkRoomEntity room : roomsToJoin) {
-
-                log.debug("[GridTalkRouter] joinRoom {} for {}", room.getRoomName(), connection.getUsername());
-                talkClientConnection.joinRoom(connection.getConnectionId(), room.getId(), connection.getUsername(), room.getRoomName());
-            }
-        }
-    }
-
-    //TODO I'm shifting in favor of pushing this functionality into the GridTalkRouter.
-
-    //consider this a work in progress...
 
     @Transactional
-    public void leaveAllRooms(MemberConnectionEntity connection) {
-
-        List<TalkRoomEntity> talkRooms = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
-
-        leaveAllRooms(connection, talkRooms);
-
-        talkRoomMemberRepository.deleteFromAllRooms(connection.getMemberId());
-
-    }
-
-    private void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
+    public void leaveAllRooms(MemberConnectionEntity connection, List<TalkRoomEntity> roomsToLeave) {
         TalkClientConnection talkClientConnection = talkClientConnectionFactory.connect();
 
         log.debug("[GridTalkRouter] leaveAllRooms for {} , found {} rooms to leave.", connection.getUsername(), roomsToLeave.size());
@@ -106,6 +77,8 @@ public class GridTalkRouter {
                 log.debug("[GridTalkRouter] leaveRoom {} for {}", room.getRoomName(), connection.getUsername());
                 talkClientConnection.leaveRoom(connection.getConnectionId(), room.getId(), connection.getUsername(), room.getRoomName());
             }
+
+            talkRoomMemberRepository.deleteFromAllRooms(connection.getMemberId());
         }
     }
 

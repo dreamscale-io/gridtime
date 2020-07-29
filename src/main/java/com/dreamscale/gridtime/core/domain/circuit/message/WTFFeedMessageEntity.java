@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity(name = "wtf_feed_message_view")
 @Data
-@EqualsAndHashCode(of = "messageId")
+@EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,18 +20,18 @@ public class WTFFeedMessageEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID messageId;
+    private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID circuitId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID roomId;
+    private UUID organizationId;
 
     private String circuitName;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID fromId;
+    private UUID fromMemberId;
 
     private String fromDisplayName;
 
@@ -42,18 +42,6 @@ public class WTFFeedMessageEntity {
     private LocalDateTime position;
 
     @Enumerated(EnumType.STRING)
-    private CircuitMessageType messageType;
+    private CircuitMessageType circuitMessageType;
 
-    private String jsonBody;
 }
-
-//
-//    create view wtf_feed_message_view as
-//    select trm.id message_id, c.id circuit_id, tr.id room_id, c.circuit_name, trm.from_id,
-//        mnv.short_name from_short_name, mnv.full_name from_full_name,
-//        trm.message_time, trm.message_type, json_body
-//        from learning_circuit c,
-//        talk_room tr,
-//        talk_room_message trm,
-//        member_name_view mnv;
-

@@ -11,6 +11,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Bookma
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator
 import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -18,7 +19,7 @@ import java.time.LocalDateTime
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
-class WTFFeedMessagesFetcherSpec extends Specification{
+class WTFFeedMessagesFetcherSpec extends Specification {
 
     @Autowired
     WTFCircuitOperator circuitOperator
@@ -32,7 +33,7 @@ class WTFFeedMessagesFetcherSpec extends Specification{
     @Autowired
     WTFFeedMessagesFetcher circuitMessagesFetcher
 
-    def "should fetch batches of circle messages"() {
+    def "should fetch batches of circuit messages"() {
         given:
         mockTimeService.now() >> LocalDateTime.now()
 

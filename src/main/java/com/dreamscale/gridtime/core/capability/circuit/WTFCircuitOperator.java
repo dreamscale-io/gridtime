@@ -3,27 +3,24 @@ package com.dreamscale.gridtime.core.capability.circuit;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
-import com.dreamscale.gridtime.api.circuit.CircuitStatusDto;
 import com.dreamscale.gridtime.api.status.Status;
-import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
-import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
-import com.dreamscale.gridtime.core.domain.circuit.RoomType;
+import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.*;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageEntity;
 import com.dreamscale.gridtime.core.domain.circuit.message.TalkRoomMessageRepository;
+import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusEntity;
+import com.dreamscale.gridtime.core.domain.member.MemberStatusRepository;
 import com.dreamscale.gridtime.core.exception.ConflictErrorCodes;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.mapper.DtoEntityMapper;
 import com.dreamscale.gridtime.core.mapper.MapperFactory;
 import com.dreamscale.gridtime.core.mapping.SillyNameGenerator;
-import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.security.RequestContext;
-import com.dreamscale.gridtime.core.capability.system.GridClock;
-import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
@@ -47,7 +44,6 @@ public class WTFCircuitOperator {
     public static final String ROOM_URN_PREFIX = "/talk/to/room/";
     public static final String RETRO_ROOM_SUFFIX = "-retro";
     public static final String WTF_ROOM_SUFFIX = "-wtf";
-    public static final String STATUS_ROOM_SUFFIX = "-status";
 
     SillyNameGenerator sillyNameGenerator;
 
@@ -58,13 +54,7 @@ public class WTFCircuitOperator {
     private TalkRoomRepository talkRoomRepository;
 
     @Autowired
-    private TalkRoomMemberRepository talkRoomMemberRepository;
-
-    @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
-
-    @Autowired
-    private LearningCircuitRoomRepository learningCircuitRoomRepository;
 
     @Autowired
     private LearningCircuitMemberRepository learningCircuitMemberRepository;
@@ -94,9 +84,6 @@ public class WTFCircuitOperator {
     private CircuitMemberStatusRepository circuitMemberStatusRepository;
 
     @Autowired
-    private MemberConnectionRepository memberConnectionRepository;
-
-    @Autowired
     private MapperFactory mapperFactory;
 
     @Autowired
@@ -110,7 +97,6 @@ public class WTFCircuitOperator {
 
     @Autowired
     private TorchieNetworkOperator torchieNetworkOperator;
-
 
     @Autowired
     private EntityManager entityManager;
@@ -175,11 +161,10 @@ public class WTFCircuitOperator {
 
         activeWorkStatusManager.pushWTFStatus(organizationId, memberId, learningCircuitEntity.getId(), now, nanoTime);
 
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_STARTED);
-
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         teamCircuitOperator.notifyTeamOfWTFStarted(organizationId, memberId, now, nanoTime, circuitDto);
+
 
         return circuitDto;
 
@@ -249,26 +234,6 @@ public class WTFCircuitOperator {
 
         if (memberStatusEntity != null && memberStatusEntity.getActiveCircuitId() != null) {
             throw new ConflictException(ConflictErrorCodes.CONFLICTING_ACTIVE_CIRCUIT, "User already has an active circuit.");
-        }
-    }
-
-    @Transactional
-    void sendStatusMessageToCircuit(LearningCircuitEntity circuit, LocalDateTime now, Long nanoTime, CircuitMessageType messageType) {
-
-        UUID roomId = null;
-        String urn = null;
-
-        if (circuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
-            roomId = circuit.getWtfRoomId();
-            urn = ROOM_URN_PREFIX + deriveWTFRoomName(circuit);
-        } else if (circuit.getCircuitState() == LearningCircuitState.RETRO) {
-            roomId = circuit.getRetroRoomId();
-            urn = ROOM_URN_PREFIX + deriveRetroTalkRoomName(circuit);
-        }
-
-        if (roomId != null) {
-            sendCircuitStatusMessage(urn, circuit.getId(), circuit.getCircuitName(), circuit.getOwnerId(), now, nanoTime,
-                    roomId, messageType);
         }
     }
 
@@ -498,7 +463,7 @@ public class WTFCircuitOperator {
         if (marks >= marksRequired) {
             log.debug("Fulfilled "+marks + " of "+marksRequired + " marks required, triggering CLOSE for circuit "+learningCircuit.getCircuitName());
 
-            triggerCircuitClose(organizationId, memberId, learningCircuit, now, nanoTime);
+            triggerCircuitClose(organizationId, learningCircuit, now, nanoTime);
         }
 
     }
@@ -538,8 +503,6 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setRetroOpenNanoTime(nanoTime);
 
         learningCircuitRepository.save(learningCircuitEntity);
-
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_RETRO_STARTED);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -655,7 +618,7 @@ public class WTFCircuitOperator {
         activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
-        teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+        teamCircuitOperator.notifyTeamOfWTFSolved(organizationId, ownerId, now, nanoTime, circuitDto);
 
         return circuitDto;
     }
@@ -677,10 +640,9 @@ public class WTFCircuitOperator {
 
         if (originalState == LearningCircuitState.TROUBLESHOOT) {
             activeWorkStatusManager.resolveWTFWithCancel(organizationId, ownerId, now, nanoTime);
-
-            sendStatusMessageToCircuit(canceledCircuit, now, nanoTime, CircuitMessageType.WTF_CANCELED);
         }
-            teamCircuitOperator.notifyTeamOfWTFStopped(organizationId, ownerId, now, nanoTime, circuitDto);
+
+        teamCircuitOperator.notifyTeamOfWTFCanceled(organizationId, ownerId, now, nanoTime, circuitDto);
 
 
         return circuitDto;
@@ -739,15 +701,13 @@ public class WTFCircuitOperator {
 
         activeWorkStatusManager.resolveWTFWithCancel(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime);
 
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_ONHOLD);
-
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
         clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
 
         removeAllCircuitMembersExceptOwner(learningCircuitEntity);
 
-        teamCircuitOperator.notifyTeamOfWTFStopped(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
+        teamCircuitOperator.notifyTeamOfWTFOnHold(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
         return circuitDto;
     }
@@ -792,15 +752,15 @@ public class WTFCircuitOperator {
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
-        sendStatusMessageToCircuit(learningCircuitEntity, now, nanoTime, CircuitMessageType.WTF_RESUMED);
-
         teamCircuitOperator.notifyTeamOfWTFResumed(organizationId, ownerId, now, nanoTime, circuitDto);
 
         return circuitDto;
     }
 
 
-    private void triggerCircuitClose(UUID organizationId, UUID memberId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
+    private void triggerCircuitClose(UUID organizationId, LearningCircuitEntity learningCircuitEntity, LocalDateTime now, Long nanoTime) {
+
+        LearningCircuitState incomingCircuitState = learningCircuitEntity.getCircuitState();
 
         validateCircuitIsSolvedOrRetro(learningCircuitEntity.getCircuitName(), learningCircuitEntity);
 
@@ -815,7 +775,12 @@ public class WTFCircuitOperator {
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
-        teamCircuitOperator.notifyTeamOfRetroClosed(organizationId, learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
+        if (incomingCircuitState.equals(LearningCircuitState.RETRO)) {
+            teamCircuitOperator.notifyTeamOfRetroClosed(organizationId, learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
+        } else {
+            teamCircuitOperator.notifyTeamOfWTFClosed(organizationId, learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
+        }
+
     }
 
     @Transactional
@@ -1022,50 +987,6 @@ public class WTFCircuitOperator {
         //activeStatusService.touchActivity(memberId);
     }
 
-    private TalkMessageDto sendCircuitStatusMessage(String urn, UUID circuitId, String circuitName, UUID circuitOwnerId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
-
-        CircuitStatusDto statusDto = new CircuitStatusDto(circuitId, circuitName, messageType.name(), messageType.getStatusMessage());
-
-        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
-        messageEntity.setId(UUID.randomUUID());
-        messageEntity.setFromId(circuitOwnerId);
-        messageEntity.setToRoomId(roomId);
-        messageEntity.setPosition(now);
-        messageEntity.setNanoTime(nanoTime);
-        messageEntity.setMessageType(messageType);
-        messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
-
-        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
-
-        talkRouter.sendRoomMessage(roomId, talkMessageDto);
-
-        talkRoomMessageRepository.save(messageEntity);
-
-        return talkMessageDto;
-    }
-
-    private TalkMessageDto sendRoomStatusMessage(String urn, UUID circuitOwnerId, UUID memberId, LocalDateTime now, Long nanoTime, UUID roomId, CircuitMessageType messageType) {
-
-        RoomMemberStatusEventDto statusDto = new RoomMemberStatusEventDto(memberId, messageType.name(), messageType.getStatusMessage());
-
-        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
-        messageEntity.setId(UUID.randomUUID());
-        messageEntity.setFromId(circuitOwnerId);
-        messageEntity.setToRoomId(roomId);
-        messageEntity.setPosition(now);
-        messageEntity.setNanoTime(nanoTime);
-        messageEntity.setMessageType(messageType);
-        messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
-        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
-
-        talkRouter.sendRoomMessage(roomId, talkMessageDto);
-
-        talkRoomMessageRepository.save(messageEntity);
-
-        return talkMessageDto;
-    }
-
-
     private TalkMessageDto sendSnippetMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, NewSnippetEventDto snippet) {
 
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
@@ -1134,27 +1055,6 @@ public class WTFCircuitOperator {
             return context.getRequestUri();
         } else {
             return null;
-        }
-    }
-
-
-    public void notifyRoomsOfMemberDisconnect(UUID oldConnectionId) {
-
-        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(oldConnectionId);
-
-        if (memberConnection != null) {
-
-            LocalDateTime now = gridClock.now();
-            Long nanoTime = gridClock.nanoTime();
-
-            List<LearningCircuitRoomEntity> circuitRooms = learningCircuitRoomRepository.findRoomsByMembership(memberConnection.getOrganizationId(), memberConnection.getMemberId());
-
-            for (LearningCircuitRoomEntity circuitRoom : circuitRooms) {
-
-                String urn = circuitRoom.getRoomName();
-
-                sendRoomStatusMessage(urn, circuitRoom.getCircuitOwnerId(), memberConnection.getMemberId(), now, nanoTime, circuitRoom.getRoomId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
-            }
         }
     }
 

@@ -73,6 +73,9 @@ public class TeamCircuitOperator {
     @Autowired
     private TalkRoomMessageRepository talkRoomMessageRepository;
 
+    @Autowired
+    private LearningCircuitEventRepository learningCircuitEventRepository;
+
     private static final String TEAM_ROOM_PREFIX = "team-";
     private static final String TEAM_ROOM_DEFAULT_NAME = "home";
 
@@ -298,42 +301,67 @@ public class TeamCircuitOperator {
 
     public void notifyTeamOfWTFStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STARTED);
 
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STARTED);
+    }
+
+    public void notifyTeamOfWTFOnHold(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_ON_HOLD);
     }
 
     public void notifyTeamOfWTFResumed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_RESUMED);
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_RESUMED);
     }
 
-    public void notifyTeamOfWTFStopped(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+    public void notifyTeamOfWTFSolved(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_STOPPED);
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_SOLVED);
+    }
+
+    public void notifyTeamOfWTFCanceled(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_CANCELED);
+    }
+
+    public void notifyTeamOfWTFClosed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
+
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_CLOSED);
     }
 
     public void notifyTeamOfWTFJoined(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_JOINED);
-
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_WTF_JOINED);
     }
 
     public void notifyTeamOfRetroStarted(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED);
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_STARTED);
     }
 
     public void notifyTeamOfRetroClosed(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto) {
 
-        notifyTeamOfWTFStatusUpdate(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_CLOSED);
+        createCircuitEventAndNotifyTeam(organizationId, memberFromId, now, nanoTime, circuitDto, CircuitMessageType.TEAM_RETRO_CLOSED);
     }
 
-    private void notifyTeamOfWTFStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
+    private void createCircuitEventAndNotifyTeam(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, LearningCircuitDto circuitDto, CircuitMessageType messageType) {
         String username = organizationMembership.getUsernameForMemberId(memberFromId);
 
         UUID teamRoomId = getMyTeamCircuitRoomId(now, organizationId, memberFromId);
-
         TalkRoomEntity teamRoom = talkRoomRepository.findById(teamRoomId);
+
+
+        LearningCircuitEventEntity circuitEventEntity = new LearningCircuitEventEntity();
+        circuitEventEntity.setId(UUID.randomUUID());
+        circuitEventEntity.setOrganizationId(organizationId);
+        circuitEventEntity.setCircuitId(circuitDto.getId());
+        circuitEventEntity.setCircuitMessageType(messageType);
+        circuitEventEntity.setFromMemberId(memberFromId);
+        circuitEventEntity.setPosition(now);
+        circuitEventEntity.setNanoTime(nanoTime);
+
+        learningCircuitEventRepository.save(circuitEventEntity);
 
         WTFStatusUpdateDto wtfStatusUpdateDto = new WTFStatusUpdateDto(username, memberFromId, messageType.name(), messageType.getStatusMessage(), circuitDto);
 
@@ -346,16 +374,14 @@ public class TeamCircuitOperator {
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(wtfStatusUpdateDto));
 
+        talkRoomMessageRepository.save(messageEntity);
+
         String urn = ROOM_URN_PREFIX + teamRoom.getRoomName();
 
         TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
 
         talkRouter.sendRoomMessage(teamRoomId, talkMessageDto);
-
-        talkRoomMessageRepository.save(messageEntity);
     }
-
-
 
 
     public void notifyTeamOfMemberStatusUpdate(UUID organizationId, UUID memberFromId, LocalDateTime now, Long nanoTime, TeamMemberDto memberStatusDto) {

@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.api.team.TeamDto;
 import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.capability.circuit.GridTalkRouter;
+import com.dreamscale.gridtime.core.capability.circuit.RoomOperator;
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.external.EmailCapability;
 import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
@@ -43,9 +44,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private ActiveAccountStatusRepository accountStatusRepository;
-
-    @Autowired
-    private WTFCircuitOperator wtfCircuitOperator;
 
     @Autowired
     private ActiveWorkStatusManager activeWorkStatusManager;
@@ -85,6 +83,9 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Autowired
     private JournalCapability journalCapability;
+
+    @Autowired
+    private RoomOperator roomOperator;
 
     @Autowired
     private EntityManager entityManager;
@@ -519,11 +520,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
-        if (oldConnectionId != null) {
-            wtfCircuitOperator.notifyRoomsOfMemberDisconnect(oldConnectionId);
-        }
-
-        talkRouter.leaveAllRooms(memberConnection);
+        roomOperator.leaveAllRooms(now, nanoTime, memberConnection);
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(rootAccountId);
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);

@@ -23,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,44 +196,23 @@ public class RoomOperator {
 
         talkRouter.joinRoom(organizationId, memberId, roomEntity.getId());
 
-        createAndSendRoomMemberJoinEvent(now, nanoTime, roomEntity, roomMemberEntity);
+        createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, roomEntity, roomMemberEntity.getMemberId(), CircuitMessageType.ROOM_MEMBER_JOIN);
     }
 
 
-
-    private void createAndSendRoomMemberJoinEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity) {
-
-        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), roomMemberEntity.getMemberId());
-
-        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
-
-        CircuitMessageType messageType = CircuitMessageType.ROOM_MEMBER_JOIN;
-
-        RoomMemberJoinEventDto statusDto = new RoomMemberJoinEventDto(circuitMemberStatus);
-
-        createAndSendRoomEvent(now, nanoTime, roomEntity, roomMemberEntity, messageType, statusDto);
-    }
-
-    private void createAndSendRoomMemberLeaveEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity) {
-
-        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), roomMemberEntity.getMemberId());
-
-        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
-
-        CircuitMessageType messageType = CircuitMessageType.ROOM_MEMBER_LEAVE;
-
-        RoomMemberLeaveEventDto statusDto = new RoomMemberLeaveEventDto(circuitMemberStatus);
-
-        createAndSendRoomEvent(now, nanoTime, roomEntity, roomMemberEntity, messageType, statusDto);
-    }
-
-    private void createAndSendRoomEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, TalkRoomMemberEntity roomMemberEntity, CircuitMessageType messageType, MessageDetailsBody statusDto) {
+    private void createAndSendRoomMemberStatusUpdateEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, UUID memberId, CircuitMessageType messageType) {
 
         String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
 
+        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), memberId);
+
+        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
+
+        RoomMemberStatusEventDto statusDto = new RoomMemberStatusEventDto(messageType.name(), messageType.getStatusMessage(), circuitMemberStatus);
+
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
-        messageEntity.setFromId(roomMemberEntity.getMemberId());
+        messageEntity.setFromId(memberId);
         messageEntity.setToRoomId(roomEntity.getId());
         messageEntity.setPosition(now);
         messageEntity.setNanoTime(nanoTime);
@@ -248,6 +225,22 @@ public class RoomOperator {
         talkRouter.sendRoomMessage(roomEntity.getId(), talkMessageDto);
     }
 
+
+    @Transactional
+    public void leaveAllRooms(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {
+
+        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
+
+        for (TalkRoomEntity talkRoom : talkRoomMemberships) {
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, talkRoom, connection.getMemberId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
+        }
+
+        talkRouter.leaveAllRooms(connection, talkRoomMemberships);
+
+        talkRoomMemberRepository.deleteFromAllRooms(connection.getMemberId());
+
+    }
 
     @Transactional
     public void leaveRoom(UUID organizationId, UUID memberId, String roomName) {
@@ -263,7 +256,7 @@ public class RoomOperator {
 
         if (roomMemberEntity != null) {
 
-            createAndSendRoomMemberLeaveEvent(now, nanoTime, roomEntity, roomMemberEntity);
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, roomEntity, roomMemberEntity.getMemberId(), CircuitMessageType.ROOM_MEMBER_LEAVE);
 
             talkRouter.leaveRoom(organizationId, memberId, roomEntity.getId());
 

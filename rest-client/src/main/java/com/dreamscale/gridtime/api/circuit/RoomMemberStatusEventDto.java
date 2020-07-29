@@ -13,7 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RoomMemberStatusEventDto implements MessageDetailsBody {
 
-    UUID memberId;
     String statusEvent;
     String statusMessage;
+
+    CircuitMemberStatusDto roomMember;
 }

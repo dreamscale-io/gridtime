@@ -1,0 +1,4 @@
+databaseChangeLog:
+
+  - include:
+        file: db/v008/refactor_learning_circuit_events.sql

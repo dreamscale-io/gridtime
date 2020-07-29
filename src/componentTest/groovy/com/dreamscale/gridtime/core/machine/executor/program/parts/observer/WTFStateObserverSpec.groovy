@@ -49,10 +49,10 @@ public class WTFStateObserverSpec extends Specification {
 
         UUID circuitId = UUID.randomUUID()
 
-        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", CircuitMessageType.WTF_STARTED)
-        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", CircuitMessageType.WTF_ONHOLD)
-        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", CircuitMessageType.WTF_RESUMED)
-        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", CircuitMessageType.WTF_SOLVED)
+        FlowableCircuitWTFMessageEvent circuitEvent1 = createCircuitMessageEvent(time2, circuitId, "circle", CircuitMessageType.TEAM_WTF_STARTED)
+        FlowableCircuitWTFMessageEvent circuitEvent2 = createCircuitMessageEvent(time3, circuitId, "circle", CircuitMessageType.TEAM_WTF_ON_HOLD)
+        FlowableCircuitWTFMessageEvent circuitEvent3 = createCircuitMessageEvent(time4, circuitId, "circle", CircuitMessageType.TEAM_WTF_RESUMED)
+        FlowableCircuitWTFMessageEvent circuitEvent4 = createCircuitMessageEvent(time5, circuitId, "circle", CircuitMessageType.TEAM_WTF_SOLVED)
 
 
         def flowables = [circuitEvent1, circuitEvent2, circuitEvent3, circuitEvent4] as List
@@ -77,14 +77,14 @@ public class WTFStateObserverSpec extends Specification {
     }
 
 
-    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circuitId, String circleName, CircuitMessageType messageType) {
+    FlowableCircuitWTFMessageEvent createCircuitMessageEvent(LocalDateTime position, UUID circuitId, String circuitName, CircuitMessageType messageType) {
 
         WTFFeedMessageEntity circuitMessage = new WTFFeedMessageEntity()
-        circuitMessage.setMessageId(UUID.randomUUID())
+        circuitMessage.setId(UUID.randomUUID())
         circuitMessage.setCircuitId(circuitId)
-        circuitMessage.setCircuitName(circleName)
+        circuitMessage.setCircuitName(circuitName)
         circuitMessage.setPosition(position)
-        circuitMessage.setMessageType(messageType)
+        circuitMessage.setCircuitMessageType(messageType)
 
         return new FlowableCircuitWTFMessageEvent(circuitMessage);
 
