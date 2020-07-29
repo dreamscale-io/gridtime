@@ -601,7 +601,7 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setTotalCircuitElapsedNanoTime(nanoElapsedTime);
 
         learningCircuitEntity.setSolvedCircuitNanoTime(nanoTime);
-
+        learningCircuitEntity.setSolvedTime(now);
         learningCircuitEntity.setCircuitState(LearningCircuitState.SOLVED);
 
         learningCircuitRepository.save(learningCircuitEntity);

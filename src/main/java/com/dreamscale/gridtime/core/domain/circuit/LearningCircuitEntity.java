@@ -38,6 +38,7 @@ public class LearningCircuitEntity {
     private UUID retroRoomId;
 
     private LocalDateTime openTime;
+    private LocalDateTime solvedTime;
 
     @Enumerated(EnumType.STRING)
     private LearningCircuitState circuitState;

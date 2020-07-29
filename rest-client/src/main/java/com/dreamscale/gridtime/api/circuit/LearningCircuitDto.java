@@ -47,6 +47,9 @@ public class LearningCircuitDto {
     private LocalDateTime openTime;
     private String openTimeStr;
 
+    private LocalDateTime solvedTime;
+    private String solvedTimeStr;
+
     private String circuitState;
 
     private Integer marksForReview;
@@ -58,5 +61,10 @@ public class LearningCircuitDto {
     public void setOpenTime(LocalDateTime openTime) {
         this.openTime = openTime;
         this.openTimeStr = TimeFormatter.format(openTime);
+    }
+
+    public void setSolvedTime(LocalDateTime solvedTime) {
+        this.solvedTime = solvedTime;
+        this.solvedTimeStr = TimeFormatter.format(solvedTime);
     }
 }

@@ -267,7 +267,6 @@ class LearningCircuitResourceSpec extends Specification {
     }
 
 
-
     def 'should solve a WTF circuit'() {
         given:
 
@@ -285,8 +284,11 @@ class LearningCircuitResourceSpec extends Specification {
         then:
         assert solvedCircuit != null
         assert solvedCircuit.circuitState == LearningCircuitState.SOLVED.name()
+        assert solvedCircuit.getSolvedTime() != null
+
         assert activeCircuit == null
     }
+
 
     def 'should cancel a WTF circuit'() {
         given:
