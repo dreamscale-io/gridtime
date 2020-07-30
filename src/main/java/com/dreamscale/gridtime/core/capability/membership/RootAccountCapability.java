@@ -571,17 +571,56 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return new SimpleStatusDto(Status.SUCCESS, "Successfully logged out");
     }
 
-    @Transactional
-    @Scheduled(fixedDelay = 60000, initialDelay = 300000)
+    @Scheduled(fixedDelay = 60000, initialDelay = 120000)
     public void processHeartbeatConnectionDisconnects() {
+
+        log.info("Processing heartbeat Idles and Disconnects");
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
-        LocalDateTime idleThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_IDLE);
         LocalDateTime disconnectThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_DISCONNECT);
 
         //handle online accounts gone idle
+
+        updateIdleStatusOnAccountsAndNotifyTeam(now, nanoTime);
+
+        //handle idle accounts disconnected (logout)
+
+        List<ActiveAccountStatusEntity> connectionsToLogout = accountStatusRepository.findLongMissingHeartbeat(Timestamp.valueOf(disconnectThreshold));
+
+        for (ActiveAccountStatusEntity account: connectionsToLogout) {
+
+            MemberConnectionEntity connection = updateOfflineStatusOnAccount(account);
+
+            notifyTeamOfOfflineStatus(now, nanoTime, connection);
+        }
+
+    }
+
+    @Transactional
+    void notifyTeamOfOfflineStatus(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {
+        activeWorkStatusManager.pushTeamMemberStatusUpdate(connection.getOrganizationId(), connection.getMemberId(), now, nanoTime);
+
+        roomOperator.leaveAllRooms(now, nanoTime, connection);
+    }
+
+    @Transactional
+    MemberConnectionEntity updateOfflineStatusOnAccount(ActiveAccountStatusEntity account) {
+        MemberConnectionEntity connection = memberConnectionRepository.findByConnectionId(account.getConnectionId());
+
+        account.setOnlineStatus(OnlineStatus.Offline);
+        account.setConnectionId(null);
+
+        accountStatusRepository.save(account);
+        return connection;
+    }
+
+
+    @Transactional
+    void updateIdleStatusOnAccountsAndNotifyTeam(LocalDateTime now, Long nanoTime) {
+
+        LocalDateTime idleThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_IDLE);
 
         List<ActiveAccountStatusEntity> idleAccounts = accountStatusRepository.findMissingHeartbeat(Timestamp.valueOf(idleThreshold));
 
@@ -589,8 +628,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
             account.setOnlineStatus(OnlineStatus.Idle);
             accountStatusRepository.save(account);
         }
-
-        entityManager.flush();
 
         for (ActiveAccountStatusEntity account: idleAccounts) {
 
@@ -600,27 +637,6 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
             roomOperator.updateStatusInAllRooms(now, nanoTime, connection);
         }
-
-        //handle idle accounts disconnected (logout)
-
-        List<ActiveAccountStatusEntity> connectionsToLogout = accountStatusRepository.findLongMissingHeartbeat(Timestamp.valueOf(disconnectThreshold));
-
-        for (ActiveAccountStatusEntity account: connectionsToLogout) {
-
-            MemberConnectionEntity connection = memberConnectionRepository.findByConnectionId(account.getConnectionId());
-
-            account.setOnlineStatus(OnlineStatus.Offline);
-            account.setConnectionId(null);
-
-            accountStatusRepository.save(account);
-
-            entityManager.flush();
-
-            activeWorkStatusManager.pushTeamMemberStatusUpdate(connection.getOrganizationId(), connection.getMemberId(), now, nanoTime);
-
-            roomOperator.leaveAllRooms(now, nanoTime, connection);
-        }
-
     }
 
     public SimpleStatusDto heartbeat(UUID rootAccountId, HeartbeatDto heartbeat) {
