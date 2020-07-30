@@ -12,6 +12,8 @@ public enum CircuitMessageType {
     SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
     ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatusEventDto.class),
     ROOM_MEMBER_LEAVE("room-member-leave", "Member has left.", RoomMemberStatusEventDto.class),
+    ROOM_MEMBER_STATUS_UPDATE("room-member-status-update", "Member status updated.", RoomMemberStatusEventDto.class),
+
 
     TEAM_INTENTION_STARTED("team-intention-started", "Intention started.", IntentionStartedDetailsDto.class),
     TEAM_INTENTION_ABORTED("team-intention-aborted", "Intention aborted.", IntentionAbortedDetailsDto.class),

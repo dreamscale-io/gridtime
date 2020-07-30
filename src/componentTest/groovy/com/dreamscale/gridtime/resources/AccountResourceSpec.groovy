@@ -3,18 +3,20 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
+import com.dreamscale.gridtime.api.organization.OnlineStatus
+import com.dreamscale.gridtime.api.organization.TeamMemberDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.client.AccountClient
 import com.dreamscale.gridtime.client.LearningCircuitClient
+import com.dreamscale.gridtime.client.MemberClient
 import com.dreamscale.gridtime.client.OrganizationClient
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.capability.external.JiraCapability
+import com.dreamscale.gridtime.core.capability.membership.RootAccountCapability
 import com.dreamscale.gridtime.core.domain.member.*
 import com.dreamscale.gridtime.core.capability.system.GridClock
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
-
-import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
@@ -26,6 +28,10 @@ class AccountResourceSpec extends Specification {
 
     @Autowired
     AccountClient accountClient
+
+    @Autowired
+    MemberClient memberClient
+
     @Autowired
     AccountClient unauthenticatedAccountClient
     @Autowired
@@ -47,14 +53,12 @@ class AccountResourceSpec extends Specification {
     EmailCapability mockEmailCapability;
 
     @Autowired
-    GridClock mockTimeService
+    GridClock gridClock
+
+    @Autowired
+    RootAccountCapability rootAccountCapability
 
     String ticketCode = null;
-
-    def setup() {
-        mockTimeService.now() >> LocalDateTime.now()
-        mockTimeService.nanoTime() >> System.nanoTime()
-    }
 
     def "should activate account and create APIKey"() {
         given:
@@ -364,6 +368,113 @@ class AccountResourceSpec extends Specification {
         assert statusDto.status == Status.SUCCESS
     }
 
+    def "should set status to idle when heartbeat dies"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        HeartbeatDto heartbeatDto = new HeartbeatDto()
+        heartbeatDto.setDeltaTime(30);
+
+        ConnectionStatusDto connect = accountClient.login()
+        accountClient.connect(new ConnectionInputDto(connect.getConnectionId()));
+
+        when:
+        SimpleStatusDto beat1 = accountClient.heartbeat(heartbeatDto)
+        SimpleStatusDto beat2 = accountClient.heartbeat(heartbeatDto)
+
+        gridClock.now()
+        gridClock.now()
+
+        rootAccountCapability.processHeartbeatConnectionDisconnects();
+
+        TeamMemberDto myStatus = memberClient.getMe();
+
+        SimpleStatusDto beat3 = accountClient.heartbeat(heartbeatDto)
+
+        then:
+        assert beat1.status == Status.SUCCESS
+        assert beat2.status == Status.SUCCESS
+        assert beat3.status == Status.FAILED
+
+        assert myStatus != null
+        assert myStatus.getOnlineStatus() == OnlineStatus.Idle
+    }
+
+    def "should set status to offline when heartbeat dies for 30 min"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        HeartbeatDto heartbeatDto = new HeartbeatDto()
+        heartbeatDto.setDeltaTime(30);
+
+        ConnectionStatusDto connect = accountClient.login()
+        accountClient.connect(new ConnectionInputDto(connect.getConnectionId()));
+
+        when:
+        SimpleStatusDto beat1 = accountClient.heartbeat(heartbeatDto)
+        SimpleStatusDto beat2 = accountClient.heartbeat(heartbeatDto)
+
+        for (int i = 0; i < 30; i++) {
+            gridClock.now()
+        }
+
+        rootAccountCapability.processHeartbeatConnectionDisconnects();
+
+        TeamMemberDto myStatus = memberClient.getMe();
+
+        SimpleStatusDto beat3 = accountClient.heartbeat(heartbeatDto)
+
+        then:
+        assert beat1.status == Status.SUCCESS
+        assert beat2.status == Status.SUCCESS
+        assert beat3.status == Status.FAILED
+
+        assert myStatus != null
+        assert myStatus.getOnlineStatus() == OnlineStatus.Offline
+    }
+
+    def "should allow relogin after heartbeat dies to fix"() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam()
+        testUser.setId(member.getRootAccountId())
+
+        HeartbeatDto heartbeatDto = new HeartbeatDto()
+        heartbeatDto.setDeltaTime(30);
+
+        ConnectionStatusDto connect = accountClient.login()
+        accountClient.connect(new ConnectionInputDto(connect.getConnectionId()));
+
+        when:
+        SimpleStatusDto beat1 = accountClient.heartbeat(heartbeatDto)
+        SimpleStatusDto beat2 = accountClient.heartbeat(heartbeatDto)
+
+        gridClock.now()
+        gridClock.now()
+
+        rootAccountCapability.processHeartbeatConnectionDisconnects();
+
+        SimpleStatusDto beat3 = accountClient.heartbeat(heartbeatDto)
+
+        accountClient.login()
+
+        SimpleStatusDto beat4 = accountClient.heartbeat(heartbeatDto)
+
+        TeamMemberDto myStatus = memberClient.getMe();
+
+        then:
+        assert beat1.status == Status.SUCCESS
+        assert beat2.status == Status.SUCCESS
+        assert beat3.status == Status.FAILED
+        assert beat4.status == Status.SUCCESS
+
+        assert myStatus != null
+        assert myStatus.getOnlineStatus() == OnlineStatus.Online
+    }
 
     private OrganizationMemberEntity createMemberWithOrgAndTeam() {
 

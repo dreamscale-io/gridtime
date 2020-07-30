@@ -3,9 +3,7 @@ package com.dreamscale.gridtime.core.domain.member;
 import com.dreamscale.gridtime.api.organization.OnlineStatus;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,6 +30,7 @@ public class MemberStatusEntity {
     private LocalDateTime lastActivity;
 
     @Column(name = "online_status")
+    @Enumerated(EnumType.STRING)
     private OnlineStatus onlineStatus;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")

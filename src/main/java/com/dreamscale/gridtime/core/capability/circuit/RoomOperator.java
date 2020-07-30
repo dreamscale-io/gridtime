@@ -166,7 +166,6 @@ public class RoomOperator {
         }
     }
 
-
     private void joinTheGridRoomAndTalkRoom(UUID organizationId, UUID memberId, TalkRoomEntity roomEntity) {
 
         LocalDateTime now = gridClock.now();
@@ -241,6 +240,17 @@ public class RoomOperator {
         talkRoomMemberRepository.deleteFromAllRooms(connection.getMemberId());
 
     }
+
+    @Transactional
+    public void updateStatusInAllRooms(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {
+        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
+
+        for (TalkRoomEntity talkRoom : talkRoomMemberships) {
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, talkRoom, connection.getMemberId(), CircuitMessageType.ROOM_MEMBER_STATUS_UPDATE);
+        }
+    }
+
 
     @Transactional
     public void leaveRoom(UUID organizationId, UUID memberId, String roomName) {
@@ -328,5 +338,7 @@ public class RoomOperator {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_ROOM, "Unable to find: " + roomName);
         }
     }
+
+
 
 }

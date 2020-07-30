@@ -39,6 +39,7 @@ public class RoomMemberStatusEntity {
 
     private LocalDateTime lastActivity;
 
+    @Enumerated(EnumType.STRING)
     private OnlineStatus onlineStatus;
 
 }

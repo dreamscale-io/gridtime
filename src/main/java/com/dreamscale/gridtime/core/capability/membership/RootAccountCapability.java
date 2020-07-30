@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.api.team.TeamLinkDto;
 import com.dreamscale.gridtime.core.capability.active.ActiveWorkStatusManager;
 import com.dreamscale.gridtime.core.capability.circuit.GridTalkRouter;
 import com.dreamscale.gridtime.core.capability.circuit.RoomOperator;
-import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
 import com.dreamscale.gridtime.core.capability.external.EmailCapability;
 import com.dreamscale.gridtime.core.capability.journal.JournalCapability;
 import com.dreamscale.gridtime.core.domain.active.ActiveAccountStatusEntity;
@@ -27,10 +26,12 @@ import org.dreamscale.exception.BadRequestException;
 import org.dreamscale.exception.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -95,6 +96,13 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     @Value( "${torchie.public.org.domain}" )
     private String publicTorchieDomain;
+
+    @Value("${account.idle.threshold.minutes}")
+    private int MINUTES_WITHOUT_HEARTBEAT_TO_IDLE;
+
+    @Value("${account.disconnect.threshold.minutes}")
+    private int MINUTES_WITHOUT_HEARTBEAT_TO_DISCONNECT;
+
 
     @Transactional
     public UserProfileDto registerAccount(RootAccountCredentialsInputDto rootAccountCreationInput) {
@@ -367,12 +375,42 @@ public class RootAccountCapability implements RootAccountIdResolver {
         }
     }
 
+    @Transactional
     public ConnectionStatusDto login(UUID rootAccountId) {
         LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
 
-        OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccountId);
+        ActiveAccountStatusEntity accountStatus = findOrCreateActiveAccountStatus(now, rootAccountId);
 
-        return loginAsOrganizationMember(now, rootAccountId, membership);
+        ConnectionStatusDto connectionStatus = null;
+
+        if (accountStatus.getOnlineStatus() != null && accountStatus.getOnlineStatus().equals(OnlineStatus.Idle)) {
+            accountStatus.setLastActivity(now);
+            accountStatus.setConnectionId(UUID.randomUUID());
+            accountStatus.setOnlineStatus(OnlineStatus.Online);
+
+            accountStatusRepository.save(accountStatus);
+
+            entityManager.flush();
+
+            OrganizationMemberEntity activeMembership = organizationCapability.findMember(accountStatus.getLoggedInOrganizationId(), rootAccountId);
+
+            connectionStatus = createValidConnectionStatusDto(activeMembership, accountStatus);
+
+            MemberConnectionEntity connection = memberConnectionRepository.findByConnectionId(accountStatus.getConnectionId());
+
+            activeWorkStatusManager.pushTeamMemberStatusUpdate(connection.getOrganizationId(), connection.getMemberId(), now, nanoTime);
+
+            roomOperator.updateStatusInAllRooms(now, nanoTime, connection);
+
+        } else {
+            OrganizationMemberEntity membership = organizationCapability.getDefaultOrganizationMembership(rootAccountId);
+
+            connectionStatus = loginAsOrganizationMember(now, rootAccountId, membership);
+        }
+
+        return connectionStatus;
+
     }
 
     public ConnectionStatusDto loginWithPassword(String username, String password) {
@@ -440,13 +478,7 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         accountStatusRepository.save(accountStatusEntity);
 
-        ConnectionStatusDto connectionStatus = new ConnectionStatusDto();
-        connectionStatus.setMemberId(membership.getId());
-        connectionStatus.setOrganizationId(membership.getOrganizationId());
-        connectionStatus.setUsername(membership.getUsername());
-        connectionStatus.setConnectionId(accountStatusEntity.getConnectionId());
-        connectionStatus.setStatus(Status.VALID);
-        connectionStatus.setMessage("Successfully logged in");
+        ConnectionStatusDto connectionStatus = createValidConnectionStatusDto(membership, accountStatusEntity);
 
         TeamDto team = teamMembership.getMyActiveTeam(membership.getOrganizationId(), membership.getId());
         if (team != null) {
@@ -456,6 +488,17 @@ public class RootAccountCapability implements RootAccountIdResolver {
         List<OrganizationDto> participatingOrgs = organizationCapability.getParticipatingOrganizations(rootAccountId);
         connectionStatus.setParticipatingOrganizations(participatingOrgs);
 
+        return connectionStatus;
+    }
+
+    private ConnectionStatusDto createValidConnectionStatusDto(OrganizationMemberEntity membership, ActiveAccountStatusEntity accountStatusEntity) {
+        ConnectionStatusDto connectionStatus = new ConnectionStatusDto();
+        connectionStatus.setMemberId(membership.getId());
+        connectionStatus.setOrganizationId(membership.getOrganizationId());
+        connectionStatus.setUsername(membership.getUsername());
+        connectionStatus.setConnectionId(accountStatusEntity.getConnectionId());
+        connectionStatus.setStatus(Status.VALID);
+        connectionStatus.setMessage("Successfully logged in");
         return connectionStatus;
     }
 
@@ -528,6 +571,57 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return new SimpleStatusDto(Status.SUCCESS, "Successfully logged out");
     }
 
+    @Transactional
+    @Scheduled(fixedDelay = 60000, initialDelay = 300000)
+    public void processHeartbeatConnectionDisconnects() {
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        LocalDateTime idleThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_IDLE);
+        LocalDateTime disconnectThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_DISCONNECT);
+
+        //handle online accounts gone idle
+
+        List<ActiveAccountStatusEntity> idleAccounts = accountStatusRepository.findMissingHeartbeat(Timestamp.valueOf(idleThreshold));
+
+        for (ActiveAccountStatusEntity account: idleAccounts) {
+            account.setOnlineStatus(OnlineStatus.Idle);
+            accountStatusRepository.save(account);
+        }
+
+        entityManager.flush();
+
+        for (ActiveAccountStatusEntity account: idleAccounts) {
+
+            MemberConnectionEntity connection = memberConnectionRepository.findByConnectionId(account.getConnectionId());
+
+            activeWorkStatusManager.pushTeamMemberStatusUpdate(connection.getOrganizationId(), connection.getMemberId(), now, nanoTime);
+
+            roomOperator.updateStatusInAllRooms(now, nanoTime, connection);
+        }
+
+        //handle idle accounts disconnected (logout)
+
+        List<ActiveAccountStatusEntity> connectionsToLogout = accountStatusRepository.findLongMissingHeartbeat(Timestamp.valueOf(disconnectThreshold));
+
+        for (ActiveAccountStatusEntity account: connectionsToLogout) {
+
+            MemberConnectionEntity connection = memberConnectionRepository.findByConnectionId(account.getConnectionId());
+
+            account.setOnlineStatus(OnlineStatus.Offline);
+            account.setConnectionId(null);
+
+            accountStatusRepository.save(account);
+
+            entityManager.flush();
+
+            activeWorkStatusManager.pushTeamMemberStatusUpdate(connection.getOrganizationId(), connection.getMemberId(), now, nanoTime);
+
+            roomOperator.leaveAllRooms(now, nanoTime, connection);
+        }
+
+    }
 
     public SimpleStatusDto heartbeat(UUID rootAccountId, HeartbeatDto heartbeat) {
         SimpleStatusDto heartBeatStatus;
@@ -537,9 +631,10 @@ public class RootAccountCapability implements RootAccountIdResolver {
         ActiveAccountStatusEntity accountStatusEntity = findOrCreateActiveAccountStatus(now, rootAccountId);
 
         if (isNotOnline(accountStatusEntity)) {
-            heartBeatStatus = new SimpleStatusDto(Status.FAILED, "Please login before updating heartbeat");
+            heartBeatStatus = new SimpleStatusDto(Status.FAILED, "Please re-login before updating heartbeat");
         } else {
             accountStatusEntity.setLastActivity(now);
+            accountStatusEntity.setLastHeartbeat(now);
             accountStatusEntity.setDeltaTime(heartbeat.getDeltaTime());
             accountStatusRepository.save(accountStatusEntity);
 

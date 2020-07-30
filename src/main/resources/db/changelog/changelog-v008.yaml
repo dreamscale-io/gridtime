@@ -5,3 +5,6 @@ databaseChangeLog:
 
   - include:
         file: db/v008/alter_learning_circuit_add_solved_time.sql
+
+  - include:
+        file: db/v008/refactor_heartbeat.sql
