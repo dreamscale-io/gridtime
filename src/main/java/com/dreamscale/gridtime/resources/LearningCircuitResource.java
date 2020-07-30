@@ -333,19 +333,15 @@ public class LearningCircuitResource {
     }
 
     /**
-     * Retrieves the list of Learning Circuits that are in "TROUBLESHOOT" state that the invoking member has also joined.
+     * Retrieves the list of Learning Circuits that the member has joined, across all states, as long as they are not closed
      *
      * When joining and leaving another team member's Learning Circuits, the invoking member is still considered
      * to be "participating" unless they explicitly leave the circuit room.
      *
-     * All circuits listed will be in "TROUBLESHOOT" state.
-     *
-     * Deprecated, use /circuit/my/troubleshoot
      *
      * @return List<LearningCircuitDto>
      */
 
-    @Deprecated
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
     public List<LearningCircuitDto> getMyParticipatingCircuits() {
@@ -354,7 +350,7 @@ public class LearningCircuitResource {
 
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        return wtfCircuitOperator.getMyTroubleshootCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
+        return wtfCircuitOperator.getMyParticipatingCircuits(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 

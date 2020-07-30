@@ -228,7 +228,7 @@ public class RoomOperator {
     @Transactional
     public void leaveAllRooms(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {
 
-        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
+        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findAllRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
 
         for (TalkRoomEntity talkRoom : talkRoomMemberships) {
 
@@ -243,7 +243,7 @@ public class RoomOperator {
 
     @Transactional
     public void updateStatusInAllRooms(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {
-        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
+        List<TalkRoomEntity> talkRoomMemberships = talkRoomRepository.findNonTeamRoomsByMembership(connection.getOrganizationId(), connection.getMemberId());
 
         for (TalkRoomEntity talkRoom : talkRoomMemberships) {
 

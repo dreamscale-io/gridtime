@@ -59,6 +59,18 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     List<LearningCircuitEntity> findParticipatingTroubleshootCircuits(@Param("organizationId") UUID organizationId,
                                                                       @Param("memberId") UUID memberId);
 
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and exists (select 1 from learning_circuit_member lcm " +
+            "where lcm.circuit_id = c.id " +
+            "and lcm.member_id = (:memberId) " +
+            "and lcm.is_active_in_session = true ) "+
+            "and (c.circuit_state != 'CLOSED') " +
+            "order by c.open_time ")
+    List<LearningCircuitEntity> findAllParticipatingCircuitsNotClosed(@Param("organizationId") UUID organizationId,
+                                                                      @Param("memberId") UUID memberId);
+
+
     LearningCircuitEntity findByOrganizationIdAndCircuitName(UUID organizationId, String circuitName);
 
     LearningCircuitEntity findByOrganizationIdAndOwnerIdAndCircuitName(UUID organizationId, UUID ownerId, String circuitName);

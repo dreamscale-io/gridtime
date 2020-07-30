@@ -15,7 +15,7 @@ import java.util.List;
 })
 public interface LearningCircuitClient {
 
-    //create circuits
+    //create and update and retrieve circuits
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH)
     LearningCircuitDto startWTF();
@@ -35,12 +35,12 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" )
     LearningCircuitWithMembersDto getCircuitWithAllDetails(@Param("name") String circuitName);
 
+    //Retrieve members for a circuit
+
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MEMBER_PATH)
     LearningCircuitMembersDto getCircuitMembers(@Param("name") String circuitName);
 
-    //workflow transitions
-
-    //document workflow transitions
+    //circuit workflow transitions
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.SOLVE_PATH)
     LearningCircuitDto solveWTF(@Param("name") String circuitName);
@@ -60,12 +60,12 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MARK_PATH + ResourcePaths.CLOSE_PATH)
     SimpleStatusDto markForClose(@Param("name") String circuitName);
 
-    //join and leave at the circuit level
+    //join at the circuit level (sends talk message join events)
 
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
     LearningCircuitDto joinWTF(@Param("name") String circuitName);
 
-    //query circuits -- these below APIs feel like they need to move somewhere else...?
+    //get all participating circuits by state, or get all participating circuits -- all APIs are participating APIs
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)
     List<LearningCircuitDto> getMyDoItLaterCircuits();
@@ -79,18 +79,13 @@ public interface LearningCircuitClient {
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.RETRO_PATH)
     List<LearningCircuitDto> getMyRetroCircuits();
 
-
-    //deprecating this API since every one of these searches returns participating, use /circuit/my/troubleshoot instead
-
-    @Deprecated
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.PARTICIPATING_PATH)
-    List<LearningCircuitDto> getAllMyParticipatingCircuits();
+    List<LearningCircuitDto> getMyParticipatingCircuits();
 
-    //do we need this?  I feel like we don't, or if we do, should follow same pattern as for single user
+    //get all participating circuits for some other member
 
-    @Deprecated
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MEMBER_PATH + "/{id}" + ResourcePaths.PARTICIPATING_PATH )
-    List<LearningCircuitDto> getAllParticipatingCircuitsForMember(@Param("id") String memberId);
+    List<LearningCircuitDto> getParticipatingCircuitsForMember(@Param("id") String memberId);
 
 
 }

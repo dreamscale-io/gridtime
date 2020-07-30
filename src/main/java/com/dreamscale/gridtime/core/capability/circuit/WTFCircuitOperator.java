@@ -1131,6 +1131,19 @@ public class WTFCircuitOperator {
         return participatingCircuits;
     }
 
+    public List<LearningCircuitDto> getMyParticipatingCircuits(UUID organizationId, UUID memberId) {
+
+        List<LearningCircuitEntity> circuits = learningCircuitRepository.findAllParticipatingCircuitsNotClosed(organizationId, memberId);
+
+        List<LearningCircuitDto> participatingCircuits = new ArrayList<>();
+
+        for (LearningCircuitEntity circuit : circuits) {
+            participatingCircuits.add(toDto(circuit));
+        }
+
+        return participatingCircuits;
+    }
+
 
     public List<LearningCircuitDto> getAllParticipatingCircuitsForOtherMember(UUID organizationId, UUID id, UUID otherMemberId) {
         return null;

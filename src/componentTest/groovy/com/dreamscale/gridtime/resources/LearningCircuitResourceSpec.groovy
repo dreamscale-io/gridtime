@@ -892,7 +892,7 @@ class LearningCircuitResourceSpec extends Specification {
         talkClient.joinExistingRoom(user2Circuit.getWtfTalkRoomName())
         talkClient.joinExistingRoom(user1Circuit.getWtfTalkRoomName())
 
-        List<LearningCircuitDto> user2Participating = circuitClient.getMyTroubleshootCircuits();
+        List<LearningCircuitDto> user2Participating = circuitClient.getMyParticipatingCircuits();
 
         LearningCircuitWithMembersDto user1CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user1Circuit.getCircuitName())
         LearningCircuitWithMembersDto user2CircuitFromUser2 = circuitClient.getCircuitWithAllDetails(user2Circuit.getCircuitName())
