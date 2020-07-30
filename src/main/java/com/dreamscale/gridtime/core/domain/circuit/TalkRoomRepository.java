@@ -16,7 +16,7 @@ public interface TalkRoomRepository extends CrudRepository<TalkRoomEntity, UUID>
     @Query(nativeQuery = true, value = "select * from talk_room tr  " +
             "where organization_id = (:organizationId) " +
             "and exists ( select 1 from talk_room_member trm " +
-            "where tr.id = trm.room_id and trm.member_id = (:memberId) "+
+            "where tr.id = trm.room_id and trm.member_id = (:memberId) and room_type != 'TEAM_ROOM' "+
             "order by tr.room_name ) ")
     List<TalkRoomEntity> findRoomsByMembership(@Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId);
 
