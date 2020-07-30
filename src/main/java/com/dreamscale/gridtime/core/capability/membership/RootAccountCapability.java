@@ -556,14 +556,17 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
         UUID oldConnectionId = accountStatusEntity.getConnectionId();
 
-        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(oldConnectionId);
 
         accountStatusEntity.setOnlineStatus(OnlineStatus.Offline);
         accountStatusEntity.setConnectionId(null);
 
         accountStatusRepository.save(accountStatusEntity);
 
-        roomOperator.leaveAllRooms(now, nanoTime, memberConnection);
+        MemberConnectionEntity memberConnection = memberConnectionRepository.findByConnectionId(oldConnectionId);
+
+        if (memberConnection != null) {
+            roomOperator.leaveAllRooms(now, nanoTime, memberConnection);
+        }
 
         OrganizationMemberEntity membership = organizationCapability.getActiveMembership(rootAccountId);
         activeWorkStatusManager.pushTeamMemberStatusUpdate(membership.getOrganizationId(), membership.getId(), now, nanoTime);
