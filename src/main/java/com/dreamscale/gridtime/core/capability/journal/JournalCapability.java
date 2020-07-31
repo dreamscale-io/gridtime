@@ -97,6 +97,7 @@ public class JournalCapability {
         UUID organizationIdForProject = projectCapability.getOrganizationIdForTeamProject(intentionInputDto.getProjectId());
 
         validateMemberOrgMatchesProjectOrg(organizationId, organizationIdForProject);
+        validateNotBlank(intentionInputDto);
 
         ActiveLinksNetworkDto activeLinksNetwork = torchieNetworkOperator.getActiveLinksNetwork(organizationId, memberId);
 
@@ -107,35 +108,6 @@ public class JournalCapability {
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
-
-        //TODO this sequence is now more complicated, because we may have intermittent WTF, related journal entries.
-        //so the WTF really needs to close when the WTF closes or is canceled, which means, I probably need to save the pointers
-        //to these journal entries.  So maybe in the learning circuit... it's a one time update... this is prolly okay...
-
-        //I've already got LearningCircuitEntity as an upstream caller,
-        // to preserve the sequencing lock, passing it in as an argument,
-        // so learning circuit can get stamped with journal_id, because it already exists
-
-        //then the close previous intention, logic becomes more complex.
-
-        //use cases:
-
-        //Expectation, if you're in your WTF, write notes in your WTF, not your journal, you've got a link to this session in your journal
-        //that forks your session into a nice little bundle, for you to reflect on later.  Start building out your knowledge books.
-
-        //books of tags... you can pull tags into your books, and give them definitions.  Mix ideas of books together,
-        // and use the ideas to drive search.
-
-        //then we assume when you're back to writing in your journal, whatever the intention you were last working on, prior to the WTF,
-        // prior to potentially several WTFs, would then be closed.  The WTF would be closed, via the workflow methods,
-        // providing our core Idea Flow measurement system.
-
-        // So Friction, we measure as a % of capacity consumption, with a specific risk profile organized into a queryable grid, organized by tags.
-        // We can analyze these risk factors, then find strategies to reduce our WTFs, with data.
-
-        // Did we succeed at reducing, lets query history.
-
-        //so things I need to do, are
 
         JournalEntryDto myEntry = createIntentionAndGrantXPForMember(now, nanoTime, organizationId, memberId, intentionInputDto, isLinked);
 
@@ -150,6 +122,12 @@ public class JournalCapability {
 
         JournalEntryEntity journalEntryEntity = journalEntryRepository.findOne(myEntry.getId());
         return journalEntryOutputMapper.toApi(journalEntryEntity);
+    }
+
+    private void validateNotBlank(IntentionInputDto intentionInputDto) {
+        if (intentionInputDto == null || intentionInputDto.getDescription() == null || intentionInputDto.getDescription().length() == 0) {
+            throw new BadRequestException(ValidationErrorCodes.FIELD_CANT_BE_BLANK, "The intention needs a description and can't be blank.");
+        }
     }
 
     @Transactional

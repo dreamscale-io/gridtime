@@ -131,6 +131,26 @@ class JournalResourceSpec extends Specification {
 
     }
 
+    def "should not allow blank intentions"() {
+        given:
+
+        AccountActivationDto artyProfile = registerAndActivate("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        when:
+
+        ProjectDto project = journalClient.findOrCreateProject(new CreateProjectInputDto("my-project", "proj description", false))
+        TaskDto task = journalClient.findOrCreateTask(project.getId().toString(), new CreateTaskInputDto("DS-111", "my task description", false))
+
+        JournalEntryDto journalEntry = journalClient.createIntention(new IntentionInputDto("", project.getId(), task.getId()))
+
+        then:
+        thrown(BadRequestException)
+    }
+
     def "should update flame rating"() {
         given:
 
