@@ -65,6 +65,9 @@ public interface LearningCircuitClient {
     @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.JOIN_PATH)
     LearningCircuitDto joinWTF(@Param("name") String circuitName);
 
+    @RequestLine("POST " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
+    LearningCircuitDto leaveWTF(@Param("name") String circuitName);
+
     //get all participating circuits by state, or get all participating circuits -- all APIs are participating APIs
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.MY_PATH + ResourcePaths.DO_IT_LATER_PATH)

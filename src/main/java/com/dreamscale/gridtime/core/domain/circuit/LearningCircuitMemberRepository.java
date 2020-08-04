@@ -25,6 +25,16 @@ public interface LearningCircuitMemberRepository extends CrudRepository<Learning
                                                @Param("circuitId") UUID circuitId,
                                                @Param("ownerId") UUID ownerId);
 
+    @Modifying
+    @Query(nativeQuery = true, value = "update learning_circuit_member lcm " +
+            "set is_active_in_session = false " +
+            "where lcm.circuit_id = (:circuitId) " +
+            "and lcm.organization_id = (:organizationId)  " +
+            "and lcm.member_id = (:memberId) ")
+    void updateMemberToInactive(@Param("organizationId") UUID organizationId,
+                                @Param("circuitId") UUID circuitId,
+                                @Param("memberId") UUID memberId);
+
 
     @Query(nativeQuery = true, value = "select count(*) from learning_circuit_member lcm " +
             "where lcm.circuit_id = (:circuitId) " +

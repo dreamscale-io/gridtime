@@ -810,6 +810,42 @@ public class WTFCircuitOperator {
 
     }
 
+    @Transactional
+    public LearningCircuitDto leaveWTF(UUID organizationId, UUID memberId, String circuitName) {
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        LearningCircuitEntity wtfCircuit = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
+
+        validateCircuitExists(circuitName, wtfCircuit);
+
+        LearningCircuitDto circuitDto = toDto(wtfCircuit);
+
+        if (!wtfCircuit.getOwnerId().equals(memberId)) {
+
+            clearActiveJoinedCircuit(organizationId, memberId);
+
+            updateCircuitMemberToInactive(wtfCircuit, memberId);
+
+            entityManager.flush();
+
+            activeWorkStatusManager.pushTeamMemberStatusUpdate(organizationId, memberId, now, nanoTime);
+
+            teamCircuitOperator.notifyTeamOfWTFLeft(organizationId, memberId, now, nanoTime, circuitDto);
+
+        }
+
+        return circuitDto;
+    }
+
+    private void updateCircuitMemberToInactive(LearningCircuitEntity learningCircuitEntity, UUID memberId) {
+
+        learningCircuitMemberRepository.updateMemberToInactive(
+                learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getId(), memberId);
+
+    }
+
     private String getActivityTypeBasedOnState(LearningCircuitEntity wtfCircuit) {
         String activityType = "WTF";
 
@@ -851,6 +887,8 @@ public class WTFCircuitOperator {
 
         LearningCircuitDto circuitDto = toDto(wtfCircuit);
         teamCircuitOperator.notifyTeamOfWTFJoined(organizationId, memberId, now, nanoTime, circuitDto);
+
+        activeWorkStatusManager.pushTeamMemberStatusUpdate(organizationId, memberId, now, nanoTime);
 
     }
 

@@ -952,6 +952,52 @@ class LearningCircuitResourceSpec extends Specification {
         assert user2Participating.size() == 1 //only includes joined, not my own
     }
 
+    def 'should join and leave another persons circuit'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+
+        //change active logged in user to a different user within same organization
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        accountClient.login()
+
+        when:
+
+        LearningCircuitDto joinedCircuit = circuitClient.joinWTF(user1Circuit.getCircuitName())
+
+        LearningCircuitDto activeCircuitAfterJoin = circuitClient.getActiveCircuit();
+
+
+        LearningCircuitDto leaveCircuit = circuitClient.leaveWTF(user1Circuit.getCircuitName())
+
+        LearningCircuitDto activeCircuitAfterLeave = circuitClient.getActiveCircuit();
+
+        List<LearningCircuitDto> user2Participating = circuitClient.getMyParticipatingCircuits();
+
+        then:
+
+        assert joinedCircuit.getCircuitName() == user1Circuit.getCircuitName()
+
+        assert leaveCircuit.getCircuitName() == user1Circuit.getCircuitName()
+
+        assert activeCircuitAfterJoin != null
+        assert activeCircuitAfterJoin.getCircuitName() == user1Circuit.getCircuitName()
+
+        assert activeCircuitAfterLeave == null
+
+        assert user2Participating.size() == 0
+    }
+
     def 'should get all members of a circuit'() {
         given:
 

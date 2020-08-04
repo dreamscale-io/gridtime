@@ -574,32 +574,35 @@ public class RootAccountCapability implements RootAccountIdResolver {
         return new SimpleStatusDto(Status.SUCCESS, "Successfully logged out");
     }
 
+
+    //TODO comment out the scheduling of this for now until we're ready to integrate reconnect logic on the Torchie side
+
 //    @Scheduled(fixedDelay = 60000, initialDelay = 120000)
-//    public void processHeartbeatConnectionDisconnects() {
-//
-//        log.info("Processing heartbeat Idles and Disconnects");
-//
-//        LocalDateTime now = gridClock.now();
-//        Long nanoTime = gridClock.nanoTime();
-//
-//        LocalDateTime disconnectThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_DISCONNECT);
-//
-//        //handle online accounts gone idle
-//
-//        updateIdleStatusOnAccountsAndNotifyTeam(now, nanoTime);
-//
-//        //handle idle accounts disconnected (logout)
-//
-//        List<ActiveAccountStatusEntity> connectionsToLogout = accountStatusRepository.findLongMissingHeartbeat(Timestamp.valueOf(disconnectThreshold));
-//
-//        for (ActiveAccountStatusEntity account: connectionsToLogout) {
-//
-//            MemberConnectionEntity connection = updateOfflineStatusOnAccount(account);
-//
-//            notifyTeamOfOfflineStatus(now, nanoTime, connection);
-//        }
-//
-//    }
+    public void processHeartbeatConnectionDisconnects() {
+
+        log.info("Processing heartbeat Idles and Disconnects");
+
+        LocalDateTime now = gridClock.now();
+        Long nanoTime = gridClock.nanoTime();
+
+        LocalDateTime disconnectThreshold = now.minusMinutes(MINUTES_WITHOUT_HEARTBEAT_TO_DISCONNECT);
+
+        //handle online accounts gone idle
+
+        updateIdleStatusOnAccountsAndNotifyTeam(now, nanoTime);
+
+        //handle idle accounts disconnected (logout)
+
+        List<ActiveAccountStatusEntity> connectionsToLogout = accountStatusRepository.findLongMissingHeartbeat(Timestamp.valueOf(disconnectThreshold));
+
+        for (ActiveAccountStatusEntity account: connectionsToLogout) {
+
+            MemberConnectionEntity connection = updateOfflineStatusOnAccount(account);
+
+            notifyTeamOfOfflineStatus(now, nanoTime, connection);
+        }
+
+    }
 
     @Transactional
     void notifyTeamOfOfflineStatus(LocalDateTime now, Long nanoTime, MemberConnectionEntity connection) {

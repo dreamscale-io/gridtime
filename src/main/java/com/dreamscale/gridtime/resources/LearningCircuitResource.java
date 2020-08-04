@@ -179,6 +179,28 @@ public class LearningCircuitResource {
         return wtfCircuitOperator.joinWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
     }
 
+
+    /**
+     * Leaves the specified WTF circuit.
+     *
+     * The users current WTF will be cleared and the member status updated
+     *
+     * @return LearningCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.LEAVE_PATH)
+    public LearningCircuitDto leaveWTF(@PathVariable("name") String circuitName) {
+
+        RequestContext context = RequestContext.get();
+        log.info("leaveWTF, user={}", context.getRootAccountId());
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return wtfCircuitOperator.leaveWTF(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+
+
     /**
      * Finishes an existing WTF , the circuit must be owned by the invoking member.
      *

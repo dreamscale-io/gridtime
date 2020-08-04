@@ -27,6 +27,7 @@ public enum CircuitMessageType {
     TEAM_WTF_SOLVED("team-wtf-solved", "WTF solved.", WTFStatusUpdateDto.class),
     TEAM_WTF_CLOSED("team-wtf-closed", "WTF closed.", WTFStatusUpdateDto.class),
     TEAM_WTF_JOINED("team-wtf-joined", "WTF joined.", WTFStatusUpdateDto.class),
+    TEAM_WTF_LEAVE("team-wtf-leave", "WTF member left.", WTFStatusUpdateDto.class),
     TEAM_RETRO_STARTED("team-wtf-retro-started", "Retro started.", WTFStatusUpdateDto.class),
     TEAM_RETRO_CLOSED("team-retro-closed", "Retro closed.", WTFStatusUpdateDto.class),
 
