@@ -583,7 +583,6 @@ public class WTFCircuitOperator {
         }
     }
 
-
     @Transactional
     public LearningCircuitDto solveWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
@@ -613,7 +612,7 @@ public class WTFCircuitOperator {
         //then clear out all the things
 
         clearActiveJoinedCircuit(organizationId, ownerId);
-        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity, now, nanoTime);
 
         activeWorkStatusManager.resolveWTFWithYay(organizationId, ownerId, now, nanoTime);
 
@@ -705,17 +704,33 @@ public class WTFCircuitOperator {
 
         clearActiveJoinedCircuit(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId());
 
-        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity, now, nanoTime);
 
         teamCircuitOperator.notifyTeamOfWTFOnHold(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime, circuitDto);
 
         return circuitDto;
     }
 
-    private void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuitEntity) {
+    private void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuit, LocalDateTime now, Long nanoTime) {
+
+        List<LearningCircuitMemberEntity> members = learningCircuitMemberRepository.findByOrganizationIdAndCircuitId(learningCircuit.getOrganizationId(), learningCircuit.getId());
+
+        for (LearningCircuitMemberEntity member: members) {
+            if (member.isActiveInSession()) {
+                clearActiveJoinedCircuit(learningCircuit.getOrganizationId(), member.getMemberId());
+            }
+        }
+
+        entityManager.flush();
+
+        for (LearningCircuitMemberEntity member: members) {
+            if (member.isActiveInSession()) {
+                activeWorkStatusManager.pushTeamMemberStatusUpdate(learningCircuit.getOrganizationId(), member.getMemberId(), now, nanoTime);
+            }
+        }
 
         learningCircuitMemberRepository.updateAllMembersToInactiveExceptOwner(
-                learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getId(), learningCircuitEntity.getOwnerId());
+                learningCircuit.getOrganizationId(), learningCircuit.getId(), learningCircuit.getOwnerId());
 
     }
 
@@ -771,7 +786,7 @@ public class WTFCircuitOperator {
 
         torchieNetworkOperator.grantGroupXP(organizationId, learningCircuitEntity.getCircuitName(), 50);
 
-        removeAllCircuitMembersExceptOwner(learningCircuitEntity);
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity, now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -846,16 +861,6 @@ public class WTFCircuitOperator {
 
     }
 
-    private String getActivityTypeBasedOnState(LearningCircuitEntity wtfCircuit) {
-        String activityType = "WTF";
-
-        if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
-            activityType = "Retro";
-        }
-
-        return activityType;
-    }
-
     private void joinCircuitAsMemberAndSendNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
 
         LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
@@ -874,7 +879,6 @@ public class WTFCircuitOperator {
             circuitMember.setJoinState(wtfCircuit.getCircuitState());
 
             learningCircuitMemberRepository.save(circuitMember);
-
 
         } else {
 
