@@ -38,7 +38,7 @@ public interface LearningCircuitClient {
     //Retrieve members for a circuit
 
     @RequestLine("GET " + ResourcePaths.CIRCUIT_PATH + ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MEMBER_PATH)
-    LearningCircuitMembersDto getCircuitMembers(@Param("name") String circuitName);
+    List<CircuitMemberStatusDto> getCircuitMembers(@Param("name") String circuitName);
 
     //circuit workflow transitions
 

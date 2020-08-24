@@ -144,11 +144,11 @@ public class LearningCircuitResource {
     /**
      * Retrieve the list of Circuit Members for a Learning Circuit, including all of their statuses
      *
-     * @return LearningCircuitWithMembersDto
+     * @return List<CircuitMemberStatusDto>
      */
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.WTF_PATH + "/{name}" + ResourcePaths.MEMBER_PATH)
-    LearningCircuitMembersDto getCircuitMembers(@PathVariable("name") String circuitName) {
+    List<CircuitMemberStatusDto> getCircuitMembers(@PathVariable("name") String circuitName) {
         RequestContext context = RequestContext.get();
         log.info("getCircuitMembers, user={}", context.getRootAccountId());
 

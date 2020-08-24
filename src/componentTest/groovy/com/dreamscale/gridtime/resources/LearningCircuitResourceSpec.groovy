@@ -1022,13 +1022,13 @@ class LearningCircuitResourceSpec extends Specification {
 
         when:
 
-        LearningCircuitMembersDto membersDto = circuitClient.getCircuitMembers(user1Circuit.getCircuitName())
+        List<CircuitMemberStatusDto> members = circuitClient.getCircuitMembers(user1Circuit.getCircuitName())
 
         then:
 
-        assert membersDto.getCircuitMembers() != null
+        assert members != null
 
-        assert membersDto.getCircuitMembers().size() == 2
+        assert members.size() == 2
 
     }
 

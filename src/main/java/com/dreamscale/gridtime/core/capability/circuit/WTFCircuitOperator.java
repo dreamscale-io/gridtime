@@ -281,7 +281,7 @@ public class WTFCircuitOperator {
         return fullDto;
     }
 
-    public LearningCircuitMembersDto getCircuitMembers(UUID organizationId, String circuitName) {
+    public List<CircuitMemberStatusDto> getCircuitMembers(UUID organizationId, String circuitName) {
 
         LearningCircuitEntity circuitEntity = learningCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, circuitName);
 
@@ -289,7 +289,7 @@ public class WTFCircuitOperator {
 
         List<CircuitMemberStatusDto> circuitMembers = getCircuitParticipantsBasedOnCircuitState(organizationId, circuitEntity);
 
-        return new LearningCircuitMembersDto(circuitMembers);
+        return circuitMembers;
     }
 
     private List<CircuitMemberStatusDto> getCircuitParticipantsBasedOnCircuitState(UUID organizationId, LearningCircuitEntity circuitEntity) {

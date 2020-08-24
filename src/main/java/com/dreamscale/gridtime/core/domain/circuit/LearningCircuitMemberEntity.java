@@ -38,5 +38,4 @@ public class LearningCircuitMemberEntity {
     private boolean isActiveInSession;
 
 
-
 }
