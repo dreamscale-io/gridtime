@@ -42,7 +42,7 @@ To retrieve the swagger json, navigate to `/v2/api-docs`
 ## Heroku
 
 This application is currently deployed on Heroku at http://ds-gridtime.herokuapp.com.  For an API-Key on the shared service, 
-please contact janelle@dreamscale.io.  We will have account creation setup soon, but while this project is still in early 
+please contact arty@dreamscale.io.  We will have account creation setup soon, but while this project is still in early 
 development, accounts are created manually.
 
 Install heroku cli (google)
