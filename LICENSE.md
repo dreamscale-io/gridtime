@@ -1,4 +1,4 @@
-GridTime Copyright (2020) (DreamScale, Inc., Public Benefit Company) (“Licensor”)
+GridTime Copyright (2020) (DreamScale, Inc., Public Benefit Corporation) (“Licensor”)
 
 Hippocratic License Version Number: 2.1.
 
