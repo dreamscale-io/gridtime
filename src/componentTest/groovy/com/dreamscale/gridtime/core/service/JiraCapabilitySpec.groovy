@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 @ComponentTest
 public class JiraCapabilitySpec extends Specification {
 

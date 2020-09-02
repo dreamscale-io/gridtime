@@ -209,6 +209,8 @@ public class RoomOperator {
 
         RoomMemberStatusEventDto statusDto = new RoomMemberStatusEventDto(messageType.name(), messageType.getStatusMessage(), circuitMemberStatus);
 
+        //dont persist these room member level events in the chat feed, since they are super noisy, consider them transient
+
         TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
         messageEntity.setId(UUID.randomUUID());
         messageEntity.setFromId(memberId);
@@ -218,8 +220,6 @@ public class RoomOperator {
         messageEntity.setMessageType(messageType);
         messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
         TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
-
-        talkRoomMessageRepository.save(messageEntity);
 
         talkRouter.sendRoomMessage(roomEntity.getId(), talkMessageDto);
     }

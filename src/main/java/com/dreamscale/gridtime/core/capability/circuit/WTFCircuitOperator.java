@@ -849,6 +849,18 @@ public class WTFCircuitOperator {
 
             teamCircuitOperator.notifyTeamOfWTFLeft(organizationId, memberId, now, nanoTime, circuitDto);
 
+            if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
+                TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getWtfRoomId());
+
+                createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
+            }
+
+            if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
+                TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getRetroRoomId());
+
+                createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
+            }
+
         }
 
         return circuitDto;
@@ -892,6 +904,20 @@ public class WTFCircuitOperator {
         LearningCircuitDto circuitDto = toDto(wtfCircuit);
         teamCircuitOperator.notifyTeamOfWTFJoined(organizationId, memberId, now, nanoTime, circuitDto);
 
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
+            TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getWtfRoomId());
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOIN);
+        }
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
+            TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getRetroRoomId());
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOIN);
+        }
+
+
         activeWorkStatusManager.pushTeamMemberStatusUpdate(organizationId, memberId, now, nanoTime);
 
     }
@@ -927,6 +953,31 @@ public class WTFCircuitOperator {
 
         activeJoinCircuitRepository.save(existingJoinCircuit);
 
+    }
+
+    private void createAndSendRoomMemberStatusUpdateEvent(LocalDateTime now, Long nanoTime, TalkRoomEntity roomEntity, UUID memberId, CircuitMessageType messageType) {
+
+        String urn = ROOM_URN_PREFIX + roomEntity.getRoomName();
+
+        RoomMemberStatusEntity roomMemberStatus = roomMemberStatusRepository.findByRoomIdAndMemberId(roomEntity.getId(), memberId);
+
+        CircuitMemberStatusDto circuitMemberStatus = roomMemberStatusDtoMapper.toApi(roomMemberStatus);
+
+        CircuitMemberStatusEventDto statusDto = new CircuitMemberStatusEventDto(messageType.name(), messageType.getStatusMessage(), circuitMemberStatus);
+
+        TalkRoomMessageEntity messageEntity = new TalkRoomMessageEntity();
+        messageEntity.setId(UUID.randomUUID());
+        messageEntity.setFromId(memberId);
+        messageEntity.setToRoomId(roomEntity.getId());
+        messageEntity.setPosition(now);
+        messageEntity.setNanoTime(nanoTime);
+        messageEntity.setMessageType(messageType);
+        messageEntity.setJsonBody(JSONTransformer.toJson(statusDto));
+        TalkMessageDto talkMessageDto = toTalkMessageDto(urn, messageEntity);
+
+        talkRoomMessageRepository.save(messageEntity);
+
+        talkRouter.sendRoomMessage(roomEntity.getId(), talkMessageDto);
     }
 
     private void clearActiveJoinedCircuit(UUID organizationId, UUID memberId) {
