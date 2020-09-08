@@ -14,6 +14,7 @@ public class GridClock {
     }
 
     public Long nanoTime() {
-        return System.nanoTime();
+
+        return System.currentTimeMillis() * 1000000;
     }
 }
