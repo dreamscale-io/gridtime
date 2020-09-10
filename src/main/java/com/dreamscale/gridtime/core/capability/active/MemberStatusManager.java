@@ -135,6 +135,12 @@ public class MemberStatusManager {
                     memberStatusEntity.getActiveCircuitId());
 
             memberStatusDto.setActiveCircuit(circuitDto);
+
+            if (memberStatusEntity.getId().equals(circuitDto.getOwnerId())) {
+                memberStatusDto.setActiveJoinType(CircuitJoinType.OWNER);
+            } else {
+                memberStatusDto.setActiveJoinType(CircuitJoinType.TEAM_MEMBER);
+            }
         }
 
         return memberStatusDto;

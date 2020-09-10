@@ -24,6 +24,8 @@ public class TeamMemberDto implements MessageDetailsBody {
     private String username;
 
     private XPSummaryDto xpSummary;
+
+    private CircuitJoinType activeJoinType;
     private LearningCircuitDto activeCircuit;
     private OnlineStatus onlineStatus;
 

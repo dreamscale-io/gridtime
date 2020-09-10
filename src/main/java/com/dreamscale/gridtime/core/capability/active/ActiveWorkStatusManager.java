@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.capability.active;
 
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto;
+import com.dreamscale.gridtime.api.organization.CircuitJoinType;
 import com.dreamscale.gridtime.api.organization.TeamMemberDto;
 import com.dreamscale.gridtime.core.capability.circuit.TeamCircuitOperator;
 import com.dreamscale.gridtime.core.capability.circuit.WTFCircuitOperator;
@@ -74,6 +75,11 @@ public class ActiveWorkStatusManager {
                 circuitId);
 
         memberStatus.setActiveCircuit(circuitDto);
+        if (memberStatus.getId().equals(circuitDto.getOwnerId())) {
+            memberStatus.setActiveJoinType(CircuitJoinType.OWNER);
+        } else {
+            memberStatus.setActiveJoinType(CircuitJoinType.TEAM_MEMBER);
+        }
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
@@ -108,6 +114,7 @@ public class ActiveWorkStatusManager {
 
         //pulls from the cached version for this session, TODO is there a way to fix this caching thing?
         memberStatus.setActiveCircuit(null);
+        memberStatus.setActiveJoinType(null);
 
         teamCircuitOperator.notifyTeamOfMemberStatusUpdate(organizationId, memberId, now, nanoTime, memberStatus);
 
