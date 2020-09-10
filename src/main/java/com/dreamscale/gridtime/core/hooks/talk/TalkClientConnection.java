@@ -51,14 +51,14 @@ public class TalkClientConnection {
         return status;
     }
 
-    public SimpleStatusDto sendDirectMessage(UUID toConnectionId, TalkMessageDto talkMessageDto, String username) {
+    public SimpleStatusDto sendDirectMessage(UUID toConnectionId, TalkMessageDto talkMessageDto, String fromUsername, String toUsername) {
         SimpleStatusDto status = null;
 
         try {
             status = talkClient.sendDirectMessage(toConnectionId.toString(), talkMessageDto);
         } catch (Exception ex) {
             log.error("[TalkClient] sendDirectMessage failed with exception.", ex);
-            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendDirectMessage("+username + ") failed with exception.");
+            throw new InternalServerException(InternalErrorCodes.TALK_ERROR, "[TalkClient] sendDirectMessage("+fromUsername + " , " + toUsername + ") failed with exception.");
         }
 
         return status;

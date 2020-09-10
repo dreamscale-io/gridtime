@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.circuit.ChatMessageInputDto;
 import com.dreamscale.gridtime.api.circuit.ScreenshotReferenceInputDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
+import com.dreamscale.gridtime.core.capability.circuit.DirectMessageOperator;
 import com.dreamscale.gridtime.core.capability.circuit.RoomOperator;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -26,6 +28,10 @@ public class TalkToResource {
 
     @Autowired
     RoomOperator roomOperator;
+
+    @Autowired
+    DirectMessageOperator directMessageOperator;
+
 
     /**
      * The invoking member joins the specified "-wtf" or "-retro" talk room.
@@ -69,6 +75,29 @@ public class TalkToResource {
         roomOperator.leaveRoom(invokingMember.getOrganizationId(),
                 invokingMember.getId(), roomName);
 
+    }
+
+    /**
+     * Sends chat message directly to the specified member
+     *
+     * The invoking member will also become a circuit participant.
+     *
+     * @param memberId
+     * @return TalkMessageDto (the message sent to the member)
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.TO_PATH + ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.CHAT_PATH )
+    public TalkMessageDto sendDirectChatMessage(@PathVariable("memberId") String memberId, @RequestBody ChatMessageInputDto chatMessageInputDto) {
+
+        RequestContext context = RequestContext.get();
+        log.info("sendDirectChatMessage, user={}", context.getRootAccountId());
+
+        UUID memberIdParsed = UUID.fromString(memberId);
+
+
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        return directMessageOperator.sendDirectChatMessage(invokingMember.getOrganizationId(), invokingMember.getId(), memberIdParsed, chatMessageInputDto.getChatMessage());
     }
 
     /**

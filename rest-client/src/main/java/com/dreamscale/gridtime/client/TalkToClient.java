@@ -20,6 +20,10 @@ public interface TalkToClient {
 
 
     @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
+            ResourcePaths.MEMBER_PATH + "/{memberId}" + ResourcePaths.CHAT_PATH)
+    TalkMessageDto sendDirectChatMessage(@Param("memberId") String memberId, ChatMessageInputDto chatMessageInputDto);
+
+    @RequestLine("POST " + ResourcePaths.TALK_PATH + ResourcePaths.TO_PATH +
             ResourcePaths.ROOM_PATH + "/{roomName}" + ResourcePaths.CHAT_PATH)
     TalkMessageDto publishChatToRoom(@Param("roomName") String roomName, ChatMessageInputDto chatMessageInputDto);
 

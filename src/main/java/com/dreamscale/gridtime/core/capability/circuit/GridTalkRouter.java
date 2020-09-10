@@ -27,11 +27,23 @@ public class GridTalkRouter {
 
     @Autowired
     private MemberDetailsRepository memberDetailsRepository;
+
     @Autowired
     private MemberConnectionRepository memberConnectionRepository;
 
     @Autowired
     private TalkClientConnectionFactory talkClientConnectionFactory;
+
+    public void sendDirectMessage(UUID connectionId, String toUsername, TalkMessageDto talkMessageDto) {
+
+        String fromUsername = talkMessageDto.getMetaProp(TalkMessageMetaProp.FROM_USERNAME);
+
+        log.debug("[GridTalkRouter] sendDirectMessage from {} to {}", fromUsername, toUsername);
+
+        TalkClientConnection talkClientConnection = talkClientConnectionFactory.connect();
+
+        talkClientConnection.sendDirectMessage(connectionId, talkMessageDto, fromUsername, toUsername);
+    }
 
     public void sendRoomMessage(UUID roomId, TalkMessageDto talkMessageDto) {
 
