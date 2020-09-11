@@ -11,6 +11,7 @@ import com.dreamscale.gridtime.api.circuit.LearningCircuitWithMembersDto
 import com.dreamscale.gridtime.api.circuit.TagsInputDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.journal.IntentionInputDto
+import com.dreamscale.gridtime.api.organization.CircuitJoinType
 import com.dreamscale.gridtime.api.organization.TeamMemberDto
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto
 import com.dreamscale.gridtime.api.project.CreateTaskInputDto
@@ -691,6 +692,8 @@ class LearningCircuitResourceSpec extends Specification {
 
         circuitClient.joinWTF(user1Circuit1.getCircuitName())
 
+        circuitClient.leaveWTF(user1Circuit1.getCircuitName())
+
         LearningCircuitDto user2Circuit = circuitClient.startWTF()
 
         circuitClient.solveWTF(user2Circuit.getCircuitName())
@@ -996,6 +999,37 @@ class LearningCircuitResourceSpec extends Specification {
         assert activeCircuitAfterLeave == null
 
         assert user2Participating.size() == 0
+    }
+
+    def 'should join a circuit and active circuit should be updated to the joined one'() {
+        given:
+
+        OrganizationMemberEntity user1 = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(user1.getRootAccountId())
+        accountClient.login()
+
+        createIntentionForWTFContext()
+
+        LearningCircuitDto user1Circuit = circuitClient.startWTF()
+
+        //change active logged in user to a different user within same organization
+
+        OrganizationMemberEntity user2 =  createMemberWithOrgAndTeam();
+        loggedInUser.setId(user2.getRootAccountId())
+
+        accountClient.login()
+
+        when:
+
+        LearningCircuitDto joinedCircuit = circuitClient.joinWTF(user1Circuit.getCircuitName())
+
+        TeamMemberDto me = memberClient.getMe()
+
+        then:
+
+        assert me.getActiveCircuit() != null
+        assert me.getActiveJoinType() == CircuitJoinType.TEAM_MEMBER
     }
 
     def 'should get all members of a circuit'() {

@@ -223,7 +223,7 @@ public class WTFCircuitOperator {
 
         learningCircuitMemberRepository.save(circuitMemberEntity);
 
-        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
+        pauseOrLeaveExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
 
         return learningCircuitEntity;
@@ -750,7 +750,7 @@ public class WTFCircuitOperator {
 
         log.debug("[WTFCircuitOperator] Resume WTF circuit {} at {}", circuitName, nanoTime);
 
-        pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
+        pauseOrLeaveExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, ownerId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, ownerId, learningCircuitEntity, JoinType.OWNER);
 
         //every time I resume a circuit, calculate how long I've been paused
@@ -813,9 +813,11 @@ public class WTFCircuitOperator {
 
         if (!wtfCircuit.getOwnerId().equals(memberId)) {
 
-            pauseExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, wtfCircuit.getId());
+            pauseOrLeaveExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, wtfCircuit.getId());
 
             updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
+
+            activeWorkStatusManager.pushWTFStatus(organizationId, memberId, wtfCircuit.getId(), now, nanoTime);
 
             joinCircuitAsMemberAndSendNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
 
@@ -835,34 +837,42 @@ public class WTFCircuitOperator {
 
         validateCircuitExists(circuitName, wtfCircuit);
 
-        LearningCircuitDto circuitDto = toDto(wtfCircuit);
+        LearningCircuitDto circuitDto = null;
 
         if (!wtfCircuit.getOwnerId().equals(memberId)) {
 
-            clearActiveJoinedCircuit(organizationId, memberId);
+            circuitDto = leaveWTFAndSendWTFNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
 
-            updateCircuitMemberToInactive(wtfCircuit, memberId);
-
-            entityManager.flush();
-
-            activeWorkStatusManager.pushTeamMemberStatusUpdate(organizationId, memberId, now, nanoTime);
-
-            teamCircuitOperator.notifyTeamOfWTFLeft(organizationId, memberId, now, nanoTime, circuitDto);
-
-            if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
-                TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getWtfRoomId());
-
-                createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
-            }
-
-            if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
-                TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getRetroRoomId());
-
-                createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
-            }
+            activeWorkStatusManager.resolveWTFWithCancel(organizationId, memberId, now, nanoTime);
 
         }
 
+        return circuitDto;
+    }
+
+    private LearningCircuitDto leaveWTFAndSendWTFNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
+        LearningCircuitDto circuitDto;
+        clearActiveJoinedCircuit(organizationId, memberId);
+
+        updateCircuitMemberToInactive(wtfCircuit, memberId);
+
+        entityManager.flush();
+
+        circuitDto = toDto(wtfCircuit);
+
+        teamCircuitOperator.notifyTeamOfWTFLeft(organizationId, memberId, now, nanoTime, circuitDto);
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
+            TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getWtfRoomId());
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
+        }
+
+        if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
+            TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getRetroRoomId());
+
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_LEAVE);
+        }
         return circuitDto;
     }
 
@@ -922,7 +932,7 @@ public class WTFCircuitOperator {
 
     }
 
-    private void pauseExistingWTFIfDifferentCircuit(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
+    private void pauseOrLeaveExistingWTFIfDifferentCircuit(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, UUID circuitId) {
 
         ActiveJoinCircuitEntity existingJoinCircuit = activeJoinCircuitRepository.findByOrganizationIdAndMemberId(organizationId, memberId);
 
@@ -931,7 +941,14 @@ public class WTFCircuitOperator {
 
             LearningCircuitEntity oldCircuit = learningCircuitRepository.findByOrganizationIdAndId(organizationId, existingJoinCircuit.getJoinedCircuitId());
             pauseAndUpdateCircuitStatus(now, nanoTime, oldCircuit);
+        } else if (existingJoinCircuit != null && existingJoinCircuit.getJoinType() == JoinType.TEAM_MEMBER_JOIN &&
+                existingJoinCircuit.getJoinedCircuitId() != null && !existingJoinCircuit.getJoinedCircuitId().equals(circuitId)) {
+
+            LearningCircuitEntity oldCircuit = learningCircuitRepository.findByOrganizationIdAndId(organizationId, existingJoinCircuit.getJoinedCircuitId());
+
+            leaveWTFAndSendWTFNotifications(now, nanoTime, organizationId, memberId, oldCircuit);
         }
+
     }
 
     private void updateActiveJoinedCircuit(LocalDateTime now, UUID organizationId, UUID memberId, LearningCircuitEntity newCircuit, JoinType joinType) {
