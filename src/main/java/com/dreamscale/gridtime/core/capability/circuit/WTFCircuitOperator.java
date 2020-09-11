@@ -908,13 +908,13 @@ public class WTFCircuitOperator {
         if (wtfCircuit.getCircuitState() == LearningCircuitState.TROUBLESHOOT) {
             TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getWtfRoomId());
 
-            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOIN);
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOINED);
         }
 
         if (wtfCircuit.getCircuitState() == LearningCircuitState.RETRO) {
             TalkRoomEntity room = talkRoomRepository.findByOrganizationIdAndId(wtfCircuit.getOrganizationId(), wtfCircuit.getRetroRoomId());
 
-            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOIN);
+            createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOINED);
         }
 
 

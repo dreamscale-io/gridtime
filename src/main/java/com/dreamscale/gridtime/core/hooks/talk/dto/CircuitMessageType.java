@@ -12,7 +12,7 @@ public enum CircuitMessageType {
     SNIPPET("snippet", null, SnippetMessageDetailsDto.class),
     ROOM_MEMBER_JOIN("room-member-join", "Member joined.", RoomMemberStatusEventDto.class),
     ROOM_MEMBER_LEAVE("room-member-leave", "Member has left.", RoomMemberStatusEventDto.class),
-    CIRCUIT_MEMBER_JOIN("circuit-member-join", "Member joined.", CircuitMemberStatusEventDto.class),
+    CIRCUIT_MEMBER_JOINED("circuit-member-join", "Member joined.", CircuitMemberStatusEventDto.class),
     CIRCUIT_MEMBER_LEAVE("circuit-member-leave", "Member has left.", CircuitMemberStatusEventDto.class),
 
     ROOM_MEMBER_STATUS_UPDATE("room-member-status-update", "Member status updated.", RoomMemberStatusEventDto.class),
