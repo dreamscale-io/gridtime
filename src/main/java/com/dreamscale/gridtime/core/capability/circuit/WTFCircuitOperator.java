@@ -727,7 +727,7 @@ public class WTFCircuitOperator {
         entityManager.flush();
 
         for (LearningCircuitMemberEntity member: members) {
-            if (member.isActiveInSession()) {
+            if (member.isActiveInSession() && !member.getMemberId().equals(learningCircuit.getOwnerId())) {
                 activeWorkStatusManager.pushTeamMemberStatusUpdate(learningCircuit.getOrganizationId(), member.getMemberId(), now, nanoTime);
             }
         }
