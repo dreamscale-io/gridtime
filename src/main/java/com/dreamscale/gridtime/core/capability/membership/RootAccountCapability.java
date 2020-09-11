@@ -747,6 +747,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public UserProfileDto updateRootProfileUsername(UUID rootAccountId, String username) {
 
+        validateNotNull("username", username);
+
         LocalDateTime now = gridClock.now();
 
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
@@ -783,6 +785,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public UserProfileDto updateRootProfileEmail(UUID rootAccountId, String newEmail) {
         RootAccountEntity rootAccountEntity = rootAccountRepository.findById(rootAccountId);
+
+        validateNotNull("email", newEmail);
 
         LocalDateTime now = gridClock.now();
 
@@ -893,6 +897,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
 
     public UserProfileDto updateOrgProfileUsername(UUID rootAccountId, String username) {
 
+        validateNotNull("username", username);
+
         RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 
         OrganizationMemberEntity activeMembership = organizationCapability.getActiveMembership(rootAccountId);
@@ -919,6 +925,8 @@ public class RootAccountCapability implements RootAccountIdResolver {
     }
 
     public UserProfileDto updateOrgProfileEmail(UUID rootAccountId, String newEmail) {
+
+        validateNotNull("email", newEmail);
 
         RootAccountEntity rootAccount = rootAccountRepository.findById(rootAccountId);
 
