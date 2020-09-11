@@ -68,6 +68,8 @@ public class ActiveWorkStatusManager {
 
         activeWorkStatusRepository.save(activeWorkStatusEntity);
 
+        entityManager.flush();
+
         TeamMemberDto memberStatus = memberStatusManager.getStatusOfMember(organizationId, memberId);
 
         //TODO remove below hack because of cacheing issue

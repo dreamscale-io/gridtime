@@ -685,7 +685,12 @@ public class WTFCircuitOperator {
         Long nanoTime = gridClock.nanoTime();
 
         log.debug("[WTFCircuitOperator] Pause WTF circuit {} at {}", circuitName, nanoTime);
-        return pauseAndUpdateCircuitStatus(now, nanoTime, learningCircuitEntity);
+        LearningCircuitDto circuitDto = pauseAndUpdateCircuitStatus(now, nanoTime, learningCircuitEntity);
+
+        activeWorkStatusManager.resolveWTFWithCancel(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime);
+
+        return circuitDto;
+
     }
 
     private LearningCircuitDto pauseAndUpdateCircuitStatus(LocalDateTime now, Long nanoTime, LearningCircuitEntity learningCircuitEntity) {
@@ -697,8 +702,6 @@ public class WTFCircuitOperator {
         learningCircuitEntity.setCircuitState(LearningCircuitState.ONHOLD);
 
         learningCircuitRepository.save(learningCircuitEntity);
-
-        activeWorkStatusManager.resolveWTFWithCancel(learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getOwnerId(), now, nanoTime);
 
         LearningCircuitDto circuitDto = toDto(learningCircuitEntity);
 
@@ -813,13 +816,21 @@ public class WTFCircuitOperator {
 
         if (!wtfCircuit.getOwnerId().equals(memberId)) {
 
+            log.info("Pausing old circuits...");
+
             pauseOrLeaveExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, wtfCircuit.getId());
+
+            log.info("Update active joined...");
 
             updateActiveJoinedCircuit(now, organizationId, memberId, wtfCircuit, JoinType.TEAM_MEMBER_JOIN);
 
-            activeWorkStatusManager.pushWTFStatus(organizationId, memberId, wtfCircuit.getId(), now, nanoTime);
+            log.info("Join as member...");
 
-            joinCircuitAsMemberAndSendNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
+            joinCircuitAsMemberAndSendWTFNotifications(now, nanoTime, organizationId, memberId, wtfCircuit);
+
+            log.info("Finally push status update");
+
+            activeWorkStatusManager.pushWTFStatus(organizationId, memberId, wtfCircuit.getId(), now, nanoTime);
 
         }
 
@@ -856,8 +867,6 @@ public class WTFCircuitOperator {
 
         updateCircuitMemberToInactive(wtfCircuit, memberId);
 
-        entityManager.flush();
-
         circuitDto = toDto(wtfCircuit);
 
         teamCircuitOperator.notifyTeamOfWTFLeft(organizationId, memberId, now, nanoTime, circuitDto);
@@ -883,7 +892,7 @@ public class WTFCircuitOperator {
 
     }
 
-    private void joinCircuitAsMemberAndSendNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
+    private void joinCircuitAsMemberAndSendWTFNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
 
         LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
 
@@ -926,9 +935,6 @@ public class WTFCircuitOperator {
 
             createAndSendRoomMemberStatusUpdateEvent(now, nanoTime, room, memberId, CircuitMessageType.CIRCUIT_MEMBER_JOINED);
         }
-
-
-        activeWorkStatusManager.pushTeamMemberStatusUpdate(organizationId, memberId, now, nanoTime);
 
     }
 
