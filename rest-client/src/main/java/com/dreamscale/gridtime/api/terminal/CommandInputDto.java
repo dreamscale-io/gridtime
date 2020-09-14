@@ -13,13 +13,13 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RunCommandInputDto {
+public class CommandInputDto {
 
     private Command command;
 
     private List<String> args;
 
-    public RunCommandInputDto(Command command, String ... inputArgs) {
+    public CommandInputDto(Command command, String ... inputArgs) {
         this.command = command;
 
         args = Arrays.asList(inputArgs);

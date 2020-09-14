@@ -79,9 +79,9 @@ public class TerminalRouteRegistry {
     }
 
 
-    public TalkMessageDto routeCommand(UUID organizationId, UUID memberId, RunCommandInputDto runCommandInputDto) {
+    public TalkMessageDto routeCommand(UUID organizationId, UUID memberId, CommandInputDto commandInputDto) {
 
-        List<TerminalRoute> terminalRoutes = this.terminalRoutes.get(runCommandInputDto.getCommand());
+        List<TerminalRoute> terminalRoutes = this.terminalRoutes.get(commandInputDto.getCommand());
 
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
@@ -89,8 +89,8 @@ public class TerminalRouteRegistry {
         if (terminalRoutes != null) {
             for (TerminalRoute route : terminalRoutes) {
 
-                if (route.matches(runCommandInputDto.getCommand(), runCommandInputDto.getArgs())) {
-                    Object result = route.route(runCommandInputDto.getArgs());
+                if (route.matches(commandInputDto.getCommand(), commandInputDto.getArgs())) {
+                    Object result = route.route(commandInputDto.getArgs());
 
                     return wrapResultAsTalkMessage(now, nanoTime, memberId, result);
                 }
