@@ -26,7 +26,7 @@ truncate table gridtime_system_job_claim cascade ;
 
 truncate table learning_circuit;
 truncate table team_circuit;
-truncate table learning_circuit_member;
+truncate table circuit_member;
 truncate table team_circuit_room;
 
 truncate table one_time_ticket;

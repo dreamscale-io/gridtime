@@ -28,9 +28,9 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
 
 
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
-            "where exists (select 1 from learning_circuit_member lcm " +
-            "where lcm.circuit_id = c.id " +
-            "and lcm.member_id = (:memberId) ) "+
+            "where exists (select 1 from circuit_member cm " +
+            "where cm.circuit_id = c.id " +
+            "and cm.member_id = (:memberId) ) "+
             "and (c.circuit_state = 'RETRO') " +
             "and c.organization_id = (:organizationId) " +
             "order by c.total_circuit_elapsed_nano_time desc ")
@@ -38,9 +38,9 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
                                                                @Param("memberId") UUID memberId);
 
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
-            "where exists (select 1 from learning_circuit_member lcm " +
-            "where lcm.circuit_id = c.id " +
-            "and lcm.member_id = (:memberId) ) "+
+            "where exists (select 1 from circuit_member cm " +
+            "where cm.circuit_id = c.id " +
+            "and cm.member_id = (:memberId) ) "+
             "and (c.circuit_state = 'SOLVED') " +
             "and c.organization_id = (:organizationId) " +
             "order by c.total_circuit_elapsed_nano_time desc ")
@@ -50,10 +50,10 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
 
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
-            "and exists (select 1 from learning_circuit_member lcm " +
-            "where lcm.circuit_id = c.id " +
-            "and lcm.member_id = (:memberId) " +
-            "and lcm.is_active_in_session = true ) "+
+            "and exists (select 1 from circuit_member cm " +
+            "where cm.circuit_id = c.id " +
+            "and cm.member_id = (:memberId) " +
+            "and cm.is_active_in_session = true ) "+
             "and (c.circuit_state = 'TROUBLESHOOT') " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findParticipatingTroubleshootCircuits(@Param("organizationId") UUID organizationId,
@@ -61,10 +61,10 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
 
     @Query(nativeQuery = true, value = "select * from learning_circuit c " +
             "where c.organization_id = (:organizationId) " +
-            "and exists (select 1 from learning_circuit_member lcm " +
-            "where lcm.circuit_id = c.id " +
-            "and lcm.member_id = (:memberId) " +
-            "and lcm.is_active_in_session = true ) "+
+            "and exists (select 1 from circuit_member cm " +
+            "where cm.circuit_id = c.id " +
+            "and cm.member_id = (:memberId) " +
+            "and cm.is_active_in_session = true ) "+
             "and (c.circuit_state = 'TROUBLESHOOT' or c.circuit_state = 'RETRO') " +
             "order by c.open_time ")
     List<LearningCircuitEntity> findAllParticipatingCircuits(@Param("organizationId") UUID organizationId,
@@ -90,33 +90,6 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
 
     @Query(nativeQuery = true, value = "select * from learning_circuit where id=(:circuitId) for update ")
     LearningCircuitEntity selectForUpdate(@Param("circuitId") UUID circuitId);
-
-//
-//    @Query(nativeQuery = true, value = "select * from circle c " +
-//            "where c.organization_id = (:organizationId) " +
-//            "and c.end_time is null " +
-//            "order by c.start_time ")
-//    List<CircleEntity> findAllOpenCircuitsForOrganization(@Param("organizationId") UUID organizationId);
-//
-//
-//    @Query(nativeQuery = true, value = "select * from circle c " +
-//            "where c.organization_id = (:organizationId) " +
-//            "and c.owner_member_id = (:memberId) "+
-//            "and c.end_time is null " +
-//            "and c.on_shelf = true " +
-//            "order by c.start_time ")
-//    List<CircleEntity> findAllDoItLaterCircuits(@Param("organizationId") UUID organizationId, @Param("fromMemberId") UUID memberId);
-//
-//    @Query(nativeQuery = true, value = "select * from circle c " +
-//            "where c.organization_id = (:organizationId) " +
-//            "and exists (select 1 from circle_member cm " +
-//            "where c.id = cm.circle_id " +
-//            "and cm.torchie_id = (:torchieId)) " +
-//            "order by c.start_time ")
-//    List<CircleEntity> findAllCircuitsByParticipation(@Param("organizationId") UUID organizationId, @Param("torchieId") UUID torchieId);
-//
-
-
 
 
 }

@@ -8,3 +8,9 @@ databaseChangeLog:
 
   - include:
         file: db/v008/refactor_heartbeat.sql
+
+  - include:
+        file: db/v008/create_terminal_circuit.sql
+
+  - include:
+        file: db/v008/refactor_circuit_member.sql

@@ -57,7 +57,7 @@ public class WTFCircuitOperator {
     private TalkRoomMessageRepository talkRoomMessageRepository;
 
     @Autowired
-    private LearningCircuitMemberRepository learningCircuitMemberRepository;
+    private CircuitMemberRepository circuitMemberRepository;
 
     @Autowired
     private CircuitMarkRepository circuitMarkRepository;
@@ -211,7 +211,7 @@ public class WTFCircuitOperator {
 
         log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, learningCircuitEntity.getCircuitName());
 
-        LearningCircuitMemberEntity circuitMemberEntity = new LearningCircuitMemberEntity();
+        CircuitMemberEntity circuitMemberEntity = new CircuitMemberEntity();
 
         circuitMemberEntity.setId(UUID.randomUUID());
         circuitMemberEntity.setJoinTime(now);
@@ -221,7 +221,7 @@ public class WTFCircuitOperator {
         circuitMemberEntity.setActiveInSession(true);
         circuitMemberEntity.setJoinState(learningCircuitEntity.getCircuitState());
 
-        learningCircuitMemberRepository.save(circuitMemberEntity);
+        circuitMemberRepository.save(circuitMemberEntity);
 
         pauseOrLeaveExistingWTFIfDifferentCircuit(now, nanoTime, organizationId, memberId, learningCircuitEntity.getId());
         updateActiveJoinedCircuit(now, organizationId, memberId, learningCircuitEntity, JoinType.OWNER);
@@ -395,7 +395,7 @@ public class WTFCircuitOperator {
     }
 
     private int getMarksRequiredForReview(LearningCircuitEntity learningCircuit) {
-        long circuitMemberCount = learningCircuitMemberRepository.countWTFMembersByCircuitId(learningCircuit.getId());
+        long circuitMemberCount = circuitMemberRepository.countWTFMembersByCircuitId(learningCircuit.getId());
 
         log.debug("MEMBER COUNT: "+ circuitMemberCount);
 
@@ -471,7 +471,7 @@ public class WTFCircuitOperator {
 
     private int getMarksRequiredForClose(LearningCircuitEntity learningCircuit) {
 
-        long circuitMemberCount = learningCircuitMemberRepository.countByCircuitId(learningCircuit.getId());
+        long circuitMemberCount = circuitMemberRepository.countByCircuitId(learningCircuit.getId());
 
         log.debug("CLOSE COUNT: "+ circuitMemberCount);
 
@@ -577,7 +577,7 @@ public class WTFCircuitOperator {
     private void validateMemberIsCircuitParticipant(LearningCircuitEntity circuit, UUID invokingMemberId) {
         log.debug("[WTFCircuitOperator] validate org={}, member={}, circuit={}", circuit.getOrganizationId(), invokingMemberId, circuit.getCircuitName());
 
-        LearningCircuitMemberEntity foundRoomMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
+        CircuitMemberEntity foundRoomMember = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
         if (foundRoomMember == null) {
             throw new BadRequestException(ValidationErrorCodes.NO_ACCESS_TO_CIRCUIT, "Member " + invokingMemberId + " unable to access circuit: " + circuit.getCircuitName());
         }
@@ -716,9 +716,9 @@ public class WTFCircuitOperator {
 
     private void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuit, LocalDateTime now, Long nanoTime) {
 
-        List<LearningCircuitMemberEntity> members = learningCircuitMemberRepository.findByOrganizationIdAndCircuitId(learningCircuit.getOrganizationId(), learningCircuit.getId());
+        List<CircuitMemberEntity> members = circuitMemberRepository.findByOrganizationIdAndCircuitId(learningCircuit.getOrganizationId(), learningCircuit.getId());
 
-        for (LearningCircuitMemberEntity member: members) {
+        for (CircuitMemberEntity member: members) {
             if (member.isActiveInSession()) {
                 clearActiveJoinedCircuit(learningCircuit.getOrganizationId(), member.getMemberId());
             }
@@ -726,13 +726,13 @@ public class WTFCircuitOperator {
 
         entityManager.flush();
 
-        for (LearningCircuitMemberEntity member: members) {
+        for (CircuitMemberEntity member: members) {
             if (member.isActiveInSession() && !member.getMemberId().equals(learningCircuit.getOwnerId())) {
                 activeWorkStatusManager.pushTeamMemberStatusUpdate(learningCircuit.getOrganizationId(), member.getMemberId(), now, nanoTime);
             }
         }
 
-        learningCircuitMemberRepository.updateAllMembersToInactiveExceptOwner(
+        circuitMemberRepository.updateAllMembersToInactiveExceptOwner(
                 learningCircuit.getOrganizationId(), learningCircuit.getId(), learningCircuit.getOwnerId());
 
     }
@@ -887,20 +887,20 @@ public class WTFCircuitOperator {
 
     private void updateCircuitMemberToInactive(LearningCircuitEntity learningCircuitEntity, UUID memberId) {
 
-        learningCircuitMemberRepository.updateMemberToInactive(
+        circuitMemberRepository.updateMemberToInactive(
                 learningCircuitEntity.getOrganizationId(), learningCircuitEntity.getId(), memberId);
 
     }
 
     private void joinCircuitAsMemberAndSendWTFNotifications(LocalDateTime now, Long nanoTime, UUID organizationId, UUID memberId, LearningCircuitEntity wtfCircuit) {
 
-        LearningCircuitMemberEntity circuitMember = learningCircuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
+        CircuitMemberEntity circuitMember = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, wtfCircuit.getId(), memberId);
 
         if (circuitMember == null) {
 
             log.debug("[WTFCircuitOperator] Member {} joining circuit {}", memberId, wtfCircuit.getCircuitName());
 
-            circuitMember = new LearningCircuitMemberEntity();
+            circuitMember = new CircuitMemberEntity();
             circuitMember.setId(UUID.randomUUID());
             circuitMember.setCircuitId(wtfCircuit.getId());
             circuitMember.setOrganizationId(organizationId);
@@ -909,13 +909,13 @@ public class WTFCircuitOperator {
             circuitMember.setActiveInSession(true);
             circuitMember.setJoinState(wtfCircuit.getCircuitState());
 
-            learningCircuitMemberRepository.save(circuitMember);
+            circuitMemberRepository.save(circuitMember);
 
         } else {
 
             circuitMember.setActiveInSession(true);
 
-            learningCircuitMemberRepository.save(circuitMember);
+            circuitMemberRepository.save(circuitMember);
         }
 
         entityManager.flush();

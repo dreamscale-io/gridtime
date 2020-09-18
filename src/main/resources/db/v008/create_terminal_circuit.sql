@@ -1,16 +1,13 @@
 --liquibase formatted sql
 
---changeset dreamscale:4
+--changeset dreamscale:5
 
-drop table team_learning_circuit;
-drop table team_circuit_input_circuit_event;
-
-create table team_circuit (
+create table terminal_circuit (
  id uuid primary key not null,
  organization_id uuid,
- team_id uuid unique,
- team_room_id uuid,
- owner_id uuid,
- moderator_id uuid
+ creator_id uuid unique,
+ talk_room_id uuid,
+ circuit_name text,
+ created_date timestamp,
+ constraint terminal_name_unique_key unique(organization_id, circuit_name)
 );
-

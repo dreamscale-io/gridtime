@@ -17,6 +17,13 @@ public class TerminalCapability {
 
 
     public TerminalCircuitDto createCircuit(UUID organizationId, UUID invokingMemberId) {
+
+        //create terminal circuit table
+
+        //create talk room for the circuit
+
+        //join the member to the circuit as creator
+
         return null;
     }
 
