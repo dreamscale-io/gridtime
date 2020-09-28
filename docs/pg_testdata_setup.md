@@ -1,4 +1,4 @@
-#Postgres Testdata Setup
+# Postgres Testdata Setup
 
 This doc covers how to setup testdata from a postgres data backup done using heroku data backup utilities, then importing the testdata into your local docker postgres, such that when you boot up the app, the app is pointed to the testdata.
 
