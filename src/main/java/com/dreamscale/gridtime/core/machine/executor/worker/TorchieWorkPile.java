@@ -19,6 +19,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -63,6 +64,7 @@ public class TorchieWorkPile implements WorkPile {
 
     private static final int MAX_TORCHIES = 10;
 
+    @Transactional
     public void sync() {
         LocalDateTime now = gridClock.now();
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {

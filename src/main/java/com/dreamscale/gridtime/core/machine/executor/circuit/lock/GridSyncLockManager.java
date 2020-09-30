@@ -2,16 +2,18 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.lock;
 
 import com.dreamscale.gridtime.core.domain.work.LockRepository;
 import com.dreamscale.gridtime.core.exception.UnableToLockException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class GridSyncLockManager {
 
-    private static final Long PLEXER_SYNC_WRITE_LOCK = Long.MAX_VALUE;
-    private static final Long TORCHIE_SYNC_WRITE_LOCK = Long.MAX_VALUE - 1;
+    private static final Long PLEXER_SYNC_WRITE_LOCK = 1L;
+    private static final Long TORCHIE_SYNC_WRITE_LOCK = 2L;
 
-    private static final Long SYSTEM_JOB_SYNC_LOCK = Long.MAX_VALUE - 2;
+    private static final Long SYSTEM_JOB_SYNC_LOCK = 3L;
 
     @Autowired
     LockRepository lockRepository;
@@ -28,6 +30,7 @@ public class GridSyncLockManager {
 
         while (!lockAcquired && tries < 10) {
             lockAcquired = lockRepository.tryToAcquireLock(lockNumber);
+
             tries++;
         }
 
@@ -57,7 +60,7 @@ public class GridSyncLockManager {
         tryToAcquireSyncLock(SYSTEM_JOB_SYNC_LOCK);
     }
 
-    public void releaseSystemJobLock() {
-        releaseSyncLock(PLEXER_SYNC_WRITE_LOCK);
+    public void releaseSystemJobSyncLock() {
+        releaseSyncLock(SYSTEM_JOB_SYNC_LOCK);
     }
 }

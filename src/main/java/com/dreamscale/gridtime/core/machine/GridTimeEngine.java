@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDa
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 @Component
@@ -20,26 +21,41 @@ public class GridTimeEngine {
 
     private GridTimeExecutor gridTimeExecutor;
 
+    @PostConstruct
+    public void init() {
+        this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkPile);
+    }
 
     public void start() {
-        this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkPile);
-
         gridTimeExecutor.start();
     }
 
-    public void waitForTicks(int tickCount) {
-        gridTimeExecutor.waitForTicks(tickCount);
+    public void reset() {
+        gridTimeExecutor.reset();
+    }
+
+    public void shutdown() {
+        gridTimeExecutor.shutdown();
+    }
+
+    public void configureDoneAfterTicks(int ticksToWait) {
+        gridTimeExecutor.configureDoneAfterTicks(ticksToWait);
+    }
+
+    public void configureDoneAfterTime(long millisToWait) {
+        gridTimeExecutor.configureDoneAfterTime(millisToWait);
+    }
+
+    public void waitForDone(int timeoutMillis) {
+        gridTimeExecutor.waitForDone(timeoutMillis);
+    }
+
+    public void waitForDone() {
+        gridTimeExecutor.waitForDone();
     }
 
     public GridTableResults getDashboardStatus(DashboardActivityScope dashboardActivityScope) {
         return circuitActivityDashboard.getDashboardStatus(dashboardActivityScope);
-    }
-
-
-    public void destroy() {
-        if (this.gridTimeExecutor != null) {
-            this.gridTimeExecutor.shutdown();
-        }
     }
 
     public void getJobs() {

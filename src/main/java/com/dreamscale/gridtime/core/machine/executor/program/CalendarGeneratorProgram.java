@@ -6,11 +6,14 @@ import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.GenerateCalendarTile;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Slf4j
 public class CalendarGeneratorProgram implements Program {
 
     private final CalendarService calendarService;
@@ -38,6 +41,8 @@ public class CalendarGeneratorProgram implements Program {
     }
 
     public CalendarGeneratorProgram(CalendarService calendarService, LocalDateTime calendarEnd) {
+        log.debug("calendar program initialized to run until "+calendarEnd);
+
         this.calendarService = calendarService;
         this.calendarEnd = calendarEnd;
         this.maxTiles = Integer.MAX_VALUE;

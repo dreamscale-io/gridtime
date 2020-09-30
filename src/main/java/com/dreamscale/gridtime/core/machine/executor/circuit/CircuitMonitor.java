@@ -45,7 +45,7 @@ public class CircuitMonitor {
     }
 
     public void startInstruction() {
-        log.debug("Setting network state to busy!");
+        log.debug("Setting circuit state to busy!");
         state = State.Busy;
         ticksProcessed++;
 
@@ -54,7 +54,7 @@ public class CircuitMonitor {
     }
 
     public void finishInstruction(long queueDurationMillis, long executionDurationMillis) {
-        log.debug("Setting network state to ready!");
+        log.debug("Setting circuit state to ready!");
         state = State.Ready;
         lastQueueDuration = queueDurationMillis;
         lastExecutionDuration = executionDurationMillis;

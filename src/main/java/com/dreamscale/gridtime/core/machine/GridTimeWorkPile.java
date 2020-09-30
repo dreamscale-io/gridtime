@@ -5,11 +5,13 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.worker.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class GridTimeWorkPile implements WorkPile {
 

@@ -14,6 +14,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -78,17 +79,20 @@ public class SystemWorkPile implements WorkPile {
 
     }
 
+    @Transactional
     public void sync() {
         LocalDateTime now = gridClock.now();
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
+
+            log.info("synchronizing system work");
 
             gridSyncLockManager.tryToAcquireSystemJobSyncLock();
 
             try {
                 spinUpCalendarProgramIfNeeded(now);
             } finally {
-                gridSyncLockManager.releaseSystemJobLock();
+                gridSyncLockManager.releaseSystemJobSyncLock();
             }
         }
     }

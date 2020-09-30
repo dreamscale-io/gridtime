@@ -38,12 +38,58 @@ class GridTimeEngineSpec extends Specification {
         time4 = clockStart.plusMinutes(95)
     }
 
-    def "should spin up engine and start calendar process"() {
+    def "should spin up engine and run for 1000 ticks"() {
         given:
 
-        //gridTimeEngine.start();
+        gridTimeEngine.configureDoneAfterTicks(1000)
 
-        //gridTimeEngine.waitForTicks(5)
+        gridTimeEngine.start()
+
+        gridTimeEngine.waitForDone()
+        gridTimeEngine.shutdown()
+
+        when:
+        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
+        println results
+
+        then:
+        assert results != null
+    }
+
+    def "should timeout engine and exit cleanly with logged exceptions"() {
+        given:
+
+        gridTimeEngine.configureDoneAfterTicks(1000)
+
+        gridTimeEngine.start()
+
+        gridTimeEngine.waitForDone(1000)
+        gridTimeEngine.shutdown()
+
+        when:
+        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
+        println results
+
+        then:
+        assert results != null
+    }
+
+    def "should reset engine after done and run for another 10 ticks"() {
+        given:
+
+        gridTimeEngine.configureDoneAfterTicks(10)
+
+        gridTimeEngine.start()
+
+        gridTimeEngine.waitForDone()
+        gridTimeEngine.reset()
+        gridTimeEngine.waitForDone()
+        gridTimeEngine.reset()
+        gridTimeEngine.waitForDone()
+        gridTimeEngine.reset()
+        gridTimeEngine.waitForDone()
+
+        gridTimeEngine.shutdown()
 
         when:
         GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
