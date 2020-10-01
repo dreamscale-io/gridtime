@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.Data;
@@ -9,35 +10,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CircuitActivitySummaryRow {
+public class CircuitActivitySummaryRow implements Cloneable {
 
     private int numberWorkers;
 
     private int ticksProcessed;
 
-    private LocalDateTime lastUpdated;
+    private GeometryClock.GridTime lastGridtime;
 
+    private double executionTimeMin;
     private double executionTimeAvg;
     private double executionTimeMax;
 
+    private double queueTimeMin;
     private double queueTimeAvg;
     private double queueTimeMax;
 
-    private int queueDepth;
 
     public void aggregateMonitor(CircuitMonitor circuitMonitor) {
 
-        ticksProcessed += circuitMonitor.getMetronomeTicksProcessed();
+        ticksProcessed += circuitMonitor.getTicksProcessed();
 
-        lastUpdated = maxDate(lastUpdated, circuitMonitor.getLastStatusUpdate());
+        lastGridtime = maxGridtime(lastGridtime, circuitMonitor.getLastGridtime());
 
+        executionTimeMin = Math.min(executionTimeMin, circuitMonitor.getRecentExecutionTimeMetric().getMin());
         executionTimeAvg = ((numberWorkers * executionTimeAvg ) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
         executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getRecentExecutionTimeMetric().getMax());
 
-        queueTimeAvg = ((numberWorkers * queueTimeAvg ) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
+        queueTimeMin = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMin());
+        queueTimeAvg = ((numberWorkers * queueTimeAvg ) + circuitMonitor.getRecentQueueTimeMetric().getAvg()) / (numberWorkers + 1);
         queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMax());
-
-        queueDepth += circuitMonitor.getQueueDepth();
 
         numberWorkers++;
     }
@@ -45,19 +47,19 @@ public class CircuitActivitySummaryRow {
     public void aggregate(CircuitActivitySummaryRow activitySummary) {
         ticksProcessed += activitySummary.getTicksProcessed();
 
-        lastUpdated = maxDate(lastUpdated, activitySummary.getLastUpdated());
+        lastGridtime = maxGridtime(lastGridtime, activitySummary.getLastGridtime());
 
+        executionTimeMin = Math.max(executionTimeMin, activitySummary.getExecutionTimeMax());
         executionTimeAvg = ((numberWorkers * executionTimeAvg ) +
                 (activitySummary.getNumberWorkers() * activitySummary.getExecutionTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
         executionTimeMax = Math.max(executionTimeMax, activitySummary.getExecutionTimeMax());
 
+        queueTimeMin = Math.max(queueTimeMax, activitySummary.getQueueTimeMin());
         queueTimeAvg = ((numberWorkers * queueTimeAvg ) +
                 (activitySummary.getNumberWorkers() * activitySummary.getQueueTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
         queueTimeMax = Math.max(queueTimeMax, activitySummary.getQueueTimeMax());
-
-        queueDepth += activitySummary.getQueueDepth();
 
         numberWorkers += activitySummary.getNumberWorkers();
 
@@ -67,14 +69,15 @@ public class CircuitActivitySummaryRow {
         List<String> row = new ArrayList<>();
 
         row.add(CellFormat.toRightSizedCell(rowKey, 10));
-        row.add(CellFormat.toCell(numberWorkers, 7));
-        row.add(CellFormat.toCell(ticksProcessed, 5));
-        row.add(CellFormat.toCell(lastUpdated, 10));
-        row.add(CellFormat.toCell(executionTimeAvg, 7));
-        row.add(CellFormat.toCell(executionTimeMax, 7));
-        row.add(CellFormat.toCell(queueTimeAvg, 5));
-        row.add(CellFormat.toCell(queueTimeMax, 5));
-        row.add(CellFormat.toCell(queueDepth, 5));
+        row.add(CellFormat.toCell(numberWorkers, 8));
+        row.add(CellFormat.toCell(ticksProcessed, 6));
+        row.add(CellFormat.toCell(lastGridtime, 24));
+        row.add(CellFormat.toCell(executionTimeMin, 8));
+        row.add(CellFormat.toCell(executionTimeAvg, 8));
+        row.add(CellFormat.toCell(executionTimeMax, 8));
+        row.add(CellFormat.toCell(queueTimeMin, 7));
+        row.add(CellFormat.toCell(queueTimeAvg, 7));
+        row.add(CellFormat.toCell(queueTimeMax, 7));
 
         return row;
     }
@@ -83,14 +86,15 @@ public class CircuitActivitySummaryRow {
         List<String> row = new ArrayList<>();
 
         row.add(CellFormat.toRightSizedCell("", 10));
-        row.add(CellFormat.toRightSizedCell("Workers", 7));
-        row.add(CellFormat.toRightSizedCell("Ticks", 5));
-        row.add(CellFormat.toRightSizedCell("LastUpdate", 10));
-        row.add(CellFormat.toRightSizedCell("ExecAvg", 7));
-        row.add(CellFormat.toRightSizedCell("ExecMax", 7));
-        row.add(CellFormat.toRightSizedCell("QAvg", 5));
-        row.add(CellFormat.toRightSizedCell("QMax", 5));
-        row.add(CellFormat.toRightSizedCell("QDepth", 5));
+        row.add(CellFormat.toRightSizedCell("Workers", 8));
+        row.add(CellFormat.toRightSizedCell("Ticks", 6));
+        row.add(CellFormat.toRightSizedCell("LastGridtime", 24));
+        row.add(CellFormat.toRightSizedCell("ExecMin", 8));
+        row.add(CellFormat.toRightSizedCell("ExecAvg", 8));
+        row.add(CellFormat.toRightSizedCell("ExecMax", 8));
+        row.add(CellFormat.toRightSizedCell("QMin", 7));
+        row.add(CellFormat.toRightSizedCell("QAvg", 7));
+        row.add(CellFormat.toRightSizedCell("QMax", 7));
 
         return row;
     }
@@ -106,18 +110,18 @@ public class CircuitActivitySummaryRow {
     }
 
 
-    private LocalDateTime maxDate(LocalDateTime date1, LocalDateTime date2) {
-        if (date1 == null) {
-            return date2;
+    private GeometryClock.GridTime maxGridtime(GeometryClock.GridTime gridtime1, GeometryClock.GridTime gridtime2) {
+        if (gridtime1 == null ) {
+            return gridtime2;
         }
-        if (date2 == null) {
-            return date1;
+        if (gridtime2 == null) {
+            return gridtime1;
         }
 
-        if (date1.isAfter(date2)) {
-            return date1;
+        if (gridtime1.isAfter(gridtime2)) {
+            return gridtime1;
         } else {
-            return date2;
+            return gridtime2;
         }
     }
 

@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit;
 
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ public class CircuitMonitor {
     private UUID workerId;
     private LocalDateTime jobStartTime;
     private LocalDateTime lastStatusUpdate;
+    private GeometryClock.GridTime lastGridtime;
 
     private WindowMetric recentExecutionTimeMetric = new WindowMetric(10);
     private WindowMetric recentQueueTimeMetric = new WindowMetric(10);
@@ -71,6 +73,8 @@ public class CircuitMonitor {
     public void updateMetronomeTickPosition(Metronome.TickScope activeTickScopePosition) {
         this.activeTickScopePosition = activeTickScopePosition;
 
+        this.lastGridtime = activeTickScopePosition.getFrom();
+
         metronomeTicksProcessed++;
     }
 
@@ -97,8 +101,6 @@ public class CircuitMonitor {
     public int getQueueDepth() {
         return queueDepth;
     }
-
-
 
 
     public enum State {

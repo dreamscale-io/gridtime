@@ -59,7 +59,7 @@ class GridTimeEngineSpec extends Specification {
     def "should timeout engine and exit cleanly with logged exceptions"() {
         given:
 
-        gridTimeEngine.configureDoneAfterTicks(1000)
+        gridTimeEngine.configureDoneAfterTicks(200)
 
         gridTimeEngine.start()
 

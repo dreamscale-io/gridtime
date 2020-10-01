@@ -63,7 +63,11 @@ public class CellFormat {
     }
 
     public static String toCellValue(GeometryClock.GridTime value) {
-        return value.toDisplayString();
+        if (value == null) {
+            return "";
+        } else {
+            return value.getFormattedGridTime();
+        }
     }
 
     public static String toCellValue(UUID value) {

@@ -378,12 +378,25 @@ public class GeometryClock {
             return zoomLevel;
         }
 
+        public String getFormattedGridTime() {
+            return formattedGridTime;
+        }
+
         public LocalDateTime getClockTime() {
             return clockTime;
         }
 
         public LocalDateTime getMomentFromOffset(Duration relativeDuration) {
             return clockTime.plus(relativeDuration);
+        }
+
+        public boolean isAfter(GridTime other) {
+            for (int i = 0; i < coords.length; i++) {
+                if (coords[i] > other.coords[i]) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

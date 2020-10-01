@@ -217,7 +217,7 @@ public class TorchieWorkPile implements WorkPile {
 
         whatsNextWheel.evictWorker(torchieId);
 
-        circuitActivityDashboard.evictMonitor(MonitorType.TORCHIE_WORKER, torchieId);
+        circuitActivityDashboard.evictMonitor(torchieId);
     }
 
 
@@ -244,7 +244,7 @@ public class TorchieWorkPile implements WorkPile {
         expire(workerId);
 
         whatsNextWheel.evictWorker(workerId);
-        circuitActivityDashboard.evictMonitor(MonitorType.TORCHIE_WORKER, workerId);
+        circuitActivityDashboard.evictMonitor(workerId);
     }
 
     @Override

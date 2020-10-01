@@ -17,6 +17,7 @@ public class WindowMetric {
     private final int windowSize;
 
     private double total = 0;
+    private double min = 0;
     private double avg;
     private double max;
 
@@ -43,6 +44,12 @@ public class WindowMetric {
         avg = total / data.size();
 
         max = Math.max(max, sample);
+
+        if (min == 0) {
+            min = sample;
+        } else {
+            min = Math.min(min, sample);
+        }
     }
 
     private void removeLastFromCalculations() {
@@ -55,6 +62,14 @@ public class WindowMetric {
             max = 0;
             for (Double sample : data) {
                 max = Math.max(max, sample);
+            }
+        }
+
+        if (lastSample.equals(min) && data.size() > 0) {
+            min = data.get(0);
+
+            for (Double sample : data) {
+                min = Math.min(min, sample);
             }
         }
     }

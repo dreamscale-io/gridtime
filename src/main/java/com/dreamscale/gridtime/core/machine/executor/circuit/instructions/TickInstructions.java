@@ -41,7 +41,7 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
 
             executeInstruction();
 
-            queueDurationMillis = momentOfCreation - momentOfExecution;
+            queueDurationMillis = momentOfExecution - momentOfCreation;
             executionDurationMillis = System.currentTimeMillis() - momentOfExecution;
 
         } catch (Exception ex) {

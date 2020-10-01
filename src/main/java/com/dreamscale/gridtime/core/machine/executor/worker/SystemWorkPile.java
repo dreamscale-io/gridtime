@@ -66,7 +66,7 @@ public class SystemWorkPile implements WorkPile {
         CircuitMonitor calendarProcessMonitor = new CircuitMonitor(ProcessType.Calendar, calendarWorkerId);
         calendarCircuit = new IdeaFlowCircuit(calendarProcessMonitor);
 
-        activityDashboard.addMonitor(MonitorType.SYS_WORKER, calendarCircuit.getWorkerId(), calendarCircuit.getCircuitMonitor());
+        activityDashboard.addMonitor(MonitorType.SYSTEM_CALENDAR, calendarCircuit.getWorkerId(), calendarCircuit.getCircuitMonitor());
         whatsNextWheel.addWorker(calendarWorkerId, calendarCircuit);
 
         UUID dashboardWorkerId = UUID.randomUUID();
@@ -74,7 +74,7 @@ public class SystemWorkPile implements WorkPile {
         CircuitMonitor dashboardProcessMonitor = new CircuitMonitor(ProcessType.Dashboard, dashboardWorkerId);
         dashboardCircuit = new IdeaFlowCircuit(dashboardProcessMonitor);
 
-        activityDashboard.addMonitor(MonitorType.SYS_WORKER, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
+        activityDashboard.addMonitor(MonitorType.SYSTEM_DASHBOARD, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
         whatsNextWheel.addWorker(dashboardWorkerId, dashboardCircuit);
 
     }
