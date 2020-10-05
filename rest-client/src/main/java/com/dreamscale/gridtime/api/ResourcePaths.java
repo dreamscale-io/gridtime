@@ -151,6 +151,7 @@ public class ResourcePaths {
     public static final String GATE_PATH = "/gate";
     public static final String THRESHOLD_PATH = "/threshold";
     public static final String RUN_PATH = "/run";
+    public static final String MANUAL_PATH = "/manual";
     public static final String ENVIRONMENT_PATH = "/environment";
     public static final String SET_PATH = "/set";
     public static final String HELP_PATH = "/help";

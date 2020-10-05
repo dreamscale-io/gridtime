@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
@@ -21,7 +22,6 @@ import spock.lang.Specification
 
 import java.time.LocalDateTime
 
-@Ignore
 @ComponentTest
 class TerminalResourceSpec extends Specification {
 
@@ -87,9 +87,7 @@ class TerminalResourceSpec extends Specification {
         1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationCode = token;
             return new SimpleStatusDto(Status.SENT, "Sent!")}
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto inviteResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "org"))
+        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "org"))
 
         then:
         assert activationCode != null
@@ -114,9 +112,7 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto inviteResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe", "to", "team"))
+        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe", "to", "team"))
 
         switchUser(zoeProfile)
 
@@ -146,9 +142,7 @@ class TerminalResourceSpec extends Specification {
         1 * mockEmailCapability.sendDownloadAndInviteToPublicEmail(_, _, _, _) >> { from, emailAddr, org, token -> activationCode = token;
             return new SimpleStatusDto(Status.SENT, "Sent!")}
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto inviteResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "public"))
+        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "public"))
 
         AccountActivationDto accountActivation = accountClient.activate(new ActivationCodeDto(activationCode: activationCode))
 
@@ -178,9 +172,7 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto shareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+        TalkMessageDto shareResult = terminalClient.runCommand(new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
 
         switchUser(zoeProfile)
 
@@ -210,10 +202,9 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
 
-        SimpleStatusDto shareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
-        SimpleStatusDto unshareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "user", "zoe"))
+        TalkMessageDto shareResult = terminalClient.runCommand( new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+        TalkMessageDto unshareResult = terminalClient.runCommand( new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "user", "zoe"))
 
         switchUser(zoeProfile)
 
@@ -245,9 +236,7 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto shareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+        TalkMessageDto shareResult = terminalClient.runCommand(new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
 
         switchUser(zoeProfile)
 
@@ -280,10 +269,8 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TerminalCircuitDto circuit = terminalClient.createCircuit();
-
-        SimpleStatusDto shareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
-        SimpleStatusDto unshareResult = terminalClient.run(circuit.getCircuitName(), new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "team", "Phoenix"))
+        TalkMessageDto shareResult = terminalClient.runCommand( new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+        TalkMessageDto unshareResult = terminalClient.runCommand( new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "team", "Phoenix"))
 
         switchUser(zoeProfile)
 
@@ -310,7 +297,7 @@ class TerminalResourceSpec extends Specification {
         accountClient.login()
 
         CommandManualDto manual = terminalClient.getCommandManual()
-        CommandManualPageDto inviteManPage = terminalClient.getManualPageForCommandOrGroup("invite");
+        CommandManualPageDto inviteManPage = terminalClient.getManualPageForCommand("invite");
         CommandManualPageDto projectManPage = terminalClient.getManualPageForGroup("project");
 
         println inviteManPage

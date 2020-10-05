@@ -25,23 +25,23 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
     private Program program;
     private Program nextProgram;
-    private Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
+    private final Map<UUID, ParallelProgram> parallelPrograms = DefaultCollections.map();
 
     private final CircuitMonitor circuitMonitor;
     private final TwilightOrangeMatrix twilightOrangeMatrix;
 
     private Eye eye;
 
-    private LinkedList<TickInstructions> instructionsToExecuteQueue;
-    private LinkedList<TickInstructions> highPriorityInstructionQueue;
+    private final LinkedList<TickInstructions> instructionsToExecuteQueue;
+    private final LinkedList<TickInstructions> highPriorityInstructionQueue;
     private TickInstructions lastInstruction;
 
-    private LinkedList<TimeBomb> activeTimeBombMonitors;
+    private final LinkedList<TimeBomb> activeTimeBombMonitors;
 
     //circuit coordinator
 
-    private List<NotifyDoneTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
-    private List<NotifyFailureTrigger> notifyWhenProgramFailsTriggers = DefaultCollections.list();
+    private final List<NotifyDoneTrigger> notifyWhenProgramDoneTriggers = DefaultCollections.list();
+    private final List<NotifyFailureTrigger> notifyWhenProgramFailsTriggers = DefaultCollections.list();
 
     private boolean isProgramHalted;
 

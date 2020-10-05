@@ -53,6 +53,7 @@ public class ProgramFactory {
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.COMPONENT_SPACE_OBSERVER));
 
+
         program.addFlowSourceToPullChain(
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.EXECUTION_ACTIVITY_FEED),
                 flowObserverFactory.get(FlowObserverFactory.ObserverType.EXECUTION_RHYTHM_OBSERVER));

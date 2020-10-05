@@ -34,11 +34,11 @@ public class CircuitActivitySummaryRow implements Cloneable {
         lastGridtime = maxGridtime(lastGridtime, circuitMonitor.getLastGridtime());
 
         executionTimeMin = Math.min(executionTimeMin, circuitMonitor.getRecentExecutionTimeMetric().getMin());
-        executionTimeAvg = ((numberWorkers * executionTimeAvg ) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
+        executionTimeAvg = ((numberWorkers * executionTimeAvg) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
         executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getRecentExecutionTimeMetric().getMax());
 
         queueTimeMin = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMin());
-        queueTimeAvg = ((numberWorkers * queueTimeAvg ) + circuitMonitor.getRecentQueueTimeMetric().getAvg()) / (numberWorkers + 1);
+        queueTimeAvg = ((numberWorkers * queueTimeAvg) + circuitMonitor.getRecentQueueTimeMetric().getAvg()) / (numberWorkers + 1);
         queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMax());
 
         numberWorkers++;
@@ -50,13 +50,13 @@ public class CircuitActivitySummaryRow implements Cloneable {
         lastGridtime = maxGridtime(lastGridtime, activitySummary.getLastGridtime());
 
         executionTimeMin = Math.max(executionTimeMin, activitySummary.getExecutionTimeMax());
-        executionTimeAvg = ((numberWorkers * executionTimeAvg ) +
+        executionTimeAvg = ((numberWorkers * executionTimeAvg) +
                 (activitySummary.getNumberWorkers() * activitySummary.getExecutionTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
         executionTimeMax = Math.max(executionTimeMax, activitySummary.getExecutionTimeMax());
 
         queueTimeMin = Math.max(queueTimeMax, activitySummary.getQueueTimeMin());
-        queueTimeAvg = ((numberWorkers * queueTimeAvg ) +
+        queueTimeAvg = ((numberWorkers * queueTimeAvg) +
                 (activitySummary.getNumberWorkers() * activitySummary.getQueueTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
         queueTimeMax = Math.max(queueTimeMax, activitySummary.getQueueTimeMax());
@@ -111,7 +111,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
 
     private GeometryClock.GridTime maxGridtime(GeometryClock.GridTime gridtime1, GeometryClock.GridTime gridtime2) {
-        if (gridtime1 == null ) {
+        if (gridtime1 == null) {
             return gridtime2;
         }
         if (gridtime2 == null) {

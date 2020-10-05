@@ -24,9 +24,9 @@ public class Torchie implements Worker<TickInstructions> {
 
     private final TorchieState torchieState;
 
-    private IdeaFlowCircuit ideaFlowCircuit;
+    private final IdeaFlowCircuit ideaFlowCircuit;
 
-    private CircuitMonitor circuitMonitor;
+    private final CircuitMonitor circuitMonitor;
 
     public Torchie(UUID torchieId, TorchieState torchieState, Program program) {
         this.torchieId = torchieId;

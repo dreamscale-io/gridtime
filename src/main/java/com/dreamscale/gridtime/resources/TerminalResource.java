@@ -1,10 +1,13 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
+import com.dreamscale.gridtime.api.terminal.Command;
+import com.dreamscale.gridtime.api.terminal.CommandManualDto;
+import com.dreamscale.gridtime.api.terminal.CommandManualPageDto;
 import com.dreamscale.gridtime.api.terminal.*;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.terminal.TerminalCapability;
+import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -14,117 +17,100 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping(path = ResourcePaths.CIRCUIT_PATH + ResourcePaths.TERMINAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = ResourcePaths.TERMINAL_PATH, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
 public class TerminalResource {
 
     @Autowired
     OrganizationCapability organizationCapability;
 
-
     @Autowired
-    TerminalCapability terminalCapability;
+    TerminalRouteRegistry terminalRouteRegistry;
 
     /**
-     * Create a new TerminalCircuit
-     *
-     * All command responses over this terminal circuit will be responded to via the talk message room
-     * @return TerminalCircuitDto
-     */
-
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping()
-    public TerminalCircuitDto createCircuit() {
-        RequestContext context = RequestContext.get();
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        log.info("createCircuit, user={}", invokingMember.getBestAvailableName());
-
-        return terminalCapability.createCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
-    }
-
-    /**
-     * Get an existing terminal circuit by name, scoped per organization
-     *
-     * @return TerminalCircuitDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/{circuitName}" )
-    public TerminalCircuitDto getCircuit(@PathVariable("circuitName") String circuitName) {
-        RequestContext context = RequestContext.get();
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        log.info("getCircuit, user={}", invokingMember.getBestAvailableName());
-
-        return terminalCapability.getCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
-    }
-
-    /**
-     * Run a specific terminal command and returns the result via terminal circuit TalkMessageDto
+     * Run a specific command on the grid and return the result synchronously as a TalkMessageDto
      *
      * @see com.dreamscale.gridtime.api.terminal.Command for the available command types
      *
      * @param commandInputDto CommandInputDto
-     * @return SimpleStatusDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{circuitName}" + ResourcePaths.RUN_PATH)
-    public SimpleStatusDto run(@PathVariable("circuitName") String circuitName, @RequestBody CommandInputDto commandInputDto) {
-        RequestContext context = RequestContext.get();
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        log.info("run, user={}", invokingMember.getBestAvailableName());
-
-        return terminalCapability.run(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, commandInputDto);
-    }
-
-    /**
-     * Set an environment variable within the context of the current session
-     **
-     * @param environmentParamInputDto EnvironmentParamInputDto
-     * @return SimpleStatusDto
-     */
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{circuitName}" + ResourcePaths.SET_PATH)
-    public SimpleStatusDto set(@PathVariable("circuitName") String circuitName, @RequestBody EnvironmentParamInputDto environmentParamInputDto) {
-        RequestContext context = RequestContext.get();
-        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
-
-        log.info("set, user={}", invokingMember.getBestAvailableName());
-
-        return terminalCapability.setEnvironmentParam(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, environmentParamInputDto);
-    }
-
-    /**
-     * Join an existing terminal circuit, must be a member of the org
-     *
      * @return TalkMessageDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{circuitName}" + ResourcePaths.JOIN_PATH)
-    public SimpleStatusDto joinCircuit(@PathVariable("circuitName") String circuitName) {
+    @PostMapping(ResourcePaths.RUN_PATH)
+    public TalkMessageDto runCommand(@RequestBody CommandInputDto commandInputDto) {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        log.info("joinCircuit, user={}", invokingMember.getBestAvailableName());
+        log.info("runCommand, user={}", invokingMember.getBestAvailableName());
 
-        return terminalCapability.joinCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return terminalRouteRegistry.routeCommand(invokingMember.getOrganizationId(), invokingMember.getId(), commandInputDto);
     }
 
     /**
-     * Leave an existing terminal circuit, must be a member of the org
+     * Returns the entire manual for all available registered terminal commands
      *
-     * @return TalkMessageDto
+     * @return CommandManualDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping("/{circuitName}" + ResourcePaths.LEAVE_PATH)
-    public SimpleStatusDto leaveCircuit(@PathVariable("circuitName") String circuitName) {
+    @GetMapping(ResourcePaths.MANUAL_PATH )
+    public CommandManualDto getManual() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        log.info("leaveCircuit, user={}", invokingMember.getBestAvailableName());
+        log.info("getCommandManual, user={}", invokingMember.getBestAvailableName());
 
-        return terminalCapability.leaveCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+        return terminalRouteRegistry.getManual(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 
-}
+    /**
+     * Gets help information summary for the specified command
+     *
+     * All variations of the command across all command groups will be compiled together into one help.
+     * For example, all the varations of the 'SHARE' command, will show you how to share different sorts of things.
+     *
+     * @see com.dreamscale.gridtime.api.terminal.Command for the available command types
+     *
+     * @param commandName
+     * @param commandName Command
+     * @return CommandManualPageDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.MANUAL_PATH + ResourcePaths.COMMAND_PATH + "/{commandName}")
+        public CommandManualPageDto getManualPageForCommand(@PathVariable("commandName") String commandName) {
+            RequestContext context = RequestContext.get();
+            OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+            log.info("getCommandManualPage, user={}", invokingMember.getBestAvailableName());
+
+            Command command = Command.fromString(commandName);
+
+            return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), command);
+        }
+
+
+        /**
+         * Gets help information summary for the specified command group
+         *
+         * Command groups are coherent groups of commands that all pertain to one thing,
+         * for example, all the commands around the 'PROJECT' command group, allow you to do things with projects
+         *
+         * @see com.dreamscale.gridtime.api.terminal.CommandGroup for the available command groups
+         *
+         * @param commandGroupName CommandGroup
+         * @return CommandManualPageDto
+         */
+        @PreAuthorize("hasRole('ROLE_USER')")
+        @GetMapping(ResourcePaths.MANUAL_PATH + ResourcePaths.GROUP_PATH + "/{commandGroupName}")
+        public CommandManualPageDto getManualPageForGroup(@PathVariable("commandGroupName") String commandGroupName) {
+            RequestContext context = RequestContext.get();
+            OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+            log.info("getCommandManualPage, user={}", invokingMember.getBestAvailableName());
+
+            CommandGroup group = CommandGroup.fromString(commandGroupName);
+
+            return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), group);
+        }
+
+    }
+
