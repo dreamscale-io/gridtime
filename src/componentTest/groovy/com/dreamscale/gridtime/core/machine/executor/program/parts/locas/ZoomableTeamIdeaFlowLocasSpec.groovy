@@ -10,6 +10,7 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberRepository
 import com.dreamscale.gridtime.core.domain.member.OrganizationRepository
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
+import com.dreamscale.gridtime.core.machine.GridTimeEngine
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.GridTimeWorkPile
 import com.dreamscale.gridtime.core.machine.Torchie
@@ -22,6 +23,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStra
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability
@@ -72,6 +74,7 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     @Autowired
     GridTimeWorkPile gridTimeWorkerPool
 
+
     LocalDateTime clockStart
     LocalDateTime wtfTime
     LocalDateTime time2
@@ -115,7 +118,8 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         mockTimeService.now() >> LocalDateTime.now()
 
-        gridTimeWorkerPool.clear();
+        gridTimeWorkerPool.reset();
+        gridTimeWorkerPool.pauseSystemJobs();
 
     }
 

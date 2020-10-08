@@ -53,6 +53,8 @@ public class SystemWorkPile implements WorkPile {
     private IdeaFlowCircuit calendarCircuit;
     private IdeaFlowCircuit dashboardCircuit;
 
+    private boolean paused = false;
+
     @PostConstruct
     private void init() {
         createSystemWorkers();
@@ -103,6 +105,8 @@ public class SystemWorkPile implements WorkPile {
         dashboardCircuit.clearProgram();
 
         lastSyncCheck = null;
+
+        paused = false;
     }
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
@@ -155,6 +159,8 @@ public class SystemWorkPile implements WorkPile {
 
 
     public TickInstructions whatsNext() {
+        if (paused) return null;
+
         peek();
 
         TickInstructions nextInstruction = peekInstruction;
@@ -182,6 +188,16 @@ public class SystemWorkPile implements WorkPile {
         if (processType == ProcessType.Dashboard) {
             dashboardCircuit.scheduleHighPriorityInstruction(instruction);
         }
+    }
+
+    @Override
+    public void pause() {
+        paused = true;
+    }
+
+    @Override
+    public void resume() {
+        paused = false;
     }
 
     private class SystemJobDoneTrigger implements NotifyDoneTrigger {

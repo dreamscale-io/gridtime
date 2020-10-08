@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
@@ -98,6 +99,7 @@ class GridTimeEngineSpec extends Specification {
         then:
         assert results != null
     }
+
 
     def generateWTFStart(LocalDateTime startTime) {
         WTFFeedMessageEntity wtfMessage = new WTFFeedMessageEntity()

@@ -1,0 +1,162 @@
+package com.dreamscale.gridtime.core.machine.executor.worker
+
+import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.core.capability.system.GridClock
+import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
+import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
+import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
+import com.dreamscale.gridtime.core.domain.journal.TaskEntity
+import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
+import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
+import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
+import com.dreamscale.gridtime.core.domain.member.TeamEntity
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
+import com.dreamscale.gridtime.core.domain.work.WorkToDoType
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CoordinateResults
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent
+import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
+
+import java.time.LocalDateTime
+
+import static com.dreamscale.gridtime.core.CoreARandom.aRandom
+
+@ComponentTest
+class TorchieWorkPileSpec extends Specification {
+    @Autowired
+    SystemWorkPile systemWorkPile;
+
+    @Autowired
+    TorchieWorkPile torchieWorkPile
+
+    @Autowired
+    CircuitActivityDashboard dashboard
+
+    @Autowired
+    AggregateWorkToDoQueueWire wire
+
+    @Autowired
+    GridClock gridClock
+
+    @Autowired
+    RootAccountEntity loggedInUser
+
+    UUID teamId
+
+    LocalDateTime clockStart
+    LocalDateTime time1
+    LocalDateTime time2
+    LocalDateTime time3
+    LocalDateTime time4
+
+    OrganizationEntity org
+
+    TeamEntity team
+
+    def setup() {
+
+        teamId = UUID.randomUUID()
+
+        org = aRandom.organizationEntity().save()
+        team = aRandom.teamEntity().id(teamId).organizationId(org.id).save()
+
+        systemWorkPile.reset()
+        torchieWorkPile.reset()
+    }
+
+    def "should spin up torchies that havent been processed yet"() {
+        given:
+
+        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(10);
+
+        loggedInUser.setId(teamMembers.get(0).getRootAccountId())
+
+        systemWorkPile.sync()
+        TickInstructions calendarInstruction = systemWorkPile.whatsNext().call();
+
+        for (int i = 0; i < 12; i++) {
+            TickInstructions moreCalendar = systemWorkPile.whatsNext().call();
+        }
+
+        CoordinateResults coordinates = (CoordinateResults) calendarInstruction.getOutputResult();
+
+        clockStart = coordinates.getGridtime().getClockTime()
+        time1 = clockStart.plusMinutes(1)
+        time2 = clockStart.plusMinutes(15)
+        time3 = clockStart.plusMinutes(60)
+        time4 = clockStart.plusMinutes(95)
+
+        for (OrganizationMemberEntity member : teamMembers) {
+            createIntention(member.getId(), time1)
+            createActivity(member.getId(), time2, time3)
+        }
+
+        when:
+
+        torchieWorkPile.sync()
+
+        TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
+
+        for (int i = 0; i < 20; i++) {
+            torchieWorkPile.whatsNext().call();
+        }
+
+        then:
+        assert torchieInstruction != null
+
+        assert torchieWorkPile.size() == 10
+        assert torchieWorkPile.hasWork()
+    }
+
+    private OrganizationMemberEntity createMemberWithinOrgAndTeam() {
+
+        RootAccountEntity account = aRandom.rootAccountEntity().save()
+
+        OrganizationMemberEntity member = aRandom.memberEntity().organizationId(org.id).rootAccountId(account.id).save()
+        TeamMemberEntity teamMember = aRandom.teamMemberEntity().teamId(teamId).organizationId(org.id).memberId(member.id).save()
+
+        return member;
+
+    }
+
+    List<OrganizationMemberEntity> createTeamOfMembers(int memberCount) {
+
+        List<OrganizationMemberEntity> members = new ArrayList<>()
+
+        for (int i = 0; i < memberCount; i++) {
+            //change active logged in user to a different user within same organization
+            OrganizationMemberEntity teamMember =  createMemberWithinOrgAndTeam();
+
+            members.add(teamMember)
+        }
+
+        return members
+    }
+
+    void createIntention(UUID memberId, LocalDateTime time) {
+        ProjectEntity projectEntity = aRandom.projectEntity().save();
+        TaskEntity taskEntity = aRandom.taskEntity().forProject(projectEntity).save();
+
+        IntentionEntity journalEntry = aRandom.intentionEntity()
+                .memberId(memberId)
+                .position(time)
+                .projectId(projectEntity.id)
+                .taskId(taskEntity.id)
+                .save()
+
+    }
+
+    void createActivity(UUID memberId, LocalDateTime start, LocalDateTime end) {
+
+        FlowActivityEntity flowActivityEntity = aRandom.flowActivityEntity()
+                .memberId(memberId)
+                .start(start)
+                .end(end)
+                .save()
+
+    }
+
+}

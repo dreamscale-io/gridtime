@@ -4,6 +4,8 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity;
+import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.machine.Torchie;
@@ -52,6 +54,9 @@ public class TorchieWorkPile implements WorkPile {
     private FlowActivityRepository flowActivityRepository;
 
     @Autowired
+    private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
     private TorchieFactory torchieFactory;
 
     private LocalDateTime lastSyncCheck;
@@ -59,10 +64,11 @@ public class TorchieWorkPile implements WorkPile {
 
     private final WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
 
-    private Duration syncInterval = Duration.ofMinutes(20);
-    private Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
+    private final Duration syncInterval = Duration.ofMinutes(20);
+    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
 
     private static final int MAX_TORCHIES = 10;
+    private boolean paused = false;
 
     @Transactional
     public void sync() {
@@ -102,22 +108,28 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     private void initializeMissingTorchies(LocalDateTime now) {
-        List<TorchieFeedCursorEntity> missingTorchies = torchieFeedCursorRepository.selectMissingTorchies();
+        List<TeamMemberEntity> missingTorchies = teamMemberRepository.selectMissingTorchies();
         List<TorchieFeedCursorEntity> readyTorchies = new ArrayList<>();
 
-        for (TorchieFeedCursorEntity torchieCursor : missingTorchies) {
+        for (TeamMemberEntity teamMember : missingTorchies) {
 
-            LocalDateTime firstTilePosition = findFirstTilePosition(torchieCursor.getTorchieId());
-            LocalDateTime lastPublishedDataPosition = findLastPublishedData(torchieCursor.getTorchieId());
+            LocalDateTime firstTilePosition = findFirstTilePosition(teamMember.getMemberId());
+            LocalDateTime lastPublishedDataPosition = findLastPublishedData(teamMember.getMemberId());
 
             if (firstTilePosition != null && lastPublishedDataPosition != null) {
+
+                TorchieFeedCursorEntity torchieCursor = new TorchieFeedCursorEntity();
+                torchieCursor.setId(UUID.randomUUID());
+                torchieCursor.setTorchieId(teamMember.getMemberId());
+                torchieCursor.setOrganizationId(teamMember.getOrganizationId());
+                torchieCursor.setTeamId(teamMember.getTeamId());
                 torchieCursor.setFirstTilePosition(firstTilePosition);
                 torchieCursor.setLastPublishedDataCursor(lastPublishedDataPosition);
                 torchieCursor.setNextWaitUntilCursor(firstTilePosition.plus(ZoomLevel.TWENTY.getDuration()));
                 torchieCursor.setLastClaimUpdate(now);
                 readyTorchies.add(torchieCursor);
             } else {
-                log.warn("Skipping torchie feed: "+torchieCursor.getTorchieId() + ", waiting for data");
+                log.warn("Skipping torchie feed: "+teamMember.getMemberId() + ", waiting for data");
             }
         }
 
@@ -212,6 +224,8 @@ public class TorchieWorkPile implements WorkPile {
 
     @Override
     public void evictLastWorker() {
+        if (paused) return;
+
         UUID torchieId = whatsNextWheel.getLastWorker();
         expire(torchieId);
 
@@ -230,7 +244,19 @@ public class TorchieWorkPile implements WorkPile {
     @Override
     public void reset() {
         evictAll();
+        paused = false;
     }
+
+    @Override
+    public void pause() {
+        paused = true;
+    }
+
+    @Override
+    public void resume() {
+        paused = false;
+    }
+
 
     private void evictAll() {
         Set<UUID> workerKeys = whatsNextWheel.getWorkerKeys();
@@ -249,6 +275,7 @@ public class TorchieWorkPile implements WorkPile {
 
     @Override
     public TickInstructions whatsNext() {
+        if (paused) return null;
 
         if (peekInstruction == null) {
             peek();

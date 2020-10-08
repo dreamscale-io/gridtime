@@ -6,6 +6,10 @@ public interface WorkPile {
 
     void reset();
 
+    void pause();
+
+    void resume();
+
     TickInstructions whatsNext();
 
     boolean hasWork();

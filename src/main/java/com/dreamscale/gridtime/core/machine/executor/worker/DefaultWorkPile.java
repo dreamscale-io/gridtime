@@ -43,6 +43,16 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
     public TickInstructions whatsNext() {
 
         if (peekInstruction == null) {

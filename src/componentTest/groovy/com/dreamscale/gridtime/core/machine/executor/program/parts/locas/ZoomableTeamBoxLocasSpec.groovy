@@ -27,6 +27,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
@@ -126,14 +127,14 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         mockTimeService.now() >> LocalDateTime.now()
 
+        gridTimeWorkerPool.reset();
+        gridTimeWorkerPool.pauseSystemJobs()
     }
 
 
     def "should aggregate BoxMetrics by GridTime across Team23"() {
 
         given:
-
-        gridTimeWorkerPool.clear()
 
         Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);

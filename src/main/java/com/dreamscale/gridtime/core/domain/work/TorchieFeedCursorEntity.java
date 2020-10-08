@@ -20,6 +20,9 @@ public class TorchieFeedCursorEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID id;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")

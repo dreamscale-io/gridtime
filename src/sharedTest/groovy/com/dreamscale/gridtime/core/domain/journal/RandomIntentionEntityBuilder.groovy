@@ -14,7 +14,7 @@ class RandomIntentionEntityBuilder extends IntentionEntity.IntentionEntityBuilde
                 .description(aRandom.text(10))
                 .position(aRandom.localDateTime())
                 .flameRating(aRandom.intBetween(-5, 5))
-                .linked(aRandom.coinFlip())
+                .linked(false)
                 .finishStatus(FinishStatus.done.name())
                 .finishTime(aRandom.localDateTimeInFuture())
                 .memberId(aRandom.uuid())

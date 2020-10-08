@@ -13,4 +13,7 @@ databaseChangeLog:
         file: db/v008/create_terminal_circuit.sql
 
   - include:
-        file: db/v008/refactor_circuit_member.sql
+      file: db/v008/refactor_circuit_member.sql
+
+  - include:
+      file: db/v008/replace_torchie_feed_cursor.sql

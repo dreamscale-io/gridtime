@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.domain.work;
 
+import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,12 +13,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedCursorEntity, UUID> {
-
-
-    @Query(nativeQuery = true, value = "select tm.member_id as torchie_id, tm.team_id, tm.organization_id " +
-            "from team_member tm " +
-            "where not exists (select 1 from torchie_feed_cursor tfc where tm.member_id = tfc.torchie_id) ")
-    List<TorchieFeedCursorEntity> selectMissingTorchies();
 
 
     @Query(nativeQuery = true, value = "select * from torchie_feed_cursor " +

@@ -57,6 +57,28 @@ public class GridTimeWorkPile implements WorkPile {
         circuitActivityDashboard.clear();
     }
 
+    @Override
+    public void pause() {
+        systemWorkPile.pause();
+        plexerWorkPile.pause();
+        torchieWorkPile.pause();
+    }
+
+    @Override
+    public void resume() {
+        systemWorkPile.resume();
+        plexerWorkPile.resume();
+        torchieWorkPile.resume();
+    }
+
+    public void pauseSystemJobs() {
+        systemWorkPile.pause();
+    }
+
+    public void resumeSystemJobs() {
+        systemWorkPile.resume();
+    }
+
     public TickInstructions whatsNext() {
 
         TickInstructions instructions = null;
@@ -114,6 +136,7 @@ public class GridTimeWorkPile implements WorkPile {
     public void clear() {
         torchieWorkPile.clear();
     }
+
 
 }
 

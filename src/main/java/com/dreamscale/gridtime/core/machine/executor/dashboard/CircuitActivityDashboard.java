@@ -33,7 +33,9 @@ public class CircuitActivityDashboard {
     public void evictMonitor(UUID workerId) {
         DashboardMonitor evictedMonitor = dashboardMonitors.remove(workerId);
 
-        dashboard.aggregateFinished(evictedMonitor);
+        if (evictedMonitor != null) {
+            dashboard.aggregateFinished(evictedMonitor);
+        }
     }
 
 

@@ -36,6 +36,7 @@ public class PlexerWorkPile implements WorkPile {
 
     private int currentPoolSize;
     private WhatsNextWheel<TickInstructions> whatsNextWheel;
+    private boolean paused = false;
 
     @PostConstruct
     public void init() {
@@ -68,10 +69,25 @@ public class PlexerWorkPile implements WorkPile {
     public void reset() {
         whatsNextWheel.clear();
         whatsNextWheel = createWhatsNextWheel(currentPoolSize);
+
+        paused = false;
     }
 
+    @Override
+    public void pause() {
+        paused = true;
+    }
+
+    @Override
+    public void resume() {
+        paused = false;
+    }
+
+
     public TickInstructions whatsNext() {
-       return whatsNextWheel.whatsNext();
+        if (paused) return null;
+
+        return whatsNextWheel.whatsNext();
     }
 
     @Override
