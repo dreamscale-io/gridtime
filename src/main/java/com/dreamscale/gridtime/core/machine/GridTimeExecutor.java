@@ -35,6 +35,7 @@ public class GridTimeExecutor {
 
         if (executorPool != null) {
             executorPool.shutdown();
+            executorPool = null;
         }
     }
 
@@ -51,8 +52,11 @@ public class GridTimeExecutor {
         executorStartTime = System.currentTimeMillis();
         ticks = 0;
 
-        if (!isGameLoopRunning.getAndSet(true)) {
-            gameLoopFuture = executorPool.submit(new GameLoopRunner());
+        if (executorPool != null && isGameLoopRunning.get() == false) {
+
+            if (!isGameLoopRunning.getAndSet(true)) {
+                gameLoopFuture = executorPool.submit(new GameLoopRunner());
+            }
         }
     }
 
@@ -76,8 +80,7 @@ public class GridTimeExecutor {
                 gameLoopFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
             }
 
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("Interrupted", ex);
         }
 
@@ -98,7 +101,7 @@ public class GridTimeExecutor {
         this.stopAfterTicks = ticksToWait;
     }
 
-    public void configureDoneAfterTime(long millisToWait ) {
+    public void configureDoneAfterTime(long millisToWait) {
         this.stopAfterTime = millisToWait;
     }
 
@@ -117,7 +120,6 @@ public class GridTimeExecutor {
     }
 
 
-
     private class GameLoopRunner implements Runnable {
 
 
@@ -132,13 +134,13 @@ public class GridTimeExecutor {
                     //fairly round robin with all active torchies,
                     //whenever there is room in the executor pool
 
-                    while (hasPoolCapacityForMoreWork() && workPile.hasWork() ) {
+                    while (hasPoolCapacityForMoreWork() && workPile.hasWork()) {
                         TickInstructions instruction = workPile.whatsNext();
                         if (instruction != null) {
-                            log.info("Submitting instruction: "+instruction.getCmdDescription());
+                            log.info("Submitting instruction: " + instruction.getCmdDescription());
 
                             ticks++;
-                            log.info("ticks = "+ticks);
+                            log.info("ticks = " + ticks);
                             currentTimeMillis = System.currentTimeMillis();
 
                             executorPool.submit(instruction);
@@ -164,9 +166,6 @@ public class GridTimeExecutor {
         }
 
     }
-
-
-
 
 
 }

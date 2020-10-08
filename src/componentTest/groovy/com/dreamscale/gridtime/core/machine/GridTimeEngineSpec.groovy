@@ -18,6 +18,9 @@ class GridTimeEngineSpec extends Specification {
     @Autowired
     GridTimeEngine gridTimeEngine
 
+    @Autowired
+    GridTimeWorkPile gridTimeWorkPile
+
     UUID torchieId
     UUID teamId
 
@@ -37,6 +40,9 @@ class GridTimeEngineSpec extends Specification {
         time2 = clockStart.plusMinutes(45)
         time3 = clockStart.plusMinutes(60)
         time4 = clockStart.plusMinutes(95)
+
+        //because the cleanup script that deletes the data in tables gets out of sync with the engine state
+        gridTimeWorkPile.reset()
     }
 
     def "should spin up engine and run for 1000 ticks"() {
