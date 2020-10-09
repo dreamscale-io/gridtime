@@ -37,6 +37,10 @@ public class CalendarService {
             tileSequence = calendarTile.getTileSeq();
         }
 
+        if (tileSequence == null) {
+            throw new RuntimeException("Calendar tile unavailable for gridtime: "+ gridTime.getFormattedGridTime());
+        }
+
         return tileSequence;
     }
 

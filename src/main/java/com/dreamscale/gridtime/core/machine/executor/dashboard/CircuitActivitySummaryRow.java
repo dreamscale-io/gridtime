@@ -6,15 +6,16 @@ import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Data
 public class CircuitActivitySummaryRow implements Cloneable {
 
+    private Set<UUID> workers = new HashSet<>();
     private int numberWorkers;
 
     private int ticksProcessed;
+    private int ticksFailed;
 
     private GeometryClock.GridTime lastGridtime;
 
@@ -30,6 +31,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
     public void aggregateMonitor(CircuitMonitor circuitMonitor) {
 
         ticksProcessed += circuitMonitor.getTicksProcessed();
+        ticksFailed += circuitMonitor.getTicksFailed();
 
         lastGridtime = maxGridtime(lastGridtime, circuitMonitor.getLastGridtime());
 
@@ -41,11 +43,13 @@ public class CircuitActivitySummaryRow implements Cloneable {
         queueTimeAvg = ((numberWorkers * queueTimeAvg) + circuitMonitor.getRecentQueueTimeMetric().getAvg()) / (numberWorkers + 1);
         queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMax());
 
-        numberWorkers++;
+        workers.add(circuitMonitor.getWorkerId());
+        numberWorkers = workers.size();
     }
 
     public void aggregate(CircuitActivitySummaryRow activitySummary) {
         ticksProcessed += activitySummary.getTicksProcessed();
+        ticksFailed += activitySummary.getTicksFailed();
 
         lastGridtime = maxGridtime(lastGridtime, activitySummary.getLastGridtime());
 
@@ -71,6 +75,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toRightSizedCell(rowKey, 10));
         row.add(CellFormat.toCell(numberWorkers, 8));
         row.add(CellFormat.toCell(ticksProcessed, 6));
+        row.add(CellFormat.toCell(ticksFailed, 6));
         row.add(CellFormat.toCell(lastGridtime, 24));
         row.add(CellFormat.toCell(executionTimeMin, 8));
         row.add(CellFormat.toCell(executionTimeAvg, 8));
@@ -88,6 +93,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toRightSizedCell("", 10));
         row.add(CellFormat.toRightSizedCell("Workers", 8));
         row.add(CellFormat.toRightSizedCell("Ticks", 6));
+        row.add(CellFormat.toRightSizedCell("TickFail", 6));
         row.add(CellFormat.toRightSizedCell("LastGridtime", 24));
         row.add(CellFormat.toRightSizedCell("ExecMin", 8));
         row.add(CellFormat.toRightSizedCell("ExecAvg", 8));

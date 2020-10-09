@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 public class GridClock {
 
     public LocalDateTime now() {
-        return LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        return now;
     }
 
     public Long nanoTime() {

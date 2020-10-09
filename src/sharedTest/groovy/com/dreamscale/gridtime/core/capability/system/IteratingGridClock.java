@@ -1,7 +1,10 @@
 package com.dreamscale.gridtime.core.capability.system;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDateTime;
 
+@Slf4j
 public class IteratingGridClock extends GridClock {
 
     private LocalDateTime currentClock;
@@ -36,6 +39,7 @@ public class IteratingGridClock extends GridClock {
     @Override
     public LocalDateTime now() {
         LocalDateTime time = currentClock;
+        log.debug("Iterating Clock: "+time);
         tick();
 
         return time;

@@ -30,7 +30,10 @@ public class WhatsNextWheel<T> implements LiveQueue {
     }
 
     public UUID getLastWorker() {
-        return nextWorkerQueue.getLast();
+        if (nextWorkerQueue.size() > 0) {
+            return nextWorkerQueue.getLast();
+        }
+        return null;
     }
 
     private boolean isWorkerReady(UUID workerId) {

@@ -39,9 +39,9 @@ public class ProgramFactory {
     @Autowired
     AggregateWorkToDoQueueWire workToDoWire;
 
-    public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
+    public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
 
-        SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition);
+        SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition, runUntilPosition);
 
         program.addFlowSourceToPullChain(
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.JOURNAL_FEED),

@@ -101,8 +101,8 @@ public class SystemWorkPile implements WorkPile {
 
     @Override
     public void reset() {
-        calendarCircuit.clearProgram();
-        dashboardCircuit.clearProgram();
+        whatsNextWheel.clear();
+        createSystemWorkers();
 
         lastSyncCheck = null;
 
@@ -116,7 +116,7 @@ public class SystemWorkPile implements WorkPile {
             UUID workerId = calendarCircuit.getWorkerId();
 
             CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now);
-            SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(workerId, jobDescriptor);
+            SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(now, workerId, jobDescriptor);
 
             if (systemJobClaim != null) {
                 Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(jobDescriptor);

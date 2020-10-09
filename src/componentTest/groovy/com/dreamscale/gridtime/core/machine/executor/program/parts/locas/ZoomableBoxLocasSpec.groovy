@@ -100,7 +100,7 @@ class ZoomableBoxLocasSpec extends Specification {
         wtfFeed.addSomeData(generateWTFEnd(time2))
 
         InputFeed fileActivityFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.FILE_ACTIVITY_FEED)
-        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1, time1.plusMinutes(3)))
+        fileActivityFeed.addSomeData(generateFileActivity(torchieId, time1, "/box1/file.txt"))
 
         //make a tile, make sure box metrics generated
         when:

@@ -13,7 +13,7 @@ import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.NoOpProgram
-
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.memory.TorchieState
 import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
@@ -29,6 +29,9 @@ class SaveToPostgresSinkSpec extends Specification {
 
     @Autowired
     SaveToPostgresSink saveToPostgresSink
+
+    @Autowired
+    CalendarService calendarService
 
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository
@@ -84,7 +87,11 @@ class SaveToPostgresSinkSpec extends Specification {
     def "should save grid rows and markers to DB"() {
         given:
 
-        torchieState.gotoPosition(GeometryClock.createGridTime(ZoomLevel.TWENTY, clockStart))
+        GeometryClock.GridTime startPosition = GeometryClock.createGridTime(ZoomLevel.TWENTY, clockStart)
+
+        calendarService.saveCalendar(1, 1, startPosition)
+
+        torchieState.gotoPosition(startPosition)
 
         torchieState.getActiveTile().startWTF(time3, new CircuitDetails(UUID.randomUUID(), "hi"), StartTypeTag.Start)
         torchieState.getActiveTile().finishAfterLoad()

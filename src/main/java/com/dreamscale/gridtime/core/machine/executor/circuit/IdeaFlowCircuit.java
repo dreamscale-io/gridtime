@@ -201,6 +201,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
     }
 
     private void notifyAllProgramIsDone() {
+        log.debug("Notify all: Program is done.");
         for (NotifyDoneTrigger trigger: notifyWhenProgramDoneTriggers) {
             trigger.notifyWhenDone(lastInstruction, lastInstruction.getAllOutputResults());
         }
@@ -253,8 +254,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         @Override
         public void notifyOnAbortOrFailure(TickInstructions finishedInstruction, Exception ex) {
 
-            circuitMonitor.finishInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
-            circuitMonitor.failInstruction();
+            circuitMonitor.failInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
 
             log.error("Terminating program because of failed intruction:" + ex);
 

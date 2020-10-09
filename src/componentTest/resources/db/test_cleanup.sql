@@ -35,5 +35,6 @@ truncate table active_join_circuit;
 truncate table project_grant_access;
 truncate table project_grant_tombstone;
 
-truncate team_member_home;
+truncate table team_member_home;
+truncate table torchie_feed_cursor;
 

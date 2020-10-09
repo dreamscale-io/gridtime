@@ -136,7 +136,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     public int getQueueDepth() {
         long queueDepth = workReadyByTeamViewRepository.count();
 
-        log.info("Active queue depth: "+queueDepth);
+        log.info("Active plexer queue depth: "+queueDepth);
         return (int)queueDepth;
     }
 

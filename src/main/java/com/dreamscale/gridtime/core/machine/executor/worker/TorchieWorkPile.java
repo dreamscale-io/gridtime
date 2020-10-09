@@ -64,7 +64,7 @@ public class TorchieWorkPile implements WorkPile {
 
     private final WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
 
-    private final Duration syncInterval = Duration.ofMinutes(20);
+    private final Duration syncInterval = Duration.ofMinutes(5);
     private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
 
     private static final int MAX_TORCHIES = 10;
@@ -80,7 +80,7 @@ public class TorchieWorkPile implements WorkPile {
 
             initializeMissingTorchies(now);
             claimTorchiesReadyForProcessing();
-            expireZombieTorchies();
+            expireZombieTorchies(now);
 
             gridSyncLockManager.releaseTorchieSyncLock();
         }
@@ -98,6 +98,8 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     private void claimTorchiesReadyForProcessing() {
+        log.debug ("claimTorchiesReadyForProcessing = size = " + whatsNextWheel.size());
+
         int claimUpTo = MAX_TORCHIES - whatsNextWheel.size();
         List<Torchie> torchies = claimUpTo(claimUpTo);
 
@@ -117,6 +119,9 @@ public class TorchieWorkPile implements WorkPile {
             LocalDateTime lastPublishedDataPosition = findLastPublishedData(teamMember.getMemberId());
 
             if (firstTilePosition != null && lastPublishedDataPosition != null) {
+
+                log.debug ("FIRST TILE POSITION: "+firstTilePosition);
+                log.debug ("LAST PUBLISHED POSITION: "+lastPublishedDataPosition);
 
                 TorchieFeedCursorEntity torchieCursor = new TorchieFeedCursorEntity();
                 torchieCursor.setId(UUID.randomUUID());
@@ -158,7 +163,7 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     private Torchie loadTorchie(TorchieFeedCursorEntity cursor) {
-        return torchieFactory.wireUpMemberTorchie(cursor.getTeamId(), cursor.getTorchieId(), getStartPosition(cursor));
+        return torchieFactory.wireUpMemberTorchie(cursor.getTeamId(), cursor.getTorchieId(), getStartPosition(cursor), getRunUntil(cursor));
     }
 
 
@@ -173,6 +178,17 @@ public class TorchieWorkPile implements WorkPile {
         }
 
         return startPosition;
+    }
+
+    private LocalDateTime getRunUntil(TorchieFeedCursorEntity cursor) {
+
+        LocalDateTime runUntilPosition = null;
+
+        if (cursor.getLastPublishedDataCursor() != null) {
+            runUntilPosition = GeometryClock.roundDownToNearestTwenty(cursor.getLastPublishedDataCursor()).minus(ZoomLevel.TWENTY.getDuration());
+        }
+
+        return runUntilPosition;
     }
 
 
@@ -206,9 +222,9 @@ public class TorchieWorkPile implements WorkPile {
     }
 
 
-    public void expireZombieTorchies() {
+    public void expireZombieTorchies(LocalDateTime now) {
 
-        LocalDateTime expireBeforeDate = gridClock.now().minus(expireWhenStaleMoreThan);
+        LocalDateTime expireBeforeDate = now.minus(expireWhenStaleMoreThan);
 
         torchieFeedCursorRepository.expireZombieTorchies(Timestamp.valueOf(expireBeforeDate));
 
@@ -227,11 +243,15 @@ public class TorchieWorkPile implements WorkPile {
         if (paused) return;
 
         UUID torchieId = whatsNextWheel.getLastWorker();
-        expire(torchieId);
 
-        whatsNextWheel.evictWorker(torchieId);
+        if (torchieId != null) {
+            log.info("Evicting :"+torchieId);
 
-        circuitActivityDashboard.evictMonitor(torchieId);
+            expire(torchieId);
+
+            whatsNextWheel.evictWorker(torchieId);
+            circuitActivityDashboard.evictMonitor(torchieId);
+        }
     }
 
 

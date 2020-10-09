@@ -38,18 +38,22 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
         log.debug("Running instruction: "+getCmdDescription());
         try {
             momentOfExecution = System.currentTimeMillis();
+            queueDurationMillis = momentOfExecution - momentOfCreation;
 
             executeInstruction();
 
-            queueDurationMillis = momentOfExecution - momentOfCreation;
             executionDurationMillis = System.currentTimeMillis() - momentOfExecution;
 
         } catch (Exception ex) {
             log.error("Exception during instruction execution", ex);
             this.exceptionResult = ex;
+            executionDurationMillis = System.currentTimeMillis() - momentOfExecution;
+
             notifyAllCircuitParticipantsOnError();
         } finally {
-            notifyAllCircuitParticipantsOnDone();
+            if (exceptionResult == null) {
+                notifyAllCircuitParticipantsOnDone();
+            }
         }
         return this;
     }

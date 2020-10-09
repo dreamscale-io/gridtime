@@ -40,9 +40,19 @@ public class TorchieFactory {
     @Autowired
     private TeamBoxConfigurationManager teamBoxConfigurationManager;
 
-
-
+    /**
+     * Run without an effective end date
+     * @param teamId
+     * @param memberId
+     * @param startingPosition
+     * @return
+     */
     public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
+
+        return wireUpMemberTorchie(teamId, memberId, startingPosition, startingPosition.plusYears(1));
+    }
+
+    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition, LocalDateTime runUntilPosition) {
 
         FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(teamId);
         TeamBoxConfiguration teamBoxConfig = teamBoxConfigurationManager.findOrCreateTeamBoxConfig(teamId);
@@ -51,7 +61,7 @@ public class TorchieFactory {
                 teamBoxConfig, featureResolverService, tileSearchService);
 
         //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(teamId, memberId, torchieState, startingPosition);
+        Program program = programFactory.createBaseTileGeneratorProgram(teamId, memberId, torchieState, startingPosition, runUntilPosition);
 
         Torchie torchie = new Torchie(memberId, torchieState, program);
 

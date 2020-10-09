@@ -28,9 +28,7 @@ public class SystemExclusiveJobClaimManager {
     @Autowired
     GridClock gridClock;
 
-    public SystemJobClaim claimIfNotRunning(UUID workerId, SystemJobDescriptor jobDescriptor) {
-
-        LocalDateTime now = gridClock.now();
+    public SystemJobClaim claimIfNotRunning(LocalDateTime now, UUID workerId, SystemJobDescriptor jobDescriptor) {
 
         GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findInProgressJobsByJobType(jobDescriptor.getJobType().name());
 

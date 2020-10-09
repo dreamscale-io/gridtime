@@ -49,15 +49,23 @@ public class CircuitMonitor {
     public void startInstruction() {
         log.debug("Setting circuit state to busy!");
         state = State.Busy;
-        ticksProcessed++;
-
 
         updateStatusTimestamp();
     }
 
     public void finishInstruction(long queueDurationMillis, long executionDurationMillis) {
-        log.debug("Setting circuit state to ready!");
+        log.debug("SUCCESS: Setting circuit state back to ready!");
         state = State.Ready;
+        updateMetrics(queueDurationMillis, executionDurationMillis);
+
+        ticksProcessed++;
+
+        updateStatusTimestamp();
+    }
+
+    private void updateMetrics(long queueDurationMillis, long executionDurationMillis) {
+        log.info("metrics = "+queueDurationMillis + ", "+executionDurationMillis);
+
         lastQueueDuration = queueDurationMillis;
         lastExecutionDuration = executionDurationMillis;
 
@@ -66,7 +74,15 @@ public class CircuitMonitor {
 
         recentExecutionTimeMetric.addSample(lastExecutionDuration);
         recentQueueTimeMetric.addSample(lastQueueDuration);
+    }
 
+    public void failInstruction(long queueDurationMillis, long executionDurationMillis) {
+        log.debug("FAILED: Setting circuit state back to ready!");
+        state = State.Ready;
+
+        ticksFailed++;
+
+        updateMetrics(queueDurationMillis, executionDurationMillis);
         updateStatusTimestamp();
     }
 
@@ -78,9 +94,7 @@ public class CircuitMonitor {
         metronomeTicksProcessed++;
     }
 
-    public void failInstruction() {
-        ticksFailed++;
-    }
+
 
     private void updateStatusTimestamp() {
         lastStatusUpdate = LocalDateTime.now();

@@ -33,11 +33,13 @@ public class SourceTileGeneratorProgram implements Program {
     private final UUID torchieId;
 
     private final Metronome metronome;
+    private final LocalDateTime runUntilPosition;
 
-    public SourceTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition) {
+    public SourceTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
         this.torchieId = torchieId;
         this.torchieState = torchieState;
         this.metronome = new Metronome(startPosition);
+        this.runUntilPosition = runUntilPosition;
     }
 
     @Override
@@ -80,7 +82,7 @@ public class SourceTileGeneratorProgram implements Program {
 
     @Override
     public boolean isDone() {
-        return false;
+        return metronome.getActiveTick().isAfter(runUntilPosition);
     }
 
     public void addFlowSourceToPullChain(FeedStrategy feedStrategy, FlowObserver... observers) {

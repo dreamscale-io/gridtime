@@ -50,11 +50,15 @@ public class GridTimeWorkPile implements WorkPile {
 
     @Override
     public void reset() {
+        log.debug("RESET ALL GRIDTIME ENGINE WORK");
+
+        circuitActivityDashboard.clear();
+
+        //these put back the base processes and monitors again after dashboard is clear
         systemWorkPile.reset();
         torchieWorkPile.reset();
         plexerWorkPile.reset();
 
-        circuitActivityDashboard.clear();
     }
 
     @Override

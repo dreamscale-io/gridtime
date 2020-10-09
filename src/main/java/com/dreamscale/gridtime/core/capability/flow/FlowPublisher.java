@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.api.flow.event.NewSnippetEventDto;
 import com.dreamscale.gridtime.api.flow.activity.*;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.flow.*;
+import com.dreamscale.gridtime.core.machine.executor.worker.BookmarkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,9 @@ public class FlowPublisher {
     @Autowired
     FlowEventRepository flowEventRepository;
 
+    @Autowired
+    BookmarkService bookmarkService;
+
     //okay, next thing I need to do, is wire in a component resolve service, that will get used on batch processing
     //I can make the details more elaborate ovre time, but first, just call the function, and write a test that
     //validates the component is getting mapped
@@ -39,30 +43,37 @@ public class FlowPublisher {
         List<Activity> sortedBatchItems = sortAllItemsByTime(batch.getAllBatchActivity());
         Duration timeAdjustment = calculateTimeAdjustment(batch.getTimeSent());
 
+        LocalDateTime lastActivityDate = null;
+
         for (Activity activityInSequence : sortedBatchItems) {
             if (activityInSequence instanceof NewEditorActivityDto) {
-                saveEditorActivity(memberId, timeAdjustment, (NewEditorActivityDto) activityInSequence);
+                lastActivityDate = saveEditorActivity(memberId, timeAdjustment, (NewEditorActivityDto) activityInSequence);
 
             } else {
-                saveActivity(memberId, timeAdjustment, activityInSequence);
+                lastActivityDate = saveActivity(memberId, timeAdjustment, activityInSequence);
             }
         }
 
         saveEvents(memberId, timeAdjustment, batch.getEventList());
+
+        bookmarkService.updateLastPublishedData(memberId, lastActivityDate);
     }
 
-    private void saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {
+    private LocalDateTime saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {
+
+        LocalDateTime lastActivityDate = null;
 
         if (activity instanceof NewExecutionActivityDto) {
-            saveExecutionActivity(memberId, timeAdjustment, (NewExecutionActivityDto) activity);
+            lastActivityDate = saveExecutionActivity(memberId, timeAdjustment, (NewExecutionActivityDto) activity);
         } else if (activity instanceof NewModificationActivityDto) {
-            saveModificationActivity(memberId, timeAdjustment, (NewModificationActivityDto) activity);
+            lastActivityDate = saveModificationActivity(memberId, timeAdjustment, (NewModificationActivityDto) activity);
         } else if (activity instanceof NewIdleActivityDto) {
-            saveIdleActivity(memberId, timeAdjustment, (NewIdleActivityDto) activity);
+            lastActivityDate = saveIdleActivity(memberId, timeAdjustment, (NewIdleActivityDto) activity);
         } else if (activity instanceof NewExternalActivityDto) {
-            saveExternalActivity(memberId, timeAdjustment, (NewExternalActivityDto) activity);
+            lastActivityDate = saveExternalActivity(memberId, timeAdjustment, (NewExternalActivityDto) activity);
         }
 
+        return lastActivityDate;
     }
 
     private List<Activity> sortAllItemsByTime(List<Activity> allBatchActivity) {
@@ -77,6 +88,7 @@ public class FlowPublisher {
     }
 
     private void saveEvents(UUID memberId, Duration adjustment, List<NewFlowBatchEventDto> eventList) {
+
         for (NewFlowBatchEventDto event : eventList) {
             FlowEventEntity entity = new FlowEventEntity();
 
@@ -106,7 +118,7 @@ public class FlowPublisher {
         flowEventRepository.save(entity);
     }
 
-    private void saveIdleActivity(UUID memberId, Duration adjustment, NewIdleActivityDto idleActivity) {
+    private LocalDateTime saveIdleActivity(UUID memberId, Duration adjustment, NewIdleActivityDto idleActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Idle);
@@ -117,9 +129,11 @@ public class FlowPublisher {
             entity.setEnd(idleActivity.getEndTime().plus(adjustment));
 
             flowActivityRepository.save(entity);
+
+            return entity.getEnd();
     }
 
-    private void saveExternalActivity(UUID memberId, Duration adjustment, NewExternalActivityDto externalActivity) {
+    private LocalDateTime saveExternalActivity(UUID memberId, Duration adjustment, NewExternalActivityDto externalActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.External);
@@ -132,9 +146,11 @@ public class FlowPublisher {
             entity.setMetadataField(FlowActivityMetadataField.comment, externalActivity.getComment());
 
             flowActivityRepository.save(entity);
+
+            return entity.getEnd();
     }
 
-    private void saveModificationActivity(UUID memberId, Duration adjustment, NewModificationActivityDto modificationActivity) {
+    private LocalDateTime saveModificationActivity(UUID memberId, Duration adjustment, NewModificationActivityDto modificationActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Modification);
@@ -147,9 +163,11 @@ public class FlowPublisher {
             entity.setMetadataField(FlowActivityMetadataField.modificationCount, modificationActivity.getModificationCount());
 
             flowActivityRepository.save(entity);
+
+            return entity.getEnd();
     }
 
-    private void saveExecutionActivity(UUID memberId, Duration adjustment, NewExecutionActivityDto executionActivity) {
+    private LocalDateTime saveExecutionActivity(UUID memberId, Duration adjustment, NewExecutionActivityDto executionActivity) {
             FlowActivityEntity entity = new FlowActivityEntity();
 
             entity.setActivityType(FlowActivityType.Execution);
@@ -165,9 +183,11 @@ public class FlowPublisher {
             entity.setMetadataField(FlowActivityMetadataField.isDebug, executionActivity.isDebug());
 
             flowActivityRepository.save(entity);
+
+            return entity.getEnd();
     }
 
-    private void saveEditorActivity(UUID memberId, Duration adjustment, NewEditorActivityDto editorActivity) {
+    private LocalDateTime saveEditorActivity(UUID memberId, Duration adjustment, NewEditorActivityDto editorActivity) {
 
         FlowActivityEntity entity = new FlowActivityEntity();
 
@@ -182,6 +202,8 @@ public class FlowPublisher {
         entity.setMetadataField(FlowActivityMetadataField.isModified, editorActivity.isModified());
 
         flowActivityRepository.save(entity);
+
+        return entity.getEnd();
     }
 
     private Duration calculateTimeAdjustment(LocalDateTime messageSentAt) {

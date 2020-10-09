@@ -32,25 +32,12 @@ class TorchieWorkPileSpec extends Specification {
     @Autowired
     TorchieWorkPile torchieWorkPile
 
-    @Autowired
-    CircuitActivityDashboard dashboard
-
-    @Autowired
-    AggregateWorkToDoQueueWire wire
-
-    @Autowired
-    GridClock gridClock
-
-    @Autowired
-    RootAccountEntity loggedInUser
-
     UUID teamId
 
     LocalDateTime clockStart
     LocalDateTime time1
     LocalDateTime time2
     LocalDateTime time3
-    LocalDateTime time4
 
     OrganizationEntity org
 
@@ -72,7 +59,45 @@ class TorchieWorkPileSpec extends Specification {
 
         List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(10);
 
-        loggedInUser.setId(teamMembers.get(0).getRootAccountId())
+        systemWorkPile.sync()
+        TickInstructions calendarInstruction = systemWorkPile.whatsNext().call();
+
+        for (int i = 0; i < 12; i++) {
+            TickInstructions moreCalendar = systemWorkPile.whatsNext().call();
+        }
+
+        CoordinateResults coordinates = (CoordinateResults) calendarInstruction.getOutputResult();
+
+        clockStart = coordinates.getGridtime().getClockTime()
+        time1 = clockStart.plusMinutes(1)
+        time2 = clockStart.plusMinutes(15)
+        time3 = clockStart.plusMinutes(43)
+
+        for (OrganizationMemberEntity member : teamMembers) {
+            createIntention(member.getId(), time1)
+            createActivity(member.getId(), time2, time3)
+        }
+
+        when:
+        torchieWorkPile.sync()
+
+        TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
+
+        for (int i = 0; i < 10; i++) {
+            torchieWorkPile.whatsNext().call();
+        }
+
+        then:
+        assert torchieInstruction != null
+
+        assert torchieWorkPile.size() == 10
+        assert torchieWorkPile.hasWork()
+    }
+
+    def "should spin up torchies and run programs to completion"() {
+        given:
+
+        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(10);
 
         systemWorkPile.sync()
         TickInstructions calendarInstruction = systemWorkPile.whatsNext().call();
@@ -86,8 +111,7 @@ class TorchieWorkPileSpec extends Specification {
         clockStart = coordinates.getGridtime().getClockTime()
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(15)
-        time3 = clockStart.plusMinutes(60)
-        time4 = clockStart.plusMinutes(95)
+        time3 = clockStart.plusMinutes(43)
 
         for (OrganizationMemberEntity member : teamMembers) {
             createIntention(member.getId(), time1)
@@ -95,20 +119,21 @@ class TorchieWorkPileSpec extends Specification {
         }
 
         when:
-
         torchieWorkPile.sync()
 
         TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
 
-        for (int i = 0; i < 20; i++) {
-            torchieWorkPile.whatsNext().call();
+        for (int i = 0; i < 40; i++) {
+            torchieInstruction = torchieWorkPile.whatsNext()
+
+            if (torchieInstruction) {
+                torchieInstruction.call()
+            }
         }
 
         then:
-        assert torchieInstruction != null
-
-        assert torchieWorkPile.size() == 10
-        assert torchieWorkPile.hasWork()
+        assert torchieWorkPile.size() == 0
+        assert torchieWorkPile.hasWork() == false
     }
 
     private OrganizationMemberEntity createMemberWithinOrgAndTeam() {
