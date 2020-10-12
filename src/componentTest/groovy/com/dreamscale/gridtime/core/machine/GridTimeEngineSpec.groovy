@@ -20,7 +20,6 @@ import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
-@Ignore
 @ComponentTest
 class GridTimeEngineSpec extends Specification {
 
