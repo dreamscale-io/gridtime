@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.FeelsRatingDetails;
 import org.springframework.web.util.UriTemplate;
 
 import java.util.LinkedHashSet;
@@ -10,8 +11,8 @@ import java.util.Set;
 
 public enum FeelsType implements FeatureType {
 
-    FEELS_GOOD("/good", "/good/{rating}", null),
-    FEELS_PAIN("/pain", "/pain/{rating}", null);
+    FEELS_GOOD("/good", "/good/{rating}", FeelsRatingDetails.class),
+    FEELS_PAIN("/pain", "/pain/{rating}", FeelsRatingDetails.class);
 
     private static final String CLASS_TYPE = "@feel";
 

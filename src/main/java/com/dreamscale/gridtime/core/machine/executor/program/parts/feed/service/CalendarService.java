@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,15 +20,6 @@ public class CalendarService {
     @Autowired
     GridTimeCalendarRepository gridTimeCalendarRepository;
 
-    @Autowired
-    GridClock gridClock;
-
-    @Autowired
-    IntentionRepository intentionRepository;
-
-    public LocalDateTime getNow() {
-        return LocalDateTime.now();
-    }
 
     public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
         Long tileSequence = null;
@@ -49,9 +41,8 @@ public class CalendarService {
         if (calendarTile != null) {
             return GeometryClock.createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getClockTime());
         } else {
-            log.warn("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
+            throw new RuntimeException("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
         }
-        return null;
     }
 
     public Long lookupTileSequenceFromSameTime(ZoomLevel zoomInOneLevel, LocalDateTime clockTime) {
@@ -61,13 +52,14 @@ public class CalendarService {
         if (calendarTile != null) {
             tileSequence = calendarTile.getTileSeq();
         } else {
-            log.warn("Unable to locate calendar for "+zoomInOneLevel + " : "+clockTime);
+            throw new RuntimeException("Unable to locate calendar for "+zoomInOneLevel + " : "+clockTime);
         }
 
 
         return tileSequence;
     }
 
+    @Transactional
     public void saveCalendar(long startSeq, int tileCount, GeometryClock.GridTime startTime) {
         long seq = startSeq;
         GeometryClock.GridTime gridTime = startTime;
@@ -79,6 +71,7 @@ public class CalendarService {
         }
     }
 
+    @Transactional
     public void saveCalendar(long tileSequence, GeometryClock.GridTime coords) {
         log.info("saveCalendar(" +  tileSequence + ", "+coords.toDisplayString() + ")");
 

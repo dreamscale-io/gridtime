@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemExclusiveJobClaimManager;
@@ -14,6 +15,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -42,18 +44,19 @@ public class SystemWorkPile implements WorkPile {
     CalendarGeneratorJob calendarGeneratorJob;
 
 
-    private final WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
+    private final WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
     private LocalDateTime lastSyncCheck;
     private TickInstructions peekInstruction;
 
     private Duration syncInterval = Duration.ofMinutes(20);
 
-
     private IdeaFlowCircuit calendarCircuit;
     private IdeaFlowCircuit dashboardCircuit;
 
     private boolean paused = false;
+
+    private int daysToKeepAhead = 1;
 
     @PostConstruct
     private void init() {
@@ -79,6 +82,10 @@ public class SystemWorkPile implements WorkPile {
         activityDashboard.addMonitor(MonitorType.SYSTEM_DASHBOARD, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
         whatsNextWheel.addWorker(dashboardWorkerId, dashboardCircuit);
 
+    }
+
+    public void configureDaysToKeepAhead(int days) {
+        this.daysToKeepAhead = days;
     }
 
     @Transactional
@@ -111,11 +118,12 @@ public class SystemWorkPile implements WorkPile {
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
 
-        if ( calendarGeneratorJob.hasWorkToDo(now) ) {
+        CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
+
+        if ( calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
 
             UUID workerId = calendarCircuit.getWorkerId();
 
-            CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now);
             SystemJobClaim systemJobClaim = systemExclusiveJobClaimManager.claimIfNotRunning(now, workerId, jobDescriptor);
 
             if (systemJobClaim != null) {
@@ -129,7 +137,7 @@ public class SystemWorkPile implements WorkPile {
                 calendarCircuit.runProgram(calendarProgram);
             }
         } else {
-            log.warn("Calendar program already running, unable to acquire job claim.");
+            log.warn("Calendar program has no more work to do.");
         }
     }
 
@@ -141,16 +149,19 @@ public class SystemWorkPile implements WorkPile {
     }
 
     private void peek() {
+
         if (peekInstruction == null) {
 
             for (int i = 0; i < whatsNextWheel.size(); i++) {
+                peekInstruction = whatsNextWheel.whatsNext();
 
-                if (peekInstruction == null) {
-                    peekInstruction = whatsNextWheel.whatsNext();
+                if (peekInstruction instanceof NoOpInstruction) {
+                    log.info("no-op");
+                    peekInstruction = null;
+                }
 
-                    if (peekInstruction != null) {
-                        break;
-                    }
+                if (peekInstruction != null) {
+                    break;
                 }
             }
         }
@@ -167,12 +178,6 @@ public class SystemWorkPile implements WorkPile {
         peekInstruction = null;
 
         return nextInstruction;
-    }
-
-    @Override
-    public void evictLastWorker() {
-        //no-op, workers can't be evicted for now
-
     }
 
     @Override

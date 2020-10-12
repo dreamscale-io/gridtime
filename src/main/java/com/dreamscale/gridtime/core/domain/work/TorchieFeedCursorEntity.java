@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity(name = "torchie_feed_cursor")
 @Data
-@EqualsAndHashCode(of = "torchieId")
+@EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

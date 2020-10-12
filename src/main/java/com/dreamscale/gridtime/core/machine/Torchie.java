@@ -18,7 +18,7 @@ import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
-public class Torchie implements Worker<TickInstructions> {
+public class Torchie implements Worker {
 
     private final UUID torchieId;
 

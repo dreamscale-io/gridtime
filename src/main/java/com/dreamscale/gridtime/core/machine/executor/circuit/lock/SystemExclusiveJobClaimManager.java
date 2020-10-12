@@ -20,9 +20,6 @@ import java.util.UUID;
 public class SystemExclusiveJobClaimManager {
 
     @Autowired
-    LockRepository lockRepository;
-
-    @Autowired
     GridtimeSystemJobClaimRepository gridtimeSystemJobClaimRepository;
 
     @Autowired
@@ -69,6 +66,7 @@ public class SystemExclusiveJobClaimManager {
         GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findById(systemJobClaim.getJobClaimId());
 
         if (existingClaim != null) {
+            log.debug("Found existing claim");
             existingClaim.setFinishedOn(now);
             existingClaim.setJobStatus(JobStatusType.DONE);
 

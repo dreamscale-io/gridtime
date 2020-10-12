@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program;
 
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
+import com.dreamscale.gridtime.core.machine.executor.job.CalendarJobDescriptor;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.LocasFactory;
@@ -85,14 +86,10 @@ public class ProgramFactory {
     }
 
 
-    public CalendarGeneratorProgram createCalendarGenerator(int maxTiles) {
 
-        return new CalendarGeneratorProgram(calendarService, maxTiles);
-    }
+    public CalendarGeneratorProgram createCalendarGenerator(CalendarJobDescriptor jobDescriptor) {
 
-    public CalendarGeneratorProgram createCalendarGenerator(LocalDateTime runUntilDate) {
-
-        return new CalendarGeneratorProgram(calendarService, runUntilDate);
+        return new CalendarGeneratorProgram(calendarService, jobDescriptor.getCalendarJobStart(), jobDescriptor.getRunUntilDate());
     }
 
 

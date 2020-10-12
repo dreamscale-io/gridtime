@@ -6,6 +6,6 @@ import java.util.UUID;
 
 public interface LiveQueue {
 
-    void submit(UUID workerId, Worker<TickInstructions> worker);
+    void submit(UUID workerId, Worker worker);
 
 }

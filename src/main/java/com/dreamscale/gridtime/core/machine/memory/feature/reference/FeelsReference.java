@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.reference;
 
+import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
 import com.dreamscale.gridtime.core.machine.memory.type.FeelsType;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeelsRatingDetails;
 import lombok.Getter;
@@ -11,10 +12,6 @@ import java.util.UUID;
 @Setter
 public class FeelsReference extends FeatureReference {
 
-    public FeelsReference(FeelsType feelsType, String searchKey) {
-        super(UUID.randomUUID(), feelsType, searchKey, null, false);
-    }
-
     public FeelsReference(FeelsType feelsType, String searchKey, FeelsRatingDetails feelsDetails) {
         super(UUID.randomUUID(), feelsType, searchKey, feelsDetails, false);
     }
@@ -23,8 +20,17 @@ public class FeelsReference extends FeatureReference {
         return (FeelsType) getFeatureType();
     }
 
-    public int getFlameRating() {
+    public Integer getFlameRating() {
         return ((FeelsRatingDetails) getDetails()).getRating();
+    }
+
+    @Override
+    public void resolve(UUID id, FeatureDetails details) {
+        if (details == null) {
+            throw new RuntimeException("Resolving feels reference witthout dettails");
+        }
+
+        super.resolve(id, details);
     }
 
     @Override

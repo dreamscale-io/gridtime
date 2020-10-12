@@ -31,5 +31,10 @@ public interface IntentionRepository extends CrudRepository<IntentionEntity, UUI
 
     @Query(nativeQuery = true, value = "select * from intention " +
             "order by position limit 1")
+    IntentionEntity findFirstAcrossMemberIds();
+
+
+    @Query(nativeQuery = true, value = "select * from intention " +
+            "order by position limit 1")
     IntentionEntity findFirst();
 }

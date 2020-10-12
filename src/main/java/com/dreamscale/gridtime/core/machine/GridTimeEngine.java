@@ -1,17 +1,23 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Component
 public class GridTimeEngine {
+
+    @Autowired
+    private GridClock gridClock;
 
     @Autowired
     private CircuitActivityDashboard circuitActivityDashboard;
@@ -44,6 +50,10 @@ public class GridTimeEngine {
 
     public void configureDoneAfterTime(long millisToWait) {
         gridTimeExecutor.configureDoneAfterTime(millisToWait);
+    }
+
+    public void configureDaysToKeepAhead(int days) {
+        gridTimeWorkPile.configureDaysToKeepAhead(days);
     }
 
     public void waitForDone(int timeoutMillis) {

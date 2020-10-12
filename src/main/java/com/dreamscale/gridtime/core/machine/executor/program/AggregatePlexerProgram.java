@@ -9,11 +9,13 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.Locas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.LocasFactory;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 public class AggregatePlexerProgram implements Program {
 
     private final UUID workerId;
@@ -43,6 +45,7 @@ public class AggregatePlexerProgram implements Program {
     @Override
     public void tick() {
 
+        log.info("mark done");
         inputWire.markDone(workerId);
 
         activeEvent = inputWire.pullNext(workerId);
@@ -63,8 +66,8 @@ public class AggregatePlexerProgram implements Program {
     public List<TickInstructions> getInstructionsAtActiveTick() {
         List<TickInstructions> instructions = new ArrayList<>();
 
-        if (activeTick != null) {
-            instructions.add(generateAggregateTickInstructions(activeTick));
+        if (activeEvent != null && activeTick != null) {
+            instructions.add(generateAggregateTickInstructions(activeEvent, activeTick));
         }
 
         return instructions;
@@ -75,7 +78,7 @@ public class AggregatePlexerProgram implements Program {
         return latestQueueDepth;
     }
 
-    private TickInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
+    private TickInstructions generateAggregateTickInstructions(AggregateStreamEvent activeEvent, Metronome.TickScope aggregateTick) {
 
         FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(activeEvent.getTeamId());
 

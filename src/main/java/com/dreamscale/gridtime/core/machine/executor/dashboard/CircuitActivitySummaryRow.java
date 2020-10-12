@@ -19,11 +19,9 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
     private GeometryClock.GridTime lastGridtime;
 
-    private double executionTimeMin;
     private double executionTimeAvg;
     private double executionTimeMax;
 
-    private double queueTimeMin;
     private double queueTimeAvg;
     private double queueTimeMax;
 
@@ -35,11 +33,9 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         lastGridtime = maxGridtime(lastGridtime, circuitMonitor.getLastGridtime());
 
-        executionTimeMin = Math.min(executionTimeMin, circuitMonitor.getRecentExecutionTimeMetric().getMin());
         executionTimeAvg = ((numberWorkers * executionTimeAvg) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
         executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getRecentExecutionTimeMetric().getMax());
 
-        queueTimeMin = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMin());
         queueTimeAvg = ((numberWorkers * queueTimeAvg) + circuitMonitor.getRecentQueueTimeMetric().getAvg()) / (numberWorkers + 1);
         queueTimeMax = Math.max(queueTimeMax, circuitMonitor.getRecentQueueTimeMetric().getMax());
 
@@ -53,13 +49,11 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         lastGridtime = maxGridtime(lastGridtime, activitySummary.getLastGridtime());
 
-        executionTimeMin = Math.max(executionTimeMin, activitySummary.getExecutionTimeMax());
         executionTimeAvg = ((numberWorkers * executionTimeAvg) +
                 (activitySummary.getNumberWorkers() * activitySummary.getExecutionTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
         executionTimeMax = Math.max(executionTimeMax, activitySummary.getExecutionTimeMax());
 
-        queueTimeMin = Math.max(queueTimeMax, activitySummary.getQueueTimeMin());
         queueTimeAvg = ((numberWorkers * queueTimeAvg) +
                 (activitySummary.getNumberWorkers() * activitySummary.getQueueTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
 
@@ -77,10 +71,8 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toCell(ticksProcessed, 6));
         row.add(CellFormat.toCell(ticksFailed, 6));
         row.add(CellFormat.toCell(lastGridtime, 24));
-        row.add(CellFormat.toCell(executionTimeMin, 8));
         row.add(CellFormat.toCell(executionTimeAvg, 8));
         row.add(CellFormat.toCell(executionTimeMax, 8));
-        row.add(CellFormat.toCell(queueTimeMin, 7));
         row.add(CellFormat.toCell(queueTimeAvg, 7));
         row.add(CellFormat.toCell(queueTimeMax, 7));
 
@@ -93,12 +85,10 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toRightSizedCell("", 10));
         row.add(CellFormat.toRightSizedCell("Workers", 8));
         row.add(CellFormat.toRightSizedCell("Ticks", 6));
-        row.add(CellFormat.toRightSizedCell("TickFail", 6));
+        row.add(CellFormat.toRightSizedCell("Fails", 6));
         row.add(CellFormat.toRightSizedCell("LastGridtime", 24));
-        row.add(CellFormat.toRightSizedCell("ExecMin", 8));
         row.add(CellFormat.toRightSizedCell("ExecAvg", 8));
         row.add(CellFormat.toRightSizedCell("ExecMax", 8));
-        row.add(CellFormat.toRightSizedCell("QMin", 7));
         row.add(CellFormat.toRightSizedCell("QAvg", 7));
         row.add(CellFormat.toRightSizedCell("QMax", 7));
 

@@ -63,6 +63,10 @@ class TorchieCmdSpec extends Specification {
        
     }
 
+    def cleanup() {
+        gridTimeExecutor.shutdown()
+    }
+
     def "goto specific tile by timestamp"() {
         when:
 

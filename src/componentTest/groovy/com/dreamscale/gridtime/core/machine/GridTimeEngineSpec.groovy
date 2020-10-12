@@ -1,33 +1,26 @@
 package com.dreamscale.gridtime.core.machine
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
+import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
+import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
+import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
-import com.dreamscale.gridtime.core.domain.member.OrganizationEntity
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
-import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
-import com.dreamscale.gridtime.core.domain.member.TeamEntity
-import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CoordinateResults
+import com.dreamscale.gridtime.core.domain.member.*
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope
-import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
-import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
+@Ignore
 @ComponentTest
 class GridTimeEngineSpec extends Specification {
 
@@ -36,6 +29,12 @@ class GridTimeEngineSpec extends Specification {
 
     @Autowired
     GridTimeWorkPile gridTimeWorkPile
+
+    @Autowired
+    FlowActivityRepository flowActivityRepository
+
+    @Autowired
+    GridClock gridClock
 
     UUID torchieId
     UUID teamId
@@ -49,16 +48,19 @@ class GridTimeEngineSpec extends Specification {
     OrganizationEntity org
 
     TeamEntity team
+    ProjectEntity projectEntity
 
     def setup() {
 
         torchieId = UUID.randomUUID()
         teamId = UUID.randomUUID()
 
+        projectEntity = aRandom.projectEntity().save();
+
         org = aRandom.organizationEntity().save()
         team = aRandom.teamEntity().id(teamId).organizationId(org.id).save()
 
-        clockStart = LocalDateTime.now()
+        clockStart = gridClock.getGridStart()
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(45)
         time3 = clockStart.plusMinutes(60)
@@ -69,10 +71,15 @@ class GridTimeEngineSpec extends Specification {
         gridTimeWorkPile.reset()
     }
 
-    def "should spin up engine and run for 1000 ticks"() {
+    def cleanup() {
+        gridTimeEngine.shutdown()
+    }
+
+    def "should spin up engine and run for 200 ticks"() {
         given:
 
-        gridTimeEngine.configureDoneAfterTicks(1000)
+        gridTimeEngine.configureDaysToKeepAhead(30)
+        gridTimeEngine.configureDoneAfterTicks(200)
 
         gridTimeEngine.start()
 
@@ -108,18 +115,17 @@ class GridTimeEngineSpec extends Specification {
     def "should spin up torchies in the engine and create detailed activity report"() {
         given:
 
+        gridTimeEngine.configureDaysToKeepAhead(1)
         gridTimeEngine.configureDoneAfterTicks(100)
-        gridTimeWorkPile.pauseSystemJobs()
 
-        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(10);
+        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(5);
 
         time1 = clockStart.plusMinutes(1)
-        time2 = clockStart.plusMinutes(15)
-        time3 = clockStart.plusMinutes(60)
+        time2 = clockStart.plusMinutes(93)
 
         for (OrganizationMemberEntity member : teamMembers) {
             createIntention(member.getId(), time1)
-            createActivity(member.getId(), time2, time3)
+            createActivity(member.getId(), time2, "/box/file1.java")
         }
 
         when:
@@ -188,7 +194,7 @@ class GridTimeEngineSpec extends Specification {
     }
 
     void createIntention(UUID memberId, LocalDateTime time) {
-        ProjectEntity projectEntity = aRandom.projectEntity().save();
+
         TaskEntity taskEntity = aRandom.taskEntity().forProject(projectEntity).save();
 
         IntentionEntity journalEntry = aRandom.intentionEntity()
@@ -200,13 +206,29 @@ class GridTimeEngineSpec extends Specification {
 
     }
 
-    void createActivity(UUID memberId, LocalDateTime start, LocalDateTime end) {
+    void createActivity(UUID memberId, LocalDateTime start, String filePath) {
 
         FlowActivityEntity flowActivityEntity = aRandom.flowActivityEntity()
                 .memberId(memberId)
                 .start(start)
-                .end(end)
-                .save()
+                .end(start.plusMinutes(5))
+                .build()
+
+        flowActivityEntity.setMetadataField(FlowActivityMetadataField.filePath, filePath)
+
+        flowActivityRepository.save(flowActivityEntity)
+    }
+
+    FlowableFlowActivity generateFileActivity(UUID memberId, LocalDateTime start, String filePath) {
+        FlowActivityEntity flowActivityEntity = aRandom.flowActivityEntity()
+                .memberId(memberId)
+                .start(start)
+                .end(start.plusMinutes(3))
+                .build();
+
+        flowActivityEntity.setMetadataField(FlowActivityMetadataField.filePath, filePath)
+
+        return new FlowableFlowActivity(flowActivityEntity);
 
     }
 }

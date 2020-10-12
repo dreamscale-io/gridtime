@@ -14,7 +14,5 @@ public interface WorkPile {
 
     boolean hasWork();
 
-    void evictLastWorker();
-
     int size();
 }

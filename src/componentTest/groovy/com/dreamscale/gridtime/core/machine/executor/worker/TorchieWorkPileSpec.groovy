@@ -18,12 +18,14 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWork
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
+@Ignore
 @ComponentTest
 class TorchieWorkPileSpec extends Specification {
     @Autowired
@@ -84,7 +86,7 @@ class TorchieWorkPileSpec extends Specification {
         TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
 
         for (int i = 0; i < 10; i++) {
-            torchieWorkPile.whatsNext().call();
+            torchieInstruction = torchieWorkPile.whatsNext().call();
         }
 
         then:

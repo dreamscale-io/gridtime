@@ -3,10 +3,12 @@ package com.dreamscale.gridtime.core.machine.memory.cache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.type.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.LRUMap;
 
 import java.util.UUID;
 
+@Slf4j
 public class FeatureCache {
 
     private static final int BOX_CACHE_SIZE = 50;
@@ -22,7 +24,6 @@ public class FeatureCache {
     private LRUMap locationCache = new LRUMap(LOCATION_CACHE_SIZE);
     private LRUMap traversalCache = new LRUMap(TRAVERSAL_CACHE_SIZE);
     private LRUMap contextCache = new LRUMap(CONTEXT_CACHE_SIZE);
-
     private LRUMap miscCache = new LRUMap(MISC_CACHE_SIZE);
 
     private final FeatureReferenceFactory featureReferenceFactory;

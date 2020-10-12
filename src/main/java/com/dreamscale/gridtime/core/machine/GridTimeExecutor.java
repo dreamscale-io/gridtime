@@ -17,13 +17,14 @@ public class GridTimeExecutor {
 
     private AtomicBoolean isGameLoopRunning;
 
-    private static final int LOOK_FOR_MORE_WORK_DELAY = 100;
+    private static final int LOOK_FOR_MORE_WORK_DELAY = 1;
     private static final int MAX_WORK_CAPACITY = 10;
 
     private long executorStartTime = 0;
     private int stopAfterTicks = 0;
     private long stopAfterTime = 0;
     private Future<?> gameLoopFuture = null;
+    private boolean stopAfterIdle;
 
     public GridTimeExecutor(WorkPile workPile) {
         this.workPile = workPile;
@@ -51,6 +52,7 @@ public class GridTimeExecutor {
     public void reset() {
         executorStartTime = System.currentTimeMillis();
         ticks = 0;
+        stopAfterIdle = false;
 
         if (executorPool != null && isGameLoopRunning.get() == false) {
 
@@ -88,11 +90,10 @@ public class GridTimeExecutor {
 
 
     private boolean hasPoolCapacityForMoreWork() {
-//
+
 //        log.info("executor tasks  = "+executorPool.getTaskCount());
 //        log.info("executor active = "+executorPool.getActiveCount());
 //        log.info("executor queue = "+executorPool.getQueue().size());
-//
 
         return executorPool.getActiveCount() <= MAX_WORK_CAPACITY;
     }
@@ -117,6 +118,10 @@ public class GridTimeExecutor {
 
     public int getTicks() {
         return ticks;
+    }
+
+    public void configureDoneAfterIdle() {
+        this.stopAfterIdle = true;
     }
 
 
@@ -146,19 +151,19 @@ public class GridTimeExecutor {
                             executorPool.submit(instruction);
                         } else {
                             log.warn("Null instruction");
-                            workPile.evictLastWorker();
                         }
 
                         stopIfConditionMet(currentTimeMillis);
 
                         if (!isGameLoopRunning.get()) {
+                            log.debug("Exiting game loop");
                             break;
                         }
                     }
                     stopIfConditionMet(currentTimeMillis);
                     Thread.sleep(LOOK_FOR_MORE_WORK_DELAY);
                 }
-
+                log.debug("About to exit");
             } catch (Exception ex) {
                 log.error("Executor GameLoop halted", ex);
                 isGameLoopRunning.set(false);

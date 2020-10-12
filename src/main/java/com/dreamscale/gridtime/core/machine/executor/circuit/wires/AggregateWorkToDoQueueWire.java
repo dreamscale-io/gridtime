@@ -41,6 +41,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     private GridClock gridClock;
 
     @Override
+    @Transactional
     public void pushAll(List<TileStreamEvent> tileStreamEvents) {
         for (TileStreamEvent tileStreamEvent : tileStreamEvents) {
             push(tileStreamEvent);
@@ -48,6 +49,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     }
 
     @Override
+    @Transactional
     public void push(TileStreamEvent event) {
 
         log.info("Pushing event into WorkToDo queue: "+event.gridTime);
@@ -66,6 +68,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
         workItem.setWorkToDoType(WorkToDoType.AggregateToTeam);
 
         workItemToAggregateRepository.save(workItem);
+
     }
 
 
@@ -94,7 +97,6 @@ public class AggregateWorkToDoQueueWire implements Wire {
     }
 
     private WorkToDo getNextWorkToDo() {
-        log.info("getNextWorkToDo");
 
         //first check whether there is stuff ready at the team level
 
@@ -125,9 +127,9 @@ public class AggregateWorkToDoQueueWire implements Wire {
     }
 
 
+    @Transactional
     @Override
     public void markDone(UUID workerId) {
-
         workItemToAggregateRepository.finishInProgressWorkItems(workerId.toString());
     }
 

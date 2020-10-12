@@ -1,13 +1,14 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.core.machine.Torchie;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 
 import java.util.UUID;
 
 public class DefaultWorkPile implements WorkPile, LiveQueue {
 
-    WhatsNextWheel<TickInstructions> whatsNextWheel = new WhatsNextWheel<>();
+    WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
     private TickInstructions peekInstruction;
 
@@ -15,7 +16,7 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
         whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
     }
 
-    public void addWorker(UUID workerId, Worker<TickInstructions> worker) {
+    public void addWorker(UUID workerId, Worker worker) {
         whatsNextWheel.addWorker(workerId, worker);
     }
 
@@ -27,8 +28,7 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
         return peekInstruction != null;
     }
 
-    @Override
-    public void evictLastWorker() {
+    private void evictLastWorker() {
         whatsNextWheel.evictLastWorker();
     }
 
@@ -55,9 +55,7 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
     @Override
     public TickInstructions whatsNext() {
 
-        if (peekInstruction == null) {
-            peek();
-        }
+        peek();
 
         TickInstructions nextInstruction = peekInstruction;
 
@@ -68,20 +66,22 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
 
     private void peek() {
 
-        if (peekInstruction == null) {
+        if (peekInstruction == null ) {
             peekInstruction = whatsNextWheel.whatsNext();
 
             while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
-
-                whatsNextWheel.evictLastWorker();
+                evictLastWorker();
                 peekInstruction = whatsNextWheel.whatsNext();
 
             }
         }
+        if (peekInstruction instanceof NoOpInstruction) {
+            peekInstruction = null;
+        }
     }
 
     @Override
-    public void submit(UUID workerId, Worker<TickInstructions> worker) {
+    public void submit(UUID workerId, Worker worker) {
         whatsNextWheel.submit(workerId, worker);
     }
 }

@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 @Slf4j
-public class IdeaFlowCircuit implements Worker<TickInstructions> {
+public class IdeaFlowCircuit implements Worker {
 
     private Program program;
     private Program nextProgram;
@@ -154,8 +154,10 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
         updateQueueDepth();
 
         lastInstruction = nextInstruction;
+
         return nextInstruction;
     }
+
 
     private void gotoNextProgram() {
         program = null;
@@ -201,9 +203,15 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
     }
 
     private void notifyAllProgramIsDone() {
-        log.debug("Notify all: Program is done.");
+        log.debug("Notify all: Program is done. Program " + program.getName() + " terminated.");
+
+        List<Results> outputResults = null;
+        if (lastInstruction != null) {
+            outputResults = lastInstruction.getAllOutputResults();
+        }
+
         for (NotifyDoneTrigger trigger: notifyWhenProgramDoneTriggers) {
-            trigger.notifyWhenDone(lastInstruction, lastInstruction.getAllOutputResults());
+            trigger.notifyWhenDone(lastInstruction, outputResults);
         }
     }
 
@@ -256,7 +264,7 @@ public class IdeaFlowCircuit implements Worker<TickInstructions> {
 
             circuitMonitor.failInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
 
-            log.error("Terminating program because of failed intruction:" + ex);
+            log.error("Terminating program because of failed instruction:" + ex);
 
             gotoNextProgram();
             notifyAllProgramAborted();

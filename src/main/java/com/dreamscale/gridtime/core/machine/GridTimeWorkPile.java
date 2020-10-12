@@ -32,8 +32,6 @@ public class GridTimeWorkPile implements WorkPile {
     @Autowired
     private PlexerWorkPile plexerWorkPile;
 
-    private boolean lastInstructionIsTorchie = false;
-
     public boolean hasWork() {
 
         systemWorkPile.sync();
@@ -83,6 +81,19 @@ public class GridTimeWorkPile implements WorkPile {
         systemWorkPile.resume();
     }
 
+    public void pausePlexerJobs() {
+        plexerWorkPile.pause();
+    }
+
+    public void resumePlexerJobs() {
+        plexerWorkPile.resume();
+    }
+
+
+    public void configureDaysToKeepAhead(int days) {
+        systemWorkPile.configureDaysToKeepAhead(days);
+    }
+
     public TickInstructions whatsNext() {
 
         TickInstructions instructions = null;
@@ -102,31 +113,19 @@ public class GridTimeWorkPile implements WorkPile {
 
         if (systemWorkPile.hasWork()) {
             instructions = systemWorkPile.whatsNext();
-            if (instructions != null) {
-                lastInstructionIsTorchie = false;
-            }
         }
 
-        if (plexerWorkPile.hasWork()) {
+        if (instructions == null && plexerWorkPile.hasWork()) {
             instructions = plexerWorkPile.whatsNext();
-            if (instructions != null) {
-                lastInstructionIsTorchie = false;
-            }
         }
 
-        if (instructions == null) {
+        if (instructions == null && torchieWorkPile.hasWork()) {
             instructions = torchieWorkPile.whatsNext();
-            lastInstructionIsTorchie = true;
         }
 
         return instructions;
     }
 
-    public void evictLastWorker() {
-        if (lastInstructionIsTorchie) {
-            torchieWorkPile.evictLastWorker();
-        }
-    }
 
     @Override
     public int size() {

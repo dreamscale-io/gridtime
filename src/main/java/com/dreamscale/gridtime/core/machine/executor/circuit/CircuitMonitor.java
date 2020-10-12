@@ -47,14 +47,14 @@ public class CircuitMonitor {
     }
 
     public void startInstruction() {
-        log.debug("Setting circuit state to busy!");
+        log.debug(processType + ": Setting circuit state to busy!");
         state = State.Busy;
 
         updateStatusTimestamp();
     }
 
     public void finishInstruction(long queueDurationMillis, long executionDurationMillis) {
-        log.debug("SUCCESS: Setting circuit state back to ready!");
+        log.debug(processType + " SUCCESS: Setting circuit state back to ready!");
         state = State.Ready;
         updateMetrics(queueDurationMillis, executionDurationMillis);
 
@@ -64,8 +64,6 @@ public class CircuitMonitor {
     }
 
     private void updateMetrics(long queueDurationMillis, long executionDurationMillis) {
-        log.info("metrics = "+queueDurationMillis + ", "+executionDurationMillis);
-
         lastQueueDuration = queueDurationMillis;
         lastExecutionDuration = executionDurationMillis;
 
@@ -77,7 +75,7 @@ public class CircuitMonitor {
     }
 
     public void failInstruction(long queueDurationMillis, long executionDurationMillis) {
-        log.debug("FAILED: Setting circuit state back to ready!");
+        log.debug(processType + " FAILED: Setting circuit state back to ready!");
         state = State.Ready;
 
         ticksFailed++;
@@ -101,6 +99,7 @@ public class CircuitMonitor {
     }
 
     public boolean isReady() {
+        log.debug(processType + " isReady? " + state);
         return state == State.Ready;
     }
 

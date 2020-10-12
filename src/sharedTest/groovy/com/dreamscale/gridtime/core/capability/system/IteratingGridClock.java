@@ -11,7 +11,6 @@ public class IteratingGridClock extends GridClock {
     private Long currentNano;
     private int ticks;
 
-    private static final LocalDateTime START_CLOCK = LocalDateTime.of(2020, 4, 20, 11, 11);
     private static final Long START_NANO = 444444444444444L;
 
     public IteratingGridClock() {
@@ -19,13 +18,9 @@ public class IteratingGridClock extends GridClock {
     }
 
     public void reset() {
-        currentClock = START_CLOCK;
+        currentClock = getGridStart();
         currentNano = START_NANO;
         ticks = 0;
-    }
-
-    public LocalDateTime getStartClock() {
-        return START_CLOCK;
     }
 
     public Long getStartNano() {

@@ -37,4 +37,5 @@ truncate table project_grant_tombstone;
 
 truncate table team_member_home;
 truncate table torchie_feed_cursor;
+truncate table grid_feature;
 

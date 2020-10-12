@@ -18,10 +18,6 @@ public class CalendarGeneratorProgram implements Program {
 
     private final CalendarService calendarService;
 
-
-    private int tilesGenerated;
-    private final int maxTiles;
-
     private long twentiesSequence;
     private long dayPartSequence;
     private long daySequence;
@@ -29,23 +25,17 @@ public class CalendarGeneratorProgram implements Program {
 
     private Metronome metronome;
 
-    private LocalDateTime calendarEnd;
+    private final LocalDateTime calendarJobStart;
+    private LocalDateTime runUntilDate;
+
     private boolean isInitialized;
 
-
-    public CalendarGeneratorProgram(CalendarService calendarService, int maxTiles) {
-        this.calendarService = calendarService;
-        this.maxTiles = maxTiles;
-
-        this.isInitialized = false;
-    }
-
-    public CalendarGeneratorProgram(CalendarService calendarService, LocalDateTime calendarEnd) {
-        log.debug("calendar program initialized to run until "+calendarEnd);
+    public CalendarGeneratorProgram(CalendarService calendarService, LocalDateTime calendarJobStart, LocalDateTime runUntilDate) {
+        log.debug("calendar program initialized to run from "+calendarJobStart + " until "+runUntilDate);
 
         this.calendarService = calendarService;
-        this.calendarEnd = calendarEnd;
-        this.maxTiles = Integer.MAX_VALUE;
+        this.calendarJobStart = calendarJobStart;
+        this.runUntilDate = runUntilDate;
 
         this.isInitialized = false;
     }
@@ -69,7 +59,7 @@ public class CalendarGeneratorProgram implements Program {
 
     @Override
     public boolean isDone() {
-        return isInitialized && (metronome.getActiveTick().isAfter(calendarEnd) || tilesGenerated >= maxTiles);
+        return isInitialized && (metronome.getActiveTick().isAfter(runUntilDate) );
     }
 
     @Override
@@ -113,27 +103,9 @@ public class CalendarGeneratorProgram implements Program {
         daySequence = getSequence(lastDay);
         weekSequence = getSequence(lastWeek);
 
-        metronome = new Metronome(getCalendarStart(lastTwenty));
-
-        if (calendarEnd == null) {
-            calendarEnd = calculateCalendarEnd();
-        }
+        metronome = new Metronome(calendarJobStart);
     }
 
-
-    private LocalDateTime getCalendarStart(GeometryClock.GridTimeSequence lastTwenty) {
-        if (lastTwenty != null) {
-            return lastTwenty.getGridTime().panRight().getClockTime();
-        } else {
-            return GeometryClock.getFirstMomentOfYear(2019);
-        }
-    }
-
-    private LocalDateTime calculateCalendarEnd() {
-        int year = calendarService.getNow().getYear();
-
-        return GeometryClock.getFirstMomentOfYear(year + 2);
-    }
 
     private long getSequence(GeometryClock.GridTimeSequence gridTimeSequence) {
         if (gridTimeSequence != null) {
@@ -147,7 +119,6 @@ public class CalendarGeneratorProgram implements Program {
     public TickInstructions baseTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
         GenerateCalendarTile instruction = new GenerateCalendarTile(calendarService, fromGridTime, twentiesSequence);
         twentiesSequence++;
-        tilesGenerated++;
 
         return instruction;
     }

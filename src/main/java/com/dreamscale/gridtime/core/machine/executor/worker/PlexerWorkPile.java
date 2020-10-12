@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.worker;
 import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.IdeaFlowCircuit;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
@@ -32,10 +33,13 @@ public class PlexerWorkPile implements WorkPile {
     FeatureCacheManager featureCacheManager;
 
 
+    private TickInstructions peekInstruction;
+
+
     private static final int DEFAULT_NUMBER_PLEXER_WORKERS = 5;
 
     private int currentPoolSize;
-    private WhatsNextWheel<TickInstructions> whatsNextWheel;
+    private WhatsNextWheel whatsNextWheel;
     private boolean paused = false;
 
     @PostConstruct
@@ -44,9 +48,9 @@ public class PlexerWorkPile implements WorkPile {
         this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
     }
 
-    private WhatsNextWheel<TickInstructions> createWhatsNextWheel(int initialPoolSize) {
+    private WhatsNextWheel createWhatsNextWheel(int initialPoolSize) {
 
-        WhatsNextWheel whatsNextWheel = new WhatsNextWheel<TickInstructions>();
+        WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
@@ -84,16 +88,29 @@ public class PlexerWorkPile implements WorkPile {
     }
 
 
+    @Override
     public TickInstructions whatsNext() {
         if (paused) return null;
 
-        return whatsNextWheel.whatsNext();
+        peek();
+
+        TickInstructions nextInstruction = peekInstruction;
+
+        peekInstruction = null;
+
+        return nextInstruction;
     }
 
-    @Override
-    public void evictLastWorker() {
-        //no-op, workers can't be evicted for now
+    private void peek() {
+
+        if (peekInstruction == null ) {
+            peekInstruction = whatsNextWheel.whatsNext();
+        }
+        if (peekInstruction instanceof NoOpInstruction) {
+            peekInstruction = null;
+        }
     }
+
 
     @Override
     public int size() {

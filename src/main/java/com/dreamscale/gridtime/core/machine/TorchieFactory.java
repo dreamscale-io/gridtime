@@ -71,25 +71,5 @@ public class TorchieFactory {
 
     }
 
-    //wire up calendar Torchie, does a years worth of tiles ahead, then stops.
-
-    public Torchie wireUpCalendarTorchie(int maxTiles) {
-        UUID torchieId = UUID.randomUUID();
-        TorchieState torchieState = new MemoryOnlyTorchieState(torchieId);
-
-        CalendarGeneratorProgram program = programFactory.createCalendarGenerator(maxTiles);
-
-        return new Torchie(torchieId, torchieState, program);
-    }
-
-    public Torchie wireUpCalendarTorchieToRunUntil(LocalDateTime runUntilDate) {
-        UUID torchieId = UUID.randomUUID();
-        TorchieState torchieState = new MemoryOnlyTorchieState(torchieId);
-
-        CalendarGeneratorProgram program = programFactory.createCalendarGenerator(runUntilDate);
-
-        return new Torchie(torchieId, torchieState, program);
-    }
-
 
 }

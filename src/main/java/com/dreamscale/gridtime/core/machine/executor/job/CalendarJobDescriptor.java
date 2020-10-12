@@ -11,9 +11,11 @@ import java.util.Map;
 @Data
 public class CalendarJobDescriptor implements SystemJobDescriptor {
 
+    private final LocalDateTime calendarJobStart;
     private LocalDateTime runUntilDate;
 
-    CalendarJobDescriptor(LocalDateTime runUntilDate) {
+    CalendarJobDescriptor(LocalDateTime calendarJobStart, LocalDateTime runUntilDate) {
+        this.calendarJobStart = calendarJobStart;
         this.runUntilDate = runUntilDate;
     }
 

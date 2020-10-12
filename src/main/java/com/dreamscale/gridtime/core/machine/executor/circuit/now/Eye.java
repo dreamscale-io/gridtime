@@ -15,7 +15,6 @@ import java.util.List;
 
 public class Eye {
 
-    WhatsNextWheel<Locas> locasJobQueue;
 
     private List<Scope> focusInScopes = DefaultCollections.list();
     private List<MetricWatcher> metricWatchers = DefaultCollections.list();

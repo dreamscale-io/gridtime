@@ -1,20 +1,24 @@
 package com.dreamscale.gridtime.core.machine.memory.cache;
 
+import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
 import com.dreamscale.gridtime.core.domain.tile.GridFeatureEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridFeatureRepository;
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.Box;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import com.dreamscale.gridtime.core.machine.memory.type.TypeRegistry;
-import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
-import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
-import com.dreamscale.gridtime.core.capability.membership.TeamCapability;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class FeatureResolverService {
 
@@ -25,8 +29,13 @@ public class FeatureResolverService {
     @Autowired
     GridFeatureRepository gridFeatureRepository;
 
+    @Autowired
+    EntityManagerFactory entityManagerFactory;
+
     private final TypeRegistry typeRegistry;
     private final FeatureReferenceFactory featureFactory;
+
+
 
     FeatureResolverService() {
         typeRegistry = new TypeRegistry();
@@ -55,28 +64,53 @@ public class FeatureResolverService {
     public void resolve(UUID teamId, FeatureReference originalReference) {
 
         if (!originalReference.isResolved()) {
-            GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndSearchKey(teamId, originalReference.getSearchKey());
 
-            if (gridFeatureEntity != null) {
-                FeatureType featureType = lookupFeatureType(gridFeatureEntity.getTypeUri());
+           synchronized (originalReference.getFeatureType()) {
 
-                FeatureDetails feature = deserialize(gridFeatureEntity.getJson(), featureType.getSerializationClass());
+                if (!originalReference.isResolved()) {
+                    tryToResolve(teamId, originalReference);
+                }
 
-                originalReference.resolve(gridFeatureEntity.getId(), feature);
-            } else {
-                String json = serialize(originalReference.getDetails());
-                gridFeatureEntity = new GridFeatureEntity(
-                        originalReference.getFeatureId(),
-                        teamId,
-                        originalReference.getFeatureType().getTypeUri(),
-                        originalReference.getSearchKey(),
-                        json);
-                gridFeatureRepository.save(gridFeatureEntity);
-
-                originalReference.resolve();
-            }
+           }
         }
     }
+
+    protected void tryToResolve(UUID teamId, FeatureReference originalReference) {
+
+        GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndSearchKey(teamId, originalReference.getSearchKey());
+
+        if (gridFeatureEntity != null) {
+
+            FeatureType featureType = lookupFeatureType(gridFeatureEntity.getTypeUri());
+
+            FeatureDetails feature = deserialize(gridFeatureEntity.getJson(), featureType.getSerializationClass());
+
+            originalReference.resolve(gridFeatureEntity.getId(), feature);
+        } else {
+
+            String json = serialize(originalReference.getDetails());
+            log.info("json = "+json);
+            GridFeatureEntity newFeature = new GridFeatureEntity(
+                    originalReference.getFeatureId(),
+                    teamId,
+                    originalReference.getFeatureType().getTypeUri(),
+                    originalReference.getSearchKey(),
+                    json);
+
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+            entityManager.getTransaction().begin();
+
+            gridFeatureRepository.save(newFeature);
+
+            entityManager.getTransaction().commit();
+
+            log.info("Created Feature Reference "+originalReference.getSearchKey());
+
+            originalReference.resolve();
+        }
+    }
+
 
     private FeatureType lookupFeatureType(String typeUri) {
         return typeRegistry.resolveFeatureType(typeUri);
