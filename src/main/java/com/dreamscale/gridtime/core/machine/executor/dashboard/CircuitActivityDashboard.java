@@ -5,13 +5,17 @@ import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.RefreshDashboardTick;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class CircuitActivityDashboard {
 
@@ -76,13 +80,12 @@ public class CircuitActivityDashboard {
         switch (dashboardActivityScope) {
             case GRID_SUMMARY:
                 return dashboard.toSummaryGridTableResults();
-//            case SYSTEM_DETAIL:
-//                return dashboard.toSystemTopGridTableResults();
-//            case PLEXER_DETAIL:
-//                return dashboard.toPlexerTopGridTableResults();
-//            case TORCHIE_DETAIL:
-//                return dashboard.toTorchieTopGridTableResults();
-//            default:
+            case PLEXER_DETAIL:
+                return dashboard.toPlexerTopGridTableResults();
+            case TORCHIE_DETAIL:
+                return dashboard.toTorchieTopGridTableResults();
+            case ALL_DETAIL:
+                return dashboard.toTopGridTableResults();
         }
         return null;
     }
@@ -103,16 +106,21 @@ public class CircuitActivityDashboard {
 
     private class Dashboard {
 
-        private CircuitActivitySummaryRow calendarFinished = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow dashboardFinished = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow torchieFinished = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow plexerFinished = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow calendarFinished ;
+        private CircuitActivitySummaryRow dashboardFinished ;
+        private CircuitActivitySummaryRow torchieFinished;
+        private CircuitActivitySummaryRow plexerFinished ;
 
-        private CircuitActivitySummaryRow calendarLive = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow dashboardLive = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow torchieLive = new CircuitActivitySummaryRow();
-        private CircuitActivitySummaryRow plexerLive = new CircuitActivitySummaryRow();
+        private CircuitActivitySummaryRow calendarLive ;
+        private CircuitActivitySummaryRow dashboardLive ;
+        private CircuitActivitySummaryRow torchieLive ;
+        private CircuitActivitySummaryRow plexerLive ;
 
+        private Map<UUID, CircuitActivitySummaryRow> finishedProcesses = DefaultCollections.map();
+
+        Dashboard() {
+            clear();
+        }
 
         public void aggregateFinished(DashboardMonitor dashboardMonitor) {
 
@@ -130,6 +138,25 @@ public class CircuitActivityDashboard {
                     dashboardFinished.aggregateMonitor(dashboardMonitor.getCircuitMonitor());
             }
 
+            CircuitActivitySummaryRow processRow = finishedProcesses.get(dashboardMonitor.getWorkerId());
+            if (processRow == null) {
+                processRow = createProcessRow(dashboardMonitor);
+                finishedProcesses.put(dashboardMonitor.getWorkerId(), processRow);
+            }
+            processRow.aggregateMonitor(dashboardMonitor.getCircuitMonitor());
+
+        }
+
+        private CircuitActivitySummaryRow createProcessRow(DashboardMonitor dashboardMonitor) {
+
+            String typePrefix = "@sys/";
+            if (dashboardMonitor.getMonitorType().equals(MonitorType.PLEXER_WORKER)) {
+                typePrefix = "@plexer/";
+            } else if (dashboardMonitor.getMonitorType().equals(MonitorType.TORCHIE_WORKER)) {
+                typePrefix = "@torchie/";
+            }
+            String processId = CellFormat.toCellValue(dashboardMonitor.getWorkerId());
+            return new CircuitActivitySummaryRow(dashboardMonitor.getMonitorType(), typePrefix + processId);
         }
 
         public void aggregateLive(DashboardMonitor dashboardMonitor) {
@@ -151,15 +178,17 @@ public class CircuitActivityDashboard {
         }
 
         public void clear() {
-            calendarFinished = new CircuitActivitySummaryRow();
-            dashboardFinished = new CircuitActivitySummaryRow();
-            torchieFinished = new CircuitActivitySummaryRow();
-            plexerFinished = new CircuitActivitySummaryRow();
+            calendarFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal");
+            dashboardFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dash");
+            torchieFinished = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie");
+            plexerFinished = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer");
 
-            calendarLive = new CircuitActivitySummaryRow();
-            dashboardLive = new CircuitActivitySummaryRow();
-            torchieLive = new CircuitActivitySummaryRow();
-            plexerLive = new CircuitActivitySummaryRow();
+            calendarLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal");
+            dashboardLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dash");
+            torchieLive = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie");
+            plexerLive = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer");
+
+            finishedProcesses = DefaultCollections.map();
         }
 
         public void clearLive() {
@@ -168,63 +197,134 @@ public class CircuitActivityDashboard {
             torchieLive = torchieFinished.clone();
             plexerLive = plexerFinished.clone();
         }
-//
-//
+
+
          public GridTableResults toSummaryGridTableResults() {
              List<List<String>> rowsOfPaddedCells = new ArrayList<>();
 
-             rowsOfPaddedCells.add(calendarLive.toRow("@sys/cal"));
-             rowsOfPaddedCells.add(dashboardLive.toRow("@sys/dash"));
+             rowsOfPaddedCells.add(calendarLive.toRow());
+             rowsOfPaddedCells.add(dashboardLive.toRow());
+             rowsOfPaddedCells.add(plexerLive.toRow());
+             rowsOfPaddedCells.add(torchieLive.toRow());
 
-             rowsOfPaddedCells.add(plexerLive.toRow("@plexer"));
-
-             rowsOfPaddedCells.add(torchieLive.toRow("@torchie"));
 
              return new GridTableResults("Gridtime Activity Summary", torchieLive.toHeaderRow(), rowsOfPaddedCells);
 
          }
-//
-//        public GridTableResults toPlexerTopGridTableResults() {
-//            return toProcessTopTable("Gridtime Plexer Activity", plexerMonitors.values());
-//        }
-//
-//        public GridTableResults toSystemTopGridTableResults() {
-//            return toProcessTopTable("Gridtime System Activity", systemMonitors.values());
-//        }
-//
-//        public GridTableResults toTorchieTopGridTableResults() {
-//            return toProcessTopTable("Gridtime Torchie Activity", torchieMonitors.values());
-//        }
-//
-//        private GridTableResults toProcessTopTable(String title, Collection<CircuitMonitor> monitors) {
-//            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
-//
-//            //so this one, we've gotta go back, and create records for each circuit monitor, so I should have another class
-//
-//            List<ProcessDetailsRow> processRows = createProcessRowsSortedByTop(monitors);
-//
-//            List<String> headers = Collections.emptyList();
-//
-//            if (processRows.size() > 0) {
-//                for (ProcessDetailsRow processRow : processRows) {
-//                    rowsOfPaddedCells.add(processRow.toRow("@proc/"+processRow.getProcessId()));
-//                }
-//                headers = processRows.get(0).toHeaderRow();
-//            }
-//
-//            return new GridTableResults(title, headers, rowsOfPaddedCells);
-//        }
 
-        private List<ProcessDetailsRow> createProcessRowsSortedByTop(Collection<CircuitMonitor> monitors) {
-            List<ProcessDetailsRow> processRows = new ArrayList<>();
+        public GridTableResults toPlexerTopGridTableResults() {
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = getRowsInTableByType(MonitorType.PLEXER_WORKER);
 
-            for (CircuitMonitor monitor: monitors) {
-                processRows.add(new ProcessDetailsRow(monitor));
+            return toProcessTopTable("Gridtime Plexer Activity Detail", rowsInTable.values());
+        }
+
+        public GridTableResults toTorchieTopGridTableResults() {
+
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = getRowsInTableByType(MonitorType.TORCHIE_WORKER);
+
+            return toProcessTopTable("Gridtime Torchie Activity Detail", rowsInTable.values());
+        }
+
+        public GridTableResults toTopGridTableResults() {
+
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = getAllRowsInTable();
+
+            return toProcessTopTable("Gridtime Activity Detail", rowsInTable.values());
+        }
+
+
+        private Map<UUID, CircuitActivitySummaryRow> getRowsInTableByType(MonitorType monitorType) {
+            List<DashboardMonitor> torchieMonitors = dashboardMonitors.values().stream().filter(
+                    (monitor -> monitor.getMonitorType().equals(monitorType)
+                    )).collect(Collectors.toList());
+
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = DefaultCollections.map();
+
+            for (DashboardMonitor monitor : torchieMonitors) {
+
+                CircuitActivitySummaryRow existingRow = finishedProcesses.get(monitor.getWorkerId());
+                CircuitActivitySummaryRow newRow = null;
+
+                if (existingRow != null) {
+                    newRow = existingRow.clone();
+                } else {
+                    newRow = createProcessRow(monitor);
+                }
+                newRow.setProcessStatus(ProcessStatus.ACTIVE);
+                newRow.aggregateMonitor(monitor.getCircuitMonitor());
+                rowsInTable.put(monitor.getWorkerId(), newRow);
             }
 
-            processRows.sort((proc1, proc2) -> Integer.compare(proc2.getTicksProcessed(), proc1.getTicksProcessed()));
+            for (Map.Entry<UUID, CircuitActivitySummaryRow> rowEntry : finishedProcesses.entrySet()) {
+                UUID workerId = rowEntry.getKey();
+                MonitorType rowType = rowEntry.getValue().getMonitorType();
+                CircuitActivitySummaryRow row = rowEntry.getValue();
 
-            return processRows;
+                if (!rowsInTable.containsKey(workerId) && rowType.equals(monitorType)) {
+                    row.setProcessStatus(ProcessStatus.INACTIVE);
+                    rowsInTable.put(workerId, row);
+                }
+            }
+            return rowsInTable;
+        }
+
+        private Map<UUID, CircuitActivitySummaryRow> getAllRowsInTable() {
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = DefaultCollections.map();
+
+            for (DashboardMonitor monitor : dashboardMonitors.values()) {
+
+                CircuitActivitySummaryRow existingRow = finishedProcesses.get(monitor.getWorkerId());
+                CircuitActivitySummaryRow newRow = null;
+
+                if (existingRow != null) {
+                    newRow = existingRow.clone();
+                } else {
+                    newRow = createProcessRow(monitor);
+                }
+                newRow.setProcessStatus(ProcessStatus.ACTIVE);
+                newRow.aggregateMonitor(monitor.getCircuitMonitor());
+                rowsInTable.put(monitor.getWorkerId(), newRow);
+            }
+
+            for (Map.Entry<UUID, CircuitActivitySummaryRow> rowEntry : finishedProcesses.entrySet()) {
+                UUID workerId = rowEntry.getKey();
+                MonitorType rowType = rowEntry.getValue().getMonitorType();
+                CircuitActivitySummaryRow row = rowEntry.getValue();
+
+                if (!rowsInTable.containsKey(workerId)) {
+                    row.setProcessStatus(ProcessStatus.INACTIVE);
+                    rowsInTable.put(workerId, row);
+                }
+            }
+            return rowsInTable;
+        }
+
+
+        private GridTableResults toProcessTopTable(String title, Collection<CircuitActivitySummaryRow> rows) {
+            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+
+            //so this one, we've gotta go back, and create records for each circuit monitor, so I should have another class
+
+            List<CircuitActivitySummaryRow> processRows = createProcessRowsSortedByTop(rows);
+
+            List<String> headers = Collections.emptyList();
+
+            if (processRows.size() > 0) {
+                for (CircuitActivitySummaryRow processRow : processRows) {
+                    rowsOfPaddedCells.add(processRow.toRow());
+                }
+                headers = processRows.get(0).toHeaderRow();
+            }
+
+            return new GridTableResults(title, headers, rowsOfPaddedCells);
+        }
+
+        private List<CircuitActivitySummaryRow> createProcessRowsSortedByTop(Collection<CircuitActivitySummaryRow> unsortedRows) {
+            List<CircuitActivitySummaryRow> sortedRows = new ArrayList<>(unsortedRows);
+
+            sortedRows.sort((proc1, proc2) -> Integer.compare(proc2.getTicksProcessed(), proc1.getTicksProcessed()));
+
+            return sortedRows;
         }
 
     }

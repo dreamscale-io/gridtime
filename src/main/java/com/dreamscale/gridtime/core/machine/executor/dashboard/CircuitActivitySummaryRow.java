@@ -11,6 +11,9 @@ import java.util.*;
 @Data
 public class CircuitActivitySummaryRow implements Cloneable {
 
+    private final String rowKey;
+    private MonitorType monitorType;
+
     private Set<UUID> workers = new HashSet<>();
     private int numberWorkers;
 
@@ -19,12 +22,20 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
     private GeometryClock.GridTime lastGridtime;
 
+    private LocalDateTime lastActivity;
+
+    private ProcessStatus processStatus;
+
     private double executionTimeAvg;
     private double executionTimeMax;
 
     private double queueTimeAvg;
     private double queueTimeMax;
 
+    CircuitActivitySummaryRow(MonitorType monitorType, String rowKey) {
+        this.monitorType = monitorType;
+        this.rowKey = rowKey;
+    }
 
     public void aggregateMonitor(CircuitMonitor circuitMonitor) {
 
@@ -32,6 +43,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         ticksFailed += circuitMonitor.getTicksFailed();
 
         lastGridtime = maxGridtime(lastGridtime, circuitMonitor.getLastGridtime());
+        lastActivity = maxDate(lastActivity, circuitMonitor.getLastStatusUpdate());
 
         executionTimeAvg = ((numberWorkers * executionTimeAvg) + circuitMonitor.getRecentExecutionTimeMetric().getAvg()) / (numberWorkers + 1);
         executionTimeMax = Math.max(executionTimeMax, circuitMonitor.getRecentExecutionTimeMetric().getMax());
@@ -43,11 +55,25 @@ public class CircuitActivitySummaryRow implements Cloneable {
         numberWorkers = workers.size();
     }
 
+    public void setProcessStatus(ProcessStatus processStatus) {
+        this.processStatus = processStatus;
+    }
+
+    public UUID getWorkerId() {
+        UUID workerId = null;
+
+        if (workers.size() > 0) {
+            workerId =  workers.iterator().next();
+        }
+        return workerId;
+    }
+
     public void aggregate(CircuitActivitySummaryRow activitySummary) {
         ticksProcessed += activitySummary.getTicksProcessed();
         ticksFailed += activitySummary.getTicksFailed();
 
         lastGridtime = maxGridtime(lastGridtime, activitySummary.getLastGridtime());
+        lastActivity = maxDate(lastActivity, activitySummary.getLastActivity());
 
         executionTimeAvg = ((numberWorkers * executionTimeAvg) +
                 (activitySummary.getNumberWorkers() * activitySummary.getExecutionTimeAvg()) / (numberWorkers + activitySummary.getNumberWorkers()));
@@ -63,18 +89,23 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
     }
 
-    List<String> toRow(String rowKey) {
+    List<String> toRow() {
         List<String> row = new ArrayList<>();
 
-        row.add(CellFormat.toRightSizedCell(rowKey, 10));
+        row.add(CellFormat.toRightSizedCell(rowKey, 18));
         row.add(CellFormat.toCell(numberWorkers, 8));
         row.add(CellFormat.toCell(ticksProcessed, 6));
         row.add(CellFormat.toCell(ticksFailed, 6));
-        row.add(CellFormat.toCell(lastGridtime, 24));
+        row.add(CellFormat.toCell(lastGridtime, 25));
+        row.add(CellFormat.toCell(lastActivity, 15));
         row.add(CellFormat.toCell(executionTimeAvg, 8));
         row.add(CellFormat.toCell(executionTimeMax, 8));
         row.add(CellFormat.toCell(queueTimeAvg, 7));
         row.add(CellFormat.toCell(queueTimeMax, 7));
+
+        if (processStatus != null) {
+            row.add(CellFormat.toRightSizedCell(processStatus.name(), 9));
+        }
 
         return row;
     }
@@ -82,15 +113,20 @@ public class CircuitActivitySummaryRow implements Cloneable {
     List<String> toHeaderRow() {
         List<String> row = new ArrayList<>();
 
-        row.add(CellFormat.toRightSizedCell("", 10));
+        row.add(CellFormat.toRightSizedCell("ID", 18));
         row.add(CellFormat.toRightSizedCell("Workers", 8));
         row.add(CellFormat.toRightSizedCell("Ticks", 6));
         row.add(CellFormat.toRightSizedCell("Fails", 6));
-        row.add(CellFormat.toRightSizedCell("LastGridtime", 24));
+        row.add(CellFormat.toRightSizedCell("Cursor", 25));
+        row.add(CellFormat.toRightSizedCell("LastActivity", 15));
         row.add(CellFormat.toRightSizedCell("ExecAvg", 8));
         row.add(CellFormat.toRightSizedCell("ExecMax", 8));
         row.add(CellFormat.toRightSizedCell("QAvg", 7));
         row.add(CellFormat.toRightSizedCell("QMax", 7));
+
+        if (processStatus != null) {
+            row.add(CellFormat.toRightSizedCell(processStatus.name(), 9));
+        }
 
         return row;
     }
@@ -121,5 +157,19 @@ public class CircuitActivitySummaryRow implements Cloneable {
         }
     }
 
+    private LocalDateTime maxDate(LocalDateTime time1, LocalDateTime time2) {
+        if (time1 == null) {
+            return time2;
+        }
+        if (time2 == null) {
+            return time1;
+        }
+
+        if (time1.isAfter(time2)) {
+            return time1;
+        } else {
+            return time2;
+        }
+    }
 
 }

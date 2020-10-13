@@ -115,16 +115,26 @@ class GridTimeEngineSpec extends Specification {
         given:
 
         gridTimeEngine.configureDaysToKeepAhead(1)
-        gridTimeEngine.configureDoneAfterTicks(100)
+        gridTimeEngine.configureDoneAfterTicks(180)
 
-        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(5);
+        List<OrganizationMemberEntity> teamMembers = createTeamOfMembers(10);
 
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(93)
+        time3 = clockStart.plusMinutes(113)
+        time4 = clockStart.plusMinutes(200)
 
         for (OrganizationMemberEntity member : teamMembers) {
             createIntention(member.getId(), time1)
             createActivity(member.getId(), time2, "/box/file1.java")
+        }
+
+        Iterator teamIter = teamMembers.iterator();
+        for (int i = 0; i < 5; i ++) {
+            OrganizationMemberEntity member = teamIter.next();
+
+            createIntention(member.getId(), time3)
+            createActivity(member.getId(), time4, "/box/file2.java")
         }
 
         when:
@@ -134,11 +144,20 @@ class GridTimeEngineSpec extends Specification {
         gridTimeEngine.waitForDone()
         gridTimeEngine.shutdown()
 
-        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
-        println results
+        GridTableResults results1 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.PLEXER_DETAIL)
+        println results1
+
+        GridTableResults results2 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.TORCHIE_DETAIL)
+        println results2
+
+        GridTableResults results3 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.ALL_DETAIL)
+        println results3
 
         then:
-        assert results != null
+        assert results1 != null
+        assert results2 != null
+        assert results3 != null
+
     }
 
 
