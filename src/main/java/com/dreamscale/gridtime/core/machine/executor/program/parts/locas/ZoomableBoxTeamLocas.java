@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
@@ -8,8 +8,6 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.id.TeamHashId;
-import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
-import com.dreamscale.gridtime.core.machine.memory.grid.CompositeBoxGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.CompositeTeamBoxGrid;
 import lombok.extern.slf4j.Slf4j;
 

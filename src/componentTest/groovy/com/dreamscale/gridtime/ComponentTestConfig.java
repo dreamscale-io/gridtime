@@ -70,6 +70,11 @@ public class ComponentTestConfig extends BaseTestConfig {
     }
 
     @Bean
+    GridClient gridClient() {
+        return createClientWithStaticApiKey(jacksonFeignBuilder, GridClient.class);
+    }
+
+    @Bean
     TalkToClient circuitTalkClient() {
         return createClientWithStaticApiKey(jacksonFeignBuilder, TalkToClient.class);
     }

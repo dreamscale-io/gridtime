@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;

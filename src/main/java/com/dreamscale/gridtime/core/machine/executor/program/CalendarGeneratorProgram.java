@@ -103,6 +103,11 @@ public class CalendarGeneratorProgram implements Program {
         daySequence = getSequence(lastDay);
         weekSequence = getSequence(lastWeek);
 
+        log.debug("init metronome: twenties - "+twentiesSequence);
+        log.debug("init metronome: daypart - "+dayPartSequence);
+        log.debug("init metronome: day - "+daySequence);
+        log.debug("init metronome: week - "+weekSequence);
+
         metronome = new Metronome(calendarJobStart);
     }
 
@@ -117,6 +122,8 @@ public class CalendarGeneratorProgram implements Program {
 
 
     public TickInstructions baseTick(GeometryClock.GridTime fromGridTime, GeometryClock.GridTime toGridTime) {
+        log.debug("Creating tick: "+fromGridTime + ", "+twentiesSequence);
+
         GenerateCalendarTile instruction = new GenerateCalendarTile(calendarService, fromGridTime, twentiesSequence);
         twentiesSequence++;
 

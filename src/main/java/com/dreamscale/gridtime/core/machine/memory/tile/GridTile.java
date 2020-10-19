@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.tile;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;

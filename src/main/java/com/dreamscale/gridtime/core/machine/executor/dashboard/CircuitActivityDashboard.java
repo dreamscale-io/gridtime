@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.RefreshDashboardTick;

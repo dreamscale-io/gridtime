@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.type;
 
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.*;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;

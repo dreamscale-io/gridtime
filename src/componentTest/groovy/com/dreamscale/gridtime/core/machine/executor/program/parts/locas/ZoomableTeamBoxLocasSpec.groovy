@@ -17,7 +17,7 @@ import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
 import com.dreamscale.gridtime.core.machine.GridTimeWorkPile
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
+import com.dreamscale.gridtime.api.grid.Results
 import com.dreamscale.gridtime.core.machine.clock.Metronome
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire
@@ -27,7 +27,6 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile
 import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager

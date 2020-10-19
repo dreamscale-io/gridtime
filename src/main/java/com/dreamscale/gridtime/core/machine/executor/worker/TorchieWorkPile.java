@@ -278,6 +278,8 @@ public class TorchieWorkPile implements WorkPile {
     @Override
     public void reset() {
         evictAll();
+        peekInstruction = null;
+
         paused = false;
     }
 

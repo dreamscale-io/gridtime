@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class CalendarGeneratorJob {
 
@@ -49,8 +51,13 @@ public class CalendarGeneratorJob {
         GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
 
         if (lastTwenty != null) {
+            log.debug("lastTwenty found: clock: "+lastTwenty.getGridTime().getClockTime() + "seq "+lastTwenty.getSequenceNumber() );
+
+            log.debug("lastTwenty found: next: "+lastTwenty.getGridTime().panRight().getClockTime() );
+
             return lastTwenty.getGridTime().panRight().getClockTime();
         } else {
+            log.debug("lastTwenty not found, start at"+ gridClock.getGridStart() );
             return gridClock.getGridStart();
         }
     }

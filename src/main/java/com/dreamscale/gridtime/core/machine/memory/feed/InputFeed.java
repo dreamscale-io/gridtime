@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.feed;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
+import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.Batch;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;

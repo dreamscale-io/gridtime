@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.query.key;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
+import com.dreamscale.gridtime.api.grid.Observable;
 import lombok.Getter;
 
 @Getter

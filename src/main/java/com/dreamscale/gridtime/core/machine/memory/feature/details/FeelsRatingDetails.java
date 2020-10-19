@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
+import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

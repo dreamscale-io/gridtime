@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.clock;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
+import com.dreamscale.gridtime.api.grid.Observable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.ToString;
 

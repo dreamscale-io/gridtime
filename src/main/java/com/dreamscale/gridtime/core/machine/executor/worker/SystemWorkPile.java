@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -15,7 +15,6 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -112,6 +111,7 @@ public class SystemWorkPile implements WorkPile {
         createSystemWorkers();
 
         lastSyncCheck = null;
+        peekInstruction = null;
 
         paused = false;
     }

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class FeatureResolverService {
+
 
 
     @Autowired
@@ -35,11 +37,16 @@ public class FeatureResolverService {
     private final TypeRegistry typeRegistry;
     private final FeatureReferenceFactory featureFactory;
 
-
+    private EntityManager entityManager;
 
     FeatureResolverService() {
         typeRegistry = new TypeRegistry();
         featureFactory = new FeatureReferenceFactory();
+    }
+
+    @PostConstruct
+    void init() {
+        entityManager = entityManagerFactory.createEntityManager();
     }
 
     private boolean isSameBox(String boxNameA, String boxNameB) {
@@ -97,7 +104,6 @@ public class FeatureResolverService {
                     originalReference.getSearchKey(),
                     json);
 
-            EntityManager entityManager = entityManagerFactory.createEntityManager();
 
             entityManager.getTransaction().begin();
 

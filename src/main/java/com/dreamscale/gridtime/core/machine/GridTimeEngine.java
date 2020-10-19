@@ -1,16 +1,17 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.grid.GridStatus;
+import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
-import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Component
@@ -32,16 +33,20 @@ public class GridTimeEngine {
         this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkPile);
     }
 
-    public void start() {
-        gridTimeExecutor.start();
+    public SimpleStatusDto start() {
+        return gridTimeExecutor.start();
+    }
+
+    public SimpleStatusDto restart() {
+        return gridTimeExecutor.restart();
     }
 
     public void reset() {
         gridTimeExecutor.reset();
     }
 
-    public void shutdown() {
-        gridTimeExecutor.shutdown();
+    public SimpleStatusDto shutdown() {
+        return gridTimeExecutor.shutdown();
     }
 
     public void configureDoneAfterTicks(int ticksToWait) {
@@ -64,7 +69,7 @@ public class GridTimeEngine {
         gridTimeExecutor.waitForDone();
     }
 
-    public GridTableResults getDashboardStatus(DashboardActivityScope dashboardActivityScope) {
+    public GridTableResults getDashboard(DashboardActivityScope dashboardActivityScope) {
         return circuitActivityDashboard.getDashboardStatus(dashboardActivityScope);
     }
 
@@ -89,4 +94,16 @@ public class GridTimeEngine {
         return gridTimeWorkPile.submitJob(torchie);
     }
 
+    public GridStatusSummaryDto getStatusSummary() {
+        GridStatusSummaryDto summaryDto = new GridStatusSummaryDto();
+
+        GridStatus status = gridTimeExecutor.getStatus();
+        summaryDto.setGridStatus(status);
+        summaryDto.setMessage(status.getMessage());
+
+        GridTableResults processSummary = circuitActivityDashboard.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY);
+        summaryDto.setActivitySummary(processSummary);
+
+        return summaryDto;
+    }
 }

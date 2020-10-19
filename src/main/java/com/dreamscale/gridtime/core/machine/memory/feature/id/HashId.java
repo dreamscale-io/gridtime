@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.id;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
-import lombok.AllArgsConstructor;
+import com.dreamscale.gridtime.api.grid.Observable;
 
 import java.util.UUID;
 

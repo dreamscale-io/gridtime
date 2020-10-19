@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.domain.journal.JournalEntryEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.flow.FinishStatus
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
+import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window

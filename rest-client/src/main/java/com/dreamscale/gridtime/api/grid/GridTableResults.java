@@ -1,11 +1,17 @@
-package com.dreamscale.gridtime.core.machine.capabilities.cmd.returns;
+package com.dreamscale.gridtime.api.grid;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
+@Data
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class GridTableResults implements Results {
 
     String title;

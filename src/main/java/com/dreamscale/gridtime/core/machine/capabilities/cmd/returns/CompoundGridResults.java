@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd.returns;
 
+import com.dreamscale.gridtime.api.grid.GridTableResults;
+import com.dreamscale.gridtime.api.grid.Results;
 import lombok.Getter;
 import lombok.Setter;
 

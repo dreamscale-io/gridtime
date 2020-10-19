@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityType
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
+import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock

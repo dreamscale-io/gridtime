@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.cell.type;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Observable;
+import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;

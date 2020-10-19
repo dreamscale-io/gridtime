@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;

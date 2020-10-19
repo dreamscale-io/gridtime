@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.instructions;
 
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 

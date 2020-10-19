@@ -1,6 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.instructions;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results;
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyFailureTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;

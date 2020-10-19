@@ -74,6 +74,7 @@ public class PlexerWorkPile implements WorkPile {
         whatsNextWheel.clear();
         whatsNextWheel = createWhatsNextWheel(currentPoolSize);
 
+        peekInstruction = null;
         paused = false;
     }
 

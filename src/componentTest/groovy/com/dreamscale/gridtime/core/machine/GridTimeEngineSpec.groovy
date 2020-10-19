@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.account.SimpleStatusDto
 import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityMetadataField
@@ -9,11 +10,11 @@ import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
 import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 import com.dreamscale.gridtime.core.domain.member.*
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
+import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
+import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -65,7 +66,7 @@ class GridTimeEngineSpec extends Specification {
         time3 = clockStart.plusMinutes(60)
         time4 = clockStart.plusMinutes(95)
 
-        gridTimeEngine.reset()
+        gridTimeEngine.restart()
         //because the cleanup script that deletes the data in tables gets out of sync with the engine state
         gridTimeWorkPile.reset()
     }
@@ -86,7 +87,7 @@ class GridTimeEngineSpec extends Specification {
         gridTimeEngine.shutdown()
 
         when:
-        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
+        GridTableResults results = gridTimeEngine.getDashboard(DashboardActivityScope.GRID_SUMMARY)
         println results
 
         then:
@@ -98,13 +99,15 @@ class GridTimeEngineSpec extends Specification {
 
         gridTimeEngine.configureDoneAfterTicks(200)
 
-        gridTimeEngine.start()
+        SimpleStatusDto status = gridTimeEngine.start()
+
+        println status;
 
         gridTimeEngine.waitForDone(1000)
         gridTimeEngine.shutdown()
 
         when:
-        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
+        GridTableResults results = gridTimeEngine.getDashboard(DashboardActivityScope.GRID_SUMMARY)
         println results
 
         then:
@@ -144,13 +147,13 @@ class GridTimeEngineSpec extends Specification {
         gridTimeEngine.waitForDone()
         gridTimeEngine.shutdown()
 
-        GridTableResults results1 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.PLEXER_DETAIL)
+        GridTableResults results1 = gridTimeEngine.getDashboard(DashboardActivityScope.PLEXER_DETAIL)
         println results1
 
-        GridTableResults results2 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.TORCHIE_DETAIL)
+        GridTableResults results2 = gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
         println results2
 
-        GridTableResults results3 = gridTimeEngine.getDashboardStatus(DashboardActivityScope.ALL_DETAIL)
+        GridTableResults results3 = gridTimeEngine.getDashboard(DashboardActivityScope.ALL_DETAIL)
         println results3
 
         then:
@@ -178,7 +181,7 @@ class GridTimeEngineSpec extends Specification {
         gridTimeEngine.shutdown()
 
         when:
-        GridTableResults results = gridTimeEngine.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY)
+        GridTableResults results = gridTimeEngine.getDashboard(DashboardActivityScope.GRID_SUMMARY)
         println results
 
         then:

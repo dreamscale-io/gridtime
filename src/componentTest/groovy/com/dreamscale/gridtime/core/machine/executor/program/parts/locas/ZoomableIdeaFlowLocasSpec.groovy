@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
 import com.dreamscale.gridtime.core.hooks.talk.dto.CircuitMessageType
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
+import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.clock.Metronome

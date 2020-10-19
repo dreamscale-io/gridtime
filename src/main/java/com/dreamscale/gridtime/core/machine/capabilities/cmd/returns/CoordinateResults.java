@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd.returns;
 
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import lombok.Getter;
 

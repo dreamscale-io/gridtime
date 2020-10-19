@@ -56,10 +56,14 @@ public class ResourcePaths {
     public static final String TORCHIE_PATH = "/torchie";
     public static final String PLEXER_PATH = "/plexer";
 
+
     public static final String TERMINAL_PATH = "/terminal";
     public static final String GRID_PATH = "/grid";
+    public static final String SHUTDOWN_PATH = "/shutdown";
+    public static final String RESTART_PATH = "/restart";
     public static final String TOP_PATH = "/top";
     public static final String PROCESS_PATH = "/process";
+    public static final String SUMMARY_PATH = "/summary";
     public static final String HALT_PATH = "/halt";
 
 

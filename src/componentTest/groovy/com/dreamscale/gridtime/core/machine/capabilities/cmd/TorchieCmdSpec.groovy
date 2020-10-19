@@ -5,8 +5,8 @@ import com.dreamscale.gridtime.core.domain.member.json.Member
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.GridTableResults
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.Results
+import com.dreamscale.gridtime.api.grid.GridTableResults
+import com.dreamscale.gridtime.api.grid.Results
 import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkPile
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag

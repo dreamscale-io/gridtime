@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.worker
 
 import com.dreamscale.gridtime.ComponentTest
-import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity
 import com.dreamscale.gridtime.core.domain.journal.ProjectEntity
@@ -11,21 +10,17 @@ import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.TeamEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
-import com.dreamscale.gridtime.core.domain.work.WorkToDoType
+import com.dreamscale.gridtime.core.machine.GridTimeEngine
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.CoordinateResults
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire
-import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent
-import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard
+import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
 import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
-@Ignore
 @ComponentTest
 class TorchieWorkPileSpec extends Specification {
     @Autowired
@@ -35,6 +30,10 @@ class TorchieWorkPileSpec extends Specification {
     TorchieWorkPile torchieWorkPile
 
     UUID teamId
+
+    @Autowired
+    GridTimeEngine gridTimeEngine;
+
 
     LocalDateTime clockStart
     LocalDateTime time1
@@ -52,8 +51,7 @@ class TorchieWorkPileSpec extends Specification {
         org = aRandom.organizationEntity().save()
         team = aRandom.teamEntity().id(teamId).organizationId(org.id).save()
 
-        systemWorkPile.reset()
-        torchieWorkPile.reset()
+        gridTimeEngine.reset();
     }
 
     def "should spin up torchies that havent been processed yet"() {
@@ -85,9 +83,13 @@ class TorchieWorkPileSpec extends Specification {
 
         TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
 
+        println gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
+
         for (int i = 0; i < 10; i++) {
             torchieInstruction = torchieWorkPile.whatsNext().call();
         }
+
+        println gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
 
         then:
         assert torchieInstruction != null
@@ -123,6 +125,8 @@ class TorchieWorkPileSpec extends Specification {
         when:
         torchieWorkPile.sync()
 
+        println gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
+
         TickInstructions torchieInstruction = torchieWorkPile.whatsNext().call();
 
         for (int i = 0; i < 40; i++) {
@@ -132,6 +136,8 @@ class TorchieWorkPileSpec extends Specification {
                 torchieInstruction.call()
             }
         }
+
+        println gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
 
         then:
         assert torchieWorkPile.size() == 0
