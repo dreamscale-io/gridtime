@@ -66,9 +66,7 @@ class GridTimeEngineSpec extends Specification {
         time3 = clockStart.plusMinutes(60)
         time4 = clockStart.plusMinutes(95)
 
-        gridTimeEngine.restart()
-        //because the cleanup script that deletes the data in tables gets out of sync with the engine state
-        gridTimeWorkPile.reset()
+        gridTimeEngine.reset()
     }
 
     def cleanup() {

@@ -24,7 +24,6 @@ import java.util.UUID;
 public class FeatureResolverService {
 
 
-
     @Autowired
     TeamCapability teamCapability;
 
@@ -72,13 +71,11 @@ public class FeatureResolverService {
 
         if (!originalReference.isResolved()) {
 
-           synchronized (originalReference.getFeatureType()) {
-
+            synchronized (this) {
                 if (!originalReference.isResolved()) {
                     tryToResolve(teamId, originalReference);
                 }
-
-           }
+            }
         }
     }
 
@@ -96,7 +93,7 @@ public class FeatureResolverService {
         } else {
 
             String json = serialize(originalReference.getDetails());
-            log.info("json = "+json);
+            log.info("json = " + json);
             GridFeatureEntity newFeature = new GridFeatureEntity(
                     originalReference.getFeatureId(),
                     teamId,
@@ -111,7 +108,7 @@ public class FeatureResolverService {
 
             entityManager.getTransaction().commit();
 
-            log.info("Created Feature Reference "+originalReference.getSearchKey());
+            log.info("Created Feature Reference " + originalReference.getSearchKey());
 
             originalReference.resolve();
         }
@@ -137,7 +134,6 @@ public class FeatureResolverService {
             return null;
         }
     }
-
 
 
 }

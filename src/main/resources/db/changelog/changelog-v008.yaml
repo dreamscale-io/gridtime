@@ -17,3 +17,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/replace_torchie_feed_cursor.sql
+
+  - include:
+      file: db/v008/alter_calendar_add_constraint.sql
