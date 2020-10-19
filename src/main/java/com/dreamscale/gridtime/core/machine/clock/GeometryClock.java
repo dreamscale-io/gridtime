@@ -391,7 +391,7 @@ public class GeometryClock {
         }
 
         public boolean isAfter(GridTime other) {
-            for (int i = 0; i < coords.length; i++) {
+            for (int i = 0; i < coords.length && i < other.coords.length; i++) {
                 if (coords[i] > other.coords[i]) {
                     return true;
                 }

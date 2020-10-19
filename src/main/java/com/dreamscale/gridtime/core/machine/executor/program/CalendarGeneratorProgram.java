@@ -22,6 +22,8 @@ public class CalendarGeneratorProgram implements Program {
     private long dayPartSequence;
     private long daySequence;
     private long weekSequence;
+    private long blockSequence;
+    private long yearSequence;
 
     private Metronome metronome;
 
@@ -97,16 +99,22 @@ public class CalendarGeneratorProgram implements Program {
         GeometryClock.GridTimeSequence lastDayPart = calendarService.getLast(ZoomLevel.DAY_PART);
         GeometryClock.GridTimeSequence lastDay = calendarService.getLast(ZoomLevel.DAY);
         GeometryClock.GridTimeSequence lastWeek = calendarService.getLast(ZoomLevel.WEEK);
+        GeometryClock.GridTimeSequence lastBlock = calendarService.getLast(ZoomLevel.BLOCK);
+        GeometryClock.GridTimeSequence lastYear = calendarService.getLast(ZoomLevel.YEAR);
 
         twentiesSequence = getSequence(lastTwenty);
         dayPartSequence = getSequence(lastDayPart);
         daySequence = getSequence(lastDay);
         weekSequence = getSequence(lastWeek);
+        blockSequence = getSequence(lastBlock);
+        yearSequence = getSequence(lastYear);
 
         log.debug("init metronome: twenties - "+twentiesSequence);
         log.debug("init metronome: daypart - "+dayPartSequence);
         log.debug("init metronome: day - "+daySequence);
         log.debug("init metronome: week - "+weekSequence);
+        log.debug("init metronome: block - "+blockSequence);
+        log.debug("init metronome: year - "+yearSequence);
 
         metronome = new Metronome(calendarJobStart);
     }
@@ -145,6 +153,14 @@ public class CalendarGeneratorProgram implements Program {
             case WEEK:
                 instruction = new GenerateCalendarTile(calendarService, fromGridTime, weekSequence);
                 weekSequence++;
+                break;
+            case BLOCK:
+                instruction = new GenerateCalendarTile(calendarService, fromGridTime, blockSequence);
+                blockSequence++;
+                break;
+            case YEAR:
+                instruction = new GenerateCalendarTile(calendarService, fromGridTime, yearSequence);
+                yearSequence++;
                 break;
         }
 

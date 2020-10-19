@@ -20,9 +20,6 @@ import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 @ComponentTest
 class TorchieSpec extends Specification {
 
-//    @Autowired
-//    StoryTileRepository tileRepository;
-
     @Autowired
     TorchieFactory torchieFactory
 

@@ -250,7 +250,6 @@ class TerminalResourceSpec extends Specification {
 
         then:
         assert psResult != null
-        assert results.getCell(0, 2) == "20"
     }
 
 
