@@ -10,19 +10,31 @@ import java.util.List;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class GridTableResults implements Results {
 
-    String title;
-    List<String> headers;
-    List<List<String>> rowsOfPaddedCells;
+    private String title;
+    private List<String> headers;
+    private List<List<String>> rowsOfPaddedCells;
 
+    private String display;
+
+    public GridTableResults(String title, List<String> headers, List<List<String>> rowsOfPaddedCells) {
+        this.title = title;
+        this.headers = headers;
+        this.rowsOfPaddedCells = rowsOfPaddedCells;
+        this.display = toDisplayString();
+    }
 
     public String getCell(String rowKey, String columnKey) {
         int columnIndex = findColumnIndex(columnKey);
         int rowIndex = findRowIndex(rowKey);
 
+        return rowsOfPaddedCells.get(rowIndex).get(columnIndex).trim();
+    }
+
+    public String getCell(int rowIndex, int columnIndex) {
         return rowsOfPaddedCells.get(rowIndex).get(columnIndex).trim();
     }
 

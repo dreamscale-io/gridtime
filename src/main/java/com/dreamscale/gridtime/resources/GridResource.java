@@ -1,15 +1,26 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
+import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto;
+import com.dreamscale.gridtime.api.terminal.Command;
+import com.dreamscale.gridtime.api.terminal.CommandGroup;
+import com.dreamscale.gridtime.core.capability.terminal.TerminalRoute;
+import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.GridTimeEngine;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -18,6 +29,19 @@ public class GridResource {
 
     @Autowired
     GridTimeEngine gridTimeEngine;
+
+    @Autowired
+    private TerminalRouteRegistry terminalRouteRegistry;
+
+    @PostConstruct
+    void init() {
+        terminalRouteRegistry.register(CommandGroup.GRID,
+                Command.GRID, "Start and stop the Gridtime operating system.", new GridTerminalRoute());
+
+        terminalRouteRegistry.register(CommandGroup.GRID,
+                Command.PS, "Show top process activity.", new PsTerminalRoute());
+
+    }
 
     /**
      * Startup the gridtime engine, and start processing data
@@ -94,6 +118,84 @@ public class GridResource {
     @GetMapping(ResourcePaths.PROCESS_PATH + ResourcePaths.PLEXER_PATH)
     public GridTableResults getTopPlexerProcesses() {
         return gridTimeEngine.getDashboard(DashboardActivityScope.PLEXER_DETAIL);
+    }
+
+
+    private class GridTerminalRoute extends TerminalRoute {
+
+        private static final String OPERATION_PARAM = "operation";
+
+        private static final String START_OPERATION_CHOICE = "start";
+        private static final String STOP_OPERATION_CHOICE = "stop";
+        private static final String RESTART_OPERATION_CHOICE = "restart";
+        private static final String STATUS_OPERATION_CHOICE = "status";
+
+        GridTerminalRoute() {
+            super(Command.GRID, "{" + OPERATION_PARAM + "}");
+
+            describeTextOption(OPERATION_PARAM, "operation to send to the grid");
+            describeChoiceOption(OPERATION_PARAM, START_OPERATION_CHOICE, STOP_OPERATION_CHOICE, RESTART_OPERATION_CHOICE, STATUS_OPERATION_CHOICE);
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+            String operation = params.get(OPERATION_PARAM);
+
+            if (operation.equals(START_OPERATION_CHOICE) ) {
+                return start();
+            }
+
+            if (operation.equals(STOP_OPERATION_CHOICE)) {
+                return shutdown();
+            }
+
+            if (operation.equals(RESTART_OPERATION_CHOICE)) {
+                return restart();
+            }
+
+            if (operation.equals(STATUS_OPERATION_CHOICE)) {
+                return getStatus();
+            }
+
+            throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find a matching terminal command to execute");
+
+        }
+    }
+
+
+    private class PsTerminalRoute extends TerminalRoute {
+
+        private static final String SCOPE_PARAM = "scope";
+        private static final String ALL_PS_CHOICE = "all";
+        private static final String TORCHIE_PS_CHOICE = "torchie";
+        private static final String PLEXER_PS_CHOICE = "plexer";
+
+        PsTerminalRoute() {
+            super(Command.PS, "{" + SCOPE_PARAM + "}");
+
+            describeChoiceOption(SCOPE_PARAM, ALL_PS_CHOICE, TORCHIE_PS_CHOICE, PLEXER_PS_CHOICE);
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+            String scope = params.get(SCOPE_PARAM);
+
+            if (scope.equals(ALL_PS_CHOICE) ) {
+                return getTopProcesses();
+            }
+
+            if (scope.equals(TORCHIE_PS_CHOICE) ) {
+                return getTopTorchieProcesses();
+            }
+
+            if (scope.equals(PLEXER_PS_CHOICE) ) {
+                return getTopPlexerProcesses();
+            }
+
+            throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find a matching terminal command to execute");
+
+        }
+
     }
 }
 

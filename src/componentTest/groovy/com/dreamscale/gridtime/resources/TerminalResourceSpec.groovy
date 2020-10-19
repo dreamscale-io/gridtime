@@ -3,6 +3,9 @@ package com.dreamscale.gridtime.resources
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
+import com.dreamscale.gridtime.api.grid.GridStatus
+import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto
+import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
@@ -16,6 +19,8 @@ import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
+import com.dreamscale.gridtime.core.machine.GridTimeEngine
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
 import spock.lang.Specification
@@ -61,11 +66,19 @@ class TerminalResourceSpec extends Specification {
     @Autowired
     GridClock mockGridClock;
 
+    @Autowired
+    GridTimeEngine gridTimeEngine;
+
+    @Autowired
+    GridClient gridClient;
+
     String activationCode = null;
 
     def setup() {
         mockGridClock.now() >> LocalDateTime.now()
         mockGridClock.nanoTime() >> System.nanoTime()
+
+        gridTimeEngine.reset()
     }
 
     def "should test terminal loop for a basic invite command"() {
@@ -184,6 +197,62 @@ class TerminalResourceSpec extends Specification {
         assert zoesProj1.getId() == proj1.getId()
 
     }
+
+
+    def "should start stop grid from terminal"() {
+
+        given:
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+        gridTimeEngine.configureDoneAfterTicks(20)
+
+        when:
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+
+        GridStatusSummaryDto statusBefore = gridClient.getStatus();
+
+        TalkMessageDto gridStopResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "stop"))
+
+        GridStatusSummaryDto statusAfter = gridClient.getStatus();
+
+        then:
+        assert gridStartResult != null
+        assert gridStopResult != null
+
+        assert statusBefore.getGridStatus().equals(GridStatus.RUNNING)
+        assert statusAfter.getGridStatus().equals(GridStatus.STOPPED)
+    }
+
+    def "should display grid processes from terminal"() {
+
+        given:
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+        gridTimeEngine.configureDoneAfterTicks(20)
+
+        when:
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+
+        gridTimeEngine.waitForDone()
+
+        TalkMessageDto psResult = terminalClient.runCommand(new CommandInputDto(Command.PS, "all"))
+        GridTableResults results = (GridTableResults) psResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert psResult != null
+        assert results.getCell(0, 2) == "20"
+    }
+
 
     def "should unshare project for user from terminal"() {
 
@@ -306,7 +375,7 @@ class TerminalResourceSpec extends Specification {
 
         then:
         assert manual != null
-        assert manual.getGroups().size() == 2;
+        assert manual.getGroups().size() == 3;
 
         assert inviteManPage != null
         assert inviteManPage.getCommandGroup() == Command.INVITE.name()
