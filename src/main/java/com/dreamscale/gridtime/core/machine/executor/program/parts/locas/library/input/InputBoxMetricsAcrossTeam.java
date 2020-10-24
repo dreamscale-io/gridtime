@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputBoxMetricsAcrossTeam implements InputStrategy<ZoomableTeamBoxMetricsEntity> {
+public class InputBoxMetricsAcrossTeam implements AggregateInputStrategy<ZoomableTeamBoxMetricsEntity> {
 
     @Autowired
     ZoomableTeamBoxMetricsRepository zoomableTeamBoxMetricsRepository;

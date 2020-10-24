@@ -23,7 +23,6 @@ import java.util.UUID;
 @Component
 public class FeatureResolverService {
 
-
     @Autowired
     TeamCapability teamCapability;
 
@@ -52,9 +51,9 @@ public class FeatureResolverService {
         return boxNameA != null && boxNameA.equals(boxNameB);
     }
 
-    public PlaceReference lookupBox(UUID teamId, UUID boxFeatureId) {
+    public PlaceReference lookupBox(UUID organizationId, UUID boxFeatureId) {
 
-        GridFeatureEntity boxFeatureEntity = gridFeatureRepository.findByTeamIdAndId(teamId, boxFeatureId);
+        GridFeatureEntity boxFeatureEntity = gridFeatureRepository.findByOrganizationIdAndId(organizationId, boxFeatureId);
 
         if (boxFeatureEntity != null) {
             FeatureType featureType = lookupFeatureType(boxFeatureEntity.getTypeUri());
@@ -67,21 +66,21 @@ public class FeatureResolverService {
         return null;
     }
 
-    public void resolve(UUID teamId, FeatureReference originalReference) {
+    public void resolve(UUID organizationId, FeatureReference originalReference) {
 
         if (!originalReference.isResolved()) {
 
             synchronized (this) {
                 if (!originalReference.isResolved()) {
-                    tryToResolve(teamId, originalReference);
+                    tryToResolve(organizationId, originalReference);
                 }
             }
         }
     }
 
-    protected void tryToResolve(UUID teamId, FeatureReference originalReference) {
+    protected void tryToResolve(UUID organizationId, FeatureReference originalReference) {
 
-        GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByTeamIdAndSearchKey(teamId, originalReference.getSearchKey());
+        GridFeatureEntity gridFeatureEntity = gridFeatureRepository.findByOrganizationIdAndSearchKey(organizationId, originalReference.getSearchKey());
 
         if (gridFeatureEntity != null) {
 
@@ -96,7 +95,7 @@ public class FeatureResolverService {
             log.info("json = " + json);
             GridFeatureEntity newFeature = new GridFeatureEntity(
                     originalReference.getFeatureId(),
-                    teamId,
+                    organizationId,
                     originalReference.getFeatureType().getTypeUri(),
                     originalReference.getSearchKey(),
                     json);

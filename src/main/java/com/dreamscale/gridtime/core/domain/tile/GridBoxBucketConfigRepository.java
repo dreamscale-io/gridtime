@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface GridBoxBucketConfigRepository extends CrudRepository<GridBoxBucketConfigEntity, UUID> {
 
-    List<GridBoxBucketConfigEntity> findByTeamId(UUID teamId);
+    List<GridBoxBucketConfigEntity> findByProjectId(UUID projectId);
 }

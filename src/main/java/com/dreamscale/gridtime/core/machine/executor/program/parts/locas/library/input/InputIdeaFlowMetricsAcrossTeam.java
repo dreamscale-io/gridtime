@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class InputIdeaFlowMetricsAcrossTeam implements InputStrategy<ZoomableTeamIdeaFlowMetricsEntity> {
+public class InputIdeaFlowMetricsAcrossTeam implements AggregateInputStrategy<ZoomableTeamIdeaFlowMetricsEntity> {
 
     @Autowired
     ZoomableTeamIdeaFlowMetricsRepository zoomableTeamIdeaFlowMetricsRepository;

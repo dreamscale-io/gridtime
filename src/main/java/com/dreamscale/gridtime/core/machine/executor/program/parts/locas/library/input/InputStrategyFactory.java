@@ -22,12 +22,18 @@ public class InputStrategyFactory {
         switch (inputType) {
             case QUERY_IDEA_FLOW_METRICS:
                 return (InputStrategy<T>) inputIdeaFlow;
-            case QUERY_TEAM_IDEA_FLOW_METRICS:
-                return (InputStrategy<T>) inputIdeaFlowMetricsAcrossTeam;
             case QUERY_BOX_METRICS:
                 return (InputStrategy<T>) inputBoxMetricsAcrossTime;
+        }
+        return null;
+    }
+
+    public <T> AggregateInputStrategy<T> getAggregate(InputType inputType) {
+        switch (inputType) {
+            case QUERY_TEAM_IDEA_FLOW_METRICS:
+                return (AggregateInputStrategy<T>) inputIdeaFlowMetricsAcrossTeam;
             case QUERY_TEAM_BOX_METRICS:
-                return (InputStrategy<T>) inputBoxMetricsAcrossTeam;
+                return (AggregateInputStrategy<T>) inputBoxMetricsAcrossTeam;
         }
         return null;
     }

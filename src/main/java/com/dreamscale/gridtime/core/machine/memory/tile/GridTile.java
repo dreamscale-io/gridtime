@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.id.TorchieHashId;
@@ -39,18 +39,18 @@ public class GridTile {
     private final MusicClock musicClock;
     private final MusicGrid musicGrid;
     private final TileAnalytics tileAnalytics;
-    private final TeamBoxConfiguration teamBoxConfiguration;
+    private final BoxResolver boxResolver;
 
     private transient FeatureCache featureCache;
 
     private final List<TimeBomb> timeBombTriggers;
 
     public GridTile(UUID torchieId, GeometryClock.GridTime gridTime, FeatureCache featureCache,
-                    TeamBoxConfiguration teamBoxConfiguration) {
+                    BoxResolver boxResolver) {
         this.torchieId = torchieId;
         this.gridTime = gridTime;
         this.featureCache = featureCache;
-        this.teamBoxConfiguration = teamBoxConfiguration;
+        this.boxResolver = boxResolver;
 
         this.zoomLevel = gridTime.getZoomLevel();
         this.musicClock = new MusicClock(zoomLevel);
@@ -167,7 +167,7 @@ public class GridTile {
             log.warn("Unable to identify projectId to lookup location, using default project");
         }
 
-        String box = teamBoxConfiguration.identifyBox(projectContext.getReferenceId(), locationPath);
+        String box = boxResolver.identifyBox(projectContext.getReferenceId(), locationPath);
         PlaceReference locationInBox = featureCache.lookupLocationReference(projectContext.getReferenceId(), box, locationPath);
 
         musicGrid.gotoLocation(moment, locationInBox, timeInLocation);

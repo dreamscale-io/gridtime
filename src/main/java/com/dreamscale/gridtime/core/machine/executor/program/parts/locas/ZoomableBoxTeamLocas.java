@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.AggregateInputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
@@ -18,7 +19,7 @@ import java.util.UUID;
 public abstract class ZoomableBoxTeamLocas<T> implements Locas {
 
     private final UUID teamId;
-    private final InputStrategy<T> input;
+    private final AggregateInputStrategy<T> input;
     private final OutputStrategy output;
 
     private final FeatureCache featureCache;
@@ -26,7 +27,7 @@ public abstract class ZoomableBoxTeamLocas<T> implements Locas {
     private CompositeTeamBoxGrid compositeTeamBoxGrid;
 
     public ZoomableBoxTeamLocas(UUID teamId, FeatureCache featureCache,
-                                InputStrategy<T> input,
+                                AggregateInputStrategy<T> input,
                                 OutputStrategy output) {
         this.teamId = teamId;
         this.featureCache = featureCache;

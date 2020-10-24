@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.now
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureReferenceFactory
@@ -47,7 +47,7 @@ class EyeSpec extends Specification {
     PlaceReference file2A
     PlaceReference file2B
 
-    TeamBoxConfiguration teamBoxConfiguration
+    BoxResolver boxResolver
 
 
     def setup() {
@@ -59,12 +59,10 @@ class EyeSpec extends Specification {
         torchieId = UUID.randomUUID()
         circleId = UUID.randomUUID();
 
-        TeamBoxConfiguration.Builder builder = new TeamBoxConfiguration.Builder();
-        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
-        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
-        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode3", "/box3/*"))
-
-        teamBoxConfiguration = builder.build();
+        boxResolver = new BoxResolver();
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("aBoxOfCode3", "/box3/*"))
 
         featureCache = new FeatureCache();
 
@@ -122,7 +120,7 @@ class EyeSpec extends Specification {
     }
 
     IMusicGrid generateSplitWTFExperienceGrid(PlaceReference ... gotoLocations) {
-        GridTile gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache, teamBoxConfiguration)
+        GridTile gridTile = new GridTile(torchieId, clock.getActiveGridTime(), featureCache, boxResolver)
 
         gridTile.startWorkContext(time1, new WorkContextEvent(
                 intentionId, "start work",

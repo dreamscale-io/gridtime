@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.domain.journal.TaskEntity
 
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
+import com.dreamscale.gridtime.core.machine.commons.DefaultCollections
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,15 +30,17 @@ class TorchieSpec extends Specification {
     UUID torchieId
     UUID teamId
     LocalDateTime clockStart
+    UUID orgId
 
     def "should create executable torchie job that doesn't splode"() {
         given:
+        orgId = UUID.randomUUID();
         torchieId = UUID.randomUUID();
         teamId = UUID.randomUUID();
 
         clockStart = LocalDateTime.of(2019, 1, 7, 0, 0)
 
-        Torchie torchie = torchieFactory.wireUpMemberTorchie(teamId, torchieId, clockStart)
+        Torchie torchie = torchieFactory.wireUpMemberTorchie(orgId, torchieId, teamId, clockStart)
 
         calendarService.saveCalendar(1, 15, torchie.getActiveTick().from)
         calendarService.saveCalendar(1, 2, torchie.getActiveTick().from.zoomOut())

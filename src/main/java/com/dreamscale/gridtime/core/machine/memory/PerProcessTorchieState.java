@@ -1,13 +1,14 @@
 package com.dreamscale.gridtime.core.machine.memory;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.TileSearchService;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,13 +16,15 @@ public class PerProcessTorchieState extends AbstractTorchieState {
 
     private final FeatureResolverService featureResolverService;
     private final TileSearchService tileSearchService;
+    private final BoxResolver boxResolver;
 
-    public PerProcessTorchieState(UUID teamId, UUID torchieId, FeatureCache featureCache, TeamBoxConfiguration teamBoxConfiguration,
+    public PerProcessTorchieState(UUID organizationId, UUID torchieId, List<UUID> teamIds, FeatureCache featureCache, BoxResolver boxResolver,
                                   FeatureResolverService featureResolverService, TileSearchService tileSearchService) {
-        super(torchieId, teamId, teamBoxConfiguration, featureCache);
+        super(organizationId, torchieId, teamIds, boxResolver, featureCache);
 
         this.featureResolverService = featureResolverService;
         this.tileSearchService = tileSearchService;
+        this.boxResolver = boxResolver;
     }
 
 
@@ -30,7 +33,7 @@ public class PerProcessTorchieState extends AbstractTorchieState {
         Set<FeatureReference> features = getActiveTile().getAllFeatures();
 
         for (FeatureReference feature : features) {
-            featureResolverService.resolve(getTeamId(), feature);
+            featureResolverService.resolve(getOrganizationId(), feature);
         }
     }
 

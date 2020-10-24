@@ -105,7 +105,7 @@ public class AdminService {
         for (BoxMatcherConfig config : boxMatcherConfigs) {
             GridBoxBucketConfigEntity configEntity = new GridBoxBucketConfigEntity();
             configEntity.setId(UUID.randomUUID());
-            configEntity.setTeamId(teamId);
+            configEntity.setOrganizationId(teamId);
             configEntity.setProjectId(projectId);
             configEntity.setBoxName(config.getBox());
             configEntity.setBoxMatcherConfigJson(JSONTransformer.toJson(config));

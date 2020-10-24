@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.core.domain.tile.zoomable.ZoomableTeamBoxMetricsE
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableBoxTeamLocas;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.ZoomableTeamLocas;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.AggregateInputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.input.InputStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.output.OutputStrategy;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
@@ -23,7 +24,7 @@ public class ZoomableTeamBoxLocas extends ZoomableBoxTeamLocas<ZoomableTeamBoxMe
 
 
     public ZoomableTeamBoxLocas(UUID teamId, FeatureCache featureCache,
-                                InputStrategy<ZoomableTeamBoxMetricsEntity> input,
+                                AggregateInputStrategy<ZoomableTeamBoxMetricsEntity> input,
                                 OutputStrategy output) {
         super(teamId, featureCache, input, output);
 

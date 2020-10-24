@@ -4,8 +4,10 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity;
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamRepository;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.machine.Torchie;
@@ -57,6 +59,9 @@ public class TorchieWorkPile implements WorkPile {
 
     @Autowired
     private FlowActivityRepository flowActivityRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
@@ -134,7 +139,6 @@ public class TorchieWorkPile implements WorkPile {
                 torchieCursor.setId(UUID.randomUUID());
                 torchieCursor.setTorchieId(teamMember.getMemberId());
                 torchieCursor.setOrganizationId(teamMember.getOrganizationId());
-                torchieCursor.setTeamId(teamMember.getTeamId());
                 torchieCursor.setFirstTilePosition(firstTilePosition);
                 torchieCursor.setLastPublishedDataCursor(lastPublishedDataPosition);
                 torchieCursor.setNextWaitUntilCursor(firstTilePosition.plus(ZoomLevel.TWENTY.getDuration()));
@@ -179,7 +183,19 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     private Torchie loadTorchie(TorchieFeedCursorEntity cursor) {
-        return torchieFactory.wireUpMemberTorchie(cursor.getTeamId(), cursor.getTorchieId(), getStartPosition(cursor), getRunUntil(cursor));
+        List<UUID> teamIds = loadTeamIds(cursor.getOrganizationId(), cursor.getTorchieId());
+        return torchieFactory.wireUpMemberTorchie(cursor.getOrganizationId(), cursor.getTorchieId(), teamIds, getStartPosition(cursor), getRunUntil(cursor));
+    }
+
+    private List<UUID> loadTeamIds(UUID organizationId, UUID memberId) {
+        List<TeamEntity> teams = teamRepository.findMyTeamsByOrgMembership(organizationId, memberId);
+
+        List<UUID> teamIds = new ArrayList<>();
+        for (TeamEntity team : teams) {
+            teamIds.add(team.getId());
+        }
+
+        return teamIds;
     }
 
 

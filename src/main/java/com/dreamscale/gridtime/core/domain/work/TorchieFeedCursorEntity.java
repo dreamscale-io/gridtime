@@ -26,9 +26,6 @@ public class TorchieFeedCursorEntity {
     private UUID torchieId;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamId;
-
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID organizationId;
 
     private LocalDateTime lastPublishedDataCursor;

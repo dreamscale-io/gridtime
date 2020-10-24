@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.locas
 
 import com.dreamscale.gridtime.ComponentTest
+import com.dreamscale.gridtime.api.grid.Results
 import com.dreamscale.gridtime.core.domain.circuit.message.WTFFeedMessageEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsEntity
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository
@@ -48,19 +49,21 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
     Metronome metronome
 
     Torchie torchie
+    UUID orgId
 
 
     def setup() {
 
+        orgId = UUID.randomUUID()
         torchieId = UUID.randomUUID()
         teamId = UUID.randomUUID()
 
-        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(teamId, torchieId);
+        ideaflowAggregatorLocas = locasFactory.createIdeaFlowAggregatorLocas(torchieId);
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)
 
-        torchie = torchieFactory.wireUpMemberTorchie(UUID.randomUUID(), torchieId, clockStart);
+        torchie = torchieFactory.wireUpMemberTorchie(orgId, torchieId, teamId, clockStart);
 
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(45)
@@ -93,7 +96,7 @@ class ZoomableIdeaFlowLocasSpec extends Specification {
         when:
         ideaflowAggregatorLocas.runProgram(aggregateTick)
 
-        GridTableResults results = ideaflowAggregatorLocas.playAllTracks();
+        Results results = ideaflowAggregatorLocas.playAllTracks();
         println results
 
         then:

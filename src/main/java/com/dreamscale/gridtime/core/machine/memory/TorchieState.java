@@ -3,21 +3,24 @@ package com.dreamscale.gridtime.core.machine.memory;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TorchieState {
 
-    UUID getTeamId();
-
     UUID getTorchieId();
 
-    void changeBoxConfiguration(TeamBoxConfiguration teamBoxConfiguration);
+    UUID getOrganizationId();
+
+    List<UUID> getTeamIds();
+
+    void changeBoxConfiguration(BoxResolver boxResolver);
 
     void gotoPosition(GeometryClock.GridTime toGridPosition);
 

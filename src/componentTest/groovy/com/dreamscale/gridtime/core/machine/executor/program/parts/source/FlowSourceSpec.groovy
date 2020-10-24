@@ -33,10 +33,13 @@ class FlowSourceSpec extends Specification {
     FlowSource journalFlowSource
     Window latestWindow
     FlowSource activityFlowSource
+    UUID orgId
 
     def setup() {
+        this.orgId = UUID.randomUUID();
         this.memberId = UUID.randomUUID();
-        this.featurePool = new MemoryOnlyTorchieState(memberId);
+
+        this.featurePool = new MemoryOnlyTorchieState(orgId, memberId);
 
         FlowObserver flowObserverMock =
                 [see: { Window window, TorchieState pool -> this.latestWindow = window }] as FlowObserver

@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
@@ -41,8 +41,8 @@ public class Torchie implements Worker {
         return torchieState.getInputFeed(type);
     }
 
-    public void changeBoxConfiguration(TeamBoxConfiguration teamBoxConfiguration) {
-        torchieState.changeBoxConfiguration(teamBoxConfiguration);
+    public void changeBoxConfiguration(BoxResolver boxResolver) {
+        torchieState.changeBoxConfiguration(boxResolver);
     }
 
 

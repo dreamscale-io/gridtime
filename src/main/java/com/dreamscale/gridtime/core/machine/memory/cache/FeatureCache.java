@@ -5,10 +5,12 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 import com.dreamscale.gridtime.core.machine.memory.type.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.LRUMap;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Slf4j
+@Component
 public class FeatureCache {
 
     private static final int BOX_CACHE_SIZE = 50;

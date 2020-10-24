@@ -9,7 +9,6 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWork
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +27,6 @@ public class PlexerWorkPile implements WorkPile {
 
     @Autowired
     AggregateWorkToDoQueueWire workToDoWire;
-
-    @Autowired
-    FeatureCacheManager featureCacheManager;
-
 
     private TickInstructions peekInstruction;
 
@@ -55,7 +50,7 @@ public class PlexerWorkPile implements WorkPile {
         for (int i = 0; i < initialPoolSize; i++) {
             UUID workerId = UUID.randomUUID();
             CircuitMonitor circuitMonitor = new CircuitMonitor(ProcessType.Plexer, workerId);
-            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregatePlexerProgram(workerId, featureCacheManager));
+            IdeaFlowCircuit circuit = new IdeaFlowCircuit(circuitMonitor, programFactory.createAggregatePlexerProgram(workerId));
 
             circuitActivityDashboard.addMonitor(MonitorType.PLEXER_WORKER, workerId, circuitMonitor);
 

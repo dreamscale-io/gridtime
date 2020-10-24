@@ -63,6 +63,7 @@ class SaveToPostgresSinkSpec extends Specification {
 
     Torchie torchie
     LocalDateTime clockStart
+    UUID orgId
 
     def setup() {
 
@@ -76,8 +77,9 @@ class SaveToPostgresSinkSpec extends Specification {
         time3 = clockStart.plusMinutes(3)
         time4 = clockStart.plusMinutes(6)
 
+        orgId = UUID.randomUUID();
         torchieId = UUID.randomUUID();
-        torchieState = new MemoryOnlyTorchieState(torchieId);
+        torchieState = new MemoryOnlyTorchieState(orgId, torchieId);
 
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);

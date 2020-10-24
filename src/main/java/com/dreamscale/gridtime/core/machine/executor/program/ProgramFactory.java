@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.observer.Flow
 import com.dreamscale.gridtime.core.machine.executor.program.parts.sink.SinkStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.transform.FlowTransformFactory;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,7 @@ public class ProgramFactory {
     @Autowired
     AggregateWorkToDoQueueWire workToDoWire;
 
-    public Program createBaseTileGeneratorProgram(UUID teamId, UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
+    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
 
         SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition, runUntilPosition);
 
@@ -75,14 +75,14 @@ public class ProgramFactory {
                 sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
 
 
-        program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(teamId, torchieId));
-        program.addAggregator(locasFactory.createBoxAggregatorLocas(teamId, torchieId));
+        program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
+        program.addAggregator(locasFactory.createBoxAggregatorLocas(torchieId));
 
         return program;
     }
 
-    public AggregatePlexerProgram createAggregatePlexerProgram(UUID workerId, FeatureCacheManager featureCacheManager) {
-        return new AggregatePlexerProgram(workerId, workToDoWire, locasFactory, featureCacheManager);
+    public AggregatePlexerProgram createAggregatePlexerProgram(UUID workerId) {
+        return new AggregatePlexerProgram(workerId, workToDoWire, locasFactory);
     }
 
 

@@ -23,15 +23,18 @@ public class JournalContextObserverSpec extends Specification {
     JournalContextObserver journalContextObserver
     GeometryClock clock
     FeatureCache featureCache
+    UUID orgId
     UUID torchieId
     MemoryOnlyTorchieState torchieState
+
 
     def setup() {
         clock = new GeometryClock(LocalDateTime.now())
         journalContextObserver = new JournalContextObserver()
+        orgId = UUID.randomUUID();
         torchieId = UUID.randomUUID()
 
-        torchieState = new MemoryOnlyTorchieState(torchieId)
+        torchieState = new MemoryOnlyTorchieState(orgId, torchieId)
         torchieState.gotoPosition(clock.getActiveGridTime())
     }
 

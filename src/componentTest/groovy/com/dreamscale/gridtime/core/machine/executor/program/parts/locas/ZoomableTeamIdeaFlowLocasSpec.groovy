@@ -22,7 +22,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStra
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
+
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
@@ -65,9 +65,6 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
     @Autowired
     AggregateWorkToDoQueueWire workToDoQueueWire
-
-    @Autowired
-    FeatureCacheManager featureCacheManager
 
     @Autowired
     GridTimeWorkPile gridTimeWorkerPool
@@ -126,9 +123,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         given:
 
-        Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
-        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
-        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
+        Torchie torchie1 = torchieFactory.wireUpMemberTorchie(org.id, member1.getId(), team.id,  clockStart);
+        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(org.id, member2.getId(), team.id, clockStart);
+        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(org.id, member3.getId(), team.id, clockStart);
 
         gridTimeWorkerPool.submitJob(torchie1);
         gridTimeWorkerPool.submitJob(torchie2);

@@ -30,7 +30,7 @@ public class InputBoxMetricsAcrossTime implements InputStrategy<ZoomableBoxMetri
 
 
     @Override
-    public List<ZoomableBoxMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope) {
+    public List<ZoomableBoxMetricsEntity> breatheIn(UUID torchieId, Metronome.TickScope tickScope) {
 
         //suck in child tiles, within the range of this one
         //so this is going to give me all box metrics, with

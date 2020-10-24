@@ -27,9 +27,9 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager
+
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
@@ -69,9 +69,6 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
     @Autowired
     AggregateWorkToDoQueueWire workToDoQueueWire
-
-    @Autowired
-    FeatureCacheManager featureCacheManager
 
     @Autowired
     GridTimeWorkPile gridTimeWorkerPool
@@ -135,21 +132,21 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
         given:
 
-        Torchie torchie1 = torchieFactory.wireUpMemberTorchie(team.id, member1.getId(), clockStart);
-        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(team.id, member2.getId(), clockStart);
-        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(team.id, member3.getId(), clockStart);
+        Torchie torchie1 = torchieFactory.wireUpMemberTorchie(org.id, member1.getId(), team.id, clockStart);
+        Torchie torchie2 = torchieFactory.wireUpMemberTorchie(org.id, member2.getId(), team.id, clockStart);
+        Torchie torchie3 = torchieFactory.wireUpMemberTorchie(org.id, member3.getId(), team.id,clockStart);
 
         gridTimeWorkerPool.submitJob(torchie1);
         gridTimeWorkerPool.submitJob(torchie2);
         gridTimeWorkerPool.submitJob(torchie3);
 
-        TeamBoxConfiguration.Builder boxConfigBuilder = new TeamBoxConfiguration.Builder()
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentA", "/box1/*"))
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentB", "/box2/*"))
+        BoxResolver boxResolver = new BoxResolver()
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("componentA", "/box1/*"))
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("componentB", "/box2/*"))
 
-        torchie1.changeBoxConfiguration(boxConfigBuilder.build())
-        torchie2.changeBoxConfiguration(boxConfigBuilder.build())
-        torchie3.changeBoxConfiguration(boxConfigBuilder.build())
+        torchie1.changeBoxConfiguration(boxResolver)
+        torchie2.changeBoxConfiguration(boxResolver)
+        torchie3.changeBoxConfiguration(boxResolver)
 
         addFileActivity(torchie1)
         addFileActivity(torchie2)

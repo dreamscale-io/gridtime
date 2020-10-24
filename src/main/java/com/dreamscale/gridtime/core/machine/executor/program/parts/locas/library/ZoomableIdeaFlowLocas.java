@@ -18,10 +18,10 @@ import java.util.UUID;
 public class ZoomableIdeaFlowLocas extends ZoomableTimeLocas<ZoomableIdeaFlowMetricsEntity> {
 
 
-    public ZoomableIdeaFlowLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
+    public ZoomableIdeaFlowLocas(UUID torchieId, FeatureCache featureCache,
                                  InputStrategy<ZoomableIdeaFlowMetricsEntity> input,
                                  OutputStrategy output) {
-        super(teamId, torchieId, featureCache, input, output);
+        super(torchieId, featureCache, input, output);
 
     }
 

@@ -26,6 +26,7 @@ import java.time.LocalDateTime
 
 class TorchieCmdSpec extends Specification {
 
+    UUID organizationId
     UUID torchieId
     TorchieState torchieState
     LocalDateTime time1
@@ -41,6 +42,7 @@ class TorchieCmdSpec extends Specification {
     GridTimeExecutor gridTimeExecutor
 
 
+
     def setup() {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
         time1 = clockStart.plusMinutes(1)
@@ -48,8 +50,9 @@ class TorchieCmdSpec extends Specification {
         time3 = clockStart.plusMinutes(3)
         time4 = clockStart.plusMinutes(6)
 
+        organizationId = UUID.randomUUID()
         torchieId = UUID.randomUUID();
-        torchieState = new MemoryOnlyTorchieState(torchieId);
+        torchieState = new MemoryOnlyTorchieState(organizationId, torchieId);
 
         torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
         System.out.println(clockStart);

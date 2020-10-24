@@ -4,7 +4,7 @@ import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
@@ -12,27 +12,31 @@ import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 public abstract class AbstractTorchieState implements TorchieState {
 
+    private final UUID organizationId;
     private final UUID torchieId;
-    private final UUID teamId;
+    private List<UUID> teamIds;
     private final FeatureCache featureCache;
 
     private Map<FeedStrategyFactory.FeedType, InputFeed> inputFeeds = DefaultCollections.map();
 
     private GeometryClock.GridTime gridTime;
 
-    private TeamBoxConfiguration teamBoxConfiguration;
+    private BoxResolver boxResolver;
     private GridTile activeGridTile;
 
-    public AbstractTorchieState(UUID torchieId, UUID teamId, TeamBoxConfiguration teamBoxConfiguration, FeatureCache featureCache) {
+
+    public AbstractTorchieState(UUID organizationId, UUID torchieId, List<UUID> teamIds, BoxResolver boxResolver, FeatureCache featureCache) {
+        this.organizationId = organizationId;
         this.torchieId = torchieId;
-        this.teamId = teamId;
-        this.teamBoxConfiguration = teamBoxConfiguration;
+        this.teamIds = teamIds;
+        this.boxResolver = boxResolver;
         this.featureCache = featureCache;
     }
 
@@ -42,10 +46,12 @@ public abstract class AbstractTorchieState implements TorchieState {
     }
 
     @Override
-    public UUID getTeamId() {
-        return teamId;
+    public UUID getOrganizationId() {
+        return organizationId;
     }
 
+    @Override
+    public List<UUID> getTeamIds() { return teamIds; }
 
     public GridTile getActiveTile() {
         return activeGridTile;
@@ -62,8 +68,8 @@ public abstract class AbstractTorchieState implements TorchieState {
 
 
     @Override
-    public void changeBoxConfiguration(TeamBoxConfiguration teamBoxConfiguration) {
-        this.teamBoxConfiguration = teamBoxConfiguration;
+    public void changeBoxConfiguration(BoxResolver boxResolver) {
+        this.boxResolver = boxResolver;
     }
 
 
@@ -80,7 +86,7 @@ public abstract class AbstractTorchieState implements TorchieState {
 
         CarryOverContext carryOverContext = getCarryOverContext(this.gridTime.panLeft());
 
-        this.activeGridTile = new GridTile(torchieId, this.gridTime, featureCache, teamBoxConfiguration);
+        this.activeGridTile = new GridTile(torchieId, this.gridTime, featureCache, boxResolver);
 
         activeGridTile.initFromCarryOverContext(carryOverContext);
     }

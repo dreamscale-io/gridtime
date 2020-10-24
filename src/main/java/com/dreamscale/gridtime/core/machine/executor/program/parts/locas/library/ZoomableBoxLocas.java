@@ -19,10 +19,10 @@ import java.util.UUID;
 public class ZoomableBoxLocas extends ZoomableBoxTimeLocas<ZoomableBoxMetricsEntity> {
 
 
-    public ZoomableBoxLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
+    public ZoomableBoxLocas(UUID torchieId, FeatureCache featureCache,
                             InputStrategy<ZoomableBoxMetricsEntity> input,
                             OutputStrategy output) {
-        super(teamId, torchieId, featureCache, input, output);
+        super(torchieId, featureCache, input, output);
 
     }
 

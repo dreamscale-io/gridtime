@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 public class GenerateBaseTile extends TickInstructions {
@@ -35,7 +36,9 @@ public class GenerateBaseTile extends TickInstructions {
 
         setOutputTile(torchieState.getActiveTile());
 
-        publishEvent(new TileStreamEvent(torchieState.getTeamId(), torchieState.getTorchieId(), tickScope.getFrom(), WorkToDoType.AggregateToTeam));
+        for (UUID teamId : torchieState.getTeamIds()) {
+            publishEvent(new TileStreamEvent(teamId, torchieState.getTorchieId(), tickScope.getFrom(), WorkToDoType.AggregateToTeam));
+        }
     }
 
     @Override

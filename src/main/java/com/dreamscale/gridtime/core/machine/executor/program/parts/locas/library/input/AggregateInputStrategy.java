@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import java.util.List;
 import java.util.UUID;
 
-public interface InputStrategy<T> {
+public interface AggregateInputStrategy<T> {
 
-    List<T> breatheIn(UUID torchieId, Metronome.TickScope tickScope);
+    List<T> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope tickScope);
 }

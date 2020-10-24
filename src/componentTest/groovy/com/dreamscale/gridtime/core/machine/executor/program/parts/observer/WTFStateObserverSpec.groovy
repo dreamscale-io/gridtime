@@ -10,7 +10,7 @@ import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.source.Window
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile
@@ -33,9 +33,7 @@ public class WTFStateObserverSpec extends Specification {
         wtfStateObserver = new WTFStateObserver()
         torchieId = UUID.randomUUID()
 
-        TeamBoxConfiguration teamBoxConfiguration = new TeamBoxConfiguration.Builder().build();
-
-        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache(), teamBoxConfiguration);
+        gridTile = new GridTile(torchieId, clock.getActiveGridTime(), new FeatureCache(), new BoxResolver());
     }
 
     def "should create wtf circuit states"() {

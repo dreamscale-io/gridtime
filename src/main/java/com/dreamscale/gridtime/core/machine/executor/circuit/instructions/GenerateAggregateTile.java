@@ -9,6 +9,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 public class GenerateAggregateTile extends TickInstructions {
@@ -31,7 +32,9 @@ public class GenerateAggregateTile extends TickInstructions {
             appendOutputResults(output.playAllTracks());
         }
 
-        publishEvent(new TileStreamEvent(torchieState.getTeamId(), torchieState.getTorchieId(), tickScope.getFrom(), WorkToDoType.AggregateToTeam));
+        for (UUID teamId : torchieState.getTeamIds()) {
+            publishEvent(new TileStreamEvent(teamId, torchieState.getTorchieId(), tickScope.getFrom(), WorkToDoType.AggregateToTeam));
+        }
     }
 
     @Override

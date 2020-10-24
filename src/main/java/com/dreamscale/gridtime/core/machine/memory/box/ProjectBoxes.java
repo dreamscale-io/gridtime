@@ -10,16 +10,14 @@ import java.util.Map;
 
 public class ProjectBoxes {
 
-    private Map<String, String> packageToBoxMap;
+    private Map<String, String> packageToBoxMap = new HashMap<>();
     private List<BoxMatcher> boxMatchers;
 
     public ProjectBoxes() {
-        packageToBoxMap = new HashMap<>();
         boxMatchers = new ArrayList<>();
     }
 
     public ProjectBoxes(BoxMatcherConfig... boxMatcherConfigs) {
-        packageToBoxMap = new HashMap<>();
         boxMatchers = new ArrayList<>();
 
         for (BoxMatcherConfig config : boxMatcherConfigs) {
@@ -28,12 +26,15 @@ public class ProjectBoxes {
     }
 
     public ProjectBoxes(List<BoxMatcherConfig> boxMatcherConfigs) {
-        packageToBoxMap = new HashMap<>();
         boxMatchers = new ArrayList<>();
 
         for (BoxMatcherConfig config : boxMatcherConfigs) {
             boxMatchers.add(new BoxMatcher(config));
         }
+    }
+
+    public void addBoxMatcher(BoxMatcherConfig config) {
+        boxMatchers.add(new BoxMatcher(config));
     }
 
     public String identifyBox(String filePath) {

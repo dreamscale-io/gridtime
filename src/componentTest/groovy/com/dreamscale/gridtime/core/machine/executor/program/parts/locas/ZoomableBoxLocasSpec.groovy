@@ -13,13 +13,14 @@ import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.TorchieFactory
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.Metronome
+import com.dreamscale.gridtime.core.machine.commons.DefaultCollections
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableBoxLocas
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,21 +61,23 @@ class ZoomableBoxLocasSpec extends Specification {
     Metronome metronome
 
     Torchie torchie
+    UUID orgId
 
 
     def setup() {
 
+        orgId = UUID.randomUUID()
         torchieId = UUID.randomUUID()
         teamId = UUID.randomUUID()
         projectId = UUID.randomUUID()
         circleId = UUID.randomUUID()
 
-        boxAggregatorLocas = locasFactory.createBoxAggregatorLocas(teamId,  torchieId);
+        boxAggregatorLocas = locasFactory.createBoxAggregatorLocas(torchieId);
 
         clockStart = LocalDateTime.of(2019, 1, 7, 4, 00)
         metronome = new Metronome(clockStart)
 
-        torchie = torchieFactory.wireUpMemberTorchie(teamId, torchieId, clockStart);
+        torchie = torchieFactory.wireUpMemberTorchie(orgId, torchieId, teamId, clockStart);
 
         time1 = clockStart.plusMinutes(1)
         time2 = clockStart.plusMinutes(4)
@@ -85,11 +88,6 @@ class ZoomableBoxLocasSpec extends Specification {
 
         calendarService.saveCalendar(1, 12, tick.from);
         calendarService.saveCalendar(1, tick.from.zoomOut());
-
-        TeamBoxConfiguration.Builder builder = new TeamBoxConfiguration.Builder()
-        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
-        builder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
-
 
     }
 
@@ -122,11 +120,11 @@ class ZoomableBoxLocasSpec extends Specification {
 
         //create box metrics, for the specified calendar times, create grid features for each
 
-        TeamBoxConfiguration.Builder boxConfigBuilder = new TeamBoxConfiguration.Builder()
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
+        BoxResolver boxResolver = new BoxResolver()
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("aBoxOfCode1", "/box1/*"))
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("aBoxOfCode2", "/box2/*"))
 
-        torchie.changeBoxConfiguration(boxConfigBuilder.build())
+        torchie.changeBoxConfiguration(boxResolver)
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
         journalFeed.addSomeData(generateIntentionStart(time1, null, "taskA", "stuff", -3))
@@ -149,17 +147,16 @@ class ZoomableBoxLocasSpec extends Specification {
         assert boxMetrics.size() == 2;
     }
 
-
   def "should aggregate BoxMetrics across Time, Grouped by Box"() {
         given:
 
         //create box metrics, for the specified calendar times, create grid features for each
 
-        TeamBoxConfiguration.Builder boxConfigBuilder = new TeamBoxConfiguration.Builder()
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentA", "/box1/*"))
-        boxConfigBuilder.boxMatcher(projectId, new BoxMatcherConfig("componentB", "/box2/*"))
+        BoxResolver boxResolver = new BoxResolver()
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("componentA", "/box1/*"))
+        boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("componentB", "/box2/*"))
 
-        torchie.changeBoxConfiguration(boxConfigBuilder.build())
+        torchie.changeBoxConfiguration(boxResolver)
 
         InputFeed journalFeed = torchie.getInputFeed(FeedStrategyFactory.FeedType.JOURNAL_FEED)
         journalFeed.addSomeData(generateIntentionStart(time1, time1.plusMinutes(34), "taskA", "stuff1", -3))

@@ -1,20 +1,24 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.core.domain.member.TeamEntity;
+import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository;
+import com.dreamscale.gridtime.core.domain.member.TeamRepository;
+import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.program.*;
-import com.dreamscale.gridtime.core.machine.memory.TorchieState;
-import com.dreamscale.gridtime.core.machine.memory.MemoryOnlyTorchieState;
 import com.dreamscale.gridtime.core.machine.memory.PerProcessTorchieState;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfigurationManager;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxConfigLoader;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCacheManager;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.TileSearchService;
-import com.dreamscale.gridtime.core.machine.memory.box.TeamBoxConfiguration;
+import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -33,35 +37,48 @@ public class TorchieFactory {
     @Autowired
     private AggregateWorkToDoQueueWire workToDoWire;
 
+    @Autowired
+    private FeatureCache featureCache ;
 
     @Autowired
-    private FeatureCacheManager featureCacheManager;
+    private BoxConfigLoader boxConfigLoader;
 
     @Autowired
-    private TeamBoxConfigurationManager teamBoxConfigurationManager;
+    private TeamRepository teamRepository;
 
-    /**
-     * Run without an effective end date
-     * @param teamId
-     * @param memberId
-     * @param startingPosition
-     * @return
-     */
-    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition) {
+    private BoxResolver boxResolver;
 
-        return wireUpMemberTorchie(teamId, memberId, startingPosition, startingPosition.plusYears(1));
+    @PostConstruct
+    private void init() {
+        boxResolver = new BoxResolver(boxConfigLoader);
     }
 
-    public Torchie wireUpMemberTorchie(UUID teamId, UUID memberId, LocalDateTime startingPosition, LocalDateTime runUntilPosition) {
+    /**
+     * Run Torchie without an effective end date
+     */
+    public Torchie wireUpMemberTorchie(UUID organizationId, UUID memberId, UUID teamId, LocalDateTime startingPosition) {
 
-        FeatureCache featureCache = featureCacheManager.findOrCreateFeatureCache(teamId);
-        TeamBoxConfiguration teamBoxConfig = teamBoxConfigurationManager.findOrCreateTeamBoxConfig(teamId);
+        return wireUpMemberTorchie(organizationId, memberId, DefaultCollections.toList(teamId), startingPosition, startingPosition.plusYears(1));
+    }
 
-        PerProcessTorchieState torchieState = new PerProcessTorchieState(teamId, memberId,  featureCache,
-                teamBoxConfig, featureResolverService, tileSearchService);
 
-        //stream data into the tiles
-        Program program = programFactory.createBaseTileGeneratorProgram(teamId, memberId, torchieState, startingPosition, runUntilPosition);
+    /**
+     * Run Torchie without an effective end date
+     */
+    public Torchie wireUpMemberTorchie(UUID organizationId, UUID memberId, List<UUID> teamIds, LocalDateTime startingPosition) {
+
+        return wireUpMemberTorchie(organizationId, memberId, teamIds, startingPosition, startingPosition.plusYears(1));
+    }
+
+    /**
+     * Run Torchie with a date range
+     */
+    public Torchie wireUpMemberTorchie(UUID organizationId, UUID memberId, List<UUID> teamIds, LocalDateTime startingPosition, LocalDateTime runUntilPosition) {
+
+        PerProcessTorchieState torchieState = new PerProcessTorchieState(organizationId, memberId, teamIds, featureCache,
+                boxResolver, featureResolverService, tileSearchService);
+
+        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition, runUntilPosition);
 
         Torchie torchie = new Torchie(memberId, torchieState, program);
 
@@ -70,6 +87,7 @@ public class TorchieFactory {
         return torchie;
 
     }
+
 
 
 }

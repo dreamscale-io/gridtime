@@ -22,7 +22,7 @@ public class InputIdeaFlowMetricsAcrossTime implements InputStrategy<ZoomableIde
 
 
     @Override
-    public List<ZoomableIdeaFlowMetricsEntity> breatheIn(UUID teamId, UUID torchieId, Metronome.TickScope zoomedOutTickScope) {
+    public List<ZoomableIdeaFlowMetricsEntity> breatheIn(UUID torchieId, Metronome.TickScope zoomedOutTickScope) {
 
         //suck in child tiles, within the range of this one
 

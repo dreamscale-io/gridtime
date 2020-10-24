@@ -17,7 +17,6 @@ import java.util.UUID;
 @Slf4j
 public abstract class ZoomableTimeLocas<T> implements Locas {
 
-    private final UUID teamId;
     private final UUID torchieId;
     private final InputStrategy<T> input;
     private final OutputStrategy output;
@@ -25,10 +24,9 @@ public abstract class ZoomableTimeLocas<T> implements Locas {
 
     private ZoomGrid zoomGrid;
 
-    public ZoomableTimeLocas(UUID teamId, UUID torchieId, FeatureCache featureCache,
+    public ZoomableTimeLocas(UUID torchieId, FeatureCache featureCache,
                              InputStrategy<T> input,
                              OutputStrategy output) {
-        this.teamId = teamId;
         this.torchieId = torchieId;
         this.featureCache = featureCache;
         this.input = input;
@@ -44,7 +42,7 @@ public abstract class ZoomableTimeLocas<T> implements Locas {
         String zoomGridId = "ZoomGrid:Id:@tile"+ torchieHash.toDisplayString() +
                 tickScope.getFrom().toDisplayString();
 
-        List<T> metricInputs = input.breatheIn(teamId, torchieId, tickScope);
+        List<T> metricInputs = input.breatheIn(torchieId, tickScope);
 
         log.debug(zoomGridId + ": Found "+metricInputs.size() + " input metrics");
 

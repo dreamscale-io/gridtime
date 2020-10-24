@@ -19,7 +19,7 @@ public class GridFeatureEntity {
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
-    private UUID teamId;
+    private UUID organizationId;
 
     private String typeUri;
 
