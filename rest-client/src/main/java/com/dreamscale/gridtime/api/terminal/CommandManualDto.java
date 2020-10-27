@@ -13,30 +13,30 @@ import java.util.*;
 @NoArgsConstructor
 public class CommandManualDto {
 
-    private List<CommandGroup> groups;
+    private List<ActivityContext> activityContexts;
 
-    private Map<CommandGroup, CommandManualPageDto> manualPagesByGroup;
+    private Map<ActivityContext, CommandManualPageDto> manualPagesByActivityType;
 
-    public void addPage(CommandGroup group, CommandManualPageDto groupPage) {
-        if (groups == null) {
-            groups = new ArrayList<>();
+    public void addPage(ActivityContext context, CommandManualPageDto contextPage) {
+        if (activityContexts == null) {
+            activityContexts = new ArrayList<>();
         }
-        groups.add(group);
+        activityContexts.add(context);
 
-        if (manualPagesByGroup == null) {
-            manualPagesByGroup = new HashMap<>();
+        if (manualPagesByActivityType == null) {
+            manualPagesByActivityType = new HashMap<>();
         }
 
-        manualPagesByGroup.put(group, groupPage);
+        manualPagesByActivityType.put(context, contextPage);
     }
 
 
     public String toDisplayString() {
         String out = "";
 
-        for (CommandGroup group : manualPagesByGroup.keySet()) {
+        for (ActivityContext context : manualPagesByActivityType.keySet()) {
 
-            CommandManualPageDto page = manualPagesByGroup.get(group);
+            CommandManualPageDto page = manualPagesByActivityType.get(context);
             out += page.toDisplayString();
         }
 

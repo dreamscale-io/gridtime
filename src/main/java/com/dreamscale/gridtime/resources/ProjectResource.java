@@ -9,7 +9,7 @@ import com.dreamscale.gridtime.api.project.ProjectDto;
 import com.dreamscale.gridtime.api.project.TaskDto;
 import com.dreamscale.gridtime.api.team.TeamInputDto;
 import com.dreamscale.gridtime.api.terminal.Command;
-import com.dreamscale.gridtime.api.terminal.CommandGroup;
+import com.dreamscale.gridtime.api.terminal.ActivityContext;
 import com.dreamscale.gridtime.core.capability.journal.ProjectCapability;
 import com.dreamscale.gridtime.core.capability.journal.TaskCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
@@ -46,15 +46,15 @@ public class ProjectResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(CommandGroup.PROJECT, Command.SHARE,
+        terminalRouteRegistry.register(ActivityContext.PROJECT, Command.SHARE,
                 "Share private projects with individuals and teams.",
                 new ShareProjectWithUserTerminalRoute(), new ShareProjectWithTeamTerminalRoute());
 
-        terminalRouteRegistry.register(CommandGroup.PROJECT, Command.UNSHARE,
+        terminalRouteRegistry.register(ActivityContext.PROJECT, Command.UNSHARE,
                 "Unshare previously shared projects and revoke access for individuals and teams.",
                 new UnshareProjectForUserTerminalRoute(), new UnshareProjectForTeamTerminalRoute());
 
-        terminalRouteRegistry.register(CommandGroup.PROJECT, Command.VIEW,
+        terminalRouteRegistry.register(ActivityContext.PROJECT, Command.VIEW,
                 "View the current details and permissions configured for a project",
                 new ViewProjectTerminalRoute());
 

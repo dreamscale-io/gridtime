@@ -32,12 +32,12 @@ public class TerminalRouteRegistry {
 
     private MultiValueMap<Command, CommandDescriptorDto> commandDescriptorsByCommand = DefaultCollections.multiMap();
 
-    private Map<CommandGroup, CommandManualPageDto> manualPagesByGroup = DefaultCollections.map();
+    private Map<ActivityContext, CommandManualPageDto> manualPagesByContext = DefaultCollections.map();
 
-    public void register(CommandGroup group, Command command, String description, TerminalRoute ... terminalRoutesForCommand) {
+    public void register(ActivityContext activityContext, Command command, String description, TerminalRoute ... terminalRoutesForCommand) {
         log.info("[TerminalRouteRegistry] Register "+command.name());
 
-        CommandManualPageDto manPage = findOrCreateManualPage(group);
+        CommandManualPageDto manPage = findOrCreateManualPage(activityContext);
 
         CommandDescriptorDto descriptor = createDescriptor(command, description, terminalRoutesForCommand);
         manPage.addCommandDescriptor(descriptor);
@@ -68,12 +68,12 @@ public class TerminalRouteRegistry {
         return descriptor;
     }
 
-    private CommandManualPageDto findOrCreateManualPage(CommandGroup group) {
-        CommandManualPageDto manPage = manualPagesByGroup.get(group);
+    private CommandManualPageDto findOrCreateManualPage(ActivityContext context) {
+        CommandManualPageDto manPage = manualPagesByContext.get(context);
 
         if (manPage == null) {
-            manPage = new CommandManualPageDto(group.name());
-            manualPagesByGroup.put(group, manPage);
+            manPage = new CommandManualPageDto(context.name());
+            manualPagesByContext.put(context, manPage);
         }
         return manPage;
     }
@@ -141,10 +141,10 @@ public class TerminalRouteRegistry {
 
         CommandManualDto manualDto = new CommandManualDto();
 
-        Set<CommandGroup> commandGroups = manualPagesByGroup.keySet();
+        Set<ActivityContext> activityContexts = manualPagesByContext.keySet();
 
-        for (CommandGroup group : commandGroups) {
-            CommandManualPageDto groupPage = manualPagesByGroup.get(group);
+        for (ActivityContext group : activityContexts) {
+            CommandManualPageDto groupPage = manualPagesByContext.get(group);
             manualDto.addPage(group, groupPage);
         }
 
@@ -162,9 +162,9 @@ public class TerminalRouteRegistry {
         return manPage;
     }
 
-    public CommandManualPageDto getManualPage(UUID organizationId, UUID memberId, CommandGroup group) {
+    public CommandManualPageDto getManualPage(UUID organizationId, UUID memberId, ActivityContext group) {
 
-        return manualPagesByGroup.get(group);
+        return manualPagesByContext.get(group);
     }
 
     private void validateAtLeastOneRouteIsFound(Command command, List<TerminalRoute> routes) {

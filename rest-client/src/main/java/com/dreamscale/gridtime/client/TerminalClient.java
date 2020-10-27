@@ -33,7 +33,7 @@ public interface TerminalClient {
     @RequestLine("GET " + ResourcePaths.TERMINAL_PATH + ResourcePaths.MANUAL_PATH + ResourcePaths.COMMAND_PATH + "/{commandName}")
     CommandManualPageDto getManualPageForCommand(@Param("commandName") String commandName);
 
-    @RequestLine("GET " + ResourcePaths.TERMINAL_PATH + ResourcePaths.MANUAL_PATH + ResourcePaths.GROUP_PATH + "/{commandGroupName}")
+    @RequestLine("GET " + ResourcePaths.TERMINAL_PATH + ResourcePaths.MANUAL_PATH + ResourcePaths.CONTEXT_PATH + "/{commandGroupName}")
     CommandManualPageDto getManualPageForGroup(@Param("commandGroupName") String commandGroupName);
 
 }

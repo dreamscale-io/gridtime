@@ -13,12 +13,12 @@ import java.util.*;
 @NoArgsConstructor
 public class CommandManualPageDto {
 
-    private String commandGroup;
+    private String contextName;
 
     private List<CommandDescriptorDto> commandDescriptors;
 
-    public CommandManualPageDto(String commandGroup) {
-        this.commandGroup = commandGroup;
+    public CommandManualPageDto(String contextName) {
+        this.contextName = contextName;
         commandDescriptors = new ArrayList<>();
     }
 
@@ -31,7 +31,7 @@ public class CommandManualPageDto {
         String out = "";
 
             out += "\n==========================================================\n" +
-                    "Command Group: "+ commandGroup + "\n";
+                    "Context: "+ contextName + "\n";
 
             for (CommandDescriptorDto descriptor : commandDescriptors) {
                 out += "\n------------------------------------\n"

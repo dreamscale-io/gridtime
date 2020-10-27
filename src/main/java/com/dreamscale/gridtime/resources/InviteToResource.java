@@ -5,7 +5,7 @@ import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.terminal.Command;
-import com.dreamscale.gridtime.api.terminal.CommandGroup;
+import com.dreamscale.gridtime.api.terminal.ActivityContext;
 import com.dreamscale.gridtime.core.capability.membership.InviteCapability;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRoute;
@@ -33,7 +33,7 @@ public class InviteToResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(CommandGroup.INVITE,
+        terminalRouteRegistry.register(ActivityContext.INVITE,
                 Command.INVITE, "Invite people to your team, org, or the public community.", new InviteTerminalRoute());
     }
 

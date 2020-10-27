@@ -89,25 +89,25 @@ public class TerminalResource {
 
 
         /**
-         * Gets help information summary for the specified command group
+         * Gets help information summary for the specified Activity Context
          *
-         * Command groups are coherent groups of commands that all pertain to one thing,
-         * for example, all the commands around the 'PROJECT' command group, allow you to do things with projects
+         * Activity Contexts are coherent groups of commands that all pertain to one activity type,
+         * for example, all the commands around the 'PROJECT' activity type, allow you to do things with projects
          *
-         * @see com.dreamscale.gridtime.api.terminal.CommandGroup for the available command groups
+         * @see ActivityContext
          *
-         * @param commandGroupName CommandGroup
+         * @param activityContextName
          * @return CommandManualPageDto
          */
         @PreAuthorize("hasRole('ROLE_USER')")
-        @GetMapping(ResourcePaths.MANUAL_PATH + ResourcePaths.GROUP_PATH + "/{commandGroupName}")
-        public CommandManualPageDto getManualPageForGroup(@PathVariable("commandGroupName") String commandGroupName) {
+        @GetMapping(ResourcePaths.MANUAL_PATH + ResourcePaths.CONTEXT_PATH + "/{activityContextName}")
+        public CommandManualPageDto getManualPageForContext(@PathVariable("activityContextName") String activityContextName) {
             RequestContext context = RequestContext.get();
             OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
             log.info("getCommandManualPage, user={}", invokingMember.getBestAvailableName());
 
-            CommandGroup group = CommandGroup.fromString(commandGroupName);
+            ActivityContext group = ActivityContext.fromString(activityContextName);
 
             return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), group);
         }

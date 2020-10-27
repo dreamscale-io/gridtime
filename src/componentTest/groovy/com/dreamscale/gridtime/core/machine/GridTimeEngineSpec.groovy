@@ -145,11 +145,14 @@ class GridTimeEngineSpec extends Specification {
         gridTimeEngine.waitForDone()
         gridTimeEngine.shutdown()
 
-        GridTableResults results1 = gridTimeEngine.getDashboard(DashboardActivityScope.PLEXER_DETAIL)
-        println results1
+        GridTableResults results = gridTimeEngine.getDashboard(DashboardActivityScope.GRID_SUMMARY)
+        println results
 
         GridTableResults results2 = gridTimeEngine.getDashboard(DashboardActivityScope.TORCHIE_DETAIL)
         println results2
+
+        GridTableResults results1 = gridTimeEngine.getDashboard(DashboardActivityScope.PLEXER_DETAIL)
+        println results1
 
         GridTableResults results3 = gridTimeEngine.getDashboard(DashboardActivityScope.ALL_DETAIL)
         println results3

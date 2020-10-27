@@ -20,9 +20,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.machine.GridTimeEngine
-import com.dreamscale.gridtime.core.machine.commons.JSONTransformer
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -374,10 +372,10 @@ class TerminalResourceSpec extends Specification {
 
         then:
         assert manual != null
-        assert manual.getGroups().size() == 3;
+        assert manual.getActivityContexts().size() == 3;
 
         assert inviteManPage != null
-        assert inviteManPage.getCommandGroup() == Command.INVITE.name()
+        assert inviteManPage.getContextName() == Command.INVITE.name()
         assert inviteManPage.getCommandDescriptors().size() == 1;
 
         CommandDescriptorDto inviteCmd = inviteManPage.getCommandDescriptors().get(0);
@@ -388,7 +386,7 @@ class TerminalResourceSpec extends Specification {
 
         assert projectManPage != null
 
-        assert projectManPage.getCommandGroup() == CommandGroup.PROJECT.name()
+        assert projectManPage.getContextName() == ActivityContext.PROJECT.name()
         assert projectManPage.getCommandDescriptors().size() == 3
 
     }

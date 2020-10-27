@@ -1,12 +1,10 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.account.EmailInputDto;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
-import com.dreamscale.gridtime.api.account.UsernameInputDto;
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto;
 import com.dreamscale.gridtime.api.terminal.Command;
-import com.dreamscale.gridtime.api.terminal.CommandGroup;
+import com.dreamscale.gridtime.api.terminal.ActivityContext;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRoute;
 import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
@@ -35,10 +33,10 @@ public class GridResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(CommandGroup.GRID,
+        terminalRouteRegistry.register(ActivityContext.GRID,
                 Command.GRID, "Start and stop the Gridtime operating system.", new GridTerminalRoute());
 
-        terminalRouteRegistry.register(CommandGroup.GRID,
+        terminalRouteRegistry.register(ActivityContext.GRID,
                 Command.PS, "Show top process activity.", new PsTerminalRoute());
 
     }
