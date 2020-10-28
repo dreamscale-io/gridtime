@@ -366,6 +366,8 @@ class TerminalResourceSpec extends Specification {
         CommandManualPageDto inviteManPage = terminalClient.getManualPageForCommand("invite");
         CommandManualPageDto projectManPage = terminalClient.getManualPageForGroup("project");
 
+        println manual
+
         println inviteManPage
 
         println projectManPage

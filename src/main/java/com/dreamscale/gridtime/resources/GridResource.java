@@ -33,10 +33,10 @@ public class GridResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(ActivityContext.GRID,
+        terminalRouteRegistry.register(ActivityContext.SYSTEM,
                 Command.GRID, "Start and stop the Gridtime operating system.", new GridTerminalRoute());
 
-        terminalRouteRegistry.register(ActivityContext.GRID,
+        terminalRouteRegistry.register(ActivityContext.SYSTEM,
                 Command.PS, "Show top process activity.", new PsTerminalRoute());
 
     }

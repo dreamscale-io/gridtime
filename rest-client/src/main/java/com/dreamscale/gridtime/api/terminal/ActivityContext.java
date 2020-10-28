@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ActivityContext {
-    GRID("Operate the grid"),
-    INVITE("Send invites"),
+    SYSTEM("Operating system commands"),
+    PEOPLE("Send invites to people"),
     PROJECT("Manage projects");
 
     private final String description;

@@ -33,7 +33,7 @@ public class InviteToResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(ActivityContext.INVITE,
+        terminalRouteRegistry.register(ActivityContext.PEOPLE,
                 Command.INVITE, "Invite people to your team, org, or the public community.", new InviteTerminalRoute());
     }
 

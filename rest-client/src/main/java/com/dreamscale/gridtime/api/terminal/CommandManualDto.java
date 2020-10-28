@@ -15,7 +15,7 @@ public class CommandManualDto {
 
     private List<ActivityContext> activityContexts;
 
-    private Map<ActivityContext, CommandManualPageDto> manualPagesByActivityType;
+    private Map<ActivityContext, CommandManualPageDto> manualPagesByActivityContext;
 
     public void addPage(ActivityContext context, CommandManualPageDto contextPage) {
         if (activityContexts == null) {
@@ -23,20 +23,24 @@ public class CommandManualDto {
         }
         activityContexts.add(context);
 
-        if (manualPagesByActivityType == null) {
-            manualPagesByActivityType = new HashMap<>();
+        if (manualPagesByActivityContext == null) {
+            manualPagesByActivityContext = new HashMap<>();
         }
 
-        manualPagesByActivityType.put(context, contextPage);
+        manualPagesByActivityContext.put(context, contextPage);
+    }
+
+    public CommandManualPageDto getManualPage(ActivityContext context) {
+        return manualPagesByActivityContext.get(context);
     }
 
 
     public String toDisplayString() {
         String out = "";
 
-        for (ActivityContext context : manualPagesByActivityType.keySet()) {
+        for (ActivityContext context : manualPagesByActivityContext.keySet()) {
 
-            CommandManualPageDto page = manualPagesByActivityType.get(context);
+            CommandManualPageDto page = manualPagesByActivityContext.get(context);
             out += page.toDisplayString();
         }
 
