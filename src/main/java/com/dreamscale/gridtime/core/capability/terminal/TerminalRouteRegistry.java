@@ -141,11 +141,9 @@ public class TerminalRouteRegistry {
 
         CommandManualDto manualDto = new CommandManualDto();
 
-        Set<ActivityContext> activityContexts = manualPagesByContext.keySet();
-
-        for (ActivityContext group : activityContexts) {
-            CommandManualPageDto groupPage = manualPagesByContext.get(group);
-            manualDto.addPage(group, groupPage);
+        for (ActivityContext context : ActivityContext.values()) {
+            CommandManualPageDto groupPage = manualPagesByContext.get(context);
+            manualDto.addPage(context, groupPage);
         }
 
         return manualDto;
