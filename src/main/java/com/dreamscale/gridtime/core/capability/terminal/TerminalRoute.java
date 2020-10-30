@@ -1,8 +1,10 @@
 package com.dreamscale.gridtime.core.capability.terminal;
 
 import com.dreamscale.gridtime.api.terminal.Command;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriTemplate;
 
@@ -30,7 +32,15 @@ public abstract class TerminalRoute {
 
     public Map<String, String> extractParameters(String cmdStr) {
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        return pathMatcher.extractUriTemplateVariables(argsTemplate, cmdStr);
+
+        Map<String, String> params = null;
+        try {
+            params = pathMatcher.extractUriTemplateVariables(argsTemplate, cmdStr);
+        } catch (IllegalStateException ex) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid parameters. "+ex.getMessage());
+        }
+
+        return params;
     }
 
     protected void describeTextOption(String param, String description) {
