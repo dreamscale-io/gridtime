@@ -54,7 +54,7 @@ public class WhatsNextWheel implements LiveQueue {
             nextWorkerQueue.add(workerId);
             workerMap.put(workerId, worker);
         } else {
-            throw new RuntimeException("Adding torchie worker already in map! "+workerId);
+            throw new RuntimeException("Adding duplicate worker already in map! "+workerId);
         }
     }
 

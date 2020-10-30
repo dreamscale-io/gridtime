@@ -104,7 +104,7 @@ public class GridTimeEngine {
         String lastError = gridTimeExecutor.getLastError();
 
         if (!gridTimeExecutor.isRunning() && lastError != null) {
-            summaryDto.setMessage(lastError);
+            summaryDto.setMessage("Last Error: "+ lastError);
         }
 
         GridTableResults processSummary = circuitActivityDashboard.getDashboardStatus(DashboardActivityScope.GRID_SUMMARY);
