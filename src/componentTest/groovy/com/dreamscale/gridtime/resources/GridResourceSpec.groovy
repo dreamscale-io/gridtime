@@ -144,6 +144,8 @@ class GridResourceSpec extends Specification {
 
         SimpleStatusDto startStatus = gridClient.start()
 
+        GridStatusSummaryDto statusBefore = gridClient.getStatus()
+
         SimpleStatusDto shutdownStatus = gridClient.shutdown()
 
         GridStatusSummaryDto statusAfter = gridClient.getStatus()
@@ -156,6 +158,9 @@ class GridResourceSpec extends Specification {
 
         assert shutdownStatus != null
         assert shutdownStatus.getStatus() == Status.SUCCESS
+
+        assert statusBefore != null
+        assert statusBefore.getGridStatus() == GridStatus.RUNNING
 
         assert statusAfter != null
         assert statusAfter.getGridStatus() == GridStatus.STOPPED

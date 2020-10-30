@@ -32,6 +32,8 @@ public class GridTimeExecutor {
 
     private GridStatus status = GridStatus.STOPPED;
 
+    private String lastError = null;
+
     public GridTimeExecutor(WorkPile workPile) {
         this.workPile = workPile;
         this.isGameLoopRunning = new AtomicBoolean(false);
@@ -90,6 +92,10 @@ public class GridTimeExecutor {
 
     public GridStatus getStatus() {
         return status;
+    }
+
+    public String getLastError() {
+        return lastError;
     }
 
     public boolean isRunning() {
@@ -165,6 +171,7 @@ public class GridTimeExecutor {
         public void run() {
             try {
                 log.info("Starting up GridTime GameLoop");
+                lastError = null;
 
                 while (isGameLoopRunning.get()) {
                     //fairly round robin with all active torchies,
@@ -202,11 +209,13 @@ public class GridTimeExecutor {
 
                 finishAllFutures();
 
-                status = GridStatus.STOPPED;
             } catch (Exception ex) {
                 log.error("Executor GameLoop halted", ex);
-                isGameLoopRunning.set(false);
+                lastError = ex.getMessage();
             }
+
+            isGameLoopRunning.set(false);
+            status = GridStatus.STOPPED;
         }
 
         private void finishAllFutures() {
