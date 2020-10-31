@@ -32,6 +32,8 @@ public class CircuitActivitySummaryRow implements Cloneable {
     private double queueTimeAvg;
     private double queueTimeMax;
 
+    private String lastFailMsg;
+
     CircuitActivitySummaryRow(MonitorType monitorType, String rowKey) {
         this.monitorType = monitorType;
         this.rowKey = rowKey;
@@ -53,6 +55,10 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         workers.add(circuitMonitor.getWorkerId());
         numberWorkers = workers.size();
+
+        if (lastFailMsg == null) {
+            lastFailMsg = circuitMonitor.getLastFailMsg();
+        }
     }
 
     public void setProcessStatus(ProcessStatus processStatus) {
@@ -87,6 +93,9 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         numberWorkers += activitySummary.getNumberWorkers();
 
+        if (lastFailMsg == null) {
+            lastFailMsg = activitySummary.getLastFailMsg();
+        }
     }
 
     List<String> toRow() {
@@ -105,6 +114,10 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         if (processStatus != null) {
             row.add(CellFormat.toRightSizedCell(processStatus.name(), 9));
+        }
+
+        if (lastFailMsg != null) {
+            row.add(CellFormat.toRightSizedCell(lastFailMsg, 40));
         }
 
         return row;
@@ -126,6 +139,10 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         if (processStatus != null) {
             row.add(CellFormat.toRightSizedCell("Status", 9));
+        }
+
+        if (lastFailMsg != null) {
+            row.add(CellFormat.toRightSizedCell("Last Failure", 40));
         }
 
         return row;

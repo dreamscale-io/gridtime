@@ -36,6 +36,8 @@ public class CircuitMonitor {
 
     private State state;
 
+    private String lastFailMsg;
+
 
     public CircuitMonitor(ProcessType processType, UUID workerId) {
         this.processType = processType;
@@ -74,11 +76,13 @@ public class CircuitMonitor {
         recentQueueTimeMetric.addSample(lastQueueDuration);
     }
 
-    public void failInstruction(long queueDurationMillis, long executionDurationMillis) {
-        log.debug(processType + " FAILED: Setting circuit state back to ready!");
+    public void failInstruction(long queueDurationMillis, long executionDurationMillis, String failMsg) {
+        log.error(processType + " FAILED: Setting circuit state back to ready!");
         state = State.Ready;
 
         ticksFailed++;
+
+        lastFailMsg = failMsg;
 
         updateMetrics(queueDurationMillis, executionDurationMillis);
         updateStatusTimestamp();

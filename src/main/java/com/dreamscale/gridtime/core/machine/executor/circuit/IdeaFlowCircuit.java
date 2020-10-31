@@ -262,7 +262,9 @@ public class IdeaFlowCircuit implements Worker {
         @Override
         public void notifyOnAbortOrFailure(TickInstructions finishedInstruction, Exception ex) {
 
-            circuitMonitor.failInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis());
+            String failMsg = ex.getClass().getSimpleName() + ": "+ex.getMessage();
+
+            circuitMonitor.failInstruction(finishedInstruction.getQueueDurationMillis(), finishedInstruction.getExecutionDurationMillis(), failMsg);
 
             log.error("Terminating program because of failed instruction:" + ex);
 

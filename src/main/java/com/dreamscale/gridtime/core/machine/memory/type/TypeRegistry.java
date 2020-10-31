@@ -37,6 +37,9 @@ public class TypeRegistry {
         String atRoute = typeUri.substring(0, indexOfFirstSlash);
         Class<? extends FeatureType> clazzType = featureTypeClassMap.get(atRoute);
 
+        if (clazzType == null) {
+            throw new RuntimeException("Unable to resolve typeUri: "+typeUri);
+        }
         return resolveSubType(clazzType, typeUri);
     }
 }
