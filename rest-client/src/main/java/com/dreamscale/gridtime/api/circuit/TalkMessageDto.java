@@ -27,7 +27,7 @@ public class TalkMessageDto {
 
     private String messageType;
 
-    @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="clazz")
+    @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="class")
     private Object data;
 
     public void addMetaProp(TalkMessageMetaProp prop, String value) {
