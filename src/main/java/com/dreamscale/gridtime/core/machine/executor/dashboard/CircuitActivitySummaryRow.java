@@ -125,7 +125,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toRightSizedCell("QMax", 7));
 
         if (processStatus != null) {
-            row.add(CellFormat.toRightSizedCell(processStatus.name(), 9));
+            row.add(CellFormat.toRightSizedCell("Status", 9));
         }
 
         return row;

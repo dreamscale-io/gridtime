@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickIn
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,11 +29,19 @@ public class CircuitActivityDashboard {
     private static final int TICKS_BETWEEN_REFRESH = 20;
 
     public void addMonitor(MonitorType monitorType, UUID workerId, CircuitMonitor circuitMonitor) {
-        DashboardMonitor monitor = new DashboardMonitor(monitorType, workerId, circuitMonitor);
+        DashboardMonitor monitor = new DashboardMonitor(monitorType, workerId, circuitMonitor, ProcessStatus.ACTIVE);
 
         dashboardMonitors.put(workerId, monitor);
     }
 
+    public void updateProcessStatus(UUID workerId, ProcessStatus processStatus) {
+        DashboardMonitor monitor = dashboardMonitors.get(workerId);
+        if (monitor != null) {
+            monitor.setProcessStatus(processStatus);
+        } else {
+            log.warn("Unable to set process status to "+processStatus + " for worker "+workerId);
+        }
+    }
 
     public void evictMonitor(UUID workerId) {
         DashboardMonitor evictedMonitor = dashboardMonitors.remove(workerId);
@@ -98,10 +107,13 @@ public class CircuitActivityDashboard {
 
     @AllArgsConstructor
     @Getter
+    @Setter
     private class DashboardMonitor {
         MonitorType monitorType;
         UUID workerId;
         CircuitMonitor circuitMonitor;
+        ProcessStatus processStatus;
+
     }
 
     private class Dashboard {
@@ -238,13 +250,13 @@ public class CircuitActivityDashboard {
 
 
         private Map<UUID, CircuitActivitySummaryRow> getRowsInTableByType(MonitorType monitorType) {
-            List<DashboardMonitor> torchieMonitors = dashboardMonitors.values().stream().filter(
+            List<DashboardMonitor> filteredMonitors = dashboardMonitors.values().stream().filter(
                     (monitor -> monitor.getMonitorType().equals(monitorType)
                     )).collect(Collectors.toList());
 
             Map<UUID, CircuitActivitySummaryRow> rowsInTable = DefaultCollections.map();
 
-            for (DashboardMonitor monitor : torchieMonitors) {
+            for (DashboardMonitor monitor : filteredMonitors) {
 
                 CircuitActivitySummaryRow existingRow = finishedProcesses.get(monitor.getWorkerId());
                 CircuitActivitySummaryRow newRow = null;
@@ -254,7 +266,7 @@ public class CircuitActivityDashboard {
                 } else {
                     newRow = createProcessRow(monitor);
                 }
-                newRow.setProcessStatus(ProcessStatus.ACTIVE);
+                newRow.setProcessStatus(monitor.getProcessStatus());
                 newRow.aggregateMonitor(monitor.getCircuitMonitor());
                 rowsInTable.put(monitor.getWorkerId(), newRow);
             }
@@ -285,7 +297,7 @@ public class CircuitActivityDashboard {
                 } else {
                     newRow = createProcessRow(monitor);
                 }
-                newRow.setProcessStatus(ProcessStatus.ACTIVE);
+                newRow.setProcessStatus(monitor.getProcessStatus());
                 newRow.aggregateMonitor(monitor.getCircuitMonitor());
                 rowsInTable.put(monitor.getWorkerId(), newRow);
             }

@@ -23,8 +23,7 @@ public class TalkMessageDto {
     private String request;  //this should be the grid request context uri
     private LocalDateTime messageTime;
     private Long nanoTime;
-    
-    @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="class")
+
     private Map<String, String> metaProps;
 
     private String messageType;

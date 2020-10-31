@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.SystemExclusiveJobClaimManager;
+import com.dreamscale.gridtime.core.machine.executor.dashboard.ProcessStatus;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarGeneratorJob;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarJobDescriptor;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
@@ -120,7 +121,7 @@ public class SystemWorkPile implements WorkPile {
 
         CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
 
-        if ( calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
+        if ( !calendarCircuit.isProgramRunning() && calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
 
             UUID workerId = calendarCircuit.getWorkerId();
 
@@ -130,14 +131,18 @@ public class SystemWorkPile implements WorkPile {
                 Program calendarProgram = calendarGeneratorJob.createStayAheadProgram(jobDescriptor);
 
                 log.info("Starting program {}", jobDescriptor.getJobType().name());
+                activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.ACTIVE);
 
                 calendarCircuit.notifyWhenProgramDone(new SystemJobDoneTrigger(systemJobClaim));
                 calendarCircuit.notifyWhenProgramFails(new SystemJobFailedTrigger(systemJobClaim));
 
                 calendarCircuit.runProgram(calendarProgram);
+            } else {
+                activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.BLOCKED);
             }
         } else {
             log.warn("Calendar program has no more work to do.");
+            activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.IDLE);
         }
     }
 
@@ -217,6 +222,8 @@ public class SystemWorkPile implements WorkPile {
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.info("Finished program {}", systemJobClaim.getJobType().name());
            systemExclusiveJobClaimManager.finishClaim(systemJobClaim);
+
+           activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.IDLE);
         }
     }
 
@@ -233,13 +240,14 @@ public class SystemWorkPile implements WorkPile {
             if (ex != null) {
                 log.error("Failing program "+systemJobClaim.getJobType().name(), ex);
                 systemExclusiveJobClaimManager.failClaim(systemJobClaim, ex.getMessage());
-            } else {
 
+                activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.FAILED);
+            } else {
                 log.warn("Aborting program {}", systemJobClaim.getJobType().name());
                 systemExclusiveJobClaimManager.abortClaim(systemJobClaim);
+
+                activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.IDLE);
             }
-
-
         }
     }
 
