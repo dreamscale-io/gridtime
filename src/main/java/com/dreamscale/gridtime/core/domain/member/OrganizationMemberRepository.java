@@ -9,6 +9,10 @@ import java.util.UUID;
 
 public interface OrganizationMemberRepository extends CrudRepository<OrganizationMemberEntity, UUID> {
 
+    @Query(nativeQuery = true, value = "select * from organization_member om " +
+            "where not exists (select 1 from torchie_feed_cursor tfc where om.id = tfc.torchie_id) ")
+    List<OrganizationMemberEntity> selectMissingTorchies();
+
     List<OrganizationMemberEntity> findByOrganizationId(UUID organizationId);
 
     OrganizationMemberEntity findByOrganizationIdAndId(UUID organizationId, UUID id);

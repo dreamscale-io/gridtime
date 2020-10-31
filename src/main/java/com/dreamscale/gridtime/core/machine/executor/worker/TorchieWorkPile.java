@@ -4,10 +4,7 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
-import com.dreamscale.gridtime.core.domain.member.TeamEntity;
-import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity;
-import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository;
-import com.dreamscale.gridtime.core.domain.member.TeamRepository;
+import com.dreamscale.gridtime.core.domain.member.*;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.machine.Torchie;
@@ -64,7 +61,7 @@ public class TorchieWorkPile implements WorkPile {
     private TeamRepository teamRepository;
 
     @Autowired
-    private TeamMemberRepository teamMemberRepository;
+    private OrganizationMemberRepository organizationMemberRepository;
 
     @Autowired
     private TorchieFactory torchieFactory;
@@ -90,11 +87,13 @@ public class TorchieWorkPile implements WorkPile {
 
             gridSyncLockManager.tryToAcquireTorchieSyncLock();
 
-            initializeMissingTorchies(now);
-            claimTorchiesReadyForProcessing(now);
-            //expireZombieTorchies(now);
-
-            gridSyncLockManager.releaseTorchieSyncLock();
+            try {
+                initializeMissingTorchies(now);
+                claimTorchiesReadyForProcessing(now);
+                //expireZombieTorchies(now);
+            } finally {
+                gridSyncLockManager.releaseTorchieSyncLock();
+            }
         }
     }
 
@@ -122,13 +121,13 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     protected void initializeMissingTorchies(LocalDateTime now) {
-        List<TeamMemberEntity> missingTorchies = teamMemberRepository.selectMissingTorchies();
+        List<OrganizationMemberEntity> missingTorchies = organizationMemberRepository.selectMissingTorchies();
         List<TorchieFeedCursorEntity> readyTorchies = new ArrayList<>();
 
-        for (TeamMemberEntity teamMember : missingTorchies) {
+        for (OrganizationMemberEntity orgMember : missingTorchies) {
 
-            LocalDateTime firstTilePosition = findFirstTilePosition(teamMember.getMemberId());
-            LocalDateTime lastPublishedDataPosition = findLastPublishedData(teamMember.getMemberId());
+            LocalDateTime firstTilePosition = findFirstTilePosition(orgMember.getId());
+            LocalDateTime lastPublishedDataPosition = findLastPublishedData(orgMember.getId());
 
             if (firstTilePosition != null && lastPublishedDataPosition != null) {
 
@@ -137,15 +136,15 @@ public class TorchieWorkPile implements WorkPile {
 
                 TorchieFeedCursorEntity torchieCursor = new TorchieFeedCursorEntity();
                 torchieCursor.setId(UUID.randomUUID());
-                torchieCursor.setTorchieId(teamMember.getMemberId());
-                torchieCursor.setOrganizationId(teamMember.getOrganizationId());
+                torchieCursor.setTorchieId(orgMember.getId());
+                torchieCursor.setOrganizationId(orgMember.getOrganizationId());
                 torchieCursor.setFirstTilePosition(firstTilePosition);
                 torchieCursor.setLastPublishedDataCursor(lastPublishedDataPosition);
                 torchieCursor.setNextWaitUntilCursor(firstTilePosition.plus(ZoomLevel.TWENTY.getDuration()));
                 torchieCursor.setLastClaimUpdate(now);
                 readyTorchies.add(torchieCursor);
             } else {
-                log.warn("Skipping torchie feed: "+teamMember.getMemberId() + ", waiting for data");
+                log.warn("Skipping torchie feed: "+orgMember.getId() + ", waiting for data");
             }
         }
 
