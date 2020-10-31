@@ -34,9 +34,12 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
     private String lastFailMsg;
 
-    CircuitActivitySummaryRow(MonitorType monitorType, String rowKey) {
+    private boolean isDetailRow = false;
+
+    CircuitActivitySummaryRow(MonitorType monitorType, String rowKey, boolean isDetailRow) {
         this.monitorType = monitorType;
         this.rowKey = rowKey;
+        this.isDetailRow = isDetailRow;
     }
 
     public void aggregateMonitor(CircuitMonitor circuitMonitor) {
@@ -112,11 +115,8 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toCell(queueTimeAvg, 7));
         row.add(CellFormat.toCell(queueTimeMax, 7));
 
-        if (processStatus != null) {
+        if (isDetailRow) {
             row.add(CellFormat.toRightSizedCell(processStatus.name(), 9));
-        }
-
-        if (lastFailMsg != null) {
             row.add(CellFormat.toRightSizedCell(lastFailMsg, 40));
         }
 
@@ -137,11 +137,8 @@ public class CircuitActivitySummaryRow implements Cloneable {
         row.add(CellFormat.toRightSizedCell("QAvg", 7));
         row.add(CellFormat.toRightSizedCell("QMax", 7));
 
-        if (processStatus != null) {
+        if (isDetailRow) {
             row.add(CellFormat.toRightSizedCell("Status", 9));
-        }
-
-        if (lastFailMsg != null) {
             row.add(CellFormat.toRightSizedCell("Last Failure", 40));
         }
 

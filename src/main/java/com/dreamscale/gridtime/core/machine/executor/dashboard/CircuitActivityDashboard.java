@@ -172,7 +172,7 @@ public class CircuitActivityDashboard {
                 typePrefix = "@sys/dsh/";
             }
             String processId = CellFormat.toCellValue(dashboardMonitor.getWorkerId());
-            return new CircuitActivitySummaryRow(dashboardMonitor.getMonitorType(), typePrefix + processId);
+            return new CircuitActivitySummaryRow(dashboardMonitor.getMonitorType(), typePrefix + processId, true);
         }
 
         public void aggregateLive(DashboardMonitor dashboardMonitor) {
@@ -194,15 +194,15 @@ public class CircuitActivityDashboard {
         }
 
         public void clear() {
-            calendarFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal");
-            dashboardFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dsh");
-            torchieFinished = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie");
-            plexerFinished = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer");
+            calendarFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal", false);
+            dashboardFinished = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dsh", false);
+            torchieFinished = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie", false);
+            plexerFinished = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer", false);
 
-            calendarLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal");
-            dashboardLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dsh");
-            torchieLive = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie");
-            plexerLive = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer");
+            calendarLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_CALENDAR, "@sys/cal", false);
+            dashboardLive = new CircuitActivitySummaryRow(MonitorType.SYSTEM_DASHBOARD, "@sys/dsh", false);
+            torchieLive = new CircuitActivitySummaryRow(MonitorType.TORCHIE_WORKER, "@torchie", false);
+            plexerLive = new CircuitActivitySummaryRow(MonitorType.PLEXER_WORKER, "@plexer", false);
 
             finishedProcesses = DefaultCollections.map();
         }

@@ -94,6 +94,10 @@ public class CellFormat {
 
     public static String toRightSizedCell(String cellContents, int cellSize) {
         String fittedContent;
+        if (cellContents == null) {
+            cellContents = "";
+        }
+
         if (cellContents.length() > cellSize ) {
             fittedContent = cellContents.substring(0, cellSize - 1) + TRUNCATED_INDICATOR;
         } else {
