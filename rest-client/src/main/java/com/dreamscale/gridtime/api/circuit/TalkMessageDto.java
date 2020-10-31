@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.api.circuit;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class TalkMessageDto {
     private Map<String, String> metaProps;
 
     private String messageType;
+
+    @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="clazz")
     private Object data;
 
     public void addMetaProp(TalkMessageMetaProp prop, String value) {

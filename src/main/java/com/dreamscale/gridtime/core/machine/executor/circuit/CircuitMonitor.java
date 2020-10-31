@@ -99,7 +99,6 @@ public class CircuitMonitor {
     }
 
     public boolean isReady() {
-        log.debug(processType + " isReady? " + state);
         return state == State.Ready;
     }
 
