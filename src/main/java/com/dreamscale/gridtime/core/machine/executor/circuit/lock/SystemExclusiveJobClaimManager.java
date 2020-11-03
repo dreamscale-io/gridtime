@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.lock;
 import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimEntity;
 import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimRepository;
 import com.dreamscale.gridtime.core.domain.job.JobStatusType;
+import com.dreamscale.gridtime.core.domain.job.SystemJobType;
 import com.dreamscale.gridtime.core.domain.work.LockRepository;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.job.SystemJobDescriptor;
@@ -25,6 +26,8 @@ public class SystemExclusiveJobClaimManager {
     @Autowired
     GridClock gridClock;
 
+    private static final int MINUTES_BEFORE_EXPIRING = 20;
+
     public SystemJobClaim claimIfNotRunning(LocalDateTime now, UUID workerId, SystemJobDescriptor jobDescriptor) {
 
         GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findInProgressJobsByJobType(jobDescriptor.getJobType().name());
@@ -33,9 +36,19 @@ public class SystemExclusiveJobClaimManager {
 
         if (existingClaim != null) {
 
-            if (existingClaim.getStartedOn().isBefore(now.minusDays(1))) {
-                log.error("{} Job started on {} has still not completed, and is blocking future jobs.",
+            if (existingClaim.getLastHeartbeat().isBefore(now.minusMinutes(MINUTES_BEFORE_EXPIRING))) {
+
+                existingClaim.setJobStatus(JobStatusType.ABORTED);
+                existingClaim.setFinishedOn(now);
+                existingClaim.setErrorMessage("Aborting stale job claim");
+
+                gridtimeSystemJobClaimRepository.save(existingClaim);
+
+                log.warn("Aborting {} Job started on {} still not completed,",
                         existingClaim.getJobType().name(), existingClaim.getStartedOn());
+
+                existingClaim = null;
+
             } else {
                 log.warn("Existing job {} already running, unable to claim", existingClaim.getJobType().name());
             }
@@ -47,6 +60,7 @@ public class SystemExclusiveJobClaimManager {
             jobClaimEntity.setJobType(jobDescriptor.getJobType());
             jobClaimEntity.setJobDescriptorJson(JSONTransformer.toJson(jobDescriptor));
             jobClaimEntity.setStartedOn(now);
+            jobClaimEntity.setLastHeartbeat(now);
             jobClaimEntity.setJobStatus(JobStatusType.IN_PROGRESS);
             jobClaimEntity.setClaimingWorkerId(workerId);
 
@@ -101,6 +115,15 @@ public class SystemExclusiveJobClaimManager {
             existingClaim.setJobStatus(JobStatusType.ABORTED);
 
             gridtimeSystemJobClaimRepository.save(existingClaim);
+        }
+    }
+
+    public void updateHeartbeat(LocalDateTime now, UUID workerId) {
+        GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findByClaimingWorkerId(workerId);
+
+        if (existingClaim == null) {
+            existingClaim.setLastHeartbeat(now);
+           gridtimeSystemJobClaimRepository.save(existingClaim);
         }
     }
 }

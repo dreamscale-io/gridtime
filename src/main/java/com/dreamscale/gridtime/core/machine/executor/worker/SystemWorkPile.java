@@ -1,6 +1,9 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.api.grid.Results;
+import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimEntity;
+import com.dreamscale.gridtime.core.domain.job.JobType;
+import com.dreamscale.gridtime.core.domain.job.SystemJobType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -49,7 +52,7 @@ public class SystemWorkPile implements WorkPile {
     private LocalDateTime lastSyncCheck;
     private TickInstructions peekInstruction;
 
-    private Duration syncInterval = Duration.ofMinutes(20);
+    private Duration syncInterval = Duration.ofMinutes(5);
 
     private IdeaFlowCircuit calendarCircuit;
     private IdeaFlowCircuit dashboardCircuit;
@@ -99,12 +102,15 @@ public class SystemWorkPile implements WorkPile {
             gridSyncLockManager.tryToAcquireSystemJobSyncLock();
 
             try {
+                updateHeartbeatOfRunningPrograms(now);
                 spinUpCalendarProgramIfNeeded(now);
             } finally {
                 gridSyncLockManager.releaseSystemJobSyncLock();
             }
         }
     }
+
+
 
     @Override
     public void reset() {
@@ -115,6 +121,13 @@ public class SystemWorkPile implements WorkPile {
         peekInstruction = null;
 
         paused = false;
+    }
+
+    private void updateHeartbeatOfRunningPrograms(LocalDateTime now) {
+
+        if (calendarCircuit.isProgramRunning()) {
+            systemExclusiveJobClaimManager.updateHeartbeat(now, calendarCircuit.getWorkerId());
+        }
     }
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
