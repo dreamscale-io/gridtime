@@ -19,7 +19,7 @@ public class ExecutionRhythmObserver implements FlowObserver<FlowableFlowActivit
 
 
     @Override
-    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
+    public void observe(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
 
         for (Flowable flowable : window.getFlowables()) {

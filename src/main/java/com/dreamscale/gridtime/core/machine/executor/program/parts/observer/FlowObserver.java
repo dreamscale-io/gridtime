@@ -6,5 +6,5 @@ import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 
 public interface FlowObserver<T extends Flowable> {
 
-    void see(Window<T> window, GridTile gridTile);
+    void observe(Window<T> window, GridTile gridTile);
 }

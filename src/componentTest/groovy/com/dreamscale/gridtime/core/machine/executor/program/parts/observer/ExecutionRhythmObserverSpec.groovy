@@ -58,7 +58,7 @@ public class ExecutionRhythmObserverSpec extends Specification {
         window.addAll(flowables)
 
         when:
-        executionRhythmObserver.see(window, gridTile)
+        executionRhythmObserver.observe(window, gridTile)
         GridTableResults results = gridTile.playTrack(TrackSetKey.Executions);
         println results
 

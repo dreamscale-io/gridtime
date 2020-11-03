@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.domain.member.json.Member;
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AuthorsDetails implements FeatureDetails {
 
     private List<Member> authors;

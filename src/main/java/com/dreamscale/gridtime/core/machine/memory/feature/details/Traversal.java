@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -10,10 +11,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class Traversal implements FeatureDetails {
 
     private UUID projectId;
-    private final String boxName;
+    private String boxName;
 
     private String locationPathA;
     private String locationPathB;

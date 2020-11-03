@@ -1,9 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 

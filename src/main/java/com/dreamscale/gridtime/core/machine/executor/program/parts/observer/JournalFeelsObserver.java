@@ -12,7 +12,7 @@ import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 public class JournalFeelsObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
+    public void observe(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
         for (FlowableJournalEntry flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());

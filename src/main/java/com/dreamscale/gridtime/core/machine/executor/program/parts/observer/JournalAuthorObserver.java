@@ -19,7 +19,7 @@ import java.util.List;
 public class JournalAuthorObserver implements FlowObserver<FlowableJournalEntry> {
 
     @Override
-    public void see(Window<FlowableJournalEntry> window, GridTile gridTile) {
+    public void observe(Window<FlowableJournalEntry> window, GridTile gridTile) {
 
         for (Flowable flowable : window.getFlowables()) {
             JournalEntryEntity journalEntry = (flowable.get());

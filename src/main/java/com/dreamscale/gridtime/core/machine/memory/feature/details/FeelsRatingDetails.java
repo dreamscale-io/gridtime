@@ -4,11 +4,13 @@ import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class FeelsRatingDetails implements FeatureDetails, Observable {
 
     private Integer rating;

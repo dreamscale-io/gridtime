@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -10,9 +11,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class Bridge implements FeatureDetails {
 
-    private final UUID projectId;
+    private UUID projectId;
 
     private String boxNameA;
     private String locationPathA;

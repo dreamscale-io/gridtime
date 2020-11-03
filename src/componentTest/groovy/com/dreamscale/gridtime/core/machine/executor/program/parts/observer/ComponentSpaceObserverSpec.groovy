@@ -54,7 +54,7 @@ public class ComponentSpaceObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        componentSpaceObserver.see(window, gridTile)
+        componentSpaceObserver.observe(window, gridTile)
         gridTile.finishAfterLoad()
 
         GridTableResults tileOutput = gridTile.playTrack(TrackSetKey.Navigations)

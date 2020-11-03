@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class ExecutionEvent implements FeatureDetails {
 
     private Long executionId;

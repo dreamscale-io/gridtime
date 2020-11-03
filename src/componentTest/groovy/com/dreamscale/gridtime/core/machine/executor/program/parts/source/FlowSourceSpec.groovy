@@ -42,7 +42,7 @@ class FlowSourceSpec extends Specification {
         this.featurePool = new MemoryOnlyTorchieState(orgId, memberId);
 
         FlowObserver flowObserverMock =
-                [see: { Window window, TorchieState pool -> this.latestWindow = window }] as FlowObserver
+                [observe: { Window window, TorchieState pool -> this.latestWindow = window }] as FlowObserver
 
         this.journalFlowSource = new FlowSource(memberId, featurePool, journalFetcher, flowObserverMock)
         this.activityFlowSource = new FlowSource(memberId, featurePool, fileActivityFetcher, flowObserverMock)

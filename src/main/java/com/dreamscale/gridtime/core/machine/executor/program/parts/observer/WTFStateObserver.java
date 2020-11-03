@@ -16,7 +16,7 @@ import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 public class WTFStateObserver implements FlowObserver<FlowableCircuitWTFMessageEvent> {
 
     @Override
-    public void see(Window<FlowableCircuitWTFMessageEvent> window, GridTile gridTile) {
+    public void observe(Window<FlowableCircuitWTFMessageEvent> window, GridTile gridTile) {
 
         for (Flowable flowable : window.getFlowables()) {
             WTFFeedMessageEntity feedMessageEntity = (flowable.get());

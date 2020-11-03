@@ -58,7 +58,7 @@ public class WTFStateObserverSpec extends Specification {
         window.addAll(flowables);
 
         when:
-        wtfStateObserver.see(window, gridTile)
+        wtfStateObserver.observe(window, gridTile)
         gridTile.finishAfterLoad()
 
         GridTableResults tileOutput = gridTile.playTrack(TrackSetKey.IdeaFlow)

@@ -18,7 +18,7 @@ public class ComponentSpaceObserver implements FlowObserver<FlowableFlowActivity
 
 
     @Override
-    public void see(Window<FlowableFlowActivity> window, GridTile gridTile) {
+    public void observe(Window<FlowableFlowActivity> window, GridTile gridTile) {
 
         for (FlowableFlowActivity flowable : window.getFlowables()) {
                 FlowActivityEntity flowActivity = flowable.get();

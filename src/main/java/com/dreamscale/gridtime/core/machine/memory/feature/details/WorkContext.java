@@ -1,10 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.feature.details;
 
 import com.dreamscale.gridtime.core.machine.memory.cache.SearchKeyGenerator;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -12,6 +9,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class WorkContext implements FeatureDetails {
 
     private StructureLevel structureLevel;
