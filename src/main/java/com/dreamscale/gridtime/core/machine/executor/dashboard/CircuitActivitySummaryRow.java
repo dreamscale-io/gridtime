@@ -59,7 +59,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         workers.add(circuitMonitor.getWorkerId());
         numberWorkers = workers.size();
 
-        if (lastFailMsg == null) {
+        if (circuitMonitor.getLastFailMsg() != null) {
             lastFailMsg = circuitMonitor.getLastFailMsg();
         }
     }
@@ -96,7 +96,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         numberWorkers += activitySummary.getNumberWorkers();
 
-        if (lastFailMsg == null) {
+        if (activitySummary.getLastFailMsg() != null) {
             lastFailMsg = activitySummary.getLastFailMsg();
         }
     }

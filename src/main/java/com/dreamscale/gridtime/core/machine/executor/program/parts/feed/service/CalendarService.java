@@ -30,7 +30,7 @@ public class CalendarService {
         }
 
         if (tileSequence == null) {
-            throw new RuntimeException("Calendar tile unavailable for gridtime: "+ gridTime.getFormattedGridTime());
+            throw new RuntimeException("Calendar not found: "+ gridTime.getFormattedGridTime());
         }
 
         return tileSequence;

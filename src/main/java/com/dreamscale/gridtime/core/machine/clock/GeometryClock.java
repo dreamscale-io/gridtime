@@ -391,12 +391,11 @@ public class GeometryClock {
         }
 
         public boolean isAfter(GridTime other) {
-            for (int i = 0; i < coords.length && i < other.coords.length; i++) {
-                if (coords[i] > other.coords[i]) {
-                    return true;
-                }
+            if (getClockTime().equals(other.getClockTime())) {
+                return zoomLevel.getDuration().getSeconds() > other.getZoomLevel().getDuration().getSeconds();
+            } else {
+                return  getClockTime().isAfter(other.getClockTime());
             }
-            return false;
         }
     }
 }
