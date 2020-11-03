@@ -37,6 +37,19 @@ class GeometryClockSpec extends Specification {
         assert coords.toDisplayString() == "/gridtime/2019-B1-W1-D1_8pm+3:40"
     }
 
+    def "should generate non-zero week coords"() {
+        given:
+        LocalDateTime clockStart = LocalDateTime.of(2020, 6, 16, 17, 20)
+        geometryClock = new GeometryClock(clockStart)
+
+        when:
+        GeometryClock.GridTime coords = geometryClock.getActiveGridTime();
+
+        then:
+        assert coords != null
+        assert coords.toDisplayString() == "/gridtime/2020-B4-W6-D2_4pm+1:20"
+    }
+
 
     def "should count by weeks with monday starts"() {
         given:
