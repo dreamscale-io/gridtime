@@ -15,6 +15,8 @@ import java.util.UUID;
 public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedCursorEntity, UUID> {
 
 
+    TorchieFeedCursorEntity findByTorchieId(UUID torchieId);
+
     @Query(nativeQuery = true, value = "select * from torchie_feed_cursor " +
             "where claiming_server_id is null "+
             " and (last_published_data_cursor > next_wait_until_cursor) " +

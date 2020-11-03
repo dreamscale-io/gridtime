@@ -119,7 +119,7 @@ public class GeometryClock {
 
     private static int calcWeeksIntoBlock(int weeksIntoYear) {
 
-        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK.getInnerBeats());
+        return Math.floorMod(weeksIntoYear, ZoomLevel.BLOCK.getInnerBeats()) + 1;
     }
 
     private static int calcAdjustedYear(int firstMondayOffset, LocalDateTime clock) {

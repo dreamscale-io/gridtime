@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
+import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityEntity;
 import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
@@ -12,6 +13,8 @@ import com.dreamscale.gridtime.core.machine.TorchieFactory;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyFailureTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
@@ -115,8 +118,12 @@ public class TorchieWorkPile implements WorkPile {
         List<Torchie> torchies = claimUpTo(now, claimUpTo);
 
         for (Torchie torchie : torchies) {
-            whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
+            NotifyTorchieDoneTrigger trigger = new NotifyTorchieDoneTrigger(torchie.getTorchieId());
+            torchie.notifyWhenProgramDone(trigger);
+            torchie.notifyWhenProgramFails(trigger);
             circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchie.getTorchieId(), torchie.getCircuitMonitor());
+
+            whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
         }
     }
 
@@ -360,5 +367,44 @@ public class TorchieWorkPile implements WorkPile {
 
     public void clear() {
         whatsNextWheel.clear();
+    }
+
+
+    private class NotifyTorchieDoneTrigger implements NotifyDoneTrigger, NotifyFailureTrigger {
+
+        private final UUID torchieId;
+
+        NotifyTorchieDoneTrigger(UUID torchieId) {
+            this.torchieId = torchieId;
+        }
+
+        @Override
+        @Transactional
+        public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
+            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+            cursor.setClaimingServerId(null);
+            torchieFeedCursorRepository.save(cursor);
+
+            evictWorker(torchieId);
+        }
+
+        @Override
+        @Transactional
+        public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
+            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+
+            Integer fails = cursor.getFailureCount();
+            if (fails == null) {
+                fails = 1;
+            } else {
+                fails++;
+            }
+
+            cursor.setFailureCount(fails);
+            cursor.setClaimingServerId(null);
+            torchieFeedCursorRepository.save(cursor);
+
+            evictWorker(torchieId);
+        }
     }
 }
