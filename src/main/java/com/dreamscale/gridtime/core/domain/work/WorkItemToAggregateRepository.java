@@ -36,5 +36,7 @@ public interface WorkItemToAggregateRepository extends CrudRepository<WorkItemTo
             "and processing_state = 'InProgress' ")
     void finishInProgressWorkItems(@Param("workerId") String workerId);
 
-
+    @Modifying
+    @Query(nativeQuery = true, value = "truncate table work_item_to_aggregate")
+    void truncate();
 }

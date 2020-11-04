@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.grid.GridStatus;
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto;
+import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
@@ -24,9 +25,13 @@ public class GridTimeEngine {
     private CircuitActivityDashboard circuitActivityDashboard;
 
     @Autowired
+    private FeedDataManager feedDataManager;
+
+    @Autowired
     private GridTimeWorkPile gridTimeWorkPile;
 
     private GridTimeExecutor gridTimeExecutor;
+
 
     @PostConstruct
     public void init() {
@@ -111,5 +116,14 @@ public class GridTimeEngine {
         summaryDto.setActivitySummary(processSummary);
 
         return summaryDto;
+    }
+
+    public SimpleStatusDto purgeAll() {
+        shutdown();
+
+        feedDataManager.purgeAll();
+
+        reset();
+        return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown and all feed data purged.");
     }
 }

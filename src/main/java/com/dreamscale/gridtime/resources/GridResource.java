@@ -42,6 +42,8 @@ public class GridResource {
         terminalRouteRegistry.register(ActivityContext.SYSTEM,
                 Command.ERROR, "Show error details.", new ErrorTerminalRoute());
 
+        terminalRouteRegistry.register(ActivityContext.SYSTEM,
+                Command.PURGE, "Purge feed data.", new PurgeTerminalRoute());
 
     }
 
@@ -135,6 +137,19 @@ public class GridResource {
         return gridTimeEngine.getDashboard(DashboardActivityScope.PLEXER_DETAIL);
     }
 
+    /**
+     * Purge the gridtime engine tile data, so it can be re-generated
+     *
+     * @return SimpleStatusDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PURGE_PATH)
+    public SimpleStatusDto purgeFeedData() {
+        return gridTimeEngine.purgeAll();
+    }
+
+
+
 
     private class GridTerminalRoute extends TerminalRoute {
 
@@ -223,6 +238,20 @@ public class GridResource {
         public Object route(Map<String, String> params) {
 
             return getProcessFailureDetails();
+        }
+
+    }
+
+    private class PurgeTerminalRoute extends TerminalRoute {
+
+        PurgeTerminalRoute() {
+            super(Command.PURGE, "");
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+
+            return purgeFeedData();
         }
 
     }

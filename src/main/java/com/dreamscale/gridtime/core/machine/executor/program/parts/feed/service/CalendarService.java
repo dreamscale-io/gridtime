@@ -104,4 +104,7 @@ public class CalendarService {
         return null;
     }
 
+    public void purgeAll() {
+        gridTimeCalendarRepository.truncate();
+    }
 }

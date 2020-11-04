@@ -58,5 +58,8 @@ public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedC
             "where claiming_server_id is not null and last_claim_update < (:expireBeforeDate) ")
     void expireZombieTorchies(@Param("expireBeforeDate") Timestamp expireBeforeDate);
 
+    @Modifying
+    @Query(nativeQuery = true, value = "truncate table torchie_feed_cursor")
+    void truncate();
 }
 

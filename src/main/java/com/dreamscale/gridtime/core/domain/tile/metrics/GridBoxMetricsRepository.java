@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.domain.tile.metrics;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,8 @@ public interface GridBoxMetricsRepository extends CrudRepository<GridBoxMetricsE
     List<GridBoxMetricsEntity> findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                      @Param("zoom") String zoomLevel,
                                                      @Param("clock") Timestamp clockTime);
+
+    @Modifying
+    @Query(nativeQuery = true, value = "truncate table grid_box_metrics")
+    void truncate();
 }

@@ -275,6 +275,32 @@ class TerminalResourceSpec extends Specification {
         assert failResult != null
     }
 
+    def "should purge grid feed data from terminal"() {
+
+        given:
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+        gridTimeEngine.configureDoneAfterTicks(20)
+
+        when:
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+
+        gridTimeEngine.waitForDone()
+
+        TalkMessageDto purgeResult = terminalClient.runCommand(new CommandInputDto(Command.PURGE))
+        SimpleStatusDto statusDto = (SimpleStatusDto) purgeResult.getData();
+
+        println statusDto
+
+        then:
+        assert purgeResult != null
+        assert statusDto.getStatus() == Status.SUCCESS
+    }
+
     def "should unshare project for user from terminal"() {
 
         given:

@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.domain.time;
 
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +21,8 @@ public interface GridTimeCalendarRepository extends CrudRepository<GridTimeCalen
     List<GridTimeCalendarEntity> findByZoomLevel(ZoomLevel zoomLevel);
 
     GridTimeCalendarEntity findByZoomLevelAndTileSeq(ZoomLevel zoomLevel, Long tileSeq);
+
+    @Modifying
+    @Query(nativeQuery = true, value = "truncate table grid_time_calendar")
+    void truncate();
 }
