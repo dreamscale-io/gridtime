@@ -39,11 +39,11 @@ public class FailureDetailRow implements Cloneable {
         row.add(firstLine);
 
         List<String> row2 = new ArrayList<>();
-        row2.add(CellFormat.toRightSizedCell("", 30));
+        row2.add(CellFormat.toRightSizedCell("", 32));
         row2.add(stack1);
 
         List<String> row3 = new ArrayList<>();
-        row3.add(CellFormat.toRightSizedCell("", 30));
+        row3.add(CellFormat.toRightSizedCell("", 32));
         row3.add(stack2);
 
         rows.add(row);
