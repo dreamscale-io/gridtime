@@ -36,6 +36,14 @@ public class Beat implements Observable {
     public static Beat BEAT_3_OF_4 = new Beat(3, 4);
     public static Beat BEAT_4_OF_4 = new Beat(4, 4);
 
+    public static Beat BEAT_1_OF_2 = new Beat(1, 2);
+    public static Beat BEAT_2_OF_2 = new Beat(2, 2);
+
+    public static Beat BEAT_1_OF_3 = new Beat(1, 3);
+    public static Beat BEAT_2_OF_3 = new Beat(2, 3);
+    public static Beat BEAT_3_OF_3 = new Beat(3, 3);
+
+
     public static Beat BEAT_1_OF_12 = new Beat(1, 12);
     public static Beat BEAT_2_OF_12 = new Beat(2, 12);
     public static Beat BEAT_3_OF_12 = new Beat(3, 12);
@@ -101,6 +109,17 @@ public class Beat implements Observable {
             BEAT_18_OF_20,
             BEAT_19_OF_20,
             BEAT_20_OF_20
+    };
+
+    public static final Beat[] TWO_BEATS_PER_MEASURE = {
+            BEAT_1_OF_2,
+            BEAT_2_OF_2,
+    };
+
+    public static final Beat[] THREE_BEATS_PER_MEASURE = {
+            BEAT_1_OF_3,
+            BEAT_2_OF_3,
+            BEAT_3_OF_3,
     };
 
     public static final Beat[] FOUR_BEATS_PER_MEASURE = {
@@ -181,8 +200,13 @@ public class Beat implements Observable {
             return SEVEN_BEATS_PER_MEASURE;
         } else if (beatsPerMeasure == 9) {
             return NINE_BEATS_PER_MEASURE;
+        } else if (beatsPerMeasure == 2) {
+            return TWO_BEATS_PER_MEASURE;
+        } else if (beatsPerMeasure == 3) {
+            return THREE_BEATS_PER_MEASURE;
         }
-        return new Beat[0];
+
+        throw new RuntimeException("No beat signature for "+beatsPerMeasure + " beats per measure.");
     }
 
     public String toDisplayString() {
