@@ -57,6 +57,7 @@ public class FeedDataManager  {
     }
 
 
+    @Transactional
     public void purgeFeeds() {
         torchieFeedCursorRepository.truncate();
         workItemToAggregateRepository.truncate();
