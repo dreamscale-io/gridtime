@@ -40,7 +40,7 @@ public class GridResource {
                 Command.PS, "Show top process activity.", new PsTerminalRoute());
 
         terminalRouteRegistry.register(ActivityContext.SYSTEM,
-                Command.FAIL, "Show failure details.", new FailTerminalRoute());
+                Command.ERROR, "Show error details.", new ErrorTerminalRoute());
 
 
     }
@@ -107,7 +107,7 @@ public class GridResource {
      * @return GridTableResults
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(ResourcePaths.PROCESS_PATH + ResourcePaths.FAIL_PATH)
+    @GetMapping(ResourcePaths.PROCESS_PATH + ResourcePaths.ERROR_PATH)
     public GridTableResults getProcessFailureDetails() {
         return gridTimeEngine.getDashboard(DashboardActivityScope.FAILURE_DETAIL);
     }
@@ -213,10 +213,10 @@ public class GridResource {
 
     }
 
-    private class FailTerminalRoute extends TerminalRoute {
+    private class ErrorTerminalRoute extends TerminalRoute {
 
-        FailTerminalRoute() {
-            super(Command.FAIL, "");
+        ErrorTerminalRoute() {
+            super(Command.ERROR, "");
         }
 
         @Override

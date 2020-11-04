@@ -266,7 +266,7 @@ class TerminalResourceSpec extends Specification {
 
         gridTimeEngine.waitForDone()
 
-        TalkMessageDto failResult = terminalClient.runCommand(new CommandInputDto(Command.FAIL))
+        TalkMessageDto failResult = terminalClient.runCommand(new CommandInputDto(Command.ERROR))
         GridTableResults results = (GridTableResults) failResult.getData();
 
         println results.toDisplayString()

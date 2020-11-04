@@ -63,7 +63,7 @@ public class ResourcePaths {
     public static final String RESTART_PATH = "/restart";
     public static final String TOP_PATH = "/top";
     public static final String PROCESS_PATH = "/process";
-    public static final String FAIL_PATH = "/fail";
+    public static final String ERROR_PATH = "/error";
 
     public static final String SUMMARY_PATH = "/summary";
     public static final String HALT_PATH = "/halt";

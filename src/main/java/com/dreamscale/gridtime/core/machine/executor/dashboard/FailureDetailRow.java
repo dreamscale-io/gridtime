@@ -1,12 +1,10 @@
 package com.dreamscale.gridtime.core.machine.executor.dashboard;
 
-import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
-import com.dreamscale.gridtime.core.machine.executor.circuit.CircuitMonitor;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class FailureDetailRow implements Cloneable {
@@ -17,6 +15,8 @@ public class FailureDetailRow implements Cloneable {
     private int ticksFailed;
 
     private final Exception failure;
+
+    private static final int STACK_FRAMES_TO_SHOW = 5;
 
     FailureDetailRow(CircuitActivitySummaryRow summaryRow, Exception ex) {
         this.rowKey = summaryRow.getRowKey();
@@ -29,28 +29,39 @@ public class FailureDetailRow implements Cloneable {
         List<List<String>> rows = new ArrayList<>();
 
         String firstLine = failure.getClass().getSimpleName() + " : " + failure.getMessage();
-        String stack1 = failure.getStackTrace()[0].toString();
-        String stack2 = failure.getStackTrace()[1].toString();
 
-        List<String> row = new ArrayList<>();
-        row.add(CellFormat.toRightSizedCell(rowKey, 18));
-        row.add(CellFormat.toCell(ticksProcessed, 6));
-        row.add(CellFormat.toCell(ticksFailed, 6));
-        row.add(firstLine);
+        List<String> firstRow = new ArrayList<>();
+        firstRow.add(CellFormat.toRightSizedCell(rowKey, 18));
+        firstRow.add(CellFormat.toCell(ticksProcessed, 6));
+        firstRow.add(CellFormat.toCell(ticksFailed, 6));
+        firstRow.add(firstLine);
 
-        List<String> row2 = new ArrayList<>();
-        row2.add(CellFormat.toRightSizedCell("", 32));
-        row2.add(stack1);
+        rows.add(firstRow);
 
-        List<String> row3 = new ArrayList<>();
-        row3.add(CellFormat.toRightSizedCell("", 32));
-        row3.add(stack2);
+        List<String> stackTraceLines = extractStackLines(failure);
 
-        rows.add(row);
-        rows.add(row2);
-        rows.add(row3);
+        for (String stackLine : stackTraceLines) {
+            List<String> stackTraceRow = new ArrayList<>();
+            stackTraceRow.add(CellFormat.toRightSizedCell("", 32));
+            stackTraceRow.add(stackLine);
+
+            rows.add(stackTraceRow);
+        }
 
         return rows;
+    }
+
+    private List<String> extractStackLines(Exception failure) {
+
+        List<String> stackLines = new ArrayList<>();
+
+        StackTraceElement[] stackTraceFrames = failure.getStackTrace();
+
+        for (int i = 0; i < STACK_FRAMES_TO_SHOW && i < stackTraceFrames.length; i++) {
+            stackLines.add(stackTraceFrames[i].toString());
+        }
+
+        return stackLines;
     }
 
     List<String> toHeaderRow() {
