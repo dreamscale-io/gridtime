@@ -42,7 +42,6 @@ public class AggregatePlexerProgram implements Program {
     @Override
     public void tick() {
 
-        log.info("mark done");
         inputWire.markDone(workerId);
 
         activeEvent = inputWire.pullNext(workerId);
