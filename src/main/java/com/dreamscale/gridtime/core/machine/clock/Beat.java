@@ -49,6 +49,32 @@ public class Beat implements Observable {
     public static Beat BEAT_11_OF_12 = new Beat(11, 12);
     public static Beat BEAT_12_OF_12 = new Beat(12, 12);
 
+    public static Beat BEAT_1_OF_6 = new Beat(1, 6);
+    public static Beat BEAT_2_OF_6 = new Beat(2, 6);
+    public static Beat BEAT_3_OF_6 = new Beat(3, 6);
+    public static Beat BEAT_4_OF_6 = new Beat(4, 6);
+    public static Beat BEAT_5_OF_6 = new Beat(5, 6);
+    public static Beat BEAT_6_OF_6 = new Beat(6, 6);
+
+    public static Beat BEAT_1_OF_7 = new Beat(1, 7);
+    public static Beat BEAT_2_OF_7 = new Beat(2, 7);
+    public static Beat BEAT_3_OF_7 = new Beat(3, 7);
+    public static Beat BEAT_4_OF_7 = new Beat(4, 7);
+    public static Beat BEAT_5_OF_7 = new Beat(5, 7);
+    public static Beat BEAT_6_OF_7 = new Beat(6, 7);
+    public static Beat BEAT_7_OF_7 = new Beat(7, 7);
+
+    public static Beat BEAT_1_OF_9 = new Beat(1, 9);
+    public static Beat BEAT_2_OF_9 = new Beat(2, 9);
+    public static Beat BEAT_3_OF_9 = new Beat(3, 9);
+    public static Beat BEAT_4_OF_9 = new Beat(4, 9);
+    public static Beat BEAT_5_OF_9 = new Beat(5, 9);
+    public static Beat BEAT_6_OF_9 = new Beat(6, 9);
+    public static Beat BEAT_7_OF_9 = new Beat(7, 9);
+    public static Beat BEAT_8_OF_9 = new Beat(8, 9);
+    public static Beat BEAT_9_OF_9 = new Beat(9, 9);
+
+
     private int beat;
     private int beatsPerMeasure;
     private int angle;
@@ -99,6 +125,36 @@ public class Beat implements Observable {
             BEAT_12_OF_12
     };
 
+    public static final Beat[] SIX_BEATS_PER_MEASURE = {
+            BEAT_1_OF_6,
+            BEAT_2_OF_6,
+            BEAT_3_OF_6,
+            BEAT_4_OF_6,
+            BEAT_5_OF_6,
+            BEAT_6_OF_6
+    };
+
+    public static final Beat[] SEVEN_BEATS_PER_MEASURE = {
+            BEAT_1_OF_7,
+            BEAT_2_OF_7,
+            BEAT_3_OF_7,
+            BEAT_4_OF_7,
+            BEAT_5_OF_7,
+            BEAT_6_OF_7,
+            BEAT_7_OF_7,
+    };
+
+    public static final Beat[] NINE_BEATS_PER_MEASURE = {
+            BEAT_1_OF_9,
+            BEAT_2_OF_9,
+            BEAT_3_OF_9,
+            BEAT_4_OF_9,
+            BEAT_5_OF_9,
+            BEAT_6_OF_9,
+            BEAT_7_OF_9,
+            BEAT_8_OF_9,
+            BEAT_9_OF_9,
+    };
 
     public Beat(int beat, int beatsPerMeasure) {
         this.beat = beat;
@@ -119,6 +175,12 @@ public class Beat implements Observable {
             return TWELVE_BEATS_PER_MEASURE;
         } else if (beatsPerMeasure == 20) {
             return TWENTY_BEATS_PER_MEASURE;
+        } else if (beatsPerMeasure == 6) {
+            return SIX_BEATS_PER_MEASURE;
+        } else if (beatsPerMeasure == 7) {
+            return SEVEN_BEATS_PER_MEASURE;
+        } else if (beatsPerMeasure == 9) {
+            return NINE_BEATS_PER_MEASURE;
         }
         return new Beat[0];
     }
