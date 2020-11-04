@@ -51,8 +51,6 @@ public class CircuitActivityDashboard {
         }
     }
 
-
-
     public boolean tickAndCheckIfNeedsRefresh() {
         ticksSinceLastRefresh++;
 
@@ -95,6 +93,8 @@ public class CircuitActivityDashboard {
                 return dashboard.toTorchieTopGridTableResults();
             case ALL_DETAIL:
                 return dashboard.toTopGridTableResults();
+            case FAILURE_DETAIL:
+                return dashboard.toFailureDetailResults();
         }
         return null;
     }
@@ -248,6 +248,13 @@ public class CircuitActivityDashboard {
             return toProcessTopTable("Gridtime Activity Detail", rowsInTable.values());
         }
 
+        public GridTableResults toFailureDetailResults() {
+
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = getAllFailingRowsInTable();
+
+            return toFailureTable("Gridtime Failure Details", rowsInTable.values());
+        }
+
 
         private Map<UUID, CircuitActivitySummaryRow> getRowsInTableByType(MonitorType monitorType) {
             List<DashboardMonitor> filteredMonitors = dashboardMonitors.values().stream().filter(
@@ -315,6 +322,18 @@ public class CircuitActivityDashboard {
             return rowsInTable;
         }
 
+        private Map<UUID, CircuitActivitySummaryRow> getAllFailingRowsInTable() {
+            Map<UUID, CircuitActivitySummaryRow> rowsInTable = getAllRowsInTable();
+            Map<UUID, CircuitActivitySummaryRow> failureRows = new LinkedHashMap<>();
+
+            for (Map.Entry<UUID, CircuitActivitySummaryRow> rowEntry : rowsInTable.entrySet()) {
+                if (rowEntry.getValue().hasFailure()) {
+                   failureRows.put(rowEntry.getKey(), rowEntry.getValue());
+                }
+            }
+            return failureRows;
+        }
+
 
         private GridTableResults toProcessTopTable(String title, Collection<CircuitActivitySummaryRow> rows) {
             List<List<String>> rowsOfPaddedCells = new ArrayList<>();
@@ -335,6 +354,30 @@ public class CircuitActivityDashboard {
             return new GridTableResults(title, headers, rowsOfPaddedCells);
         }
 
+        private GridTableResults toFailureTable(String title, Collection<CircuitActivitySummaryRow> failureRows) {
+
+            List<List<String>> rowsOfPaddedCells = new ArrayList<>();
+
+            List<String> headers = Collections.emptyList();
+
+            for (CircuitActivitySummaryRow row : failureRows) {
+                for (Exception ex : row.getLastFailures()) {
+                    FailureDetailRow failDetail = new FailureDetailRow(row, ex);
+
+                    rowsOfPaddedCells.addAll(failDetail.toRows());
+
+                    if (headers.isEmpty()) {
+                        headers = failDetail.toHeaderRow();
+                    }
+                }
+            }
+
+            return new GridTableResults(title, headers, rowsOfPaddedCells);
+        }
+    }
+
+
+
         private List<CircuitActivitySummaryRow> createProcessRowsSortedByTop(Collection<CircuitActivitySummaryRow> unsortedRows) {
             List<CircuitActivitySummaryRow> sortedRows = new ArrayList<>(unsortedRows);
 
@@ -343,5 +386,5 @@ public class CircuitActivityDashboard {
             return sortedRows;
         }
 
-    }
+
 }

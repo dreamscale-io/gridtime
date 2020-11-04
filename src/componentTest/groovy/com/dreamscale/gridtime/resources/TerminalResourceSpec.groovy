@@ -250,6 +250,30 @@ class TerminalResourceSpec extends Specification {
         assert psResult != null
     }
 
+    def "should show failure details from terminal"() {
+
+        given:
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+        gridTimeEngine.configureDoneAfterTicks(20)
+
+        when:
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+
+        gridTimeEngine.waitForDone()
+
+        TalkMessageDto failResult = terminalClient.runCommand(new CommandInputDto(Command.FAIL))
+        GridTableResults results = (GridTableResults) failResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert failResult != null
+    }
 
     def "should unshare project for user from terminal"() {
 

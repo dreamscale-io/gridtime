@@ -39,6 +39,10 @@ public class GridResource {
         terminalRouteRegistry.register(ActivityContext.SYSTEM,
                 Command.PS, "Show top process activity.", new PsTerminalRoute());
 
+        terminalRouteRegistry.register(ActivityContext.SYSTEM,
+                Command.FAIL, "Show failure details.", new FailTerminalRoute());
+
+
     }
 
     /**
@@ -95,6 +99,19 @@ public class GridResource {
     public GridTableResults getTopProcesses() {
         return gridTimeEngine.getDashboard(DashboardActivityScope.ALL_DETAIL);
     }
+
+
+    /**
+     * Get the latest failure details for all processes
+     *
+     * @return GridTableResults
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.PROCESS_PATH + ResourcePaths.FAIL_PATH)
+    public GridTableResults getProcessFailureDetails() {
+        return gridTimeEngine.getDashboard(DashboardActivityScope.FAILURE_DETAIL);
+    }
+
 
     /**
      * Get the latest process detail for all torchie processes
@@ -192,6 +209,20 @@ public class GridResource {
 
             throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find a matching terminal command to execute");
 
+        }
+
+    }
+
+    private class FailTerminalRoute extends TerminalRoute {
+
+        FailTerminalRoute() {
+            super(Command.FAIL, "");
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+
+            return getProcessFailureDetails();
         }
 
     }

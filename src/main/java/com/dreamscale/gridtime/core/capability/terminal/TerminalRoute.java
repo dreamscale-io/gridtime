@@ -8,6 +8,7 @@ import org.dreamscale.exception.BadRequestException;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriTemplate;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,27 +18,34 @@ public abstract class TerminalRoute {
 
     private final Command command;
 
-    private final String argsTemplate;
+    private String argsTemplate;
 
-    private final UriTemplate uriTemplate;
+    private UriTemplate uriTemplate;
 
     private Map<String, String> optionsHelpDescriptions;
 
     public TerminalRoute(Command command, String argsTemplate) {
         this.command = command;
-        this.argsTemplate = argsTemplate;
-        uriTemplate = new UriTemplate(argsTemplate);
+
+        if (argsTemplate != null && argsTemplate.length() > 0) {
+            this.argsTemplate = argsTemplate;
+            this.uriTemplate = new UriTemplate(argsTemplate);
+        }
+
         optionsHelpDescriptions = new LinkedHashMap<>();
     }
 
     public Map<String, String> extractParameters(String cmdStr) {
         AntPathMatcher pathMatcher = new AntPathMatcher();
 
-        Map<String, String> params = null;
-        try {
-            params = pathMatcher.extractUriTemplateVariables(argsTemplate, cmdStr);
-        } catch (IllegalStateException ex) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid parameters. "+ex.getMessage());
+        Map<String, String> params = Collections.emptyMap();
+
+        if (argsTemplate != null) {
+            try {
+                params = pathMatcher.extractUriTemplateVariables(argsTemplate, cmdStr);
+            } catch (IllegalStateException ex) {
+                throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid parameters. "+ex.getMessage());
+            }
         }
 
         return params;
@@ -62,9 +70,12 @@ public abstract class TerminalRoute {
 
     protected boolean matches(Command inputCommand, List<String> args) {
         if (inputCommand.equals(command)) {
-
-            String standarizedArgTemplateStr = StringUtils.join(args, " ");
-            return uriTemplate.matches(standarizedArgTemplateStr);
+            if (uriTemplate != null) {
+                String standarizedArgTemplateStr = StringUtils.join(args, " ");
+                return uriTemplate.matches(standarizedArgTemplateStr);
+            } else {
+                return true;
+            }
         }
         return false;
     }

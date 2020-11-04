@@ -28,6 +28,9 @@ public interface GridClient {
     @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.PROCESS_PATH)
     GridTableResults getTopProcesses();
 
+    @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.PROCESS_PATH + ResourcePaths.FAIL_PATH)
+    GridTableResults getProcessFailureDetails();
+
     @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.PROCESS_PATH + ResourcePaths.TORCHIE_PATH)
     GridTableResults getTopTorchieProcesses();
 

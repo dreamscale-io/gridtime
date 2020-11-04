@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.UUID;
 
 @Slf4j
@@ -37,6 +38,8 @@ public class CircuitMonitor {
     private State state;
 
     private String lastFailMsg;
+
+    private LinkedList<Exception> lastFailures = new LinkedList<>();
 
 
     public CircuitMonitor(ProcessType processType, UUID workerId) {
@@ -76,13 +79,19 @@ public class CircuitMonitor {
         recentQueueTimeMetric.addSample(lastQueueDuration);
     }
 
-    public void failInstruction(long queueDurationMillis, long executionDurationMillis, String failMsg) {
+    public void failInstruction(long queueDurationMillis, long executionDurationMillis, Exception ex) {
         log.error(processType + " FAILED: Setting circuit state back to ready!");
         state = State.Ready;
 
         ticksFailed++;
 
-        lastFailMsg = failMsg;
+        lastFailures.push(ex);
+
+        if (lastFailures.size() > 3) {
+            lastFailures.removeLast();
+        }
+
+        lastFailMsg = ex.getMessage();
 
         updateMetrics(queueDurationMillis, executionDurationMillis);
         updateStatusTimestamp();

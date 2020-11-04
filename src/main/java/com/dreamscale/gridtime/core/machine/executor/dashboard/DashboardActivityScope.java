@@ -4,5 +4,5 @@ public enum DashboardActivityScope {
 
     ALL_DETAIL,
     PLEXER_DETAIL,
-    GRID_SUMMARY, TORCHIE_DETAIL
+    GRID_SUMMARY, FAILURE_DETAIL, TORCHIE_DETAIL
 }

@@ -36,6 +36,8 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
     private boolean isDetailRow = false;
 
+    private LinkedList<Exception> lastFailures = new LinkedList<>();
+
     CircuitActivitySummaryRow(MonitorType monitorType, String rowKey, boolean isDetailRow) {
         this.monitorType = monitorType;
         this.rowKey = rowKey;
@@ -62,6 +64,19 @@ public class CircuitActivitySummaryRow implements Cloneable {
         if (circuitMonitor.getLastFailMsg() != null) {
             lastFailMsg = circuitMonitor.getLastFailMsg();
         }
+
+        for (Exception ex : circuitMonitor.getLastFailures()) {
+            pushFailure(ex);
+        }
+
+    }
+
+    private void pushFailure(Exception ex) {
+        lastFailures.push(ex);
+
+        if (lastFailures.size() > 3) {
+            lastFailures.removeLast();
+        }
     }
 
     public void setProcessStatus(ProcessStatus processStatus) {
@@ -72,7 +87,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         UUID workerId = null;
 
         if (workers.size() > 0) {
-            workerId =  workers.iterator().next();
+            workerId = workers.iterator().next();
         }
         return workerId;
     }
@@ -98,6 +113,10 @@ public class CircuitActivitySummaryRow implements Cloneable {
 
         if (activitySummary.getLastFailMsg() != null) {
             lastFailMsg = activitySummary.getLastFailMsg();
+        }
+
+        for (Exception ex : activitySummary.getLastFailures()) {
+            pushFailure(ex);
         }
     }
 
@@ -186,4 +205,7 @@ public class CircuitActivitySummaryRow implements Cloneable {
         }
     }
 
+    public boolean hasFailure() {
+        return lastFailMsg != null;
+    }
 }
