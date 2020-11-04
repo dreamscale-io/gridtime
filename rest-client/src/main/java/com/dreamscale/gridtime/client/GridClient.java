@@ -22,6 +22,12 @@ public interface GridClient {
     @RequestLine("POST " + ResourcePaths.GRID_PATH + ResourcePaths.RESTART_PATH)
     SimpleStatusDto restart();
 
+    @RequestLine("POST " + ResourcePaths.GRID_PATH + ResourcePaths.PURGE_PATH + ResourcePaths.ALL_PATH)
+    SimpleStatusDto purgeAll();
+
+    @RequestLine("POST " + ResourcePaths.GRID_PATH + ResourcePaths.PURGE_PATH + ResourcePaths.FEED_PATH)
+    SimpleStatusDto purgeFeeds();
+
     @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.STATUS_PATH)
     GridStatusSummaryDto getStatus();
 
@@ -29,7 +35,7 @@ public interface GridClient {
     GridTableResults getTopProcesses();
 
     @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.PROCESS_PATH + ResourcePaths.ERROR_PATH)
-    GridTableResults getProcessFailureDetails();
+    GridTableResults getProcessErrorDetails();
 
     @RequestLine("GET " + ResourcePaths.GRID_PATH + ResourcePaths.PROCESS_PATH + ResourcePaths.TORCHIE_PATH)
     GridTableResults getTopTorchieProcesses();

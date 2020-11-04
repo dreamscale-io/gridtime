@@ -124,6 +124,15 @@ public class GridTimeEngine {
         feedDataManager.purgeAll();
 
         reset();
+        return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown and all feed and calendar data purged.");
+    }
+
+    public SimpleStatusDto purgeFeeds() {
+        shutdown();
+
+        feedDataManager.purgeFeeds();
+
+        reset();
         return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown and all feed data purged.");
     }
 }

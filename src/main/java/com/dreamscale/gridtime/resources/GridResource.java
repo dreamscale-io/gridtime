@@ -138,14 +138,25 @@ public class GridResource {
     }
 
     /**
-     * Purge the gridtime engine tile data, so it can be re-generated
+     * Purge ALL gridtime engine data, so everything can be re-generated
      *
      * @return SimpleStatusDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.PURGE_PATH)
-    public SimpleStatusDto purgeFeedData() {
+    @PostMapping(ResourcePaths.PURGE_PATH + ResourcePaths.ALL_PATH)
+    public SimpleStatusDto purgeAll() {
         return gridTimeEngine.purgeAll();
+    }
+
+    /**
+     * Purge the gridtime engine feed data only, the calendar will remain in tact
+     *
+     * @return SimpleStatusDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.PURGE_PATH + ResourcePaths.FEED_PATH)
+    public SimpleStatusDto purgeFeedData() {
+        return gridTimeEngine.purgeFeeds();
     }
 
 
@@ -244,14 +255,31 @@ public class GridResource {
 
     private class PurgeTerminalRoute extends TerminalRoute {
 
+        private static final String TARGET_PARAM = "target";
+        private static final String ALL_CHOICE = "all";
+        private static final String FEEDS_CHOICE = "feeds";
+
+
         PurgeTerminalRoute() {
-            super(Command.PURGE, "");
+            super(Command.PURGE, "{" + TARGET_PARAM + "}");
+
+            describeChoiceOption(TARGET_PARAM, ALL_CHOICE, FEEDS_CHOICE);
         }
 
         @Override
         public Object route(Map<String, String> params) {
+            String target = params.get(TARGET_PARAM);
 
-            return purgeFeedData();
+            if (target.equals(ALL_CHOICE) ) {
+                return purgeAll();
+            }
+
+            if (target.equals(FEEDS_CHOICE) ) {
+                return purgeFeedData();
+            }
+
+            throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find a matching terminal command to execute");
+
         }
 
     }

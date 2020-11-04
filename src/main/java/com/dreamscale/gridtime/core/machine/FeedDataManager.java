@@ -53,6 +53,11 @@ public class FeedDataManager  {
     public void purgeAll() {
         calendarService.purgeAll();
 
+        purgeFeeds();
+    }
+
+
+    public void purgeFeeds() {
         torchieFeedCursorRepository.truncate();
         workItemToAggregateRepository.truncate();
 
@@ -61,8 +66,6 @@ public class FeedDataManager  {
         gridIdeaFlowMetricsRepository.truncate();
         gridBoxMetricsRepository.truncate();
     }
-
-
 }
 
 

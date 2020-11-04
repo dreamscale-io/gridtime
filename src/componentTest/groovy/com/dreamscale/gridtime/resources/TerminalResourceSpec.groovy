@@ -291,7 +291,7 @@ class TerminalResourceSpec extends Specification {
 
         gridTimeEngine.waitForDone()
 
-        TalkMessageDto purgeResult = terminalClient.runCommand(new CommandInputDto(Command.PURGE))
+        TalkMessageDto purgeResult = terminalClient.runCommand(new CommandInputDto(Command.PURGE, "all"))
         SimpleStatusDto statusDto = (SimpleStatusDto) purgeResult.getData();
 
         println statusDto

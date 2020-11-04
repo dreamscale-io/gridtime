@@ -17,6 +17,7 @@ public class FailureDetailRow implements Cloneable {
     private final Exception failure;
 
     private static final int STACK_FRAMES_TO_SHOW = 5;
+    public static final String PACKAGE_FILTER_TO_INCLUDE_STACK_FRAMES = "com.dreamscale";
 
     FailureDetailRow(CircuitActivitySummaryRow summaryRow, Exception ex) {
         this.rowKey = summaryRow.getRowKey();
@@ -57,8 +58,12 @@ public class FailureDetailRow implements Cloneable {
 
         StackTraceElement[] stackTraceFrames = failure.getStackTrace();
 
-        for (int i = 0; i < STACK_FRAMES_TO_SHOW && i < stackTraceFrames.length; i++) {
-            stackLines.add(stackTraceFrames[i].toString());
+        for (int i = 0; stackLines.size() < STACK_FRAMES_TO_SHOW && i < stackTraceFrames.length; i++) {
+            String stackLine = stackTraceFrames[i].toString();
+
+            if (stackLine.contains(PACKAGE_FILTER_TO_INCLUDE_STACK_FRAMES)) {
+                stackLines.add(stackLine);
+            }
         }
 
         return stackLines;
