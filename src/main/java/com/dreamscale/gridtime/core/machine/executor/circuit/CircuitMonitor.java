@@ -85,13 +85,17 @@ public class CircuitMonitor {
 
         ticksFailed++;
 
-        lastFailures.push(ex);
+        if (ex != null) {
+            lastFailures.push(ex);
 
-        if (lastFailures.size() > 3) {
-            lastFailures.removeLast();
+            if (lastFailures.size() > 3) {
+                lastFailures.removeLast();
+            }
+
+            lastFailMsg = ex.getClass().getSimpleName() + " "+ ex.getMessage();
+        } else {
+            lastFailMsg = "No Exception";
         }
-
-        lastFailMsg = ex.getMessage();
 
         updateMetrics(queueDurationMillis, executionDurationMillis);
         updateStatusTimestamp();
