@@ -191,8 +191,6 @@ public class GridTimeExecutor {
 
                             purgeDoneFutures();
 
-                        } else {
-                            log.warn("Null instruction");
                         }
 
                         stopIfConditionMet(currentTimeMillis);
