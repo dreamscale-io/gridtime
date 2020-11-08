@@ -90,6 +90,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
         entity.setPercentLearning(ideaFlowMetrics.getPercentLearning());
         entity.setPercentProgress(ideaFlowMetrics.getPercentProgress());
         entity.setPercentPairing(ideaFlowMetrics.getPercentPairing());
+        entity.setTimeInTile(ideaFlowMetrics.getTimeInTile().getSeconds());
         return entity;
     }
 }
