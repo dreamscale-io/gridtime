@@ -33,7 +33,7 @@ public enum PlaceType implements FeatureType {
 
 
     PlaceType(String typeUri, String uriTemplatePath, Class<? extends FeatureDetails> serializationClass) {
-        this.typeUri = typeUri;
+        this.typeUri = CLASS_TYPE + typeUri;
         this.uriTemplate = new UriTemplate(CLASS_TYPE + uriTemplatePath);
         this.serializationClass = serializationClass;
     }
