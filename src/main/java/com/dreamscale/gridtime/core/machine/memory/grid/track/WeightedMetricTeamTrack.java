@@ -39,7 +39,7 @@ public class WeightedMetricTeamTrack {
             }
 
             if (metric == null) {
-                throw new RuntimeException("Null metric for "+columnHeader + " for id: "+torchieId);
+                throw new RuntimeException("Null metric for "+rowKey.getName() + ", col = "+ columnHeader + ", id: "+torchieId);
             }
             WeightedMetric weightedMetric = new WeightedMetric(durationWeight, metric);
             metricsPerTeamMember.put(torchieId, weightedMetric);
