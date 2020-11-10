@@ -118,8 +118,11 @@ public class FeatureCache {
 
         T cachedReference = (T) cache.get(fallbackReference.getSearchKey());
         if (cachedReference == null) {
-            cachedReference = fallbackReference;
-            cache.put(fallbackReference.getSearchKey(), fallbackReference);
+
+            synchronized (cache) {
+                cachedReference = fallbackReference;
+                cache.put(fallbackReference.getSearchKey(), fallbackReference);
+            }
         }
 
         return cachedReference;

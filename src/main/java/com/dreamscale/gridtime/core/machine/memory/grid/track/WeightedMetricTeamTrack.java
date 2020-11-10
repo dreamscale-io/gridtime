@@ -38,6 +38,9 @@ public class WeightedMetricTeamTrack {
                 log.warn("Replacing metric at id :"+torchieId +" for "+rowKey.toDisplayString());
             }
 
+            if (metric == null) {
+                throw new RuntimeException("Null metric for "+columnHeader + " for id: "+torchieId);
+            }
             WeightedMetric weightedMetric = new WeightedMetric(durationWeight, metric);
             metricsPerTeamMember.put(torchieId, weightedMetric);
             summaryCandle.addWeightedMetricSample(weightedMetric);
