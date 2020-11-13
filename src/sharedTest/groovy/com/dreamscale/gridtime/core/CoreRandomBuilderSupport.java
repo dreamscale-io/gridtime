@@ -11,7 +11,9 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.flow.RandomFlowActivityEntityBuilder;
 import com.dreamscale.gridtime.core.domain.journal.*;
 import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.domain.work.RandomTorchieFeedCursorEntityBuilder;
 import com.dreamscale.gridtime.core.domain.work.RandomWorkItemToAggregateEntityBuilder;
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.domain.work.WorkItemToAggregateRepository;
 import com.dreamscale.gridtime.core.hooks.jira.dto.RandomJiraProjectDtoBuilder;
 import com.dreamscale.gridtime.core.hooks.jira.dto.RandomJiraTaskDtoBuilder;
@@ -31,6 +33,9 @@ public class CoreRandomBuilderSupport {
 
     @Autowired
     private WorkItemToAggregateRepository workItemToAggregateRepository;
+
+    @Autowired
+    private TorchieFeedCursorRepository torchieFeedCursorRepository;
 
     @Autowired
     private IntentionRepository intentionRepository;
@@ -111,6 +116,10 @@ public class CoreRandomBuilderSupport {
 
     public RandomWorkItemToAggregateEntityBuilder workItem() {
         return new RandomWorkItemToAggregateEntityBuilder(workItemToAggregateRepository);
+    }
+
+    public RandomTorchieFeedCursorEntityBuilder torchieFeedCursor() {
+        return new RandomTorchieFeedCursorEntityBuilder(torchieFeedCursorRepository);
     }
 
     public RandomIdleActivityBuilder idleActivity() { return new RandomIdleActivityBuilder(); }

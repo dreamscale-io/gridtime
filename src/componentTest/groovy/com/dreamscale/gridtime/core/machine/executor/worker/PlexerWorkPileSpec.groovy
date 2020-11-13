@@ -91,6 +91,9 @@ class PlexerWorkPileSpec extends Specification {
         wire.push(new TileStreamEvent(team.id, member.id, coordinates.getGridtime(), WorkToDoType.AggregateToTeam))
         wire.push(new TileStreamEvent(team.id, otherMember.id, coordinates.getGridtime(), WorkToDoType.AggregateToTeam))
 
+        aRandom.torchieFeedCursor().torchieId(member.id).save()
+        aRandom.torchieFeedCursor().torchieId(otherMember.id).save()
+
         when:
 
         TickInstructions aggregateInstruction = plexerWorkPile.whatsNext().call();

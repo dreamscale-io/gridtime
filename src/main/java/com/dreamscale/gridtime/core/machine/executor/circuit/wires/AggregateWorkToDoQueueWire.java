@@ -111,7 +111,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
         }
 
         //if there's no complete stuff, then we can also process incomplete stuff after a delay
-        
+
         LocalDateTime partialWorkReadyDate = gridClock.now().minus(DELAY_BEFORE_PROCESSING_PARTIAL_WORK);
 
          workItem = workReadyByTeamViewRepository.findOldestPartialTeamWorkItemOlderThan(Timestamp.valueOf(partialWorkReadyDate));

@@ -4,6 +4,8 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
 import com.dreamscale.gridtime.core.domain.work.ProcessingState
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository
 import com.dreamscale.gridtime.core.domain.work.WorkToDoType
 import com.dreamscale.gridtime.core.domain.work.WorkItemToAggregateEntity
 import com.dreamscale.gridtime.core.domain.work.WorkItemToAggregateRepository
@@ -30,6 +32,9 @@ class AggregateWorkToDoWireSpec extends Specification {
 
     @Autowired
     TeamMemberRepository teamMemberRepository
+
+    @Autowired
+    TorchieFeedCursorRepository torchieFeedCursorRepository
 
     @Autowired
     CalendarService calendarService
@@ -66,7 +71,10 @@ class AggregateWorkToDoWireSpec extends Specification {
         GeometryClock.GridTime gridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, oldTime);
         WorkItemToAggregateEntity workItem = aRandom.workItem().teamId(teamId).forGridTime(gridTime).processingState(ProcessingState.Ready).save()
 
+        TorchieFeedCursorEntity cursor = aRandom.torchieFeedCursor().torchieId(member1).save()
+
         calendarService.saveCalendar(workItem.tileSeq, gridTime)
+
 
         when:
         AggregateStreamEvent aggregateStreamEvent = queuedWorkToDoWire.pullNext(workerId)
@@ -92,6 +100,9 @@ class AggregateWorkToDoWireSpec extends Specification {
         teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member2, teamId, now))
         teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member3, teamId, now))
 
+        aRandom.torchieFeedCursor().torchieId(member1).save()
+        aRandom.torchieFeedCursor().torchieId(member2).save()
+        aRandom.torchieFeedCursor().torchieId(member3).save()
 
         TileStreamEvent torchieStreamEvent1 = new TileStreamEvent(teamId, member1, gridTime, WorkToDoType.AggregateToTeam);
         TileStreamEvent torchieStreamEvent2 = new TileStreamEvent(teamId, member2, gridTime, WorkToDoType.AggregateToTeam);
