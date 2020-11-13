@@ -80,18 +80,20 @@ public class AggregateWorkToDoQueueWire implements Wire {
 
         gridSyncLockManager.tryToAcquirePlexerSyncLock();
 
-        WorkToDo workToDo = getNextWorkToDo();
+        try {
+            WorkToDo workToDo = getNextWorkToDo();
 
-        if (workToDo != null) {
-            GeometryClock.GridTimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
+            if (workToDo != null) {
+                GeometryClock.GridTimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
 
-            nextEvent = new AggregateStreamEvent(workToDo.getTeamId(), sequence.getGridTime(), workToDo.getWorkToDoType());
+                nextEvent = new AggregateStreamEvent(workToDo.getTeamId(), sequence.getGridTime(), workToDo.getWorkToDoType());
 
-            workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
+                //this claims all work for the entire group
+                workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
+            }
+        } finally {
+            gridSyncLockManager.releasePlexerSyncLock();
         }
-
-        gridSyncLockManager.releasePlexerSyncLock();
-
 
         return nextEvent;
     }
@@ -109,7 +111,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
         }
 
         //if there's no complete stuff, then we can also process incomplete stuff after a delay
-
+        
         LocalDateTime partialWorkReadyDate = gridClock.now().minus(DELAY_BEFORE_PROCESSING_PARTIAL_WORK);
 
          workItem = workReadyByTeamViewRepository.findOldestPartialTeamWorkItemOlderThan(Timestamp.valueOf(partialWorkReadyDate));

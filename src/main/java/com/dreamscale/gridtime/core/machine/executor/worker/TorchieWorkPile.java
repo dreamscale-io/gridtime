@@ -198,7 +198,10 @@ public class TorchieWorkPile implements WorkPile {
 
         List<UUID> teamIds = new ArrayList<>();
         for (TeamEntity team : teams) {
-            teamIds.add(team.getId());
+            TeamType type = team.getTeamType();
+            if (!type.equals(TeamType.ME) && !type.equals(TeamType.EVERYONE) ) {
+                teamIds.add(team.getId());
+            }
         }
 
         return teamIds;

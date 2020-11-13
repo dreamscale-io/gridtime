@@ -42,6 +42,7 @@ public class AggregatePlexerProgram implements Program {
     @Override
     public void tick() {
 
+        //TODO this done call is weird, seems like it should be on a finishing work thing, not here.
         inputWire.markDone(workerId);
 
         activeEvent = inputWire.pullNext(workerId);
