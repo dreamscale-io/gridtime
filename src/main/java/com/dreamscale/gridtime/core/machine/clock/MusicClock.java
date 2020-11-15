@@ -26,7 +26,7 @@ public class MusicClock implements Iterator<RelativeBeat> {
     private MusicClock summaryClock;
 
     public MusicClock(GeometryClock.GridTime gridTime) {
-        this(gridTime.getZoomLevel(), gridTime.getZoomLevel().getInnerBeats());
+        this(gridTime.getZoomLevel(), gridTime.getZoomLevel().getInnerBeats(), false);
 
         GeometryClock.GridTime innerGridTime = gridTime.zoomIn();
 
@@ -38,10 +38,10 @@ public class MusicClock implements Iterator<RelativeBeat> {
     }
 
     public MusicClock(ZoomLevel zoomLevel) {
-        this(zoomLevel, zoomLevel.getInnerBeats());
+        this(zoomLevel, zoomLevel.getInnerBeats(), false);
     }
 
-    private MusicClock(ZoomLevel zoomLevel, int beats) {
+    private MusicClock(ZoomLevel zoomLevel, int beats, boolean isSummaryClock) {
 
         this.zoomLevel = zoomLevel;
         this.relativeStart = Duration.ofSeconds(0);
@@ -53,7 +53,7 @@ public class MusicClock implements Iterator<RelativeBeat> {
         this.currentBeatIndex = 0;
         this.currentBeat = clockBeats[0];
 
-        if (zoomLevel.getInnerBeats() == beats) {
+        if (!isSummaryClock) {
             summaryClock = toSummaryClock();
         }
     }
@@ -131,7 +131,7 @@ public class MusicClock implements Iterator<RelativeBeat> {
     private MusicClock generateSummaryClock() {
         int summaryBeatsPerMeasure =  beatsPerMeasure / zoomLevel.getBeatsPerPartialSum();
 
-        MusicClock summaryClock = new MusicClock(zoomLevel, summaryBeatsPerMeasure);
+        MusicClock summaryClock = new MusicClock(zoomLevel, summaryBeatsPerMeasure, true);
 
         for (int i = 0; i < clockBeats.length; i++) {
             RelativeBeat detailBeat = clockBeats[i];

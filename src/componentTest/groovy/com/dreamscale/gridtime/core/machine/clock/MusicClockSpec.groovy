@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb
 import spock.lang.Specification
 
 import java.time.Duration
+import java.time.LocalDateTime
 
 class MusicClockSpec extends Specification {
 
@@ -197,5 +198,17 @@ class MusicClockSpec extends Specification {
 
     }
 
+
+    def "should create music clock for a week clock"() {
+        given:
+        musicClock = new MusicClock(new GeometryClock.GridTime(ZoomLevel.WEEK, LocalDateTime.of(2020, 1, 13, 0, 0, 0)))
+        when:
+        musicClock.gotoBeat(5);
+
+        then:
+        assert musicClock.getBeat(5) == musicClock.getActiveBeat()
+        assert musicClock.getActiveBeat().beat == 5
+
+    }
 
 }

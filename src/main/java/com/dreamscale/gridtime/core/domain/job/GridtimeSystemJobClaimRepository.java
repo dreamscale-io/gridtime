@@ -20,8 +20,8 @@ public interface GridtimeSystemJobClaimRepository extends CrudRepository<Gridtim
 
 
     @Query(nativeQuery = true, value = "select * from gridtime_system_job_claim " +
-            "where claiming_worker_id =(:workerId) " )
-    GridtimeSystemJobClaimEntity findByClaimingWorkerId(@Param("workerId") UUID workerId);
+            "where claiming_worker_id =(:workerId) and job_status = 'IN_PROGRESS' " )
+    GridtimeSystemJobClaimEntity findInProgressJobByClaimingWorkerId(@Param("workerId") UUID workerId);
 
 }
 

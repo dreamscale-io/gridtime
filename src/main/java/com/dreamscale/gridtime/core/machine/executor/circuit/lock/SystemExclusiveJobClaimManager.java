@@ -3,8 +3,6 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.lock;
 import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimEntity;
 import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimRepository;
 import com.dreamscale.gridtime.core.domain.job.JobStatusType;
-import com.dreamscale.gridtime.core.domain.job.SystemJobType;
-import com.dreamscale.gridtime.core.domain.work.LockRepository;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.job.SystemJobDescriptor;
 import com.dreamscale.gridtime.core.machine.executor.worker.SystemJobClaim;
@@ -119,9 +117,9 @@ public class SystemExclusiveJobClaimManager {
     }
 
     public void updateHeartbeat(LocalDateTime now, UUID workerId) {
-        GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findByClaimingWorkerId(workerId);
+        GridtimeSystemJobClaimEntity existingClaim = gridtimeSystemJobClaimRepository.findInProgressJobByClaimingWorkerId(workerId);
 
-        if (existingClaim == null) {
+        if (existingClaim != null) {
             existingClaim.setLastHeartbeat(now);
            gridtimeSystemJobClaimRepository.save(existingClaim);
         }

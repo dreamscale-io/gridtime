@@ -34,7 +34,6 @@ public class IteratingGridClock extends GridClock {
     @Override
     public LocalDateTime now() {
         LocalDateTime time = currentClock;
-        log.debug("Iterating Clock: "+time);
         tick();
 
         return time;
