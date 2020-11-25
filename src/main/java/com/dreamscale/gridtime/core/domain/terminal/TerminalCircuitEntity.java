@@ -1,4 +1,4 @@
-package com.dreamscale.gridtime.core.domain.circuit;
+package com.dreamscale.gridtime.core.domain.terminal;
 
 import lombok.*;
 
@@ -25,10 +25,11 @@ public class TerminalCircuitEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID creatorId;
 
+    private String circuitName;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID talkRoomId;
 
-    private String circuitName;
 
     private LocalDateTime createdDate;
 

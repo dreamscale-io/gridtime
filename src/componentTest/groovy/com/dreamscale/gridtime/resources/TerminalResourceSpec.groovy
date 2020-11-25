@@ -20,6 +20,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.machine.GridTimeEngine
+import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -98,11 +99,30 @@ class TerminalResourceSpec extends Specification {
         1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationCode = token;
             return new SimpleStatusDto(Status.SENT, "Sent!")}
 
-        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "org"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "org"))
 
         then:
         assert activationCode != null
         assert inviteResult != null
+    }
+
+    def "should throw an error with invalid circuit"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        when:
+
+        accountClient.login()
+
+        TalkMessageDto result = terminalClient.runCommand("invalid", new CommandInputDto(Command.GRID, "status"))
+
+        then:
+        thrown BadRequestException
     }
 
     def "should invite with user names"() {
@@ -123,7 +143,9 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe", "to", "team"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe", "to", "team"))
 
         switchUser(zoeProfile)
 
@@ -153,7 +175,9 @@ class TerminalResourceSpec extends Specification {
         1 * mockEmailCapability.sendDownloadAndInviteToPublicEmail(_, _, _, _) >> { from, emailAddr, org, token -> activationCode = token;
             return new SimpleStatusDto(Status.SENT, "Sent!")}
 
-        TalkMessageDto inviteResult = terminalClient.runCommand(new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "public"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "zoe@dreamscale.io", "to", "public"))
 
         AccountActivationDto accountActivation = accountClient.activate(new ActivationCodeDto(activationCode: activationCode))
 
@@ -183,7 +207,9 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto shareResult = terminalClient.runCommand(new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto shareResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
 
         switchUser(zoeProfile)
 
@@ -209,11 +235,13 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GRID, "start"))
 
         GridStatusSummaryDto statusBefore = gridClient.getStatus();
 
-        TalkMessageDto gridStopResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "stop"))
+        TalkMessageDto gridStopResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GRID, "stop"))
 
         GridStatusSummaryDto statusAfter = gridClient.getStatus();
 
@@ -237,11 +265,13 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GRID, "start"))
 
         gridTimeEngine.waitForDone()
 
-        TalkMessageDto psResult = terminalClient.runCommand(new CommandInputDto(Command.PS, "all"))
+        TalkMessageDto psResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.PS, "all"))
         GridTableResults results = (GridTableResults) psResult.getData();
 
         println results.toDisplayString()
@@ -262,11 +292,13 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GRID, "start"))
 
         gridTimeEngine.waitForDone()
 
-        TalkMessageDto failResult = terminalClient.runCommand(new CommandInputDto(Command.ERROR))
+        TalkMessageDto failResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.ERROR))
         GridTableResults results = (GridTableResults) failResult.getData();
 
         println results.toDisplayString()
@@ -287,11 +319,13 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto gridStartResult = terminalClient.runCommand(new CommandInputDto(Command.GRID, "start"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto gridStartResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GRID, "start"))
 
         gridTimeEngine.waitForDone()
 
-        TalkMessageDto purgeResult = terminalClient.runCommand(new CommandInputDto(Command.PURGE, "feeds"))
+        TalkMessageDto purgeResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.PURGE, "feeds"))
         SimpleStatusDto statusDto = (SimpleStatusDto) purgeResult.getData();
 
         println statusDto
@@ -318,9 +352,10 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
 
-        TalkMessageDto shareResult = terminalClient.runCommand( new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
-        TalkMessageDto unshareResult = terminalClient.runCommand( new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "user", "zoe"))
+        TalkMessageDto shareResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "user", "zoe"))
+        TalkMessageDto unshareResult = terminalClient.runCommand(circuit.getCircuitName(),  new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "user", "zoe"))
 
         switchUser(zoeProfile)
 
@@ -352,7 +387,9 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto shareResult = terminalClient.runCommand(new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto shareResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
 
         switchUser(zoeProfile)
 
@@ -385,8 +422,10 @@ class TerminalResourceSpec extends Specification {
 
         when:
 
-        TalkMessageDto shareResult = terminalClient.runCommand( new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
-        TalkMessageDto unshareResult = terminalClient.runCommand( new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "team", "Phoenix"))
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto shareResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SHARE, "project", "proj1", "with", "team", "Phoenix"))
+        TalkMessageDto unshareResult = terminalClient.runCommand(circuit.getCircuitName(),  new CommandInputDto(Command.UNSHARE, "project", "proj1", "for", "team", "Phoenix"))
 
         switchUser(zoeProfile)
 

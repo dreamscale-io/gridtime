@@ -4,5 +4,5 @@ public enum RoomType {
     WTF_ROOM,
     RETRO_ROOM,
     STATUS_ROOM,
-    TEAM_ROOM
+    TERMINAL, TEAM_ROOM
 }

@@ -39,3 +39,6 @@ truncate table team_member_home;
 truncate table torchie_feed_cursor;
 truncate table grid_feature;
 
+truncate table terminal_circuit;
+truncate table terminal_circuit_command_history;
+truncate table terminal_circuit_location_history;

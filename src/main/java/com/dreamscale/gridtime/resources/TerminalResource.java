@@ -1,13 +1,14 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
+import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
 import com.dreamscale.gridtime.api.terminal.Command;
 import com.dreamscale.gridtime.api.terminal.CommandManualDto;
 import com.dreamscale.gridtime.api.terminal.CommandManualPageDto;
 import com.dreamscale.gridtime.api.terminal.*;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
-import com.dreamscale.gridtime.core.capability.terminal.TerminalRouteRegistry;
+import com.dreamscale.gridtime.core.capability.terminal.TerminalCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
 import com.dreamscale.gridtime.core.security.RequestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,44 @@ public class TerminalResource {
     OrganizationCapability organizationCapability;
 
     @Autowired
-    TerminalRouteRegistry terminalRouteRegistry;
+    TerminalCapability terminalCapability;
 
     /**
-     * Run a specific command on the grid and return the result synchronously as a TalkMessageDto
+     * Create a new TerminalCircuit
+     *
+     * All command responses over this terminal circuit will be responded to via the talk message room
+     * @return TerminalCircuitDto
+     */
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.CIRCUIT_PATH)
+    public TerminalCircuitDto createCircuit() {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("createCircuit, user={}", invokingMember.getBestAvailableName());
+
+        return terminalCapability.createCircuit(invokingMember.getOrganizationId(), invokingMember.getId());
+    }
+
+    /**
+     * Get an existing terminal circuit by name, scoped per organization
+     *
+     * @return TerminalCircuitDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.CIRCUIT_PATH + "/{circuitName}" )
+    public TerminalCircuitDto getCircuit(@PathVariable("circuitName") String circuitName) {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("getCircuit, user={}", invokingMember.getBestAvailableName());
+
+        return terminalCapability.getCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+    /**
+     * Run a specific terminal command and returns the result via circuit (also response)
      *
      * @see com.dreamscale.gridtime.api.terminal.Command for the available command types
      *
@@ -35,15 +70,48 @@ public class TerminalResource {
      * @return TalkMessageDto
      */
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(ResourcePaths.RUN_PATH)
-    public TalkMessageDto runCommand(@RequestBody CommandInputDto commandInputDto) {
+    @PostMapping(ResourcePaths.CIRCUIT_PATH + "/{circuitName}" + ResourcePaths.RUN_PATH)
+    public TalkMessageDto runCommand(@PathVariable("circuitName") String circuitName, @RequestBody CommandInputDto commandInputDto) {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        log.info("runCommand, user={}", invokingMember.getBestAvailableName());
+        log.info("run, user={}", invokingMember.getBestAvailableName());
 
-        return terminalRouteRegistry.routeCommand(invokingMember.getOrganizationId(), invokingMember.getId(), commandInputDto);
+        return terminalCapability.runCommand(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, commandInputDto);
     }
+
+    /**
+     * Join an existing terminal circuit, must be a member of the org
+     *
+     * @return TalkMessageDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.CIRCUIT_PATH + "/{circuitName}" + ResourcePaths.JOIN_PATH)
+    public SimpleStatusDto joinCircuit(@PathVariable("circuitName") String circuitName) {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("joinCircuit, user={}", invokingMember.getBestAvailableName());
+
+        return terminalCapability.joinCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
+    /**
+     * Leave an existing terminal circuit, must be a member of the org
+     *
+     * @return TalkMessageDto
+     */
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @PostMapping(ResourcePaths.CIRCUIT_PATH + "/{circuitName}" + ResourcePaths.LEAVE_PATH)
+    public SimpleStatusDto leaveCircuit(@PathVariable("circuitName") String circuitName) {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("leaveCircuit, user={}", invokingMember.getBestAvailableName());
+
+        return terminalCapability.leaveCircuit(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName);
+    }
+
 
     /**
      * Returns the entire manual for all available registered terminal commands
@@ -58,7 +126,7 @@ public class TerminalResource {
 
         log.info("getCommandManual, user={}", invokingMember.getBestAvailableName());
 
-        return terminalRouteRegistry.getManual(invokingMember.getOrganizationId(), invokingMember.getId());
+        return terminalCapability.getManual(invokingMember.getOrganizationId(), invokingMember.getId());
     }
 
 
@@ -84,7 +152,7 @@ public class TerminalResource {
 
             Command command = Command.fromString(commandName);
 
-            return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), command);
+            return terminalCapability.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), command);
         }
 
 
@@ -107,9 +175,9 @@ public class TerminalResource {
 
             log.info("getCommandManualPage, user={}", invokingMember.getBestAvailableName());
 
-            ActivityContext group = ActivityContext.fromString(activityContextName);
+            ActivityContext activityContext = ActivityContext.fromString(activityContextName);
 
-            return terminalRouteRegistry.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), group);
+            return terminalCapability.getManualPage(invokingMember.getOrganizationId(), invokingMember.getId(), activityContext);
         }
 
     }

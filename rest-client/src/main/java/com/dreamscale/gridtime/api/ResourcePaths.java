@@ -67,6 +67,18 @@ public class ResourcePaths {
     public static final String PURGE_PATH = "/purge";
 
 
+    public static final String EXPLORER_PATH = "/explorer";
+    public static final String GOTO_PATH = "/goto";
+    public static final String LOOK_PATH = "/see";
+    public static final String ZOOM_PATH = "/zoom";
+    public static final String IN_PATH = "/in";
+    public static final String OUT_PATH = "/out";
+    public static final String PAN_PATH = "/pan";
+    public static final String LEFT_PATH = "/left";
+    public static final String RIGHT_PATH = "/right";
+
+
+
     public static final String SUMMARY_PATH = "/summary";
     public static final String HALT_PATH = "/halt";
 

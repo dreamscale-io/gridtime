@@ -81,7 +81,7 @@ public class CalendarService {
         calendar.setTileSeq(tileSequence);
         calendar.setZoomLevel(coords.getZoomLevel());
         calendar.setClockTime(coords.getClockTime());
-        calendar.setGridTime(coords.toDisplayString());
+        calendar.setGridTime(coords.getFormattedGridTime());
 
         calendar.setYear(coords.getYear());
         calendar.setBlock(coords.getBlock());
@@ -97,9 +97,9 @@ public class CalendarService {
         return toSequence(gridTimeCalendarRepository.getLast(zoomLevel.name()));
     }
 
-    private GeometryClock.GridTimeSequence toSequence(GridTimeCalendarEntity last) {
-        if (last != null) {
-            return GeometryClock.createSequencedGridTime(last.getZoomLevel(), last.getClockTime(), last.getTileSeq());
+    private GeometryClock.GridTimeSequence toSequence(GridTimeCalendarEntity tile) {
+        if (tile != null) {
+            return GeometryClock.createSequencedGridTime(tile.getZoomLevel(), tile.getClockTime(), tile.getTileSeq());
         }
         return null;
     }
