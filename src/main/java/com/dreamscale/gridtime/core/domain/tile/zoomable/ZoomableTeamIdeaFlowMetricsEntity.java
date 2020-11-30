@@ -36,7 +36,9 @@ public class ZoomableTeamIdeaFlowMetricsEntity {
 
     private String gridTime;
 
-    private LocalDateTime clockTime;
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     private Long timeInTile;
 

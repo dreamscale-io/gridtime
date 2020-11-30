@@ -29,4 +29,13 @@ public interface ZoomableIdeaFlowMetricsRepository extends CrudRepository<Zoomab
     ZoomableIdeaFlowMetricsEntity findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                         @Param("zoom") String zoomLevel,
                                                         @Param("clock") Timestamp clockTime);
+
+
+    @Query(nativeQuery = true, value = "select * from zoomable_idea_flow_metrics_v " +
+            "where torchie_id=(:torchieId) " +
+            "and zoom_level=(:zoom) " +
+            "and tile_seq = (:tileSeq) ")
+    ZoomableIdeaFlowMetricsEntity findByTorchieTile(@Param("torchieId") UUID torchieId,
+                                                        @Param("zoom") String zoomLevel,
+                                                        @Param("tileSeq") Long tileSeq);
 }

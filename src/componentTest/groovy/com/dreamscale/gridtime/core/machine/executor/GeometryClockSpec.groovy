@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
+import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -79,6 +80,39 @@ class GeometryClockSpec extends Specification {
 
     }
 
+    def "pan right block block should pan across year boundary in grid coordinates "() {
+        given:
+        GeometryClock blockClock = new GeometryClock(ZoomLevel.BLOCK, [2019, 9] as Integer[])
+        GeometryClock yearClock = new GeometryClock(ZoomLevel.YEAR, [2020] as Integer[])
 
+
+        when:
+        GeometryClock.GridTime blockCoords = blockClock.getActiveGridTime();
+        GeometryClock.GridTime nextBlockCoords = blockCoords.panRight();
+
+        GeometryClock.GridTime yearCoords = yearClock.getActiveGridTime();
+
+
+        LocalDateTime blockTime = blockCoords.getClockTime();
+
+        println blockTime
+
+        LocalDateTime nextBlockTime = nextBlockCoords.getClockTime();
+
+        println nextBlockTime
+
+        LocalDateTime yearTime = yearCoords.getClockTime();
+
+        println yearTime
+
+        then:
+        assert blockCoords.toDisplayString() == "/gridtime/2019-B9"
+        assert nextBlockCoords.toDisplayString() == "/gridtime/2020-B1"
+
+        assert yearCoords.toDisplayString() == "/gridtime/2020"
+
+        assert nextBlockTime == yearTime
+
+    }
 
 }

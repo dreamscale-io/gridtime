@@ -23,11 +23,11 @@ public interface GridIdeaFlowMetricsRepository extends CrudRepository<GridIdeaFl
                                                            @Param("end") Long sequenceEnd);
 
 
-    @Query(nativeQuery = true, value = "select ifm.* from grid_idea_flow_metrics ifm, grid_time_calendar gtc " +
+    @Query(nativeQuery = true, value = "select ifm.* from grid_idea_flow_metrics ifm, grid_calendar gtc " +
             "where ifm.torchie_id=(:torchieId) " +
             "and ifm.zoom_level=(:zoom) " +
             "and ifm.zoom_level=gtc.zoom_level " +
-            "and gtc.clock_time = (:clock) ")
+            "and gtc.start_time = (:clock) ")
     GridIdeaFlowMetricsEntity findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                     @Param("zoom") String zoomLevel,
                                                     @Param("clock") Timestamp clockTime);

@@ -32,7 +32,9 @@ public class ZoomableBoxMetricsEntity {
 
     private String gridTime;
 
-    private LocalDateTime clockTime;
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID boxFeatureId;

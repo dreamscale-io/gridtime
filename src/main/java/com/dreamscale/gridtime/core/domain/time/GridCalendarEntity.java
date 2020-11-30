@@ -10,13 +10,13 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name = "grid_time_calendar")
+@Entity(name = "grid_calendar")
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GridTimeCalendarEntity {
+public class GridCalendarEntity {
 
     @Id
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
@@ -27,7 +27,9 @@ public class GridTimeCalendarEntity {
 
     private Long tileSeq;
 
-    private LocalDateTime clockTime;
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     private String gridTime;
 

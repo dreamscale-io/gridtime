@@ -15,4 +15,6 @@ public interface GridRowRepository extends CrudRepository<GridRowEntity, UUID> {
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_row")
     void truncate();
+
+    List<GridRowEntity> findByTorchieIdAndZoomLevelAndTileSeq(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq);
 }

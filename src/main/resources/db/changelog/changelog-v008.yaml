@@ -32,3 +32,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/create_terminal_session_tables.sql
+
+  - include:
+      file: db/v008/refactor_for_db_reports.sql

@@ -11,11 +11,11 @@ import java.util.UUID;
 
 public interface GridBoxMetricsRepository extends CrudRepository<GridBoxMetricsEntity, UUID> {
 
-    @Query(nativeQuery = true, value = "select bm.* from grid_box_metrics bm, grid_time_calendar gtc " +
+    @Query(nativeQuery = true, value = "select bm.* from grid_box_metrics bm, grid_calendar gtc " +
             "where bm.torchie_id=(:torchieId) " +
             "and bm.zoom_level=(:zoom) " +
             "and bm.zoom_level=gtc.zoom_level " +
-            "and gtc.clock_time = (:clock) ")
+            "and gtc.start_time = (:clock) ")
     List<GridBoxMetricsEntity> findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                      @Param("zoom") String zoomLevel,
                                                      @Param("clock") Timestamp clockTime);

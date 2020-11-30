@@ -20,6 +20,10 @@ public class GeometryClock {
         this.activeGridTime = createGridTime(ZoomLevel.TWENTY, roundedClockTime);
     }
 
+    public GeometryClock(ZoomLevel zoomLevel, Integer [] coords) {
+        activeGridTime = createGridTimeFromCoordinates(zoomLevel, coords);
+    }
+
     public static LocalDateTime roundDownToNearestTwenty(LocalDateTime middleOfNowhereTime) {
         int minutes = middleOfNowhereTime.getMinute();
 
@@ -337,11 +341,27 @@ public class GeometryClock {
         }
 
         private GridTime plusBlock() {
+
+            if (getBlock() == 9) {
+
+                Integer [] newCoords = Arrays.copyOf(coords, coords.length);
+
+                newCoords[0] = newCoords[0] + 1;
+                newCoords[1] = 1;
+
+                return GeometryClock.createGridTimeFromCoordinates(zoomLevel, newCoords);
+            }
+
             return GeometryClock.createGridTime(zoomLevel, clockTime.plusWeeks(6));
         }
 
         private GridTime plusYear() {
-            return GeometryClock.createGridTime(zoomLevel, clockTime.plusYears(1));
+
+            Integer [] newCoords = Arrays.copyOf(coords, coords.length);
+
+            newCoords[0] = newCoords[0] + 1;
+
+            return GeometryClock.createGridTimeFromCoordinates(zoomLevel, newCoords);
         }
 
         public Integer getYear() {
@@ -396,6 +416,10 @@ public class GeometryClock {
             } else {
                 return  getClockTime().isAfter(other.getClockTime());
             }
+        }
+
+        public Integer[] getCoordinates() {
+            return coords;
         }
     }
 }

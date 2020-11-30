@@ -1,10 +1,8 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
-import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.domain.time.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,13 +16,13 @@ import java.util.UUID;
 public class CalendarService {
 
     @Autowired
-    GridTimeCalendarRepository gridTimeCalendarRepository;
+    GridCalendarRepository gridCalendarRepository;
 
 
     public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
         Long tileSequence = null;
 
-        GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndClockTime(gridTime.getZoomLevel(), gridTime.getClockTime());
+        GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndStartTime(gridTime.getZoomLevel(), gridTime.getClockTime());
         if (calendarTile != null) {
             tileSequence = calendarTile.getTileSeq();
         }
@@ -37,9 +35,9 @@ public class CalendarService {
     }
 
     public GeometryClock.GridTimeSequence lookupGridTimeSequence(ZoomLevel zoomLevel, long tileSeq) {
-        GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndTileSeq(zoomLevel, tileSeq);
+        GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndTileSeq(zoomLevel, tileSeq);
         if (calendarTile != null) {
-            return GeometryClock.createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getClockTime());
+            return GeometryClock.createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getStartTime());
         } else {
             throw new RuntimeException("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
         }
@@ -48,7 +46,7 @@ public class CalendarService {
     public Long lookupTileSequenceFromSameTime(ZoomLevel zoomInOneLevel, LocalDateTime clockTime) {
         Long tileSequence = null;
 
-        GridTimeCalendarEntity calendarTile = gridTimeCalendarRepository.findByZoomLevelAndClockTime(zoomInOneLevel, clockTime);
+        GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndStartTime(zoomInOneLevel, clockTime);
         if (calendarTile != null) {
             tileSequence = calendarTile.getTileSeq();
         } else {
@@ -75,12 +73,16 @@ public class CalendarService {
     public void saveCalendar(long tileSequence, GeometryClock.GridTime coords) {
         log.info("saveCalendar(" +  tileSequence + ", "+coords.toDisplayString() + ")");
 
-        GridTimeCalendarEntity calendar = new GridTimeCalendarEntity();
+        GridCalendarEntity calendar = new GridCalendarEntity();
+
+        LocalDateTime endTime = coords.panRight().getClockTime().minusSeconds(1);
 
         calendar.setId(UUID.randomUUID());
         calendar.setTileSeq(tileSequence);
         calendar.setZoomLevel(coords.getZoomLevel());
-        calendar.setClockTime(coords.getClockTime());
+        calendar.setStartTime(coords.getClockTime());
+        calendar.setEndTime(endTime);
+
         calendar.setGridTime(coords.getFormattedGridTime());
 
         calendar.setYear(coords.getYear());
@@ -90,21 +92,21 @@ public class CalendarService {
         calendar.setDayPart(coords.getDayPart());
         calendar.setTwentyOfTwelve(coords.getTwentyOfTwelve());
 
-        gridTimeCalendarRepository.save(calendar);
+        gridCalendarRepository.save(calendar);
     }
 
     public GeometryClock.GridTimeSequence getLast(ZoomLevel zoomLevel) {
-        return toSequence(gridTimeCalendarRepository.getLast(zoomLevel.name()));
+        return toSequence(gridCalendarRepository.getLast(zoomLevel.name()));
     }
 
-    private GeometryClock.GridTimeSequence toSequence(GridTimeCalendarEntity tile) {
+    private GeometryClock.GridTimeSequence toSequence(GridCalendarEntity tile) {
         if (tile != null) {
-            return GeometryClock.createSequencedGridTime(tile.getZoomLevel(), tile.getClockTime(), tile.getTileSeq());
+            return GeometryClock.createSequencedGridTime(tile.getZoomLevel(), tile.getStartTime(), tile.getTileSeq());
         }
         return null;
     }
 
     public void purgeAll() {
-        gridTimeCalendarRepository.truncate();
+        gridCalendarRepository.truncate();
     }
 }
