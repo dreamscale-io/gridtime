@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -87,9 +89,28 @@ public interface LearningCircuitRepository extends CrudRepository<LearningCircui
     LearningCircuitEntity findByOrganizationIdAndId(UUID organizationId, UUID circuitId);
 
 
-
     @Query(nativeQuery = true, value = "select * from learning_circuit where id=(:circuitId) for update ")
     LearningCircuitEntity selectForUpdate(@Param("circuitId") UUID circuitId);
 
 
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and c.owner_id = (:memberId) " +
+            "and c.solved_time is not null " +
+            "and c.open_time between (:startTime) and (:endTime) " +
+            "order by total_circuit_elapsed_nano_time desc limit (:limit) ")
+    List<LearningCircuitEntity> findTopWTFsForMemberInTimeRange(
+            @Param("organizationId") UUID organizationId, @Param("memberId") UUID memberId,
+            @Param("startTime") Timestamp startTime, @Param("endTime") Timestamp endTime, @Param("limit") int limit);
+
+
+    @Query(nativeQuery = true, value = "select * from learning_circuit c " +
+            "where c.organization_id = (:organizationId) " +
+            "and c.owner_id in (select tm.member_id from team_member tm where tm.team_id = (:teamId)) " +
+            "and c.solved_time is not null " +
+            "and c.open_time between (:startTime) and (:endTime) " +
+            "order by total_circuit_elapsed_nano_time desc limit (:limit) ")
+    List<LearningCircuitEntity> findTopWTFsAcrossTeamInTimeRange(
+            @Param("organizationId") UUID organizationId, @Param("teamId") UUID teamId,
+            @Param("startTime") Timestamp startTime, @Param("endTime")  Timestamp endTime, @Param("limit") int limit);
 }

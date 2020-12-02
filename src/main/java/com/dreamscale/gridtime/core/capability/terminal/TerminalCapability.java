@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.capability.terminal;
 import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.circuit.CircuitMemberStatusDto;
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto;
+import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.api.terminal.*;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.*;
@@ -46,10 +47,10 @@ public class TerminalCapability {
     private TerminalCircuitCommandHistoryRepository terminalCircuitCommandHistoryRepository;
 
     @Autowired
-    private TalkRoomRepository talkRoomRepository;
+    private CircuitMemberRepository circuitMemberRepository;
 
     @Autowired
-    private TalkRoomMemberRepository talkRoomMemberRepository;
+    private TalkRoomRepository talkRoomRepository;
 
     @Autowired
     private GridClock gridClock;
@@ -58,7 +59,7 @@ public class TerminalCapability {
     private MapperFactory mapperFactory;
 
     @Autowired
-    private RoomMemberStatusRepository roomMemberStatusRepository;
+    private CircuitMemberStatusRepository circuitMemberStatusRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -68,14 +69,14 @@ public class TerminalCapability {
 
     public static final String TERMINAL_ROOM_SUFFIX = "-term";
 
-    private DtoEntityMapper<CircuitMemberStatusDto, RoomMemberStatusEntity> roomMemberStatusDtoMapper;
+    private DtoEntityMapper<CircuitMemberStatusDto, CircuitMemberStatusEntity> circuitMemberStatusDtoMapper;
     private DtoEntityMapper<TerminalCircuitDto, TerminalCircuitEntity> circuitDtoMapper;
 
 
     @PostConstruct
     private void init() throws IOException, URISyntaxException {
         circuitDtoMapper = mapperFactory.createDtoEntityMapper(TerminalCircuitDto.class, TerminalCircuitEntity.class);
-        roomMemberStatusDtoMapper = mapperFactory.createDtoEntityMapper(CircuitMemberStatusDto.class, RoomMemberStatusEntity.class);
+        circuitMemberStatusDtoMapper = mapperFactory.createDtoEntityMapper(CircuitMemberStatusDto.class, CircuitMemberStatusEntity.class);
 
         sillyNameGenerator = new SillyNameGenerator();
     }
@@ -104,11 +105,21 @@ public class TerminalCapability {
 
         terminalCircuitRepository.save(circuit);
 
+        CircuitMemberEntity circuitMember = new CircuitMemberEntity();
+        circuitMember.setId(UUID.randomUUID());
+        circuitMember.setCircuitId(circuit.getId());
+        circuitMember.setOrganizationId(organizationId);
+        circuitMember.setMemberId(invokingMemberId);
+        circuitMember.setActiveInSession(true);
+        circuitMember.setJoinTime(now);
+
+        circuitMemberRepository.save(circuitMember);
+
         entityManager.flush();
 
-        RoomMemberStatusEntity creatorStatusEntity = roomMemberStatusRepository.findByRoomIdAndMemberId(room.getId(), invokingMemberId);
+        CircuitMemberStatusEntity creatorStatusEntity = circuitMemberStatusRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuit.getId(), invokingMemberId);
 
-        CircuitMemberStatusDto creatorStatusDto = roomMemberStatusDtoMapper.toApi(creatorStatusEntity);
+        CircuitMemberStatusDto creatorStatusDto = circuitMemberStatusDtoMapper.toApi(creatorStatusEntity);
 
         TerminalCircuitDto circuitDto = circuitDtoMapper.toApi(circuit);
 
@@ -119,7 +130,6 @@ public class TerminalCapability {
     }
 
     private TalkRoomEntity createTalkRoomForCircuit(LocalDateTime now, TerminalCircuitEntity circuit) {
-        //create talk room for the circuit
 
         TalkRoomEntity room = new TalkRoomEntity();
         room.setId(UUID.randomUUID());
@@ -129,15 +139,6 @@ public class TerminalCapability {
 
         talkRoomRepository.save(room);
 
-        //join the member to the circuit as creator
-
-        TalkRoomMemberEntity roomMember = new TalkRoomMemberEntity();
-        roomMember.setId(UUID.randomUUID());
-        roomMember.setOrganizationId(circuit.getOrganizationId());
-        roomMember.setMemberId(circuit.getCreatorId());
-        roomMember.setJoinTime(now);
-
-        talkRoomMemberRepository.save(roomMember);
         return room;
     }
 
@@ -171,7 +172,6 @@ public class TerminalCapability {
     public TalkMessageDto runCommand(UUID organizationId, UUID invokingMemberId, String circuitName, CommandInputDto commandInputDto) {
 
         LocalDateTime now = gridClock.now();
-        Long nanoTime = gridClock.nanoTime();
 
         validateNotNull("circuitName", circuitName);
 
@@ -179,6 +179,10 @@ public class TerminalCapability {
         TerminalCircuitEntity circuit = terminalCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, lowerCaseName);
 
         validateCircuitExists(lowerCaseName, circuit);
+
+        if (!circuit.getCreatorId().equals(invokingMemberId)) {
+            validateCircuitMembership(circuit, invokingMemberId);
+        }
 
         TerminalCircuitCommandHistoryEntity commandHistory = new TerminalCircuitCommandHistoryEntity();
 
@@ -190,29 +194,44 @@ public class TerminalCapability {
 
         terminalCircuitCommandHistoryRepository.save(commandHistory);
 
-        //need to look up circuit, validate exists
-
-        //save command history
-
-        //route the command
-
-        //command and response should go out as talk messages
-
-        //need to write a test with invalid circuit
-
-        //need to clear the circuit tables in test setup
-
-        //then deploy, and update the terminal client to create a new circuit before running all the commands
-
         return terminalRouteRegistry.routeCommand(organizationId, invokingMemberId, commandInputDto);
     }
 
-    public SimpleStatusDto joinCircuit(UUID organizationId, UUID invokingMemberId, String sessionName) {
-        return null;
-    }
 
-    public SimpleStatusDto closeSession(UUID organizationId, UUID invokingMemberId, String sessionName) {
-        return null;
+
+    public SimpleStatusDto joinCircuit(UUID organizationId, UUID invokingMemberId, String circuitName) {
+
+        LocalDateTime now = gridClock.now();
+
+        validateNotNull("circuitName", circuitName);
+
+        String lowerCaseCircuitName = circuitName.toLowerCase();
+
+        TerminalCircuitEntity circuit = terminalCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, lowerCaseCircuitName);
+
+        validateCircuitExists(lowerCaseCircuitName, circuit);
+
+        CircuitMemberEntity membership = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuit.getId(), invokingMemberId);
+
+        SimpleStatusDto status;
+
+        if (membership == null) {
+            membership = new CircuitMemberEntity();
+            membership.setId(UUID.randomUUID());
+            membership.setOrganizationId(organizationId);
+            membership.setMemberId(invokingMemberId);
+            membership.setCircuitId(circuit.getId());
+            membership.setJoinTime(now);
+            membership.setActiveInSession(true);
+
+            circuitMemberRepository.save(membership);
+
+            status = new SimpleStatusDto(Status.JOINED, "Member joined.");
+        } else {
+            status = new SimpleStatusDto(Status.NO_ACTION, "Member already joined.");
+        }
+
+        return status;
     }
 
     public TerminalCircuitDto getCircuit(UUID organizationId, UUID invokingMemberId, String sessionName) {
@@ -220,12 +239,32 @@ public class TerminalCapability {
     }
 
     public SimpleStatusDto leaveCircuit(UUID organizationId, UUID invokingMemberId, String circuitName) {
-        return null;
+
+        validateNotNull("circuitName", circuitName);
+
+        String lowerCaseCircuitName = circuitName.toLowerCase();
+
+        TerminalCircuitEntity circuit = terminalCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, lowerCaseCircuitName);
+
+        validateCircuitExists(lowerCaseCircuitName, circuit);
+
+        CircuitMemberEntity membership = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(organizationId, circuit.getId(), invokingMemberId);
+
+        SimpleStatusDto status;
+
+        if (membership != null) {
+            membership.setActiveInSession(false);
+
+            circuitMemberRepository.save(membership);
+
+            status = new SimpleStatusDto(Status.SUCCESS, "Member left.");
+        } else {
+            status = new SimpleStatusDto(Status.NO_ACTION, "Member not in circuit.");
+        }
+
+        return status;
     }
 
-    public SimpleStatusDto setEnvironmentParam(UUID organizationId, UUID invokingMemberId, String circuitName, EnvironmentParamInputDto environmentParamInputDto) {
-        return null;
-    }
 
     public CommandManualDto getManual(UUID organizationId, UUID memberId) {
         return terminalRouteRegistry.getManual(organizationId, memberId);
@@ -250,4 +289,13 @@ public class TerminalCapability {
             throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_CIRCUIT, "Unable to find terminal circuit: " + circuitName);
         }
     }
+
+    private void validateCircuitMembership(TerminalCircuitEntity circuit, UUID invokingMemberId) {
+        CircuitMemberEntity membership = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
+
+        if (membership == null) {
+            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_JOINED_TO_CIRCUIT, "Member is not joined to terminal circuit "+circuit.getCircuitName());
+        }
+    }
+
 }

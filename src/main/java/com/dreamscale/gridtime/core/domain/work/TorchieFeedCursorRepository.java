@@ -14,6 +14,7 @@ import java.util.UUID;
 
 public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedCursorEntity, UUID> {
 
+    TorchieFeedCursorEntity findByOrganizationIdAndTorchieId(UUID organizationId, UUID torchieId);
 
     TorchieFeedCursorEntity findByTorchieId(UUID torchieId);
 

@@ -134,6 +134,22 @@ public class GridTimeFormatter {
         return gridTime;
     }
 
+    public static String formatCoords(Integer[] coords) {
+        String coordFormat = "gt[";
+
+        for (int i = 0; i < coords.length; i++) {
+            coordFormat += coords[i];
+
+            if (i + 1 < coords.length) {
+                coordFormat += ",";
+            }
+        }
+
+        coordFormat += "]";
+
+        return coordFormat;
+    }
+
 //    public static Integer [] parseGridTime(String gridtime) {
 //        AntPathMatcher pathMatcher = new AntPathMatcher();
 //           Map<String, String> variables = pathMatcher.extractUriTemplateVariables("{year}_B{block}_W{week}_D{day}_TT{twelves}-{twenties}", gridTime);

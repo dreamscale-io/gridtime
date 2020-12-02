@@ -31,4 +31,6 @@ public class RequestContext {
 
     private String requestUri;
 
+    private String terminalCircuitContext;
+
 }

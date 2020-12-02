@@ -39,10 +39,6 @@ public class GeometryClock {
         return firstMondayOfSameYear.atStartOfDay();
     }
 
-    public static GridTimeSequence createGridTimeSequence(ZoomLevel zoomLevel, long tileSeq, LocalDateTime clockTime) {
-        return new GridTimeSequence(tileSeq, createGridTime(zoomLevel, clockTime));
-    }
-
     public void sync(GridTime gridTime) {
         activeGridTime = gridTime;
     }
@@ -56,10 +52,7 @@ public class GeometryClock {
         return activeGridTime;
     }
 
-    public static GridTimeSequence createSequencedGridTime(ZoomLevel zoomLevel, LocalDateTime clockTime, long sequenceNumber) {
-        GridTime gridTime = createGridTime(zoomLevel, clockTime);
-        return new GridTimeSequence(sequenceNumber, gridTime);
-    }
+
 
     //TODO Leaving this here, since I keep going back and forth changing my mind
 
@@ -189,14 +182,6 @@ public class GeometryClock {
     }
 
 
-
-    @AllArgsConstructor
-    @Getter
-    public static class GridTimeSequence {
-        long sequenceNumber;
-        GridTime gridTime;
-    }
-
     @AllArgsConstructor
     @ToString
     public static class GridTime implements Observable {
@@ -206,6 +191,7 @@ public class GeometryClock {
         private final Integer[] coords;
 
         private final String formattedGridTime;
+        private final String formattedCoords;
 
 
         public GridTime(ZoomLevel zoomLevel, LocalDateTime clockTime, Integer ... fullCoordinates) {
@@ -213,6 +199,7 @@ public class GeometryClock {
              this.clockTime = clockTime;
              this.coords = truncateCoordinates(zoomLevel, fullCoordinates);
              this.formattedGridTime = GridTimeFormatter.formatGridTime(coords);
+             this.formattedCoords = GridTimeFormatter.formatCoords(coords);
         }
 
         private static Integer[] truncateCoordinates(ZoomLevel zoomLevel, Integer[] fullCoordinates) {
@@ -420,6 +407,10 @@ public class GeometryClock {
 
         public Integer[] getCoordinates() {
             return coords;
+        }
+
+        public String getFormattedCoords() {
+            return formattedCoords;
         }
     }
 }

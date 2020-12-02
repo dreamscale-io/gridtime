@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,4 +26,9 @@ public interface GridCalendarRepository extends CrudRepository<GridCalendarEntit
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_calendar")
     void truncate();
+
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = (:zoom) and start_time <= (:now) order by tile_seq desc limit 1")
+    GridCalendarEntity findTileStartingBeforeTime(@Param("zoom") String zoomLevel, @Param("now") Timestamp now);
 }

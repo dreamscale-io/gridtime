@@ -62,7 +62,7 @@ public class TerminalResource {
     }
 
     /**
-     * Run a specific terminal command and returns the result via circuit (also response)
+     * Run a specific terminal command and returns the result via circuit talk message
      *
      * @see com.dreamscale.gridtime.api.terminal.Command for the available command types
      *
@@ -75,7 +75,9 @@ public class TerminalResource {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
-        log.info("run, user={}", invokingMember.getBestAvailableName());
+        log.info("runCommand, user={}", invokingMember.getBestAvailableName());
+
+        context.setTerminalCircuitContext(circuitName);
 
         return terminalCapability.runCommand(invokingMember.getOrganizationId(), invokingMember.getId(), circuitName, commandInputDto);
     }

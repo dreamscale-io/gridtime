@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.GenerateCalendarTile;
@@ -95,12 +96,12 @@ public class CalendarGeneratorProgram implements Program {
 
 
     private void initMetronomeAndStartSequences() {
-        GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
-        GeometryClock.GridTimeSequence lastDayPart = calendarService.getLast(ZoomLevel.DAY_PART);
-        GeometryClock.GridTimeSequence lastDay = calendarService.getLast(ZoomLevel.DAY);
-        GeometryClock.GridTimeSequence lastWeek = calendarService.getLast(ZoomLevel.WEEK);
-        GeometryClock.GridTimeSequence lastBlock = calendarService.getLast(ZoomLevel.BLOCK);
-        GeometryClock.GridTimeSequence lastYear = calendarService.getLast(ZoomLevel.YEAR);
+        GridtimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
+        GridtimeSequence lastDayPart = calendarService.getLast(ZoomLevel.DAY_PART);
+        GridtimeSequence lastDay = calendarService.getLast(ZoomLevel.DAY);
+        GridtimeSequence lastWeek = calendarService.getLast(ZoomLevel.WEEK);
+        GridtimeSequence lastBlock = calendarService.getLast(ZoomLevel.BLOCK);
+        GridtimeSequence lastYear = calendarService.getLast(ZoomLevel.YEAR);
 
         twentiesSequence = getSequence(lastTwenty);
         dayPartSequence = getSequence(lastDayPart);
@@ -120,7 +121,7 @@ public class CalendarGeneratorProgram implements Program {
     }
 
 
-    private long getSequence(GeometryClock.GridTimeSequence gridTimeSequence) {
+    private long getSequence(GridtimeSequence gridTimeSequence) {
         if (gridTimeSequence != null) {
             return gridTimeSequence.getSequenceNumber() + 1;
         } else {

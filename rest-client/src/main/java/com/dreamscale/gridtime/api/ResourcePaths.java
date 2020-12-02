@@ -77,7 +77,8 @@ public class ResourcePaths {
     public static final String LEFT_PATH = "/left";
     public static final String RIGHT_PATH = "/right";
 
-
+    public static final String QUERY_PATH = "/query";
+    public static final String TARGET_PATH = "/target";
 
     public static final String SUMMARY_PATH = "/summary";
     public static final String HALT_PATH = "/halt";

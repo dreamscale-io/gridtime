@@ -48,6 +48,6 @@ public class IteratingGridClock extends GridClock {
     private void tick() {
         ticks++;
         currentClock = currentClock.plusMinutes(1);
-        currentNano += 6000000000L;
+        currentNano += 60000000000L;
     }
 }

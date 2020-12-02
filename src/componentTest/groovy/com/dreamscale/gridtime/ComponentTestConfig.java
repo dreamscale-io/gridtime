@@ -113,6 +113,10 @@ public class ComponentTestConfig extends BaseTestConfig {
     InvitationClient invitationClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, InvitationClient.class); }
 
 
+    @Bean
+    QueryClient queryClient() { return createClientWithStaticApiKey(jacksonFeignBuilder, QueryClient.class); }
+
+
     AccountClient unauthenticatedAccountClient() {
         return jacksonFeignBuilder.target(AccountClient.class, baseUrl);
     }

@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.wires;
 
 import com.dreamscale.gridtime.core.domain.work.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.circuit.lock.GridSyncLockManager;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
@@ -84,7 +85,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
             WorkToDo workToDo = getNextWorkToDo();
 
             if (workToDo != null) {
-                GeometryClock.GridTimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
+                GridtimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
 
                 nextEvent = new AggregateStreamEvent(workToDo.getTeamId(), sequence.getGridTime(), workToDo.getWorkToDoType());
 

@@ -569,8 +569,8 @@ class LearningCircuitResourceSpec extends Specification {
 
         println "solveWTF ====" + solveWTF
 
-        assert solveWTF.getTotalCircuitElapsedNanoTime() == 12000000000 //2 min
-        assert solveWTF.getTotalCircuitPausedNanoTime() == 6000000000 //1 min
+        assert solveWTF.getTotalCircuitElapsedNanoTime() == 120000000000L //2 min
+        assert solveWTF.getTotalCircuitPausedNanoTime() == 60000000000L //1 min
 
     }
 

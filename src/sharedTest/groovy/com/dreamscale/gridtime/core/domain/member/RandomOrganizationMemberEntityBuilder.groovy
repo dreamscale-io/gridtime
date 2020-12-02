@@ -10,7 +10,7 @@ class RandomOrganizationMemberEntityBuilder extends OrganizationMemberEntity.Org
 	RandomOrganizationMemberEntityBuilder(OrganizationMemberRepository organizationMemberRepository) {
 		this.organizationMemberRepository = organizationMemberRepository
 
-		String username = aRandom.firstName().toLowerCase();
+		String username = aRandom.firstName().toLowerCase().replaceAll(" ", "");
 
 		id(aRandom.uuid())
 		.rootAccountId(aRandom.uuid())

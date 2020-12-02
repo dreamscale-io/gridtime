@@ -58,6 +58,14 @@ public class CellFormat {
         return value.name();
     }
 
+    public static String toCellValue(String value) {
+        if (value == null) {
+            return "";
+        } else {
+            return value;
+        }
+    }
+
     public static String toCellValue(ProcessType value) {
         return value.name();
     }

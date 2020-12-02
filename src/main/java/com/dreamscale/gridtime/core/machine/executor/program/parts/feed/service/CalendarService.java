@@ -1,13 +1,16 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.time.*;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -18,6 +21,8 @@ public class CalendarService {
     @Autowired
     GridCalendarRepository gridCalendarRepository;
 
+    @Autowired
+    GridClock clock;
 
     public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
         Long tileSequence = null;
@@ -34,10 +39,10 @@ public class CalendarService {
         return tileSequence;
     }
 
-    public GeometryClock.GridTimeSequence lookupGridTimeSequence(ZoomLevel zoomLevel, long tileSeq) {
+    public GridtimeSequence lookupGridTimeSequence(ZoomLevel zoomLevel, long tileSeq) {
         GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndTileSeq(zoomLevel, tileSeq);
         if (calendarTile != null) {
-            return GeometryClock.createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getStartTime());
+            return createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getStartTime());
         } else {
             throw new RuntimeException("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
         }
@@ -95,18 +100,30 @@ public class CalendarService {
         gridCalendarRepository.save(calendar);
     }
 
-    public GeometryClock.GridTimeSequence getLast(ZoomLevel zoomLevel) {
+    public GridtimeSequence getLast(ZoomLevel zoomLevel) {
         return toSequence(gridCalendarRepository.getLast(zoomLevel.name()));
     }
 
-    private GeometryClock.GridTimeSequence toSequence(GridCalendarEntity tile) {
+    private GridtimeSequence toSequence(GridCalendarEntity tile) {
         if (tile != null) {
-            return GeometryClock.createSequencedGridTime(tile.getZoomLevel(), tile.getStartTime(), tile.getTileSeq());
+            return createGridTimeSequence(tile.getZoomLevel(), tile.getTileSeq(), tile.getStartTime());
         }
         return null;
     }
 
+
+    private GridtimeSequence createGridTimeSequence(ZoomLevel zoomLevel, long tileSeq, LocalDateTime clockTime) {
+        return new GridtimeSequence(tileSeq, GeometryClock.createGridTime(zoomLevel, clockTime));
+    }
+
+
+
     public void purgeAll() {
         gridCalendarRepository.truncate();
+    }
+
+    public GridCalendarEntity lookupTile(ZoomLevel zoomLevel, LocalDateTime time) {
+
+        return gridCalendarRepository.findTileStartingBeforeTime(zoomLevel.name(), Timestamp.valueOf(time));
     }
 }

@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
@@ -48,7 +49,7 @@ public class CalendarGeneratorJob {
 
 
     private LocalDateTime getCalendarJobStart() {
-        GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
+        GridtimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
 
         if (lastTwenty != null) {
             log.debug("lastTwenty found: clock: "+lastTwenty.getGridTime().getClockTime() + "seq "+lastTwenty.getSequenceNumber() );
@@ -65,7 +66,7 @@ public class CalendarGeneratorJob {
 
     public boolean hasWorkToDo(CalendarJobDescriptor jobDescriptor) {
 
-        GeometryClock.GridTimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
+        GridtimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
 
         boolean hasWork = false;
 
