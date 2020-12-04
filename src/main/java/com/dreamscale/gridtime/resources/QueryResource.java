@@ -42,16 +42,16 @@ public class QueryResource {
 
     @PostConstruct
     void init() {
-        terminalRouteRegistry.register(ActivityContext.QUERY, Command.SELECT,
-                "Select data from DB",
-                new SelectTopWTFsTerminalRoute(),
-                new SelectTopWTFsForUserTerminalRoute(),
-                new SelectTopWTFsForTeamTerminalRoute());
-
-        terminalRouteRegistry.register(ActivityContext.QUERY, Command.TARGET,
+        terminalRouteRegistry.register(ActivityContext.TILES, Command.TARGET,
                 "Set target user or team for all queries",
                 new SetUserTargetTerminalRoute(),
                 new SetTeamTargetTerminalRoute());
+
+        terminalRouteRegistry.register(ActivityContext.TILES, Command.SELECT,
+                "Query data and return tabular reports",
+                new SelectTopWTFsTerminalRoute(),
+                new SelectTopWTFsForUserTerminalRoute(),
+                new SelectTopWTFsForTeamTerminalRoute());
 
     }
 
@@ -102,16 +102,16 @@ public class QueryResource {
 
     private class SelectTopWTFsTerminalRoute extends TerminalRoute {
 
-        private static final String SCOPE_PARAM = "timeScope";
+        private static final String TIME_PARAM = "time";
 
         SelectTopWTFsTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + SCOPE_PARAM + "}");
-            describeChoiceOption(SCOPE_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "}");
+            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(SCOPE_PARAM);
+            String scopeName = params.get(TIME_PARAM);
 
             if (!scopeName.startsWith("gt")) {
                 try {
@@ -128,18 +128,18 @@ public class QueryResource {
 
     private class SelectTopWTFsForTeamTerminalRoute extends TerminalRoute {
 
-        private static final String SCOPE_PARAM = "timeScope";
+        private static final String TIME_PARAM = "time";
         private static final String TEAM_PARAM = "teamName";
 
         SelectTopWTFsForTeamTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + SCOPE_PARAM + "} for team {"+ TEAM_PARAM + "}");
-            describeChoiceOption(SCOPE_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "} for team {"+ TEAM_PARAM + "}");
+            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
             describeTextOption(TEAM_PARAM, "name of the team to query");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(SCOPE_PARAM);
+            String scopeName = params.get(TIME_PARAM);
             String teamName = params.get(TEAM_PARAM);
 
             if (!scopeName.startsWith("gt")) {
@@ -157,18 +157,18 @@ public class QueryResource {
 
     private class SelectTopWTFsForUserTerminalRoute extends TerminalRoute {
 
-        private static final String SCOPE_PARAM = "timeScope";
+        private static final String TIME_PARAM = "time";
         private static final String USERNAME_PARAM = "username";
 
         SelectTopWTFsForUserTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + SCOPE_PARAM + "} for user {"+ USERNAME_PARAM + "}");
-            describeChoiceOption(SCOPE_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "} for user {"+ USERNAME_PARAM + "}");
+            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
             describeTextOption(USERNAME_PARAM, "name of the user to query");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(SCOPE_PARAM);
+            String scopeName = params.get(TIME_PARAM);
             String username = params.get(USERNAME_PARAM);
 
             if (!scopeName.startsWith("gt")) {

@@ -107,13 +107,13 @@ public class QueryCapability {
                     break;
             }
 
-            if (calendar == null) {
-                throw new RuntimeException("Unable to resolve timescope = "+timeScope);
+            if (calendar == null ) {
+                throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Missing calendar data for timescope = "+timeScope);
             }
             queryTimeScope = new QueryTimeScope(calendar.getStartTime(), calendar.getEndTime());
 
         } else {
-            throw new RuntimeException("Gridtime expressions not yet supported");
+            throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Gridtime expressions not yet supported");
         }
 
         return queryTimeScope;

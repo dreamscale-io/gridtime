@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum ActivityContext {
     SYSTEM("Grid operating system administration"),
     PEOPLE("Manage teams and send invites"),
-    PROJECT("Manage projects"),
-    QUERY("Query flow activity data");
+    PROJECT("Manage project configs and permissions"),
+    TILES("Query grid data tiles");
 
     private final String description;
 
