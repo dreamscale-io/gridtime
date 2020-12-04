@@ -38,3 +38,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/create_query_target.sql
+
+  - include:
+      file: db/v008/refactor_terminal_circuit.sql
