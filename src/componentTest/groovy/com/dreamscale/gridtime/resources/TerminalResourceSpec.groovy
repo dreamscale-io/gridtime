@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.resources
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
+import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
 import com.dreamscale.gridtime.api.grid.GridStatus
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto
@@ -11,15 +12,20 @@ import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
+import com.dreamscale.gridtime.api.query.TimeScope
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.api.terminal.*
 import com.dreamscale.gridtime.client.*
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
+import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.machine.GridTimeEngine
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock
+import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -70,6 +76,15 @@ class TerminalResourceSpec extends Specification {
 
     @Autowired
     GridClient gridClient;
+
+    @Autowired
+    CalendarService calendarService;
+
+    @Autowired
+    LearningCircuitClient circuitClient;
+
+    @Autowired
+    GridClock gridClock;
 
     String activationCode = null;
 
@@ -440,6 +455,126 @@ class TerminalResourceSpec extends Specification {
 
     }
 
+    def "should query top wtfs for invoking user"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        calendarService.saveCalendar(1, 3, GeometryClock.createGridTime(ZoomLevel.BLOCK, gridClock.now()))
+
+        LearningCircuitDto circuit1 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit1.getCircuitName())
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "BLOCK"))
+
+        GridTableResults results = (GridTableResults) queryResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert queryResult != null
+        assert results.getRowsOfPaddedCells().size() == 2
+    }
+
+
+    def "should query top wtfs for targeted user"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        calendarService.saveCalendar(1, 3, GeometryClock.createGridTime(ZoomLevel.BLOCK, gridClock.now()))
+
+        LearningCircuitDto circuit1 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit1.getCircuitName())
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto targetResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.TARGET, "user", "arty"))
+
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "BLOCK"))
+
+        GridTableResults results = (GridTableResults) queryResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert targetResult != null
+        assert queryResult != null
+        assert results.getRowsOfPaddedCells().size() == 2
+    }
+
+
+
+    def "should query top wtfs across team"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+        AccountActivationDto zoeProfile = register("zoe@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        calendarService.saveCalendar(1, 3, GeometryClock.createGridTime(ZoomLevel.BLOCK, gridClock.now()))
+
+        LearningCircuitDto circuit1 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit1.getCircuitName())
+
+        switchUser(zoeProfile)
+
+        accountClient.login()
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        TeamDto team = teamClient.createTeam("Phoenix")
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto inviteResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.INVITE, "arty", "to", "team"))
+
+        TalkMessageDto targetResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.TARGET, "team", "phoenix"))
+
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "BLOCK"))
+
+        GridTableResults results = (GridTableResults) queryResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert targetResult != null
+        assert queryResult != null
+        assert results.getRowsOfPaddedCells().size() == 2
+    }
+
+
     def "should get terminal help manual"() {
         given:
 
@@ -463,7 +598,7 @@ class TerminalResourceSpec extends Specification {
 
         then:
         assert manual != null
-        assert manual.getActivityContexts().size() == 3;
+        assert manual.getActivityContexts().size() == 4;
 
         assert inviteManPage != null
         assert inviteManPage.getContextName() == Command.INVITE.name()

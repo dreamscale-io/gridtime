@@ -114,23 +114,23 @@ public class InviteToResource {
     private class InviteTerminalRoute extends TerminalRoute {
 
         private static final String USER_PARAM = "user";
-        private static final String TARGET_PARAM = "target";
+        private static final String GROUP_PARAM = "group";
 
-        private static final String ORG_TARGET_CHOICE = "org";
-        private static final String TEAM_TARGET_CHOICE = "team";
-        private static final String PUBLIC_TARGET_CHOICE = "public";
+        private static final String ORG_CHOICE = "org";
+        private static final String TEAM_CHOICE = "team";
+        private static final String PUBLIC_CHOICE = "public";
 
         InviteTerminalRoute() {
-            super(Command.INVITE, "{" + USER_PARAM + "} to {" + TARGET_PARAM + "}");
+            super(Command.INVITE, "{" + USER_PARAM + "} to {" + GROUP_PARAM + "}");
 
             describeTextOption(USER_PARAM, "an email or username");
-            describeChoiceOption(TARGET_PARAM, ORG_TARGET_CHOICE, TEAM_TARGET_CHOICE, PUBLIC_TARGET_CHOICE);
+            describeChoiceOption(GROUP_PARAM, ORG_CHOICE, TEAM_CHOICE, PUBLIC_CHOICE);
         }
 
         @Override
         public Object route(Map<String, String> params) {
             String user = params.get(USER_PARAM);
-            String target = params.get(TARGET_PARAM);
+            String target = params.get(GROUP_PARAM);
 
             if (isEmail(user)) {
 
@@ -162,15 +162,15 @@ public class InviteToResource {
         }
 
         private boolean isOrg(String target) {
-            return (target != null) && target.equals(ORG_TARGET_CHOICE);
+            return (target != null) && target.equals(ORG_CHOICE);
         }
 
         private boolean isTeam(String target) {
-            return (target != null) && target.equals(TEAM_TARGET_CHOICE);
+            return (target != null) && target.equals(TEAM_CHOICE);
         }
 
         private boolean isPublic(String target) {
-            return (target != null) && target.equals(PUBLIC_TARGET_CHOICE);
+            return (target != null) && target.equals(PUBLIC_CHOICE);
         }
 
         private boolean isEmail(String user) {

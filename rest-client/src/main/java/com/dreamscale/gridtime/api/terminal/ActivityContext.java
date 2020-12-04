@@ -4,9 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum ActivityContext {
-    SYSTEM("Operating system commands"),
-    PEOPLE("Send invites to people"),
-    PROJECT("Manage projects");
+    SYSTEM("Grid operating system administration"),
+    PEOPLE("Manage teams and send invites"),
+    PROJECT("Manage projects"),
+    QUERY("Query flow activity data");
 
     private final String description;
 
