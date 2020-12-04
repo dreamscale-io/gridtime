@@ -96,7 +96,7 @@ class QueryResourceSpec extends Specification {
 
         circuitClient.solveWTF(circuit2.getCircuitName())
 
-        GridTableResults results = queryClient.getTopWTFsForTimeScope(TimeScope.BLOCK.name())
+        GridTableResults results = queryClient.getTopWTFsForTimeScope(TimeScope.BLOCK)
 
         println results
 
@@ -137,7 +137,7 @@ class QueryResourceSpec extends Specification {
 
         when:
 
-        GridTableResults results = queryClient.getTopWTFsForTimeScopeAndTarget(TimeScope.BLOCK.name(), TargetType.TEAM.name(), team.getLowerCaseName())
+        GridTableResults results = queryClient.getTopWTFsForTimeScopeAndTarget(TimeScope.BLOCK, TargetType.TEAM, team.getLowerCaseName())
 
         println results
 

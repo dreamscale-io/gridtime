@@ -6,6 +6,8 @@ import com.dreamscale.gridtime.api.circuit.*;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.api.query.QueryInputDto;
 import com.dreamscale.gridtime.api.query.TargetInputDto;
+import com.dreamscale.gridtime.api.query.TargetType;
+import com.dreamscale.gridtime.api.query.TimeScope;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -20,10 +22,10 @@ public interface QueryClient {
 
 
     @RequestLine("GET " + ResourcePaths.QUERY_PATH + ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH +  "?scope={scope}")
-    GridTableResults getTopWTFsForTimeScope(@Param("scope") String timeScope);
+    GridTableResults getTopWTFsForTimeScope(@Param("scope") TimeScope timeScope);
 
     @RequestLine("GET " + ResourcePaths.QUERY_PATH + ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH +  "?scope={scope}&target_type={targetType}&target_name={targetName}")
-    GridTableResults getTopWTFsForTimeScopeAndTarget(@Param("scope") String timeScope, @Param("targetType") String targetType, @Param("targetName") String targetName);
+    GridTableResults getTopWTFsForTimeScopeAndTarget(@Param("scope") TimeScope timeScope, @Param("targetType") TargetType targetType, @Param("targetName") String targetName);
 
 
     @RequestLine("POST " + ResourcePaths.QUERY_PATH + ResourcePaths.TARGET_PATH)
