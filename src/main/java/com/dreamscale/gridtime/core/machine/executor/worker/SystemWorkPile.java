@@ -59,7 +59,7 @@ public class SystemWorkPile implements WorkPile {
 
     private boolean paused = false;
 
-    private int daysToKeepAhead = 1;
+    private int daysToKeepAhead = 365; //block, year, tiles aren't saved until the end, workaround to make sure we have end of year tiles
 
     @PostConstruct
     private void init() {
