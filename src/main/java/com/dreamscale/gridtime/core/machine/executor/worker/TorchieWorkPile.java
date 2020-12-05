@@ -311,6 +311,7 @@ public class TorchieWorkPile implements WorkPile {
     public void shutdown() {
         evictAll();
         peekInstruction = null;
+        lastSyncCheck = null;
     }
 
     @Override
