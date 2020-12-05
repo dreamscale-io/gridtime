@@ -124,6 +124,8 @@ public class CalendarService {
 
     public GridCalendarEntity lookupTile(ZoomLevel zoomLevel, LocalDateTime time) {
 
-        return gridCalendarRepository.findTileStartingBeforeTime(zoomLevel.name(), Timestamp.valueOf(time));
+        Timestamp timestamp = Timestamp.valueOf(time);
+        log.debug("Looking up tile for "+zoomLevel.name() + " before "+time + " ("+timestamp + ")");
+        return gridCalendarRepository.findTileStartingBeforeTime(zoomLevel.name(), timestamp);
     }
 }
