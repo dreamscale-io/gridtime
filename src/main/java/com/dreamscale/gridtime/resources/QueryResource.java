@@ -49,9 +49,9 @@ public class QueryResource {
 
         terminalRouteRegistry.register(ActivityContext.TILES, Command.SELECT,
                 "Query data and return tabular reports",
-                new SelectTopWTFsTerminalRoute(),
                 new SelectTopWTFsForUserTerminalRoute(),
-                new SelectTopWTFsForTeamTerminalRoute());
+                new SelectTopWTFsForTeamTerminalRoute(),
+                new SelectTopWTFsTerminalRoute());
 
     }
 
@@ -118,7 +118,7 @@ public class QueryResource {
                     TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
                     return getTopWTFs(Optional.of(scope), Optional.empty(), Optional.empty());
                 } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid scope parameter "+scopeName);
+                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
                 }
             } else {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
@@ -147,7 +147,7 @@ public class QueryResource {
                     TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
                     return getTopWTFs(Optional.of(scope), Optional.of(TargetType.TEAM), Optional.of(teamName));
                 } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid scope parameter "+scopeName);
+                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
                 }
             } else {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
@@ -176,7 +176,7 @@ public class QueryResource {
                     TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
                     return getTopWTFs(Optional.of(scope), Optional.of(TargetType.MEMBER), Optional.of(username));
                 } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid scope parameter "+scopeName);
+                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
                 }
             } else {
                 throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
