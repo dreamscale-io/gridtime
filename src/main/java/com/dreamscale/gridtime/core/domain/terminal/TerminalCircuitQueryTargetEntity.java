@@ -32,6 +32,8 @@ public class TerminalCircuitQueryTargetEntity {
     @Enumerated(EnumType.STRING)
     private TargetType targetType;
 
+    private String targetName;
+
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID targetId;
 

@@ -41,3 +41,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/refactor_terminal_circuit.sql
+
+  - include:
+      file: db/v008/alter_tc_query_target_add_name.sql

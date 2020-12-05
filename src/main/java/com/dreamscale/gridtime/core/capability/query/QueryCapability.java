@@ -20,6 +20,7 @@ import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitQueryTargetRe
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitRepository;
 import com.dreamscale.gridtime.core.domain.time.GridCalendarEntity;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.dreamscale.exception.BadRequestException;
@@ -110,7 +111,8 @@ public class QueryCapability {
             if (calendar == null ) {
                 throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Missing calendar data for timescope = "+timeScope);
             }
-            queryTimeScope = new QueryTimeScope(calendar.getStartTime(), calendar.getEndTime());
+
+            queryTimeScope = new QueryTimeScope(calendar.getGridTime(), calendar.getStartTime(), calendar.getEndTime());
 
         } else {
             throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Gridtime expressions not yet supported");
@@ -131,6 +133,7 @@ public class QueryCapability {
         TerminalCircuitQueryTargetEntity targetEntity = new TerminalCircuitQueryTargetEntity();
         targetEntity.setId(UUID.randomUUID());
         targetEntity.setTargetType(targetType);
+        targetEntity.setTargetName(targetInputDto.getTargetName().toLowerCase());
         targetEntity.setTargetId(targetId);
         targetEntity.setTargetDate(now);
         targetEntity.setCircuitId(circuit.getId());
@@ -138,13 +141,15 @@ public class QueryCapability {
 
         terminalCircuitQueryTargetRepository.save(targetEntity);
 
-        return new QueryTarget(targetType, circuit.getOrganizationId(), targetId);
+        return new QueryTarget(targetType, targetInputDto.getTargetName(), circuit.getOrganizationId(), targetId);
     }
 
 
     private QueryTarget resolveQueryTarget(UUID organizationId, UUID invokingMemberId, TerminalCircuitEntity circuit, QueryInputDto queryInputDto) {
 
         TargetType targetType = queryInputDto.getTargetType();
+        String targetName = queryInputDto.getTargetName();
+
         UUID targetId = resolveTargetId(organizationId, queryInputDto.getTargetType(), queryInputDto.getTargetName());
 
         if (targetId == null && circuit != null) {
@@ -153,11 +158,12 @@ public class QueryCapability {
             if (lastTarget != null) {
                 targetType = lastTarget.getTargetType();
                 targetId = lastTarget.getTargetId();
+                targetName = lastTarget.getTargetName();
             }
         }
 
         if (targetId == null) {
-            targetType = TargetType.MEMBER;
+            targetType = TargetType.USER;
 
             if (circuit != null) {
                 targetId = circuit.getCreatorId();
@@ -165,7 +171,7 @@ public class QueryCapability {
                 targetId = invokingMemberId;
             }
         }
-        return new QueryTarget(targetType, organizationId, targetId);
+        return new QueryTarget(targetType, targetName, organizationId, targetId);
     }
 
     private UUID resolveTargetId(UUID organizationId, TargetType targetType, String targetName) {
@@ -176,7 +182,7 @@ public class QueryCapability {
 
             String lowercaseName = targetName.toLowerCase();
 
-            if (targetType.equals(TargetType.MEMBER)) {
+            if (targetType.equals(TargetType.USER)) {
                 OrganizationMemberEntity member = organizationMemberRepository.findByOrganizationIdAndLowercaseUsername(organizationId, lowercaseName);
                 validateMemberFound(targetName, member);
 
@@ -251,5 +257,9 @@ public class QueryCapability {
         }
     }
 
+    public SimpleStatusDto getCurrentTime() {
+        GeometryClock.GridTime currentTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, gridClock.now());
 
+        return new SimpleStatusDto(Status.VALID, "Current Gridtime is "+currentTime.getFormattedGridTime() + " ("+ currentTime.getFormattedCoords() + ")");
+    }
 }

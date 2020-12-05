@@ -575,6 +575,29 @@ class TerminalResourceSpec extends Specification {
     }
 
 
+    def "should get current gridtime clock"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto gtResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GT))
+
+        SimpleStatusDto results = (SimpleStatusDto) gtResult.getData();
+
+        println results.message
+
+        then:
+        assert results != null
+    }
+
     def "should get terminal help manual"() {
         given:
 

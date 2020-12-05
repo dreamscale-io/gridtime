@@ -22,7 +22,11 @@ public class TerminalRouteDto {
 
     public String toDisplayString() {
 
-        String out = "Usage: "+ command.name().toLowerCase() + " " + argsTemplate + "\n";
+        String args = argsTemplate;
+        if (args == null) {
+            args = "";
+        }
+        String out = "Usage: "+ command.name().toLowerCase() + " " + args + "\n";
 
         for (String option: optionsHelp.keySet()) {
             String help = optionsHelp.get(option);

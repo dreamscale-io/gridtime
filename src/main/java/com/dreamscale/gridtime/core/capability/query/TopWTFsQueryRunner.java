@@ -2,26 +2,17 @@ package com.dreamscale.gridtime.core.capability.query;
 
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.api.query.TargetType;
-import com.dreamscale.gridtime.api.shared.TimeFormatter;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitEntity;
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitRepository;
-import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitState;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivitySummaryRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
 import java.sql.Timestamp;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -40,7 +31,7 @@ public class TopWTFsQueryRunner {
     public GridTableResults runQuery(QueryTarget queryTarget, QueryTimeScope queryTimeScope) {
 
         List<LearningCircuitEntity> topWtfs = Collections.emptyList();
-        if (queryTarget.getTargetType().equals(TargetType.MEMBER)) {
+        if (queryTarget.getTargetType().equals(TargetType.USER)) {
             topWtfs = learningCircuitRepository.findTopWTFsForMemberInTimeRange(
                     queryTarget.getOrganizationId(), queryTarget.getTargetId(),
                     Timestamp.valueOf(queryTimeScope.getStartTime()),
@@ -53,7 +44,10 @@ public class TopWTFsQueryRunner {
                     Timestamp.valueOf(queryTimeScope.getEndTime()), TOP_QUERY_LIMIT);
         }
 
-        return toGridTableResults("Top WTFs", topWtfs);
+        return toGridTableResults("Top WTFs for "
+                + queryTarget.getTargetType().name() + " "
+                + queryTarget.getTargetName() + " :: "
+                + queryTimeScope.getScopeDescription() , topWtfs);
     }
 
 

@@ -42,13 +42,18 @@ public class QueryResource {
 
     @PostConstruct
     void init() {
+
+        terminalRouteRegistry.register(ActivityContext.TILES, Command.GT,
+                "Get the current gridtime clock",
+                new QueryTimeTerminalRoute());
+
         terminalRouteRegistry.register(ActivityContext.TILES, Command.TARGET,
                 "Set target user or team for all queries",
                 new SetUserTargetTerminalRoute(),
                 new SetTeamTargetTerminalRoute());
 
         terminalRouteRegistry.register(ActivityContext.TILES, Command.SELECT,
-                "Query data and return tabular reports",
+                "Query data and return tabular results",
                 new SelectTopWTFsForUserTerminalRoute(),
                 new SelectTopWTFsForTeamTerminalRoute(),
                 new SelectTopWTFsTerminalRoute());
@@ -99,6 +104,19 @@ public class QueryResource {
 
         return queryCapability.setQueryTarget(invokingMember.getOrganizationId(), invokingMember.getId(), terminalCircuitContext, targetInputDto);
     }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.TIME_PATH )
+    public SimpleStatusDto getCurrentTime() {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("getCurrentTime, user={}", invokingMember.getBestAvailableName());
+
+        return queryCapability.getCurrentTime();
+    }
+
+
 
     private class SelectTopWTFsTerminalRoute extends TerminalRoute {
 
@@ -174,7 +192,7 @@ public class QueryResource {
             if (!scopeName.startsWith("gt")) {
                 try {
                     TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
-                    return getTopWTFs(Optional.of(scope), Optional.of(TargetType.MEMBER), Optional.of(username));
+                    return getTopWTFs(Optional.of(scope), Optional.of(TargetType.USER), Optional.of(username));
                 } catch (IllegalArgumentException ex) {
                     throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
                 }
@@ -197,7 +215,7 @@ public class QueryResource {
         public Object route(Map<String, String> params) {
             String username = params.get(USERNAME_PARAM);
 
-            return setQueryTarget(new TargetInputDto(TargetType.MEMBER, username));
+            return setQueryTarget(new TargetInputDto(TargetType.USER, username));
         }
     }
 
@@ -218,6 +236,17 @@ public class QueryResource {
         }
     }
 
+    private class QueryTimeTerminalRoute extends TerminalRoute {
+
+        QueryTimeTerminalRoute() {
+            super(Command.GT, "");
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+            return getCurrentTime();
+        }
+    }
 
 }
 

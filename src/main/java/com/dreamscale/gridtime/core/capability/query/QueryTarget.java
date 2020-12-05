@@ -10,6 +10,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class QueryTarget {
     private TargetType targetType;
+    private String targetName;
+
     private UUID organizationId;
     private UUID targetId;
 }
