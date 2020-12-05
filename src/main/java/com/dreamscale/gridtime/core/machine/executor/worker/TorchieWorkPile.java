@@ -75,7 +75,7 @@ public class TorchieWorkPile implements WorkPile {
     private final WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
     private final Duration syncInterval = Duration.ofMinutes(5);
-    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(60);
+    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(10);
 
     private static final int MAX_TORCHIES = 10;
     private boolean paused = false;
@@ -93,11 +93,25 @@ public class TorchieWorkPile implements WorkPile {
             try {
                 initializeMissingTorchies(now);
                 claimTorchiesReadyForProcessing(now);
-                //expireZombieTorchies(now);
+                updateKeepAliveOnClaimedTorchies(now);
+                expireZombieTorchies(now);
             } finally {
                 gridSyncLockManager.releaseTorchieSyncLock();
             }
         }
+    }
+
+    private void updateKeepAliveOnClaimedTorchies(LocalDateTime now) {
+        Set<UUID> torchieIds = whatsNextWheel.getWorkerKeys();
+
+        List<TorchieFeedCursorEntity> cursorUpdates = new ArrayList<>();
+
+        for (UUID torchieId : torchieIds) {
+            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+            cursor.setLastClaimUpdate(now);
+            cursorUpdates.add(cursor);
+        }
+        torchieFeedCursorRepository.save(cursorUpdates);
     }
 
     public TorchieCmd getTorchieCmd(UUID torchieId) {
@@ -293,7 +307,11 @@ public class TorchieWorkPile implements WorkPile {
         }
     }
 
-
+    @Override
+    public void shutdown() {
+        evictAll();
+        peekInstruction = null;
+    }
 
     @Override
     public int size() {
@@ -384,10 +402,6 @@ public class TorchieWorkPile implements WorkPile {
         @Override
         @Transactional
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
-            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
-            cursor.setClaimingServerId(null);
-            torchieFeedCursorRepository.save(cursor);
-
             evictWorker(torchieId);
         }
 

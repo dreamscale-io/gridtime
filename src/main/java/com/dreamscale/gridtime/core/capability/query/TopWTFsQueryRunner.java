@@ -93,8 +93,8 @@ public class TopWTFsQueryRunner {
     List<String> createHeaderRow() {
         List<String> row = new ArrayList<>();
 
-        row.add("Link");
-        row.add("Member");
+        row.add("Circuit");
+        row.add("User");
         row.add("Coords");
         row.add("Day");
         row.add("Timer(h:m:s)");
@@ -114,7 +114,7 @@ public class TopWTFsQueryRunner {
 
         String circuitState = wtf.getCircuitState().name();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE LLL dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd");
 
         String openTime = formatter.format(wtf.getOpenTime());
 

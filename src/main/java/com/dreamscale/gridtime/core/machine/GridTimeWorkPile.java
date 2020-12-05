@@ -73,6 +73,11 @@ public class GridTimeWorkPile implements WorkPile {
         torchieWorkPile.resume();
     }
 
+    @Override
+    public void shutdown() {
+        torchieWorkPile.shutdown();
+    }
+
     public void pauseSystemJobs() {
         systemWorkPile.pause();
     }

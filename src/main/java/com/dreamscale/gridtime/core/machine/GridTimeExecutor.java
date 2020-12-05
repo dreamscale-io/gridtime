@@ -45,6 +45,7 @@ public class GridTimeExecutor {
             isGameLoopRunning.set(false);
 
             waitForDone();
+            workPile.shutdown();
 
             return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown in progress.");
         } else {

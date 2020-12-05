@@ -15,4 +15,6 @@ public interface WorkPile {
     boolean hasWork();
 
     int size();
+
+    default void shutdown() {}
 }
