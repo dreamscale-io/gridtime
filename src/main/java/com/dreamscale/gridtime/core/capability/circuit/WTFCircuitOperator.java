@@ -622,6 +622,7 @@ public class WTFCircuitOperator {
         return circuitDto;
     }
 
+    @Transactional
     public LearningCircuitDto cancelWTF(UUID organizationId, UUID ownerId, String circuitName) {
 
         LocalDateTime now = gridClock.now();
@@ -642,7 +643,6 @@ public class WTFCircuitOperator {
         }
 
         teamCircuitOperator.notifyTeamOfWTFCanceled(organizationId, ownerId, now, nanoTime, circuitDto);
-
 
         return circuitDto;
 
@@ -669,6 +669,7 @@ public class WTFCircuitOperator {
 
         learningCircuitRepository.save(learningCircuitEntity);
 
+        removeAllCircuitMembersExceptOwner(learningCircuitEntity, now, nanoTime);
         clearActiveJoinedCircuit(organizationId, ownerId);
 
         return learningCircuitEntity;
@@ -714,7 +715,7 @@ public class WTFCircuitOperator {
         return circuitDto;
     }
 
-    private void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuit, LocalDateTime now, Long nanoTime) {
+    void removeAllCircuitMembersExceptOwner(LearningCircuitEntity learningCircuit, LocalDateTime now, Long nanoTime) {
 
         List<CircuitMemberEntity> members = circuitMemberRepository.findByOrganizationIdAndCircuitId(learningCircuit.getOrganizationId(), learningCircuit.getId());
 
@@ -736,8 +737,6 @@ public class WTFCircuitOperator {
                 learningCircuit.getOrganizationId(), learningCircuit.getId(), learningCircuit.getOwnerId());
 
     }
-
-    //TODO start, cancel, pause
 
 
     @Transactional
