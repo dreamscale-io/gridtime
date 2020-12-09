@@ -33,6 +33,8 @@ public class GridCalendarEntity {
 
     private String gridTime;
 
+    private String gridCoords;
+
     private Integer year;
 
     private Integer block;

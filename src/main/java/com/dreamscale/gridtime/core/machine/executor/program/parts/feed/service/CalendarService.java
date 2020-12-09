@@ -90,6 +90,7 @@ public class CalendarService {
         calendar.setEndTime(endTime);
 
         calendar.setGridTime(coords.getFormattedGridTime());
+        calendar.setGridCoords(coords.getFormattedCoords());
 
         calendar.setYear(coords.getYear());
         calendar.setBlock(coords.getBlock());

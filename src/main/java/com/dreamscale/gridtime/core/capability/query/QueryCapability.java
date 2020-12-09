@@ -116,7 +116,7 @@ public class QueryCapability {
                 throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Missing calendar data for timescope = "+timeScope);
             }
 
-            queryTimeScope = new QueryTimeScope(calendar.getGridTime(), calendar.getStartTime(), calendar.getEndTime());
+            queryTimeScope = new QueryTimeScope(calendar.getGridCoords(), calendar.getStartTime(), calendar.getEndTime());
 
         } else if (gridtimeScopeExpression != null) {
             GridtimeExpression gtExp = GridtimeExpression.parse(gridtimeScopeExpression);

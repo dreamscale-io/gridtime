@@ -44,10 +44,9 @@ public class TopWTFsQueryRunner {
                     Timestamp.valueOf(queryTimeScope.getEndTime()), TOP_QUERY_LIMIT);
         }
 
-        return toGridTableResults("Top WTFs for "
+        return toGridTableResults("Top WTFs in " + queryTimeScope.getScopeDescription() + " for "
                 + queryTarget.getTargetType().name() + " "
-                + queryTarget.getTargetName() + " :: "
-                + queryTimeScope.getScopeDescription() , topWtfs);
+                + queryTarget.getTargetName() , topWtfs);
     }
 
 
