@@ -64,6 +64,7 @@ public class QueryResource {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH )
     public GridTableResults getTopWTFs(@RequestParam("scope") Optional<TimeScope> timeScope,
+                                       @RequestParam("gt_exp") Optional<String> gridtimeExpression,
                                        @RequestParam("target_type") Optional<TargetType> targetType,
                                        @RequestParam("target_name") Optional<String> targetName) {
         RequestContext context = RequestContext.get();
@@ -74,6 +75,10 @@ public class QueryResource {
         String terminalCircuitContext = context.getTerminalCircuitContext();
 
         QueryInputDto queryInputDto = new QueryInputDto();
+
+        if (gridtimeExpression.isPresent()) {
+            queryInputDto.setGridtimeScopeExpression(gridtimeExpression.get());
+        }
 
         if (timeScope.isPresent()) {
             queryInputDto.setTimeScope(timeScope.get());
@@ -116,7 +121,18 @@ public class QueryResource {
         return queryCapability.getCurrentTime();
     }
 
+    TimeScope toTimeScope(String scopeName) {
+        TimeScope scope = null;
+        if (scopeName != null && !scopeName.startsWith("gt")) {
+            try {
+                scope = TimeScope.valueOf(scopeName.toUpperCase());
 
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: " + scopeName);
+            }
+        }
+        return scope;
+    }
 
     private class SelectTopWTFsTerminalRoute extends TerminalRoute {
 
@@ -131,16 +147,18 @@ public class QueryResource {
         public Object route(Map<String, String> params) {
             String scopeName = params.get(TIME_PARAM);
 
-            if (!scopeName.startsWith("gt")) {
-                try {
-                    TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
-                    return getTopWTFs(Optional.of(scope), Optional.empty(), Optional.empty());
-                } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
-                }
+            Optional<TimeScope> timeScope;
+            Optional<String> gtExp;
+
+            if (scopeName.startsWith("gt")) {
+                gtExp = Optional.of(scopeName);
+                timeScope = Optional.empty();
             } else {
-                throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
+                gtExp = Optional.empty();
+                timeScope = Optional.of(toTimeScope(scopeName));
             }
+
+            return getTopWTFs(timeScope, gtExp, Optional.empty(), Optional.empty());
         }
     }
 
@@ -160,16 +178,17 @@ public class QueryResource {
             String scopeName = params.get(TIME_PARAM);
             String teamName = params.get(TEAM_PARAM);
 
-            if (!scopeName.startsWith("gt")) {
-                try {
-                    TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
-                    return getTopWTFs(Optional.of(scope), Optional.of(TargetType.TEAM), Optional.of(teamName));
-                } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
-                }
+            Optional<TimeScope> timeScope;
+            Optional<String> gtExp;
+
+            if (scopeName.startsWith("gt")) {
+                gtExp = Optional.of(scopeName);
+                timeScope = Optional.empty();
             } else {
-                throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
+                gtExp = Optional.empty();
+                timeScope = Optional.of(toTimeScope(scopeName));
             }
+            return getTopWTFs(timeScope, gtExp, Optional.of(TargetType.TEAM), Optional.of(teamName));
         }
     }
 
@@ -189,16 +208,19 @@ public class QueryResource {
             String scopeName = params.get(TIME_PARAM);
             String username = params.get(USERNAME_PARAM);
 
-            if (!scopeName.startsWith("gt")) {
-                try {
-                    TimeScope scope = TimeScope.valueOf(scopeName.toUpperCase());
-                    return getTopWTFs(Optional.of(scope), Optional.of(TargetType.USER), Optional.of(username));
-                } catch (IllegalArgumentException ex) {
-                    throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "Invalid time parameter: "+scopeName);
-                }
+            Optional<TimeScope> timeScope;
+            Optional<String> gtExp;
+
+            if (scopeName.startsWith("gt")) {
+                gtExp = Optional.of(scopeName);
+                timeScope = Optional.empty();
             } else {
-                throw new BadRequestException(ValidationErrorCodes.INVALID_COMMAND_PARAMETERS, "gt[expression]s not yet supported");
+                gtExp = Optional.empty();
+                timeScope = Optional.of(toTimeScope(scopeName));
             }
+
+            return getTopWTFs(timeScope, gtExp, Optional.of(TargetType.USER), Optional.of(username));
+
         }
     }
 

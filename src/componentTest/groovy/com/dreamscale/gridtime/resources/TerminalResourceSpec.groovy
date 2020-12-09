@@ -488,6 +488,39 @@ class TerminalResourceSpec extends Specification {
     }
 
 
+    def "should query top wtfs with gridtime expression"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        accountClient.login()
+
+        calendarService.saveCalendar(1, 3, GeometryClock.createGridTime(ZoomLevel.BLOCK, gridClock.now()))
+
+        LearningCircuitDto circuit1 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit1.getCircuitName())
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "gt[2020, 1]"))
+
+        GridTableResults results = (GridTableResults) queryResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert queryResult != null
+        assert results.getRowsOfPaddedCells().size() == 2
+    }
+
+
     def "should query top wtfs for targeted user"() {
         given:
 

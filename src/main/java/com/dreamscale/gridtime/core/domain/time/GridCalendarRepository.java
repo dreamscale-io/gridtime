@@ -31,4 +31,38 @@ public interface GridCalendarRepository extends CrudRepository<GridCalendarEntit
     @Query(nativeQuery = true, value = "select * from grid_calendar " +
             "where zoom_level = (:zoom) and start_time <= (:now) order by tile_seq desc limit 1")
     GridCalendarEntity findTileStartingBeforeTime(@Param("zoom") String zoomLevel, @Param("now") Timestamp now);
+
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'YEAR' and year = (:year) limit 1 ")
+    GridCalendarEntity findYearTileByCoords(@Param("year") Integer year);
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'BLOCK' and year = (:year) and block = (:block) limit 1 ")
+    GridCalendarEntity findBlockTileByCoords(@Param("year") Integer year, @Param("block") Integer block);
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'WEEK' and year = (:year) and block = (:block) and block_week = (:week) limit 1 ")
+    GridCalendarEntity findWeekTileByCoords(@Param("year") Integer year, @Param("block") Integer block, @Param("week") Integer week);
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'DAY' and year = (:year) and block = (:block) " +
+            "and block_week = (:week) and day = (:day) limit 1 ")
+    GridCalendarEntity findDayTileByCoords(@Param("year") Integer year, @Param("block") Integer block,
+                                           @Param("week") Integer week, @Param("day") Integer day);
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'DAY_PART' and year = (:year) and block = (:block) " +
+            "and block_week = (:week) and day = (:day) and day_part = (:daypart) limit 1 ")
+    GridCalendarEntity findDayPartTileByCoords(@Param("year") Integer year, @Param("block") Integer block,
+                                               @Param("week") Integer week, @Param("day") Integer day,
+                                               @Param("daypart") Integer daypart);
+
+
+    @Query(nativeQuery = true, value = "select * from grid_calendar " +
+            "where zoom_level = 'TWENTY' and year = (:year) and block = (:block) and block_week = (:week) " +
+            "and day = (:day) and day_part = (:daypart) and twenty_of_twelve = (:twenty) ")
+    GridCalendarEntity findTwentyTileByCoords(@Param("year") Integer year, @Param("block") Integer block,
+                                        @Param("week") Integer week, @Param("day") Integer day, @Param("daypart") Integer daypart,
+                                        @Param("twenty") Integer twenty);
 }

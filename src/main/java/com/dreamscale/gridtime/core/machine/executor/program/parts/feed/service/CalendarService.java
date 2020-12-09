@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -127,5 +128,35 @@ public class CalendarService {
         Timestamp timestamp = Timestamp.valueOf(time);
         log.debug("Looking up tile for "+zoomLevel.name() + " before "+time + " ("+timestamp + ")");
         return gridCalendarRepository.findTileStartingBeforeTime(zoomLevel.name(), timestamp);
+    }
+
+    public GridCalendarEntity lookupTile(ZoomLevel zoomLevel, List<Integer> coords) {
+
+        if (zoomLevel.equals(ZoomLevel.YEAR)) {
+            return gridCalendarRepository.findYearTileByCoords(coords.get(0));
+        }
+
+        if (zoomLevel.equals(ZoomLevel.BLOCK)) {
+            return gridCalendarRepository.findBlockTileByCoords(coords.get(0), coords.get(1));
+        }
+
+        if (zoomLevel.equals(ZoomLevel.WEEK)) {
+            return gridCalendarRepository.findWeekTileByCoords(coords.get(0), coords.get(1), coords.get(2));
+        }
+
+        if (zoomLevel.equals(ZoomLevel.DAY)) {
+            return gridCalendarRepository.findDayTileByCoords(coords.get(0), coords.get(1), coords.get(2), coords.get(3));
+        }
+
+        if (zoomLevel.equals(ZoomLevel.DAY_PART)) {
+            return gridCalendarRepository.findDayPartTileByCoords(coords.get(0), coords.get(1), coords.get(2), coords.get(3), coords.get(4));
+        }
+
+        if (zoomLevel.equals(ZoomLevel.TWENTY)) {
+            return gridCalendarRepository.findTwentyTileByCoords(coords.get(0), coords.get(1), coords.get(2),
+                    coords.get(3), coords.get(4), coords.get(5));
+        }
+
+        throw new RuntimeException("Unknown zoomLevel, cant lookup tile: " +zoomLevel );
     }
 }

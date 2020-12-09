@@ -107,6 +107,37 @@ class QueryResourceSpec extends Specification {
     }
 
 
+
+    def 'should return wtfs for member with expression'() {
+        given:
+
+        OrganizationMemberEntity member = createMemberWithOrgAndTeam();
+
+        loggedInUser.setId(member.getRootAccountId())
+
+        createIntentionForWTFContext()
+
+        calendarService.saveCalendar(1, 3, GeometryClock.createGridTime(ZoomLevel.BLOCK, gridClock.now()))
+
+        when:
+        LearningCircuitDto circuit = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit.getCircuitName())
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        GridTableResults results = queryClient.getTopWTFsForGtExpression("gt[2020,1]")
+
+        println results
+
+        then:
+        assert results != null
+        assert results.getRowsOfPaddedCells().size() == 2
+
+    }
+
+
+
     def 'should return wtfs for team'() {
         given:
 

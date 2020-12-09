@@ -86,11 +86,13 @@ public class TerminalRouteRegistry {
         LocalDateTime now = gridClock.now();
         Long nanoTime = gridClock.nanoTime();
 
+        CommandInputDto standardizedCommand = standardize(commandInputDto);
+
         if (terminalRoutes != null) {
             for (TerminalRoute route : terminalRoutes) {
 
-                if (route.matches(commandInputDto.getCommand(), commandInputDto.getArgs())) {
-                    Object result = route.route(commandInputDto.getArgs());
+                if (route.matches(standardizedCommand.getCommand(), standardizedCommand.getArgs())) {
+                    Object result = route.route(standardizedCommand.getArgs());
 
                     return wrapResultAsTalkMessage(now, nanoTime, memberId, result);
                 }
@@ -98,6 +100,21 @@ public class TerminalRouteRegistry {
         }
 
         throw new BadRequestException(ValidationErrorCodes.UNABLE_TO_FIND_TERMINAL_ROUTE, "Unable to find matching terminal route in registry.");
+    }
+
+    private CommandInputDto standardize(CommandInputDto commandInputDto) {
+        CommandInputDto standardizedCommand = new CommandInputDto();
+
+        standardizedCommand.setCommand(commandInputDto.getCommand());
+
+        List<String> standardizedArgs = new ArrayList<>();
+        for (String arg : commandInputDto.getArgs()) {
+            standardizedArgs.add(arg.replaceAll(" ", ""));
+        }
+
+        standardizedCommand.setArgs(standardizedArgs);
+
+        return standardizedCommand;
     }
 
     private TalkMessageDto wrapResultAsTalkMessage(LocalDateTime now, Long nanoTime, UUID memberId, Object result) {

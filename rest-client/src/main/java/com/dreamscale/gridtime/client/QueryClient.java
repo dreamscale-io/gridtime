@@ -27,6 +27,11 @@ public interface QueryClient {
     @RequestLine("GET " + ResourcePaths.QUERY_PATH + ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH +  "?scope={scope}&target_type={targetType}&target_name={targetName}")
     GridTableResults getTopWTFsForTimeScopeAndTarget(@Param("scope") TimeScope timeScope, @Param("targetType") TargetType targetType, @Param("targetName") String targetName);
 
+    @RequestLine("GET " + ResourcePaths.QUERY_PATH + ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH +  "?gt_exp={gtExp}")
+    GridTableResults getTopWTFsForGtExpression(@Param("gtExp") String gridtimeExpression);
+
+    @RequestLine("GET " + ResourcePaths.QUERY_PATH + ResourcePaths.TOP_PATH + ResourcePaths.WTF_PATH +  "?gt_exp={gtExp}&target_type={targetType}&target_name={targetName}")
+    GridTableResults getTopWTFsForGtExpressionAndTarget(@Param("gtExp") String gridtimeExpression, @Param("targetType") TargetType targetType, @Param("targetName") String targetName);
 
     @RequestLine("POST " + ResourcePaths.QUERY_PATH + ResourcePaths.TARGET_PATH)
     SimpleStatusDto setQueryTarget(TargetInputDto targetInputDto);

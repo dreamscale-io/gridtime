@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.api.query.TargetInputDto;
 import com.dreamscale.gridtime.api.query.TargetType;
 import com.dreamscale.gridtime.api.query.TimeScope;
 import com.dreamscale.gridtime.api.status.Status;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberEntity;
 import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberRepository;
@@ -57,6 +58,8 @@ public class QueryCapability {
     @Autowired
     TopWTFsQueryRunner topWTFsQueryRunner;
 
+    @Autowired
+    MemberDetailsRetriever memberDetailsRetriever;
 
     public GridTableResults getTopWTFs(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext, QueryInputDto queryInputDto) {
 
@@ -88,6 +91,7 @@ public class QueryCapability {
 
 
     private QueryTimeScope resolveQueryTimeScope(TimeScope timeScope, String gridtimeScopeExpression) {
+
         QueryTimeScope queryTimeScope = null;
 
         if (timeScope != null ) {
@@ -114,8 +118,43 @@ public class QueryCapability {
 
             queryTimeScope = new QueryTimeScope(calendar.getGridTime(), calendar.getStartTime(), calendar.getEndTime());
 
+        } else if (gridtimeScopeExpression != null) {
+            GridtimeExpression gtExp = GridtimeExpression.parse(gridtimeScopeExpression);
+
+            queryTimeScope = toQueryTimeScope(gtExp);
+
+        }
+
+        return queryTimeScope;
+
+    }
+
+    private QueryTimeScope toQueryTimeScope(GridtimeExpression gtExp) {
+
+        QueryTimeScope queryTimeScope = null;
+        if (!gtExp.hasRangeExpression()) {
+            GridCalendarEntity calendar = calendarService.lookupTile(gtExp.getZoomLevel(), gtExp.getCoords());
+
+            if (calendar == null ) {
+                throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Missing calendar data for timescope = "+gtExp.getTimescopeExpression());
+            }
+
+            queryTimeScope = new QueryTimeScope(gtExp.getTimescopeExpression(), calendar.getStartTime(), calendar.getEndTime());
         } else {
-            throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Gridtime expressions not yet supported");
+
+            if (!gtExp.getZoomLevel().equals(gtExp.getRangeZoomLevel())) {
+                throw new BadRequestException(ValidationErrorCodes.INVALID_GT_EXPRESSION, "Range expression currently only valid on last gt[exp] term: "+gtExp.getTimescopeExpression());
+            }
+
+            GridCalendarEntity calendarMin = calendarService.lookupTile(gtExp.getZoomLevel(), gtExp.getCoords());
+
+            GridCalendarEntity calendarMax = calendarService.lookupTile(gtExp.getZoomLevel(), gtExp.getRangeCoords());
+
+            if (calendarMin == null || calendarMax == null) {
+                throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Missing calendar data for timescope = "+gtExp.getTimescopeExpression());
+            }
+
+            queryTimeScope = new QueryTimeScope(gtExp.getTimescopeExpression(), calendarMin.getStartTime(), calendarMax.getEndTime());
         }
 
         return queryTimeScope;
@@ -170,6 +209,7 @@ public class QueryCapability {
             } else {
                 targetId = invokingMemberId;
             }
+            targetName = memberDetailsRetriever.lookupUsername(targetId);
         }
         return new QueryTarget(targetType, targetName, organizationId, targetId);
     }
