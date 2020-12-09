@@ -115,4 +115,28 @@ class GeometryClockSpec extends Specification {
 
     }
 
+    def "should rollback from block 1 to 9 at end of the year "() {
+        given:
+
+        GeometryClock.GridTime time = GeometryClock.createGridTimeFromCoordinates(ZoomLevel.BLOCK, [2021, 1] as Integer[])
+
+        println time.getClockTime()
+
+        GeometryClock firstBlockClock = new GeometryClock(ZoomLevel.BLOCK, [2021, 1] as Integer[])
+        GeometryClock twentyClock = new GeometryClock(firstBlockClock.getActiveGridTime().getClockTime())
+
+
+        when:
+        GeometryClock.GridTime nextCoords = twentyClock.getActiveGridTime();
+
+        for (int i = 0; i < 100; i++) {
+            nextCoords = nextCoords.panLeft();
+            println nextCoords.getFormattedGridTime()
+        }
+        then:
+        assert nextCoords.getBlock() == 9
+
+    }
+
+
 }

@@ -83,7 +83,7 @@ public class GeometryClock {
         return new GridTime(zoomLevel, clockTime, year, block, weeksIntoBlock, daysIntoWeek, dayPart, twentyWithinDayPart);
     }
 
-    private static GridTime createGridTimeFromCoordinates(ZoomLevel zoomLevel, Integer[] coords) {
+    public static GridTime createGridTimeFromCoordinates(ZoomLevel zoomLevel, Integer[] coords) {
         LocalDateTime moment = getFirstMomentOfYear(coords[0]);
 
         if (coords.length >= 2) {
@@ -302,11 +302,26 @@ public class GeometryClock {
         }
 
         private GridTime minusBlock() {
+            if (getBlock() == 1) {
+
+                Integer [] newCoords = Arrays.copyOf(coords, coords.length);
+
+                newCoords[0] = newCoords[0] - 1;
+                newCoords[1] = 9;
+
+                return GeometryClock.createGridTimeFromCoordinates(zoomLevel, newCoords);
+            }
+
             return GeometryClock.createGridTime(zoomLevel, clockTime.minusWeeks(6));
+
         }
 
         private GridTime minusYear() {
-            return GeometryClock.createGridTime(zoomLevel, clockTime.minusYears(1));
+            Integer [] newCoords = Arrays.copyOf(coords, coords.length);
+
+            newCoords[0] = newCoords[0] - 1;
+
+            return GeometryClock.createGridTimeFromCoordinates(zoomLevel, newCoords);
         }
 
         // pan right functions

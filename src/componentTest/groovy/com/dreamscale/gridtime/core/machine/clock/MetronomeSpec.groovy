@@ -52,4 +52,60 @@ class MetronomeSpec extends Specification {
         assert tick12.aggregateTickScopes[0].to.toDisplayString() == "/gridtime/2019-B1-W1-D1_4am"
     }
 
+
+    def "getAggregateTick should truncate for block correctly"() {
+
+        when:
+        Metronome.TickScope tick = Metronome.getAggregateTick(ZoomLevel.BLOCK,
+                GeometryClock.createGridTimeFromCoordinates(ZoomLevel.TWENTY, [2021, 1, 1, 1, 1, 1] as Integer []))
+
+        then:
+
+        assert tick.from.toDisplayString() == "/gridtime/2020-B9"
+    }
+
+    def "getAggregateTick should truncate for year correctly"() {
+
+        when:
+        Metronome.TickScope tick = Metronome.getAggregateTick(ZoomLevel.YEAR,
+                GeometryClock.createGridTimeFromCoordinates(ZoomLevel.TWENTY, [2021, 1, 1, 1, 1, 1] as Integer []))
+
+        then:
+
+        assert tick.from.toDisplayString() == "/gridtime/2020"
+    }
+
+    def "should tick over year end and create block 9 block"() {
+        given:
+
+        LocalDateTime christmas = LocalDateTime.of(2021, 1, 3, 0, 0);
+
+        Metronome metronome = new Metronome(christmas)
+
+        when:
+
+        Metronome.TickScope lastTickScope = null;
+
+        for (int i = 0; i < 100; i++) {
+            Metronome.TickScope tickScope = metronome.tick()
+
+            if (tickScope.getFrom().getBlock() == 1) {
+                break;
+            }
+            lastTickScope = tickScope
+        }
+
+        for (int i = 0; i < lastTickScope.aggregateTickScopes.size(); i++ ) {
+            println lastTickScope.aggregateTickScopes[i].toDisplayString()
+        }
+
+        then:
+        assert lastTickScope.from.toDisplayString() == "/gridtime/2020-B9-W4-D7_8pm+3:40"
+
+        assert lastTickScope.aggregateTickScopes[0].from.toDisplayString() == "/gridtime/2020-B9-W4-D7_8pm"
+        assert lastTickScope.aggregateTickScopes[1].from.toDisplayString() == "/gridtime/2020-B9-W4-D7"
+        assert lastTickScope.aggregateTickScopes[2].from.toDisplayString() == "/gridtime/2020-B9-W4"
+        assert lastTickScope.aggregateTickScopes[3].from.toDisplayString() == "/gridtime/2020-B9"
+        assert lastTickScope.aggregateTickScopes[4].from.toDisplayString() == "/gridtime/2020"
+    }
 }
