@@ -27,6 +27,8 @@ public class GridRowEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID calendarId;
 
+    private int rowIndex;
+
     private String rowName;
 
     private String json;

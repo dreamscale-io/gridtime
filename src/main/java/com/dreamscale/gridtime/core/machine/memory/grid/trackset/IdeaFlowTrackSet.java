@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.trackset;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.MusicClock;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.FeatureRowKey;
 import com.dreamscale.gridtime.core.machine.memory.tag.FinishTag;
@@ -40,6 +41,8 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
     private BandedMusicTrack<IdeaFlowStateReference> wtfTrack;
     private BandedMusicTrack<IdeaFlowStateReference> learningProgressTrack;
 
+    private final BandedMusicTrack<FeelsReference> feelsTrack;
+
     private RollingAggregateTrack rollingAggregateModificationsTrack;
 
     private static final int MODIFICATION_THRESHOLD_FOR_PROGRESS = 150;
@@ -53,6 +56,8 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
         this.wtfTrack = new BandedMusicTrack<>(FeatureRowKey.FLOW_WTF, gridTime, musicClock);
         this.learningProgressTrack = new BandedMusicTrack<>(FeatureRowKey.FLOW_LEARNING, gridTime, musicClock);
 
+        this.feelsTrack = new BandedMusicTrack<>(FeatureRowKey.FLOW_FEELS, gridTime, musicClock);
+
         this.rollingAggregateModificationsTrack = new RollingAggregateTrack(gridTime, musicClock);
     }
 
@@ -63,6 +68,19 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
     public void clearWTF(LocalDateTime moment, FinishTag finishTag) {
         wtfTrack.stopPlaying(moment, finishTag);
     }
+
+    public void startFeels(LocalDateTime moment, FeelsReference feelsReference) {
+        feelsTrack.startPlaying(moment, feelsReference);
+    }
+
+    public void clearFeels(LocalDateTime moment) {
+        feelsTrack.stopPlaying(moment);
+    }
+
+    public FeelsReference getFeelsAtBeat(RelativeBeat beat) {
+        return feelsTrack.getFeatureAt(beat);
+    }
+
 
     public void addModificationSampleForLearningBand(RelativeBeat beat, int modificationSample) {
         rollingAggregateModificationsTrack.addModificationSample(beat, modificationSample);
@@ -76,6 +94,8 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
         createLearningBandsBasedOnThreshold();
 
         learningProgressTrack.finish();
+
+        feelsTrack.finish();
     }
 
     public IdeaFlowStateReference getIdeaFlowStateAtBeat(RelativeBeat beat) {
@@ -121,6 +141,9 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
         IdeaFlowStateReference lastLearning = learningProgressTrack.getLast();
         carryOverContext.saveReference("last.learning", lastLearning);
 
+        FeelsReference lastState = feelsTrack.getLast();
+        carryOverContext.saveReference("last.feels", lastState);
+
         carryOverContext.saveRollingAggregate("last.rolling.aggregate", rollingAggregateModificationsTrack.getLast());
 
         return carryOverContext;
@@ -132,6 +155,9 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
 
         IdeaFlowStateReference lastLearning = (IdeaFlowStateReference) subContext.getReference("last.learning");
         learningProgressTrack.initFirst(lastLearning);
+
+        FeelsReference lastState = (FeelsReference) subContext.getReference("last.feels");
+        feelsTrack.initFirst(lastState);
 
         RollingAggregate aggregate = subContext.getRollingAggregate("last.rolling.aggregate");
         rollingAggregateModificationsTrack.initCarryOver(aggregate);
@@ -156,6 +182,12 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
                 boxMetrics.addProgressSample(true);
             }
         }
+
+        FeelsReference feelsReference = getFeelsAtBeat(beat);
+
+        if (feelsReference != null) {
+            boxMetrics.addFeelsSample(feelsReference.getFlameRating());
+        }
     }
 
     @Override
@@ -169,6 +201,7 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
         rows.add(wtfTrack.toGridRow());
         rows.add(learningProgressTrack.toGridRow());
         rows.add(rollingAggregateModificationsTrack.toGridRow(MetricRowKey.FLOW_MODS, AggregateType.TOTAL));
+        rows.add(feelsTrack.toGridRow());
 
         return rows;
     }
@@ -178,6 +211,7 @@ public class IdeaFlowTrackSet implements PlayableCompositeTrackSet {
 
         allFeatures.addAll(wtfTrack.getFeatures());
         allFeatures.addAll(learningProgressTrack.getFeatures());
+        allFeatures.addAll(feelsTrack.getFeatures());
 
         return allFeatures;
     }

@@ -8,7 +8,7 @@ public enum FeatureRowKey implements Key {
     AUTHOR_NAME("@author/name"),
     EXEC_RHYTHM("@exec/rhythm"),
 
-    FEELS_RATING("@feels/rating"),
+    FLOW_FEELS("@flow/feels"),
     FLOW_WTF("@flow/wtf"),
     FLOW_LEARNING("@flow/learning"),
 

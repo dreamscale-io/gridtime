@@ -52,8 +52,9 @@ public class SaveToPostgresSink implements SinkStrategy {
         List<GridRow> allGridRows = gridTile.getAllGridRows();
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
-        for (GridRow row: allGridRows) {
-            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, gridTile.getZoomLevel(), calendarId, row);
+        for (int i = 0; i < allGridRows.size(); i++) {
+            GridRow row = allGridRows.get(i);
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, gridTile.getZoomLevel(), calendarId, row, i);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);
             }
@@ -195,7 +196,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         return markerEntities;
     }
 
-    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row, int rowIndex) {
         GridRowEntity gridRowEntity = null;
 
         Map<String, CellValue> rowValues = row.toCellValueMap();
@@ -207,6 +208,7 @@ public class SaveToPostgresSink implements SinkStrategy {
             gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
             gridRowEntity.setCalendarId(calendarId);
+            gridRowEntity.setRowIndex(rowIndex);
             gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());

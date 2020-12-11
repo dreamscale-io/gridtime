@@ -38,7 +38,6 @@ public class MusicGrid implements IMusicGrid {
     private final String title;
 
     private AuthorsTrackSet authorsTracks;
-    private FeelsTrackSet feelsTracks;
 
     private WorkContextTrackSet contextTracks;
     private IdeaFlowTrackSet ideaflowTracks;
@@ -61,7 +60,6 @@ public class MusicGrid implements IMusicGrid {
         this.landscapeMetrics = new FeatureLandscapeMetrics();
 
         this.authorsTracks = new AuthorsTrackSet(TrackSetKey.Authors, gridTime, musicClock);
-        this.feelsTracks = new FeelsTrackSet(TrackSetKey.Feels, gridTime, musicClock);
 
         this.contextTracks = new WorkContextTrackSet(TrackSetKey.WorkContext, gridTime, musicClock);
         this.ideaflowTracks = new IdeaFlowTrackSet(TrackSetKey.IdeaFlow, featureCache, gridTime, musicClock);
@@ -69,7 +67,7 @@ public class MusicGrid implements IMusicGrid {
         this.executionTracks = new ExecutionTrackSet(TrackSetKey.Executions, gridTime, musicClock);
         this.navigationTracks = new NavigationTrackSet(TrackSetKey.Navigations, featureCache, glyphReferences, gridTime, musicClock);
 
-        addAllTrackSets(authorsTracks, feelsTracks, contextTracks, ideaflowTracks, navigationTracks, executionTracks);
+        addAllTrackSets(authorsTracks, contextTracks, ideaflowTracks, navigationTracks, executionTracks);
 
     }
 
@@ -107,11 +105,11 @@ public class MusicGrid implements IMusicGrid {
 
 
     public void startFeels(LocalDateTime moment, FeelsReference feelsState) {
-        feelsTracks.startFeels(moment, feelsState);
+        ideaflowTracks.startFeels(moment, feelsState);
     }
 
     public void clearFeels(LocalDateTime moment) {
-        feelsTracks.clearFeels(moment);
+        ideaflowTracks.clearFeels(moment);
     }
 
     public WorkContextReference getLastContextOnOrBeforeMoment(LocalDateTime moment, WorkContextType fromStructureLevel) {
@@ -207,7 +205,6 @@ public class MusicGrid implements IMusicGrid {
                 GridMetrics boxMetrics = landscapeMetrics.getMetricsFor(boxReference);
 
                 ideaflowTracks.populateBoxWithBeat(beat, boxMetrics);
-                feelsTracks.populateBoxWithBeat(beat, boxMetrics);
                 authorsTracks.populateBoxWithBeat(beat, boxMetrics);
                 navigationTracks.populateBoxWithBeat(beat, boxMetrics);
                 executionTracks.populateBoxWithBeat(beat, boxMetrics);

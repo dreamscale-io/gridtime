@@ -171,7 +171,7 @@ public class IdeaFlowMetrics implements MetricQuery {
     }
 
     private static AverageMetric selectAverageFlame(IMusicGrid musicGrid) {
-        GridRow feelsRow = musicGrid.getRow(FeatureRowKey.FEELS_RATING);
+        GridRow feelsRow = musicGrid.getRow(FeatureRowKey.FLOW_FEELS);
 
         AverageMetric averageMetric = new AverageMetric();
 

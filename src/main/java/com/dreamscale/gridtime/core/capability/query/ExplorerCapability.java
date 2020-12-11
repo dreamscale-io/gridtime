@@ -4,16 +4,9 @@ import com.dreamscale.gridtime.api.query.TileLocationInputDto;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
-import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberEntity;
-import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitEntity;
-import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitLocationHistoryEntity;
-import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitLocationHistoryRepository;
-import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
-import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +48,10 @@ public class ExplorerCapability {
 
         terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
 
-        return lookupTileAtLocationn(tileLocation);
+        return lookupTileAtLocation(tileLocation);
     }
 
-    private GridTableResults lookupTileAtLocationn(GridtimeExpression tileLocation) {
+    private GridTableResults lookupTileAtLocation(GridtimeExpression tileLocation) {
 
         //first, lets start with the 20 min tiles, and reconstructing the table on the screen
 

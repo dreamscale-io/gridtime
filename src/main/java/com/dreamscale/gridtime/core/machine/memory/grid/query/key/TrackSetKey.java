@@ -7,7 +7,6 @@ public enum TrackSetKey implements Key {
     WorkContext("@work"),
     Authors("@author"),
     IdeaFlow("@flow"),
-    Feels("@feels"),
     Executions("@exec"),
     Navigations("@nav");
 
