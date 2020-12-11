@@ -1,8 +1,8 @@
 package com.dreamscale.gridtime.resources;
 
 import com.dreamscale.gridtime.api.ResourcePaths;
-import com.dreamscale.gridtime.api.query.GridLocationDto;
-import com.dreamscale.gridtime.api.query.LocationInputDto;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
+import com.dreamscale.gridtime.api.query.TileLocationInputDto;
 import com.dreamscale.gridtime.core.capability.query.ExplorerCapability;
 import com.dreamscale.gridtime.core.capability.membership.OrganizationCapability;
 import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity;
@@ -25,7 +25,7 @@ public class ExplorerResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.GOTO_PATH)
-    public GridLocationDto gotoLocation(@RequestBody LocationInputDto locationInputDto) {
+    public GridTableResults gotoLocation(@RequestBody TileLocationInputDto tileLocationInputDto) {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -33,13 +33,13 @@ public class ExplorerResource {
 
         String terminalCircuitContext = context.getTerminalCircuitContext();
 
-        return explorerCapability.gotoLocation(invokingMember.getOrganizationId(), invokingMember.getId(), terminalCircuitContext, locationInputDto);
+        return explorerCapability.gotoLocation(invokingMember.getOrganizationId(), invokingMember.getId(), terminalCircuitContext, tileLocationInputDto);
     }
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.LOOK_PATH)
-    public GridLocationDto look() {
+    public GridTableResults look() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -53,7 +53,7 @@ public class ExplorerResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ZOOM_PATH + ResourcePaths.IN_PATH)
-    public GridLocationDto zoomIn() {
+    public GridTableResults zoomIn() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -66,7 +66,7 @@ public class ExplorerResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(ResourcePaths.ZOOM_PATH + ResourcePaths.OUT_PATH)
-    public GridLocationDto zoomOut() {
+    public GridTableResults zoomOut() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -80,7 +80,7 @@ public class ExplorerResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.PAN_PATH + ResourcePaths.LEFT_PATH)
-    public GridLocationDto panLeft() {
+    public GridTableResults panLeft() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 
@@ -93,7 +93,7 @@ public class ExplorerResource {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping(ResourcePaths.PAN_PATH + ResourcePaths.RIGHT_PATH)
-    public GridLocationDto panRight() {
+    public GridTableResults panRight() {
         RequestContext context = RequestContext.get();
         OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
 

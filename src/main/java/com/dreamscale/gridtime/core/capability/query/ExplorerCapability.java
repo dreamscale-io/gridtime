@@ -1,22 +1,17 @@
 package com.dreamscale.gridtime.core.capability.query;
 
-import com.dreamscale.gridtime.api.query.GridLocationDto;
-import com.dreamscale.gridtime.api.query.LocationInputDto;
+import com.dreamscale.gridtime.api.query.TileLocationInputDto;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberEntity;
-import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberRepository;
-import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberStatusRepository;
 import com.dreamscale.gridtime.core.domain.member.MemberDetailsEntity;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitEntity;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitLocationHistoryEntity;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitLocationHistoryRepository;
-import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitRepository;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
-import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
@@ -31,18 +26,6 @@ import java.util.UUID;
 public class ExplorerCapability {
 
     @Autowired
-    TerminalCircuitRepository terminalCircuitRepository;
-
-    @Autowired
-    CircuitMemberRepository circuitMemberRepository;
-
-    @Autowired
-    CircuitMemberStatusRepository circuitMemberStatusRepository;
-
-    @Autowired
-    TerminalCircuitLocationHistoryRepository terminalCircuitLocationHistoryRepository;
-
-    @Autowired
     CalendarService calendarService;
 
     @Autowired
@@ -54,99 +37,64 @@ public class ExplorerCapability {
     @Autowired
     TorchieFeedCursorRepository torchieFeedCursorRepository;
 
-    public GridLocationDto gotoLocation(UUID organizationId, UUID memberId, String terminalCircuitContext, LocationInputDto locationInputDto) {
-        return null;
-    }
+    @Autowired
+    TerminalCircuitOperator terminalCircuitOperator;
 
-    public GridLocationDto look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+
+    public GridTableResults gotoLocation(UUID organizationId, UUID memberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
 
         LocalDateTime now = gridClock.now();
 
-        TerminalCircuitEntity circuit = terminalCircuitRepository.findByOrganizationIdAndCircuitName(organizationId, terminalCircuitContext);
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, memberId, terminalCircuitContext);
 
-        validateCircuitExists(terminalCircuitContext, circuit);
+        GridtimeExpression tileLocation = GridtimeExpression.parse(tileLocationInputDto.getGridtimeExpression());
 
-        if (!circuit.getCreatorId().equals(invokingMemberId)) {
-            validateCircuitMembership(circuit, invokingMemberId);
+        if (tileLocation.hasRangeExpression()) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_GT_EXPRESSION, "Tile location must be specific and not a range.");
         }
 
-        TerminalCircuitLocationHistoryEntity location = terminalCircuitLocationHistoryRepository.findLastLocationByOrganizationIdAndCircuitName(organizationId, terminalCircuitContext);
+        terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
 
-        if (location == null) {
-            location = createInitialLocationFromFeedLocation(now, organizationId, circuit.getCreatorId(), circuit.getId());
-        }
+        return lookupTileAtLocationn(tileLocation);
+    }
 
-        GridtimeSequence gridTimeSequence = calendarService.lookupGridTimeSequence(location.getZoomLevel(), location.getTileSeq());
+    private GridTableResults lookupTileAtLocationn(GridtimeExpression tileLocation) {
 
-        GridLocationDto gridLocation = new GridLocationDto();
-        gridLocation.setGridTime(gridTimeSequence.getGridTime().getFormattedGridTime());
-        gridLocation.setZoomLevel(location.getZoomLevel().name());
-        gridLocation.setCoordinates(gridTimeSequence.getGridTime().getCoordinates());
+        //first, lets start with the 20 min tiles, and reconstructing the table on the screen
 
-        GridTableResults results = runQuery(circuit, gridTimeSequence );
+        //Ive got the rows with different track types
+
+        //currently these row types don't have an order.  I can give them one in the tables, so they sort consistently
+
+        //lets start with this
+
+        //then I think I want to do lookup tables as support commands, so tracks can have details?
+        //maybe save off these feature maps, and then the feature maps are organized by row?
+        //some will just be a set of things.  Aggregated by type perhaps.  Need to figure out execution metrics.
 
         return null;
     }
 
-    private GridTableResults runQuery(TerminalCircuitEntity circuit, GridtimeSequence gridTimeSequence) {
-
+    public GridTableResults look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
 
         return null;
     }
 
-    private TerminalCircuitLocationHistoryEntity createInitialLocationFromFeedLocation(LocalDateTime now, UUID organizationId, UUID memberId, UUID circuitId) {
 
-        TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByOrganizationIdAndTorchieId(organizationId, memberId);
-
-        if (cursor == null || cursor.getLastTileProcessedCursor() == null) {
-            throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Unable to initialize location. No feed data available.");
-        }
-
-        MemberDetailsEntity memberDetails = memberDetailsRetriever.lookupMemberDetails(organizationId, memberId);
-
-        Long tileSeq = calendarService.lookupTileSequenceFromSameTime(ZoomLevel.TWENTY, cursor.getLastTileProcessedCursor());
-
-        TerminalCircuitLocationHistoryEntity historyEntity = new TerminalCircuitLocationHistoryEntity();
-        historyEntity.setId(UUID.randomUUID());
-        historyEntity.setCircuitId(circuitId);
-        historyEntity.setMovementDate(now);
-        historyEntity.setZoomLevel(ZoomLevel.TWENTY);
-        historyEntity.setTileSeq(tileSeq.intValue());
-
-        terminalCircuitLocationHistoryRepository.save(historyEntity);
-
-        return historyEntity;
-
-    }
-
-
-    private void validateCircuitExists(String circuitName, TerminalCircuitEntity terminalCircuitEntity) {
-        if (terminalCircuitEntity == null) {
-            throw new BadRequestException(ValidationErrorCodes.MISSING_OR_INVALID_CIRCUIT, "Unable to find terminal circuit: " + circuitName);
-        }
-    }
-
-    private void validateCircuitMembership(TerminalCircuitEntity circuit, UUID invokingMemberId) {
-        CircuitMemberEntity membership = circuitMemberRepository.findByOrganizationIdAndCircuitIdAndMemberId(circuit.getOrganizationId(), circuit.getId(), invokingMemberId);
-
-        if (membership == null) {
-            throw new BadRequestException(ValidationErrorCodes.MEMBER_NOT_JOINED_TO_CIRCUIT, "Member is not joined to terminal circuit "+circuit.getCircuitName());
-        }
-    }
-    public GridLocationDto zoomIn(UUID organizationId, UUID memberId, String terminalCircuitContext) {
+    public GridTableResults zoomIn(UUID organizationId, UUID memberId, String terminalCircuitContext) {
         return null;
     }
 
-    public GridLocationDto zoomOut(UUID organizationId, UUID memberId, String terminalCircuitContext) {
+    public GridTableResults zoomOut(UUID organizationId, UUID memberId, String terminalCircuitContext) {
         return null;
     }
 
-    public GridLocationDto panLeft(UUID organizationId, UUID memberId, String terminalCircuitContext) {
+    public GridTableResults panLeft(UUID organizationId, UUID memberId, String terminalCircuitContext) {
         return null;
     }
 
-    public GridLocationDto panRight(UUID organizationId, UUID memberId, String terminalCircuitContext) {
+    public GridTableResults panRight(UUID organizationId, UUID memberId, String terminalCircuitContext) {
         return null;
     }
 }

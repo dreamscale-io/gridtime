@@ -12,8 +12,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationInputDto {
+public class TileLocationInputDto {
 
-    String locationExpression;
+    String gridtimeExpression;
 }
 

@@ -17,7 +17,7 @@ public interface TerminalCircuitQueryTargetRepository extends CrudRepository<Ter
                                                                                   @Param("circuitName") String circuitName);
 
     @Query(nativeQuery = true, value = "select qt.* from terminal_circuit_query_target qt " +
-            "where qt.circuit_id = (:circuitId) " +
+            "where qt.organization_id = (:organizationId) and qt.circuit_id = (:circuitId) " +
             "order by target_date desc limit 1")
-    TerminalCircuitQueryTargetEntity findLastTargetByCircuitId(@Param("circuitId") UUID circuitId);
+    TerminalCircuitQueryTargetEntity findLastTargetByCircuitId(@Param("organizationId") UUID organizationId, @Param("circuitId") UUID circuitId);
 }

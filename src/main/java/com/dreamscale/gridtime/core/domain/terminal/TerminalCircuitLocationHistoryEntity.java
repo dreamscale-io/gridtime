@@ -23,6 +23,9 @@ public class TerminalCircuitLocationHistoryEntity {
     private UUID id;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID organizationId;
+
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID circuitId;
 
     @Enumerated(EnumType.STRING)

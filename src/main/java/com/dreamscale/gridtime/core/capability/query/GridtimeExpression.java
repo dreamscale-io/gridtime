@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 public class GridtimeExpression {
 
-    private String timescopeExpression;
+    private String formattedExpression;
 
     private Integer year;
     private Integer block;
@@ -31,7 +31,7 @@ public class GridtimeExpression {
     private List<Integer> coords;
     private List<Integer> rangeCoords;
 
-    public static GridtimeExpression parse(String timeScopeExpression) {
+    public static GridtimeExpression parse(String gridtimeExpressionStr) {
 
         char ch;
         StringBuilder token = new StringBuilder("");
@@ -39,7 +39,7 @@ public class GridtimeExpression {
         int coordinatePosition = 0;
         boolean isRangeCoordinate = false;
 
-        String coordinateExp = timeScopeExpression.substring(timeScopeExpression.indexOf('[') + 1);
+        String coordinateExp = gridtimeExpressionStr.substring(gridtimeExpressionStr.indexOf('[') + 1);
 
         GridtimeExpression exp = new GridtimeExpression();
 
@@ -58,11 +58,11 @@ public class GridtimeExpression {
                 token.setLength(0);
                 isRangeCoordinate = true;
             } else {
-                throw new BadRequestException(ValidationErrorCodes.INVALID_GT_EXPRESSION, "Unable to parse " + timeScopeExpression + " ch = "+ch);
+                throw new BadRequestException(ValidationErrorCodes.INVALID_GT_EXPRESSION, "Unable to parse " + gridtimeExpressionStr + " ch = "+ch);
             }
         }
 
-        exp.setTimescopeExpression(timeScopeExpression);
+        exp.setFormattedExpression(gridtimeExpressionStr);
         exp.setZoomLevel(determineZoomLevel(coordinatePosition - 1));
         exp.setCoords(createCoords(exp));
 
