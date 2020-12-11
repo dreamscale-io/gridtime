@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface GridMarkerRepository extends CrudRepository<GridMarkerEntity, UUID> {
 
-    List<GridMarkerEntity> findByTorchieIdAndRowNameOrderByTileSeq(UUID torchieId, String rowName);
+    List<GridMarkerEntity> findByTorchieIdAndRowName(UUID torchieId, String rowName);
 
-    List<GridMarkerEntity> findByTorchieIdOrderByTileSeq(UUID torchieId);
+    List<GridMarkerEntity> findByTorchieId(UUID torchieId);
 
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_marker")

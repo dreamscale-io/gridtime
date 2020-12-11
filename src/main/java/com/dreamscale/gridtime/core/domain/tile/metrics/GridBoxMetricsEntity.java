@@ -25,10 +25,9 @@ public class GridBoxMetricsEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
-    @Enumerated(EnumType.STRING)
-    private ZoomLevel zoomLevel;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
-    private Long tileSeq;
 
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID boxFeatureId;

@@ -28,10 +28,8 @@ public class TerminalCircuitLocationHistoryEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID circuitId;
 
-    @Enumerated(EnumType.STRING)
-    private ZoomLevel zoomLevel;
-
-    private Integer tileSeq;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
     private LocalDateTime movementDate;
 

@@ -39,15 +39,15 @@ public class OutputBoxMetrics implements OutputStrategy {
 
         List<BoxMetrics> boxMetrics = BoxMetrics.queryFrom(musicGrid);
 
-        Long tileSeq = calendarService.lookupTileSequenceNumber(tickScope.getFrom());
+        UUID calendarId = calendarService.lookupCalendarId(tickScope.getFrom());
 
-        List<GridBoxMetricsEntity> entities = createEntities(torchieId, tileSeq, boxMetrics);
+        List<GridBoxMetricsEntity> entities = createEntities(torchieId, calendarId, boxMetrics);
         gridBoxMetricsRepository.save(entities);
 
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
         for (GridRow row: musicGrid.getAllGridRows()) {
-            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tickScope.getZoomLevel(), tileSeq, row);
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tickScope.getZoomLevel(), calendarId, row);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);
             }
@@ -57,7 +57,7 @@ public class OutputBoxMetrics implements OutputStrategy {
         return rowEntities.size();
     }
 
-    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
         GridRowEntity gridRowEntity = null;
 
         Map<String, CellValue> rowValues = row.toCellValueMap();
@@ -68,8 +68,7 @@ public class OutputBoxMetrics implements OutputStrategy {
             gridRowEntity.setId(UUID.randomUUID());
             gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
-            gridRowEntity.setZoomLevel(zoomLevel);
-            gridRowEntity.setTileSeq(tileSeq);
+            gridRowEntity.setCalendarId(calendarId);
             gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
@@ -78,24 +77,23 @@ public class OutputBoxMetrics implements OutputStrategy {
         return gridRowEntity;
     }
 
-    private List<GridBoxMetricsEntity> createEntities(UUID torchieId, Long tileSeq, List<BoxMetrics> boxMetricsList) {
+    private List<GridBoxMetricsEntity> createEntities(UUID torchieId, UUID calendarId, List<BoxMetrics> boxMetricsList) {
 
         List<GridBoxMetricsEntity> entities = new ArrayList<>();
 
         for (BoxMetrics metrics : boxMetricsList) {
-            entities.add(createGridBoxMetricsEntity(torchieId, tileSeq, metrics));
+            entities.add(createGridBoxMetricsEntity(torchieId, calendarId, metrics));
         }
 
         return entities;
     }
 
-    private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, Long tileSeq, BoxMetrics boxMetrics) {
+    private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, UUID calendarId, BoxMetrics boxMetrics) {
         GridBoxMetricsEntity boxMetricsEntity = new GridBoxMetricsEntity();
 
         boxMetricsEntity.setId(UUID.randomUUID());
         boxMetricsEntity.setTorchieId(torchieId);
-        boxMetricsEntity.setTileSeq(tileSeq);
-        boxMetricsEntity.setZoomLevel(boxMetrics.getZoomLevel());
+        boxMetricsEntity.setCalendarId(calendarId);
 
         boxMetricsEntity.setBoxFeatureId(boxMetrics.getBox().getFeatureId());
         boxMetricsEntity.setTimeInBox(boxMetrics.getTimeInBox().getSeconds());

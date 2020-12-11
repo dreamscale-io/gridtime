@@ -24,10 +24,8 @@ public class GridIdeaFlowMetricsEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
-    @Enumerated(EnumType.STRING)
-    private ZoomLevel zoomLevel;
-
-    private Long tileSeq;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
     private Long timeInTile;
 

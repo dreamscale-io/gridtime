@@ -55,14 +55,13 @@ public class AggregateWorkToDoQueueWire implements Wire {
 
         log.info("Pushing event into WorkToDo queue: "+event.gridTime);
 
-        Long tileSeq = calendarService.lookupTileSequenceNumber(event.getGridTime());
+        UUID calendarId = calendarService.lookupCalendarId(event.getGridTime());
 
         WorkItemToAggregateEntity workItem = new WorkItemToAggregateEntity();
         workItem.setId(UUID.randomUUID());
         workItem.setEventTime(gridClock.now());
         workItem.setProcessingState(ProcessingState.Ready);
-        workItem.setZoomLevel(event.getGridTime().getZoomLevel());
-        workItem.setTileSeq(tileSeq);
+        workItem.setCalendarId(calendarId);
         workItem.setGridTime(event.getGridTime().toDisplayString());
         workItem.setSourceTorchieId(event.getTorchieId());
         workItem.setTeamId(event.getTeamId());
@@ -85,12 +84,12 @@ public class AggregateWorkToDoQueueWire implements Wire {
             WorkToDo workToDo = getNextWorkToDo();
 
             if (workToDo != null) {
-                GridtimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getZoomLevel(), workToDo.getTileSeq());
+                GridtimeSequence sequence = calendarService.lookupGridTimeSequence(workToDo.getCalendarId());
 
                 nextEvent = new AggregateStreamEvent(workToDo.getTeamId(), sequence.getGridTime(), workToDo.getWorkToDoType());
 
                 //this claims all work for the entire group
-                workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getZoomLevel().toString(), workToDo.getTileSeq());
+                workItemToAggregateRepository.updateInProgress(workerId.toString(), workToDo.getTeamId().toString(), workToDo.getCalendarId().toString());
             }
         } finally {
             gridSyncLockManager.releasePlexerSyncLock();
@@ -126,7 +125,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     }
 
     private WorkToDo toWorkToDo(WorkReadyByTeamViewEntity workItem) {
-        return new WorkToDo(workItem.getWorkId().getTeamId(), workItem.getZoomLevel(), workItem.getTileSeq(), workItem.getWorkToDoType());
+        return new WorkToDo(workItem.getWorkId().getTeamId(), workItem.getCalendarId(), workItem.getWorkToDoType());
     }
 
 
@@ -147,8 +146,7 @@ public class AggregateWorkToDoQueueWire implements Wire {
     @Getter
     private class WorkToDo {
         UUID teamId;
-        ZoomLevel zoomLevel;
-        Long tileSeq;
+        UUID calendarId;
         WorkToDoType workToDoType;
     }
 }

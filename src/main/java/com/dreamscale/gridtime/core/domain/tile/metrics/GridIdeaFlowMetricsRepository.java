@@ -12,11 +12,12 @@ import java.util.UUID;
 public interface GridIdeaFlowMetricsRepository extends CrudRepository<GridIdeaFlowMetricsEntity, UUID> {
 
 
-    @Query(nativeQuery = true, value = "select * from grid_idea_flow_metrics " +
-            "where torchie_id=(:torchieId) " +
-            "and zoom_level=(:zoom) " +
-            "and tile_seq >= (:start) and tile_seq <= (:end) "+
-            "order by tile_seq")
+    @Query(nativeQuery = true, value = "select ifm.* from grid_idea_flow_metrics ifm, grid_calendar gtc " +
+            "where ifm.torchie_id=(:torchieId) " +
+            "and ifm.calendar_id = gtc.id " +
+            "and gtc.zoom_level=(:zoom) " +
+            "and gtc.tile_seq >= (:start) and gtc.tile_seq <= (:end) "+
+            "order by gtc.tile_seq")
     List<GridIdeaFlowMetricsEntity> findByTorchieZoomRange(@Param("torchieId") UUID torchieId,
                                                            @Param("zoom") String zoomLevel,
                                                            @Param("start") Long sequenceStart,
@@ -25,8 +26,8 @@ public interface GridIdeaFlowMetricsRepository extends CrudRepository<GridIdeaFl
 
     @Query(nativeQuery = true, value = "select ifm.* from grid_idea_flow_metrics ifm, grid_calendar gtc " +
             "where ifm.torchie_id=(:torchieId) " +
-            "and ifm.zoom_level=(:zoom) " +
-            "and ifm.zoom_level=gtc.zoom_level " +
+            "and ifm.calendar_id=gtc.id " +
+            "and gtc.zoom_level = (:zoom) " +
             "and gtc.start_time = (:clock) ")
     GridIdeaFlowMetricsEntity findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                     @Param("zoom") String zoomLevel,

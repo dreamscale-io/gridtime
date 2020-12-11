@@ -10,11 +10,9 @@ import java.util.UUID;
 
 public interface GridRowRepository extends CrudRepository<GridRowEntity, UUID> {
 
-    List<GridRowEntity> findByTorchieIdAndZoomLevelAndRowNameOrderByTileSeq(UUID torchieId, ZoomLevel zoomLevel, String rowName);
+    List<GridRowEntity> findByTorchieIdAndRowName(UUID torchieId, String rowName);
 
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_row")
     void truncate();
-
-    List<GridRowEntity> findByTorchieIdAndZoomLevelAndTileSeq(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq);
 }

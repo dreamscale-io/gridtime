@@ -29,6 +29,9 @@ public class ZoomableTeamBoxMetricsEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
+
     @Enumerated(EnumType.STRING)
     private ZoomLevel zoomLevel;
 

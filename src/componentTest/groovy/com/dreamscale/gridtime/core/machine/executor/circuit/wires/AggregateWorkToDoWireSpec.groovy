@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine.executor.circuit.wires
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.member.TeamMemberEntity
 import com.dreamscale.gridtime.core.domain.member.TeamMemberRepository
+import com.dreamscale.gridtime.core.domain.time.GridCalendarEntity
 import com.dreamscale.gridtime.core.domain.work.ProcessingState
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository
@@ -69,11 +70,12 @@ class AggregateWorkToDoWireSpec extends Specification {
         teamMemberRepository.save(new TeamMemberEntity(UUID.randomUUID(), orgId, member1, teamId, now))
 
         GeometryClock.GridTime gridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, oldTime);
-        WorkItemToAggregateEntity workItem = aRandom.workItem().teamId(teamId).forGridTime(gridTime).processingState(ProcessingState.Ready).save()
+
+        GridCalendarEntity calendarEntity = calendarService.saveCalendar(1, gridTime)
+
+        WorkItemToAggregateEntity workItem = aRandom.workItem().teamId(teamId).calendarId(calendarEntity.getId()).processingState(ProcessingState.Ready).save()
 
         TorchieFeedCursorEntity cursor = aRandom.torchieFeedCursor().torchieId(member1).save()
-
-        calendarService.saveCalendar(workItem.tileSeq, gridTime)
 
 
         when:

@@ -50,3 +50,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/alter_terminal_loc_history_add_org_id.sql
+
+  - include:
+      file: db/v008/refactor_calendar_deps.sql

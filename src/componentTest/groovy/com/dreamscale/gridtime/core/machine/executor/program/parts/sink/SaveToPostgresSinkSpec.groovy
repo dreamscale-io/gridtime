@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.sink
 
 import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository
-import com.dreamscale.gridtime.core.domain.tile.metrics.GridBridgeMetricsRepository
+
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerEntity
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository
 import com.dreamscale.gridtime.core.domain.tile.GridRowEntity
@@ -35,9 +35,6 @@ class SaveToPostgresSinkSpec extends Specification {
 
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository
-
-    @Autowired
-    GridBridgeMetricsRepository gridBridgeMetricsRepository
 
     @Autowired
     GridMarkerRepository gridMarkerRepository
@@ -101,10 +98,9 @@ class SaveToPostgresSinkSpec extends Specification {
         when:
         saveToPostgresSink.save(torchieId, torchieState)
 
-        List<GridRowEntity> rowEntities = gridRowRepository.findByTorchieIdAndZoomLevelAndRowNameOrderByTileSeq(torchieId,
-                ZoomLevel.TWENTY, "@flow/wtf");
+        List<GridRowEntity> rowEntities = gridRowRepository.findByTorchieIdAndRowName(torchieId, "@flow/wtf");
 
-        List<GridMarkerEntity> markerEntities = gridMarkerRepository.findByTorchieIdOrderByTileSeq(torchieId);
+        List<GridMarkerEntity> markerEntities = gridMarkerRepository.findByTorchieId(torchieId);
 
         println markerEntities
 

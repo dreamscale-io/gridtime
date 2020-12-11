@@ -22,7 +22,8 @@ public class GridMarkerEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID torchieId;
 
-    private Long tileSeq;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
     private LocalDateTime position;
 

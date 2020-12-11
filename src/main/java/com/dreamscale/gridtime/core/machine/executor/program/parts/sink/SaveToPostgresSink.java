@@ -47,13 +47,13 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         //first thing I need to do, is save the wtf banded row.
 
-        Long tileSeq = calendarService.lookupTileSequenceNumber(gridTile.getGridTime());
+        UUID calendarId = calendarService.lookupCalendarId(gridTile.getGridTime());
 
         List<GridRow> allGridRows = gridTile.getAllGridRows();
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
         for (GridRow row: allGridRows) {
-            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, gridTile.getZoomLevel(), tileSeq, row);
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, gridTile.getZoomLevel(), calendarId, row);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);
             }
@@ -65,7 +65,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         List<GridMarkerEntity> markerEntities = new ArrayList<>();
 
         for (GridRow row: allGridRows) {
-            List<GridMarkerEntity> rowMarkers = createRowMarkerEntitiesIfNotEmpty(torchieId, tileSeq, row);
+            List<GridMarkerEntity> rowMarkers = createRowMarkerEntitiesIfNotEmpty(torchieId, calendarId, row);
             if (rowMarkers != null) {
                 markerEntities.addAll(rowMarkers);
             }
@@ -77,9 +77,8 @@ public class SaveToPostgresSink implements SinkStrategy {
         log.debug("wtf percent: "+ ideaFlowMetrics.getPercentWtf());
         log.debug("ideaflowMetrics: "+ ideaFlowMetrics);
 
-        GridIdeaFlowMetricsEntity gridIdeaFlowMetricsEntity = createGridIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
+        GridIdeaFlowMetricsEntity gridIdeaFlowMetricsEntity = createGridIdeaFlowMetricsEntity(torchieId, calendarId, ideaFlowMetrics);
 
-        log.debug("Saving ideaflow tile: "+tileSeq);
         gridIdeaFlowMetricsRepository.save(gridIdeaFlowMetricsEntity);
 
 
@@ -88,7 +87,7 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         for (BoxMetrics boxMetrics : boxMetricsList) {
 
-            GridBoxMetricsEntity gridBoxMetricsEntity = createGridBoxMetricsEntity(torchieId, tileSeq, boxMetrics);
+            GridBoxMetricsEntity gridBoxMetricsEntity = createGridBoxMetricsEntity(torchieId, calendarId, boxMetrics);
             boxMetricsEntityList.add(gridBoxMetricsEntity);
             log.debug("box: "+gridBoxMetricsEntity);
         }
@@ -132,13 +131,12 @@ public class SaveToPostgresSink implements SinkStrategy {
         //TODO aggregate up
     }
 
-    private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, Long tileSeq, BoxMetrics boxMetrics) {
+    private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, UUID calendarId, BoxMetrics boxMetrics) {
         GridBoxMetricsEntity boxMetricsEntity = new GridBoxMetricsEntity();
 
         boxMetricsEntity.setId(UUID.randomUUID());
         boxMetricsEntity.setTorchieId(torchieId);
-        boxMetricsEntity.setTileSeq(tileSeq);
-        boxMetricsEntity.setZoomLevel(boxMetrics.getZoomLevel());
+        boxMetricsEntity.setCalendarId(calendarId);
 
         boxMetricsEntity.setBoxFeatureId(boxMetrics.getBox().getFeatureId());
         boxMetricsEntity.setTimeInBox(boxMetrics.getTimeInBox().getSeconds());
@@ -155,13 +153,12 @@ public class SaveToPostgresSink implements SinkStrategy {
         return boxMetricsEntity;
     }
 
-    private GridIdeaFlowMetricsEntity createGridIdeaFlowMetricsEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
+    private GridIdeaFlowMetricsEntity createGridIdeaFlowMetricsEntity(UUID torchieId, UUID calendarId, IdeaFlowMetrics ideaFlowMetrics) {
 
         GridIdeaFlowMetricsEntity ideaFlowEntity = new GridIdeaFlowMetricsEntity();
         ideaFlowEntity.setId(UUID.randomUUID());
         ideaFlowEntity.setTorchieId(torchieId);
-        ideaFlowEntity.setTileSeq(tileSeq);
-        ideaFlowEntity.setZoomLevel(ideaFlowMetrics.getZoomLevel());
+        ideaFlowEntity.setCalendarId(calendarId);
         ideaFlowEntity.setAvgFlame(ideaFlowMetrics.getAvgFlame());
         ideaFlowEntity.setTimeInTile(ideaFlowMetrics.getTimeInTile().getSeconds());
         ideaFlowEntity.setPercentWtf(ideaFlowMetrics.getPercentWtf());
@@ -171,7 +168,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         return ideaFlowEntity;
     }
 
-    private List<GridMarkerEntity> createRowMarkerEntitiesIfNotEmpty(UUID torchieId, Long tileSeq, GridRow row) {
+    private List<GridMarkerEntity> createRowMarkerEntitiesIfNotEmpty(UUID torchieId, UUID calendarId, GridRow row) {
 
         List<GridMarkerEntity> markerEntities = null;
 
@@ -184,7 +181,7 @@ public class SaveToPostgresSink implements SinkStrategy {
                 GridMarkerEntity markerEntity = new GridMarkerEntity();
                 markerEntity.setId(UUID.randomUUID());
                 markerEntity.setTorchieId(torchieId);
-                markerEntity.setTileSeq(tileSeq);
+                markerEntity.setCalendarId(calendarId);
                 markerEntity.setRowName(row.getRowKey().getName());
                 markerEntity.setPosition(featureTag.getPosition());
                 markerEntity.setTagType(featureTag.getTag().getType());
@@ -198,7 +195,7 @@ public class SaveToPostgresSink implements SinkStrategy {
         return markerEntities;
     }
 
-    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
         GridRowEntity gridRowEntity = null;
 
         Map<String, CellValue> rowValues = row.toCellValueMap();
@@ -209,8 +206,7 @@ public class SaveToPostgresSink implements SinkStrategy {
             gridRowEntity.setId(UUID.randomUUID());
             gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
-            gridRowEntity.setZoomLevel(zoomLevel);
-            gridRowEntity.setTileSeq(tileSeq);
+            gridRowEntity.setCalendarId(calendarId);
             gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());

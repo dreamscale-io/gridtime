@@ -13,8 +13,8 @@ public interface GridBoxMetricsRepository extends CrudRepository<GridBoxMetricsE
 
     @Query(nativeQuery = true, value = "select bm.* from grid_box_metrics bm, grid_calendar gtc " +
             "where bm.torchie_id=(:torchieId) " +
-            "and bm.zoom_level=(:zoom) " +
-            "and bm.zoom_level=gtc.zoom_level " +
+            "and bm.calendar_id = gtc.id " +
+            "and gtc.zoom_level = (:zoom) " +
             "and gtc.start_time = (:clock) ")
     List<GridBoxMetricsEntity> findByTorchieGridTime(@Param("torchieId") UUID torchieId,
                                                      @Param("zoom") String zoomLevel,

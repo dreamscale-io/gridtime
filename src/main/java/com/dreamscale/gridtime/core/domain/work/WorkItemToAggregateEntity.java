@@ -31,10 +31,9 @@ public class WorkItemToAggregateEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID claimingWorkerId;
 
-    @Enumerated(EnumType.STRING)
-    private ZoomLevel zoomLevel;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
-    private Long tileSeq;
 
     private String gridTime;
 

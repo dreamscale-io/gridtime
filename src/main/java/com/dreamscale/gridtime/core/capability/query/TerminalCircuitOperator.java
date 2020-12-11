@@ -72,8 +72,7 @@ public class TerminalCircuitOperator {
         location.setId(UUID.randomUUID());
         location.setOrganizationId(organizationId);
         location.setCircuitId(circuitId);
-        location.setZoomLevel(tile.getZoomLevel());
-        location.setTileSeq(tile.getTileSeq().intValue());
+        location.setCalendarId(tile.getId());
         location.setMovementDate(now);
 
         terminalCircuitLocationHistoryRepository.save(location);

@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity(name = "work_ready_by_team_view")
 @Data
@@ -19,13 +20,11 @@ public class WorkReadyByTeamViewEntity {
     @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private WorkId workId;
 
-    @Enumerated(EnumType.STRING)
-    private ZoomLevel zoomLevel;
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    private UUID calendarId;
 
     @Enumerated(EnumType.STRING)
     private WorkToDoType workToDoType;
-
-    private Long tileSeq;
 
     private LocalDateTime earliestEventTime;
 

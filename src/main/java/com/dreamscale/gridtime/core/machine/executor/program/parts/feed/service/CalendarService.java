@@ -25,6 +25,21 @@ public class CalendarService {
     @Autowired
     GridClock clock;
 
+    public UUID lookupCalendarId(GeometryClock.GridTime gridTime) {
+        UUID calendarId = null;
+
+        GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndStartTime(gridTime.getZoomLevel(), gridTime.getClockTime());
+        if (calendarTile != null) {
+            calendarId = calendarTile.getId();
+        }
+
+        if (calendarId == null) {
+            throw new RuntimeException("Calendar not found: "+ gridTime.getFormattedGridTime());
+        }
+
+        return calendarId;
+    }
+
     public Long lookupTileSequenceNumber(GeometryClock.GridTime gridTime) {
         Long tileSequence = null;
 
@@ -46,6 +61,15 @@ public class CalendarService {
             return createGridTimeSequence(zoomLevel, tileSeq, calendarTile.getStartTime());
         } else {
             throw new RuntimeException("Unable to locate calendar for "+zoomLevel + " , sequence "+tileSeq);
+        }
+    }
+
+    public GridtimeSequence lookupGridTimeSequence(UUID calendarId) {
+        GridCalendarEntity calendarTile = gridCalendarRepository.findOne(calendarId);
+        if (calendarTile != null) {
+            return createGridTimeSequence(calendarTile.getZoomLevel(), calendarTile.getTileSeq(), calendarTile.getStartTime());
+        } else {
+            throw new RuntimeException("Unable to locate calendar for id: "+calendarId);
         }
     }
 
@@ -76,7 +100,7 @@ public class CalendarService {
     }
 
     @Transactional
-    public void saveCalendar(long tileSequence, GeometryClock.GridTime coords) {
+    public GridCalendarEntity saveCalendar(long tileSequence, GeometryClock.GridTime coords) {
         log.info("saveCalendar(" +  tileSequence + ", "+coords.toDisplayString() + ")");
 
         GridCalendarEntity calendar = new GridCalendarEntity();
@@ -100,6 +124,8 @@ public class CalendarService {
         calendar.setTwentyOfTwelve(coords.getTwentyOfTwelve());
 
         gridCalendarRepository.save(calendar);
+
+        return calendar;
     }
 
     public GridtimeSequence getLast(ZoomLevel zoomLevel) {

@@ -22,11 +22,10 @@ public interface WorkItemToAggregateRepository extends CrudRepository<WorkItemTo
     @Query(nativeQuery = true, value = "update work_item_to_aggregate " +
             "set processing_state = 'InProgress', "+
             " claiming_worker_id = cast(:workerId as uuid) "+
-            "where zoom_level = (:zoom) and tile_seq = (:tileseq) and team_id = cast(:teamId as uuid)")
+            "where calendar_id = cast(:calendarId as uuid) and team_id = cast(:teamId as uuid)")
     void updateInProgress(@Param("workerId") String workerId,
                           @Param("teamId") String teamId,
-                          @Param("zoom") String zoomLevel,
-                          @Param("tileseq") Long tileSeq);
+                          @Param("calendarId") String calendarId);
 
 
     @Modifying

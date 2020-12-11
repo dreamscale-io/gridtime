@@ -39,15 +39,15 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
 
         IdeaFlowMetrics ideaFlowMetrics = IdeaFlowMetrics.queryFrom(musicGrid);
 
-        Long tileSeq = calendarService.lookupTileSequenceNumber(tickScope.getFrom());
+        UUID calendarId = calendarService.lookupCalendarId(tickScope.getFrom());
 
-        GridIdeaFlowMetricsEntity metricsEntity = createIdeaFlowMetricsEntity(torchieId, tileSeq, ideaFlowMetrics);
+        GridIdeaFlowMetricsEntity metricsEntity = createIdeaFlowMetricsEntity(torchieId, calendarId, ideaFlowMetrics);
         gridIdeaFlowMetricsRepository.save(metricsEntity);
 
 
         List<GridRowEntity> rowEntities = new ArrayList<>();
         for (GridRow row: musicGrid.getAllGridRows()) {
-            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tickScope.getZoomLevel(), tileSeq, row);
+            GridRowEntity rowEntity = createRowEntityIfNotEmpty(torchieId, tickScope.getZoomLevel(), calendarId, row);
             if (rowEntity != null) {
                 rowEntities.add(rowEntity);
             }
@@ -57,7 +57,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
         return rowEntities.size();
     }
 
-    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, Long tileSeq, GridRow row) {
+    private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
         GridRowEntity gridRowEntity = null;
 
         Map<String, CellValue> rowValues = row.toCellValueMap();
@@ -68,8 +68,7 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
             gridRowEntity.setId(UUID.randomUUID());
             gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
-            gridRowEntity.setZoomLevel(zoomLevel);
-            gridRowEntity.setTileSeq(tileSeq);
+            gridRowEntity.setCalendarId(calendarId);
             gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
@@ -78,13 +77,12 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
         return gridRowEntity;
     }
 
-    private GridIdeaFlowMetricsEntity createIdeaFlowMetricsEntity(UUID torchieId, Long tileSeq, IdeaFlowMetrics ideaFlowMetrics) {
+    private GridIdeaFlowMetricsEntity createIdeaFlowMetricsEntity(UUID torchieId, UUID calendarId, IdeaFlowMetrics ideaFlowMetrics) {
         GridIdeaFlowMetricsEntity entity = new GridIdeaFlowMetricsEntity();
 
         entity.setId(UUID.randomUUID());
         entity.setTorchieId(torchieId);
-        entity.setZoomLevel(ideaFlowMetrics.getZoomLevel());
-        entity.setTileSeq(tileSeq);
+        entity.setCalendarId(calendarId);
         entity.setAvgFlame(ideaFlowMetrics.getAvgFlame());
         entity.setPercentWtf(ideaFlowMetrics.getPercentWtf());
         entity.setPercentLearning(ideaFlowMetrics.getPercentLearning());
