@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.api.grid.Results;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyFailureTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Notifier;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public abstract class TickInstructions implements Callable<TickInstructions> {
+public abstract class TickInstructions implements Callable<TickInstructions>, Notifier {
 
     private GridTile outputTile;
     private List<Results> outputResults = DefaultCollections.list();
@@ -82,11 +83,11 @@ public abstract class TickInstructions implements Callable<TickInstructions> {
         }
     }
 
-    public void addNotifyOnDoneTrigger(NotifyDoneTrigger notifyTrigger) {
+    public void notifyOnDone(NotifyDoneTrigger notifyTrigger) {
         this.notifyDoneTriggers.add(notifyTrigger);
     }
 
-    public void addNotifyOnErrorTrigger(NotifyFailureTrigger notifyTrigger) {
+    public void notifyOnFail(NotifyFailureTrigger notifyTrigger) {
         this.notifyOnFailureTriggers.add(notifyTrigger);
     }
 

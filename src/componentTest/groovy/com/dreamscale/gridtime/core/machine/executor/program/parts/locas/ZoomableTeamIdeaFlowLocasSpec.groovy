@@ -22,7 +22,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStra
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableCircuitWTFMessageEvent
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import com.dreamscale.gridtime.core.machine.executor.program.parts.locas.library.ZoomableTeamIdeaFlowLocas
-
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed
 import com.dreamscale.gridtime.core.capability.membership.TeamCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
@@ -67,7 +67,10 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
     AggregateWorkToDoQueueWire workToDoQueueWire
 
     @Autowired
-    GridTimeWorkPile gridTimeWorkerPool
+    TorchieWorkPile torchieWorkPile
+
+    @Autowired
+    GridTimeWorkPile gridTimeWorkPile
 
 
     LocalDateTime clockStart
@@ -117,8 +120,8 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         mockTimeService.now() >> LocalDateTime.now()
 
-        gridTimeWorkerPool.reset();
-        gridTimeWorkerPool.pauseSystemJobs();
+        gridTimeWorkPile.reset();
+        gridTimeWorkPile.pauseSystemJobs();
 
     }
 
@@ -131,9 +134,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(org.id, member2.getId(), team.id, clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(org.id, member3.getId(), team.id, clockStart);
 
-        gridTimeWorkerPool.submitJob(torchie1);
-        gridTimeWorkerPool.submitJob(torchie2);
-        gridTimeWorkerPool.submitJob(torchie3);
+        torchieWorkPile.submitToLiveQueue(torchie1);
+        torchieWorkPile.submitToLiveQueue(torchie2);
+        torchieWorkPile.submitToLiveQueue(torchie3);
 
         InputFeed feed1 = torchie1.getInputFeed(FeedStrategyFactory.FeedType.WTF_MESSAGES_FEED)
         feed1.addSomeData(generateWTFStart(wtfTime))
@@ -149,13 +152,13 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
 
         when:
 
-        gridTimeWorkerPool.whatsNext().call();
-        gridTimeWorkerPool.whatsNext().call();
-        gridTimeWorkerPool.whatsNext().call();
+        gridTimeWorkPile.whatsNext().call();
+        gridTimeWorkPile.whatsNext().call();
+        gridTimeWorkPile.whatsNext().call();
 
         //last exec should call team tile
 
-        TickInstructions teamInstruction = gridTimeWorkerPool.whatsNext();
+        TickInstructions teamInstruction = gridTimeWorkPile.whatsNext();
 
         println "RUNNING LAST: "+ teamInstruction.getCmdDescription()
         teamInstruction.call()

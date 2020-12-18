@@ -15,7 +15,6 @@ import java.util.*;
 public class GridRow implements Iterable<GridCell> {
 
     private Key rowKey;
-    private static final int DEFAULT_ROW_NAME_COLUMN_SIZE = 14;
 
     List<GridCell> gridCells = DefaultCollections.list();
 
@@ -66,8 +65,8 @@ public class GridRow implements Iterable<GridCell> {
         return featureTags;
     }
 
-    public Map<String, CellValue> toCellValueMap() {
-        Map<String, CellValue> cellValueMap = new LinkedHashMap<>();
+    public CellValueMap toCellValueMap() {
+        CellValueMap cellValueMap = new CellValueMap();
         for (GridCell cell : gridCells) {
             String beat = cell.toHeaderCell().trim();
             String value = cell.toValueCell().trim();
@@ -83,10 +82,11 @@ public class GridRow implements Iterable<GridCell> {
 
     private String toRightSizedRowName(String rowName) {
         String fittedContent;
-        if ( rowName.length() > DEFAULT_ROW_NAME_COLUMN_SIZE ) {
-            fittedContent = rowName.substring(0, DEFAULT_ROW_NAME_COLUMN_SIZE);
+        int colSize = CellSize.calculateRowNameCellSize();
+        if ( rowName.length() > colSize ) {
+            fittedContent = rowName.substring(0, colSize);
         } else {
-            fittedContent = StringUtils.rightPad(rowName, DEFAULT_ROW_NAME_COLUMN_SIZE);
+            fittedContent = StringUtils.rightPad(rowName, colSize);
         }
         return fittedContent;
     }

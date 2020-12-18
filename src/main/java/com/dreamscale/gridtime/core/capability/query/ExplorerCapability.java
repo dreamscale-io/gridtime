@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,61 +34,97 @@ public class ExplorerCapability {
     @Autowired
     TerminalCircuitOperator terminalCircuitOperator;
 
+    @Autowired
+    TileQueryRunner tileQueryRunner;
 
-    public GridTableResults gotoLocation(UUID organizationId, UUID memberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
+    public GridTableResults gotoLocation(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
 
         LocalDateTime now = gridClock.now();
 
-        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, memberId, terminalCircuitContext);
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
         GridtimeExpression tileLocation = GridtimeExpression.parse(tileLocationInputDto.getGridtimeExpression());
 
-        if (tileLocation.hasRangeExpression()) {
-            throw new BadRequestException(ValidationErrorCodes.INVALID_GT_EXPRESSION, "Tile location must be specific and not a range.");
-        }
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
 
         terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
 
-        return lookupTileAtLocation(tileLocation);
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    private GridTableResults lookupTileAtLocation(GridtimeExpression tileLocation) {
+    private GridTableResults lookupTileAtLocation(QueryTarget queryTarget, GridtimeExpression tileLocation) {
 
-        //first, lets start with the 20 min tiles, and reconstructing the table on the screen
-
-        //Ive got the rows with different track types
-
-        //currently these row types don't have an order.  I can give them one in the tables, so they sort consistently
-
-        //lets start with this
-
-        //then I think I want to do lookup tables as support commands, so tracks can have details?
-        //maybe save off these feature maps, and then the feature maps are organized by row?
-        //some will just be a set of things.  Aggregated by type perhaps.  Need to figure out execution metrics.
-
-        return null;
+        return tileQueryRunner.runQuery(queryTarget, tileLocation);
     }
 
     public GridTableResults look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
-        return null;
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(gtLocation);
+
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
 
-    public GridTableResults zoomIn(UUID organizationId, UUID memberId, String terminalCircuitContext) {
-        return null;
+    public GridTableResults zoomIn(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
+
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GeometryClock.GridTime zoomedInGridtime = gtLocation.zoomIn();
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(zoomedInGridtime);
+
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults zoomOut(UUID organizationId, UUID memberId, String terminalCircuitContext) {
-        return null;
+    public GridTableResults zoomOut(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
+
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GeometryClock.GridTime zoomedOutGridtime = gtLocation.zoomOut();
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(zoomedOutGridtime);
+
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults panLeft(UUID organizationId, UUID memberId, String terminalCircuitContext) {
-        return null;
+    public GridTableResults panLeft(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
+
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GeometryClock.GridTime panLeftGridtime = gtLocation.panLeft();
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(panLeftGridtime);
+
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults panRight(UUID organizationId, UUID memberId, String terminalCircuitContext) {
-        return null;
+    public GridTableResults panRight(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
+
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GeometryClock.GridTime panRightGridtime = gtLocation.panRight();
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(panRightGridtime);
+
+        return lookupTileAtLocation(queryTarget, tileLocation);
     }
 }

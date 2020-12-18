@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;
 import com.dreamscale.gridtime.core.machine.executor.circuit.now.Eye;
 import com.dreamscale.gridtime.core.machine.executor.circuit.now.TwilightOrangeMatrix;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.DevNullWire;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Notifier;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.ParallelProgram;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 @Slf4j
-public class IdeaFlowCircuit implements Worker {
+public class IdeaFlowCircuit implements Worker, Notifier {
 
     private Program program;
     private Program nextProgram;
@@ -97,7 +98,7 @@ public class IdeaFlowCircuit implements Worker {
         isProgramHalted = false;
     }
 
-    public void clearProgram() {
+    public void abortProgram() {
         program = null;
         nextProgram = null;
 
@@ -147,8 +148,8 @@ public class IdeaFlowCircuit implements Worker {
 
         if (nextInstruction != null) {
             circuitMonitor.startInstruction();
-            nextInstruction.addNotifyOnDoneTrigger(new EvaluateOutputTrigger());
-            nextInstruction.addNotifyOnErrorTrigger(new TerminateProgramTrigger());
+            nextInstruction.notifyOnDone(new EvaluateOutputTrigger());
+            nextInstruction.notifyOnFail(new TerminateProgramTrigger());
         }
 
         updateQueueDepth();
@@ -228,11 +229,11 @@ public class IdeaFlowCircuit implements Worker {
         }
     }
 
-    public void notifyWhenProgramDone(NotifyDoneTrigger notifyTrigger) {
+    public void notifyOnDone(NotifyDoneTrigger notifyTrigger) {
         this.notifyWhenProgramDoneTriggers.add(notifyTrigger);
     }
 
-    public void notifyWhenProgramFails(NotifyFailureTrigger notifyTrigger) {
+    public void notifyOnFail(NotifyFailureTrigger notifyTrigger) {
         this.notifyWhenProgramFailsTriggers.add(notifyTrigger);
     }
 

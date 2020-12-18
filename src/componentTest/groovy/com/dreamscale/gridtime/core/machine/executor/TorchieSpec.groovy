@@ -58,6 +58,7 @@ class TorchieSpec extends Specification {
 
         when:
         for (int i = 0; i < 15; i++) {
+            println i
             TickInstructions instructions = torchie.whatsNext();
             instructions.call()
 

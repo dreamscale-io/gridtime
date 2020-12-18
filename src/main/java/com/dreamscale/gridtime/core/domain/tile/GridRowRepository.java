@@ -12,7 +12,11 @@ public interface GridRowRepository extends CrudRepository<GridRowEntity, UUID> {
 
     List<GridRowEntity> findByTorchieIdAndRowName(UUID torchieId, String rowName);
 
+    List<GridRowEntity> findByTorchieIdAndCalendarIdOrderByRowIndex(UUID targetId, UUID calendarId);
+
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_row")
     void truncate();
+
+
 }

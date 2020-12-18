@@ -29,7 +29,11 @@ public class CircuitActivityDashboard {
     private static final int TICKS_BETWEEN_REFRESH = 20;
 
     public void addMonitor(MonitorType monitorType, UUID workerId, CircuitMonitor circuitMonitor) {
-        DashboardMonitor monitor = new DashboardMonitor(monitorType, workerId, circuitMonitor, ProcessStatus.ACTIVE);
+        addMonitor(monitorType, workerId, circuitMonitor, ProcessStatus.ACTIVE);
+    }
+
+    public void addMonitor(MonitorType monitorType, UUID workerId, CircuitMonitor circuitMonitor, ProcessStatus processStatus) {
+        DashboardMonitor monitor = new DashboardMonitor(monitorType, workerId, circuitMonitor, processStatus);
 
         dashboardMonitors.put(workerId, monitor);
     }

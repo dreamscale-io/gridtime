@@ -10,6 +10,7 @@ import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValue;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValueMap;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
@@ -199,9 +200,9 @@ public class SaveToPostgresSink implements SinkStrategy {
     private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row, int rowIndex) {
         GridRowEntity gridRowEntity = null;
 
-        Map<String, CellValue> rowValues = row.toCellValueMap();
+        CellValueMap cellValueMap = row.toCellValueMap();
 
-        if (rowValues.size() > 0) {
+        if (cellValueMap.size() > 0) {
 
             gridRowEntity = new GridRowEntity();
             gridRowEntity.setId(UUID.randomUUID());
@@ -209,7 +210,7 @@ public class SaveToPostgresSink implements SinkStrategy {
             gridRowEntity.setTorchieId(torchieId);
             gridRowEntity.setCalendarId(calendarId);
             gridRowEntity.setRowIndex(rowIndex);
-            gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
+            gridRowEntity.setJson(JSONTransformer.toJson(cellValueMap));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
         }

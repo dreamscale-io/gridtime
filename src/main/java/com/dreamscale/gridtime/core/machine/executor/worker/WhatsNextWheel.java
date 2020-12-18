@@ -5,14 +5,19 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpIn
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
-public class WhatsNextWheel implements LiveQueue {
+public class WhatsNextWheel {
 
     private Map<UUID, Worker> workerMap = DefaultCollections.map();
 
     private final LinkedList<UUID> nextWorkerQueue = new LinkedList<>();
+
+    private Map<UUID, LocalDateTime> markedForEviction = new HashMap<>();
+
+    private final int SECONDS_TIL_EVICTION = 30;
 
     public TickInstructions whatsNext() {
         int i = 0;
@@ -59,9 +64,7 @@ public class WhatsNextWheel implements LiveQueue {
     }
 
     public void evictLastWorker() {
-        UUID lastWorkerId = getLastWorker();
-        log.debug("evict last worker "+lastWorkerId);
-        evictWorker(lastWorkerId);
+        evictWorker(getLastWorker());
     }
 
     public Set<UUID> getWorkerKeys() {
@@ -71,7 +74,8 @@ public class WhatsNextWheel implements LiveQueue {
     public void evictWorker(UUID workerId) {
         log.debug("evicting worker " + workerId);
         nextWorkerQueue.remove(workerId);
-        Worker worker = workerMap.remove(workerId);
+        markedForEviction.remove(workerId);
+        workerMap.remove(workerId);
 
     }
 
@@ -87,16 +91,46 @@ public class WhatsNextWheel implements LiveQueue {
         return workerMap.get(workerId);
     }
 
-    @Override
-    public void submit(UUID workerId, Worker worker) {
-
-        if (!workerMap.containsKey(workerId)) {
-            addWorker(workerId, worker);
-        }
-    }
-
     public void clear() {
         workerMap.clear();
         nextWorkerQueue.clear();
+    }
+
+    public void unmarkForEviction(UUID workerId) {
+        synchronized (markedForEviction) {
+            if (markedForEviction.containsKey(workerId)) {
+                markedForEviction.remove(workerId);
+                nextWorkerQueue.add(workerId);
+            }
+
+        }
+    }
+
+    public void markLastForEviction(LocalDateTime now) {
+        UUID lastWorkerId = getLastWorker();
+
+        synchronized (markedForEviction) {
+            markedForEviction.putIfAbsent(lastWorkerId, now);
+            nextWorkerQueue.remove(lastWorkerId);
+        }
+    }
+
+    public List<UUID> purgeEvicted(LocalDateTime now) {
+        List<UUID> purged = new ArrayList<>();
+
+        synchronized (markedForEviction) {
+            Iterator<Map.Entry<UUID, LocalDateTime>> evictIter = markedForEviction.entrySet().iterator();
+
+            while (evictIter.hasNext()) {
+                Map.Entry<UUID, LocalDateTime> entry = evictIter.next();
+                if (entry.getValue().isBefore(now.minusSeconds(SECONDS_TIL_EVICTION))) {
+                    workerMap.remove(entry.getKey());
+                    purged.add(entry.getKey());
+                    evictIter.remove();
+                }
+
+            }
+        }
+        return purged;
     }
 }

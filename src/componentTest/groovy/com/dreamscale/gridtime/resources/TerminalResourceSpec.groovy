@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.api.account.*
 import com.dreamscale.gridtime.api.circuit.LearningCircuitDto
 import com.dreamscale.gridtime.api.circuit.TalkMessageDto
+import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto
 import com.dreamscale.gridtime.api.grid.GridStatus
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto
 import com.dreamscale.gridtime.api.grid.GridTableResults
@@ -12,25 +13,28 @@ import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
-import com.dreamscale.gridtime.api.query.TimeScope
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.api.terminal.*
 import com.dreamscale.gridtime.client.*
 import com.dreamscale.gridtime.core.capability.external.EmailCapability
 import com.dreamscale.gridtime.core.capability.system.GridClock
-import com.dreamscale.gridtime.core.domain.member.OrganizationMemberEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountEntity
 import com.dreamscale.gridtime.core.domain.member.RootAccountRepository
 import com.dreamscale.gridtime.core.machine.GridTimeEngine
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.SystemCmd
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
+
+import static com.dreamscale.gridtime.core.CoreARandom.aRandom
 
 @ComponentTest
 class TerminalResourceSpec extends Specification {
@@ -82,6 +86,9 @@ class TerminalResourceSpec extends Specification {
 
     @Autowired
     LearningCircuitClient circuitClient;
+
+    @Autowired
+    FlowClient flowClient;
 
     @Autowired
     GridClock gridClock;
@@ -629,6 +636,108 @@ class TerminalResourceSpec extends Specification {
 
         then:
         assert results != null
+    }
+
+    @Ignore
+    def "should goto specific grid tile"() {
+        given:
+
+        AccountActivationDto artyProfile = register("arty@dreamscale.io");
+
+        switchUser(artyProfile)
+
+        ConnectionStatusDto loginStatus = accountClient.login()
+
+        LearningCircuitDto circuit1 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit1.getCircuitName())
+
+        LearningCircuitDto circuit2 = circuitClient.startWTF()
+        circuitClient.solveWTF(circuit2.getCircuitName())
+
+        NewFlowBatchDto batch = aRandom.flowBatch().timeSent(gridClock.now()).build();
+        flowClient.publishBatch(batch)
+
+        gridTimeEngine.setAutorun(false)
+        gridTimeEngine.start()
+
+        SystemCmd systemCmd = gridTimeEngine.getSystemCmd()
+        systemCmd.runCalendarUntil(gridClock.now().plusDays(3))
+
+        //I need an intention, and some published data to get the torchie cursor to load
+
+        TorchieCmd cmd = gridTimeEngine.getTorchieCmd(loginStatus.getMemberId())
+
+        cmd.runProgram()
+
+        println "CALENDAR DONE!"
+
+
+        //runProgramForTickCount()
+
+        //claim on submitToLiveQueue if not already claimed, reject if claimed by another server, but okay if claimed by this server
+
+        //manually, has it load the torchie without a claim, without submitting to the queue, but giving back a handle
+        //first submitToLiveQueue creates a claim, this way, we can configure the program to run how we want before submitting,
+        //or just do manual stuff.
+
+        //but if I don't have a claim, it's possible during this time, another torchie could be spun up,
+        //so maybe I claim this one when I get the command, even though its not in queue?  It will expire if it gets abandonded
+        //it will expire if it gets evicted too.
+
+        //why is torchie still trying to run?
+
+        //autorun should be disabled, calendar seems to be running anyway?
+
+        //maybe do some wtfs here
+
+        //so what I want to be able to do isn't pause, but block the automated process, pulling,
+        //be able to run an empty engine, so I can load manually with my own work that I want to run.
+
+        //disable auto-run.
+        //be able to manual enable jobs.
+        //then start one torchie via cmd, and run to completion.
+        //if the torchie is already running, the additional cmd requests would go in the queue,
+        //and the Cmd wrapper would handle any required sync and locking requirements for coordinating
+        //with a potentially running process.  For the most part, if all I'm doing is queuing instructions,
+        //they would run in sync on the engine.
+
+        //but I should be able to add monitor jobs, and feedback loops, triggers, and so forth.
+        //triggers should be able to connect to the talk network, send a message over a terminal circuit, or via notifications
+        //so there should be a notification target for the response of the instruction, whenever its done
+
+        //in general torchieCmd should be a sync wrapper that interfaces with the engine and lets you do stuff
+
+        //lets remove the pause commands since it's not really what I want to do
+
+        //gtconfig autorun off
+
+        //watch for tag {tagname} then notify circuit /wtf/{wtfname}
+        //watch for threshold wtf > .70 / day
+        //watch for box {component}
+
+        //then the thing I'm trying to test is the ability to goto a tile, and see the detail
+        //but I need an easy way to configure the data loading and generation of a tile for testing
+
+        //the cmd should be able to create tile reprocessing jobs?
+
+
+
+        println "DONNE!"
+        //cmd runUntil (tile)
+
+        when:
+
+        TerminalCircuitDto circuit = terminalClient.createCircuit()
+
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "BLOCK"))
+
+        GridTableResults results = (GridTableResults) queryResult.getData();
+
+        println results.toDisplayString()
+
+        then:
+        assert queryResult != null
+        assert results.getRowsOfPaddedCells().size() == 2
     }
 
     def "should get terminal help manual"() {

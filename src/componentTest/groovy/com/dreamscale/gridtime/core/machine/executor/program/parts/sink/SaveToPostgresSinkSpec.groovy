@@ -104,6 +104,8 @@ class SaveToPostgresSinkSpec extends Specification {
 
         println markerEntities
 
+        println rowEntities.get(0).getJson()
+
         then:
         assert rowEntities != null
         assert rowEntities.size() == 1

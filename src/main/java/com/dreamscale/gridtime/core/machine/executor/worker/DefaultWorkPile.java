@@ -12,24 +12,12 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
 
     private TickInstructions peekInstruction;
 
-    public void addTorchie(Torchie torchie) {
-        whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
-    }
-
-    public void addWorker(UUID workerId, Worker worker) {
-        whatsNextWheel.addWorker(workerId, worker);
-    }
-
     @Override
     public boolean hasWork() {
         if (peekInstruction == null) {
             peek();
         }
         return peekInstruction != null;
-    }
-
-    private void evictLastWorker() {
-        whatsNextWheel.evictLastWorker();
     }
 
     @Override
@@ -53,6 +41,11 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
+    public void setAutorun(boolean isAutorun) {
+
+    }
+
+    @Override
     public TickInstructions whatsNext() {
 
         peek();
@@ -70,7 +63,7 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
             peekInstruction = whatsNextWheel.whatsNext();
 
             while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
-                evictLastWorker();
+                whatsNextWheel.evictLastWorker();
                 peekInstruction = whatsNextWheel.whatsNext();
 
             }
@@ -81,7 +74,7 @@ public class DefaultWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
-    public void submit(UUID workerId, Worker worker) {
-        whatsNextWheel.submit(workerId, worker);
+    public void submitToLiveQueue(Torchie torchie) {
+        whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
     }
 }

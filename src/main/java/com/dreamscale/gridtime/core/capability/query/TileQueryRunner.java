@@ -1,30 +1,38 @@
 package com.dreamscale.gridtime.core.capability.query;
 
 import com.dreamscale.gridtime.api.grid.GridTableResults;
-import com.dreamscale.gridtime.api.query.TargetType;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
-import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitEntity;
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitRepository;
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository;
+import com.dreamscale.gridtime.core.domain.tile.GridRowEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository;
-import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
-import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.domain.time.GridCalendarEntity;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.clock.*;
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
-import org.apache.commons.lang3.time.DurationFormatUtils;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellSize;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValue;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValueMap;
+import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 @Component
 public class TileQueryRunner {
 
+
+    @Autowired
+    CalendarService calendarService;
 
     @Autowired
     LearningCircuitRepository learningCircuitRepository;
@@ -44,110 +52,77 @@ public class TileQueryRunner {
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository;
 
-    private static final int TOP_QUERY_LIMIT = 10;
 
-    public GridTableResults runQuery(QueryTarget queryTarget, QueryTimeScope queryTimeScope) {
+    public GridTableResults runQuery(QueryTarget queryTarget, GridtimeExpression tileLocation) {
 
-        List<LearningCircuitEntity> topWtfs = Collections.emptyList();
-        if (queryTarget.getTargetType().equals(TargetType.USER)) {
-            topWtfs = learningCircuitRepository.findTopWTFsForMemberInTimeRange(
-                    queryTarget.getOrganizationId(), queryTarget.getTargetId(),
-                    Timestamp.valueOf(queryTimeScope.getStartTime()),
-                    Timestamp.valueOf(queryTimeScope.getEndTime()), TOP_QUERY_LIMIT);
-
-        } else if (queryTarget.getTargetType().equals(TargetType.TEAM)) {
-            topWtfs = learningCircuitRepository.findTopWTFsAcrossTeamInTimeRange(
-                    queryTarget.getOrganizationId(), queryTarget.getTargetId(),
-                    Timestamp.valueOf(queryTimeScope.getStartTime()),
-                    Timestamp.valueOf(queryTimeScope.getEndTime()), TOP_QUERY_LIMIT);
+        if (tileLocation.getZoomLevel() != ZoomLevel.TWENTY) {
+            throw new BadRequestException(ValidationErrorCodes.NO_DATA_AVAILABLE, "Query not yet supported");
         }
 
-        return toGridTableResults("Top WTFs in " + queryTimeScope.getScopeDescription() + " for "
-                + queryTarget.getTargetType().name() + " "
-                + queryTarget.getTargetName() , topWtfs);
+        GridCalendarEntity calendar = calendarService.lookupTile(tileLocation.getZoomLevel(), tileLocation.getCoords());
+
+        List<GridRowEntity> rows = gridRowRepository.findByTorchieIdAndCalendarIdOrderByRowIndex(queryTarget.getTargetId(), calendar.getId());
+
+        String title = "Tile "+ tileLocation.getFormattedExpression() + " for "+queryTarget.getTargetType() + " "+ queryTarget.getTargetName();
+
+
+        return createTable(title, tileLocation, rows);
+
     }
 
+    private GridTableResults createTable(String title, GridtimeExpression tileLocation, List<GridRowEntity> rows) {
+        List<String> headerRow = new ArrayList<>();
+        headerRow.add(CellFormat.toRightSizedCell("ID", CellSize.calculateSummaryCellSize()));
 
-    private GridTableResults toGridTableResults(String title, List<LearningCircuitEntity> topWtfs) {
+        MusicClock musicClock = new MusicClock(tileLocation.getZoomLevel());
+        Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
 
-        List<String> headerRow = createHeaderRow();
-
-        List<List<String>> valueRows = new ArrayList<>();
-
-        for (LearningCircuitEntity wtf : topWtfs) {
-            List<String> row = createRow(wtf);
-
-            valueRows.add(row);
+        while (iterator.hasNext()) {
+            RelativeBeat beat = iterator.next();
+            headerRow.add(CellFormat.toRightSizedCell(beat.toDisplayString(), CellSize.calculateCellSize(beat)));
         }
 
-        rightSizeCells(headerRow, valueRows);
+        List<List<String>> rowsWithPaddedCells = new ArrayList<>();
 
-        return new GridTableResults(title, headerRow, valueRows);
+        //let me change the data type to a subclass, and then test the serialization next
+        for (GridRowEntity rowEntity : rows) {
+                CellValueMap cellValueMap = JSONTransformer.fromJson(rowEntity.getJson(), CellValueMap.class);
+                List<String> formattedRow = toFormattedRow(rowEntity.getRowName(), cellValueMap);
+            rowsWithPaddedCells.add(formattedRow);
+
+        }
+
+        return new GridTableResults(title, headerRow, rowsWithPaddedCells);
     }
 
-    private void rightSizeCells(List<String> headerRow, List<List<String>> valueRows) {
-        List<Integer> colSizes = new ArrayList<>();
+    private List<String> toFormattedRow(String rowName, CellValueMap cellValueMap) {
 
-        for (int j = 0;  j < headerRow.size(); j++) {
+        List<String> rowValues = new ArrayList<>();
+        rowValues.add(CellFormat.toRightSizedCell(rowName, CellSize.calculateRowNameCellSize()));
 
-            int maxColSize = headerRow.get(j).length();
+        String firstKey = cellValueMap.getFirstKey();
+        int numBeats = getBeatsPerMeasureFromKey(firstKey);
 
-            for (int i = 0; i < valueRows.size(); i++) {
-                maxColSize = Math.max(maxColSize, valueRows.get(i).get(j).length());
+        Beat[] beats = Beat.getFlyweightBeats(numBeats);
+
+        for (int i = 0; i < beats.length; i++) {
+            Beat beat = beats[i];
+            CellValue valueObj = cellValueMap.get(beat.toDisplayString());
+            String value = "";
+
+            if (valueObj != null) {
+                value = valueObj.getVal();
             }
-
-            headerRow.set(j, CellFormat.toRightSizedCell(headerRow.get(j), maxColSize + 1));
-
-            for (int i = 0; i < valueRows.size(); i++) {
-                valueRows.get(i).set(j, CellFormat.toRightSizedCell(valueRows.get(i).get(j), maxColSize + 1));
-            }
-
-            colSizes.add(maxColSize);
+            rowValues.add(CellFormat.toRightSizedCell(value, CellSize.calculateCellSize(beat)));
         }
+
+        return rowValues;
     }
 
+    private int getBeatsPerMeasureFromKey(String firstKey) {
+        String numberBeats = firstKey.substring(0, firstKey.indexOf('.'));
 
-    List<String> createHeaderRow() {
-        List<String> row = new ArrayList<>();
-
-        row.add("Circuit");
-        row.add("User");
-        row.add("Coords");
-        row.add("Day");
-        row.add("Timer(h:m:s)");
-        row.add("Status");
-        row.add("Description");
-
-        return row;
-    }
-
-    List<String> createRow(LearningCircuitEntity wtf) {
-        List<String> row = new ArrayList<>();
-
-        String circuitLink = "/wtf/" + wtf.getCircuitName();
-        String username = memberDetailsRetriever.lookupUsername(wtf.getOwnerId());
-
-        String duration = DurationFormatUtils.formatDuration(wtf.getTotalCircuitElapsedNanoTime() / 1000000, "HH:mm:ss", true);
-
-        String circuitState = wtf.getCircuitState().name();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd");
-
-        String openTime = formatter.format(wtf.getOpenTime());
-
-        String openGridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, wtf.getOpenTime()).getFormattedCoords();
-
-        String description = wtf.getDescription();
-
-        row.add(CellFormat.toCellValue(circuitLink));
-        row.add(CellFormat.toCellValue(username));
-        row.add(CellFormat.toCellValue(openGridTime));
-        row.add(CellFormat.toCellValue(openTime));
-        row.add(CellFormat.toCellValue(duration));
-        row.add(CellFormat.toCellValue(circuitState));
-        row.add(CellFormat.toCellValue(CellFormat.toRightSizedCell(description, 40)));
-
-        return row;
+        return Integer.parseInt(numberBeats);
     }
 
 

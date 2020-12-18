@@ -136,16 +136,16 @@ public class QueryResource {
 
     private class SelectTopWTFsTerminalRoute extends TerminalRoute {
 
-        private static final String TIME_PARAM = "time";
+        private static final String GRIDTIME_PARAM = "gridtime";
 
         SelectTopWTFsTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "}");
-            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + GRIDTIME_PARAM + "}");
+            describeChoiceOption(GRIDTIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(TIME_PARAM);
+            String scopeName = params.get(GRIDTIME_PARAM);
 
             Optional<TimeScope> timeScope;
             Optional<String> gtExp;
@@ -164,18 +164,18 @@ public class QueryResource {
 
     private class SelectTopWTFsForTeamTerminalRoute extends TerminalRoute {
 
-        private static final String TIME_PARAM = "time";
+        private static final String GRIDTIME_PARAM = "gridtime";
         private static final String TEAM_PARAM = "teamName";
 
         SelectTopWTFsForTeamTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "} for team {"+ TEAM_PARAM + "}");
-            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + GRIDTIME_PARAM + "} for team {"+ TEAM_PARAM + "}");
+            describeChoiceOption(GRIDTIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
             describeTextOption(TEAM_PARAM, "name of the team to query");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(TIME_PARAM);
+            String scopeName = params.get(GRIDTIME_PARAM);
             String teamName = params.get(TEAM_PARAM);
 
             Optional<TimeScope> timeScope;
@@ -194,18 +194,18 @@ public class QueryResource {
 
     private class SelectTopWTFsForUserTerminalRoute extends TerminalRoute {
 
-        private static final String TIME_PARAM = "time";
+        private static final String GRIDTIME_PARAM = "gridtime";
         private static final String USERNAME_PARAM = "username";
 
         SelectTopWTFsForUserTerminalRoute() {
-            super(Command.SELECT, "top wtfs in {" + TIME_PARAM + "} for user {"+ USERNAME_PARAM + "}");
-            describeChoiceOption(TIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
+            super(Command.SELECT, "top wtfs in {" + GRIDTIME_PARAM + "} for user {"+ USERNAME_PARAM + "}");
+            describeChoiceOption(GRIDTIME_PARAM, TimeScope.BLOCK.name(), TimeScope.WEEK.name(), TimeScope.DAY.name(), "gt[expression]");
             describeTextOption(USERNAME_PARAM, "name of the user to query");
         }
 
         @Override
         public Object route(Map<String, String> params) {
-            String scopeName = params.get(TIME_PARAM);
+            String scopeName = params.get(GRIDTIME_PARAM);
             String username = params.get(USERNAME_PARAM);
 
             Optional<TimeScope> timeScope;

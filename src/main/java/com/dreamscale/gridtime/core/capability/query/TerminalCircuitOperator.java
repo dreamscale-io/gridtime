@@ -1,10 +1,17 @@
 package com.dreamscale.gridtime.core.capability.query;
 
+import com.dreamscale.gridtime.api.query.TargetType;
+import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberEntity;
 import com.dreamscale.gridtime.core.domain.circuit.CircuitMemberRepository;
 import com.dreamscale.gridtime.core.domain.terminal.*;
 import com.dreamscale.gridtime.core.domain.time.GridCalendarEntity;
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +39,39 @@ public class TerminalCircuitOperator {
     @Autowired
     CalendarService calendarService;
 
+    @Autowired
+    MemberDetailsRetriever memberDetailsRetriever;
 
-    public QueryTarget resolveLastQueryTarget(UUID organizationId, UUID circuitId) {
+    @Autowired
+    TorchieFeedCursorRepository torchieFeedCursorRepository;
+
+    @Autowired
+    GridClock gridClock;
+
+
+    public QueryTarget resolveQueryTarget(UUID organizationId, UUID invokingMemberId, TerminalCircuitEntity circuit) {
+
+        QueryTarget queryTarget = null;
+
+        if (circuit != null) {
+            queryTarget = resolveLastQueryTargetForCircuit(organizationId, circuit.getId());
+        }
+
+        if (queryTarget == null) {
+            UUID targetId = null;
+
+            if (circuit != null) {
+                targetId = circuit.getCreatorId();
+            } else {
+                targetId = invokingMemberId;
+            }
+            String targetName = memberDetailsRetriever.lookupUsername(targetId);
+            queryTarget = new QueryTarget(TargetType.USER, targetName, organizationId, targetId);
+        }
+        return queryTarget;
+    }
+
+    private QueryTarget resolveLastQueryTargetForCircuit(UUID organizationId, UUID circuitId) {
 
         TerminalCircuitQueryTargetEntity lastTarget = terminalCircuitQueryTargetRepository.findLastTargetByCircuitId(organizationId, circuitId);
 
@@ -76,6 +114,31 @@ public class TerminalCircuitOperator {
         location.setMovementDate(now);
 
         terminalCircuitLocationHistoryRepository.save(location);
+    }
+
+    public GeometryClock.GridTime resolveLastLocation(UUID organizationId, UUID invokingMemberId, UUID circuitId) {
+
+        GeometryClock.GridTime gridTime = null;
+
+        GridCalendarEntity lastLocation = calendarService.lookupTileByCircuitLocationHistory(organizationId, circuitId);
+
+        if (lastLocation != null) {
+            gridTime = GeometryClock.createGridTime(lastLocation.getZoomLevel(), lastLocation.getStartTime());
+        }
+
+        if (gridTime == null) {
+            TorchieFeedCursorEntity feedCursor = torchieFeedCursorRepository.findByOrganizationIdAndTorchieId(organizationId, invokingMemberId);
+            if (feedCursor != null) {
+                gridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, feedCursor.getLastTileProcessedCursor());
+            }
+        }
+
+        if (gridTime == null) {
+            gridTime = GeometryClock.createGridTime(ZoomLevel.TWENTY, gridClock.getGridStart());
+        }
+
+        return gridTime;
+
     }
 
     private void validateCalendarTileFound(GridtimeExpression tileLocation, GridCalendarEntity tile) {

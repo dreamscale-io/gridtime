@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.cell;
 
+import com.dreamscale.gridtime.core.machine.clock.Beat;
 import com.dreamscale.gridtime.core.machine.clock.RelativeBeat;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,6 +16,8 @@ public class CellSize {
 
     private static final String TRUNCATED_INDICATOR = "*";
 
+    private static final int DEFAULT_ROW_NAME_COLUMN_SIZE = 14;
+
 
     public static int calculateCellSizeWithSummaryCell(RelativeBeat beat, int numberSummaryColumns) {
 
@@ -25,15 +28,24 @@ public class CellSize {
 
     public static int calculateCellSize(RelativeBeat beat) {
         int beatsPerMeasure = beat.getBeatsPerMeasure();
-            if (beatsPerMeasure == 20) {
-                return DEFAULT_CELL_SIZE_FOR_20_BEATS;
-            } else if (beatsPerMeasure == 12) {
-                return DEFAULT_CELL_SIZE_FOR_12_BEATS;
-            } else if (beatsPerMeasure == 6) {
-                return DEFAULT_CELL_SIZE_FOR_6_BEATS;
-            } else {
-                return DEFAULT_CELL_SIZE_FOR_4_BEATS;
-            }
+        return calculateCellSizeBasedOnBeatsPerMeasure(beatsPerMeasure);
+    }
+
+    public static int calculateCellSize(Beat beat) {
+        int beatsPerMeasure = beat.getBeatsPerMeasure();
+        return calculateCellSizeBasedOnBeatsPerMeasure(beatsPerMeasure);
+    }
+
+    private static int calculateCellSizeBasedOnBeatsPerMeasure(int beatsPerMeasure) {
+        if (beatsPerMeasure == 20) {
+            return DEFAULT_CELL_SIZE_FOR_20_BEATS;
+        } else if (beatsPerMeasure == 12) {
+            return DEFAULT_CELL_SIZE_FOR_12_BEATS;
+        } else if (beatsPerMeasure == 6) {
+            return DEFAULT_CELL_SIZE_FOR_6_BEATS;
+        } else {
+            return DEFAULT_CELL_SIZE_FOR_4_BEATS;
+        }
     }
 
     public static int calculateSummaryCellSize() {
@@ -42,6 +54,10 @@ public class CellSize {
 
     public static int calculateFixedCellSize() {
         return DEFAULT_CELL_SIZE_FOR_FIXED;
+    }
+
+    public static int calculateRowNameCellSize() {
+        return DEFAULT_ROW_NAME_COLUMN_SIZE;
     }
 
 

@@ -2,7 +2,9 @@ package com.dreamscale.gridtime.core.capability.query;
 
 
 import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import lombok.Getter;
 import lombok.Setter;
 import org.dreamscale.exception.BadRequestException;
@@ -30,6 +32,8 @@ public class GridtimeExpression {
 
     private List<Integer> coords;
     private List<Integer> rangeCoords;
+
+    private GridtimeExpression() {}
 
     public static GridtimeExpression parse(String gridtimeExpressionStr) {
 
@@ -71,6 +75,24 @@ public class GridtimeExpression {
         }
 
         return exp;
+    }
+
+
+    public static GridtimeExpression createFrom(GeometryClock.GridTime gt) {
+
+        GridtimeExpression gtExp = new GridtimeExpression();
+
+        gtExp.setYear(gt.getYear());
+        gtExp.setBlock(gt.getBlock());
+        gtExp.setWeek(gt.getBlockWeek());
+        gtExp.setDay(gt.getDay());
+        gtExp.setDaypart(gt.getDayPart());
+        gtExp.setTwenty(gt.getTwentyOfTwelve());
+        gtExp.setZoomLevel(gt.getZoomLevel());
+        gtExp.setFormattedExpression(gt.getFormattedCoords());
+        gtExp.setCoords(DefaultCollections.toList(gt.getCoordinates()));
+
+        return gtExp;
     }
 
     private static List<Integer> createCoords(GridtimeExpression exp) {

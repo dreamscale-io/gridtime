@@ -15,4 +15,10 @@ public interface TerminalCircuitLocationHistoryRepository extends CrudRepository
             "order by movement_date desc limit 1")
     TerminalCircuitLocationHistoryEntity findLastLocationByOrganizationIdAndCircuitName(
             @Param("organizationId") UUID organizationId, @Param("circuitName") String circuitName);
+
+
+    @Query(nativeQuery = true, value = "select lh.* from terminal_circuit_location_history lh " +
+            "where lh.circuit_id = (:circuitId) and lh.organization_id = (:organizationId) "+
+            "order by movement_date desc limit 1")
+    TerminalCircuitLocationHistoryEntity findLastLocationByOrganizationIdAndCircuitId(UUID organizationId, UUID circuitId);
 }

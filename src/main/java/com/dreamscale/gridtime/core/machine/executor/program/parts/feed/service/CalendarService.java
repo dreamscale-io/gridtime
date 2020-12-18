@@ -157,6 +157,10 @@ public class CalendarService {
         return gridCalendarRepository.findTileStartingBeforeTime(zoomLevel.name(), timestamp);
     }
 
+    public GridCalendarEntity lookupTileByCircuitLocationHistory(UUID organizationId, UUID circuitId) {
+        return gridCalendarRepository.findTileByLastCircuitLocationHistory(organizationId, circuitId);
+    }
+
     public GridCalendarEntity lookupTile(ZoomLevel zoomLevel, List<Integer> coords) {
 
         if (zoomLevel.equals(ZoomLevel.YEAR)) {

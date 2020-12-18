@@ -23,13 +23,9 @@ import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -40,7 +36,7 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-public class TorchieWorkPile implements WorkPile {
+public class TorchieWorkPile implements WorkPile, LiveQueue {
 
     @Autowired
     private CircuitActivityDashboard circuitActivityDashboard;
@@ -79,6 +75,7 @@ public class TorchieWorkPile implements WorkPile {
 
     private static final int MAX_TORCHIES = 10;
     private boolean paused = false;
+    private boolean autorun = true;
 
     private UUID serverClaimId = UUID.randomUUID();
 
@@ -92,13 +89,27 @@ public class TorchieWorkPile implements WorkPile {
 
             try {
                 initializeMissingTorchies(now);
-                claimTorchiesReadyForProcessing(now);
+                if (autorun) {
+                    claimTorchiesReadyForProcessing(now);
+                }
                 updateKeepAliveOnClaimedTorchies(now);
+                purgeEvictedTorchies(now);
                 expireZombieTorchies(now);
             } finally {
                 gridSyncLockManager.releaseTorchieSyncLock();
             }
         }
+    }
+
+    private void purgeEvictedTorchies(LocalDateTime now) {
+
+        List<UUID> purged = whatsNextWheel.purgeEvicted(now);
+
+        for (UUID workerId : purged) {
+            circuitActivityDashboard.evictMonitor(workerId);
+            expireClaim(workerId);
+        }
+
     }
 
     private void updateKeepAliveOnClaimedTorchies(LocalDateTime now) {
@@ -122,7 +133,35 @@ public class TorchieWorkPile implements WorkPile {
             torchie = loadTorchie(torchieId);
         }
 
-        return new TorchieCmd(whatsNextWheel, torchie);
+        return new TorchieCmd(this, torchie);
+    }
+
+    @Override
+    public void submitToLiveQueue(Torchie torchie) {
+
+        UUID torchieId = torchie.getTorchieId();
+
+        LocalDateTime now = gridClock.now();
+
+        if (whatsNextWheel.contains(torchieId)) {
+            whatsNextWheel.unmarkForEviction(torchieId);
+        } else {
+            try {
+                gridSyncLockManager.tryToAcquireTorchieSyncLock();
+
+                TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+                if (cursor != null) {
+                    claimTorchie(now, cursor);
+                }
+                circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
+                whatsNextWheel.addWorker(torchieId, torchie);
+            } catch (Exception ex) {
+                log.error("Unable to claim torchie", ex);
+            } finally {
+                gridSyncLockManager.releaseTorchieSyncLock();
+            }
+
+        }
     }
 
     private void claimTorchiesReadyForProcessing(LocalDateTime now) {
@@ -133,8 +172,8 @@ public class TorchieWorkPile implements WorkPile {
 
         for (Torchie torchie : torchies) {
             NotifyTorchieDoneTrigger trigger = new NotifyTorchieDoneTrigger(torchie.getTorchieId());
-            torchie.notifyWhenProgramDone(trigger);
-            torchie.notifyWhenProgramFails(trigger);
+            torchie.notifyOnDone(trigger);
+            torchie.notifyOnFail(trigger);
             circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchie.getTorchieId(), torchie.getCircuitMonitor());
 
             whatsNextWheel.addWorker(torchie.getTorchieId(), torchie);
@@ -181,12 +220,7 @@ public class TorchieWorkPile implements WorkPile {
 
         for (TorchieFeedCursorEntity cursor : unclaimedTorchies) {
 
-            log.debug("Claiming "+cursor.getTorchieId() + " with "+serverClaimId);
-
-            cursor.setClaimingServerId(serverClaimId);
-            cursor.setLastClaimUpdate(now);
-
-            TorchieFeedCursorEntity updated = torchieFeedCursorRepository.save(cursor);
+            claimTorchie(now, cursor);
 
             Torchie torchie = loadTorchie(cursor);
 
@@ -194,6 +228,15 @@ public class TorchieWorkPile implements WorkPile {
         }
 
         return claimedTorchies;
+    }
+
+    private void claimTorchie(LocalDateTime now, TorchieFeedCursorEntity cursor) {
+        log.debug("Claiming "+cursor.getTorchieId() + " with "+serverClaimId);
+
+        cursor.setClaimingServerId(serverClaimId);
+        cursor.setLastClaimUpdate(now);
+
+        TorchieFeedCursorEntity updated = torchieFeedCursorRepository.save(cursor);
     }
 
     private Torchie loadTorchie(UUID torchieId) {
@@ -272,8 +315,8 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     @Transactional
-    protected void expire(UUID torchieId) {
-       torchieFeedCursorRepository.expire(torchieId);
+    protected void expireClaim(UUID torchieId) {
+       torchieFeedCursorRepository.expireClaim(torchieId);
     }
 
 
@@ -292,19 +335,6 @@ public class TorchieWorkPile implements WorkPile {
             peek();
         }
         return (peekInstruction != null ) ;
-    }
-
-    private void evictLastWorker() {
-        if (paused) return;
-
-        UUID torchieId = whatsNextWheel.getLastWorker();
-
-        if (torchieId != null) {
-            expire(torchieId);
-
-            whatsNextWheel.evictWorker(torchieId);
-            circuitActivityDashboard.evictMonitor(torchieId);
-        }
     }
 
     @Override
@@ -337,6 +367,11 @@ public class TorchieWorkPile implements WorkPile {
         paused = false;
     }
 
+    @Override
+    public void setAutorun(boolean isAutorun) {
+        this.autorun = isAutorun;
+    }
+
 
     private void evictAll() {
         Set<UUID> workerKeys = whatsNextWheel.getWorkerKeys();
@@ -347,10 +382,10 @@ public class TorchieWorkPile implements WorkPile {
     }
 
     private void evictWorker(UUID workerId) {
-        expire(workerId);
-
         whatsNextWheel.evictWorker(workerId);
         circuitActivityDashboard.evictMonitor(workerId);
+
+        expireClaim(workerId);
     }
 
     @Override
@@ -371,8 +406,12 @@ public class TorchieWorkPile implements WorkPile {
         if (peekInstruction == null ) {
             peekInstruction = whatsNextWheel.whatsNext();
 
+            LocalDateTime now = gridClock.now();
+
             while (peekInstruction == null && whatsNextWheel.isNotExhausted()) {
-                evictLastWorker();
+
+                whatsNextWheel.markLastForEviction(now);
+
                 peekInstruction = whatsNextWheel.whatsNext();
             }
         }
@@ -381,15 +420,12 @@ public class TorchieWorkPile implements WorkPile {
         }
     }
 
-    public TorchieCmd submitJob(Torchie torchie) {
-        whatsNextWheel.submit(torchie.getTorchieId(), torchie);
 
-        return new TorchieCmd(whatsNextWheel, torchie);
-    }
 
     public void clear() {
         whatsNextWheel.clear();
     }
+
 
 
     private class NotifyTorchieDoneTrigger implements NotifyDoneTrigger, NotifyFailureTrigger {
@@ -409,6 +445,8 @@ public class TorchieWorkPile implements WorkPile {
         @Override
         @Transactional
         public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
+            evictWorker(torchieId);
+
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
 
             Integer fails = cursor.getFailureCount();
@@ -422,7 +460,7 @@ public class TorchieWorkPile implements WorkPile {
             cursor.setClaimingServerId(null);
             torchieFeedCursorRepository.save(cursor);
 
-            evictWorker(torchieId);
+
         }
     }
 }

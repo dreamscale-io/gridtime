@@ -10,6 +10,8 @@ public interface WorkPile {
 
     void resume();
 
+    void setAutorun(boolean isAutorun);
+
     TickInstructions whatsNext();
 
     boolean hasWork();

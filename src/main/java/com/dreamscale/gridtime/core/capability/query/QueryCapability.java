@@ -54,7 +54,7 @@ public class QueryCapability {
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuitIfExists(organizationId, invokingMemberId, terminalCircuitContext);
 
-        QueryTarget queryTarget = resolveQueryTarget(organizationId, invokingMemberId, circuit, queryInputDto);
+        QueryTarget queryTarget = resolveQueryTarget(organizationId, invokingMemberId, circuit, queryInputDto.getTargetType(), queryInputDto.getTargetName());
 
         QueryTimeScope queryTimeScope = resolveQueryTimeScope(queryInputDto.getTimeScope(), queryInputDto.getGridtimeScopeExpression());
 
@@ -161,27 +161,15 @@ public class QueryCapability {
     }
 
 
-    private QueryTarget resolveQueryTarget(UUID organizationId, UUID invokingMemberId, TerminalCircuitEntity circuit, QueryInputDto queryInputDto) {
+    public QueryTarget resolveQueryTarget(UUID organizationId, UUID invokingMemberId, TerminalCircuitEntity circuit, TargetType inputTargetType, String inputTargetName) {
 
+        QueryTarget queryTarget = resolveQueryTargetFromInput(organizationId, inputTargetType, inputTargetName);
 
-        QueryTarget queryTarget = resolveQueryTargetFromInput(organizationId, queryInputDto.getTargetType(), queryInputDto.getTargetName());
+        if (queryTarget == null ) {
 
-        if (queryTarget == null && circuit != null) {
-
-            queryTarget = terminalCircuitOperator.resolveLastQueryTarget(organizationId, circuit.getId());
+            queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
         }
 
-        if (queryTarget == null) {
-            UUID targetId = null;
-
-            if (circuit != null) {
-                targetId = circuit.getCreatorId();
-            } else {
-                targetId = invokingMemberId;
-            }
-            String targetName = memberDetailsRetriever.lookupUsername(targetId);
-            queryTarget = new QueryTarget(TargetType.USER, targetName, organizationId, targetId);
-        }
         return queryTarget;
     }
 

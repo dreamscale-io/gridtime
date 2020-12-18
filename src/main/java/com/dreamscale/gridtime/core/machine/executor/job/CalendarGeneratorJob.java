@@ -1,8 +1,6 @@
 package com.dreamscale.gridtime.core.machine.executor.job;
 
 import com.dreamscale.gridtime.core.capability.system.GridClock;
-import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
-import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.GridtimeSequence;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -36,6 +33,12 @@ public class CalendarGeneratorJob {
         return new CalendarJobDescriptor(getCalendarJobStart(), runUntilDate);
     }
 
+    public CalendarJobDescriptor createJobDescriptor(LocalDateTime runUntilProposedDate) {
+        LocalDateTime runUntilDate = roundToNearestTile(runUntilProposedDate);
+
+        return new CalendarJobDescriptor(getCalendarJobStart(), runUntilDate);
+    }
+
     public Program createStayAheadProgram(CalendarJobDescriptor jobDescriptor) {
 
         return programFactory.createCalendarGenerator(jobDescriptor);
@@ -47,14 +50,15 @@ public class CalendarGeneratorJob {
         return runUntilDate.truncatedTo(ChronoUnit.DAYS);
     }
 
+    private LocalDateTime roundToNearestTile(LocalDateTime runUntilDate) {
+        return GeometryClock.roundDownToNearestTwenty(runUntilDate);
+    }
 
     private LocalDateTime getCalendarJobStart() {
         GridtimeSequence lastTwenty = calendarService.getLast(ZoomLevel.TWENTY);
 
         if (lastTwenty != null) {
-            log.debug("lastTwenty found: clock: "+lastTwenty.getGridTime().getClockTime() + "seq "+lastTwenty.getSequenceNumber() );
-
-            log.debug("lastTwenty found: next: "+lastTwenty.getGridTime().panRight().getClockTime() );
+            log.debug("lastTwenty found: "+lastTwenty.getGridTime().getClockTime() + ", seq "+lastTwenty.getSequenceNumber() );
 
             return lastTwenty.getGridTime().panRight().getClockTime();
         } else {

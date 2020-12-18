@@ -4,6 +4,7 @@ import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Notifier;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
@@ -15,7 +16,7 @@ import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
 import java.util.UUID;
 
-public class Torchie implements Worker {
+public class Torchie implements Worker, Notifier {
 
     private final UUID torchieId;
 
@@ -63,12 +64,12 @@ public class Torchie implements Worker {
         ideaFlowCircuit.scheduleHighPriorityInstruction(instructions);
     }
 
-    public void notifyWhenProgramDone(NotifyDoneTrigger notifyTrigger) {
-        ideaFlowCircuit.notifyWhenProgramDone(notifyTrigger);
+    public void notifyOnDone(NotifyDoneTrigger notifyTrigger) {
+        ideaFlowCircuit.notifyOnDone(notifyTrigger);
     }
 
-    public void notifyWhenProgramFails(NotifyFailureTrigger notifyTrigger) {
-        ideaFlowCircuit.notifyWhenProgramFails(notifyTrigger);
+    public void notifyOnFail(NotifyFailureTrigger notifyTrigger) {
+        ideaFlowCircuit.notifyOnFail(notifyTrigger);
     }
 
 

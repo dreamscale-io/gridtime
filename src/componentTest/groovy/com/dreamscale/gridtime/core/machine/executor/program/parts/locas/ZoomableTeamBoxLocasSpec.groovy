@@ -27,6 +27,7 @@ import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableFlowActivity
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.flowable.FlowableJournalEntry
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
+import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile
 import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver
 import com.dreamscale.gridtime.core.machine.memory.box.matcher.BoxMatcherConfig
 
@@ -72,6 +73,9 @@ class ZoomableTeamBoxLocasSpec extends Specification {
 
     @Autowired
     GridTimeWorkPile gridTimeWorkerPool
+
+    @Autowired
+    TorchieWorkPile torchieWorkPile
 
     LocalDateTime clockStart
     LocalDateTime wtfTime
@@ -140,9 +144,9 @@ class ZoomableTeamBoxLocasSpec extends Specification {
         Torchie torchie2 = torchieFactory.wireUpMemberTorchie(org.id, member2.getId(), team.id, clockStart);
         Torchie torchie3 = torchieFactory.wireUpMemberTorchie(org.id, member3.getId(), team.id,clockStart);
 
-        gridTimeWorkerPool.submitJob(torchie1);
-        gridTimeWorkerPool.submitJob(torchie2);
-        gridTimeWorkerPool.submitJob(torchie3);
+        torchieWorkPile.submitToLiveQueue(torchie1);
+        torchieWorkPile.submitToLiveQueue(torchie2);
+        torchieWorkPile.submitToLiveQueue(torchie3);
 
         BoxResolver boxResolver = new BoxResolver()
         boxResolver.addBoxConfig(projectId, new BoxMatcherConfig("componentA", "/box1/*"))

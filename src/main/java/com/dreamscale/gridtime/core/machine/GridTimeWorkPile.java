@@ -1,5 +1,6 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.SystemCmd;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -46,6 +47,10 @@ public class GridTimeWorkPile implements WorkPile {
         return torchieWorkPile.getTorchieCmd(torchieId);
     }
 
+    public SystemCmd getSystemCmd() {
+        return systemWorkPile.getSystemCmd();
+    }
+
     @Override
     public void reset() {
         log.debug("RESET ALL GRIDTIME ENGINE WORK");
@@ -57,6 +62,13 @@ public class GridTimeWorkPile implements WorkPile {
         torchieWorkPile.reset();
         plexerWorkPile.reset();
 
+    }
+
+    @Override
+    public void setAutorun(boolean isAutorun) {
+        systemWorkPile.setAutorun(isAutorun);
+        plexerWorkPile.setAutorun(isAutorun);
+        torchieWorkPile.setAutorun(isAutorun);
     }
 
     @Override
@@ -135,10 +147,6 @@ public class GridTimeWorkPile implements WorkPile {
     @Override
     public int size() {
         return systemWorkPile.size() + torchieWorkPile.size() + plexerWorkPile.size();
-    }
-
-    public TorchieCmd submitJob(Torchie torchie) {
-        return torchieWorkPile.submitJob(torchie);
     }
 
     public void clear() {

@@ -6,6 +6,7 @@ import com.dreamscale.gridtime.core.domain.tile.GridRowEntity;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValueMap;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
@@ -60,7 +61,7 @@ public class OutputBoxMetrics implements OutputStrategy {
     private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
         GridRowEntity gridRowEntity = null;
 
-        Map<String, CellValue> rowValues = row.toCellValueMap();
+        CellValueMap rowValues = row.toCellValueMap();
 
         if (rowValues.size() > 0) {
 

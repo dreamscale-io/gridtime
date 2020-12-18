@@ -50,7 +50,7 @@ public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedC
     @Query(nativeQuery = true, value = "update torchie_feed_cursor " +
             "set claiming_server_id = null "+
             "where torchie_id = (:torchieId) ")
-    void expire(@Param("torchieId") UUID torchieId);
+    void expireClaim(@Param("torchieId") UUID torchieId);
 
     @Modifying
     @Transactional

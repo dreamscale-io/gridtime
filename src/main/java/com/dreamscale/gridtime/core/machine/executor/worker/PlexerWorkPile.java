@@ -83,6 +83,11 @@ public class PlexerWorkPile implements WorkPile {
         paused = false;
     }
 
+    @Override
+    public void setAutorun(boolean isAutorun) {
+        //no-op for plexers
+    }
+
 
     @Override
     public TickInstructions whatsNext() {

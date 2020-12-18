@@ -65,4 +65,10 @@ public interface GridCalendarRepository extends CrudRepository<GridCalendarEntit
     GridCalendarEntity findTwentyTileByCoords(@Param("year") Integer year, @Param("block") Integer block,
                                         @Param("week") Integer week, @Param("day") Integer day, @Param("daypart") Integer daypart,
                                         @Param("twenty") Integer twenty);
+
+    @Query(nativeQuery = true, value = "select gc.* from grid_calendar gc " +
+            "where gc.id = (select calendar_id from terminal_circuit_location_history lh " +
+            "where lh.organization_id = (:organizationId) and lh.circuit_id = (:circuitId) " +
+            "order by movement_date desc limit 1) ")
+    GridCalendarEntity findTileByLastCircuitLocationHistory( @Param("organizationId") UUID organizationId, @Param("circuitId" ) UUID circuitId);
 }

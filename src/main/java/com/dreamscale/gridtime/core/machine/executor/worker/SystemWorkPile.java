@@ -1,9 +1,8 @@
 package com.dreamscale.gridtime.core.machine.executor.worker;
 
 import com.dreamscale.gridtime.api.grid.Results;
-import com.dreamscale.gridtime.core.domain.job.GridtimeSystemJobClaimEntity;
-import com.dreamscale.gridtime.core.domain.job.JobType;
-import com.dreamscale.gridtime.core.domain.job.SystemJobType;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.SyncCmd;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.SystemCmd;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.NoOpInstruction;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
@@ -58,8 +57,10 @@ public class SystemWorkPile implements WorkPile {
     private IdeaFlowCircuit dashboardCircuit;
 
     private boolean paused = false;
+    private boolean autorun = true;
 
     private int daysToKeepAhead = 365; //block, year, tiles aren't saved until the end,
+
 
     @PostConstruct
     private void init() {
@@ -103,7 +104,9 @@ public class SystemWorkPile implements WorkPile {
 
             try {
                 updateHeartbeatOfRunningPrograms(now);
-                spinUpCalendarProgramIfNeeded(now);
+                if (autorun) {
+                    spinUpCalendarProgramIfNeeded(now);
+                }
             } finally {
                 gridSyncLockManager.releaseSystemJobSyncLock();
             }
@@ -133,6 +136,10 @@ public class SystemWorkPile implements WorkPile {
 
         CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
 
+        runCalendarProgram(now, jobDescriptor);
+    }
+
+    private synchronized void runCalendarProgram(LocalDateTime now, CalendarJobDescriptor jobDescriptor) {
         if ( !calendarCircuit.isProgramRunning() && calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
 
             UUID workerId = calendarCircuit.getWorkerId();
@@ -145,8 +152,8 @@ public class SystemWorkPile implements WorkPile {
                 log.info("Starting program {}", jobDescriptor.getJobType().name());
                 activityDashboard.updateProcessStatus(calendarCircuit.getWorkerId(), ProcessStatus.ACTIVE);
 
-                calendarCircuit.notifyWhenProgramDone(new SystemJobDoneTrigger(systemJobClaim));
-                calendarCircuit.notifyWhenProgramFails(new SystemJobFailedTrigger(systemJobClaim));
+                calendarCircuit.notifyOnDone(new SystemJobDoneTrigger(systemJobClaim));
+                calendarCircuit.notifyOnFail(new SystemJobFailedTrigger(systemJobClaim));
 
                 calendarCircuit.runProgram(calendarProgram);
             } else {
@@ -220,6 +227,40 @@ public class SystemWorkPile implements WorkPile {
     @Override
     public void resume() {
         paused = false;
+    }
+
+    @Override
+    public void setAutorun(boolean isAutorun) {
+        this.autorun = isAutorun;
+    }
+
+    public SystemCmd getSystemCmd() {
+        return new InternalSystemCmd();
+    }
+
+
+    private class InternalSystemCmd extends SyncCmd implements SystemCmd {
+
+        public void runCalendarUntil(LocalDateTime runUntilDate) {
+            startCommandInProgress();
+
+            LocalDateTime now = gridClock.now();
+            CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(runUntilDate);
+
+            if (!calendarCircuit.isProgramRunning()) {
+                configureNotify(calendarCircuit);
+
+                runCalendarProgram(now, jobDescriptor);
+            }
+            waitForCommandToFinish();
+        }
+
+        public void abortCalendarProgram() {
+            if (calendarCircuit.isProgramRunning()) {
+                calendarCircuit.abortProgram();
+            }
+        }
+
     }
 
     private class SystemJobDoneTrigger implements NotifyDoneTrigger {

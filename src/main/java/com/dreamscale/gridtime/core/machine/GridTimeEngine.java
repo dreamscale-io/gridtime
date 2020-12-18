@@ -5,6 +5,7 @@ import com.dreamscale.gridtime.api.grid.GridStatus;
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.SystemCmd;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.DashboardActivityScope;
@@ -54,6 +55,10 @@ public class GridTimeEngine {
         return gridTimeExecutor.shutdown();
     }
 
+    public void setAutorun(boolean isAutorun) {
+        gridTimeWorkPile.setAutorun(isAutorun);
+    }
+
     public void configureDoneAfterTicks(int ticksToWait) {
         gridTimeExecutor.configureDoneAfterTicks(ticksToWait);
     }
@@ -95,8 +100,8 @@ public class GridTimeEngine {
         return gridTimeWorkPile.getTorchieCmd(torchieId);
     }
 
-    public TorchieCmd submitJob(Torchie torchie) {
-        return gridTimeWorkPile.submitJob(torchie);
+    public SystemCmd getSystemCmd() {
+        return gridTimeWorkPile.getSystemCmd();
     }
 
     public GridStatusSummaryDto getStatusSummary() {
@@ -135,4 +140,6 @@ public class GridTimeEngine {
         reset();
         return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown and all feed data purged.");
     }
+
+
 }

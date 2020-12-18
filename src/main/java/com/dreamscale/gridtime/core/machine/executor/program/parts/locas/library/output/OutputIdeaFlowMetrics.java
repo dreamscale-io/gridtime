@@ -7,6 +7,7 @@ import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValueMap;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
@@ -60,16 +61,16 @@ public class OutputIdeaFlowMetrics implements OutputStrategy {
     private GridRowEntity createRowEntityIfNotEmpty(UUID torchieId, ZoomLevel zoomLevel, UUID calendarId, GridRow row) {
         GridRowEntity gridRowEntity = null;
 
-        Map<String, CellValue> rowValues = row.toCellValueMap();
+       CellValueMap cellValueMap = row.toCellValueMap();
 
-        if (rowValues.size() > 0) {
+        if (cellValueMap.size() > 0) {
 
             gridRowEntity = new GridRowEntity();
             gridRowEntity.setId(UUID.randomUUID());
             gridRowEntity.setRowName(row.getRowKey().getName());
             gridRowEntity.setTorchieId(torchieId);
             gridRowEntity.setCalendarId(calendarId);
-            gridRowEntity.setJson(JSONTransformer.toJson(rowValues));
+            gridRowEntity.setJson(JSONTransformer.toJson(cellValueMap));
 
             log.debug(row.getRowKey().getName() + ":" +gridRowEntity.getJson());
         }
