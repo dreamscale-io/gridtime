@@ -133,4 +133,11 @@ public class WhatsNextWheel {
         }
         return purged;
     }
+
+    void abortAllPrograms() {
+        for (Worker worker : workerMap.values()) {
+            worker.abortAndClearProgram();
+        }
+    }
+
 }

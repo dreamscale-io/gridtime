@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.executor.circuit.now.Eye;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
@@ -30,6 +31,8 @@ public abstract class AbstractTorchieState implements TorchieState {
 
     private BoxResolver boxResolver;
     private GridTile activeGridTile;
+
+    private Eye eye;
 
 
     public AbstractTorchieState(UUID organizationId, UUID torchieId, List<UUID> teamIds, BoxResolver boxResolver, FeatureCache featureCache) {
@@ -62,10 +65,15 @@ public abstract class AbstractTorchieState implements TorchieState {
     }
 
     @Override
-    public String getActiveTime() {
-        return gridTime.toDisplayString();
+    public GeometryClock.GridTime getActiveGridTime() {
+        return gridTime;
     }
 
+
+    @Override
+    public void monitorWith(Eye eye) {
+        this.eye = eye;
+    }
 
     @Override
     public void changeBoxConfiguration(BoxResolver boxResolver) {
@@ -83,6 +91,10 @@ public abstract class AbstractTorchieState implements TorchieState {
         log.debug("gotoTilePosition: " + toGridPosition.toDisplayString());
 
         this.gridTime = toGridPosition;
+
+        if (eye != null) {
+            eye.seePosition(gridTime);
+        }
 
         CarryOverContext carryOverContext = getCarryOverContext(this.gridTime.panLeft());
 
@@ -109,13 +121,6 @@ public abstract class AbstractTorchieState implements TorchieState {
         inputFeeds.put(feedType, inputFeed);
 
         return inputFeed;
-    }
-
-    private void validateCoordsMatchAndResetTileIfNeeded(GeometryClock.GridTime toCoordPosition, GeometryClock.GridTime nextGridTime) {
-        if (!nextGridTime.equals(toCoordPosition)) {
-            gridTime = toCoordPosition;
-            activeGridTile = null;
-        }
     }
 
     @Override

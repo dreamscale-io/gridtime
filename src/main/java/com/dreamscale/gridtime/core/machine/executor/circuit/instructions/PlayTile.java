@@ -21,6 +21,6 @@ public class PlayTile extends TickInstructions {
 
     @Override
     public String getCmdDescription() {
-        return "play tile "+ torchieState.getActiveTime();
+        return "play tile "+ torchieState.getActiveGridTime();
     }
 }

@@ -66,11 +66,19 @@ public class PlexerWorkPile implements WorkPile {
 
     @Override
     public void reset() {
-        whatsNextWheel.clear();
+        shutdown();
         whatsNextWheel = createWhatsNextWheel(currentPoolSize);
 
         peekInstruction = null;
         paused = false;
+    }
+
+    @Override
+    public void shutdown() {
+        whatsNextWheel.abortAllPrograms();
+        whatsNextWheel.clear();
+
+        peekInstruction = null;
     }
 
     @Override

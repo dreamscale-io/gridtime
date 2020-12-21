@@ -1,6 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory;
 
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.executor.circuit.now.Eye;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategy;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
@@ -24,7 +25,7 @@ public interface TorchieState {
 
     void gotoPosition(GeometryClock.GridTime toGridPosition);
 
-    String getActiveTime();
+    GeometryClock.GridTime getActiveGridTime();
 
     GridTile getActiveTile();
 
@@ -38,6 +39,5 @@ public interface TorchieState {
 
     void resolveFeatureReferences();
 
-
-
+    void monitorWith(Eye eye);
 }

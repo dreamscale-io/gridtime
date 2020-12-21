@@ -132,6 +132,22 @@ public class CircuitMonitor {
     }
 
 
+    public void waitForReady() {
+        int waitLoopCounter = 30;
+        try {
+            while (!isReady() && waitLoopCounter > 0) {
+                Thread.sleep(100);
+                waitLoopCounter--;
+            }
+            if (waitLoopCounter == 0) {
+                log.error("Wait loop count exceeded");
+            }
+        } catch (InterruptedException ex) {
+            log.error("Interrupted", ex);
+        }
+
+    }
+
     public enum State {
         Ready,
         Busy

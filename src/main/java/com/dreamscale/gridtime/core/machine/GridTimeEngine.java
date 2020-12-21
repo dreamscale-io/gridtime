@@ -97,11 +97,21 @@ public class GridTimeEngine {
 
 
     public TorchieCmd getTorchieCmd(UUID torchieId) {
-        return gridTimeWorkPile.getTorchieCmd(torchieId);
+        if (gridTimeExecutor.isRunning()) {
+            return gridTimeWorkPile.getTorchieCmd(torchieId);
+        }
+        else {
+            throw new RuntimeException("Gridtime engine isn't running, please start before retrieving TorchieCmd");
+        }
     }
 
     public SystemCmd getSystemCmd() {
-        return gridTimeWorkPile.getSystemCmd();
+        if (gridTimeExecutor.isRunning()) {
+            return gridTimeWorkPile.getSystemCmd();
+        }
+        else {
+            throw new RuntimeException("Gridtime engine isn't running, please start before retrieving SystemCmd");
+        }
     }
 
     public GridStatusSummaryDto getStatusSummary() {

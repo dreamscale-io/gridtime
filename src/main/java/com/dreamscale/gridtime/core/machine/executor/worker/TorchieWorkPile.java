@@ -24,8 +24,13 @@ import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -85,9 +90,10 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
-            gridSyncLockManager.tryToAcquireTorchieSyncLock();
-
             try {
+
+                gridSyncLockManager.tryToAcquireTorchieSyncLock();
+
                 initializeMissingTorchies(now);
                 if (autorun) {
                     claimTorchiesReadyForProcessing(now);
@@ -146,22 +152,29 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         if (whatsNextWheel.contains(torchieId)) {
             whatsNextWheel.unmarkForEviction(torchieId);
         } else {
-            try {
-                gridSyncLockManager.tryToAcquireTorchieSyncLock();
-
-                TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
-                if (cursor != null) {
-                    claimTorchie(now, cursor);
-                }
-                circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
-                whatsNextWheel.addWorker(torchieId, torchie);
-            } catch (Exception ex) {
-                log.error("Unable to claim torchie", ex);
-            } finally {
-                gridSyncLockManager.releaseTorchieSyncLock();
-            }
-
+            lockAndClaimTorchie(now, torchie);
         }
+    }
+
+    @Transactional(propagation= Propagation.REQUIRES_NEW)
+    protected void lockAndClaimTorchie(LocalDateTime now, Torchie torchie) {
+
+        UUID torchieId = torchie.getTorchieId();
+
+        gridSyncLockManager.tryToAcquireTorchieSyncLock();
+        try {
+            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+            if (cursor != null) {
+                claimTorchie(now, cursor);
+            }
+            circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
+            whatsNextWheel.addWorker(torchieId, torchie);
+        } catch (Exception ex) {
+            log.error("Unable to claim torchie", ex);
+        } finally {
+            gridSyncLockManager.releaseTorchieSyncLock();
+        }
+
     }
 
     private void claimTorchiesReadyForProcessing(LocalDateTime now) {
@@ -240,7 +253,7 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     }
 
     private Torchie loadTorchie(UUID torchieId) {
-        TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findOne(torchieId);
+        TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
 
         return loadTorchie(cursor);
     }
@@ -338,13 +351,6 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
-    public void shutdown() {
-        evictAll();
-        peekInstruction = null;
-        lastSyncCheck = null;
-    }
-
-    @Override
     public int size() {
         return whatsNextWheel.size();
     }
@@ -353,8 +359,9 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     public void reset() {
         evictAll();
         peekInstruction = null;
-
+        lastSyncCheck = null;
         paused = false;
+        autorun = true;
     }
 
     @Override
@@ -439,12 +446,14 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         @Override
         @Transactional
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
+            log.debug("Notify Torchie program done");
             evictWorker(torchieId);
         }
 
         @Override
         @Transactional
         public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
+            log.debug("Notify Torchie abort or failed program");
             evictWorker(torchieId);
 
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);

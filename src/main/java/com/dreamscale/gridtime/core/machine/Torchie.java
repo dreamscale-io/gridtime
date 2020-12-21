@@ -1,12 +1,16 @@
 package com.dreamscale.gridtime.core.machine;
 
+import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.InstructionsBuilder;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.now.Eye;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Notifier;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Wire;
 import com.dreamscale.gridtime.core.machine.executor.program.Program;
+import com.dreamscale.gridtime.core.machine.executor.program.ProgramFactory;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
 import com.dreamscale.gridtime.core.machine.executor.worker.Worker;
 import com.dreamscale.gridtime.core.machine.memory.TorchieState;
@@ -14,6 +18,7 @@ import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Torchie implements Worker, Notifier {
@@ -26,13 +31,20 @@ public class Torchie implements Worker, Notifier {
 
     private final CircuitMonitor circuitMonitor;
 
-    public Torchie(UUID torchieId, TorchieState torchieState, Program program) {
+    private final Eye eye;
+
+
+    public Torchie(UUID torchieId, TorchieState torchieState, Program defaultProgram) {
         this.torchieId = torchieId;
 
         this.torchieState = torchieState;
 
         this.circuitMonitor = new CircuitMonitor(ProcessType.Torchie, torchieId);
-        this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, program);
+        this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, defaultProgram);
+
+        this.eye = new Eye();
+
+        torchieState.monitorWith(eye);
     }
 
     public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
@@ -41,11 +53,6 @@ public class Torchie implements Worker, Notifier {
 
     public void changeBoxConfiguration(BoxResolver boxResolver) {
         torchieState.changeBoxConfiguration(boxResolver);
-    }
-
-
-    public String whatTimeIsIt() {
-        return torchieState.getActiveTime();
     }
 
 
@@ -119,4 +126,23 @@ public class Torchie implements Worker, Notifier {
         ideaFlowCircuit.configureOutputStreamEventWire(outputWire);
     }
 
+    public GeometryClock.GridTime getActiveGridTime() {
+        return torchieState.getActiveGridTime();
+    }
+
+    public void waitForCircuitReady() {
+        circuitMonitor.waitForReady();
+    }
+
+    public void abortAndClearProgram() {
+        ideaFlowCircuit.abortAndClearProgram();
+    }
+
+    public void watchForGridtime(GeometryClock.GridTime timeToWatch, NotifySeeTrigger notifySeeTrigger) {
+        eye.watchForGridtime(timeToWatch, notifySeeTrigger);
+    }
+
+    public TickInstructions getLastInstruction() {
+        return ideaFlowCircuit.getLastInstruction();
+    }
 }

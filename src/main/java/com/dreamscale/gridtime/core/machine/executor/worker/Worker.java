@@ -10,4 +10,6 @@ public interface Worker {
     CircuitMonitor getCircuitMonitor();
 
     boolean isWorkerReady();
+
+    void abortAndClearProgram();
 }

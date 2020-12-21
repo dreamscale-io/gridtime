@@ -56,7 +56,7 @@ public class CellSize {
         return DEFAULT_CELL_SIZE_FOR_FIXED;
     }
 
-    public static int calculateRowNameCellSize() {
+    public static int calculateRowKeyCellSize() {
         return DEFAULT_ROW_NAME_COLUMN_SIZE;
     }
 

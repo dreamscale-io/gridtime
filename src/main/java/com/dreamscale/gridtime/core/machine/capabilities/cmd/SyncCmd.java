@@ -13,13 +13,15 @@ import java.util.List;
 @Slf4j
 public abstract class SyncCmd {
 
-
     private final NotifyDoneTrigger NOTIFY_WHEN_DONE;
     private final NotifyFailureTrigger NOTIFY_WHEN_FAILED;
 
-    private static final int MAX_WAIT_LOOPS = 300;
+    private static final int MAX_WAIT_LOOPS = 30;
 
     private boolean syncCommandInProgress;
+
+    private boolean lastCommandSuccess = true;
+    private Exception lastException;
 
     protected SyncCmd() {
         syncCommandInProgress = false;
@@ -37,6 +39,14 @@ public abstract class SyncCmd {
         notifier.notifyOnFail(NOTIFY_WHEN_FAILED);
     }
 
+    protected NotifyDoneTrigger getNotifyDoneTrigger() {
+        return NOTIFY_WHEN_DONE;
+    }
+
+    protected NotifyFailureTrigger getNotifyFailedTrigger() {
+        return NOTIFY_WHEN_FAILED;
+    }
+
     protected void waitForCommandToFinish() {
         int waitLoopCounter = MAX_WAIT_LOOPS;
         try {
@@ -47,6 +57,10 @@ public abstract class SyncCmd {
             if (waitLoopCounter == 0) {
                 log.error("Wait loop count exceeded");
             }
+            if (lastException != null || !lastCommandSuccess) {
+                throw new RuntimeException("System command aborted or failed ", lastException);
+            }
+
         } catch (InterruptedException ex) {
             log.error("Interrupted", ex);
         }
@@ -58,6 +72,8 @@ public abstract class SyncCmd {
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.debug("System command finished successfully");
             syncCommandInProgress = false;
+            lastException = null;
+            lastCommandSuccess = true;
         }
     }
 
@@ -66,6 +82,8 @@ public abstract class SyncCmd {
         public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
             log.error("System command failed. ", ex);
             syncCommandInProgress = false;
+            lastException = ex;
+            lastCommandSuccess = false;
         }
     }
 }

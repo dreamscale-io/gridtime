@@ -1,7 +1,9 @@
 package com.dreamscale.gridtime.core.machine.executor.circuit.now;
 
+import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.NotifySeeTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.AlarmScript;
 import com.dreamscale.gridtime.core.machine.executor.circuit.alarm.TimeBomb;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.Locas;
@@ -10,9 +12,12 @@ import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureRefe
 import com.dreamscale.gridtime.core.machine.memory.grid.IMusicGrid;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.MetricRowKey;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 public class Eye {
 
 
@@ -22,12 +27,67 @@ public class Eye {
     private List<FeatureReference> watchForFeaturesMissing = DefaultCollections.list();
 
     private List<FeatureReference> wtfMarkers = DefaultCollections.list();
-    private List<NotifyDoneTrigger> notifyTriggers = DefaultCollections.list();
+    private List<NotifySeeTrigger> notifyTriggers = DefaultCollections.list();
+
+    private List<Watcher> watchers = DefaultCollections.list();
 
     private double watchForPainAboveThreshold = -3;
     private double watchForJoyAboveThreshold = 3;
 
 
+    public void seePosition(GeometryClock.GridTime gridTime) {
+        checkWatchers(WatcherType.POSITION, gridTime);
+    }
+
+    private void checkWatchers(WatcherType watcherType, Object seen) {
+        Iterator<Watcher> watcherIter = watchers.iterator();
+
+        while (watcherIter.hasNext()) {
+            Watcher watcher = watcherIter.next();
+
+            if (watcher.matches(watcherType, seen)) {
+                watcher.fireTrigger();
+                watcherIter.remove();
+            }
+        }
+    }
+
+    public void notifyOnSee(NotifySeeTrigger notifySeeTrigger) {
+        notifyTriggers.add(notifySeeTrigger);
+    }
+
+    public void watchForGridtime(GeometryClock.GridTime timeToWatch, NotifySeeTrigger notifySeeTrigger) {
+        log.debug("Watching for Gridtime "+timeToWatch);
+        watchers.add(new Watcher(WatcherType.POSITION, timeToWatch, notifySeeTrigger));
+    }
+
+
+    @AllArgsConstructor
+    private class Watcher {
+        private WatcherType watcherType;
+        private Object watchFor;
+        private NotifySeeTrigger notifySeeTrigger;
+
+        private Watcher(WatcherType watcherType, Object watchFor, NotifySeeTrigger trigger) {
+            this.watcherType = watcherType;
+            this.watchFor = watchFor;
+            this.notifySeeTrigger = trigger;
+        }
+
+        private Object seen;
+
+        boolean matches(WatcherType watcherType, Object seen) {
+            if (watcherType.equals(this.watcherType) && watchFor.equals(seen)) {
+                this.seen = seen;
+                return true;
+            }
+            return false;
+        }
+
+        void fireTrigger() {
+            notifySeeTrigger.notifyOnSee(watcherType, seen);
+        }
+    }
 
     //locas is a Context predictive thread...
 
@@ -97,10 +157,6 @@ public class Eye {
         this.wtfMarkers.add(featureReference);
     }
 
-    public void onThresholdTrigger(NotifyDoneTrigger notifyTrigger) {
-        this.notifyTriggers.add(notifyTrigger);
-    }
-
     public Locas bubbleUp(TwilightMap searchForSimilarMap) {
         //navigate in a few layers based on provided search criteria, and aggregate a metrics grid,
         //this is a job that requires exec cycle work, but is dynamically generated based on the current map
@@ -125,6 +181,8 @@ public class Eye {
     public List<AlarmScript> triggerAlarms() {
         return DefaultCollections.list();
     }
+
+
 
     private interface MetricWatcher {
 

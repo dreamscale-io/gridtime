@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.core.machine.executor.program;
 
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
+import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.AggregateWorkToDoQueueWire;
 import com.dreamscale.gridtime.core.machine.executor.job.CalendarJobDescriptor;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.FeedStrategyFactory;
@@ -39,6 +41,10 @@ public class ProgramFactory {
 
     @Autowired
     AggregateWorkToDoQueueWire workToDoWire;
+
+    @Autowired
+    TorchieFeedCursorRepository torchieFeedCursorRepository;
+
 
     public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
 
@@ -91,6 +97,7 @@ public class ProgramFactory {
 
         return new CalendarGeneratorProgram(calendarService, jobDescriptor.getCalendarJobStart(), jobDescriptor.getRunUntilDate());
     }
+
 
 
 //    public AggregateByTeamProgram createAggregateWiresProgram(UUID teamId, PerProcessFeaturePool featurePool, AggregatingWire teamWire) {

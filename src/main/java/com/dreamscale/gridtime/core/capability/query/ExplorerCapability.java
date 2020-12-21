@@ -73,6 +73,8 @@ public class ExplorerCapability {
 
     public GridTableResults zoomIn(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
+        LocalDateTime now = gridClock.now();
+
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
         QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
@@ -83,10 +85,14 @@ public class ExplorerCapability {
 
         GridtimeExpression tileLocation = GridtimeExpression.createFrom(zoomedInGridtime);
 
+        terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
+
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
     public GridTableResults zoomOut(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        LocalDateTime now = gridClock.now();
+
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
         QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
@@ -97,10 +103,14 @@ public class ExplorerCapability {
 
         GridtimeExpression tileLocation = GridtimeExpression.createFrom(zoomedOutGridtime);
 
+        terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
+
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
     public GridTableResults panLeft(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        LocalDateTime now = gridClock.now();
+
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
         QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
@@ -111,10 +121,14 @@ public class ExplorerCapability {
 
         GridtimeExpression tileLocation = GridtimeExpression.createFrom(panLeftGridtime);
 
+        terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
+
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
     public GridTableResults panRight(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        LocalDateTime now = gridClock.now();
+
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
         QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
@@ -124,6 +138,8 @@ public class ExplorerCapability {
         GeometryClock.GridTime panRightGridtime = gtLocation.panRight();
 
         GridtimeExpression tileLocation = GridtimeExpression.createFrom(panRightGridtime);
+
+        terminalCircuitOperator.saveLocationHistory(now, organizationId, circuit.getId(), tileLocation);
 
         return lookupTileAtLocation(queryTarget, tileLocation);
     }

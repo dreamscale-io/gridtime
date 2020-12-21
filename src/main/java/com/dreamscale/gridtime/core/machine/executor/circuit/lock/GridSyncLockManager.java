@@ -18,20 +18,52 @@ public class GridSyncLockManager {
     @Autowired
     LockRepository lockRepository;
 
-
     private void releaseSyncLock(Long lockNumber) {
-        boolean release = lockRepository.releaseLock(lockNumber);
+        boolean success = lockRepository.releaseLock(lockNumber);
+
+        if (!success) {
+            log.error("Unable to release lock "+lockNumber);
+        }
+
+        int tries = 0;
+        try {
+            while (!success && tries < 10) {
+                success = lockRepository.releaseLock(lockNumber);
+
+                if (success) {
+                    break;
+                } else {
+                    log.debug("Lock release failed, retrying");
+                    Thread.sleep(100);
+                }
+                tries++;
+            }
+        } catch (InterruptedException ex) {
+            log.error("Interrupted", ex);
+         }
+
     }
+
 
     private void tryToAcquireSyncLock(Long lockNumber) {
 
         boolean lockAcquired = false;
         int tries = 0;
 
-        while (!lockAcquired && tries < 10) {
-            lockAcquired = lockRepository.tryToAcquireLock(lockNumber);
+        try {
+            while (!lockAcquired && tries < 10) {
+                lockAcquired = lockRepository.tryToAcquireLock(lockNumber);
 
-            tries++;
+                if (lockAcquired) {
+                    break;
+                } else {
+                    log.debug("Lock attempt failed, retrying");
+                    Thread.sleep(100);
+                }
+                tries++;
+            }
+        } catch (InterruptedException ex) {
+            log.error("Interrupted", ex);
         }
 
         if (!lockAcquired) {

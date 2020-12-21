@@ -72,7 +72,7 @@ public class TileQueryRunner {
 
     private GridTableResults createTable(String title, GridtimeExpression tileLocation, List<GridRowEntity> rows) {
         List<String> headerRow = new ArrayList<>();
-        headerRow.add(CellFormat.toRightSizedCell("ID", CellSize.calculateSummaryCellSize()));
+        headerRow.add(CellFormat.toRightSizedCell("ID", CellSize.calculateRowKeyCellSize()));
 
         MusicClock musicClock = new MusicClock(tileLocation.getZoomLevel());
         Iterator<RelativeBeat> iterator = musicClock.getForwardsIterator();
@@ -98,7 +98,7 @@ public class TileQueryRunner {
     private List<String> toFormattedRow(String rowName, CellValueMap cellValueMap) {
 
         List<String> rowValues = new ArrayList<>();
-        rowValues.add(CellFormat.toRightSizedCell(rowName, CellSize.calculateRowNameCellSize()));
+        rowValues.add(CellFormat.toRightSizedCell(rowName, CellSize.calculateRowKeyCellSize()));
 
         String firstKey = cellValueMap.getFirstKey();
         int numBeats = getBeatsPerMeasureFromKey(firstKey);

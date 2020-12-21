@@ -82,7 +82,7 @@ public class GridRow implements Iterable<GridCell> {
 
     private String toRightSizedRowName(String rowName) {
         String fittedContent;
-        int colSize = CellSize.calculateRowNameCellSize();
+        int colSize = CellSize.calculateRowKeyCellSize();
         if ( rowName.length() > colSize ) {
             fittedContent = rowName.substring(0, colSize);
         } else {

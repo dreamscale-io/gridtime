@@ -9,10 +9,14 @@ import com.dreamscale.gridtime.api.grid.GridStatus
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto
 import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
+import com.dreamscale.gridtime.api.journal.IntentionInputDto
+import com.dreamscale.gridtime.api.journal.JournalEntryDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
 import com.dreamscale.gridtime.api.organization.SubscriptionInputDto
 import com.dreamscale.gridtime.api.project.CreateProjectInputDto
+import com.dreamscale.gridtime.api.project.CreateTaskInputDto
 import com.dreamscale.gridtime.api.project.ProjectDto
+import com.dreamscale.gridtime.api.project.TaskDto
 import com.dreamscale.gridtime.api.status.Status
 import com.dreamscale.gridtime.api.team.TeamDto
 import com.dreamscale.gridtime.api.terminal.*
@@ -638,7 +642,6 @@ class TerminalResourceSpec extends Specification {
         assert results != null
     }
 
-    @Ignore
     def "should goto specific grid tile"() {
         given:
 
@@ -657,87 +660,60 @@ class TerminalResourceSpec extends Specification {
         NewFlowBatchDto batch = aRandom.flowBatch().timeSent(gridClock.now()).build();
         flowClient.publishBatch(batch)
 
+        ProjectDto proj = journalClient.findOrCreateProject(new CreateProjectInputDto("proj", "proj", false))
+        TaskDto task = journalClient.findOrCreateTask(proj.getId().toString(), new CreateTaskInputDto("task", "task", false))
+        JournalEntryDto intention = journalClient.createIntention(new IntentionInputDto("intention", proj.getId(), task.getId()))
+
+        gridTimeEngine.configureDoneAfterTicks(1000)
         gridTimeEngine.setAutorun(false)
         gridTimeEngine.start()
 
+        LocalDateTime runUntil = gridClock.now().plusDays(1);
+
         SystemCmd systemCmd = gridTimeEngine.getSystemCmd()
-        systemCmd.runCalendarUntil(gridClock.now().plusDays(3))
+        systemCmd.runCalendarUntil(runUntil)
 
-        //I need an intention, and some published data to get the torchie cursor to load
+        TorchieCmd torchieCmd = gridTimeEngine.getTorchieCmd(loginStatus.getMemberId())
+        torchieCmd.runProgramUntil(runUntil)
 
-        TorchieCmd cmd = gridTimeEngine.getTorchieCmd(loginStatus.getMemberId())
+        GridTableResults table = torchieCmd.playTile()
+        println table
 
-        cmd.runProgram()
-
-        println "CALENDAR DONE!"
-
-
-        //runProgramForTickCount()
-
-        //claim on submitToLiveQueue if not already claimed, reject if claimed by another server, but okay if claimed by this server
-
-        //manually, has it load the torchie without a claim, without submitting to the queue, but giving back a handle
-        //first submitToLiveQueue creates a claim, this way, we can configure the program to run how we want before submitting,
-        //or just do manual stuff.
-
-        //but if I don't have a claim, it's possible during this time, another torchie could be spun up,
-        //so maybe I claim this one when I get the command, even though its not in queue?  It will expire if it gets abandonded
-        //it will expire if it gets evicted too.
-
-        //why is torchie still trying to run?
-
-        //autorun should be disabled, calendar seems to be running anyway?
-
-        //maybe do some wtfs here
-
-        //so what I want to be able to do isn't pause, but block the automated process, pulling,
-        //be able to run an empty engine, so I can load manually with my own work that I want to run.
-
-        //disable auto-run.
-        //be able to manual enable jobs.
-        //then start one torchie via cmd, and run to completion.
-        //if the torchie is already running, the additional cmd requests would go in the queue,
-        //and the Cmd wrapper would handle any required sync and locking requirements for coordinating
-        //with a potentially running process.  For the most part, if all I'm doing is queuing instructions,
-        //they would run in sync on the engine.
-
-        //but I should be able to add monitor jobs, and feedback loops, triggers, and so forth.
-        //triggers should be able to connect to the talk network, send a message over a terminal circuit, or via notifications
-        //so there should be a notification target for the response of the instruction, whenever its done
-
-        //in general torchieCmd should be a sync wrapper that interfaces with the engine and lets you do stuff
-
-        //lets remove the pause commands since it's not really what I want to do
-
-        //gtconfig autorun off
-
-        //watch for tag {tagname} then notify circuit /wtf/{wtfname}
-        //watch for threshold wtf > .70 / day
-        //watch for box {component}
-
-        //then the thing I'm trying to test is the ability to goto a tile, and see the detail
-        //but I need an easy way to configure the data loading and generation of a tile for testing
-
-        //the cmd should be able to create tile reprocessing jobs?
-
-
-
-        println "DONNE!"
-        //cmd runUntil (tile)
+        GeometryClock.GridTime day = GeometryClock.createGridTime(ZoomLevel.DAY, circuit1.getOpenTime());
 
         when:
 
         TerminalCircuitDto circuit = terminalClient.createCircuit()
 
-        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", "BLOCK"))
+        TalkMessageDto queryResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.SELECT, "top", "wtfs", "in", day.getFormattedCoords()))
 
         GridTableResults results = (GridTableResults) queryResult.getData();
 
-        println results.toDisplayString()
+        println results
+        String cellValue = results.getCell(0, 2);
+
+        TalkMessageDto gotoLocResults = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GOTO, cellValue))
+
+        GridTableResults tile = (GridTableResults) gotoLocResults.getData();
+
+        println tile
+
+        GridTableResults tile2
+
+        for (int i = 0; i < 5; i++) {
+            TalkMessageDto nextResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.PAN, "right"))
+
+            tile2 = (GridTableResults) nextResult.getData();
+
+            println tile2
+        }
 
         then:
-        assert queryResult != null
-        assert results.getRowsOfPaddedCells().size() == 2
+
+        assert tile != null
+        assert tile2 != null
+        assert tile.size() == 6; //has wtf track
+        assert tile2.size() == 5; //no wtf
     }
 
     def "should get terminal help manual"() {
@@ -802,30 +778,6 @@ class TerminalResourceSpec extends Specification {
         return accountClient.activate(new ActivationCodeDto(inviteKey))
     }
 
-    private String inviteToOrgWithEmail(String email) {
-
-        String activationToken = null;
-
-        1 * mockEmailCapability.sendDownloadActivateAndOrgInviteEmail(_, _, _) >> { emailAddr, org, token -> activationToken = token; return null}
-
-        inviteToClient.inviteToActiveOrganization(new EmailInputDto(email))
-
-        return activationToken;
-    }
-
-    private OrganizationSubscriptionDto createSubscriptionAndValidateEmail(String domain, String ownerEmail) {
-        SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)
-
-        String validateToken = null;
-
-        1 * mockEmailCapability.sendEmailToValidateOrgEmailAddress(_, _) >> { emailAddr, token -> validateToken = token; return null}
-
-        OrganizationSubscriptionDto dreamScaleSubscription = subscriptionClient.createSubscription(dreamScaleSubscriptionInput)
-
-        invitationClient.useInvitationKey(new InvitationKeyInputDto(validateToken))
-
-        return dreamScaleSubscription;
-    }
 
     private OrganizationSubscriptionDto createSubscription(String domain, String ownerEmail) {
         SubscriptionInputDto dreamScaleSubscriptionInput = createSubscriptionInput(domain, ownerEmail)

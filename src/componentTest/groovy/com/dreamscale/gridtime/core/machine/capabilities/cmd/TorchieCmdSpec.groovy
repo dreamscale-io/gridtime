@@ -289,16 +289,16 @@ class TorchieCmdSpec extends Specification {
         assert firstTile != null;
         assert secondTile != null;
 
-        assert firstTile.getCell("@flow/learning", "20.1") == "prg^"
+        assert firstTile.getCell("@flow/learn", "20.1") == "prg^"
 
         assert firstTile.getQuarterCell("@flow/modify", "20.1") == "543.0"
         assert firstTile.getQuarterCell("@flow/modify", "20.6") == "563.0"
         assert firstTile.getQuarterCell("@flow/modify", "20.11") == "563.0"
         assert firstTile.getQuarterCell("@flow/modify", "20.16") == "563.0"
 
-        assert secondTile.getCell("@flow/learning", "20.1") == "prg"
-        assert secondTile.getCell("@flow/learning", "20.6") == "lrn^"
-        assert secondTile.getCell("@flow/learning", "20.20") == "lrn"
+        assert secondTile.getCell("@flow/learn", "20.1") == "prg"
+        assert secondTile.getCell("@flow/learn", "20.6") == "lrn^"
+        assert secondTile.getCell("@flow/learn", "20.20") == "lrn"
 
         assert secondTile.getQuarterCell("@flow/modify", "20.1") == "563.0"
         assert secondTile.getQuarterCell("@flow/modify", "20.6") == "20.0"

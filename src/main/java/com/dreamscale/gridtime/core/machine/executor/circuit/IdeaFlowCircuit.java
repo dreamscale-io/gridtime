@@ -98,7 +98,7 @@ public class IdeaFlowCircuit implements Worker, Notifier {
         isProgramHalted = false;
     }
 
-    public void abortProgram() {
+    public void abortAndClearProgram() {
         program = null;
         nextProgram = null;
 
@@ -141,7 +141,7 @@ public class IdeaFlowCircuit implements Worker, Notifier {
                 circuitMonitor.updateMetronomeTickPosition(program.getActiveTick());
             }
 
-        } else {
+        } else if (!isProgramHalted) {
             fireProgramDoneTriggers();
             gotoNextProgram();
         }
@@ -168,8 +168,6 @@ public class IdeaFlowCircuit implements Worker, Notifier {
             nextProgram = null;
         }
     }
-
-
 
     private void updateQueueDepth() {
         int programQueueDepth = 0;

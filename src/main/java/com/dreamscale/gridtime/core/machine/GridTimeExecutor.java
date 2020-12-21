@@ -44,8 +44,9 @@ public class GridTimeExecutor {
         if (isGameLoopRunning.get()) {
             isGameLoopRunning.set(false);
 
-            waitForDone();
             workPile.shutdown();
+
+            waitForDone();
 
             return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown in progress.");
         } else {
@@ -107,8 +108,10 @@ public class GridTimeExecutor {
 
         try {
             if (gameLoopFuture != null) {
+                log.debug("Waiting for game loop exit");
                 gameLoopFuture.get();
 
+                log.debug("Game loop complete");
                 gameLoopFuture = null;
             }
 
@@ -152,10 +155,12 @@ public class GridTimeExecutor {
     private void stopIfConditionMet(long currentTimeMillis) {
         if (stopAfterTicks > 0 && ticks >= stopAfterTicks) {
             isGameLoopRunning.set(false);
+            workPile.shutdown();
         }
 
         if (stopAfterTime > 0 && (currentTimeMillis - executorStartTime) >= stopAfterTime) {
             isGameLoopRunning.set(false);
+            workPile.shutdown();
         }
     }
 

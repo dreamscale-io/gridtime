@@ -87,6 +87,9 @@ public class GridTimeWorkPile implements WorkPile {
 
     @Override
     public void shutdown() {
+        log.debug("Workpile SHUTDOWN");
+        systemWorkPile.shutdown();
+        plexerWorkPile.shutdown();
         torchieWorkPile.shutdown();
     }
 

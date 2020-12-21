@@ -116,13 +116,24 @@ public class SystemWorkPile implements WorkPile {
 
     @Override
     public void reset() {
-        whatsNextWheel.clear();
+        shutdown();
         createSystemWorkers();
 
         lastSyncCheck = null;
         peekInstruction = null;
+        autorun = true;
 
         paused = false;
+    }
+
+    @Override
+    public void shutdown() {
+        calendarCircuit.abortAndClearProgram();
+        dashboardCircuit.abortAndClearProgram();
+
+        whatsNextWheel.clear();
+
+        peekInstruction = null;
     }
 
     private void updateHeartbeatOfRunningPrograms(LocalDateTime now) {
@@ -257,7 +268,7 @@ public class SystemWorkPile implements WorkPile {
 
         public void abortCalendarProgram() {
             if (calendarCircuit.isProgramRunning()) {
-                calendarCircuit.abortProgram();
+                calendarCircuit.abortAndClearProgram();
             }
         }
 

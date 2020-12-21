@@ -10,11 +10,11 @@ public enum FeatureRowKey implements Key {
 
     FLOW_FEELS("@flow/feels"),
     FLOW_WTF("@flow/wtf"),
-    FLOW_LEARNING("@flow/learning"),
+    FLOW_LEARNING("@flow/learn"),
 
     WORK_PROJECT("@work/project"),
     WORK_TASK("@work/task"),
-    WORK_INTENTION("@work/intention"),
+    WORK_INTENTION("@work/intent"),
 
     NAV_BOX("@nav/box"),
     NAV_BRIDGE("@nav/bridge"),

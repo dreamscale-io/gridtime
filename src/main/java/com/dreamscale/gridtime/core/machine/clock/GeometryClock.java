@@ -4,12 +4,14 @@ import com.dreamscale.gridtime.api.grid.Observable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
 import java.util.Arrays;
 
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
+@Slf4j
 public class GeometryClock {
 
     private GridTime activeGridTime;
@@ -221,8 +223,10 @@ public class GeometryClock {
             return new Integer[0];
         }
 
-        public boolean equals(GridTime o) {
-            return formattedGridTime.equals(o.formattedGridTime);
+        @Override
+        public boolean equals(Object o) {
+            GridTime gt = (GridTime) o;
+            return formattedGridTime.equals(gt.formattedGridTime);
         }
 
         public Duration getRelativeTime(LocalDateTime moment) {
@@ -426,6 +430,10 @@ public class GeometryClock {
 
         public String getFormattedCoords() {
             return formattedCoords;
+        }
+
+        public String toString() {
+            return getFormattedGridTime();
         }
     }
 }

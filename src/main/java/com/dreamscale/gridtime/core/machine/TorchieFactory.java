@@ -61,15 +61,6 @@ public class TorchieFactory {
         return wireUpMemberTorchie(organizationId, memberId, DefaultCollections.toList(teamId), startingPosition, startingPosition.plusYears(1));
     }
 
-
-    /**
-     * Run Torchie without an effective end date
-     */
-    public Torchie wireUpMemberTorchie(UUID organizationId, UUID memberId, List<UUID> teamIds, LocalDateTime startingPosition) {
-
-        return wireUpMemberTorchie(organizationId, memberId, teamIds, startingPosition, startingPosition.plusYears(1));
-    }
-
     /**
      * Run Torchie with a date range
      */
@@ -78,9 +69,9 @@ public class TorchieFactory {
         PerProcessTorchieState torchieState = new PerProcessTorchieState(organizationId, memberId, teamIds, featureCache,
                 boxResolver, featureResolverService, tileSearchService);
 
-        Program program = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition, runUntilPosition);
+        Program defaultProgram = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition, runUntilPosition);
 
-        Torchie torchie = new Torchie(memberId, torchieState, program);
+        Torchie torchie = new Torchie(memberId, torchieState, defaultProgram);
 
         torchie.configureOutputStreamEventWire(workToDoWire);
 
