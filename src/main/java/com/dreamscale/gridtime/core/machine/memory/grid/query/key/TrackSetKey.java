@@ -11,6 +11,7 @@ public enum TrackSetKey implements Key {
     Navigations("@nav");
 
     private final String name;
+    private final boolean required = true;
 
     TrackSetKey(String name) {
         this.name = name;

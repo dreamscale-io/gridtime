@@ -4,4 +4,6 @@ public interface Key {
 
     String getName();
 
+    boolean isRequired();
+
 }

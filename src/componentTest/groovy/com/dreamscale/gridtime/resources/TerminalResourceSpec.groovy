@@ -712,8 +712,8 @@ class TerminalResourceSpec extends Specification {
 
         assert tile != null
         assert tile2 != null
-        assert tile.size() == 6; //has wtf track
-        assert tile2.size() == 5; //no wtf
+        assert tile.size() == 8;
+        assert tile2.size() == 8;
     }
 
     def "should get terminal help manual"() {

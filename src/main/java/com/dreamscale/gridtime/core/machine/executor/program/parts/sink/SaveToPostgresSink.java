@@ -202,7 +202,7 @@ public class SaveToPostgresSink implements SinkStrategy {
 
         CellValueMap cellValueMap = row.toCellValueMap();
 
-        if (cellValueMap.size() > 0) {
+        if (cellValueMap.size() > 0 || row.getRowKey().isRequired()) {
 
             gridRowEntity = new GridRowEntity();
             gridRowEntity.setId(UUID.randomUUID());

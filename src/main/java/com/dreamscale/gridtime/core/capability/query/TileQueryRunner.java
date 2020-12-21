@@ -87,7 +87,7 @@ public class TileQueryRunner {
         //let me change the data type to a subclass, and then test the serialization next
         for (GridRowEntity rowEntity : rows) {
                 CellValueMap cellValueMap = JSONTransformer.fromJson(rowEntity.getJson(), CellValueMap.class);
-                List<String> formattedRow = toFormattedRow(rowEntity.getRowName(), cellValueMap);
+                List<String> formattedRow = toFormattedRow(tileLocation.getZoomLevel(), rowEntity.getRowName(), cellValueMap);
             rowsWithPaddedCells.add(formattedRow);
 
         }
@@ -95,13 +95,17 @@ public class TileQueryRunner {
         return new GridTableResults(title, headerRow, rowsWithPaddedCells);
     }
 
-    private List<String> toFormattedRow(String rowName, CellValueMap cellValueMap) {
+    private List<String> toFormattedRow(ZoomLevel zoomLevel, String rowName, CellValueMap cellValueMap) {
 
         List<String> rowValues = new ArrayList<>();
         rowValues.add(CellFormat.toRightSizedCell(rowName, CellSize.calculateRowKeyCellSize()));
 
-        String firstKey = cellValueMap.getFirstKey();
-        int numBeats = getBeatsPerMeasureFromKey(firstKey);
+        int numBeats = zoomLevel.getInnerBeats();
+
+        if (cellValueMap.size() > 0) {
+            String firstKey = cellValueMap.getFirstKey();
+            numBeats = getBeatsPerMeasureFromKey(firstKey);
+        }
 
         Beat[] beats = Beat.getFlyweightBeats(numBeats);
 

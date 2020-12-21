@@ -5,29 +5,31 @@ import lombok.Getter;
 
 @Getter
 public enum MetricRowKey implements Observable, Key {
-    EXECUTION_RUN_TIME("@exec/runtime"),
-    EXECUTION_CYCLE_TIME("@exec/cycletime"),
-    FILE_TRAVERSAL_VELOCITY("@nav/speed"),
-    MODIFICATION_COUNT("@nav/modify"),
-    FOCUS_WEIGHT("@nav/focus"),
-    FEELS("@flow/feels"),
-    IS_WTF("@flow/wtf"),
-    FLOW_MODS("@flow/modify"),
-    IS_LEARNING("@flow/learn"),
-    IS_PROGRESS("@flow/prog"),
-    IS_PAIRING("@auth/pair"),
+    EXECUTION_RUN_TIME("@exec/runtime", false),
+    EXECUTION_CYCLE_TIME("@exec/cycletime", false),
+    FILE_TRAVERSAL_VELOCITY("@nav/speed", false),
+    MODIFICATION_COUNT("@nav/modify", false),
+    FOCUS_WEIGHT("@nav/focus", false),
+    FEELS("@flow/feels", true),
+    IS_WTF("@flow/wtf", false),
+    FLOW_MODS("@flow/modify", false),
+    IS_LEARNING("@flow/learn", false),
+    IS_PROGRESS("@flow/prog", false),
+    IS_PAIRING("@auth/pair", false),
 
-    ZOOM_DURATION_IN_TILE("@zoom/time"),
-    ZOOM_AVG_FLAME("@zoom/feels"),
-    ZOOM_PERCENT_WTF("@zoom/wtf"),
-    ZOOM_PERCENT_LEARNING("@zoom/learn"),
-    ZOOM_PERCENT_PAIRING("@zoom/pair"),
-    ZOOM_PERCENT_PROGRESS("@zoom/prog");
+    ZOOM_DURATION_IN_TILE("@zoom/time", true),
+    ZOOM_AVG_FLAME("@zoom/feels", true),
+    ZOOM_PERCENT_WTF("@zoom/wtf", true),
+    ZOOM_PERCENT_LEARNING("@zoom/learn", true),
+    ZOOM_PERCENT_PAIRING("@zoom/pair", true),
+    ZOOM_PERCENT_PROGRESS("@zoom/prog", true);
 
-    private String name;
+    private final String name;
+    private final boolean required;
 
-    MetricRowKey(String name) {
+    MetricRowKey(String name, boolean isRequired) {
         this.name = name;
+        this.required = isRequired;
     }
 
     @Override
