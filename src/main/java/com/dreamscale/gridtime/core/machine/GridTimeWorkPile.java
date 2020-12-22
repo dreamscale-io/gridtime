@@ -47,6 +47,10 @@ public class GridTimeWorkPile implements WorkPile {
         return torchieWorkPile.getTorchieCmd(torchieId);
     }
 
+    public void releaseTorchieCmd(TorchieCmd cmd) {
+        torchieWorkPile.releaseTorchieCmd(cmd);
+    }
+
     public SystemCmd getSystemCmd() {
         return systemWorkPile.getSystemCmd();
     }
@@ -155,6 +159,7 @@ public class GridTimeWorkPile implements WorkPile {
     public void clear() {
         torchieWorkPile.clear();
     }
+
 
 
 }

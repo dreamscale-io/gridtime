@@ -642,7 +642,7 @@ class TerminalResourceSpec extends Specification {
         assert results != null
     }
 
-    def "should goto specific grid tile"() {
+    def "should goto and explore generated grid tiles"() {
         given:
 
         AccountActivationDto artyProfile = register("arty@dreamscale.io");
@@ -678,6 +678,8 @@ class TerminalResourceSpec extends Specification {
 
         GridTableResults table = torchieCmd.playTile()
         println table
+
+        gridTimeEngine.releaseTorchieCmd(torchieCmd)
 
         GeometryClock.GridTime day = GeometryClock.createGridTime(ZoomLevel.DAY, circuit1.getOpenTime());
 

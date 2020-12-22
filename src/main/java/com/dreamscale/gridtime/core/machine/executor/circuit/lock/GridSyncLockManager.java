@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+
 @Slf4j
 @Component
 public class GridSyncLockManager {
@@ -18,32 +20,16 @@ public class GridSyncLockManager {
     @Autowired
     LockRepository lockRepository;
 
+    @Autowired
+    EntityManager entityManager;
+
     private void releaseSyncLock(Long lockNumber) {
         boolean success = lockRepository.releaseLock(lockNumber);
 
         if (!success) {
             log.error("Unable to release lock "+lockNumber);
         }
-
-        int tries = 0;
-        try {
-            while (!success && tries < 10) {
-                success = lockRepository.releaseLock(lockNumber);
-
-                if (success) {
-                    break;
-                } else {
-                    log.debug("Lock release failed, retrying");
-                    Thread.sleep(100);
-                }
-                tries++;
-            }
-        } catch (InterruptedException ex) {
-            log.error("Interrupted", ex);
-         }
-
     }
-
 
     private void tryToAcquireSyncLock(Long lockNumber) {
 
@@ -65,6 +51,8 @@ public class GridSyncLockManager {
         } catch (InterruptedException ex) {
             log.error("Interrupted", ex);
         }
+
+        entityManager.flush();
 
         if (!lockAcquired) {
             throw new UnableToLockException("Unable to acquire worker lock after 10 tries");

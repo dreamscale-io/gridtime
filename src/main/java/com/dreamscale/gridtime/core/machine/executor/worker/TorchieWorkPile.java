@@ -6,8 +6,10 @@ import com.dreamscale.gridtime.core.domain.flow.FlowActivityRepository;
 import com.dreamscale.gridtime.core.domain.journal.IntentionEntity;
 import com.dreamscale.gridtime.core.domain.journal.IntentionRepository;
 import com.dreamscale.gridtime.core.domain.member.*;
+import com.dreamscale.gridtime.core.domain.work.ClaimType;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
+import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.TorchieFactory;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
@@ -22,13 +24,11 @@ import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDa
 import com.dreamscale.gridtime.core.machine.executor.dashboard.MonitorType;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -68,30 +68,19 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     @Autowired
     private TorchieFactory torchieFactory;
 
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-
-    private EntityManager entityManager;
-
     private LocalDateTime lastSyncCheck;
     private TickInstructions peekInstruction;
 
     private final WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
     private final Duration syncInterval = Duration.ofMinutes(5);
-    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(10);
+    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(300);
 
     private static final int MAX_TORCHIES = 10;
     private boolean paused = false;
     private boolean autorun = true;
 
-    private UUID serverClaimId = UUID.randomUUID();
-
-    @PostConstruct
-    void init() {
-        entityManager = entityManagerFactory.createEntityManager();
-    }
-
+    public static final UUID SERVER_CLAIM_ID = UUID.randomUUID();
 
     @Transactional
     public void sync() {
@@ -121,8 +110,14 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         List<UUID> purged = whatsNextWheel.purgeEvicted(now);
 
         for (UUID workerId : purged) {
+            log.debug("Purging!");
             circuitActivityDashboard.evictMonitor(workerId);
-            expireClaim(workerId);
+
+            TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(workerId);
+            log.debug(cursor.toString());
+            if (ClaimType.AUTO.equals(cursor.getClaimType())) {
+                expireClaim(workerId);
+            }
         }
 
     }
@@ -140,6 +135,7 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         torchieFeedCursorRepository.save(cursorUpdates);
     }
 
+    @Transactional
     public TorchieCmd getTorchieCmd(UUID torchieId) {
 
         Torchie torchie = (Torchie) whatsNextWheel.getWorker(torchieId);
@@ -148,7 +144,22 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
             torchie = loadTorchie(torchieId);
         }
 
+        LocalDateTime now = gridClock.now();
+        manuallyLockTorchie(now, torchie);
+
         return new TorchieCmd(this, torchie);
+    }
+
+    @Transactional
+    public void releaseTorchieCmd(TorchieCmd cmd) {
+        UUID torchieId = cmd.getTorchieId();
+
+        Worker worker = whatsNextWheel.getWorker(torchieId);
+        if (worker != null) {
+            worker.abortAndClearProgram();
+        }
+
+        evictWorker(torchieId);
     }
 
     @Override
@@ -161,39 +172,53 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         if (whatsNextWheel.contains(torchieId)) {
             whatsNextWheel.unmarkForEviction(torchieId);
         } else {
-            lockAndClaimTorchie(now, torchie);
+            refreshClaimAndSubmitToQueue(now, torchie);
         }
-
     }
 
-    protected void lockAndClaimTorchie(LocalDateTime now, Torchie torchie) {
+    private void manuallyLockTorchie(LocalDateTime now, Torchie torchie) {
 
         UUID torchieId = torchie.getTorchieId();
-
-        entityManager.getTransaction().begin();
 
         gridSyncLockManager.tryToAcquireTorchieSyncLock();
         try {
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
-            if (cursor != null) {
-                log.debug("Claiming "+ cursor.getTorchieId() + " with "+serverClaimId);
+            validateCursorFound(cursor);
+            validateUnclaimedOrAlreadyClaimed(cursor);
 
-                cursor.setClaimingServerId(serverClaimId);
-                cursor.setLastClaimUpdate(now);
+            log.debug("Claiming "+ cursor.getTorchieId() + " with "+ SERVER_CLAIM_ID);
 
-                TorchieFeedCursorEntity updated = torchieFeedCursorRepository.save(cursor);
-            }
-            circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
-            whatsNextWheel.addWorker(torchieId, torchie);
+            cursor.setClaimingServerId(SERVER_CLAIM_ID);
+            cursor.setLastClaimUpdate(now);
+            cursor.setClaimType(ClaimType.MANUAL);
+
+            torchieFeedCursorRepository.save(cursor);
+
         } catch (Exception ex) {
             log.error("Unable to claim torchie", ex);
         } finally {
             gridSyncLockManager.releaseTorchieSyncLock();
         }
-
-        entityManager.getTransaction().commit();
-
     }
+
+    @Transactional
+    protected void refreshClaimAndSubmitToQueue(LocalDateTime now, Torchie torchie) {
+
+        UUID torchieId = torchie.getTorchieId();
+
+        TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
+
+        validateCursorFound(cursor);
+        validateCursorClaimedByServer(cursor);
+
+        cursor.setLastClaimUpdate(now);
+        torchieFeedCursorRepository.save(cursor);
+
+        circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
+        whatsNextWheel.addWorker(torchieId, torchie);
+    }
+
+
 
     private void claimTorchiesReadyForProcessing(LocalDateTime now) {
         log.debug ("claimTorchiesReadyForProcessing = torchies = " + whatsNextWheel.size());
@@ -251,10 +276,11 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
         for (TorchieFeedCursorEntity cursor : unclaimedTorchies) {
 
-            log.debug("Claiming "+ cursor.getTorchieId() + " with "+serverClaimId);
+            log.debug("Claiming "+ cursor.getTorchieId() + " with "+ SERVER_CLAIM_ID);
 
-            cursor.setClaimingServerId(serverClaimId);
+            cursor.setClaimingServerId(SERVER_CLAIM_ID);
             cursor.setLastClaimUpdate(now);
+            cursor.setClaimType(ClaimType.AUTO);
 
             TorchieFeedCursorEntity updated = torchieFeedCursorRepository.save(cursor);
 
@@ -268,9 +294,29 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
     private Torchie loadTorchie(UUID torchieId) {
         TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
-
+        validateCursorFound(cursor);
         return loadTorchie(cursor);
     }
+
+    private void validateCursorFound(TorchieFeedCursorEntity cursor) {
+        if (cursor == null) {
+            throw new BadRequestException(ValidationErrorCodes.NO_CURSOR_FOUND, "Torchie can't be loaded, no cursor found to process.");
+        }
+    }
+
+    private void validateCursorClaimedByServer(TorchieFeedCursorEntity cursor) {
+        if (cursor.getClaimingServerId() == null || !SERVER_CLAIM_ID.equals(cursor.getClaimingServerId())) {
+            log.debug(cursor.toString());
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROCESS_CLAIM, "The server has no valid claim to run this process.");
+        }
+    }
+
+    private void validateUnclaimedOrAlreadyClaimed(TorchieFeedCursorEntity cursor) {
+        if (cursor.getClaimingServerId() != null && !SERVER_CLAIM_ID.equals(cursor.getClaimingServerId())) {
+            throw new BadRequestException(ValidationErrorCodes.INVALID_PROCESS_CLAIM, "The server has no valid claim to run this process.");
+        }
+    }
+
 
     private Torchie loadTorchie(TorchieFeedCursorEntity cursor) {
         List<UUID> teamIds = loadTeamIds(cursor.getOrganizationId(), cursor.getTorchieId());
@@ -343,7 +389,8 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
     @Transactional
     protected void expireClaim(UUID torchieId) {
-       torchieFeedCursorRepository.expireClaim(torchieId);
+        log.debug("Expiring claim for "+torchieId);
+        torchieFeedCursorRepository.expireClaim(torchieId);
     }
 
 

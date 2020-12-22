@@ -105,6 +105,10 @@ public class GridTimeEngine {
         }
     }
 
+    public void releaseTorchieCmd(TorchieCmd cmd) {
+        gridTimeWorkPile.releaseTorchieCmd(cmd);
+    }
+
     public SystemCmd getSystemCmd() {
         if (gridTimeExecutor.isRunning()) {
             return gridTimeWorkPile.getSystemCmd();
@@ -150,6 +154,7 @@ public class GridTimeEngine {
         reset();
         return new SimpleStatusDto(Status.SUCCESS, "Gridtime shutdown and all feed data purged.");
     }
+
 
 
 }

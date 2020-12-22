@@ -1,20 +1,18 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd;
 
-import com.dreamscale.gridtime.api.grid.Results;
+import com.dreamscale.gridtime.api.grid.GridTableResults;
+import com.dreamscale.gridtime.core.machine.Torchie;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
-import com.dreamscale.gridtime.core.machine.Torchie;
-import com.dreamscale.gridtime.api.grid.GridTableResults;
-import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.executor.circuit.NotifySeeTrigger;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.circuit.now.WatcherType;
 import com.dreamscale.gridtime.core.machine.executor.worker.LiveQueue;
-import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 public class TorchieCmd extends SyncCmd {
@@ -25,6 +23,10 @@ public class TorchieCmd extends SyncCmd {
     public TorchieCmd(LiveQueue liveTorchieQueue, Torchie torchie) {
         this.liveTorchieQueue = liveTorchieQueue;
         this.torchie = torchie;
+    }
+
+    public UUID getTorchieId() {
+        return torchie.getTorchieId();
     }
 
     public void runProgram() {

@@ -102,9 +102,9 @@ class ZoomableTeamIdeaFlowLocasSpec extends Specification {
         teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member2.getId())
         teamCapability.addMemberToTeamWithMemberId(org.getId(), member1.getId(), "Team23", member3.getId())
 
-        aRandom.torchieFeedCursor().torchieId(member1.getId()).save()
-        aRandom.torchieFeedCursor().torchieId(member2.getId()).save()
-        aRandom.torchieFeedCursor().torchieId(member3.getId()).save()
+        aRandom.torchieFeedCursor().torchieId(member1.getId()).claimingServerId(torchieWorkPile.SERVER_CLAIM_ID).save()
+        aRandom.torchieFeedCursor().torchieId(member2.getId()).claimingServerId(torchieWorkPile.SERVER_CLAIM_ID).save()
+        aRandom.torchieFeedCursor().torchieId(member3.getId()).claimingServerId(torchieWorkPile.SERVER_CLAIM_ID).save()
 
         ideaFlowTeamAggregatorLocas = locasFactory.createIdeaFlowTeamAggregatorLocas(team.getId());
 

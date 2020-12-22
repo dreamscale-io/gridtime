@@ -145,13 +145,19 @@ public class SystemWorkPile implements WorkPile {
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
 
-        CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
-
-        runCalendarProgram(now, jobDescriptor);
+        if (!calendarCircuit.isProgramRunning()) {
+            CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
+            runCalendarProgram(now, jobDescriptor);
+        }
     }
 
     private synchronized void runCalendarProgram(LocalDateTime now, CalendarJobDescriptor jobDescriptor) {
-        if ( !calendarCircuit.isProgramRunning() && calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
+        if (calendarCircuit.isProgramRunning()) {
+            log.warn("Calendar program already running.");
+            return;
+        }
+
+        if ( calendarGeneratorJob.hasWorkToDo(jobDescriptor) ) {
 
             UUID workerId = calendarCircuit.getWorkerId();
 

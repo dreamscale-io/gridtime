@@ -48,14 +48,14 @@ public interface TorchieFeedCursorRepository extends CrudRepository<TorchieFeedC
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = "update torchie_feed_cursor " +
-            "set claiming_server_id = null "+
+            "set claiming_server_id = null, claim_type = null "+
             "where torchie_id = (:torchieId) ")
     void expireClaim(@Param("torchieId") UUID torchieId);
 
     @Modifying
     @Transactional
     @Query(nativeQuery = true, value = "update torchie_feed_cursor " +
-            "set claiming_server_id = null "+
+            "set claiming_server_id = null, claim_type = null "+
             "where claiming_server_id is not null and last_claim_update < (:expireBeforeDate) ")
     void expireZombieTorchies(@Param("expireBeforeDate") Timestamp expireBeforeDate);
 

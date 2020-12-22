@@ -16,6 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class TorchieFeedCursorEntity {
 
     @Id
@@ -42,5 +43,8 @@ public class TorchieFeedCursorEntity {
     private LocalDateTime lastClaimUpdate;
 
     private Integer failureCount;
+
+    @Enumerated(EnumType.STRING)
+    private ClaimType claimType;
 }
 

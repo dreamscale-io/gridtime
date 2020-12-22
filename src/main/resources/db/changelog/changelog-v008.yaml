@@ -56,3 +56,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/refactor_tile_data.sql
+
+  - include:
+      file: db/v008/alter_feed_cursor_add_claim_type.sql
