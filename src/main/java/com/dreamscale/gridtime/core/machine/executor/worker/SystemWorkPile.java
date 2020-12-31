@@ -62,11 +62,6 @@ public class SystemWorkPile implements WorkPile {
     private int daysToKeepAhead = 365; //block, year, tiles aren't saved until the end,
 
 
-    @PostConstruct
-    private void init() {
-        createSystemWorkers();
-    }
-
     private void createSystemWorkers() {
         //create one per process type, these never get evicted
 
@@ -127,9 +122,21 @@ public class SystemWorkPile implements WorkPile {
     }
 
     @Override
+    public void start() {
+        shutdown();
+        createSystemWorkers();
+        lastSyncCheck = null;
+        paused = false;
+    }
+
+    @Override
     public void shutdown() {
-        calendarCircuit.abortAndClearProgram();
-        dashboardCircuit.abortAndClearProgram();
+        if (calendarCircuit != null) {
+            calendarCircuit.abortAndClearProgram();
+        }
+        if (dashboardCircuit != null) {
+            dashboardCircuit.abortAndClearProgram();
+        }
 
         whatsNextWheel.clear();
 

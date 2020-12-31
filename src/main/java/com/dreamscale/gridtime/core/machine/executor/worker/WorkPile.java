@@ -19,4 +19,6 @@ public interface WorkPile {
     int size();
 
     default void shutdown() {}
+
+    default void start() {}
 }

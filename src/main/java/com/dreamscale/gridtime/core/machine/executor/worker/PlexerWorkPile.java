@@ -34,14 +34,8 @@ public class PlexerWorkPile implements WorkPile {
     private static final int DEFAULT_NUMBER_PLEXER_WORKERS = 5;
 
     private int currentPoolSize;
-    private WhatsNextWheel whatsNextWheel;
+    private WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
     private boolean paused = false;
-
-    @PostConstruct
-    public void init() {
-        this.currentPoolSize = DEFAULT_NUMBER_PLEXER_WORKERS;
-        this.whatsNextWheel = createWhatsNextWheel(currentPoolSize);
-    }
 
     private WhatsNextWheel createWhatsNextWheel(int initialPoolSize) {
 
@@ -67,6 +61,8 @@ public class PlexerWorkPile implements WorkPile {
     @Override
     public void reset() {
         shutdown();
+
+        currentPoolSize = DEFAULT_NUMBER_PLEXER_WORKERS;
         whatsNextWheel = createWhatsNextWheel(currentPoolSize);
 
         peekInstruction = null;
@@ -74,9 +70,16 @@ public class PlexerWorkPile implements WorkPile {
     }
 
     @Override
+    public void start() {
+        reset();
+    }
+
+    @Override
     public void shutdown() {
         whatsNextWheel.abortAllPrograms();
         whatsNextWheel.clear();
+
+        currentPoolSize = 0;
 
         peekInstruction = null;
     }

@@ -56,7 +56,9 @@ public class FlowPublisher {
 
         saveEvents(memberId, timeAdjustment, batch.getEventList());
 
-        bookmarkService.updateLastPublishedData(memberId, lastActivityDate);
+        if (lastActivityDate != null) {
+            bookmarkService.updateLastPublishedData(memberId, lastActivityDate);
+        }
     }
 
     private LocalDateTime saveActivity(UUID memberId, Duration timeAdjustment, Activity activity) {

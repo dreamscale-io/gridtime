@@ -113,7 +113,7 @@ public class TileQueryRunner {
         gridLocation.setTileResults(tileResults);
 
         GridTableResults featureTable = toFeatureTable(featureMap);
-        
+
         return gridLocation;
     }
 

@@ -62,6 +62,8 @@ public class GridTimeExecutor {
 
             gameLoopFuture = executorPool.submit(new GameLoopRunner());
 
+            workPile.start();
+
             status = GridStatus.RUNNING;
 
             return new SimpleStatusDto(Status.SUCCESS, "Gridtime engine starting.");
