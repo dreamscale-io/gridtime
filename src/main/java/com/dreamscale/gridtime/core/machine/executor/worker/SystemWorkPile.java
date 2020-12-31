@@ -93,8 +93,6 @@ public class SystemWorkPile implements WorkPile {
         if (lastSyncCheck == null || now.isAfter(lastSyncCheck.plus(syncInterval))) {
             lastSyncCheck = now;
 
-            log.info("synchronizing system work");
-
             gridSyncLockManager.tryToAcquireSystemJobSyncLock();
 
             try {

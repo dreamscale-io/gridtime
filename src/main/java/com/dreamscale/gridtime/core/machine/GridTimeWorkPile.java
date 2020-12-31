@@ -33,6 +33,8 @@ public class GridTimeWorkPile implements WorkPile {
     @Autowired
     private PlexerWorkPile plexerWorkPile;
 
+    private boolean hasStatusUpdate = false;
+
     public boolean hasWork() {
 
         systemWorkPile.sync();
@@ -131,7 +133,7 @@ public class GridTimeWorkPile implements WorkPile {
         //TODO create the ability to kill jobs
 
 
-        if (circuitActivityDashboard.tickAndCheckIfNeedsRefresh()) {
+        if (circuitActivityDashboard.checkIfNeedsRefresh(hasStatusUpdate)) {
             systemWorkPile.submitWork(ProcessType.Dashboard, circuitActivityDashboard.generateRefreshTick());
         }
 
@@ -145,6 +147,12 @@ public class GridTimeWorkPile implements WorkPile {
 
         if (instructions == null && torchieWorkPile.hasWork()) {
             instructions = torchieWorkPile.whatsNext();
+        }
+
+        if (instructions != null) {
+            hasStatusUpdate = true;
+        } else {
+            hasStatusUpdate = false;
         }
 
         return instructions;

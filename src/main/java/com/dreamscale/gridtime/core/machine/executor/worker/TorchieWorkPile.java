@@ -109,8 +109,11 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
         List<UUID> purged = whatsNextWheel.purgeEvicted(now);
 
+        if (purged.size() > 0) {
+            log.debug("Purging "+purged.size() + " torchies.");
+        }
+
         for (UUID workerId : purged) {
-            log.debug("Purging!");
             circuitActivityDashboard.evictMonitor(workerId);
 
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(workerId);
