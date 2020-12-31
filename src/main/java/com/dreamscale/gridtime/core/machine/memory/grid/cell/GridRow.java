@@ -72,9 +72,10 @@ public class GridRow implements Iterable<GridCell> {
             String value = cell.toValueCell().trim();
 
             List<UUID> refs = cell.getFeatureRefs();
+            List<String> glyphs = cell.getFeatureGlyphs();
 
             if (value.length() > 0) {
-                cellValueMap.put(beat, new CellValue(value, refs));
+                cellValueMap.put(beat, new CellValue(value, refs, glyphs));
             }
         }
         return cellValueMap;

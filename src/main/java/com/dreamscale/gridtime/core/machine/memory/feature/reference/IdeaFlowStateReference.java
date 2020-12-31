@@ -35,4 +35,9 @@ public class IdeaFlowStateReference extends FeatureReference {
         }
         return "?";
     }
+
+    @Override
+    public String getDescription() {
+        return getIdeaFlowStateType().name();
+    }
 }

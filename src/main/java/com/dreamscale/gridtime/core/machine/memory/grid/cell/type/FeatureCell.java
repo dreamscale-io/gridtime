@@ -6,12 +6,14 @@ import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellSize;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Getter
 public class FeatureCell<F extends FeatureReference> implements GridCell {
 
@@ -25,7 +27,7 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
     private F feature;
     private List<F> features;
     private List<FeatureTag<F>> tags;
-    private List<String> featureShorthands;
+    private List<String> featureGlyphs;
 
     public FeatureCell(RelativeBeat beat, F feature, List<FeatureTag<F>> tags) {
         this.beat = beat;
@@ -43,9 +45,9 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         this.defaultCellSizeForBeat = CellSize.calculateCellSize(beat);
     }
 
-    public FeatureCell(RelativeBeat beat, List<F> features, List<String> featureShorthands, List<FeatureTag<F>> tags) {
+    public FeatureCell(RelativeBeat beat, List<F> features, List<String> featureGlyphs, List<FeatureTag<F>> tags) {
         this(beat, features, tags);
-        this.featureShorthands = featureShorthands;
+        this.featureGlyphs = featureGlyphs;
     }
 
     public String toHeaderCell() {
@@ -97,7 +99,6 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
                 refs.add(feature.getFeatureId());
             }
         }
-
         return refs;
     }
 
@@ -162,7 +163,7 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         String str = "";
         for (int i = 0; i < features.size(); i++) {
             F feature = features.get(i);
-            String shorthand = getFeatureShorthand(i);
+            String shorthand = getFeatureGlyph(i);
 
             if (shorthand != null) {
                 str += shorthand;
@@ -182,11 +183,16 @@ public class FeatureCell<F extends FeatureReference> implements GridCell {
         return str;
     }
 
-    private String getFeatureShorthand(int i) {
-        if (featureShorthands != null) {
-            return featureShorthands.get(i);
+    private String getFeatureGlyph(int i) {
+        if (featureGlyphs != null) {
+            return featureGlyphs.get(i);
         }
         return null;
+    }
+
+    @Override
+    public List<String> getFeatureGlyphs() {
+        return featureGlyphs;
     }
 
     private String toAllTagString() {

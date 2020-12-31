@@ -35,8 +35,8 @@ class JSONTransformerSpec extends Specification {
         CellValueMap map = new CellValueMap();
         List<UUID> featureList = DefaultCollections.toList(UUID.randomUUID())
 
-        map.put("20.1", new CellValue("wtf", featureList))
-        map.put("20.2", new CellValue("wtf*", featureList))
+        map.put("20.1", new CellValue("wtf", featureList, null))
+        map.put("20.2", new CellValue("wtf*", featureList, null))
 
         when:
         String json = JSONTransformer.toJson(map);

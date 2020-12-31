@@ -40,4 +40,8 @@ public interface GridCell extends Observable {
             return null;
         }
     }
+
+    default List<String> getFeatureGlyphs() {
+        return null;
+    }
 }

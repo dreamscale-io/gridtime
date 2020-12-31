@@ -27,7 +27,7 @@ public class FeelsReference extends FeatureReference {
     @Override
     public void resolve(UUID id, FeatureDetails details) {
         if (details == null) {
-            throw new RuntimeException("Resolving feels reference witthout dettails");
+            throw new RuntimeException("Resolving feels reference witthout details");
         }
 
         super.resolve(id, details);
@@ -36,5 +36,10 @@ public class FeelsReference extends FeatureReference {
     @Override
     public String toDisplayString() {
         return ((FeelsRatingDetails) getDetails()).toDisplayString();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Feels "+getFlameRating();
     }
 }

@@ -46,6 +46,17 @@ public class ExecutionReference extends FeatureReference {
         return "?";
     }
 
+    @Override
+    public String getDescription() {
+        String description = getProcessName();
+
+        return description;
+    }
+
+    public String getProcessName() {
+        return ((ExecutionEvent)getDetails()).getProcessName();
+    }
+
     public LocalDateTime getPosition() {
         return ((ExecutionEvent)getDetails()).getPosition();
     }

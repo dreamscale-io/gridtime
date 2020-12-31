@@ -710,6 +710,8 @@ class TerminalResourceSpec extends Specification {
             println tile2
         }
 
+        gridTimeEngine.shutdown()
+
         then:
 
         assert tile != null

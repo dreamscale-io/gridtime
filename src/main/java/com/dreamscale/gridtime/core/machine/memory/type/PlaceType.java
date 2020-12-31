@@ -2,6 +2,9 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.IdeaFlowStateReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import org.springframework.web.util.UriTemplate;
 
 import java.util.LinkedHashSet;
@@ -66,6 +69,11 @@ public enum PlaceType implements FeatureType {
     @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
         return serializationClass;
+    }
+
+    @Override
+    public FeatureReference createReference(String searchKey, FeatureDetails details) {
+        return new PlaceReference(this, searchKey, details);
     }
 
     @Override

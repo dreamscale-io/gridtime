@@ -4,9 +4,11 @@ import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.memory.type.FeatureType;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 
+@Slf4j
 @Getter
 public abstract class FeatureReference implements Cloneable, Observable {
 
@@ -46,4 +48,6 @@ public abstract class FeatureReference implements Cloneable, Observable {
     }
 
     public abstract String toDisplayString();
+
+    public abstract String getDescription();
 }

@@ -3,7 +3,10 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.returns.*;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.IdeaFlowStateReference;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UriTemplate;
 
@@ -102,6 +105,11 @@ public enum CmdType implements FeatureType {
 
     @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
+        return null;
+    }
+
+    @Override
+    public FeatureReference createReference(String searchKey, FeatureDetails details) {
         return null;
     }
 

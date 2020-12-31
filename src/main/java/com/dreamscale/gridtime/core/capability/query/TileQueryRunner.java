@@ -1,5 +1,7 @@
 package com.dreamscale.gridtime.core.capability.query;
 
+import com.dreamscale.gridtime.api.grid.Feature;
+import com.dreamscale.gridtime.api.grid.GridLocation;
 import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitRepository;
@@ -13,6 +15,8 @@ import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.clock.*;
 import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellSize;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellValue;
@@ -22,9 +26,7 @@ import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -52,6 +54,9 @@ public class TileQueryRunner {
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository;
 
+    @Autowired
+    FeatureResolverService featureResolverService;
+
 
     public GridTableResults runQuery(QueryTarget queryTarget, GridtimeExpression tileLocation) {
 
@@ -65,12 +70,18 @@ public class TileQueryRunner {
 
         String title = "Tile "+ tileLocation.getFormattedExpression() + " for "+queryTarget.getTargetType() + " "+ queryTarget.getTargetName();
 
+        log.debug("Retrieving "+title);
 
-        return createTable(title, tileLocation, rows);
+        GridLocation location = createGridLocation(title, queryTarget.getOrganizationId(), tileLocation, rows);
+
+        return location.getTileResults();
 
     }
 
-    private GridTableResults createTable(String title, GridtimeExpression tileLocation, List<GridRowEntity> rows) {
+    private GridLocation createGridLocation(String title, UUID organizationId, GridtimeExpression tileLocation, List<GridRowEntity> rows) {
+
+        GridLocation gridLocation = new GridLocation();
+
         List<String> headerRow = new ArrayList<>();
         headerRow.add(CellFormat.toRightSizedCell("ID", CellSize.calculateRowKeyCellSize()));
 
@@ -85,14 +96,60 @@ public class TileQueryRunner {
         List<List<String>> rowsWithPaddedCells = new ArrayList<>();
 
         //let me change the data type to a subclass, and then test the serialization next
+
+        Map<UUID, Feature> featureMap = new LinkedHashMap<>();
+
         for (GridRowEntity rowEntity : rows) {
                 CellValueMap cellValueMap = JSONTransformer.fromJson(rowEntity.getJson(), CellValueMap.class);
+
+                lookupFeaturesAndAddToMap(organizationId, featureMap, cellValueMap);
+
                 List<String> formattedRow = toFormattedRow(tileLocation.getZoomLevel(), rowEntity.getRowName(), cellValueMap);
             rowsWithPaddedCells.add(formattedRow);
 
         }
 
-        return new GridTableResults(title, headerRow, rowsWithPaddedCells);
+        GridTableResults tileResults = new GridTableResults(title, headerRow, rowsWithPaddedCells);
+        gridLocation.setTileResults(tileResults);
+
+        GridTableResults featureTable = toFeatureTable(featureMap);
+        
+        return gridLocation;
+    }
+
+    private GridTableResults toFeatureTable(Map<UUID, Feature> featureMap) {
+
+        return null;
+    }
+
+    private Map<UUID, Feature> lookupFeaturesAndAddToMap(UUID organizationId, Map<UUID, Feature> featureMap, CellValueMap cellValueMap) {
+
+        for (Map.Entry<String, CellValue> cellEntry : cellValueMap.getRowValues().entrySet()) {
+            List<UUID> refs = cellEntry.getValue().getRefs();
+            List<String> glyphs = cellEntry.getValue().getGlyphRefs();
+
+            if (refs != null) {
+                for (int i = 0; i < refs.size(); i++) {
+                    UUID ref = refs.get(i);
+                    if (!featureMap.containsKey(ref)) {
+                        FeatureReference reference = featureResolverService.lookupById(organizationId, ref);
+                        if (reference != null) {
+                            String glyph = null;
+                            if (glyphs != null && i < glyphs.size()) {
+                                glyph = glyphs.get(i);
+                            }
+                            Feature feature = new Feature(ref, reference.getFeatureType().name(), glyph, reference.getDescription(), cellEntry.getKey());
+
+                            featureMap.put(ref, feature);
+                        } else {
+                            log.warn("Unable to map feature ref in column "+cellEntry.getKey() + " value: "+cellEntry.getValue().getVal());
+                        }
+                    }
+                }
+            }
+        }
+        return featureMap;
+
     }
 
     private List<String> toFormattedRow(ZoomLevel zoomLevel, String rowName, CellValueMap cellValueMap) {

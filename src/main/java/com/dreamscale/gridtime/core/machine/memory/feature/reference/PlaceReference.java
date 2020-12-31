@@ -124,4 +124,9 @@ public class PlaceReference extends FeatureReference {
     public String toDisplayString() {
         return getSearchKey();
     }
+
+    @Override
+    public String getDescription() {
+        return getSearchKey();
+    }
 }

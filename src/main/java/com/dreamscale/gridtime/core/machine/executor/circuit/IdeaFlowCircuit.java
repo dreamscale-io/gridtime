@@ -73,7 +73,7 @@ public class IdeaFlowCircuit implements Worker, Notifier {
         //generates instructions for actively firing triggers
     }
 
-    public void runProgram(Program program) {
+    public synchronized void runProgram(Program program) {
         if (this.program == null) {
             this.program = program;
             log.debug("Running program: "+program.getName());
@@ -98,7 +98,8 @@ public class IdeaFlowCircuit implements Worker, Notifier {
         isProgramHalted = false;
     }
 
-    public void abortAndClearProgram() {
+    public synchronized void abortAndClearProgram() {
+
         program = null;
         nextProgram = null;
 
@@ -111,7 +112,6 @@ public class IdeaFlowCircuit implements Worker, Notifier {
         notifyWhenProgramFailsTriggers.clear();
     }
 
-
     public void runParallelProgram(UUID programId, ParallelProgram parallelProgram) {
         parallelPrograms.put(programId, parallelProgram);
     }
@@ -120,7 +120,7 @@ public class IdeaFlowCircuit implements Worker, Notifier {
         parallelPrograms.remove(programId);
     }
 
-    public TickInstructions whatsNext() {
+    public synchronized TickInstructions whatsNext() {
 
         TickInstructions nextInstruction = null;
 
@@ -160,7 +160,7 @@ public class IdeaFlowCircuit implements Worker, Notifier {
     }
 
 
-    private void gotoNextProgram() {
+    private synchronized void gotoNextProgram() {
         program = null;
 
         if (nextProgram != null) {

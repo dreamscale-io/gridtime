@@ -10,7 +10,13 @@ import java.util.UUID;
 
 public class FeatureReferenceFactory {
 
-    public static final String UNKNOWN = "[UNKNOWN]";
+    public FeatureReference createResolvedFeatureReference(UUID featureId, FeatureType featureType, String searchKey, FeatureDetails details) {
+
+        FeatureReference reference = featureType.createReference(searchKey, details);
+        reference.resolve(featureId, details);
+
+        return reference;
+    }
 
     public IdeaFlowStateReference createWTFReference(CircuitDetails circuitDetails) {
 
@@ -39,9 +45,6 @@ public class FeatureReferenceFactory {
         return new PlaceReference(PlaceType.LOCATION, location.toSearchKey(), location);
     }
 
-    public PlaceReference createResolvedBoxReference(UUID featureId, Box boxDetails) {
-        return new PlaceReference(featureId, PlaceType.BOX, boxDetails);
-    }
 
     public PlaceReference createBoxReference(UUID projectId, String boxName) {
         Box box = new Box(projectId, boxName);
@@ -98,15 +101,6 @@ public class FeatureReferenceFactory {
             return new ExecutionReference(ExecutionEventType.APP, executionEvent.toSearchKey(), executionEvent);
         }
     }
-
-    private String serialize(FeatureDetails feature) {
-        return JSONTransformer.toJson(feature);
-    }
-
-    private FeatureDetails deserialize(String json, Class<? extends FeatureDetails> serializationClass) {
-        return JSONTransformer.fromJson(json, serializationClass);
-    }
-
 
     public AuthorsReference createAuthorsReference(AuthorsDetails authorsDetails) {
        int numberAuthors = authorsDetails.getAuthors().size();

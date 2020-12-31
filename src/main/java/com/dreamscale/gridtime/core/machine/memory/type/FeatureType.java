@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.api.grid.Observable;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 
 import java.util.Map;
 import java.util.Set;
@@ -30,4 +31,6 @@ public interface FeatureType extends Observable {
         }
         return null;
     }
+
+    FeatureReference createReference(String searchKey, FeatureDetails details);
 }

@@ -2,6 +2,9 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.AuthorsReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import org.springframework.web.util.UriTemplate;
 
 import java.util.LinkedHashSet;
@@ -62,6 +65,10 @@ public enum AuthorsType implements FeatureType {
         return serializationClass;
     }
 
+    @Override
+    public FeatureReference createReference(String searchKey, FeatureDetails details) {
+        return new AuthorsReference(this, searchKey, (AuthorsDetails) details);
+    }
 
     @Override
     public String toDisplayString() {

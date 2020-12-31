@@ -18,10 +18,10 @@ truncate table grid_calendar cascade ;
 truncate table talk_room cascade ;
 truncate table talk_room_message cascade ;
 truncate table talk_room_member cascade ;
-truncate table work_item_to_aggregate cascade ;
 
 truncate table grid_idea_flow_metrics cascade ;
 truncate table grid_box_metrics cascade ;
+truncate table grid_row;
 truncate table gridtime_system_job_claim cascade ;
 
 truncate table learning_circuit;
@@ -42,3 +42,5 @@ truncate table grid_feature;
 truncate table terminal_circuit;
 truncate table terminal_circuit_command_history;
 truncate table terminal_circuit_location_history;
+
+truncate table work_item_to_aggregate ; --this table is deadlocking during the tests, so put at end for now

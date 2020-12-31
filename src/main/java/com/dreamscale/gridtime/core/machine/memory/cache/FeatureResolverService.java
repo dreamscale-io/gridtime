@@ -51,23 +51,24 @@ public class FeatureResolverService {
         return boxNameA != null && boxNameA.equals(boxNameB);
     }
 
-    public PlaceReference lookupBox(UUID organizationId, UUID boxFeatureId) {
+    public FeatureReference lookupById(UUID organizationId, UUID featureId) {
 
-        GridFeatureEntity boxFeatureEntity = gridFeatureRepository.findByOrganizationIdAndId(organizationId, boxFeatureId);
+        GridFeatureEntity featureEntity = gridFeatureRepository.findByOrganizationIdAndId(organizationId, featureId);
 
-        if (boxFeatureEntity != null) {
-            FeatureType featureType = lookupFeatureType(boxFeatureEntity.getTypeUri());
+        if (featureEntity != null) {
+            FeatureType featureType = lookupFeatureType(featureEntity.getTypeUri());
 
-            Box box = (Box) deserialize(boxFeatureEntity.getJson(), featureType.getSerializationClass());
+            FeatureDetails details = deserialize(featureEntity.getJson(), featureType.getSerializationClass());
 
-            return featureFactory.createResolvedBoxReference(boxFeatureId, box);
+            return featureFactory.createResolvedFeatureReference(featureId, featureType, featureEntity.getSearchKey(), details);
         }
 
+        log.warn("Feature not found with id :"+featureId);
         return null;
     }
 
-    public void resolve(UUID organizationId, FeatureReference originalReference) {
 
+    public void resolve(UUID organizationId, FeatureReference originalReference) {
         if (!originalReference.isResolved()) {
 
             synchronized (this) {
@@ -92,7 +93,6 @@ public class FeatureResolverService {
         } else {
 
             String json = serialize(originalReference.getDetails());
-            log.info("json = " + json);
             GridFeatureEntity newFeature = new GridFeatureEntity(
                     originalReference.getFeatureId(),
                     organizationId,
@@ -100,14 +100,13 @@ public class FeatureResolverService {
                     originalReference.getSearchKey(),
                     json);
 
-
             entityManager.getTransaction().begin();
 
             gridFeatureRepository.save(newFeature);
 
             entityManager.getTransaction().commit();
 
-            log.info("Created Feature Reference " + originalReference.getSearchKey());
+            log.debug("Created Feature Reference " + originalReference.getSearchKey());
 
             originalReference.resolve();
         }
@@ -133,6 +132,7 @@ public class FeatureResolverService {
             return null;
         }
     }
+
 
 
 }

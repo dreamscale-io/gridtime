@@ -1,9 +1,13 @@
 package com.dreamscale.gridtime.core.machine.memory.type;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
+import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.WorkContext;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.StructureLevel;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.IdeaFlowStateReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.WorkContextReference;
 import org.springframework.web.util.UriTemplate;
 
 import java.util.LinkedHashSet;
@@ -76,6 +80,11 @@ public enum WorkContextType implements FeatureType {
                 return INTENTION_WORK;
         }
         return null;
+    }
+
+    @Override
+    public FeatureReference createReference(String searchKey, FeatureDetails details) {
+        return new WorkContextReference(this, searchKey, (WorkContext) details);
     }
 
     @Override

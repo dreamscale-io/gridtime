@@ -108,7 +108,7 @@ public class RoomOperator {
     }
 
     private boolean isUUID(String talkRoomName) {
-        return (talkRoomName.length() == 36);
+        return (talkRoomName.length() == 36 && !talkRoomName.contains("_"));
     }
 
     private TalkMessageDto sendRoomMessage(String urn, UUID messageId, LocalDateTime now, Long nanoTime, UUID fromMemberId, UUID roomId, String chatMessage) {

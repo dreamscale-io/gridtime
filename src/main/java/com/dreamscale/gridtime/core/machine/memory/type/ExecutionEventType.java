@@ -3,6 +3,9 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.ExecutionEvent;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference;
 import org.springframework.web.util.UriTemplate;
 
 import java.util.LinkedHashSet;
@@ -56,6 +59,11 @@ public enum ExecutionEventType implements FeatureType {
     @Override
     public Class<? extends FeatureDetails> getSerializationClass() {
         return serializationClass;
+    }
+
+    @Override
+    public FeatureReference createReference(String searchKey, FeatureDetails details) {
+        return new ExecutionReference(this, searchKey, (ExecutionEvent) details);
     }
 
     @Override

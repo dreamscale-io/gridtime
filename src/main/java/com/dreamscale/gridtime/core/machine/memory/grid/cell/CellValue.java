@@ -15,4 +15,5 @@ import java.util.UUID;
 public class CellValue {
     String val;
     List<UUID> refs;
+    List<String> glyphRefs;
 }
