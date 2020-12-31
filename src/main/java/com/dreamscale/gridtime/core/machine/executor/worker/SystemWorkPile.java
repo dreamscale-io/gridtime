@@ -61,6 +61,7 @@ public class SystemWorkPile implements WorkPile {
 
     private int daysToKeepAhead = 365; //block, year, tiles aren't saved until the end,
 
+    private boolean isInitialized = false;
 
     private void createSystemWorkers() {
         //create one per process type, these never get evicted
@@ -81,6 +82,7 @@ public class SystemWorkPile implements WorkPile {
         activityDashboard.addMonitor(MonitorType.SYSTEM_DASHBOARD, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
         whatsNextWheel.addWorker(dashboardWorkerId, dashboardCircuit);
 
+        isInitialized = true;
     }
 
     public void configureDaysToKeepAhead(int days) {
@@ -143,14 +145,14 @@ public class SystemWorkPile implements WorkPile {
 
     private void updateHeartbeatOfRunningPrograms(LocalDateTime now) {
 
-        if (calendarCircuit.isProgramRunning()) {
+        if (isInitialized && calendarCircuit.isProgramRunning()) {
             systemExclusiveJobClaimManager.updateHeartbeat(now, calendarCircuit.getWorkerId());
         }
     }
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
 
-        if (!calendarCircuit.isProgramRunning()) {
+        if (isInitialized && !calendarCircuit.isProgramRunning()) {
             CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
             runCalendarProgram(now, jobDescriptor);
         }

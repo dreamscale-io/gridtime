@@ -55,16 +55,14 @@ public class CircuitActivityDashboard {
         }
     }
 
-    public boolean checkIfNeedsRefresh(boolean hasStatusUpdate) {
+    public boolean checkIfNeedsRefresh() {
         ticksSinceLastRefresh++;
 
         if (ticksSinceLastRefresh > TICKS_BETWEEN_REFRESH) {
 
             ticksSinceLastRefresh = 0;
 
-            if (hasStatusUpdate) {
-                return true;
-            }
+            return true;
         }
 
         return false;
