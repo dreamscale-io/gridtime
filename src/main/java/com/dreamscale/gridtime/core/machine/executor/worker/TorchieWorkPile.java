@@ -429,6 +429,13 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     }
 
     @Override
+    public void shutdown() {
+        evictAll();
+        peekInstruction = null;
+        lastSyncCheck = null;
+    }
+
+    @Override
     public void pause() {
         paused = true;
     }
