@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.machine;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.SystemCmd;
 import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.executor.circuit.ProcessType;
+import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.RefreshDashboardTick;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
 import com.dreamscale.gridtime.core.machine.executor.dashboard.CircuitActivityDashboard;
 import com.dreamscale.gridtime.core.machine.executor.worker.*;
@@ -159,7 +160,7 @@ public class GridTimeWorkPile implements WorkPile {
             updatesSinceLastRefresh = 0;
         }
 
-        if (instructions != null) {
+        if (instructions != null && !(instructions instanceof RefreshDashboardTick)) {
             updatesSinceLastRefresh++;
         }
 
