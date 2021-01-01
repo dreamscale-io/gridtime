@@ -290,7 +290,7 @@ public class CircuitActivityDashboard {
                 CircuitActivitySummaryRow row = rowEntry.getValue();
 
                 if (!rowsInTable.containsKey(workerId) && rowType.equals(monitorType)) {
-                    row.setProcessStatus(ProcessStatus.INACTIVE);
+                    row.setProcessStatus(ProcessStatus.FINISHED);
                     rowsInTable.put(workerId, row);
                 }
             }
@@ -321,7 +321,7 @@ public class CircuitActivityDashboard {
                 CircuitActivitySummaryRow row = rowEntry.getValue();
 
                 if (!rowsInTable.containsKey(workerId)) {
-                    row.setProcessStatus(ProcessStatus.INACTIVE);
+                    row.setProcessStatus(ProcessStatus.FINISHED);
                     rowsInTable.put(workerId, row);
                 }
             }
