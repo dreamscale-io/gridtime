@@ -74,7 +74,7 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     private final WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
 
     private final Duration syncInterval = Duration.ofMinutes(5);
-    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(300);
+    private final Duration expireWhenStaleMoreThan = Duration.ofMinutes(10);
 
     private static final int MAX_TORCHIES = 10;
     private boolean paused = false;
@@ -95,10 +95,10 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
                 initializeMissingTorchies(now);
                 if (autorun) {
                     claimTorchiesReadyForProcessing(now);
+                    purgeEvictedTorchies(now);
+                    expireZombieTorchies(now);
                 }
                 updateKeepAliveOnClaimedTorchies(now);
-                purgeEvictedTorchies(now);
-                expireZombieTorchies(now);
             } finally {
                 gridSyncLockManager.releaseTorchieSyncLock();
             }
