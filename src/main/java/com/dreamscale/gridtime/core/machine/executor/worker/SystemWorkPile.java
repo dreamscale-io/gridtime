@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -61,7 +60,7 @@ public class SystemWorkPile implements WorkPile {
 
     private int daysToKeepAhead = 365; //block, year, tiles aren't saved until the end,
 
-    private boolean isInitialized = false;
+    private boolean isStarted = false;
 
     private void createSystemWorkers() {
         //create one per process type, these never get evicted
@@ -81,8 +80,6 @@ public class SystemWorkPile implements WorkPile {
 
         activityDashboard.addMonitor(MonitorType.SYSTEM_DASHBOARD, dashboardCircuit.getWorkerId(), dashboardCircuit.getCircuitMonitor());
         whatsNextWheel.addWorker(dashboardWorkerId, dashboardCircuit);
-
-        isInitialized = true;
     }
 
     public void configureDaysToKeepAhead(int days) {
@@ -112,53 +109,57 @@ public class SystemWorkPile implements WorkPile {
     @Override
     public void reset() {
         shutdown();
-        createSystemWorkers();
+        start();
 
-        lastSyncCheck = null;
-        peekInstruction = null;
         autorun = true;
-
-        paused = false;
     }
 
     @Override
     public void start() {
-        shutdown();
-        createSystemWorkers();
+        if (!isStarted) {
+            createSystemWorkers();
+            isStarted = true;
+        }
+
         lastSyncCheck = null;
+        peekInstruction = null;
         paused = false;
     }
 
     @Override
     public void shutdown() {
-        if (calendarCircuit != null) {
+        if (isStarted) {
             calendarCircuit.abortAndClearProgram();
-        }
-        if (dashboardCircuit != null) {
             dashboardCircuit.abortAndClearProgram();
+            whatsNextWheel.clear();
         }
 
-        whatsNextWheel.clear();
-
+        isStarted = false;
+        lastSyncCheck = null;
         peekInstruction = null;
+        paused = false;
     }
 
     private void updateHeartbeatOfRunningPrograms(LocalDateTime now) {
 
-        if (isInitialized && calendarCircuit.isProgramRunning()) {
+        if (isStarted && calendarCircuit.isProgramRunning()) {
             systemExclusiveJobClaimManager.updateHeartbeat(now, calendarCircuit.getWorkerId());
         }
     }
 
     private void spinUpCalendarProgramIfNeeded(LocalDateTime now) {
 
-        if (isInitialized && !calendarCircuit.isProgramRunning()) {
+        if (isStarted && !calendarCircuit.isProgramRunning()) {
             CalendarJobDescriptor jobDescriptor = calendarGeneratorJob.createJobDescriptor(now, daysToKeepAhead);
             runCalendarProgram(now, jobDescriptor);
         }
     }
 
     private synchronized void runCalendarProgram(LocalDateTime now, CalendarJobDescriptor jobDescriptor) {
+        if (!isStarted) {
+            log.warn("Can't run program, engine not started.");
+            return;
+        }
         if (calendarCircuit.isProgramRunning()) {
             log.warn("Calendar program already running.");
             return;
