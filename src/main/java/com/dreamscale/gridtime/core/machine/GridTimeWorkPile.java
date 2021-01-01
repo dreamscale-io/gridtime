@@ -33,7 +33,7 @@ public class GridTimeWorkPile implements WorkPile {
     @Autowired
     private PlexerWorkPile plexerWorkPile;
 
-    private boolean updatedSinceLastRefresh = false;
+    private int updatesSinceLastRefresh = 0;
 
     public boolean hasWork() {
 
@@ -68,6 +68,7 @@ public class GridTimeWorkPile implements WorkPile {
         torchieWorkPile.reset();
         plexerWorkPile.reset();
 
+        updatesSinceLastRefresh++;
     }
 
     @Override
@@ -97,6 +98,17 @@ public class GridTimeWorkPile implements WorkPile {
         systemWorkPile.shutdown();
         plexerWorkPile.shutdown();
         torchieWorkPile.shutdown();
+
+        updatesSinceLastRefresh++;
+    }
+
+    @Override
+    public void start() {
+        systemWorkPile.start();
+        plexerWorkPile.start();
+        torchieWorkPile.start();
+
+        updatesSinceLastRefresh++;
     }
 
     public void pauseSystemJobs() {
@@ -128,8 +140,6 @@ public class GridTimeWorkPile implements WorkPile {
 
         //TODO query history table and make grid results, for a certain torchie proc.
 
-        //once I get the system calendar job done, write an integration test at the engine level
-
         //TODO create the ability to kill jobs
 
         if (systemWorkPile.hasWork()) {
@@ -144,15 +154,13 @@ public class GridTimeWorkPile implements WorkPile {
             instructions = torchieWorkPile.whatsNext();
         }
 
-        boolean needsRefresh = circuitActivityDashboard.checkIfNeedsRefresh();
-
-        if (needsRefresh && updatedSinceLastRefresh) {
+        if (circuitActivityDashboard.checkIfNeedsRefresh(updatesSinceLastRefresh)) {
             systemWorkPile.submitWork(ProcessType.Dashboard, circuitActivityDashboard.generateRefreshTick());
-            updatedSinceLastRefresh = false;
+            updatesSinceLastRefresh = 0;
         }
 
         if (instructions != null) {
-            updatedSinceLastRefresh = true;
+            updatesSinceLastRefresh++;
         }
 
 
