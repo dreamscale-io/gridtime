@@ -37,6 +37,8 @@ public class PlexerWorkPile implements WorkPile {
     private WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
     private boolean paused = false;
 
+    private boolean isStarted = false;
+
     private WhatsNextWheel createWhatsNextWheel(int initialPoolSize) {
 
         WhatsNextWheel whatsNextWheel = new WhatsNextWheel();
@@ -61,25 +63,32 @@ public class PlexerWorkPile implements WorkPile {
     @Override
     public void reset() {
         shutdown();
+        start();
+    }
 
-        currentPoolSize = DEFAULT_NUMBER_PLEXER_WORKERS;
-        whatsNextWheel = createWhatsNextWheel(currentPoolSize);
+    @Override
+    public void start() {
+        if (!isStarted) {
+            currentPoolSize = DEFAULT_NUMBER_PLEXER_WORKERS;
+            whatsNextWheel = createWhatsNextWheel(currentPoolSize);
 
+            isStarted = true;
+        }
         peekInstruction = null;
         paused = false;
     }
 
     @Override
-    public void start() {
-        reset();
-    }
-
-    @Override
     public void shutdown() {
-        whatsNextWheel.abortAllPrograms();
-        whatsNextWheel.clear();
+        if (isStarted) {
+            whatsNextWheel.abortAllPrograms();
+            whatsNextWheel.clear();
+            currentPoolSize = 0;
 
-        currentPoolSize = 0;
+            isStarted = false;
+        }
+
+        paused = false;
 
         peekInstruction = null;
     }
