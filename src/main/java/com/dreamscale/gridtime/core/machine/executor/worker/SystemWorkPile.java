@@ -131,6 +131,12 @@ public class SystemWorkPile implements WorkPile {
         if (isStarted) {
             calendarCircuit.abortAndClearProgram();
             dashboardCircuit.abortAndClearProgram();
+
+            Set<UUID> keys = whatsNextWheel.getWorkerKeys();
+            for (UUID workerId: keys) {
+                activityDashboard.evictMonitor(workerId);
+            }
+
             whatsNextWheel.clear();
         }
 

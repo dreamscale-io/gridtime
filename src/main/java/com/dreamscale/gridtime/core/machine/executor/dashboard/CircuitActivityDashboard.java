@@ -55,6 +55,7 @@ public class CircuitActivityDashboard {
         }
     }
 
+
     public boolean checkIfNeedsRefresh(int updatesSinceLastRefresh) {
         ticksSinceLastRefresh++;
 
@@ -107,6 +108,8 @@ public class CircuitActivityDashboard {
     public TickInstructions generateRefreshTick() {
         return new RefreshDashboardTick(this);
     }
+
+
 
     @AllArgsConstructor
     @Getter

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -82,7 +83,14 @@ public class PlexerWorkPile implements WorkPile {
     public void shutdown() {
         if (isStarted) {
             whatsNextWheel.abortAllPrograms();
+
+            Set<UUID> keys = whatsNextWheel.getWorkerKeys();
+            for (UUID workerId: keys) {
+                circuitActivityDashboard.evictMonitor(workerId);
+            }
+
             whatsNextWheel.clear();
+
             currentPoolSize = 0;
 
             isStarted = false;
