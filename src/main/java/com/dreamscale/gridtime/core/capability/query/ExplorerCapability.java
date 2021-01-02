@@ -1,15 +1,13 @@
 package com.dreamscale.gridtime.core.capability.query;
 
+import com.dreamscale.gridtime.api.grid.GridTileDto;
 import com.dreamscale.gridtime.api.query.TileLocationInputDto;
-import com.dreamscale.gridtime.api.grid.GridTableResults;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
-import com.dreamscale.gridtime.core.exception.ValidationErrorCodes;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
-import org.dreamscale.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +35,7 @@ public class ExplorerCapability {
     @Autowired
     TileQueryRunner tileQueryRunner;
 
-    public GridTableResults gotoLocation(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
+    public GridTileDto gotoLocation(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
 
         LocalDateTime now = gridClock.now();
 
@@ -52,12 +50,12 @@ public class ExplorerCapability {
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    private GridTableResults lookupTileAtLocation(QueryTarget queryTarget, GridtimeExpression tileLocation) {
+    private GridTileDto lookupTileAtLocation(QueryTarget queryTarget, GridtimeExpression tileLocation) {
 
         return tileQueryRunner.runQuery(queryTarget, tileLocation);
     }
 
-    public GridTableResults look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+    public GridTileDto look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
 
@@ -71,7 +69,7 @@ public class ExplorerCapability {
     }
 
 
-    public GridTableResults zoomIn(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+    public GridTileDto zoomIn(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
         LocalDateTime now = gridClock.now();
 
@@ -90,7 +88,7 @@ public class ExplorerCapability {
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults zoomOut(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+    public GridTileDto zoomOut(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
         LocalDateTime now = gridClock.now();
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
@@ -108,7 +106,7 @@ public class ExplorerCapability {
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults panLeft(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+    public GridTileDto panLeft(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
         LocalDateTime now = gridClock.now();
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
@@ -126,7 +124,7 @@ public class ExplorerCapability {
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
 
-    public GridTableResults panRight(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+    public GridTileDto panRight(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
         LocalDateTime now = gridClock.now();
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);

@@ -8,7 +8,7 @@ import com.dreamscale.gridtime.api.flow.batch.NewFlowBatchDto
 import com.dreamscale.gridtime.api.grid.GridStatus
 import com.dreamscale.gridtime.api.grid.GridStatusSummaryDto
 import com.dreamscale.gridtime.api.grid.GridTableResults
-import com.dreamscale.gridtime.api.invitation.InvitationKeyInputDto
+import com.dreamscale.gridtime.api.grid.GridTileDto
 import com.dreamscale.gridtime.api.journal.IntentionInputDto
 import com.dreamscale.gridtime.api.journal.JournalEntryDto
 import com.dreamscale.gridtime.api.organization.OrganizationSubscriptionDto
@@ -33,7 +33,6 @@ import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.LocalDateTime
@@ -696,16 +695,16 @@ class TerminalResourceSpec extends Specification {
 
         TalkMessageDto gotoLocResults = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.GOTO, cellValue))
 
-        GridTableResults tile = (GridTableResults) gotoLocResults.getData();
+        GridTileDto tile = (GridTileDto) gotoLocResults.getData();
 
         println tile
 
-        GridTableResults tile2
+        GridTileDto tile2
 
         for (int i = 0; i < 5; i++) {
             TalkMessageDto nextResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.PAN, "right"))
 
-            tile2 = (GridTableResults) nextResult.getData();
+            tile2 = (GridTileDto) nextResult.getData();
 
             println tile2
         }
@@ -716,8 +715,8 @@ class TerminalResourceSpec extends Specification {
 
         assert tile != null
         assert tile2 != null
-        assert tile.size() == 8;
-        assert tile2.size() == 8;
+        assert tile.size() == 14;
+        assert tile2.size() == 11;
     }
 
     def "should get terminal help manual"() {

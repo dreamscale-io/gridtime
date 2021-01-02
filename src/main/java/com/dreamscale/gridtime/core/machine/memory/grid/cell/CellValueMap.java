@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -33,6 +34,10 @@ public class CellValueMap {
             firstKey = rowValues.keySet().iterator().next();
         }
         return firstKey;
+    }
+
+    public Set<String> keySet() {
+        return rowValues.keySet();
     }
 
 

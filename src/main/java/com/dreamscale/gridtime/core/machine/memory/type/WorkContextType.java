@@ -18,7 +18,7 @@ public enum WorkContextType implements FeatureType {
 
     PROJECT_WORK("/project", "/project/{sha}", WorkContext.class),
     TASK_WORK("/task", "/task/{sha}", WorkContext.class),
-    INTENTION_WORK("/intention", "/intention/{sha}", WorkContext.class);
+    INTENTION_WORK("/intent", "/intent/{sha}", WorkContext.class);
 
     //each option stuff
 

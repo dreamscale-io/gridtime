@@ -49,6 +49,18 @@ public class GridTableResults implements Results {
         return rowsOfPaddedCells.size();
     }
 
+    public int getTableWidth() {
+       int width = 0;
+       if (rowsOfPaddedCells.size() > 0) {
+           List<String> firstRow = rowsOfPaddedCells.get(0);
+
+           for (String col : firstRow) {
+               width += col.length() + 1;
+           }
+       }
+       return width;
+    }
+
     private int findRowIndex(String rowKey) {
         for (int i = 0; i < rowsOfPaddedCells.size(); i++) {
             String rowKeyColumn = rowsOfPaddedCells.get(i).get(0);

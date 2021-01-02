@@ -8,6 +8,7 @@ import com.dreamscale.gridtime.core.domain.circuit.LearningCircuitRepository;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.CellFormat;
+import com.dreamscale.gridtime.core.machine.memory.grid.cell.RightSizer;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,31 +63,11 @@ public class TopWTFsQueryRunner {
             valueRows.add(row);
         }
 
-        rightSizeCells(headerRow, valueRows);
+        RightSizer.rightSizeCells(headerRow, valueRows);
 
         return new GridTableResults(title, headerRow, valueRows);
     }
 
-    private void rightSizeCells(List<String> headerRow, List<List<String>> valueRows) {
-        List<Integer> colSizes = new ArrayList<>();
-
-        for (int j = 0;  j < headerRow.size(); j++) {
-
-            int maxColSize = headerRow.get(j).length();
-
-            for (int i = 0; i < valueRows.size(); i++) {
-                maxColSize = Math.max(maxColSize, valueRows.get(i).get(j).length());
-            }
-
-            headerRow.set(j, CellFormat.toRightSizedCell(headerRow.get(j), maxColSize + 1));
-
-            for (int i = 0; i < valueRows.size(); i++) {
-                valueRows.get(i).set(j, CellFormat.toRightSizedCell(valueRows.get(i).get(j), maxColSize + 1));
-            }
-
-            colSizes.add(maxColSize);
-        }
-    }
 
 
     List<String> createHeaderRow() {
