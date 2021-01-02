@@ -3,7 +3,6 @@ package com.dreamscale.gridtime.core.machine.memory.type;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetails;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.FeatureDetails;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.IdeaFlowStateReference;
 import org.springframework.web.util.UriTemplate;

@@ -2,7 +2,7 @@ package com.dreamscale.gridtime.core.machine.memory.grid.landscape;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionEventReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.glyph.GlyphReferences;
 import com.dreamscale.gridtime.core.machine.memory.grid.landscape.metrics.BoxMetrics;
@@ -80,10 +80,10 @@ public class GravityModel {
 
     }
 
-    public void executeInPlace(PlaceReference location, ExecutionReference executionReference) {
+    public void executeInPlace(PlaceReference location, ExecutionEventReference executionEventReference) {
         PlaceReference boxReference = featureCache.lookupBoxReference(location);
 
         BoxMetrics boxMetrics = findOrCreateBoxMetrics(boxReference);
-        boxMetrics.execute(executionReference);
+        boxMetrics.execute(executionEventReference);
     }
 }

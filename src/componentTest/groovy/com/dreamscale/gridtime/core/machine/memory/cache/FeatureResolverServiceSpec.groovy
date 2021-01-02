@@ -6,7 +6,7 @@ import com.dreamscale.gridtime.core.machine.memory.feature.details.AuthorsDetail
 import com.dreamscale.gridtime.core.machine.memory.feature.details.ExecutionEvent
 import com.dreamscale.gridtime.core.machine.memory.feature.details.StructureLevel
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.AuthorsReference
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionEventReference
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeelsReference
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.WorkContextReference
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,9 +49,9 @@ class FeatureResolverServiceSpec extends Specification {
 
     def "should serialize and deserialize all object types"() {
         given:
-        ExecutionReference executionReference = featureCache.lookupExecutionReference(
+        ExecutionEventReference executionReference = featureCache.lookupExecutionReference(
                 new ExecutionEvent(3L, LocalDateTime.now(), Duration.ofSeconds(3)))
-        ExecutionReference executionReference2 = featureCache.lookupExecutionReference(
+        ExecutionEventReference executionReference2 = featureCache.lookupExecutionReference(
                 new ExecutionEvent(3L, LocalDateTime.now(), Duration.ofSeconds(3)))
 
 

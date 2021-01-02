@@ -1,7 +1,6 @@
 package com.dreamscale.gridtime.core.machine.memory.cache;
 
 import com.dreamscale.gridtime.core.machine.memory.type.*;
-import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
 import com.dreamscale.gridtime.core.machine.memory.feature.details.*;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.*;
 
@@ -94,11 +93,11 @@ public class FeatureReferenceFactory {
         return new WorkContextReference(WorkContextType.fromLevel(structureLevel), workContext.toSearchKey(), workContext);
     }
 
-    public ExecutionReference createExecutionReference(ExecutionEvent executionEvent) {
+    public ExecutionEventReference createExecutionReference(ExecutionEvent executionEvent) {
         if (executionEvent.isUnitTest()) {
-            return new ExecutionReference(ExecutionEventType.TEST, executionEvent.toSearchKey(), executionEvent);
+            return new ExecutionEventReference(ExecutionEventType.TEST, executionEvent.toSearchKey(), executionEvent);
         } else {
-            return new ExecutionReference(ExecutionEventType.APP, executionEvent.toSearchKey(), executionEvent);
+            return new ExecutionEventReference(ExecutionEventType.APP, executionEvent.toSearchKey(), executionEvent);
         }
     }
 

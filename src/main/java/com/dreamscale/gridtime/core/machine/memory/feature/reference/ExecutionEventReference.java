@@ -14,14 +14,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class ExecutionReference extends FeatureReference {
+public class ExecutionEventReference extends FeatureReference {
 
 
-    public ExecutionReference(ExecutionEventType eventType, String searchKey) {
+    public ExecutionEventReference(ExecutionEventType eventType, String searchKey) {
         super(UUID.randomUUID(), eventType, searchKey, null, false);
     }
 
-    public ExecutionReference(ExecutionEventType eventType, String searchKey, ExecutionEvent executionEvent) {
+    public ExecutionEventReference(ExecutionEventType eventType, String searchKey, ExecutionEvent executionEvent) {
         super(UUID.randomUUID(), eventType, searchKey, executionEvent, false);
     }
 
@@ -48,7 +48,12 @@ public class ExecutionReference extends FeatureReference {
 
     @Override
     public String getDescription() {
-        String description = getProcessName();
+        String description = getProcessName() + " ("+toDisplayString()+", "+getExecutionTime().getSeconds() + "s";
+
+        if (isDebug()) {
+            description += ", debug";
+        }
+        description += ")";
 
         return description;
     }
@@ -71,5 +76,9 @@ public class ExecutionReference extends FeatureReference {
 
     public boolean isGreen() {
         return ((ExecutionEvent)getDetails()).isGreen();
+    }
+
+    public boolean isDebug() {
+        return ((ExecutionEvent)getDetails()).isDebug();
     }
 }

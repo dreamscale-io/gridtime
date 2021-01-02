@@ -127,6 +127,19 @@ public class PlaceReference extends FeatureReference {
 
     @Override
     public String getDescription() {
+        PlaceType placeType = getPlaceType();
+
+        switch (placeType) {
+            case BOX:
+                return getBoxName();
+            case LOCATION:
+                return getLocationPath();
+            case TRAVERSAL_IN_BOX:
+                return getLocationPathA() + " :: "+getLocationPathB();
+            case BRIDGE_BETWEEN_BOXES:
+                return getBoxNameA() + " :: "+getBoxNameB();
+        }
+
         return getSearchKey();
     }
 }

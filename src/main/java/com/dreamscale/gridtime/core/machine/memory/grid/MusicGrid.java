@@ -162,7 +162,7 @@ public class MusicGrid implements IMusicGrid {
         ideaflowTracks.addModificationSampleForLearningBand(beat, modificationCount);
     }
 
-    public void executeThing(ExecutionReference execution) {
+    public void executeThing(ExecutionEventReference execution) {
         LocalDateTime moment = execution.getPosition();
 
         PlaceReference lastLocation = navigationTracks.getLastLocationBeforeMoment(moment);

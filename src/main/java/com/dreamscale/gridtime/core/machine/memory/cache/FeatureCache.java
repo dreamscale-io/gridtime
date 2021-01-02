@@ -55,10 +55,10 @@ public class FeatureCache {
         return cacheLookup(feelsState);
     }
 
-    public ExecutionReference lookupExecutionReference(ExecutionEvent executionEvent) {
-        ExecutionReference executionReference = featureReferenceFactory.createExecutionReference(executionEvent);
+    public ExecutionEventReference lookupExecutionReference(ExecutionEvent executionEvent) {
+        ExecutionEventReference executionEventReference = featureReferenceFactory.createExecutionReference(executionEvent);
 
-        return cacheLookup(executionReference);
+        return cacheLookup(executionEventReference);
     }
 
     public WorkContextReference lookupDefaultProject() {

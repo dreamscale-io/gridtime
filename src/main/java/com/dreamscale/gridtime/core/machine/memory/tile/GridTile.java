@@ -189,9 +189,9 @@ public class GridTile {
      */
     public void executeThing(ExecutionEvent executionEvent) {
 
-        ExecutionReference executionReference = featureCache.lookupExecutionReference(executionEvent);
+        ExecutionEventReference executionEventReference = featureCache.lookupExecutionReference(executionEvent);
 
-        musicGrid.executeThing(executionReference);
+        musicGrid.executeThing(executionEventReference);
     }
 
     public void finishAfterLoad() {

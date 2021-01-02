@@ -1,7 +1,7 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.landscape.metrics;
 
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
-import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionReference;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.ExecutionEventReference;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.PlaceReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.CandleStick;
 import com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics.GridMetrics;
@@ -67,7 +67,7 @@ public class BoxMetrics {
         boxMetrics.addModificationSample(modificationCount);
     }
 
-    public void execute(ExecutionReference executionReference) {
-        boxMetrics.addExecutionTimeSample(executionReference.getExecutionTime());
+    public void execute(ExecutionEventReference executionEventReference) {
+        boxMetrics.addExecutionTimeSample(executionEventReference.getExecutionTime());
     }
 }
