@@ -23,4 +23,9 @@ public interface GridBoxMetricsRepository extends CrudRepository<GridBoxMetricsE
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_box_metrics")
     void truncate();
+
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from grid_box_metrics where torchie_id=(:torchieId) and calendar_id=(:calendarId)")
+    void deleteByTorchieIdAndCalendarId(@Param("torchieId") UUID torchieId, @Param("calendarId") UUID calendarId);
+
 }

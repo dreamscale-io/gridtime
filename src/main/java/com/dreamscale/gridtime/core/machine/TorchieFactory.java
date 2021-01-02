@@ -71,7 +71,7 @@ public class TorchieFactory {
 
         Program defaultProgram = programFactory.createBaseTileGeneratorProgram(memberId, torchieState, startingPosition, runUntilPosition);
 
-        Torchie torchie = new Torchie(memberId, torchieState, defaultProgram);
+        Torchie torchie = new Torchie(memberId, torchieState, defaultProgram, programFactory);
 
         torchie.configureOutputStreamEventWire(workToDoWire);
 

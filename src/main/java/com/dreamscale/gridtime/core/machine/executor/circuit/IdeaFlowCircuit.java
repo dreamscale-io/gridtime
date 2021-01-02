@@ -121,7 +121,6 @@ public class IdeaFlowCircuit implements Worker, Notifier {
     }
 
     public synchronized TickInstructions whatsNext() {
-
         TickInstructions nextInstruction = null;
 
         if (highPriorityInstructionQueue.size() > 0) {

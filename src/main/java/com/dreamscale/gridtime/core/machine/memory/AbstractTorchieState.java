@@ -126,6 +126,9 @@ public abstract class AbstractTorchieState implements TorchieState {
     @Override
     public abstract void resolveFeatureReferences();
 
+    @Override
+    public abstract TorchieState fork();
+
     protected abstract CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime);
 
 }

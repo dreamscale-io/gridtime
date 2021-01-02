@@ -39,5 +39,7 @@ public interface TorchieState {
 
     void resolveFeatureReferences();
 
+    TorchieState fork();
+
     void monitorWith(Eye eye);
 }

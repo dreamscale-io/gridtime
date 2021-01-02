@@ -98,11 +98,11 @@ public class SourceTileGeneratorProgram implements Program {
     }
 
 
-    private TickInstructions generateBaseTickInstructions(Metronome.TickScope tick) {
+    public TickInstructions generateBaseTickInstructions(Metronome.TickScope tick) {
         return new GenerateBaseTile(torchieState, pullChain, tick);
     }
 
-    private TickInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
+    public TickInstructions generateAggregateTickInstructions(Metronome.TickScope aggregateTick) {
         return new GenerateAggregateTile(torchieState, aggregatorChain, aggregateTick);
     }
 

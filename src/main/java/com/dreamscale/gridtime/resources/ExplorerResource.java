@@ -44,7 +44,11 @@ public class ExplorerResource {
 
         terminalRouteRegistry.register(ActivityContext.TILES, Command.LOOK,
                 "View the tile at the current gridtime (gt) location",
-                new GotoTileTerminalRoute());
+                new LookTileTerminalRoute());
+
+        terminalRouteRegistry.register(ActivityContext.TILES, Command.REGEN,
+                "Regenerate the tile at the current gridtime (gt) location",
+                new RegenerateTileTerminalRoute());
 
         terminalRouteRegistry.register(ActivityContext.TILES, Command.ZOOM,
                 "Zoom in or out of the current gridtime (gt) location",
@@ -81,6 +85,19 @@ public class ExplorerResource {
         String terminalCircuitContext = context.getTerminalCircuitContext();
 
         return explorerCapability.look(invokingMember.getOrganizationId(), invokingMember.getId(), terminalCircuitContext);
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping(ResourcePaths.REGENERATE_PATH)
+    public GridTileDto regenerateTile() {
+        RequestContext context = RequestContext.get();
+        OrganizationMemberEntity invokingMember = organizationCapability.getActiveMembership(context.getRootAccountId());
+
+        log.info("regenerateTile, user={}", invokingMember.getBestAvailableName());
+
+        String terminalCircuitContext = context.getTerminalCircuitContext();
+
+        return explorerCapability.regenerateTile(invokingMember.getOrganizationId(), invokingMember.getId(), terminalCircuitContext);
     }
 
 
@@ -214,6 +231,18 @@ public class ExplorerResource {
         @Override
         public Object route(Map<String, String> params) {
             return look();
+        }
+    }
+
+    private class RegenerateTileTerminalRoute extends TerminalRoute {
+
+        RegenerateTileTerminalRoute() {
+            super(Command.REGEN, "");
+        }
+
+        @Override
+        public Object route(Map<String, String> params) {
+            return regenerateTile();
         }
     }
 }

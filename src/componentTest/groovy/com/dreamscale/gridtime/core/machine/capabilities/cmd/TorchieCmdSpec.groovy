@@ -1,12 +1,13 @@
 package com.dreamscale.gridtime.core.machine.capabilities.cmd
 
-
+import com.dreamscale.gridtime.ComponentTest
 import com.dreamscale.gridtime.core.domain.member.json.Member
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.Torchie
 import com.dreamscale.gridtime.core.machine.GridTimeExecutor
 import com.dreamscale.gridtime.api.grid.GridTableResults
 import com.dreamscale.gridtime.api.grid.Results
+import com.dreamscale.gridtime.core.machine.executor.circuit.TransactionWrapper
 import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkPile
 import com.dreamscale.gridtime.core.machine.memory.tag.types.FinishTypeTag
 import com.dreamscale.gridtime.core.machine.memory.tag.types.StartTypeTag
@@ -19,6 +20,7 @@ import com.dreamscale.gridtime.core.machine.memory.feature.details.CircuitDetail
 import com.dreamscale.gridtime.core.machine.memory.feature.details.ExecutionEvent
 import com.dreamscale.gridtime.core.machine.memory.feature.details.WorkContextEvent
 import com.dreamscale.gridtime.core.machine.memory.grid.query.key.TrackSetKey
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import java.time.Duration
@@ -39,9 +41,8 @@ class TorchieCmdSpec extends Specification {
     Torchie torchie
     LocalDateTime clockStart
 
+    @Autowired
     GridTimeExecutor gridTimeExecutor
-
-
 
     def setup() {
         clockStart = LocalDateTime.of(2019, 1, 7, 2, 20)
@@ -54,11 +55,13 @@ class TorchieCmdSpec extends Specification {
         torchieId = UUID.randomUUID();
         torchieState = new MemoryOnlyTorchieState(organizationId, torchieId);
 
-        torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
+        torchie = new Torchie(torchieId, torchieState, new NoOpProgram(), null);
         System.out.println(clockStart);
 
         DefaultWorkPile workerPool = new DefaultWorkPile()
-        gridTimeExecutor = new GridTimeExecutor(workerPool);
+        gridTimeExecutor = new GridTimeExecutor();
+        gridTimeExecutor.setWorkPile(workerPool);
+        gridTimeExecutor.setTransactionWrapper(new TransactionWrapper())
         gridTimeExecutor.start()
 
         cmd = new TorchieCmd(workerPool, torchie);

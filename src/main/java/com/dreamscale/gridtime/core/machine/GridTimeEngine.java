@@ -31,13 +31,8 @@ public class GridTimeEngine {
     @Autowired
     private GridTimeWorkPile gridTimeWorkPile;
 
+    @Autowired
     private GridTimeExecutor gridTimeExecutor;
-
-
-    @PostConstruct
-    public void init() {
-        this.gridTimeExecutor = new GridTimeExecutor(gridTimeWorkPile);
-    }
 
     public SimpleStatusDto start() {
         return gridTimeExecutor.start();

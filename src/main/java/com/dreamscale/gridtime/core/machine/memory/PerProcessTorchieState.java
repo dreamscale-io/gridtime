@@ -38,6 +38,14 @@ public class PerProcessTorchieState extends AbstractTorchieState {
     }
 
     @Override
+    public TorchieState fork() {
+        TorchieState forkedState = new PerProcessTorchieState(getOrganizationId(), getTorchieId(), getTeamIds(), getFeatureCache(),
+                boxResolver, featureResolverService, tileSearchService);
+
+        return forkedState;
+    }
+
+    @Override
     protected CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime) {
         return tileSearchService.getCarryOverContextOfTile(getTorchieId(), gridTime);
     }

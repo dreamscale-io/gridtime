@@ -6,6 +6,8 @@ import com.dreamscale.gridtime.core.machine.executor.circuit.NotifyDoneTrigger;
 import com.dreamscale.gridtime.core.machine.commons.DefaultCollections;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.Notifier;
 import com.dreamscale.gridtime.core.machine.executor.circuit.wires.TileStreamEvent;
+import com.dreamscale.gridtime.core.machine.executor.circuit.TransactionWrappable;
+import com.dreamscale.gridtime.core.machine.executor.circuit.TransactionWrapper;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public abstract class TickInstructions implements Callable<TickInstructions>, Notifier {
+public abstract class TickInstructions implements Callable<TickInstructions>, Notifier, TransactionWrappable {
 
     private GridTile outputTile;
     private List<Results> outputResults = DefaultCollections.list();
@@ -30,6 +32,8 @@ public abstract class TickInstructions implements Callable<TickInstructions>, No
     private long queueDurationMillis;
     private long executionDurationMillis;
 
+    private TransactionWrapper transactionWrapper;
+
     TickInstructions() {
         momentOfCreation = System.currentTimeMillis();
     }
@@ -41,7 +45,11 @@ public abstract class TickInstructions implements Callable<TickInstructions>, No
             momentOfExecution = System.currentTimeMillis();
             queueDurationMillis = momentOfExecution - momentOfCreation;
 
-            executeInstruction();
+            if (transactionWrapper != null) {
+                transactionWrapper.wrapWithTransaction(this);
+            } else {
+                executeInstruction();
+            }
 
             executionDurationMillis = System.currentTimeMillis() - momentOfExecution;
 
@@ -57,6 +65,11 @@ public abstract class TickInstructions implements Callable<TickInstructions>, No
             }
         }
         return this;
+    }
+
+    @Override
+    public void runInTransaction() throws InterruptedException {
+        executeInstruction();
     }
 
     private void notifyAllCircuitParticipantsOnError() {
@@ -143,7 +156,6 @@ public abstract class TickInstructions implements Callable<TickInstructions>, No
         return exceptionResult != null;
     }
 
-
     public Exception getExceptionResult() {
         return exceptionResult;
     }
@@ -163,4 +175,7 @@ public abstract class TickInstructions implements Callable<TickInstructions>, No
     }
 
 
+    public void setTransactionRunner(TransactionWrapper transactionWrapper) {
+        this.transactionWrapper = transactionWrapper;
+    }
 }

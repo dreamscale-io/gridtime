@@ -4,8 +4,13 @@ import com.dreamscale.gridtime.api.account.SimpleStatusDto;
 import com.dreamscale.gridtime.api.grid.GridStatus;
 import com.dreamscale.gridtime.api.status.Status;
 import com.dreamscale.gridtime.core.machine.executor.circuit.instructions.TickInstructions;
+import com.dreamscale.gridtime.core.machine.executor.circuit.TransactionWrapper;
+import com.dreamscale.gridtime.core.machine.executor.worker.DefaultWorkPile;
 import com.dreamscale.gridtime.core.machine.executor.worker.WorkPile;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,9 +18,16 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
+@Component
 public class GridTimeExecutor {
 
-    private WorkPile workPile;
+    @Autowired
+    @Qualifier("gridTimeWorkPile")
+    WorkPile workPile;
+
+    @Autowired
+    TransactionWrapper transactionWrapper;
+
     private ThreadPoolExecutor executorPool;
 
     private int ticks = 0;
@@ -34,8 +46,7 @@ public class GridTimeExecutor {
 
     private String lastError = null;
 
-    public GridTimeExecutor(WorkPile workPile) {
-        this.workPile = workPile;
+    public GridTimeExecutor() {
         this.isGameLoopRunning = new AtomicBoolean(false);
         this.executorPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(MAX_WORK_CAPACITY + 1);
     }
@@ -136,7 +147,6 @@ public class GridTimeExecutor {
 
     }
 
-
     private boolean hasPoolCapacityForMoreWork() {
 
 //        log.info("executor tasks  = "+executorPool.getTaskCount());
@@ -170,6 +180,14 @@ public class GridTimeExecutor {
         return ticks;
     }
 
+    public void setWorkPile(WorkPile workPile) {
+        this.workPile = workPile;
+    }
+
+    public void setTransactionWrapper(TransactionWrapper transactionWrapper) {
+        this.transactionWrapper = transactionWrapper;
+    }
+
     private class GameLoopRunner implements Runnable {
 
         long currentTimeMillis = 0;
@@ -189,6 +207,7 @@ public class GridTimeExecutor {
                         TickInstructions instruction = workPile.whatsNext();
                         if (instruction != null) {
                             log.info("Submitting instruction: " + instruction.getCmdDescription());
+                            instruction.setTransactionRunner(transactionWrapper);
 
                             ticks++;
                             log.info("ticks = " + ticks);
@@ -240,6 +259,7 @@ public class GridTimeExecutor {
         }
 
     }
+
 
 
 }

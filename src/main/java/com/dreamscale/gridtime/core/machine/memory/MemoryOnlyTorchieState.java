@@ -25,6 +25,11 @@ public class MemoryOnlyTorchieState extends AbstractTorchieState {
     }
 
     @Override
+    public TorchieState fork() {
+        return new MemoryOnlyTorchieState(getOrganizationId(), getTorchieId());
+    }
+
+    @Override
     protected CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime) {
         return null;
     }

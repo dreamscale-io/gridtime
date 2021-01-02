@@ -76,6 +76,7 @@ public class ResourcePaths {
     public static final String PAN_PATH = "/pan";
     public static final String LEFT_PATH = "/left";
     public static final String RIGHT_PATH = "/right";
+    public static final String REGENERATE_PATH = "/regenerate";
 
     public static final String QUERY_PATH = "/query";
     public static final String TARGET_PATH = "/target";
@@ -206,4 +207,5 @@ public class ResourcePaths {
     public static final String SYSTEM_PATH = "/system";
     public static final String STOP_PATH = "/stop";
     public static final String COMMAND_PATH = "/command";
+
 }

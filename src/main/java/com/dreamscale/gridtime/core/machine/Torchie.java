@@ -1,6 +1,5 @@
 package com.dreamscale.gridtime.core.machine;
 
-import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
 import com.dreamscale.gridtime.core.machine.clock.Metronome;
 import com.dreamscale.gridtime.core.machine.executor.circuit.*;
@@ -17,15 +16,18 @@ import com.dreamscale.gridtime.core.machine.memory.TorchieState;
 import com.dreamscale.gridtime.core.machine.memory.box.BoxResolver;
 import com.dreamscale.gridtime.core.machine.memory.feed.InputFeed;
 import com.dreamscale.gridtime.core.machine.memory.feed.Flowable;
+import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 public class Torchie implements Worker, Notifier {
 
     private final UUID torchieId;
 
     private final TorchieState torchieState;
+
+    private final ProgramFactory programFactory;
 
     private final IdeaFlowCircuit ideaFlowCircuit;
 
@@ -34,10 +36,11 @@ public class Torchie implements Worker, Notifier {
     private final Eye eye;
 
 
-    public Torchie(UUID torchieId, TorchieState torchieState, Program defaultProgram) {
+    public Torchie(UUID torchieId, TorchieState torchieState, Program defaultProgram, ProgramFactory programFactory) {
         this.torchieId = torchieId;
 
         this.torchieState = torchieState;
+        this.programFactory = programFactory;
 
         this.circuitMonitor = new CircuitMonitor(ProcessType.Torchie, torchieId);
         this.ideaFlowCircuit = new IdeaFlowCircuit(circuitMonitor, defaultProgram);
@@ -45,6 +48,8 @@ public class Torchie implements Worker, Notifier {
         this.eye = new Eye();
 
         torchieState.monitorWith(eye);
+
+        log.debug("INSTANTIATING TORCHIE! "+this);
     }
 
     public <T extends Flowable> InputFeed<T> getInputFeed(FeedStrategyFactory.FeedType type) {
@@ -56,7 +61,7 @@ public class Torchie implements Worker, Notifier {
     }
 
 
-    public void sees() {
+    public void see() {
         //lets take a sampling of diagnostic instructions, and throw them on high priority queue
         //on the circuit.  And tell you a summary of what Torchie is thinkin about right now.
 
@@ -64,7 +69,7 @@ public class Torchie implements Worker, Notifier {
     }
 
     public InstructionsBuilder getInstructionsBuilder() {
-        return new InstructionsBuilder(torchieId, torchieState);
+        return new InstructionsBuilder(torchieId, torchieState, programFactory);
     }
 
     public void scheduleInstruction(TickInstructions instructions) {
@@ -94,10 +99,6 @@ public class Torchie implements Worker, Notifier {
 
     public UUID getTorchieId() {
         return torchieId;
-    }
-
-    public void serializeForSleep() {
-
     }
 
     public void haltProgram() {

@@ -120,7 +120,7 @@ public class Metronome {
 
         List<TickScope> aggregateTickScopes;
 
-        TickScope(GeometryClock.GridTime from, GeometryClock.GridTime to) {
+        public TickScope(GeometryClock.GridTime from, GeometryClock.GridTime to) {
             this.zoomLevel = from.getZoomLevel();
             this.from = from;
             this.to = to;

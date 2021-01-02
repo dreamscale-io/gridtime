@@ -697,6 +697,12 @@ class TerminalResourceSpec extends Specification {
 
         GridTileDto tile = (GridTileDto) gotoLocResults.getData();
 
+        TalkMessageDto regenResults = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.REGEN))
+
+        GridTileDto regenTile = (GridTileDto) regenResults.getData();
+
+        println regenTile
+
         println tile
 
         GridTileDto tile2

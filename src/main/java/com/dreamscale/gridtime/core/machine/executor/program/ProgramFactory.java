@@ -46,9 +46,23 @@ public class ProgramFactory {
     TorchieFeedCursorRepository torchieFeedCursorRepository;
 
 
-    public Program createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
+    public SourceTileGeneratorProgram createBaseTileGeneratorProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
 
         SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition, runUntilPosition);
+        programPullChain(torchieId, program, false);
+
+        return program;
+    }
+
+    public SourceTileGeneratorProgram createBaseTileRegenProgram(UUID torchieId, TorchieState torchieState, LocalDateTime startPosition, LocalDateTime runUntilPosition) {
+
+        SourceTileGeneratorProgram program = new SourceTileGeneratorProgram(torchieId, torchieState, startPosition, runUntilPosition);
+        programPullChain(torchieId, program, true);
+
+        return program;
+    }
+
+    private void programPullChain(UUID torchieId, SourceTileGeneratorProgram program, boolean forRegen) {
 
         program.addFlowSourceToPullChain(
                 feedStrategyFactory.get(FeedStrategyFactory.FeedType.JOURNAL_FEED),
@@ -74,17 +88,24 @@ public class ProgramFactory {
         program.addFlowTransformerToPullChain(
                 flowTransformFactory.get(FlowTransformFactory.TransformType.RESOLVE_FEATURES_TRANSFORM));
 
+        if (forRegen) {
+            program.addFlowTransformerToPullChain(
+                    flowTransformFactory.get(FlowTransformFactory.TransformType.DELETE_OLD_TILE_TRANSFORM)
+            );
+        }
         //save off the data in the tiles to permanent stores
 
         program.addFlowSinkToPullChain(
-                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES),
-                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
+                sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_TO_POSTGRES));
 
+        if (!forRegen) {
+            program.addFlowSinkToPullChain(
+                    sinkStrategyFactory.get(SinkStrategyFactory.SinkType.SAVE_BOOKMARK));
+        }
 
         program.addAggregator(locasFactory.createIdeaFlowAggregatorLocas(torchieId));
         program.addAggregator(locasFactory.createBoxAggregatorLocas(torchieId));
 
-        return program;
     }
 
     public AggregatePlexerProgram createAggregatePlexerProgram(UUID workerId) {

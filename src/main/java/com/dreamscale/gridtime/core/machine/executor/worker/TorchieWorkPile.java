@@ -89,7 +89,6 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
             lastSyncCheck = now;
 
             try {
-
                 gridSyncLockManager.tryToAcquireTorchieSyncLock();
 
                 initializeMissingTorchies(now);
@@ -114,11 +113,10 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         }
 
         for (UUID workerId : purged) {
-            circuitActivityDashboard.evictMonitor(workerId);
-
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(workerId);
             log.debug(cursor.toString());
             if (ClaimType.AUTO.equals(cursor.getClaimType())) {
+                circuitActivityDashboard.evictMonitor(workerId);
                 expireClaim(workerId);
             }
         }
@@ -157,12 +155,7 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     public void releaseTorchieCmd(TorchieCmd cmd) {
         UUID torchieId = cmd.getTorchieId();
 
-        Worker worker = whatsNextWheel.getWorker(torchieId);
-        if (worker != null) {
-            worker.abortAndClearProgram();
-        }
-
-        evictWorker(torchieId);
+        releaseManualClaim(gridClock.now(), torchieId);
     }
 
     @Override
@@ -172,10 +165,13 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
         LocalDateTime now = gridClock.now();
 
+        refreshClaim(now, torchie);
+
         if (whatsNextWheel.contains(torchieId)) {
             whatsNextWheel.unmarkForEviction(torchieId);
         } else {
-            refreshClaimAndSubmitToQueue(now, torchie);
+            circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
+            whatsNextWheel.addWorker(torchieId, torchie);
         }
     }
 
@@ -205,7 +201,7 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
     }
 
     @Transactional
-    protected void refreshClaimAndSubmitToQueue(LocalDateTime now, Torchie torchie) {
+    protected void refreshClaim(LocalDateTime now, Torchie torchie) {
 
         UUID torchieId = torchie.getTorchieId();
 
@@ -216,12 +212,19 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
 
         cursor.setLastClaimUpdate(now);
         torchieFeedCursorRepository.save(cursor);
-
-        circuitActivityDashboard.addMonitor(MonitorType.TORCHIE_WORKER, torchieId, torchie.getCircuitMonitor());
-        whatsNextWheel.addWorker(torchieId, torchie);
     }
 
+    @Transactional
+    protected void releaseManualClaim(LocalDateTime now, UUID torchieId) {
+        TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
 
+        validateCursorFound(cursor);
+        validateCursorClaimedByServer(cursor);
+
+        cursor.setClaimType(ClaimType.AUTO);
+        cursor.setLastClaimUpdate(now);
+        torchieFeedCursorRepository.save(cursor);
+    }
 
     private void claimTorchiesReadyForProcessing(LocalDateTime now) {
         log.debug ("claimTorchiesReadyForProcessing = torchies = " + whatsNextWheel.size());
@@ -518,14 +521,14 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
         @Transactional
         public void notifyWhenDone(TickInstructions instructions, List<Results> results) {
             log.debug("Notify Torchie program done");
-            evictWorker(torchieId);
+            whatsNextWheel.markForEviction(torchieId, gridClock.now());
         }
 
         @Override
         @Transactional
         public void notifyOnAbortOrFailure(TickInstructions instructions, Exception ex) {
             log.debug("Notify Torchie abort or failed program");
-            evictWorker(torchieId);
+            whatsNextWheel.markForEviction(torchieId, gridClock.now());
 
             TorchieFeedCursorEntity cursor = torchieFeedCursorRepository.findByTorchieId(torchieId);
 
@@ -537,7 +540,6 @@ public class TorchieWorkPile implements WorkPile, LiveQueue {
             }
 
             cursor.setFailureCount(fails);
-            cursor.setClaimingServerId(null);
             torchieFeedCursorRepository.save(cursor);
 
 

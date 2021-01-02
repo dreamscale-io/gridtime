@@ -36,4 +36,9 @@ public interface GridIdeaFlowMetricsRepository extends CrudRepository<GridIdeaFl
     @Modifying
     @Query(nativeQuery = true, value = "truncate table grid_idea_flow_metrics")
     void truncate();
+
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from grid_idea_flow_metrics where torchie_id=(:torchieId) and calendar_id=(:calendarId)")
+    void deleteByTorchieIdAndCalendarId(@Param("torchieId") UUID torchieId, @Param("calendarId") UUID calendarId);
+
 }

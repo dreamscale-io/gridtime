@@ -78,7 +78,7 @@ class SaveToPostgresSinkSpec extends Specification {
         torchieId = UUID.randomUUID();
         torchieState = new MemoryOnlyTorchieState(orgId, torchieId);
 
-        torchie = new Torchie(torchieId, torchieState, new NoOpProgram());
+        torchie = new Torchie(torchieId, torchieState, new NoOpProgram(), null);
         System.out.println(clockStart);
 
     }

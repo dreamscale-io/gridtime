@@ -3,6 +3,7 @@ package com.dreamscale.gridtime.core.capability.query;
 import com.dreamscale.gridtime.api.grid.GridTileDto;
 import com.dreamscale.gridtime.api.query.TileLocationInputDto;
 import com.dreamscale.gridtime.core.capability.active.MemberDetailsRetriever;
+import com.dreamscale.gridtime.core.capability.cmd.CommandCapability;
 import com.dreamscale.gridtime.core.capability.system.GridClock;
 import com.dreamscale.gridtime.core.domain.terminal.TerminalCircuitEntity;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
@@ -35,6 +36,9 @@ public class ExplorerCapability {
     @Autowired
     TileQueryRunner tileQueryRunner;
 
+    @Autowired
+    CommandCapability commandCapability;
+
     public GridTileDto gotoLocation(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext, TileLocationInputDto tileLocationInputDto) {
 
         LocalDateTime now = gridClock.now();
@@ -55,6 +59,11 @@ public class ExplorerCapability {
         return tileQueryRunner.runQuery(queryTarget, tileLocation);
     }
 
+    private GridTileDto regenerateTileAtLocation(QueryTarget queryTarget, GridtimeExpression tileLocation) {
+
+        return commandCapability.regenerateTile(queryTarget, tileLocation);
+    }
+
     public GridTileDto look(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
 
         TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
@@ -66,6 +75,18 @@ public class ExplorerCapability {
         GridtimeExpression tileLocation = GridtimeExpression.createFrom(gtLocation);
 
         return lookupTileAtLocation(queryTarget, tileLocation);
+    }
+
+    public GridTileDto regenerateTile(UUID organizationId, UUID invokingMemberId, String terminalCircuitContext) {
+        TerminalCircuitEntity circuit = terminalCircuitOperator.validateCircuitMembershipAndGetCircuit(organizationId, invokingMemberId, terminalCircuitContext);
+
+        QueryTarget queryTarget = terminalCircuitOperator.resolveQueryTarget(organizationId, invokingMemberId, circuit);
+
+        GeometryClock.GridTime gtLocation = terminalCircuitOperator.resolveLastLocation(organizationId, invokingMemberId, circuit.getId());
+
+        GridtimeExpression tileLocation = GridtimeExpression.createFrom(gtLocation);
+
+        return regenerateTileAtLocation(queryTarget, tileLocation);
     }
 
 
@@ -141,4 +162,6 @@ public class ExplorerCapability {
 
         return lookupTileAtLocation(queryTarget, tileLocation);
     }
+
+
 }

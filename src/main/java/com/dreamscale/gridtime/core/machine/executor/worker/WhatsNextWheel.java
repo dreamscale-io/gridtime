@@ -115,6 +115,14 @@ public class WhatsNextWheel {
         }
     }
 
+
+    public void markForEviction(UUID torchieId, LocalDateTime now) {
+        synchronized (markedForEviction) {
+            markedForEviction.putIfAbsent(torchieId, now);
+            nextWorkerQueue.remove(torchieId);
+        }
+    }
+
     public List<UUID> purgeEvicted(LocalDateTime now) {
         List<UUID> purged = new ArrayList<>();
 

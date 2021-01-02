@@ -57,6 +57,8 @@ public class TorchieCmd extends SyncCmd {
         waitForCommandToFinish();
     }
 
+
+
     private class HaltProgramTrigger implements NotifySeeTrigger {
 
         @Override
@@ -71,6 +73,12 @@ public class TorchieCmd extends SyncCmd {
         TickInstructions instructions = torchie.getInstructionsBuilder().gotoTile(zoom, tileTime);
         runInstructionAndWaitTilDone(instructions);
     }
+
+    public void regenerateTile(ZoomLevel zoom, LocalDateTime tileTime) {
+        TickInstructions instructions = torchie.getInstructionsBuilder().regenerateTile(zoom, tileTime);
+        runInstructionAndWaitTilDone(instructions);
+    }
+
 
     public void nextTile() {
         TickInstructions instructions = torchie.getInstructionsBuilder().nextTile();
