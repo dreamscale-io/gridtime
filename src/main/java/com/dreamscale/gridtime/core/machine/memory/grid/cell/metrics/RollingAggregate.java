@@ -1,20 +1,24 @@
 package com.dreamscale.gridtime.core.machine.memory.grid.cell.metrics;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 import java.util.LinkedList;
 
+@Getter
 public class RollingAggregate {
 
+    private CandleStick withinWindowCandleStick = new CandleStick();
+    private CandleStick aggregateCandleStick = new CandleStick();
+    private LinkedList<CandleStick> pastCandleSticks = new LinkedList<>(); //newest stick in the front, oldest in the back
 
-    private CandleStickDetails candleSticks = new CandleStickDetails();
-
+    private static final int MAX_STICKS = 4;
     /*
      * Add direct samples that fall within this time bucket
      */
     public void addSample(double sample) {
-        candleSticks.getWithinWindowCandleStick().addSample(sample);
-        candleSticks.getAggregateCandleStick().addSample(sample);
+        withinWindowCandleStick.addSample(sample);
+        aggregateCandleStick.addSample(sample);
     }
 
     /**
@@ -25,53 +29,34 @@ public class RollingAggregate {
         LinkedList<CandleStick> priorSticks = rollingAggregate.getRolledPastCandlesMinusOldest();
         priorSticks.push(rollingAggregate.getWithinWindowCandleStick());
 
-        candleSticks.aggregateWithPastObservations(priorSticks);
+        aggregateWithPastObservations(priorSticks);
     }
 
+    @JsonIgnore
     private LinkedList<CandleStick> getRolledPastCandlesMinusOldest() {
-        return candleSticks.getRolledPastCandlesMinusOldest();
+        LinkedList<CandleStick> pastCandles = new LinkedList<>(pastCandleSticks);
+        if (pastCandles.size() >= MAX_STICKS) {
+            pastCandles.removeLast();
+        }
+        return pastCandles;
     }
 
-    public CandleStick getWithinWindowCandleStick() {
-        return candleSticks.getWithinWindowCandleStick();
-    }
-
-    public CandleStick getAggregateCandleStick() {
-        return candleSticks.getAggregateCandleStick();
-    }
-
+    @JsonIgnore
     public boolean isTotalOverThreshold(int total) {
-        return candleSticks.getAggregateCandleStick().getTotal() > total;
+        return aggregateCandleStick.getTotal() > total;
     }
 
-    @Getter
-    private static class CandleStickDetails {
 
-        private CandleStick withinWindowCandleStick = new CandleStick();
-        private CandleStick aggregateCandleStick = new CandleStick();
-        private LinkedList<CandleStick> pastCandleSticks = new LinkedList<>(); //newest stick in the front, oldest in the back
+    private void aggregateWithPastObservations(LinkedList<CandleStick> priorCandleSticks) {
+        aggregateCandleStick = new CandleStick();
 
-        private static final int MAX_STICKS = 4;
+        pastCandleSticks = priorCandleSticks;
 
-
-        LinkedList<CandleStick> getRolledPastCandlesMinusOldest() {
-            LinkedList<CandleStick> pastCandles = new LinkedList<>(pastCandleSticks);
-            if (pastCandles.size() >= 4) {
-                pastCandles.removeLast();
-            }
-            return pastCandles;
+        for (CandleStick pastCandle: priorCandleSticks) {
+            aggregateCandleStick.combineAggregate(pastCandle);
         }
 
-        void aggregateWithPastObservations(LinkedList<CandleStick> priorCandleSticks) {
-            aggregateCandleStick = new CandleStick();
-
-            pastCandleSticks = priorCandleSticks;
-
-            for (CandleStick pastCandle: priorCandleSticks) {
-                aggregateCandleStick.combineAggregate(pastCandle);
-            }
-
-            aggregateCandleStick.combineAggregate(withinWindowCandleStick);
-        }
+        aggregateCandleStick.combineAggregate(withinWindowCandleStick);
     }
+
 }

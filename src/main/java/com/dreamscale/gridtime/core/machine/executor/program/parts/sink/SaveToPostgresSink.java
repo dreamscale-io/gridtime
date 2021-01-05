@@ -15,6 +15,7 @@ import com.dreamscale.gridtime.core.machine.memory.grid.cell.GridRow;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.tag.FeatureTag;
+import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
 import com.dreamscale.gridtime.core.machine.memory.tile.GridTile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class SaveToPostgresSink implements SinkStrategy {
 
     @Autowired
     GridBoxMetricsRepository gridBoxMetricsRepository;
+
+    @Autowired
+    GridTileCarryOverContextRepository gridTileCarryOverContextRepository;
 
     @Override
     public void save(UUID torchieId, TorchieState torchieState) {
@@ -97,40 +101,23 @@ public class SaveToPostgresSink implements SinkStrategy {
         log.debug("Saving BoxMetrics, count: "+boxMetricsEntityList.size());
         gridBoxMetricsRepository.save(boxMetricsEntityList);
 
-        //box metrics, each tile can have multiple boxes... max of all boxes per tile
+        GridTileCarryOverContextEntity carryOverContextEntity = createCarryOverContextEntity(torchieId, calendarId, gridTile.getCarryOverContext());
+        gridTileCarryOverContextRepository.save(carryOverContextEntity);
 
-        //then when I aggregate, need to do it by box...
-        //so I've got a DayPart tile, get all the boxes across all the 12 subtiles, and group by box
+    }
 
-        //so each row is a box reference
+    private GridTileCarryOverContextEntity createCarryOverContextEntity(UUID torchieId, UUID calendarId, CarryOverContext carryOverContext) {
+        GridTileCarryOverContextEntity carryOverContextEntity = new GridTileCarryOverContextEntity();
+        carryOverContextEntity.setId(UUID.randomUUID());
+        carryOverContextEntity.setTorchieId(torchieId);
+        carryOverContextEntity.setCalendarId(calendarId);
 
-        //@box/K
-        //@box/F
+        String json = JSONTransformer.toJson(carryOverContext.export());
+        log.debug("json for context = "+json);
 
-        //then my columns are the metrics?  So, wtf percent, tile,
+        carryOverContextEntity.setJson(json);
 
-
-        //TILE DICTIONARY...
-
-        //so rows will have all these rhythm patterns... bridge patterns... need to add bridges, okay added bridges
-        //instead of feature references being in rows, save the lookup table
-
-        //we want to be able to do union distinct on dictionaries
-
-        //okay tile summary... what do we need to do fo
-
-        //TODO save lookup tables
-
-        //wtf and wtf^ reference UUID
-        //execution, do I need the featureIds? (yes)
-
-        //TODO save box analytics
-
-        //TODO save bridge analytics
-
-        //TODO update floating now
-
-        //TODO aggregate up
+        return carryOverContextEntity;
     }
 
     private GridBoxMetricsEntity createGridBoxMetricsEntity(UUID torchieId, UUID calendarId, BoxMetrics boxMetrics) {

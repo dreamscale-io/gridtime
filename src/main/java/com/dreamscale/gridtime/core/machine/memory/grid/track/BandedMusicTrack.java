@@ -66,15 +66,14 @@ public class BandedMusicTrack<F extends FeatureReference> implements MusicTrack 
 
         FeatureTag<F> lastStartTag = getLastStartTagInProgress(fromBeat);
 
-
-        if (lastStartTag == null || lastStartTag.getFeature() != feature) {
+        if (lastStartTag == null || !lastStartTag.getFeature().equals(feature)) {
             trackMusic.put(fromBeat, feature);
             trackTags.add(fromBeat, new FeatureTag<>(moment, feature, startTag));
         }
 
-        if (lastStartTag != null && lastStartTag.getFeature() == feature) {
+        if (lastStartTag != null && lastStartTag.getFeature().equals(feature)) {
             removeFinishTags(fromBeat);
-        } else if (lastStartTag != null && lastStartTag.getFeature() != feature) {
+        } else if (lastStartTag != null && !lastStartTag.getFeature().equals(feature)) {
             RelativeBeat prevBeat = musicClock.getPreviousBeat(fromBeat);
             trackTags.add(prevBeat, new FeatureTag<>(moment, lastStartTag.getFeature(), FinishTypeTag.Success));
         }

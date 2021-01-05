@@ -30,6 +30,9 @@ public class FeatureResolverService {
     GridFeatureRepository gridFeatureRepository;
 
     @Autowired
+    FeatureCache featureCache;
+
+    @Autowired
     EntityManagerFactory entityManagerFactory;
 
     private final TypeRegistry typeRegistry;
@@ -53,18 +56,26 @@ public class FeatureResolverService {
 
     public FeatureReference lookupById(UUID organizationId, UUID featureId) {
 
-        GridFeatureEntity featureEntity = gridFeatureRepository.findByOrganizationIdAndId(organizationId, featureId);
+        FeatureReference featureReference = featureCache.lookupById(featureId);
 
-        if (featureEntity != null) {
-            FeatureType featureType = lookupFeatureType(featureEntity.getTypeUri());
+        if (featureReference == null) {
+            GridFeatureEntity featureEntity = gridFeatureRepository.findByOrganizationIdAndId(organizationId, featureId);
 
-            FeatureDetails details = deserialize(featureEntity.getJson(), featureType.getSerializationClass());
+            if (featureEntity != null) {
+                FeatureType featureType = lookupFeatureType(featureEntity.getTypeUri());
 
-            return featureFactory.createResolvedFeatureReference(featureId, featureType, featureEntity.getSearchKey(), details);
+                FeatureDetails details = deserialize(featureEntity.getJson(), featureType.getSerializationClass());
+                featureReference = featureFactory.createResolvedFeatureReference(featureId, featureType, featureEntity.getSearchKey(), details);
+
+                featureCache.addToCacheById(featureReference);
+            }
         }
 
-        log.warn("Feature not found with id :"+featureId);
-        return null;
+        if (featureReference == null) {
+            throw new RuntimeException("Feature not found with id :"+featureId);
+        }
+
+        return featureReference;
     }
 
 
@@ -110,6 +121,7 @@ public class FeatureResolverService {
 
             originalReference.resolve();
         }
+        featureCache.addToCacheById(originalReference);
     }
 
 

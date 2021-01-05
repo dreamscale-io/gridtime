@@ -31,6 +31,7 @@ import com.dreamscale.gridtime.core.machine.capabilities.cmd.TorchieCmd
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock
 import com.dreamscale.gridtime.core.machine.clock.ZoomLevel
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache
 import org.dreamscale.exception.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
@@ -96,6 +97,9 @@ class TerminalResourceSpec extends Specification {
     @Autowired
     GridClock gridClock;
 
+    @Autowired
+    FeatureCache featureCache
+
     String activationCode = null;
 
     def setup() {
@@ -103,6 +107,8 @@ class TerminalResourceSpec extends Specification {
         mockGridClock.nanoTime() >> System.nanoTime()
 
         gridTimeEngine.reset()
+
+        featureCache.clear();
     }
 
     def "should test terminal loop for a basic invite command"() {
@@ -697,22 +703,23 @@ class TerminalResourceSpec extends Specification {
 
         GridTileDto tile = (GridTileDto) gotoLocResults.getData();
 
-        TalkMessageDto regenResults = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.REGEN))
-
-        GridTileDto regenTile = (GridTileDto) regenResults.getData();
-
-        println regenTile
-
         println tile
 
         GridTileDto tile2
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             TalkMessageDto nextResult = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.PAN, "right"))
 
             tile2 = (GridTileDto) nextResult.getData();
 
             println tile2
+
+            TalkMessageDto regenResults = terminalClient.runCommand(circuit.getCircuitName(), new CommandInputDto(Command.REGEN))
+
+            GridTileDto regenTile = (GridTileDto) regenResults.getData();
+
+            println "*** REGEN ***"
+            println regenTile
         }
 
         gridTimeEngine.shutdown()

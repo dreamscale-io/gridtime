@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine;
 
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
+import com.dreamscale.gridtime.core.domain.tile.GridTileCarryOverContextRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.domain.work.TorchieFeedCursorRepository;
@@ -16,6 +17,7 @@ import com.dreamscale.gridtime.core.machine.executor.worker.PlexerWorkPile;
 import com.dreamscale.gridtime.core.machine.executor.worker.SystemWorkPile;
 import com.dreamscale.gridtime.core.machine.executor.worker.TorchieWorkPile;
 import com.dreamscale.gridtime.core.machine.executor.worker.WorkPile;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,9 @@ public class FeedDataManager  {
 
     @Autowired
     CalendarService calendarService;
+
+    @Autowired
+    FeatureCache featureCache;
 
     @Autowired
     private TorchieFeedCursorRepository torchieFeedCursorRepository;
@@ -48,6 +53,9 @@ public class FeedDataManager  {
     @Autowired
     private GridBoxMetricsRepository gridBoxMetricsRepository;
 
+    @Autowired
+    private GridTileCarryOverContextRepository gridTileCarryOverContextRepository;
+
 
     @Transactional
     public void purgeAll() {
@@ -66,6 +74,10 @@ public class FeedDataManager  {
         gridMarkerRepository.truncate();
         gridIdeaFlowMetricsRepository.truncate();
         gridBoxMetricsRepository.truncate();
+
+        gridTileCarryOverContextRepository.truncate();
+
+        featureCache.clear();
     }
 }
 

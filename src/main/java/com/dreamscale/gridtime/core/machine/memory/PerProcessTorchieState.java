@@ -47,7 +47,7 @@ public class PerProcessTorchieState extends AbstractTorchieState {
 
     @Override
     protected CarryOverContext getCarryOverContextFromTileDB(GeometryClock.GridTime gridTime) {
-        return tileSearchService.getCarryOverContextOfTile(getTorchieId(), gridTime);
+        return tileSearchService.getCarryOverContextOfTile(getOrganizationId(), getTorchieId(), gridTime);
     }
 
 

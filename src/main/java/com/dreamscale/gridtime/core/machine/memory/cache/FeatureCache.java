@@ -18,6 +18,7 @@ public class FeatureCache {
     private static final int LOCATION_CACHE_SIZE = 100;
     private static final int TRAVERSAL_CACHE_SIZE = 200;
     private static final int CONTEXT_CACHE_SIZE = 50;
+    private static final int FEATURE_BY_ID_CACHE_SIZE = 100;
 
     private static final int MISC_CACHE_SIZE = 100;
 
@@ -27,6 +28,7 @@ public class FeatureCache {
     private LRUMap traversalCache = new LRUMap(TRAVERSAL_CACHE_SIZE);
     private LRUMap contextCache = new LRUMap(CONTEXT_CACHE_SIZE);
     private LRUMap miscCache = new LRUMap(MISC_CACHE_SIZE);
+    private LRUMap featureByIdCache = new LRUMap(FEATURE_BY_ID_CACHE_SIZE);
 
     private final FeatureReferenceFactory featureReferenceFactory;
 
@@ -35,6 +37,20 @@ public class FeatureCache {
 
     public FeatureCache() {
         this.featureReferenceFactory = new FeatureReferenceFactory();
+    }
+
+    public FeatureReference lookupById(UUID featureId) {
+        return (FeatureReference) featureByIdCache.get(featureId);
+    }
+
+
+    public void addToCacheById(FeatureReference featureReference) {
+        if (featureReference.isResolved()) {
+            synchronized (featureByIdCache) {
+                featureByIdCache.put(featureReference.getFeatureId(), featureReference);
+            }
+            cacheLookup(featureReference);
+        }
     }
 
     public IdeaFlowStateReference lookupWTFReference(CircuitDetails circuitDetails) {
@@ -143,6 +159,16 @@ public class FeatureCache {
         return miscCache;
     }
 
+
+    public void clear() {
+        boxCache.clear();
+        bridgeCache.clear();
+        locationCache.clear();
+        traversalCache.clear();
+        contextCache.clear();
+        miscCache.clear();
+        featureByIdCache.clear();
+    }
 
 
 }

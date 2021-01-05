@@ -107,7 +107,7 @@ public abstract class AbstractTorchieState implements TorchieState {
         if (activeGridTile != null && activeGridTile.getGridTime().equals(panLeftGridTime)) {
             return activeGridTile.getCarryOverContext();
         } else {
-            return getCarryOverContextFromTileDB(gridTime);
+            return getCarryOverContextFromTileDB(panLeftGridTime);
         }
     }
 

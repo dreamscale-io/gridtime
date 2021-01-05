@@ -59,3 +59,6 @@ databaseChangeLog:
 
   - include:
       file: db/v008/alter_feed_cursor_add_claim_type.sql
+
+  - include:
+      file: db/v008/create_grid_tile_carry_over_context.sql

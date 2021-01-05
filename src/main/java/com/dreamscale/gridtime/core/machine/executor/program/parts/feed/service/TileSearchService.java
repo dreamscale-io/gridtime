@@ -1,30 +1,70 @@
 package com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service;
 
+import com.dreamscale.gridtime.core.domain.tile.GridTileCarryOverContextEntity;
+import com.dreamscale.gridtime.core.domain.tile.GridTileCarryOverContextRepository;
 import com.dreamscale.gridtime.core.machine.clock.GeometryClock;
+import com.dreamscale.gridtime.core.machine.commons.JSONTransformer;
+import com.dreamscale.gridtime.core.machine.memory.cache.FeatureResolverService;
+import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureReference;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.BoxMetrics;
 import com.dreamscale.gridtime.core.machine.memory.grid.query.metrics.IdeaFlowMetrics;
 import com.dreamscale.gridtime.core.machine.memory.feature.reference.FeatureId;
 import com.dreamscale.gridtime.core.machine.memory.tile.CarryOverContext;
+import com.dreamscale.gridtime.core.machine.memory.tile.ExportedCarryOverContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
 public class TileSearchService {
 
+    @Autowired
+    CalendarService calendarService;
 
-    public CarryOverContext getCarryOverContextOfTile(UUID torchieId, GeometryClock.GridTime gridGridTime) {
+    @Autowired
+    FeatureResolverService featureResolverService;
 
-        //StoryTileEntity tile = storyTileRepository.findByTorchieIdAndDreamTime(torchieId, gridCoords.getFormattedGridTime());
+    @Autowired
+    GridTileCarryOverContextRepository gridTileCarryOverContextRepository;
 
-        //TODO clean up persistence of save/retrieving tiles
+    public CarryOverContext getCarryOverContextOfTile(UUID organizationId, UUID torchieId, GeometryClock.GridTime gridTime) {
 
-//        if (tile != null) {
-//            StoryTileModel model = JSONTransformer.fromJson(tile.getJsonTile(), StoryTileModel.class);
-//            return model.getCarryOverContext();
-//        }
+        UUID calendarId = calendarService.lookupPotentialCalendarId(gridTime);
+        if (calendarId == null) {
+            return null;
+        }
+        
+        GridTileCarryOverContextEntity contextEntity = gridTileCarryOverContextRepository.findByTorchieIdAndCalendarId(torchieId, calendarId);
+
+        if (contextEntity != null) {
+            ExportedCarryOverContext exported = JSONTransformer.fromJson(contextEntity.getJson(), ExportedCarryOverContext.class);
+
+            Map<UUID, FeatureReference> featureMap = resolveFeatures(organizationId, exported);
+
+            CarryOverContext carryOverContext = new CarryOverContext();
+
+            carryOverContext.importContext(exported, featureMap);
+
+            return carryOverContext;
+        }
         return null;
+    }
+
+    private Map<UUID, FeatureReference> resolveFeatures(UUID organizationId, ExportedCarryOverContext exported) {
+        Map<UUID, FeatureReference> featureMap = new HashMap<>();
+
+        for (UUID featureId : exported.getAllFeatureIds()) {
+            if (!featureMap.containsKey(featureId)) {
+                FeatureReference feature = featureResolverService.lookupById(organizationId, featureId);
+                featureMap.put(featureId, feature);
+            }
+        }
+
+        return featureMap;
     }
 
     List<IdeaFlowMetrics> queryTiles(UUID torchieId, GeometryClock.GridTime queryByGridTime) {

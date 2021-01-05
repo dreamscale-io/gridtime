@@ -25,6 +25,17 @@ public class CalendarService {
     @Autowired
     GridClock clock;
 
+    public UUID lookupPotentialCalendarId(GeometryClock.GridTime gridTime) {
+        UUID calendarId = null;
+
+        GridCalendarEntity calendarTile = gridCalendarRepository.findByZoomLevelAndStartTime(gridTime.getZoomLevel(), gridTime.getClockTime());
+        if (calendarTile != null) {
+            calendarId = calendarTile.getId();
+        }
+
+        return calendarId;
+    }
+
     public UUID lookupCalendarId(GeometryClock.GridTime gridTime) {
         UUID calendarId = null;
 

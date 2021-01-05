@@ -2,6 +2,7 @@ package com.dreamscale.gridtime.core.machine.executor.program.parts.transform;
 
 import com.dreamscale.gridtime.core.domain.tile.GridMarkerRepository;
 import com.dreamscale.gridtime.core.domain.tile.GridRowRepository;
+import com.dreamscale.gridtime.core.domain.tile.GridTileCarryOverContextRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridBoxMetricsRepository;
 import com.dreamscale.gridtime.core.domain.tile.metrics.GridIdeaFlowMetricsRepository;
 import com.dreamscale.gridtime.core.machine.executor.program.parts.feed.service.CalendarService;
@@ -30,6 +31,9 @@ public class DeleteOldTileTransform implements TransformStrategy {
     GridBoxMetricsRepository gridBoxMetricsRepository;
 
     @Autowired
+    GridTileCarryOverContextRepository gridTileCarryOverContextRepository;
+
+    @Autowired
     CalendarService calendarService;
 
     @Override
@@ -42,6 +46,7 @@ public class DeleteOldTileTransform implements TransformStrategy {
         gridMarkerRepository.deleteByTorchieIdAndCalendarId(torchieState.getTorchieId(), calendarId);
         gridIdeaFlowMetricsRepository.deleteByTorchieIdAndCalendarId(torchieState.getTorchieId(), calendarId);
         gridBoxMetricsRepository.deleteByTorchieIdAndCalendarId(torchieState.getTorchieId(), calendarId);
+        gridTileCarryOverContextRepository.deleteByTorchieIdAndCalendarId(torchieState.getTorchieId(), calendarId);
     }
 
 }

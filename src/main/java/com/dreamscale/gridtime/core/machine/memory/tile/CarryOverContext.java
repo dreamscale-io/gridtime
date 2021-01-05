@@ -26,7 +26,6 @@ public class CarryOverContext {
 
     private Map<String, RollingAggregate> savedRollingAggregates = DefaultCollections.map();
 
-
     private Map<String, CarryOverContext> subContextMap = DefaultCollections.map();
 
     public CarryOverContext(String contextOwner) {
@@ -89,4 +88,50 @@ public class CarryOverContext {
         return savedStateFlags.get(key);
     }
 
+    public ExportedCarryOverContext export() {
+        ExportedCarryOverContext exported = new ExportedCarryOverContext();
+        exported.setContextOwner(contextOwner);
+        exported.setSavedRollingAggregates(savedRollingAggregates);
+        exported.setSavedStateFlags(savedStateFlags);
+        exported.setSavedTags(savedTags);
+
+        LinkedHashMap<String, UUID> featureMap = new LinkedHashMap<>();
+        for (Map.Entry<String, FeatureReference> entry: savedFeatureReferences.entrySet()) {
+            featureMap.put(entry.getKey(), entry.getValue().getFeatureId());
+        }
+
+        exported.setSavedFeatureIds(featureMap);
+
+        LinkedHashMap<String, ExportedCarryOverContext> subcontextMap = new LinkedHashMap<>();
+        for (Map.Entry<String, CarryOverContext> subcontextEntry : subContextMap.entrySet()) {
+            subcontextMap.put(subcontextEntry.getKey(), subcontextEntry.getValue().export());
+        }
+
+        exported.setSubContextMap(subcontextMap);
+
+        return exported;
+    }
+
+    public void importContext(ExportedCarryOverContext exported, Map<UUID, FeatureReference> featureMap) {
+        contextOwner = exported.getContextOwner();
+        savedRollingAggregates = exported.getSavedRollingAggregates();
+        savedStateFlags = exported.getSavedStateFlags();
+        savedTags = exported.getSavedTags();
+
+        LinkedHashMap<String, FeatureReference> importedFeatureMap = new LinkedHashMap<>();
+        for (Map.Entry<String, UUID> entry: exported.getSavedFeatureIds().entrySet()) {
+            importedFeatureMap.put(entry.getKey(), featureMap.get(entry.getValue()));
+        }
+        savedFeatureReferences = importedFeatureMap;
+
+        LinkedHashMap<String, CarryOverContext> importedSubcontextMap = new LinkedHashMap<>();
+        for (Map.Entry<String, ExportedCarryOverContext> entry : exported.getSubContextMap().entrySet()) {
+            CarryOverContext subcontext = new CarryOverContext();
+            subcontext.importContext(entry.getValue(), featureMap);
+            importedSubcontextMap.put(entry.getKey(), subcontext);
+        }
+
+        subContextMap = importedSubcontextMap;
+
+    }
 }

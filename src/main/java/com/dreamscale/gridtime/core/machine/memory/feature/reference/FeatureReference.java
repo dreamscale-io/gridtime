@@ -50,4 +50,25 @@ public abstract class FeatureReference implements Cloneable, Observable {
     public abstract String toDisplayString();
 
     public abstract String getDescription();
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof FeatureReference) {
+            FeatureReference oReference = (FeatureReference) o;
+            if ( oReference == this || oReference.getSearchKey().equals(getSearchKey())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return getSearchKey().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return toDisplayString() + " "+ featureId;
+    }
 }
